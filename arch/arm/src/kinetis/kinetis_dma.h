@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include "chip/kinetis_dma.h"
+#include "hardware/kinetis_dma.h"
 
 /****************************************************************************
  * Pre-processor Declarations

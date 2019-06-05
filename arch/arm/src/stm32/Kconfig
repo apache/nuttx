@@ -566,45 +566,38 @@ config ARCH_CHIP_STM32F302K6
 	bool "STM32F302K6"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_I2C3
 
 config ARCH_CHIP_STM32F302K8
 	bool "STM32F302K8"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_I2C3
 
 config ARCH_CHIP_STM32F302C6
 	bool "STM32F302C6"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F302C8
 	bool "STM32F302C8"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F302R6
 	bool "STM32F302R6"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F302R8
 	bool "STM32F302R8"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F302CB
 	bool "STM32F302CB"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 
@@ -612,7 +605,6 @@ config ARCH_CHIP_STM32F302CC
 	bool "STM32F302CC"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 
@@ -620,7 +612,6 @@ config ARCH_CHIP_STM32F302RB
 	bool "STM32F302RB"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -630,7 +621,6 @@ config ARCH_CHIP_STM32F302RC
 	bool "STM32F302RC"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -640,7 +630,6 @@ config ARCH_CHIP_STM32F302VB
 	bool "STM32F302VB"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -650,7 +639,6 @@ config ARCH_CHIP_STM32F302VC
 	bool "STM32F302VC"
 	select STM32_STM32F30XX
 	select STM32_STM32F302
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -660,21 +648,18 @@ config ARCH_CHIP_STM32F303K6
 	bool "STM32F303K6"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_DAC2
 
 config ARCH_CHIP_STM32F303K8
 	bool "STM32F303K8"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_DAC2
 
 config ARCH_CHIP_STM32F303C6
 	bool "STM32F303C6"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_USART3
 
@@ -682,7 +667,6 @@ config ARCH_CHIP_STM32F303C8
 	bool "STM32F303C8"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_USART3
 
@@ -690,7 +674,6 @@ config ARCH_CHIP_STM32F303CB
 	bool "STM32F303CB"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -705,7 +688,6 @@ config ARCH_CHIP_STM32F303CC
 	bool "STM32F303CC"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -720,7 +702,6 @@ config ARCH_CHIP_STM32F303RB
 	bool "STM32F303RB"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -737,7 +718,6 @@ config ARCH_CHIP_STM32F303RC
 	bool "STM32F303RC"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -754,7 +734,6 @@ config ARCH_CHIP_STM32F303RD
 	bool "STM32F303RD"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -773,7 +752,6 @@ config ARCH_CHIP_STM32F303RE
 	bool "STM32F303RE"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -792,7 +770,6 @@ config ARCH_CHIP_STM32F303VB
 	bool "STM32F303VB"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -809,7 +786,6 @@ config ARCH_CHIP_STM32F303VC
 	bool "STM32F303VC"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_I2C2
@@ -826,7 +802,6 @@ config ARCH_CHIP_STM32F303RD
 	bool "STM32F303RD"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -835,7 +810,6 @@ config ARCH_CHIP_STM32F303RE
 	bool "STM32F303RE"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -844,7 +818,6 @@ config ARCH_CHIP_STM32F303VD
 	bool "STM32F303VD"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -853,7 +826,6 @@ config ARCH_CHIP_STM32F303VE
 	bool "STM32F303VE"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -862,7 +834,6 @@ config ARCH_CHIP_STM32F303ZD
 	bool "STM32F303ZD"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -871,7 +842,6 @@ config ARCH_CHIP_STM32F303ZE
 	bool "STM32F303ZE"
 	select STM32_STM32F30XX
 	select STM32_STM32F303
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_ADC4
 	select STM32_HAVE_USART3
@@ -879,137 +849,110 @@ config ARCH_CHIP_STM32F303ZE
 config ARCH_CHIP_STM32F334K4
 	bool "STM32F334K4"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334K6
 	bool "STM32F334K6"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334K8
 	bool "STM32F334K8"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334C4
 	bool "STM32F334C4"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334C6
 	bool "STM32F334C6"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334C8
 	bool "STM32F334C8"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334R4
 	bool "STM32F334R4"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334R6
 	bool "STM32F334R6"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F334R8
 	bool "STM32F334R8"
 	select STM32_STM32F33XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372C8
 	bool "STM32F372C8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372R8
 	bool "STM32F372R8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372V8
 	bool "STM32F372V8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372CB
 	bool "STM32F372CB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372RB
 	bool "STM32F372RB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372VB
 	bool "STM32F372VB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372CC
 	bool "STM32F372CC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372RC
 	bool "STM32F372RC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F372VC
 	bool "STM32F372VC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373C8
 	bool "STM32F373C8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373R8
 	bool "STM32F373R8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373V8
 	bool "STM32F373V8"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373CB
 	bool "STM32F373CB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373RB
 	bool "STM32F373RB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373VB
 	bool "STM32F373VB"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373CC
 	bool "STM32F373CC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373RC
 	bool "STM32F373RC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F373VC
 	bool "STM32F373VC"
 	select STM32_STM32F37XX
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F401CB
 	bool "STM32F401CB"
@@ -1063,171 +1006,143 @@ config ARCH_CHIP_STM32F410RB
 	bool "STM32F410RB"
 	select STM32_STM32F4XXX
 	select STM32_STM32F410
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F411RE
 	bool "STM32F411RE"
 	select STM32_STM32F4XXX
 	select STM32_STM32F411
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F411VE
 	bool "STM32F411VE"
 	select STM32_STM32F4XXX
 	select STM32_STM32F411
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405RG
 	bool "STM32F405RG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F405
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405VG
 	bool "STM32F405VG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F405
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405ZG
 	bool "STM32F405ZG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F405
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407VE
 	bool "STM32F407VE"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407VG
 	bool "STM32F407VG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407ZE
 	bool "STM32F407ZE"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407ZG
 	bool "STM32F407ZG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407IE
 	bool "STM32F407IE"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407IG
 	bool "STM32F407IG"
 	select STM32_STM32F4XXX
 	select STM32_STM32F407
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F427V
 	bool "STM32F427V"
 	select STM32_STM32F4XXX
 	select STM32_STM32F427
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F427Z
 	bool "STM32F427Z"
 	select STM32_STM32F4XXX
 	select STM32_STM32F427
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F427I
 	bool "STM32F427I"
 	select STM32_STM32F4XXX
 	select STM32_STM32F427
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F429V
 	bool "STM32F429V"
 	select STM32_STM32F4XXX
 	select STM32_STM32F429
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F429Z
 	bool "STM32F429Z"
 	select STM32_STM32F4XXX
 	select STM32_STM32F429
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F429I
 	bool "STM32F429I"
 	select STM32_STM32F4XXX
 	select STM32_STM32F429
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F429B
 	bool "STM32F429B"
 	select STM32_STM32F4XXX
 	select STM32_STM32F429
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F429N
 	bool "STM32F429N"
 	select STM32_STM32F4XXX
 	select STM32_STM32F429
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F446M
 	bool "STM32F446M"
 	select STM32_STM32F4XXX
 	select STM32_STM32F446
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F446R
 	bool "STM32F446R"
 	select STM32_STM32F4XXX
 	select STM32_STM32F446
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F446V
 	bool "STM32F446V"
 	select STM32_STM32F4XXX
 	select STM32_STM32F446
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F446Z
 	bool "STM32F446Z"
 	select STM32_STM32F4XXX
 	select STM32_STM32F446
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F469A
 	bool "STM32F469A"
 	select STM32_STM32F4XXX
 	select STM32_STM32F469
-	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F469I
 	bool "STM32F469I"
 	select STM32_STM32F4XXX
 	select STM32_STM32F469
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ETHMAC
 
 config ARCH_CHIP_STM32F469B
 	bool "STM32F469B"
 	select STM32_STM32F4XXX
 	select STM32_STM32F469
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ETHMAC
 
 config ARCH_CHIP_STM32F469N
 	bool "STM32F469N"
 	select STM32_STM32F4XXX
 	select STM32_STM32F469
-	select ARCH_HAVE_FPU
 	select STM32_HAVE_ETHMAC
 
 endchoice
@@ -1325,6 +1240,7 @@ config STM32_STM32L15XX
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1
 	select STM32_HAVE_IP_DMA_V1
+	select STM32_HAVE_IP_I2C_V1
 
 config STM32_ENERGYLITE
 	bool
@@ -1343,6 +1259,7 @@ config STM32_STM32F10XX
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1_BASIC
 	select STM32_HAVE_IP_DMA_V1
+	select STM32_HAVE_IP_I2C_V1
 
 config STM32_VALUELINE
 	bool
@@ -1404,6 +1321,10 @@ config STM32_USBACCESSLINE
 	select STM32_HAVE_USART3
 	select STM32_HAVE_SPI2
 
+config STM32_MEDIUMPLUSDENSITY
+	bool
+	default n
+
 config STM32_HIGHDENSITY
 	bool
 	default n
@@ -1453,14 +1374,7 @@ config STM32_STM32F20XX
 	bool
 	default n
 	select ARCH_CORTEXM3
-	select STM32_HAVE_IOCOMPENSATION
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1
-	select STM32_HAVE_IP_DMA_V2
-
-config STM32_STM32F205
-	bool
-	default n
+	select STM32_HAVE_CRYP
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_OTGHS
 	select STM32_HAVE_USART3
@@ -1482,53 +1396,35 @@ config STM32_STM32F205
 	select STM32_HAVE_TIM14
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_ADC3
-	select STM32_HAVE_CAN1
-	select STM32_HAVE_CAN2
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_I2C3
+	select STM32_HAVE_CAN1
+	select STM32_HAVE_CAN2
 	select STM32_HAVE_RNG
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
+	select STM32_HAVE_IOCOMPENSATION
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1
+	select STM32_HAVE_IP_DMA_V2
+	select STM32_HAVE_IP_I2C_V1
+
+config STM32_STM32F205
+	bool
+	default n
 
 config STM32_STM32F207
 	bool
 	default n
-	select STM32_HAVE_OTGFS
 	select STM32_HAVE_FSMC
-	select STM32_HAVE_USART3
-	select STM32_HAVE_UART4
-	select STM32_HAVE_UART5
-	select STM32_HAVE_USART6
-	select STM32_HAVE_TIM1
-	select STM32_HAVE_TIM3
-	select STM32_HAVE_TIM4
-	select STM32_HAVE_TIM5
-	select STM32_HAVE_TIM6
-	select STM32_HAVE_TIM7
-	select STM32_HAVE_TIM8
-	select STM32_HAVE_TIM9
-	select STM32_HAVE_TIM10
-	select STM32_HAVE_TIM11
-	select STM32_HAVE_TIM12
-	select STM32_HAVE_TIM13
-	select STM32_HAVE_TIM14
-	select STM32_HAVE_ADC2
-	select STM32_HAVE_ADC3
-	select STM32_HAVE_CAN1
-	select STM32_HAVE_CAN2
-	select STM32_HAVE_DAC1
-	select STM32_HAVE_I2C2
-	select STM32_HAVE_I2C3
-	select STM32_HAVE_RNG
 	select STM32_HAVE_ETHMAC
-	select STM32_HAVE_SPI2
-	select STM32_HAVE_SPI3
 
 config STM32_STM32F30XX
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
@@ -1538,9 +1434,11 @@ config STM32_STM32F30XX
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
+	select STM32_HAVE_TSC
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
 	select STM32_HAVE_IP_DMA_V1
+	select STM32_HAVE_IP_I2C_V2
 
 config STM32_STM32F302
 	bool
@@ -1565,6 +1463,7 @@ config STM32_STM32F33XX
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
 	select STM32_HAVE_HRTIM1
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
@@ -1577,6 +1476,7 @@ config STM32_STM32F33XX
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
+	select STM32_HAVE_TSC
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_ADC2_DMA
@@ -1587,11 +1487,13 @@ config STM32_STM32F33XX
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
 	select STM32_HAVE_IP_DMA_V1
+	select STM32_HAVE_IP_I2C_V2
 
 config STM32_STM32F37XX
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
 	select STM32_HAVE_USBDEV
 	select STM32_HAVE_TIM3
 	select STM32_HAVE_TIM4
@@ -1601,6 +1503,7 @@ config STM32_STM32F37XX
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
+	select STM32_HAVE_TSC
 	select STM32_HAVE_SDADC1
 	select STM32_HAVE_SDADC2
 	select STM32_HAVE_SDADC3
@@ -1614,17 +1517,21 @@ config STM32_STM32F37XX
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1_BASIC
 	select STM32_HAVE_IP_DMA_V1
+	select STM32_HAVE_IP_I2C_V2
 
 config STM32_STM32F4XXX
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	select STM32_HAVE_CRYP
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_IOCOMPENSATION
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1
 	select STM32_HAVE_IP_DMA_V2
+	select STM32_HAVE_IP_I2C_V1
 
 config STM32_STM32F401xBC
 	bool
@@ -1640,7 +1547,6 @@ config STM32_STM32F401
 	bool
 	default n
 	select ARCH_CORTEXM4
-	select ARCH_HAVE_FPU
 	select STM32_STM32F4XXX
 	select STM32_HAVE_USART6
 	select STM32_HAVE_TIM1
@@ -1760,7 +1666,7 @@ config STM32_STM32F407
 config STM32_STM32F427
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -1802,7 +1708,7 @@ config STM32_STM32F427
 config STM32_STM32F429
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
@@ -1880,7 +1786,7 @@ config STM32_STM32F446
 config STM32_STM32F469
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
@@ -1932,6 +1838,14 @@ menu "STM32 Peripheral Support"
 # These "hidden" settings determine is a peripheral option is available for the
 # selection MCU
 
+config STM32_HAVE_AES
+	bool
+	default n
+
+config STM32_HAVE_CRYP
+	bool
+	default n
+
 config STM32_HAVE_CCM
 	bool
 	default n
@@ -1941,6 +1855,10 @@ config STM32_HAVE_USBDEV
 	default n
 
 config STM32_HAVE_OTGFS
+	bool
+	default n
+
+config STM32_HAVE_FMC
 	bool
 	default n
 
@@ -2049,6 +1967,10 @@ config STM32_HAVE_TIM16
 	default n
 
 config STM32_HAVE_TIM17
+	bool
+	default n
+
+config STM32_HAVE_TSC
 	bool
 	default n
 
@@ -2213,6 +2135,14 @@ config STM32_HAVE_OPAMP4
 	default n
 
 # These are STM32 peripherals IP blocks
+
+config STM32_HAVE_IP_I2C_V1
+	bool
+	default n
+
+config STM32_HAVE_IP_I2C_V2
+	bool
+	default n
 
 config STM32_HAVE_IP_DMA_V1
 	bool
@@ -2390,7 +2320,7 @@ config STM32_CRC
 config STM32_CRYP
 	bool "CRYP"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F4XXX
+	depends on STM32_HAVE_CRYP
 
 config STM32_DMA1
 	bool "DMA1"
@@ -2451,6 +2381,11 @@ config STM32_FSMC
 	bool "FSMC"
 	default n
 	depends on STM32_HAVE_FSMC
+
+config STM32_FMC
+	bool "FMC"
+	default n
+	depends on STM32_HAVE_FMC
 
 config STM32_HASH
 	bool "HASH"
@@ -2763,7 +2698,7 @@ config STM32_TIM17
 config STM32_TSC
 	bool "TSC"
 	default n
-	depends on STM32_STM32F30XX
+	depends on STM32_HAVE_TSC
 
 config STM32_USART1
 	bool "USART1"
@@ -3180,13 +3115,13 @@ config STM32_DMACAPABLE
 		Drivers then may use this information to determine if they should
 		attempt the DMA or fall back to a different transfer method.
 
-config STM32_FSMC_SRAM
-	bool "External SRAM on FSMC"
+config STM32_EXTERNAL_RAM
+	bool "External RAM on FSMC/FMC"
 	default n
-	depends on STM32_FSMC
+	depends on STM32_FSMC || STM32_FMC
 	select ARCH_HAVE_HEAP2
 	---help---
-		In addition to internal SRAM, SRAM may also be available through the FSMC.
+		In addition to internal SRAM, external RAM may be available through the FSMC/FMC.
 
 menu "Timer Configuration"
 	depends on STM32_TIM
@@ -3299,11 +3234,11 @@ if STM32_TIM1_CHANNEL1
 
 config STM32_TIM1_CH1MODE
 	int "TIM1 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH1OUT
 	bool "TIM1 Channel 1 Output"
@@ -3329,11 +3264,11 @@ if STM32_TIM1_CHANNEL2
 
 config STM32_TIM1_CH2MODE
 	int "TIM1 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH2OUT
 	bool "TIM1 Channel 2 Output"
@@ -3359,11 +3294,11 @@ if STM32_TIM1_CHANNEL3
 
 config STM32_TIM1_CH3MODE
 	int "TIM1 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH3OUT
 	bool "TIM1 Channel 3 Output"
@@ -3389,11 +3324,11 @@ if STM32_TIM1_CHANNEL4
 
 config STM32_TIM1_CH4MODE
 	int "TIM1 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH4OUT
 	bool "TIM1 Channel 4 Output"
@@ -3414,10 +3349,10 @@ if STM32_TIM1_CHANNEL5
 
 config STM32_TIM1_CH5MODE
 	int "TIM1 Channel 5 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH5OUT
 	bool "TIM1 Channel 5 Output"
@@ -3438,10 +3373,10 @@ if STM32_TIM1_CHANNEL6
 
 config STM32_TIM1_CH6MODE
 	int "TIM1 Channel 6 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH6OUT
 	bool "TIM1 Channel 6 Output"
@@ -3523,11 +3458,11 @@ endif # STM32_TIM1_CHANNEL = 4
 
 config STM32_TIM1_CHMODE
 	int "TIM1 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3568,11 +3503,11 @@ if STM32_TIM2_CHANNEL1
 
 config STM32_TIM2_CH1MODE
 	int "TIM2 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH1OUT
 	bool "TIM2 Channel 1 Output"
@@ -3592,11 +3527,11 @@ if STM32_TIM2_CHANNEL2
 
 config STM32_TIM2_CH2MODE
 	int "TIM2 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH2OUT
 	bool "TIM2 Channel 2 Output"
@@ -3616,11 +3551,11 @@ if STM32_TIM2_CHANNEL3
 
 config STM32_TIM2_CH3MODE
 	int "TIM2 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH3OUT
 	bool "TIM2 Channel 3 Output"
@@ -3640,11 +3575,11 @@ if STM32_TIM2_CHANNEL4
 
 config STM32_TIM2_CH4MODE
 	int "TIM2 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH4OUT
 	bool "TIM2 Channel 4 Output"
@@ -3708,11 +3643,11 @@ endif # STM32_TIM2_CHANNEL = 4
 
 config STM32_TIM2_CHMODE
 	int "TIM2 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3753,11 +3688,11 @@ if STM32_TIM3_CHANNEL1
 
 config STM32_TIM3_CH1MODE
 	int "TIM3 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH1OUT
 	bool "TIM3 Channel 1 Output"
@@ -3777,11 +3712,11 @@ if STM32_TIM3_CHANNEL2
 
 config STM32_TIM3_CH2MODE
 	int "TIM3 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH2OUT
 	bool "TIM3 Channel 2 Output"
@@ -3801,11 +3736,11 @@ if STM32_TIM3_CHANNEL3
 
 config STM32_TIM3_CH3MODE
 	int "TIM3 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH3OUT
 	bool "TIM3 Channel 3 Output"
@@ -3825,11 +3760,11 @@ if STM32_TIM3_CHANNEL4
 
 config STM32_TIM3_CH4MODE
 	int "TIM3 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH4OUT
 	bool "TIM3 Channel 4 Output"
@@ -3893,11 +3828,11 @@ endif # STM32_TIM3_CHANNEL = 4
 
 config STM32_TIM3_CHMODE
 	int "TIM3 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3938,11 +3873,11 @@ if STM32_TIM4_CHANNEL1
 
 config STM32_TIM4_CH1MODE
 	int "TIM4 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH1OUT
 	bool "TIM4 Channel 1 Output"
@@ -3962,11 +3897,11 @@ if STM32_TIM4_CHANNEL2
 
 config STM32_TIM4_CH2MODE
 	int "TIM4 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH2OUT
 	bool "TIM4 Channel 2 Output"
@@ -3986,11 +3921,11 @@ if STM32_TIM4_CHANNEL3
 
 config STM32_TIM4_CH3MODE
 	int "TIM4 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH3OUT
 	bool "TIM4 Channel 3 Output"
@@ -4010,11 +3945,11 @@ if STM32_TIM4_CHANNEL4
 
 config STM32_TIM4_CH4MODE
 	int "TIM4 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH4OUT
 	bool "TIM4 Channel 4 Output"
@@ -4078,11 +4013,11 @@ endif # STM32_TIM4_CHANNEL = 4
 
 config STM32_TIM4_CHMODE
 	int "TIM4 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4123,11 +4058,11 @@ if STM32_TIM5_CHANNEL1
 
 config STM32_TIM5_CH1MODE
 	int "TIM5 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH1OUT
 	bool "TIM5 Channel 1 Output"
@@ -4147,11 +4082,11 @@ if STM32_TIM5_CHANNEL2
 
 config STM32_TIM5_CH2MODE
 	int "TIM5 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH2OUT
 	bool "TIM5 Channel 2 Output"
@@ -4171,11 +4106,11 @@ if STM32_TIM5_CHANNEL3
 
 config STM32_TIM5_CH3MODE
 	int "TIM5 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH3OUT
 	bool "TIM5 Channel 3 Output"
@@ -4195,11 +4130,11 @@ if STM32_TIM5_CHANNEL4
 
 config STM32_TIM5_CH4MODE
 	int "TIM5 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH4OUT
 	bool "TIM5 Channel 4 Output"
@@ -4263,11 +4198,11 @@ endif # STM32_TIM5_CHANNEL = 4
 
 config STM32_TIM5_CHMODE
 	int "TIM5 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4329,11 +4264,17 @@ if STM32_TIM8_CHANNEL1
 
 config STM32_TIM8_CH1MODE
 	int "TIM8 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32_TIM8_CH1OUT
+        bool "TIM8 Channel 1 Output"
+        default n
+        ---help---
+                Enables channel 1 output.
 
 config STM32_TIM8_CH1NOUT
 	bool "TIM8 Channel 1 Complementary Output"
@@ -4353,11 +4294,11 @@ if STM32_TIM8_CHANNEL2
 
 config STM32_TIM8_CH2MODE
 	int "TIM8 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH2OUT
 	bool "TIM8 Channel 2 Output"
@@ -4383,11 +4324,11 @@ if STM32_TIM8_CHANNEL3
 
 config STM32_TIM8_CH3MODE
 	int "TIM8 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH3OUT
 	bool "TIM8 Channel 3 Output"
@@ -4413,11 +4354,11 @@ if STM32_TIM8_CHANNEL4
 
 config STM32_TIM8_CH4MODE
 	int "TIM8 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH4OUT
 	bool "TIM8 Channel 4 Output"
@@ -4438,10 +4379,10 @@ if STM32_TIM8_CHANNEL5
 
 config STM32_TIM8_CH5MODE
 	int "TIM8 Channel 5 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH5OUT
 	bool "TIM8 Channel 5 Output"
@@ -4462,10 +4403,10 @@ if STM32_TIM8_CHANNEL6
 
 config STM32_TIM8_CH6MODE
 	int "TIM8 Channel 6 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH6OUT
 	bool "TIM8 Channel 6 Output"
@@ -4547,11 +4488,11 @@ endif # STM32_TIM8_CHANNEL = 4
 
 config STM32_TIM8_CHMODE
 	int "TIM8 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4585,11 +4526,11 @@ if STM32_TIM9_CHANNEL1
 
 config STM32_TIM9_CH1MODE
 	int "TIM9 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM9_CH1OUT
 	bool "TIM9 Channel 1 Output"
@@ -4609,11 +4550,11 @@ if STM32_TIM9_CHANNEL2
 
 config STM32_TIM9_CH2MODE
 	int "TIM9 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM9_CH2OUT
 	bool "TIM9 Channel 2 Output"
@@ -4657,11 +4598,11 @@ endif # STM32_TIM9_CHANNEL = 2
 
 config STM32_TIM9_CHMODE
 	int "TIM9 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4695,11 +4636,11 @@ if STM32_TIM10_CHANNEL1
 
 config STM32_TIM10_CH1MODE
 	int "TIM10 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM10_CH1OUT
 	bool "TIM10 Channel 1 Output"
@@ -4733,11 +4674,11 @@ endif # STM32_TIM10_CHANNEL = 1
 
 config STM32_TIM10_CHMODE
 	int "TIM10 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4771,11 +4712,11 @@ if STM32_TIM11_CHANNEL1
 
 config STM32_TIM11_CH1MODE
 	int "TIM11 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM11_CH1OUT
 	bool "TIM11 Channel 1 Output"
@@ -4809,11 +4750,11 @@ endif # STM32_TIM11_CHANNEL = 1
 
 config STM32_TIM11_CHMODE
 	int "TIM11 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4847,11 +4788,11 @@ if STM32_TIM12_CHANNEL1
 
 config STM32_TIM12_CH1MODE
 	int "TIM12 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM12_CH1OUT
 	bool "TIM12 Channel 1 Output"
@@ -4871,11 +4812,11 @@ if STM32_TIM12_CHANNEL2
 
 config STM32_TIM12_CH2MODE
 	int "TIM12 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM12_CH2OUT
 	bool "TIM12 Channel 2 Output"
@@ -4897,7 +4838,7 @@ config STM32_TIM12_CHANNEL
 		If TIM12 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,2}
 
-if STM32_TIM9_CHANNEL = 1
+if STM32_TIM12_CHANNEL = 1
 
 config STM32_TIM12_CH1OUT
 	bool "TIM12 Channel 1 Output"
@@ -4919,11 +4860,11 @@ endif # STM32_TIM12_CHANNEL = 2
 
 config STM32_TIM12_CHMODE
 	int "TIM12 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4957,11 +4898,11 @@ if STM32_TIM13_CHANNEL1
 
 config STM32_TIM13_CH1MODE
 	int "TIM13 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM13_CH1OUT
 	bool "TIM13 Channel 1 Output"
@@ -4983,7 +4924,7 @@ config STM32_TIM13_CHANNEL
 		If TIM13 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
 
-if STM32_TIM14_CHANNEL = 1
+if STM32_TIM13_CHANNEL = 1
 
 config STM32_TIM13_CH1OUT
 	bool "TIM13 Channel 1 Output"
@@ -4995,11 +4936,11 @@ endif # STM32_TIM13_CHANNEL = 1
 
 config STM32_TIM13_CHMODE
 	int "TIM13 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5033,11 +4974,11 @@ if STM32_TIM14_CHANNEL1
 
 config STM32_TIM14_CH1MODE
 	int "TIM14 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM14_CH1OUT
 	bool "TIM14 Channel 1 Output"
@@ -5071,11 +5012,11 @@ endif # STM32_TIM14_CHANNEL = 1
 
 config STM32_TIM14_CHMODE
 	int "TIM14 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5129,11 +5070,11 @@ if STM32_TIM15_CHANNEL1
 
 config STM32_TIM15_CH1MODE
 	int "TIM15 Channel 1 Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM15_CH1OUT
 	bool "TIM15 Channel 1 Output"
@@ -5159,11 +5100,11 @@ if STM32_TIM15_CHANNEL2
 
 config STM32_TIM15_CH2MODE
 	int "TIM15 Channel 2 Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM15_CH2OUT
 	bool "TIM15 Channel 2 Output"
@@ -5219,11 +5160,11 @@ endif # STM32_TIM15_CHANNEL = 2
 
 config STM32_TIM15_CHMODE
 	int "TIM15 Channel Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5277,10 +5218,10 @@ if STM32_TIM16_CHANNEL1
 
 config STM32_TIM16_CH1MODE
 	int "TIM16 Channel 1 Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM16_CH1OUT
 	bool "TIM16 Channel 1 Output"
@@ -5314,10 +5255,10 @@ endif # STM32_TIM16_CHANNEL = 1
 
 config STM32_TIM16_CHMODE
 	int "TIM16 Channel Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5371,10 +5312,10 @@ if STM32_TIM17_CHANNEL1
 
 config STM32_TIM17_CH1MODE
 	int "TIM17 Channel 1 Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM17_CH1OUT
 	bool "TIM17 Channel 1 Output"
@@ -5408,10 +5349,10 @@ endif # STM32_TIM17_CHANNEL = 1
 
 config STM32_TIM17_CHMODE
 	int "TIM17 Channel Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5432,38 +5373,6 @@ config STM32_PWM_TRGO
 	depends on STM32_PWM
 	---help---
 		Enable TRGO support for PWM driver
-
-config STM32_TIM1_PWM_ADC
-	bool "TIM1 PWM ADC "
-	default n
-	depends on STM32_TIM1 && STM32_ADC && STM32_TIM1_PWM
-	---help---
-		ADC trigger with TIM1 configured as PWM source
-
-choice
-	prompt "Select TIM1 PWM ADC channel"
-	default STM32_TIM1_PWM_ADC1
-	depends on STM32_TIM1_PWM_ADC
-
-config STM32_TIM1_PWM_ADC1
-	bool "TIM1 PWM ADC1"
-	depends on STM32_ADC1
-	---help---
-		Trigger ADC1 with PWM configured TIM1
-
-config STM32_TIM1_PWM_ADC2
-	bool "TIM1 PWM ADC2"
-	depends on STM32_ADC2
-	---help---
-		Trigger ADC2 with PWM configured TIM1
-
-config STM32_TIM1_PWM_ADC3
-	bool "TIM1 PWM ADC3"
-	depends on STM32_ADC3
-	---help---
-		Trigger ADC3 with PWM configured TIM1
-
-endchoice
 
 config STM32_TIM1_ADC
 	bool "TIM1 ADC"
@@ -5726,6 +5635,9 @@ config STM32_HAVE_ADC2_TIMER
 config STM32_HAVE_ADC3_TIMER
 	bool
 
+config STM32_HAVE_ADC4_TIMER
+	bool
+
 config STM32_ADC1_SAMPLE_FREQUENCY
 	int "ADC1 Sampling Frequency"
 	default 100
@@ -5737,7 +5649,7 @@ config STM32_ADC1_TIMTRIG
 	int "ADC1 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC1_TIMER || STM32_TIM1_PWM_ADC1
+	depends on STM32_HAVE_ADC1_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
@@ -5752,7 +5664,7 @@ config STM32_ADC2_TIMTRIG
 	int "ADC2 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC2_TIMER || STM32_TIM1_PWM_ADC2
+	depends on STM32_HAVE_ADC2_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
@@ -5767,7 +5679,7 @@ config STM32_ADC3_TIMTRIG
 	int "ADC3 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC3_TIMER || STM32_TIM1_PWM_ADC3
+	depends on STM32_HAVE_ADC3_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
@@ -9397,6 +9309,14 @@ config STM32_OTGHS_SOFINTR
 	---help---
 		Enable SOF interrupts.  Why would you ever want to do that?
 
+config STM32_OTGHS_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG HS USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
 endmenu
 
 menu "USB Host Debug Configuration"
@@ -9524,7 +9444,7 @@ config STM32_LTDC_FB_BASE
 	---help---
 		If you are using the LTDC, then you must provide the address
 		of the start of the framebuffer.  This address will typically
-		be in the SRAM or SDRAM memory region of the FSMC.
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
 
 config STM32_LTDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
@@ -9698,7 +9618,7 @@ config STM32_DMA2D_FB_BASE
 	---help---
 		If you are using the DMA2D, then you must provide the address
 		of the start of the DMA2D overlays framebuffer. This address will typically
-		be in the SRAM or SDRAM memory region of the FSMC.
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
 
 config STM32_DMA2D_FB_SIZE
 	int "Framebuffer memory size (bytes)"

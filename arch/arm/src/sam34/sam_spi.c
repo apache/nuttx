@@ -69,10 +69,10 @@
 #include "sam_cmcc.h"
 #include "sam_periphclks.h"
 #include "sam_spi.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_dmac.h"
-#include "chip/sam_spi.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_dmac.h"
+#include "hardware/sam_spi.h"
+#include "hardware/sam_pinmap.h"
 
 #if defined(CONFIG_SAM34_SPI0) || defined(CONFIG_SAM34_SPI1)
 

@@ -69,9 +69,9 @@
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "sam_usbhost.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_sfr.h"
-#include "chip/sam_ohci.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_sfr.h"
+#include "hardware/sam_ohci.h"
 
 #ifdef CONFIG_SAMA5_OHCI
 

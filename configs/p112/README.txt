@@ -137,17 +137,32 @@ that connects to the P112 via the Z85230 ESCC channel A.
 Status
 ======
 
-2014-8-22:  After some time idling away, I tried rebuilding with Windows 8, the latest MinGW
-and the latest SDCC.  I fixed a few things but there a still a few issues.  The last "show
-stopper" before I gave up for now was during building dependencies:
+2014-8-22:  After some time idling away, I tried rebuilding with Windows 8,
+  the latest MinGW and the latest SDCC.  I fixed a few things but there a
+  still a few issues.  The last "show stopper" before I gave up for now was
+  during building dependencies:
 
-ASlink-Error-<cannot open> : "bin/mm_initialize.rel"
+  ASlink-Error-<cannot open> : "bin/mm_initialize.rel"
 
-Clearly there is something wrong with the command line options given to SDCC because it is
-trying to compile and link when we really only want dependencies.  I did not spend very much
-time trying to solve the problem; I assume that it is not too difficult.
+  Clearly there is something wrong with the command line options given to
+  SDCC because it is trying to compile and link when we really only want
+  dependencies.  I did not spend very much time trying to solve the problem;
+  I assume that it is not too difficult.
 
-2014-9-15: There has been a lot of change to the address environment APIs with the inegration
-of address environments on the Cortex-A.  It is likely that there is some breakage due to
-incompatibilities with the Z180's mini-MMU.
+2014-9-15: There has been a lot of change to the address environment APIs
+  with the integration of address environments on the Cortex-A.  It is
+  likely that there is some breakage due to incompatibilities with the
+  Z180's mini-MMU.
+
+Known compilation problems with SDCC:
+
+Known compilation problems:
+
+    CC:  stdlib/lib_strtof.c
+    stdlib/lib_strtof.c:62:6: warning: #warning "Size of exponent is unknown"
+    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
+    stdlib/lib_strtof.c:102: error 122: dividing by ZERO
+    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
+
+  Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
 

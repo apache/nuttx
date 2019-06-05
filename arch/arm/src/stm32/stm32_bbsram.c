@@ -131,10 +131,8 @@ static ssize_t stm32_bbsram_write(FAR struct file *filep,
                  FAR const char *buffer, size_t len);
 static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     stm32_bbsram_unlink(FAR struct inode *inode);
 #endif
@@ -155,9 +153,7 @@ static const struct file_operations stm32_bbsram_fops =
   .write  = stm32_bbsram_write,
   .seek   = stm32_bbsram_seek,
   .ioctl  = stm32_bbsram_ioctl,
-#ifndef CONFIG_DISABLE_POLL
   .poll   = stm32_bbsram_poll,
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = stm32_bbsram_unlink,
 #endif
@@ -545,7 +541,6 @@ static ssize_t stm32_bbsram_write(FAR struct file *filep, FAR const char *buffer
  * Name: stm32_bbsram_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
                              bool setup)
 {
@@ -560,7 +555,6 @@ static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: stm32_bbsram_ioctl

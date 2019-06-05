@@ -78,10 +78,8 @@ static int        bluetooth_connect(FAR struct socket *psock,
 static int        bluetooth_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        bluetooth_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    bluetooth_send(FAR struct socket *psock,
                    FAR const void *buf, size_t len, int flags);
 static ssize_t    bluetooth_sendto(FAR struct socket *psock,
@@ -104,9 +102,7 @@ const struct sock_intf_s g_bluetooth_sockif =
   bluetooth_listen,      /* si_listen */
   bluetooth_connect,     /* si_connect */
   bluetooth_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   bluetooth_poll_local,  /* si_poll */
-#endif
   bluetooth_send,        /* si_send */
   bluetooth_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -619,7 +615,6 @@ int bluetooth_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int bluetooth_poll_local(FAR struct socket *psock,
                                  FAR struct pollfd *fds, bool setup)
 {
@@ -630,7 +625,6 @@ static int bluetooth_poll_local(FAR struct socket *psock,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: bluetooth_send

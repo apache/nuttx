@@ -71,8 +71,6 @@
  *   CONFIG_IOEXPANDER
  *     Enables support for the PCA9555 I/O expander
  *
- * Other settings that effect the driver: CONFIG_DISABLE_POLL
- *
  * CONFIG_IOEXPANDER_PCA9555
  *   Enables support for the PCA9555 driver (Needs CONFIG_INPUT)
  * CONFIG_PCA9555_MULTIPLE

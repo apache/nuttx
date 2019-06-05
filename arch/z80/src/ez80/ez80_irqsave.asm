@@ -38,11 +38,12 @@
 ;**************************************************************************
 
 ;**************************************************************************
-; Global Symbols Expported
+; Global Symbols Exported
 ;**************************************************************************
 
 	xdef	_up_irq_save
 	xdef	_up_irq_restore
+	xdef	_up_irq_enable
 
 ;**************************************************************************
 ; Code
@@ -93,7 +94,7 @@ _disabled:
 ;*
 ;**************************************************************************
 
-up_irq_enable:
+_up_irq_enable:
 	ld		a, i			; AF = interrupt state
 	ei						; Interrupts are enabled (does not affect F)
 	push	af				; Transfer to HL via the stack

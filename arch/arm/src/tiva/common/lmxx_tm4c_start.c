@@ -46,10 +46,7 @@
 #include <nuttx/init.h>
 #include <arch/irq.h>
 
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
-
+#include "nvic.h"
 #include "up_arch.h"
 #include "up_internal.h"
 

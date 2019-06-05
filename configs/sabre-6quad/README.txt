@@ -4,6 +4,12 @@ README.txt
 This directory holds a port of NuttX to the NXP/Freescale Sabre board
 featuring the iMX 6Quad CPU.
 
+This is a minimal port, used primarily for verifying SMP operation.  More
+recently, a port to the i.MX RT was added.  This port has gotten more
+support since it is better aligned with usage in embedded systems.  The
+i.MX6 and the i.MX6 share IOMUXing and some peripherals.  It ought to be
+a simple matter to backport some of the common drivers from i.MXRT to i.MX6.
+
 Contents
 ========
 
@@ -163,11 +169,35 @@ Status
   configuration, you will see a crash due to memory corruption consistently,
   specially in the nested signal test (apps/examples/ostest/signest.c).
 
-2018-06-20:  There is a problem with the Interrupt Stack for SMP in
+2018-06-20:  There was a problem with the Interrupt Stack for SMP in
   arch/arm/src/armv7-a/arm_vectors.S:  There is only one interrupt stack for
   all CPUs!  A fix for this was put in place on 2018-06-21.  Big Improvement!
-  Bit this does not completely eliminate instabilities which seem to be
+  But this does not completely eliminate instabilities which seem to be
   related to memory corruption -- mm_mallinfo() asserts.
+
+CORTEX-A GIC SGI INTERRUPT MASKING (From the top-level TODO list)
+-----------------------------------------------------------------
+In the ARMv7-A GICv2 architecture, the inter-processor interrupts (SGIs) are
+non maskable and will occur even if interrupts are disabled.  This adds a
+lot of complexity to the ARMV7-A critical section design.
+
+Masayuki Ishikawa has suggested the use of the GICv2 ICCMPR register to
+control SGI interrupts.  This register (much like the ARMv7-M BASEPRI
+register) can be used to mask interrupts by interrupt priority.  Since SGIs
+may be assigned priorities the ICCMPR should be able to block execution of
+SGIs as well.
+
+Such an implementation would be very similar to the BASEPRI (vs PRIMASK)
+implementation for the ARMv7-M:  (1) The up_irq_save() and up_irq_restore()
+registers would have to set/restore the ICCMPR register, (2) register setup
+logic in arch/arm/src/armv7-a for task start-up and signal dispatch would
+have to set the ICCMPR correctly, and (3) the 'xcp' structure would have to
+be extended to hold the ICCMPR register;  logic would have to added be
+save/restore the ICCMPR register in the 'xcp' structure on each interrupt
+and context switch.
+
+This would also be an essential part of a high priority, nested interrupt
+implementation (unrelated feature).
 
 Platform Features
 =================

@@ -84,8 +84,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/sam_pinmap.h"
-#include "chip/sam_chipid.h"
+#include "hardware/sam_pinmap.h"
+#include "hardware/sam_chipid.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_ethernet.h"
@@ -3462,7 +3462,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
   uint16_t phyval;
   int ret;
 
-  /* Does this MAC support a KSZ80x1 PHY? */
+  /* Does this MAC support a KSZ80X1 PHY? */
 
   if (priv->phytype == SAMV7_PHY_KSZ8051 ||
       priv->phytype == SAMV7_PHY_KSZ8061 ||
@@ -3483,7 +3483,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
           /* Enable link up/down interrupts */
 
           ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
-                            (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+                            (MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN));
         }
 
       /* Disable management port (probably) */

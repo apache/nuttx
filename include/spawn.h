@@ -92,9 +92,7 @@ struct posix_spawnattr_s
   uint8_t  max_repl;             /* Maximum pending replenishments */
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t sigmask;              /* Signals to be masked */
-#endif
 
 #ifndef CONFIG_BUILD_KERNEL
   /* Used only by task_spawn (non-standard) */
@@ -197,12 +195,8 @@ int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr,
 int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr,
       FAR int *policy);
 #define posix_spawnattr_getsigdefault(attr,sigdefault) (ENOSYS)
-#ifndef CONFIG_DISABLE_SIGNALS
 int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr,
                                FAR sigset_t *sigmask);
-#else
-#  define posix_spawnattr_getsigmask(attr,sigmask) (ENOSYS)
-#endif
 
 /* Set spawn attributes interfaces */
 
@@ -212,12 +206,8 @@ int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr,
       FAR const struct sched_param *param);
 int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
 #define posix_spawnattr_setsigdefault(attr,sigdefault) (ENOSYS)
-#ifndef CONFIG_DISABLE_SIGNALS
 int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
                                FAR const sigset_t *sigmask);
-#else
-#  define posix_spawnattr_setsigmask(attr,sigmask) (ENOSYS)
-#endif
 
 /* Non-standard get/set spawn attributes interfaces for use only with
  * task_spawn()

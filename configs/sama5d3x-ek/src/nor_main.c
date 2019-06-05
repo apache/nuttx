@@ -50,9 +50,9 @@
 #include "cp15_cacheops.h"
 
 #include "sam_periphclks.h"
-#include "chip/sam_hsmc.h"
-#include "chip/sam_matrix.h"
-#include "chip/sam_aximx.h"
+#include "hardware/sam_hsmc.h"
+#include "hardware/sam_matrix.h"
+#include "hardware/sam_aximx.h"
 
 #include "sama5d3x-ek.h"
 

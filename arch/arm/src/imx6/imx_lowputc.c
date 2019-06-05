@@ -45,9 +45,9 @@
 
 #include "up_arch.h"
 
-#include "chip/imx_iomuxc.h"
-#include "chip/imx_ccm.h"
-#include "chip/imx_uart.h"
+#include "hardware/imx_iomuxc.h"
+#include "hardware/imx_ccm.h"
+#include "hardware/imx_uart.h"
 #include "imx_config.h"
 #include "imx_iomuxc.h"
 #include "imx_gpio.h"
@@ -55,7 +55,7 @@
 
 #include "up_internal.h"
 
-#include "chip/imx_pinmux.h"
+#include "hardware/imx_pinmux.h"
 #include <arch/board/board.h> /* Include last:  has dependencies */
 
 /****************************************************************************

@@ -104,7 +104,7 @@ static inline void nxbe_getrectangle_dev(FAR struct nxbe_window_s *wnd,
  *
  * Input Parameters:
  *   wnd  - The window structure reference
- *   rect - The location to be copied
+ *   rect - The location to be copied (in device coordinates, clipped)
  *   plane - Specifies the color plane to get from.
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
@@ -126,8 +126,8 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
 
   DEBUGASSERT(pplane != NULL && pplane->pwfb.getrectangle != NULL);
 
-  /* The rectangle that we receive here is in abolute device coordinates.  We
-   * need to restore this to windows relative coordinates.
+  /* The rectangle that we receive here is in abolute device coordinates.
+   * We need to restore this to windows relative coordinates.
    */
 
   nxgl_rectoffset(&relrect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
@@ -153,7 +153,7 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
  *
  * Input Parameters:
  *   wnd  - The window structure reference
- *   rect - The location to be copied
+ *   rect - The location to be copied (in window-relative coordinates)
  *   plane - Specifies the color plane to get from.
  *   dest - The location to copy the memory region
  *   deststride - The width, in bytes, of the dest memory
@@ -174,7 +174,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
   DEBUGASSERT(plane < wnd->be->vinfo.nplanes);
 
   /* Offset the rectangle by the window origin to convert it into a
-   * bounding box
+   * bounding box in device coordinates
    */
 
   nxgl_rectoffset(&remaining, rect, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
@@ -197,18 +197,47 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
 
       if (NXBE_ISRAMBACKED(wnd))
         {
-          nxbe_getrectangle_pwfb(wnd, rect, plane, dest, deststride);
+          nxbe_getrectangle_pwfb(wnd, &remaining, plane, dest, deststride);
         }
       else
 #endif
+      /* If the window is hidden, then there is no available data source */
+
+      if (!NXBE_ISHIDDEN(wnd))
         {
+#ifdef CONFIG_NX_SWCURSOR
+          /* Is the software cursor visible? */
+
+          if (wnd->be->cursor.visible)
+            {
+              /* Erase any portion of the cursor that may be above this
+               * region.
+               * REVISIT:  Only a single color plane is supported
+               */
+
+              wnd->be->plane[0].cursor.erase(wnd->be, &remaining, 0);
+            }
+#endif
           /* Get the rectangle from the graphics device memory.
            * NOTE: Since raw graphic memory is returned, the returned memory
            * content may be the memory of windows above this one and may
            * not necessarily belong to this window.
            */
 
-           nxbe_getrectangle_dev(wnd, rect, plane, dest, deststride);
+           nxbe_getrectangle_dev(wnd, &remaining, plane, dest, deststride);
+
+#ifdef CONFIG_NX_SWCURSOR
+          /* Was the software cursor visible? */
+
+          if (wnd->be->cursor.visible)
+            {
+              /* Restore the software cursor if any part of the cursor was
+               * erased above.
+               */
+
+              wnd->be->plane[0].cursor.draw(wnd->be, &remaining, 0);
+            }
+#endif
         }
     }
 }

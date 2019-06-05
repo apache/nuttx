@@ -49,7 +49,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/sam_usb.h"
+#include "hardware/sam_usb.h"
 
 /*****************************************************************************
  * Public Function Prototypes

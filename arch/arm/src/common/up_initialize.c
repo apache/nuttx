@@ -51,6 +51,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -203,7 +204,9 @@ void up_initialize(void)
    * serial driver).
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
+#if defined (CONFIG_ARM_LWL_CONSOLE)
+  lwlconsole_init();
+#elif defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
 #elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
@@ -258,9 +261,11 @@ void up_initialize(void)
   (void)telnet_initialize();
 #endif
 
+#if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
+#endif
 
   /* Initialize the L2 cache if present and selected */
 

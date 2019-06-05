@@ -52,9 +52,9 @@
 #include "chip.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_port.h"
+#  include "hardware/samd_port.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_port.h"
+#  include "hardware/saml_port.h"
 #else
 #  error Unrecognized SAMD/L architecture
 #endif

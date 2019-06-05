@@ -80,6 +80,9 @@ config LIBC_LONG_LONG
 		libraries that will be drawn into the build if long long support
 		is enabled.
 
+		NOTE:  This setting has no effect if the underlying architecture
+		cannot support long long types
+
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default n

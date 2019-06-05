@@ -178,7 +178,6 @@ struct xcptcontext
 
   uint16_t regs[XCPTCONTEXT_REGS];
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
    */
@@ -195,7 +194,6 @@ struct xcptcontext
 
   uint32_t saved_pc;  /* Saved return address */
   uint16_t saved_i;   /* Saved interrupt state */
-#endif
 };
 #endif
 

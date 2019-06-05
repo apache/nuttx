@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "sam_periphclks.h"
-#include "chip/sam_pit.h"
+#include "hardware/sam_pit.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -39,7 +39,7 @@
  *************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/chip.h"
+#include "chip.h"
 #include "common/up_internal.h"
 
 #ifdef USE_LOWUARTINIT

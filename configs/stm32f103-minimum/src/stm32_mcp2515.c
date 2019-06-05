@@ -107,9 +107,15 @@ static struct stm32_mcp2515config_s g_mcp2515config =
 {
   .config =
   {
+    .spi        = NULL,
+    .baud       = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
+    .btp        = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
     .devid      = 0,
+    .mode       = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
     .nfilters   = 6,
-    .ntxbuffers = 3,
+#ifdef MCP2515_LOOPBACK
+    .loopback   = false;
+#endif
     .attach     = mcp2515_attach,
   },
 };
@@ -140,7 +146,7 @@ int mcp2515_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 static int mcp2515_attach(FAR struct mcp2515_config_s *state,
-                           mcp2515_handler_t handler, FAR void *arg)
+                          mcp2515_handler_t handler, FAR void *arg)
 {
   FAR struct stm32_mcp2515config_s *priv =
              (FAR struct stm32_mcp2515config_s *)state;

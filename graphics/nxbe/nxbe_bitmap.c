@@ -100,7 +100,7 @@ static void bitmap_clipcopy(FAR struct nxbe_clipops_s *cops,
  * Input Parameters:
  *   wnd   - The window that will receive the bitmap image
  *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *            the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -193,7 +193,7 @@ static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -220,6 +220,13 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
 
   DEBUGASSERT(wnd != NULL && dest != NULL && src != NULL && origin != NULL);
   DEBUGASSERT(wnd->be != NULL && wnd->be->plane != NULL);
+
+  /* Don't update hidden windows */
+
+  if (NXBE_ISHIDDEN(wnd))
+    {
+      return;
+    }
 
   /* Verify that the destination rectangle begins "below" and to the "right"
    * of the origin
@@ -293,7 +300,7 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -321,14 +328,23 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
       /* Update the per-window framebuffer */
 
       nxbe_bitmap_pwfb(wnd, dest, src, origin, stride);
-
-      /* Overlay any update any sprites on the per-window frambuffer */
-
-      nxbe_sprite_refresh(wnd, dest);
     }
 #endif
 
-  /* Rend the bitmap directly to the graphics device in any case */
+  /* Don't update hidden windows */
 
-  nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+  if (!NXBE_ISHIDDEN(wnd))
+    {
+      /* Rend the bitmap directly to the graphics device */
+
+      nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+
+#ifdef CONFIG_NX_SWCURSOR
+      /* Update cursor backup memory and redraw the cursor in the modified window
+       * region.
+       */
+
+      nxbe_cursor_backupdraw_all(wnd, dest);
+#endif
+    }
 }

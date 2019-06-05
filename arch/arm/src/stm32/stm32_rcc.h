@@ -46,19 +46,19 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32L15XX)
-#  include "chip/stm32l15xxx_rcc.h"
+#  include "hardware/stm32l15xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32f10xxx_rcc.h"
+#  include "hardware/stm32f10xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_rcc.h"
+#  include "hardware/stm32f20xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
-#  include "chip/stm32f30xxx_rcc.h"
+#  include "hardware/stm32f30xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F33XX)
-#  include "chip/stm32f33xxx_rcc.h"
+#  include "hardware/stm32f33xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
-#  include "chip/stm32f37xxx_rcc.h"
+#  include "hardware/stm32f37xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "chip/stm32f40xxx_rcc.h"
+#  include "hardware/stm32f40xxx_rcc.h"
 #endif
 
 /************************************************************************************

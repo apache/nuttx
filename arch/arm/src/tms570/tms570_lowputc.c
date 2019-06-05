@@ -54,8 +54,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/tms570_sci.h"
-#include "chip/tms570_iomm.h"
+#include "hardware/tms570_sci.h"
+#include "hardware/tms570_iomm.h"
 #include "tms570_lowputc.h"
 
 /****************************************************************************

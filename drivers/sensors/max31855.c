@@ -107,10 +107,8 @@ static const struct file_operations g_max31855fops =
   max31855_read,
   max31855_write,
   NULL,
+  NULL,
   NULL
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
 };
 
 /****************************************************************************

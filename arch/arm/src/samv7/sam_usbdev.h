@@ -47,7 +47,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <arch/samv7/chip.h>
 
-#include "chip/sam_usbhs.h"
+#include "hardware/sam_usbhs.h"
 
 /************************************************************************************
  * Public Functions

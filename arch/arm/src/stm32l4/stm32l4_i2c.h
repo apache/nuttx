@@ -44,7 +44,7 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "chip.h"
-#include "chip/stm32l4_i2c.h"
+#include "hardware/stm32l4_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions

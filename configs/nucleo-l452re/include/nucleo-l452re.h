@@ -49,19 +49,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if 1
-#  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
-#elif 0
-/* Make sure you installed one! */
-
-#  define HSE_CLOCK_CONFIG          /* HSE with 8 MHz xtal */
-#else
-#  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
-#endif
-
 /* Clocking *************************************************************************/
 
-#if defined(HSI_CLOCK_CONFIG)
 /* The NUCLEOL452RE supports both HSE and LSE crystals (X2 and X3).  However, as
  * shipped, the X3 crystal is not populated.  Therefore the Nucleo-L452RE
  * will need to run off the 16MHz HSI clock, or the 32khz-synced MSI.
@@ -96,6 +85,18 @@
 #define STM32L4_HSI_FREQUENCY     16000000ul
 #define STM32L4_LSI_FREQUENCY     32000
 #define STM32L4_LSE_FREQUENCY     32768
+
+#if 1
+#  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
+#elif 0
+/* Make sure you installed one! */
+
+#  define HSE_CLOCK_CONFIG          /* HSE with 8 MHz xtal */
+#else
+#  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
+#endif
+
+#if defined(HSI_CLOCK_CONFIG)
 
 #define STM32L4_BOARD_USEHSI      1
 
@@ -223,23 +224,13 @@
 #define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR(2)
 #define STM32L4_PLLCFG_PLLR_ENABLED
 
-/* 'SAIPLL1' is used to generate the 48 MHz clock, since we can't
- * do that with the main PLL's N value.  We set N = 12, and enable
- * the Q output (ultimately for CLK48) with /4.  So,
- * 16 MHz / 1 * 12 / 4 = 48 MHz
- *
- * XXX NOTE:  currently the SAIPLL /must/ be explicitly selected in the
- * menuconfig, or else all this is a moot point, and the various 48 MHz
- * peripherals will not work (RNG at present).  I would suggest removing
- * that option from Kconfig altogether, and simply making it an option
- * that is selected via a #define here, like all these other params.
- */
+/* 'SAIPLL1' is not used in this application */
 
 #define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(12)
 #define STM32L4_PLLSAI1CFG_PLLP         0
 #undef  STM32L4_PLLSAI1CFG_PLLP_ENABLED
-#define STM32L4_PLLSAI1CFG_PLLQ         RCC_PLLSAI1CFG_PLLQ_4
-#define STM32L4_PLLSAI1CFG_PLLQ_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLQ         0
+#undef  STM32L4_PLLSAI1CFG_PLLQ_ENABLED
 #define STM32L4_PLLSAI1CFG_PLLR         0
 #undef  STM32L4_PLLSAI1CFG_PLLR_ENABLED
 
@@ -253,10 +244,13 @@
 
 #define STM32L4_SYSCLK_FREQUENCY  80000000ul
 
-/* CLK48 will come from PLLSAI1 (implicitly Q) */
+/* CLK48 will come from HSI48 */
 
-#define STM32L4_USE_CLK48
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* enable the LSE oscillator, used automatically trim the MSI, and for RTC */
 
@@ -351,8 +345,11 @@
 
 /* Enable CLK48; get it from PLLSAI1 */
 
-#define STM32L4_USE_CLK48
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* Enable LSE (for the RTC) */
 
@@ -410,13 +407,13 @@
 #define STM32L4_PLLCFG_PLLR             RCC_PLLCFG_PLLR_2
 #define STM32L4_PLLCFG_PLLR_ENABLED
 
-/* 'SAIPLL1' is used to generate the 48 MHz clock */
+/* 'SAIPLL1' is not used in this application */
 
 #define STM32L4_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(24)
 #define STM32L4_PLLSAI1CFG_PLLP         0
 #undef  STM32L4_PLLSAI1CFG_PLLP_ENABLED
-#define STM32L4_PLLSAI1CFG_PLLQ         RCC_PLLSAI1CFG_PLLQ_2
-#define STM32L4_PLLSAI1CFG_PLLQ_ENABLED
+#define STM32L4_PLLSAI1CFG_PLLQ         0
+#undef STM32L4_PLLSAI1CFG_PLLQ_ENABLED
 #define STM32L4_PLLSAI1CFG_PLLR         0
 #undef  STM32L4_PLLSAI1CFG_PLLR_ENABLED
 
@@ -430,10 +427,13 @@
 
 #define STM32L4_SYSCLK_FREQUENCY  80000000ul
 
-/* Enable CLK48; get it from PLLSAI1 */
+/* Enable CLK48; get it from HSI48 */
 
-#define STM32L4_USE_CLK48
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* Enable LSE (for the RTC) */
 

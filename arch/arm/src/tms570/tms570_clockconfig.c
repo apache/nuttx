@@ -50,13 +50,13 @@
 
 #include "up_arch.h"
 
-#include "chip/tms570_esm.h"
-#include "chip/tms570_sys.h"
-#include "chip/tms570_sys2.h"
-#include "chip/tms570_pcr.h"
-#include "chip/tms570_flash.h"
-#include "chip/tms570_iomm.h"
-#include "chip/tms570_pinmux.h"
+#include "hardware/tms570_esm.h"
+#include "hardware/tms570_sys.h"
+#include "hardware/tms570_sys2.h"
+#include "hardware/tms570_pcr.h"
+#include "hardware/tms570_flash.h"
+#include "hardware/tms570_iomm.h"
+#include "hardware/tms570_pinmux.h"
 
 #include "tms570_selftest.h"
 #include "tms570_clockconfig.h"

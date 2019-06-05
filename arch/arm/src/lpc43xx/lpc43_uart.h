@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc43_uart.h"
+#include "hardware/lpc43_uart.h"
 
 /****************************************************************************
  * Pre-processor Definitions

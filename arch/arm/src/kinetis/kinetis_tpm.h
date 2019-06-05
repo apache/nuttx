@@ -50,7 +50,7 @@
  */
 
 #if defined(KINETIS_K66)
-#  include "chip/kinetis_kx6tpm.h"
+#  include "hardware/kinetis_kx6tpm.h"
 #else
 #  error "No TMP definitions for this Kinetis part"
 #endif

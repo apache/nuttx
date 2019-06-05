@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/lpc17_sdcard.h"
+#include "hardware/lpc17_sdcard.h"
 
 /************************************************************************************
  * Public Functions

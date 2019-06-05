@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/lpc43_sdmmc.h"
+#include "hardware/lpc43_sdmmc.h"
 
 /************************************************************************************
  * Public Functions

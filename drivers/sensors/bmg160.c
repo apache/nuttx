@@ -117,10 +117,8 @@ static const struct file_operations g_bmg160_fops =
   bmg160_read,
   bmg160_write,
   NULL,
-  bmg160_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  bmg160_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

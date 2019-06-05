@@ -53,8 +53,8 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/nrf52_utils.h"
-#include "chip/nrf52_rng.h"
+#include "hardware/nrf52_utils.h"
+#include "hardware/nrf52_rng.h"
 #include "up_internal.h"
 
 /****************************************************************************

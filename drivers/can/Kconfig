@@ -119,7 +119,6 @@ config CAN_LOOPBACK
 config CAN_NPOLLWAITERS
 	int "Number of poll waiters"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		The maximum number of threads that may be waiting on the
 		poll method.
@@ -174,6 +173,11 @@ config MCP2515_CLK_FREQUENCY
 	int "MCP2515 on-board clock frequency"
 	default 8000000
 	range 1 25000000
+
+config MCP2515_SPI_SCK_FREQUENCY
+	int "MCP2515 SPI SCK Frequency"
+	default 1000000
+	range 100000 10000000
 
 endif # CAN_MCP2515
 endif # CAN

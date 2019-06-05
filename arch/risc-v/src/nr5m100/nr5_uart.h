@@ -36,7 +36,7 @@
 #include <stdint.h>
 
 #ifdef CONFIG_NR5_NR5M1XX
-#include "chip/nr5m1xx_uart.h"
+#include "hardware/nr5m1xx_uart.h"
 #endif
 
 void nr5_uart_init(int uart_num);

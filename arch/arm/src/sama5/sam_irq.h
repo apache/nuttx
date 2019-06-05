@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/sam_aic.h"
+#include "hardware/sam_aic.h"
 
 /****************************************************************************
  * Pre-processor Definitions

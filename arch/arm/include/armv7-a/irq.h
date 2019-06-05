@@ -229,7 +229,6 @@ struct xcpt_syscall_s
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there are pending signals
    * to be processed.
    */
@@ -247,14 +246,13 @@ struct xcptcontext
   uint32_t saved_pc;
   uint32_t saved_cpsr;
 
-# ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
 
   uint32_t sigreturn;
 
-# endif
 #endif
 
   /* Register save area */
@@ -302,9 +300,7 @@ struct xcptcontext
 
   FAR uint32_t *ustkptr;  /* Saved user stack pointer */
   FAR uint32_t *kstack;   /* Allocate base of the (aligned) kernel stack */
-#ifndef CONFIG_DISABLE_SIGNALS
   FAR uint32_t *kstkptr;  /* Saved kernel stack pointer */
-#endif
 #endif
 #endif
 };

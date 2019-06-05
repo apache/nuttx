@@ -49,6 +49,7 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxcursor.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -151,6 +152,7 @@ enum nxmsg_e
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
   NX_SVRMSG_MODAL,            /* Select/de-slect window modal state */
+  NX_SVRMSG_SETVISIBILITY,          /* Show or hide a window */
   NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_GETRECTANGLE,     /* Get a rectangular region in the window */
@@ -312,8 +314,8 @@ struct nxsvrmsg_curenable_s
 
 struct nxsvrmsg_curimage_s
 {
-  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_IMAGE */
-  FAR struct cursor_image_s image  /* True: show the cursor, false: hide the cursor */
+  uint32_t msgid;                    /* NX_SVRMSG_CURSOR_IMAGE */
+  FAR struct nx_cursorimage_s image  /* Describes the cursor image */
 };
 #endif
 
@@ -321,8 +323,8 @@ struct nxsvrmsg_curimage_s
 
 struct nxsvrmsg_curpos_s
 {
-  uint32_t msgid;                /* NX_SVRMSG_CURSOR_SETPOS */
-  FAR struct cursor_pos_s pos;   /* The new cursor position */
+  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_SETPOS */
+  FAR struct nxgl_point_s pos;     /* The new cursor position */
 };
 #endif
 
@@ -394,6 +396,17 @@ struct nxsvrmsg_modal_s
   uint32_t msgid;                  /* NX_SVRMSG_MODAL */
   FAR struct nxbe_window_s *wnd;   /* The window to be modified */
   bool modal;                      /* True: enter modal state; False: leave modal state */
+};
+
+/* This message either (1) hides a visible window, or (2) makes a hidden
+ * window visible.
+ */
+
+struct nxsvrmsg_setvisibility_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_SETVISIBILITY */
+  FAR struct nxbe_window_s *wnd;   /* The window to be modified */
+  bool hide;                       /* True: Hide window; False: show window */
 };
 
 /* Set a single pixel in the window with a color */

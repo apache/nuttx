@@ -52,9 +52,9 @@
 
 #include "up_arch.h"
 #include "kl_gpio.h"
-#include "chip/kl_tsi.h"
-#include "chip/kl_pinmux.h"
-#include "chip/kl_sim.h"
+#include "hardware/kl_tsi.h"
+#include "hardware/kl_pinmux.h"
+#include "hardware/kl_sim.h"
 
 #ifdef CONFIG_KL_TSI
 

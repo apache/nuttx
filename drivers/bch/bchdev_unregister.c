@@ -73,7 +73,7 @@
 int bchdev_unregister(FAR const char *chardev)
 {
   FAR struct bchlib_s *bch;
-  FAR struct file filestruct;
+  struct file filestruct;
   int ret;
 
   /* Sanity check */

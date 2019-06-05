@@ -61,9 +61,9 @@
 
 #include "kinetis_config.h"
 #include "chip.h"
-#include "chip/kinetis_i2c.h"
-#include "chip/kinetis_sim.h"
-#include "chip/kinetis_pinmux.h"
+#include "hardware/kinetis_i2c.h"
+#include "hardware/kinetis_sim.h"
+#include "hardware/kinetis_pinmux.h"
 #include "kinetis.h"
 #include "kinetis_i2c.h"
 

@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-void *pthread_get_stackaddr_np(FAR pthread_t thread)
+void *pthread_get_stackaddr_np(pthread_t thread)
 {
   FAR struct pthread_tcb_s *tcb =
     (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);

@@ -49,7 +49,7 @@
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
-#include "chip/esp32_dport.h"
+#include "hardware/esp32_dport.h"
 #include "esp32_cpuint.h"
 #include "xtensa.h"
 

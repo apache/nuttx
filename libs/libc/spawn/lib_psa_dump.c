@@ -129,9 +129,7 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
       _err("            Unrecognized\n");
     }
 
-#ifndef CONFIG_DISABLE_SIGNALS
   _err("  sigmask:  %08x\n", attr->sigmask);
-#endif
 #endif /* CONFIG_DEBUG_ERROR */
 }
 

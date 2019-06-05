@@ -104,11 +104,9 @@ static const struct file_operations g_mlx90614_fops =
   mlx90614_close,  /* close */
   mlx90614_read,   /* read */
   mlx90614_write,  /* write */
-  NULL,             /* seek */
-  mlx90614_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL            /* poll */
-#endif
+  NULL,            /* seek */
+  mlx90614_ioctl,  /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */
 #endif

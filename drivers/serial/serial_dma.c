@@ -46,7 +46,7 @@
 
 #include <nuttx/serial/serial.h>
 
-#ifdef CONFIG_SERIAL_DMA
+#if defined(CONFIG_SERIAL_TXDMA) || defined(CONFIG_SERIAL_RXDMA)
 
 /************************************************************************************
  * Private Functions
@@ -105,7 +105,8 @@ static int uart_check_signo(const char *buf, size_t size)
  *
  ************************************************************************************/
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_SERIAL_RXDMA) && \
+   (defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP))
 static int uart_recvchars_signo(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -144,6 +145,7 @@ static int uart_recvchars_signo(FAR uart_dev_t *dev)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_dma(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
@@ -172,6 +174,7 @@ void uart_xmitchars_dma(FAR uart_dev_t *dev)
 
   uart_dmasend(dev);
 }
+#endif
 
 /************************************************************************************
  * Name: uart_xmitchars_done
@@ -183,6 +186,7 @@ void uart_xmitchars_dma(FAR uart_dev_t *dev)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_done(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
@@ -204,6 +208,7 @@ void uart_xmitchars_done(FAR uart_dev_t *dev)
       uart_datasent(dev);
     }
 }
+#endif
 
 /************************************************************************************
  * Name: uart_recvchars_dma
@@ -213,6 +218,7 @@ void uart_xmitchars_done(FAR uart_dev_t *dev)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_dma(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -331,6 +337,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
 
   uart_dmareceive(dev);
 }
+#endif
 
 /************************************************************************************
  * Name: uart_recvchars_done
@@ -342,6 +349,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_done(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -383,5 +391,6 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
     }
 #endif
 }
+#endif
 
-#endif /* CONFIG_SERIAL_DMA */
+#endif /* CONFIG_SERIAL_TXDMA || CONFIG_SERIAL_RXDMA */

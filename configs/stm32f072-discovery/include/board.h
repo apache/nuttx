@@ -113,7 +113,7 @@
 
 #define STM32_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2         /* Source is HSI/2 */
 #define STM32_PLLSRC_FREQUENCY   (STM32_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
-#ifdef CONFIG_STM32F0L0_USB
+#ifdef CONFIG_STM32F0L0G0_USB
 #  undef  STM32_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
 #  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
 #  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
@@ -129,7 +129,7 @@
 
 #define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL       /* Use the PLL as the SYSCLK */
 #define STM32_SYSCLK_SWS         RCC_CFGR_SWS_PLL
-#ifdef CONFIG_STM32F0L0_USB
+#ifdef CONFIG_STM32F0L0G0_USB
 #  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
 #else
 #  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */

@@ -50,7 +50,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
-#include <arch/serial.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -113,22 +112,24 @@ static uart_dev_t g_uartport =
   { 1 },                    /* closesem */
   { 0 },                    /* xmitsem */
   { 0 },                    /* recvsem */
+  { 0 },                    /* pollsem */
   {                         /* xmit */
     { 1 },                  /*   sem */
     0,                      /*   head */
     0,                      /*   tail */
     CONFIG_UART_TXBUFSIZE,  /*   size */
-    g_uarttxbuffer,         /*   buffer */
+    g_uarttxbuffer          /*   buffer */
   },
   {                         /* recv */
     { 1 },                  /*   sem */
     0,                      /*   head */
     0,                      /*   tail */
     CONFIG_UART_RXBUFSIZE,  /*   size */
-    g_uartrxbuffer,         /*   buffer */
+    g_uartrxbuffer          /*   buffer */
   },
   &g_uart_ops,              /* ops */
   NULL,                     /* priv */
+  NULL                      /* pollfds */
 };
 
 /****************************************************************************

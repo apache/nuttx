@@ -96,7 +96,7 @@ int stm32_veml6070initialize(FAR const char *devpath)
   ret = veml6070_register(devpath, i2c, VEML6070_I2C_DATA_LSB_CMD_ADDR);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      snerr("ERROR: Error registering VEML6070\n");
     }
 
   return ret;

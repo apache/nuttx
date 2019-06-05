@@ -3609,7 +3609,7 @@
 	  NuttX OS test, but configured to build natively on Windows.  Its only
 	  real purpose is to very the native Windows build logic.
 	* tools/mkdeps.bat and tools/mkdeps.c:  mkdeps.bat is a failed attempt
-	  to leverage mkdeps.sh to CMD.exe.  It fails because the are certain
+	  to leverage mkdeps.sh to CMD.exe.  It fails because there are certain
 	  critical CFLAG values that cannot be passed on the CMD.exe command line
 	  (like '=').  mkdeps.c is a work in progress that will, hopefully,
 	  replace both mkdeps.sh and mkdeps.bat.
@@ -23764,4 +23764,501 @@
 	  break compilation in certain configurations.  From Mateusz Szafoni
 	  (2019-03-24).
 
-7.30 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.30 2019-05-19 Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/ and config/ files:  All board interfaces (those starting with
+	  board_) must be defined in board-specific logic.  Otherwise, they cannot
+	  be customized for specialized usage by different boards.  The
+	  board_reset() interface was defined in architecture-specific logic that
+	  only called up_systemreset().  That is useless!  This change removes the
+	  board_reset() implementation from the architecture-specific code and
+	  re-implements it in the src/ directory of each board that has
+	  CONFIG_BOARDCTL_RESET enabled.  That is the correct functional
+	  partitioning.  From Gregory Nutt (2019-03-25).
+	* configs/omnibusf4/src/stm32_reset:  Add boardctl() reset logic.  From
+	  Bill Gatliff (2019-03-25).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Fix QuadSPI interrupts.  This commit
+	  essentially replaces wrongly named configuration variables
+	  STM32F7_QSPI_INTERRUPTS into CONFIG_STM32F7_QSPI_INTERRUPTS.  Also fixes
+	  some getreg/putreg where register addresses were used instead of
+	  register offsets  From Pierre-Olivier Vauboin (2019-03-25).
+	* graphics/nxmu, include/nuttx/nx/nxmu.h, libs/libnx:  Add new
+	  server->client callback to notify the window client of server events.
+	  Remove the old 'blocked' callback and just make it one case of an 'event'
+	  callback.  From Gregory Nutt (2019-03-25).
+	* graphics/ and libs/libnx:  Implement new interfaces nx_synch() and
+	  nxtk_synch().  This are used to synchronize the NX server with the window
+	  client.  Currently most of the logic is equivalent to nx_block() and
+	  nxtk_block(), but with slightly different semantics.  They are separate
+	  now because they are likely to diverge in the future.  From Gregory Nutt
+	  (2019-03-25).
+	* configs/stm32f103-minimum/src/:  USB reset was not working appropriately
+	  since the pin connected to D+ was incorrectly defined and the pullup/down
+	  logic was reversed.  From Matias N (2019-03-25).
+	* configs/omnibusf4:  Add board_ioctl() which is needed only if
+	  CONFIG_BOARDCTL_IOCTL=y is selected;  Update NSH configuration to enable
+	  board IOCTLs and DFU mode reset.  From Bill Gatliff (2019-03-26).
+	* include/limits.h:  Remove the duplicate TMP_MAX definitions.  The
+	  standard requires that TMP_MAX defines be in stdio.h.  From Xiang Xiao
+	  (2019-03-26).
+	* include/sys/select.h: Fix compiler error when CONFIG_NSOCKET_DESCRIPTORS
+	  is undefined.  From Xiang Xiao (2019-03-26).
+	* arch/arm/src/armv7-a/Toolchain.defs:  Fix 'cc1: warning: switch
+	  -mcpu=cortex-a7 conflicts with -march=armv7-a switch'  From Xiang Xiao
+	  (2019-03-26).
+	* drivers/usbdev/cdcacm.c:  This fixes a problem where the host sent a "get
+	  descriptor" message of type "standard" with a recipient of type
+	  "interface". Since the composite driver would only pass messages to the
+	  child interfaces when a message was not "standard", this message was not
+	  handled. I changed the condition so that the composite driver checks not
+	  only if this is a "standard" message but if it is also directed to the
+	  device. Otherwise, the handling is delegated to the children of the
+	  composite device.  From Matias N (2019-03-26).
+	* drivers/video/max7456.c:  Adds a read-only (for now) /dev/osd0/CM
+	  interface for obtaining the chip's onboard NVM character map data.  Use
+	  seek() to position the cursor over a desired subset of bytes, or request
+	  a large read to obtain the entire EEPROM memory contents.  Values are
+	  returned in binary form. Use hexdump, etc. to format them for viewing.
+	  From Bill Gatliff (2019-03-26).
+	* configs/nucleo-l476rg/src/stm32_gpio.c,
+	   configs/stm32f103-minimum/src/stm32_gpio.c, and
+	   drivers/sensors/zerocross.c:  Fix some errors when debug assertions are
+	   enabled.  From Matous Pokorny (2019-03-29).
+	* configs/boardctl.c, include/sys/boardctl.h:  Add a command to start the
+	  VNC server.  From Gregory Nutt (2019-04-02).
+	* drivers/syslog/syslog_stream.c:  In syslog buffered mode, avoid IOB alloc
+	  lock-up with heavy network activity.  This change alters the buffered
+	  syslog logic to use 'iob_tryalloc' instead of blocking 'iob_alloc' to
+	  avoid syslog printing from getting stuck when all IOBs are depleted by
+	  network activity.  An issue was seen when large incoming TCP transfer
+	  uses free IOB buffers and processing threads try to use syslog which then
+	  block at iob_alloc.  From Jussi Kivilinna (2019-04-03).
+	* arch/stm32f7: Support bypassing the input clock divider on the SDMMC
+	  interface. This enables using the full clock speed provided to the SDMMC
+	  interface with no dividing.  From Anthony Merlino (2019-04-03).
+	* arch/arc/stm32f7: Add support for using the HSE in bypass mode,
+	  configured by board.h  From Anthony Merlino (2019-04-03).
+	* arch/arm/stm32f7: Fixes some macros related to OTGFS/OTGHS preventing
+	  OTGHS from working.  From Anthony Merlino (2019-04-03).
+	* arch/arm/src/nrf52/nrf52832_errdata.c: Fix compiler error when following
+	  C89.  From Erik Englund (2019-04-03).
+	* PIC32MZ:  The commit corrects the gpioirq when mismatch mode is selected
+	  and add support for edge detect mode.  Slew Rate was also added for
+	  completeness.  From Abdelatif Guettouche (2019-04-03).
+	* libs/libc/stdio/lib_libvsprintf.c:  Restore support for printing NULL
+	  string as "(null)".  Legacy printf supported printing "(null)" in place
+	  for NULL string:  printf("null: %s\n", NULL); => null: (null).  This
+	  commit restores this functionality for new printf library.  From Jussi
+	  Kivilinna (2019-04-04).
+	* fs/littlefs/lfs.c:  Fix lfs_format bug.  In superblock disk root-block
+	  assignment, the second must be root[1].  From YanLin Zhu (2019-04-04).
+	* sched/pthread:  Added non-standard pthread_get_stackaddr_np() and
+	  pthread_get_stacksize_np().  From Joao Matos (2019-04-04).
+	* include/pthread.h and libs/libcpthread:  Fixed
+	  pthread_attr_get/setstacksize param type to size_t.  From Joao Matos
+	  (2019-04-04).
+	* Fixed R_OK/X_OK definitions to match POSIX.  From Joao Matos (2019-04-04).
+	* libs/libc/locale/lib_setlocale.c: Improved error handling in
+	  setlocale().  From Joao Matos (2019-04-04).
+	* libs/libc/misc/lib_utsname.c: Fixed return code in uname().  From Joao
+	  Matos (2019-04-04).
+	* include/sys/syscall.h and syscall/: Added support for munmap() syscall.
+	  From Joao Matos (2019-04-04).
+	* include/alloca.h:  Add alloca.h.  Included limited implementation of
+	  alloc() that is only available for GCC versions 3 and above.  From Joao
+	  Matos (2019-04-04).
+	* configs/nucleo-144/include/board.h:  Added STM32_RCC_DCKCFGR2_DSISRC
+	  definition.  From Joao Matos (2019-04-04).
+	* include/signal.h:  Add commented out definition of the si_addr field.
+	  From oao Matos (2019-04-04).
+	* arch/arm/src/stm32f7/stm32_fmc.h: Updated stm32_fmc.h with more FMC
+	  definitions.  From oao Matos (2019-04-04).
+	* Added support for KSZ8081RNA PHY to LPC17xx Ethernet driver.  From
+	  jjlange (2019-04-04).
+	* Refresh configurations.  Remove CONFIG_NXWM_UNITTEST=y, not longer in
+	  Kconfigs.  From Gregory Nutt (2019-04-04).
+	* syscall/syscall.csv: Fix a warning due to inconsistencies in return
+	  type.  From Gregory Nutt (2019-04-04).
+	* syscall/syscall.csv:  Correct an error in creating the munmap() proxy if
+	  CONFIG_FS_RAMMAP is not defined.  From Gregory Nutt (2019-04-04).
+	* graphics/, lib/libnx, include/nutt/nx:  Add support for modal windows.
+	  From Gregory Nutt (2019-04-05).
+	* drivers/contactless/mfrc522.c: Fixes for MFRC522.  In mfrc522_read
+	  uid.sak must be different from 0x04 not as before from 0x00. SAK == 0x00
+	  is a valid PICC type.  Add interface to read MIFARE Ultralight data  From
+	  Mateusz Szafoni (2019-04-05).
+	* configs/nucleo-l073rz: add mfrc522 support  From Mateusz Szafoni
+	  (2019-04-05).
+	* graphics/nxbe:  Implement hooks that will eventually support software
+	  'sprites', i.e., things like OSD functionality, a software cursor,
+	  selection rectangles, window resize preview, etc.  From Gregory Nutt
+	  (2019-04-05).
+	* Added support for Ethernet PHY ioctl() on LPC17xx.  From jjlange
+	  (2019-04-05).
+	* include/nuttx/nx/nxcursor.h:  Add a header file describing the
+	  implementation of an NX cursor interface.  From Gregory Nutt (2019-04-06).
+	* libs/libnx/nxmu:  Add front-end, client, message handling needed for
+	  cursor support.  Still actual cursor logic yet, just message handling.
+	  graphics/nxmu and graphics/nxbe:  Add back-end message handling needed
+	  for cursor support.  No actual cursor logic yet, just message handling.
+	  From Gregory Nutt (2019-04-06).
+	* graphics:  Extend the definition of the cursor image structure.  From
+	  Gregory Nutt (2019-04-07).
+	* arch/arm/src/stm32f7:  USB High speed for STM32F7 series  From Ramtin
+	  Amin (2019-04-07).
+	* I2C1 config on stm32f746g-disco. Typo in stm32f7/stm32_i2c.c  From
+	  Matthew Koch (2019-04-08).
+	* Kconfig warnings: defaults for choice values not supported  From Matthew
+	  Koch (2019-04-08).
+	* arch/arm/src/stm32f7: Ported the PWM from F4 to F7.  From Eduard Niesner
+	  (2019-04-08).
+	* graphics/nxbe:  Correct some experimental cursor drawing algorithms.
+	  From Gregory Nutt (2019-04-08).
+	* grahics/nxglib/nxglib.h:  Move internal function prototypes from
+	  include/nuttx/nx/nxglib.h to graphics/nxglib/nxglib.h.  From Gregory Nutt
+	  (2019-04-08).
+	* Support for STM32L071X and a few improvements for STM32F0L0:
+	    arch/arm/src/stm32f0l0: add peripherals configuration for STM32L0
+	    arch/arm/src/stm32f0l0: a few fixes for USART
+	    arch/arm/include/stm32f0l0/stm32f0_irq.h: use names as in other STM32
+	    arch/arm/include/stm32f0l0/chip.h: use names as in other STM32
+	  From Mateusz Szafoni (2019-04-09).
+	* Adds support for software cursors with differing pixel depths on multiple
+	  displays.  This bring the software cursor to code complete.  Still
+	  untested.  From Gregory Nutt (2019-04-09).
+	* graphics/nxbe:  Add some missing checks:  Don't permit the software
+	  cursor to be enabled until it has been assigned an image; don't perform
+	  any cursor operations while the cursor is disabled.  From Gregory Nutt
+	  (2019-04-10).
+	* include/nuttx/usb/hid.h:  The usbhid_descriptor_s struct defined in hid.h
+	  included some optional fields that should not be hard-defined as part of
+	  that structure.  An arbitrary number of optional entries could be
+	  included in the descriptor, but that is not properly represented.  No
+	  code on NuttX currently depends on the structure definition with an
+	  optional descriptor so it is safe to remove.  From Matias N (2019-03-30).
+	* arch/arm/src/stm32f7/stm32_otgdev.c: Correct hard-coded FIFO size that is
+	  wrong for OTG FS.  From Ramtin Amin (2019-04-11).
+	* /graphics/nxglib/cursor:  Correct two locations where y was used but
+	  where x was intended.  From Gregory Nutt (2019-04-11).
+	* Documentation/NXGraphicsSubsystem.html:  Update documentation to describe
+	  blocking, synchronization, and cursor interfaces.  From Gregory Nutt
+	  (2019-04-11).
+	* arch/arm/src/stm32f: Added support for TICKLESS mode.  From Valmantas
+	  Paliksa (2019-04-12).
+	* arch/arm/src/stm32f7/stm32_spi.c:  Add SPI DMA threshold configuration.
+	  From Valmantas Paliksa (2019-04-12).
+	* arch/arm/src/stm32f7/stm32_ethernet.c:  Auto-generate Ethernet MAC
+	  address from device unique ID.  From Valmantas Paliksa (2019-04-12).
+	* arch/arm/src/stm32f7/stm32_flash.c: Add flash block mapping support for
+	  progmem.  From Valmantas Paliksa (2019-04-12).
+	* arch/arm/src/stm32f7/stm32_uid.c:  Add UID access.  From Valmantas
+	  Paliksa (2019-04-12).
+	* drivers/can/can.c:  Support multiple readers of the same port  From
+	  Valmantas Paliksa (2019-04-12).
+	* drivers/can/mcp2515.c:  mcp2515 driver optimizations.  From Valmantas
+	  Paliksa (2019-04-12).
+	* arch/arm/src/stm32f7/stm32_can.c: CAN fixes.  From Valmantas Paliksa
+	  (2019-04-12).
+	* graphics/nxbe:  More work cursor coordinates.  Still at least one big bug
+	  in the logic.  From Gregory Nutt (2019-04-13).
+	* arch/arm/src/stm32:  As noted by Matias N, the FLASH base address used
+	  was incorrect.  It was using the address of the FLASH data, not the
+	  address of the FLASH registers.  From Gregory Nutt (2019-04-13).
+	* arch/arm/src/stm32/stm32f10xxf30xx_flash.c:  RCC register access should
+	  not be offset by FLASH register base.  From Matias N (2019-04-13).
+	* graphics/nxbe:  This seems to fix the last of software cursor bugs.  On
+	  the LPC54, it looks pretty clean.  Not flickery as I feared.  Probably
+	  not so good on low end displays.  Possible transient artifacts?  Not
+	  sure, maybe.  Or maybe my eyes are playing tricks from staring at this
+	  too long.  From Gregory Nutt (2019-04-13).
+	* configs/stm32f103-minimum/src:  Add PROCFS automount support  From Alan
+	  Carvalho de Assis (2019-04-14).
+	* net/utils:  net_lock() and net_restorelock() now return a value.  That
+	  values is the standard zero on success; negated errno value on failure.
+	  This return value is only needed for -ECANCELED.  That cancellation
+	  indication needs to ripple all the way back to the highest levels where
+	  the cancellation can be acted on.  This commit only adds the return
+	  value; it does not add checking for the return values of net_lock() and
+	  net_restorelock() at higher levels.  That is required too.  From Gregory
+	  Nutt (2019-04-14).
+	* configs/stm32ldiscovery/src:  Add support for board_late_initialize(),
+	  Move common initialization logic out of board_app_initialize() into new
+	  file stm32_bringup.c  From Gregory Nutt (2019-04-15).
+	* drivers/leds/userled:  Fix ledset validity check in ULEDIOC_SETALL
+	  ioctl.  From Jussi Kivilinna (2019-04-15).
+	* arch/arm/src/stm32/Kconfig:  It seems one option in the timer
+	  configuration was lost at some point.  From Matias N (2019-04-15).
+	* stm32f7: I2C Interrupt storm fix  From David Sidrane (2019-04-16).
+	* arch/arm/src/stm32l4/stm32l4_pwm.c Fix register addr, en_bit and resetbit
+	  for pwm timers  From Fabian Justi (2019-04-17).
+	* configs/nucleo-l476rg/src/nucleo-l476rg.h Fixed naming stm32l4_pwm_setup
+	  configs/nucleo-l476rg/src/stm32_appinit.c Fixed naming stm32l4_pwm_setup
+	  From Fabian Justi (2019-04-17).
+	* stm32f7: I2C track bad state.  The previous commit was true draconian.
+	  Now we track bad state and so the SW reset only when it occurs.  From
+	  David Sidrane (2019-04-17).
+	* arch/arm/src/stm32f7: stm32f76xx77xx_pinmap.h:  Adds additional pin
+	  alternate function for SPI2  From Anthony Merlino (2019-04-17).
+	* include/cxx/cstdlib:  Add std::random()  From Gregory Nutt (2019-04-21).
+	* arch/arm/src/cxd56xx and arch/arm/include/cxd56xx:  Add initial CXD56xx
+	  chip sources.  From Nobuto Kobayashi (2019-04-22).
+	* configs/spresense:  Add Spresense board support.  From Nobuto Kobayashi
+	  (2019-04-22).
+	* drivers/usbhost/usbhost_storage.c:  Correct typo "const const" to "const".
+	  arch/arm/src/stm32/stm32_i2s.c:  In debug assertions, it on a sample rate
+	  of 0, but based on other code comments this value implies disabling the
+	  i2s master clock.
+	  arch/arm/src/stm32/stm32_usbhost.h and arch/arm/src/stm32/Kconfig:  Allow
+	  vbus monitoring for the OTG_HS host driver.
+	  From Jason Harris (2019-04-23).
+	* drivers/serial:  The upper half serial driver configuration
+	  CONFIG_SERIAL_DMA used to enable DMA on both RX and TX streams.  This was
+	  replaced with CONFIG_SERIAL_RXDMA and CONFIG_SERIAKL_TXDMA which will
+	  permit supporting DMA on only one or both streams.  From Gregory Nutt
+	  (2019-04-24).
+	* configs/stm32f103-minimum/src/stm32_mcp2515.c:  Patch up more breakage
+	  found in build testing.  Looks like fields were added and removed by
+	  commit eb7373cedfa, but the implementation that uses the structure were
+	  not updated.  From Gregory Nutt (2019-04-24).
+	* arch/arm/src/stm32h7/stm32_start.c:  Inclusion of nvic.h should not be
+	  conditioned on CONFIG_ARCH_FPU.  From Mateusz Szafoni (2019-04-25).
+	* arch/arm/src:  Remove dependency on CONFIG_ARCH_FPU for inclusion of
+	  nvic.h in all other *_start.c files.  From Gregory Nutt (2019-04-25).
+	* nucleo-144: Regenerate f767-netnsh/defconfig.  It appear that
+	  CONFIG_NET_SOCKOPTS,  is no more explicitly needed.  From Phil Coval
+	  (2019-04-25).
+	* configs/nucleo-h743zi/nsh/defconfig: Enable the FPU.  From Jason Harris
+	  (2019-04-25).
+	* Revert "sched/clock/clock_initialize.c:  clock_inittime() needs to be
+	  done with CONFIG_SCHED_TICKLESS and clock_initialize should skip
+	  clock_inittime() for external RTC case since the RTC isn't ready yet."
+	  This reverts commit 2bc709d4b99447f8decdc7580fdabab6dd8939b1.  Commit
+	  2bc709d4b99447f8decdc7580fdabab6dd8939b1 was intended to handle the case
+	  where up_timer_gettime may not start from zero case.  However, this
+	  change has the side-effect of breaking every implementation of tickless
+	  mode:  After this change the tickless timer structures are used before
+	  they are initialized in clock_inittime().  Initialization happens later
+	  when up_initialize is called() when arm_timer_initialize().
+
+	  Since the tickless mode timer is very special, one solution might be to:
+	  (1)  Rename xxx_timer_initialize to up_timer_initialize, (2) Move
+	  up_timer_initialize to include/nuttx/arch.h, and (3) Call it from clock
+	  subsystem instead up_initialize.  Basically, this change make timer
+	  initialization almost same as rtc initialization(up_rtc_initialize).  For
+	  now, however, we just need to revert the change.  From Gregory Nutt
+	  (2019-04-26).
+	* nucleo-144:  Mount sysfs for ifconfig for f767-netnsh/defconfig.  Even if
+	  ifconfig is working to set IP, it will not work to display NICs (without
+	  args)  From Phil Coval (2019-04-26).
+	* nucleo-144: Update mbed URL and fix mistakes  From Phil Coval (2019-04-26).
+	* stm32f7: Add basic PWM support to nucleo-144 board.  More PWMs and multi
+	  channels support may be investigated and added later.  Tested on
+	  nucleo-f767zi.  From Phil Coval (2019-04-27).
+	* configs/nucleo-h743zi:  Add support for I2C devices: ssd1306, pca9635,
+	  i2ctools  From Mateusz Szafoni (2019-04-28).
+	* Documentation/NuttxPortingGuide.html & drivers/syslog/README.txt: vsyslog
+	  returns nothing.  From Mateusz Szafoni (2019-04-28).
+	* configs/same70-xplained/twm4nx:  Add a configuration for test Twm4Nx
+	  using VNC.  From Gregory Nutt (2019-04-28).
+	* configs/nucleo-l476rg/src:  Make naming of functions consistent:
+	  stm32l4_ no stm32_.  Inconsistency noted by Phil Coval in Bitbucket PR
+	  864.  This commit takes a different approach to resolving the naming
+	  inconsistency, however.  From Gregory Nutt (2019-04-29).
+	* arch/arm/src/stm32l4:  Add USB FS device support.  From Juha Niskanen
+	  (2019-04-29).
+	* configs:  Update all configurations to account for the configuration
+	  changes resulting from the separation of network initialization logic
+	  from NSH.  From Gregory Nutt (2019-04-29).
+	* configs/same70-xplained/twm4nx/defconfig:  Updated to correctly
+	  initialize network.  I am getting a VNC display.  It is incomplete and
+	  crashes thereafter.  But that is a start.  From Gregory Nutt (2019-04-29).
+	* In many files:  Remove references to CONFIG_DISABLE_SIGNALS.  Signals can
+	  no longer be disabled.  From Gregory Nutt (2019-04-29).
+	* net/socket/getsockname.c: Fix addrlen check in socket debug features.
+	  Getsockname checked erroneously a pointer agains 0, where the intention
+	  was to dereference the pointer and to check the length.  This causes also
+	  a compilation failure if the code is compiled with CONFIG_DEBUG_FEATURES
+	  and with -Werror flag set.  From Jukka Laitinen (2019-04-30).
+	* drivers/net/phy_notify.c:  Change sprintf to strncpy in phy_notify.  On
+	  some platforms, the sprintf doesn't accept a const char* as a format
+	  argument.  From Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7:  Add STM32H7 SDMMC driver.  This is the initial
+	  SDMMC driver for STM32H7.  It is mostly copied from STM32F7, with
+	  modified register addresses and bits, and IDMA added.  This is still WIP;
+	  it only works with IDMA.  From Jukka Laitinen (2019-04-30).
+	* configs/nucleo-h743zi/include/board.h:  Add default clock configuration
+	  for SDMMC for nucleo-h743zi.  From Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7/chip/stm32h7x3xx_rcc.h:  Fixes for STM32H7 RCC
+	  definitions:  (1) Fix compilation for UART7, UART8 and I2C4, (2) Add
+	  backup domain control registers.  From Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7/stm32h7x3xx_rcc.c:  Set the STM32H7 default HSI
+	  pre-divider to 4.  The I2C driver currently assumes HSI clock to be
+	  16MHz.  From Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7/chip/stm32h7x3xx_memorymap.h:  Add the STM32H7
+	  SYSTEM_UID and DEBUGMCU_BASE register definitions.  From Jukka Laitinen
+	  (2019-04-30).
+	* arch/arm/src/stm32h7/chip/stm32h7x3xx_pinmap.h:  Add the
+	  GPIO_ETH_RMII_RXD1 pinmap definition for STM32H7.  From Jukka Laitinen
+	  (2019-04-30).
+	* arch/arm/src/stm32h7/stm32_i2c.c: Fix I2C4 compilation for STM32H7.  From
+	  Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7/:  Add stm32h7 Ethernet driver.  This is the initial
+	  push for the Ethernet driver.  The driver has been tested to be working
+	  on a nucleo board.  This is still WIP, it doesn't for example do MAC
+	  filtering on HW level, but just receives all ethernet packets.  From
+	  Jukka Laitinen (2019-04-30).
+	* arch/arm/src/stm32h7/:  Add timer devices driver for STM32H7.  This is
+	  mostly a forklift from stm32f7 with some h7 specific modifications.  From
+	  Jukka Laitinen (2019-04-30).
+	* - Mostly arch/arm/src/imxrt and include/imxrt:  This commit gets imx1020
+	  family support started. It is pretty similar, but subtly different, to
+	  1050/60 (less PLLs, less GPIO banks, differently numbered ports etc.
+	  etc.).  I think it's time to at least look at what needs to be done
+	  before we can get these into the mainline kernel even though they're not
+	  properly mature yet.  Core memory functions, PLLs, serial and networking
+	  are all working, but there's no stress-testing or similar been done...I'm
+	  not aware of anything broken, but there again I haven't looked too hard.
+
+	  I want to go through and start moving each of the imxrt family-specific
+	  files into its own subdirectory to tidy things up a bit, and remove the
+	  vast majority of ifdefs from the mainline code...but I think it's
+	  appropriate to separate the cleanup steps from the new-chip-support
+	  steps to keep things a bit more compartmentalized. Next week is a travel
+	  week so it's possible I'll get time on the cleanup side of the house.
+
+	  I can't be 100% certain I didn't inflict casualties on the imxrt1050/60
+	  code in the process of doing this, but nsh for 1050 and netnsh and nsh
+	  for the 1060 both compile correctly, so if I did break anything it's
+	  going to be properly evil and difficult to find.
+
+	  - Directory re-arrangement and splitting of each imxrt family variant
+	  - Prevent intermittent SDCard timeouts by increasing timer in line with
+	    spec.
+	  - Support data dump on Hardfault
+	  - Fix missing ccm definitions and wrong iomux offset
+	  - Prevent hardfault when can't read from ENET PHY
+	  - More consistent Ethernet pinmux.
+      From Dave Marples (2019-04-30).
+	* include/nuttx/usb/hid.h:  The usbhid_descriptor_s struct defined in
+	  hid.h included some optional fields that should not be hard-defined as
+	  part of that structure.  An arbitrary number of optional entries could be
+	  included in the descriptor, but that is not properly represented.  No
+	  code on NuttX currently depends on the structure definition with an
+	  optional descriptor so it is safe to remove.
+	* Documentation/NuttShell.html: Command date is misspelled as data in
+	  chapter 2.12 Show or set the date and time (date).  From Michał Łyszczek
+	  (2019-05-01).
+	* configs/same70-xplained/twm4nx/defconfig: Increase packet MTU to 1500.
+	  From Gregory Nutt (2019-05-03).
+	* Fix build for battery gauge  From Tom Kopriva (2019-05-03).
+	* configs/same70-xplained/twm4nx/defconfig:  Switch to 8BPP.  That is the
+	  negotiated size requested by the VNC client anyway.  From Gregory Nutt
+	  (2019-05-03).
+	* graphics/vnc/server/vnc_color.c:  Fix an error in color conversion.  From
+	  Gregory Nutt (2019-05-03).
+	* configs/lpcxpresso-lpc54628:  Add a Twm4Nx configuration.  From Gregory
+	  Nutt (2019-05-04).
+	* arch/arm/src/common/up_initialize.c: up_initialize.c needs to know about
+	  ramlog_consoleinit()  From Jason Harris (2019-05-04).
+	* NX graphics:  This commit adds support for hiding windows. This features
+	  is needed by Twm4Nx:  When a window is iconified, the icon should appear
+	  on the background and the window should disappear (i.e., be hidden).  The
+	  windows needs to remain healthy and to be updated in all ways, but it
+	  cannot affect the display content.
+
+	  Conversely, when the icon is clicked, the icon needs to be hidden on
+	  the background and the window needs to be restored in its current state
+	  (which may be different than the state of the window at the time it
+	  was iconified.
+	  From Gregory Nutt (2019-05-05).
+	* arch/arm/src/stm32h7: Add missing parts for timer driver:  Add the
+	  missing header files,  add the driver Kconfig, and add it to make
+	  system.  From Jukka Laitinen (2019-05-05).
+	* configs/nucleo-h743zi/include/board.h:  Add the input clock frequency
+	  definitions for all the drivers. Assumes internal clock source for all
+	  the timers.  From Jukka Laitinen (2019-05-05).
+	* arch/arm/src/stm32h7/stm32_tim.c: don't use hardcoded UIF interrupt
+	  From Mateusz Szafoni (2019-05-06).
+	* Add missing files of BMP180 example for nucleo-l476rg  From Fabian Justi
+	  (2019-05-06).
+	* drivers/sensors/apds9960.c:  Initial state of allocated structure was not
+	  being set.  Noted by Leif Jacob.  From Gregory Nutt (2019-05-06).
+	* graphics/nxbe/nxbe_setvisibility.c:  Fix a missed redraw command in last
+	  NX visibility changes.  From Gregory Nutt (2019-05-06).
+	* graphics/:  Windows can now be created in the hidden state.  This can be
+	  used to clean up initial window presentation which may involve several
+	  steps.  This makes those steps all invisible until nx[tk]_setvisibility()
+	  is called to make the windows visible.  From Gregory Nutt (2019-05-07).
+	* libs/libnx/nxtk/nxtk_events:  Fix an error in handling mouse events for
+	  framed windows.  When drawing, NX may report mouse positions outside of
+	  the Window.  The is only for NX windows, but the outside-the-side
+	  positions were being discarded by nxtk_events().  From Gregory Nutt
+	  (2019-05-07).
+	* net/sixlowpan/sixlowpan_hc06.c:  Correct an endian-ness problem in HC06
+	  decompression.  From Ivan Ucherdzhiev (2019-05-08).
+	* arm/src/lpc54xx/:  Bring in the USB FS OHCI driver from LPC17.  This is a
+	  quick'n'dirty port that I will finish sometime later (I hope).
+	  Currently, it is missing hardware clocking setup and is not even hooked
+	  into the build system yet.  Needless to say it does not yet even
+	  compile.  From Gregory Nutt (2019-05-08).
+	* Documentation/NXGraphicsSubsystem.html:  Add documentation for new
+	  nx[tk]_modal() and nx[tk]_setvisibility() interfaces.  From Gregory Nutt
+	  (2019-05-08).
+	* arch/arm/src/stm32f0l0:  Initial ADC support and some improvements for
+	  the STM32 M0  From Mateusz Szafoni (2019-05-09).
+	* configs/b-l072z-lrwan1: add ADC example  From Mateusz Szafoni (2019-05-09).
+	* graphics/:  Add new NX interfaces to query if a window is hidden or not.
+	  From Gregory Nutt (2019-05-09).
+	* libs/libnx/nxtk/nxtk_opentoolbar.c:  Refuse to open a toolbar of height
+	  zero or less.  From Gregory Nutt (2019-05-10).
+	* graphics/nxbe/nxbe_getrectangle.c:  Fix an error in coordinate system
+	  usage.  Expected rectangle in device coordinate frame, but was passing
+	  the rectangle in window-relative coordinate frame.  From Gregory Nutt
+	  (2019-05-10).
+	* nrf24l01: don't block in read if file descriptor is O_NONBLOCK.  Add
+	  support for "multicast" TX mode - no waiting for ACK (needs to be enabled
+	  with fcntl SETTXPAYLOADNOACK)  From Leif Jakob (2019-05-11).
+	* libs/libnx/nxmu/:  Add a few bad input parameter checks.
+	  configs/lpcxpresso-lpc54628/twm4nx/defconfig:  Need to enable the NX
+	  library.  From Gregory Nutt (2019-05-12).
+	* libs/libnx/nxglib/nxglib_intersecting.c:  Correct bogus logic in
+	  nxgl_interesting.  Good to know I was stupid then too and that is it not
+	  just a recent thing.  From Gregory Nutt (2019-05-13).
+	* arch/arm/src/stm32l4/stm32l4_usbdev.c:  Add missing PWR USBV enable,
+	  correct two USB register bits  From Juha Niskanen (2019-05-14).
+	* arch/arm/src/stm32l4: Port HSI48 and CRS from STM32F0L0  From Juha
+	  Niskanen (2019-05-14).
+	* arch/arm/src/stm32 and arch/arm/src/stm32f0l0: Port STM32F7 I2C to
+	  STM32F3 and STM32F0L0  From Mateusz Szafoni (2019-05-15).
+	* configs/b-l072z-lrwan1:  Add nxlines_oled example (ssd1306).  Add support
+	  for the I2C tool  From Mateusz Szafoni (2019-05-15).
+	* configs/nucleo-f303ze: nxlines_oled example (ssd1306)  From Mateusz
+	  Szafoni (2019-05-15).
+	* graphics/:  Fix an oversight in the implementation of per-window
+	  framebuffers.  It is true that redraw callbacks can be suppressed for all
+	  cases ... EXCEPT ONE:  When the window is resized to a larger size, then
+	  the newly exposed territory must be drawn for the first time.  From
+	  Gregory Nutt (2019-05-16).
+	* graphics/nxterm and configs/boardctl.c:  Replace specific interfaces
+	  between boardctl and nxterm with a generalized IOCTL interface.  From
+	  Gregory Nutt (2019-05-16).
+	* graphics/nxterm:  Add a new IOCTL that can be used to inform NxTerm that
+	  the size of a window has changed.  From Gregory Nutt (2019-05-16).
+	* configs/stm32f4discovery: Keep c++ global constructor symbols  From
+	  Masayuki Ishikawa (2019-05-17).
+	* arch/arm/src/stm32/Kconfig: simplify ARCH_HAVE_FPU selection and remove
+	  redundant options for F207  From Mateusz Szafoni (2019-05-17).
+	* drivers/usbmisc:  Add FUSB303 driver  From Juha Niskanen (2019-05-17).
+	* sched/signal/sig_default.c:  The abnormal termination handler was just
+	  calling exit() conditionally when, for example, Ctrl-C is sent to a
+	  task.  The abnormal termination handler must obey the rules of
+	  cancellation points:  If cancelation is disabled, then the abnormal
+	  termination logic must wait for cancelation to be re-enabled; If
+	  cancellation is deffered then the abnormal termination logic may have to
+	  wait for the victim task to enter or exit a cancellation point.  From
+	  Gregory Nutt (2019-05-17).
+	* arch/arm/src/stm32f0l0:  Add support for AES, RND, and HS148 for L0.
+	  Move HSI48 enable from stm32_usbdev.c to stm32xx_rcc.c  From Mateusz
+	  Szafoni (2019-05-17).
+
+8.1 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>

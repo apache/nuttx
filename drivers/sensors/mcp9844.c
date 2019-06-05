@@ -105,10 +105,8 @@ static const struct file_operations g_mcp9844_fops =
   mcp9844_read,
   mcp9844_write,
   NULL,
-  mcp9844_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  mcp9844_ioctl,
+  NULL
 };
 
 /****************************************************************************

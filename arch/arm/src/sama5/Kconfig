@@ -3748,7 +3748,6 @@ config SAMA_TSD_RXP
 config SAMA5_TSD_NPOLLWAITERS
 	int "Number poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 

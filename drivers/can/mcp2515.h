@@ -208,7 +208,6 @@
 
 #define TXBSIDH_SID_MASK     0xff     /* Standard Identifier bits <10:3> */
 
-
 /* TXBnSIDL – TRANSMIT BUFFER n STANDARD IDENTIFIER LOW */
 
 #define TXBSIDL_SID_SHIFT    (5)      /* Bits 5-7: Standard Identifier bits <2:0> */
@@ -216,7 +215,6 @@
 #define TXBSIDL_EXIDE        (1 << 3) /* Bit    3: Extended Identifier Enable bit */
 #define TXBSIDL_EID_SHIFT    (0)      /* Bits 0-1: Extended Identifier bits <17:16> */
 #define TXBSIDL_EID_MASK     (0x03 << TXBSIDL_EID_MASK)
-
 
 /* TXBnEID8 – TRANSMIT BUFFER n EXTENDED IDENTIFIER HIGH */
 
@@ -260,8 +258,9 @@
                                       /* Bit 7: Not used */
 
 /* N.B.: In the datasheet DS21801D the file RXM of RXBnCTRL could to assume
-         the value 01 and 10 to receive only STD or EXT msgs respectively.
-         But in a more recent datasheet DS20001801H it was removed. */
+ *       the value 01 and 10 to receive only STD or EXT msgs respectively.
+ *       But in a more recent datasheet DS20001801H it was removed.
+ */
 
 /* RXB1CTRL – RECEIVE BUFFER 1 CONTROL */
 
@@ -421,9 +420,12 @@
 #define MCP2515_LOAD_TX0     0x40
 #define MCP2515_LOAD_TX1     0x42
 #define MCP2515_LOAD_TX2     0x44
+#define MCP2515_LOAD_TXB(n)  (0x40 + 2 * (n))
+#define MCP2515_READ_RXB(n)  (((n) == 0) ? 0x90 : 0x94)
 #define MCP2515_RTS_TX0      0x81
 #define MCP2515_RTS_TX1      0x82
 #define MCP2515_RTS_TX2      0x84
+#define MCP2515_RTS(x)       (0x81+x)
 #define MCP2515_RTS_ALL      0x87
 #define MCP2515_READ_STATUS  0xA0
 #define MCP2515_RX_STATUS    0xB0

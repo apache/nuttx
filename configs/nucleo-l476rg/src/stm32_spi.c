@@ -48,7 +48,7 @@
 #include <arch/board/board.h>
 
 #include <up_arch.h>
-#include <chip.h>
+#include "chip.h"
 #include <stm32l4.h>
 
 #include "nucleo-l476rg.h"

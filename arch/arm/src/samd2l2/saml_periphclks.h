@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/saml_mclk.h"
+#include "hardware/saml_mclk.h"
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 

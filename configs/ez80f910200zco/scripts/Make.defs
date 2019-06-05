@@ -36,23 +36,31 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
-# These are the directories where the ZDS-II toolchain is installed.  NOTE
-# that short 8.3 path names are used in order to avoid spaces.  On my machine
-# I have:
+# These are the default directories where the ZDS-II toolchain is installed.
+# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
+# machine I have:
 #
-# C:\PROGRA~1\ = C:\Profram Files\
-# C:\PROGRA~2\ = C:\Program Files (x86)\
+# Versions 5.1.1 and 5.2.1
+#   C:\PROGRA~1\ = C:\Program Files\
+#   C:\PROGRA~2\ = C:\Program Files (x86)\
 #
 # Your PC may be configured differently.
+#
+# Version 5.3.0, the default install location is C:\ZiLOG
 
-ifeq ($(CONFIG_EZ80_ZDSII_V521),y)
-ZDSVERSION := 5.2.1
-else # ifeq ($(CONFIGEZ80_ZDSII_V511),y)
+ifeq ($(CONFIG_EZ80_ZDSII_V511),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
 ZDSVERSION := 5.1.1
+else ifeq ($(CONFIG_EZ80_ZDSII_V521),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
+ZDSVERSION := 5.2.1
+else ifeq ($(CONFIG_EZ80_ZDSII_V530),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.3.0
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ZDSINSTALLDIR := C:/PROGRA~2/ZiLOG/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
+  ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
   INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
   ZDSBINDIR := $(INSTALLDIR)\bin
   ZDSSTDINCDIR := $(INSTALLDIR)\include\std
@@ -68,7 +76,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCHUSRINCLUDES = -usrinc:.
 else
   WINTOOL := y
-  ZDSINSTALLDIR := C:/PROGRA~2/ZiLOG/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
+  ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
   INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
   ZDSBINDIR := $(INSTALLDIR)/bin
   ZDSSTDINCDIR := $(INSTALLDIR)/include/std
@@ -134,7 +142,7 @@ else
 endif
 
 ARCHCPUFLAGS = -chartype:S -promote -cpu:$(ARCHCPU) -NOgenprintf -NOmodsect \
-			   -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
+               -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
 ARCHLIST = -keeplst -NOlist -NOlistinc -keepasm
 ARCHPICFLAGS =
 ARCHWARNINGS = -warn
@@ -154,14 +162,14 @@ ARFLAGS = -quiet -warn
 
 LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)configs$(DELIM)ez80f910200zco$(DELIM)scripts$(DELIM)ez80f910200zco.linkcmd
 
-# Tool names/pathes
+# Tool names/paths.
 
 CROSSDEV =
-CC = ez80cc.exe
+CC = $(ZDSBINDIR)$(DELIM)ez80cc.exe
 CPP = gcc -E
-LD = ez80link.exe
-AS = ez80asm.exe
-AR = ez80lib.exe
+LD = $(ZDSBINDIR)$(DELIM)ez80link.exe
+AS = $(ZDSBINDIR)$(DELIM)ez80asm.exe
+AR = $(ZDSBINDIR)$(DELIM)ez80lib.exe
 
 # File extensions
 
@@ -179,15 +187,15 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
 define PREPROCESS
 	@echo CPP: $1->$2
-	$(Q) "$(CPP)" $(CPPFLAGS) $1 -o $2
+	$(Q) $(CPP) $(CPPFLAGS) $1 -o $2
 endef
 
 define COMPILE
-	$(Q) "$(CC)" $(CFLAGS)  ${shell echo $1 | sed -e "s/\//\\/g"}
+	$(Q) $(CC) $(CFLAGS)  ${shell echo $1 | sed -e "s/\//\\/g"}
 endef
 
 define ASSEMBLE
-	$(Q) "$(AS)" $(AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
+	$(Q) $(AS) $(AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
 endef
 
 define MOVEOBJ
@@ -198,7 +206,7 @@ endef
 
 define ARCHIVE
 	@echo AR: $2
-	$(Q) for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
+	$(Q) for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
 endef
 
 define CLEAN
@@ -214,15 +222,15 @@ else
 
 define PREPROCESS
 	@echo "CPP: $1->$2"
-	$(Q) "$(CPP)" $(CPPFLAGS) $1 -o $2
+	$(Q) $(CPP) $(CPPFLAGS) $1 -o $2
 endef
 
 define COMPILE
-	$(Q) (wfile=`cygpath -w "$1"`; "$(CC)" $(CFLAGS) $$wfile)
+	$(Q) $(CC) $(CFLAGS) `cygpath -w "$1"`
 endef
 
 define ASSEMBLE
-	$(Q) (wfile=`cygpath -w "$1"`; "$(AS)" $(AFLAGS) $$wfile)
+	$(Q) $(AS) $(AFLAGS) `cygpath -w "$1"`
 endef
 
 define MOVEOBJ
@@ -234,7 +242,7 @@ endef
 define ARCHIVE
 	$(Q) for __obj in $(2) ; do \
 		echo "AR: $$__obj"; \
-		"$(AR)" $(ARFLAGS) $1=-+$$__obj || { echo "$(AR) $1=-+$$__obj FAILED!" ; exit 1 ; } \
+		$(AR) $(ARFLAGS) $1=-+$$__obj || { echo "$(AR) $1=-+$$__obj FAILED!" ; exit 1 ; } \
 	done
 endef
 

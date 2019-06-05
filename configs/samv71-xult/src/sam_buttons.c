@@ -51,7 +51,7 @@
 
 #include "up_arch.h"
 #include "sam_gpio.h"
-#include "chip/sam_matrix.h"
+#include "hardware/sam_matrix.h"
 #include "samv71-xult.h"
 
 #ifdef CONFIG_ARCH_BUTTONS

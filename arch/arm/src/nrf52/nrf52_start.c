@@ -48,7 +48,7 @@
 #include "nvic.h"
 
 #include "nrf52_clockconfig.h"
-#include "chip/nrf52_utils.h"
+#include "hardware/nrf52_utils.h"
 #include "nrf52_lowputc.h"
 #include "nrf52_start.h"
 #include "nrf52_gpio.h"

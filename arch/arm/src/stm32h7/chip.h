@@ -48,8 +48,12 @@
 
 #include <arch/irq.h>
 #include <arch/stm32h7/chip.h>
-#include "chip/stm32_pinmap.h"
-#include "chip/stm32_memorymap.h"
+#include "hardware/stm32_pinmap.h"
+#include "hardware/stm32_memorymap.h"
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external
@@ -63,10 +67,6 @@
 
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Types

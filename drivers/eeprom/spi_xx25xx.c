@@ -254,10 +254,8 @@ static const struct file_operations ee25xx_fops =
   ee25xx_read,  /* read */
   ee25xx_write, /* write */
   ee25xx_seek,  /* seek */
-  ee25xx_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0           /* poll */
-#endif
+  ee25xx_ioctl, /* ioctl */
+  NULL          /* poll */
 };
 
 /****************************************************************************

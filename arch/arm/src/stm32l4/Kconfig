@@ -459,6 +459,7 @@ config STM32L4_STM32L4X2
 	bool
 	default n
 	select STM32L4_STM32L4X3
+	select STM32L4_HAVE_USBFS
 
 config STM32L4_STM32L4X3
 	# STM32L4 devices documented in RM0394, regardless of what ST's
@@ -474,6 +475,7 @@ config STM32L4_STM32L4X3
 	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_LCD if !(STM32L4_STM32L4X1 || STM32L4_STM32L4X2)
+	select STM32L4_HAVE_HSI48
 
 config STM32L4_STM32L4X5
 	# STM32L4 USB OTG Lines (documented in RM0351)
@@ -563,6 +565,7 @@ config STM32L4_STM32L4XR
 	select STM32L4_HAVE_I2C4
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_HSI48
 
 # Chip subfamilies:
 
@@ -679,6 +682,7 @@ config STM32L4_STM32L496XX
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DMA2D
 	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_HSI48
 
 config STM32L4_STM32L4A6XX
 	bool
@@ -932,6 +936,10 @@ config STM32L4_HAVE_HASH
 	bool
 	default n
 
+config STM32L4_HAVE_HSI48
+	bool
+	default n
+
 config STM32L4_HAVE_I2C4
 	bool
 	default n
@@ -953,6 +961,10 @@ config STM32L4_HAVE_LPTIM2
 	default n
 
 config STM32L4_HAVE_OTGFS
+	bool
+	default n
+
+config STM32L4_HAVE_USBFS
 	bool
 	default n
 
@@ -1447,6 +1459,12 @@ config STM32L4_LPTIM2
 	default n
 	select STM32L4_LPTIM
 	depends on STM32L4_HAVE_LPTIM2
+
+config STM32L4_USBFS
+	bool "USB FS"
+	default n
+	depends on STM32L4_HAVE_USBFS
+	select USBDEV
 
 comment "APB2 Peripherals"
 

@@ -45,7 +45,7 @@
 #include <nuttx/mmcsd.h>
 
 #include "chip.h"
-#include "chip/imxrt_usdhc.h"
+#include "hardware/imxrt_usdhc.h"
 
 /****************************************************************************
  * Public Function Prototypes

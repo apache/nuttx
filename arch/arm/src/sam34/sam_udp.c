@@ -72,7 +72,7 @@
 #include "up_internal.h"
 
 #include "sam_periphclks.h"
-#include "chip/sam_udp.h"
+#include "hardware/sam_udp.h"
 #include "sam_udp.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_SAM34_UDP)

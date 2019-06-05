@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_pwm.h"
+#include "hardware/sam_pwm.h"
 
 #ifdef CONFIG_SAMA5_PWM
 

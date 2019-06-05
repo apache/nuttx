@@ -159,14 +159,12 @@ struct xbeenet_driver_s
   sem_t xd_eventsem;                /* Signaling semaphore for waiting get event */
   sq_queue_t primitive_queue;       /* For holding primitives to pass along */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* MAC Service notification information */
 
   bool    xd_notify_registered;
   pid_t   xd_notify_pid;
   struct sigevent xd_notify_event;
   struct sigwork_s xd_notify_work;
-#endif
 };
 
 /****************************************************************************
@@ -442,14 +440,12 @@ static int xbeenet_notify(FAR struct xbee_maccb_s *maccb,
           nxsem_post(&priv->xd_eventsem);
         }
 
-#ifndef CONFIG_DISABLE_SIGNALS
       if (priv->xd_notify_registered)
         {
           priv->xd_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->xd_notify_pid, &priv->xd_notify_event,
                              SI_QUEUE, &priv->xd_notify_work);
         }
-#endif
 
       nxsem_post(&priv->xd_exclsem);
       return OK;
@@ -1034,7 +1030,6 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
           switch (cmd)
             {
-        #ifndef CONFIG_DISABLE_SIGNALS
               /* Command:     MAC802154IOC_NOTIFY_REGISTER
                * Description: Register to receive a signal whenever there is a
                *              event primitive sent from the MAC layer.
@@ -1054,7 +1049,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                   ret = OK;
                 }
                 break;
-        #endif
+
               case MAC802154IOC_GET_EVENT:
                 {
                   FAR struct ieee802154_primitive_s *primitive;

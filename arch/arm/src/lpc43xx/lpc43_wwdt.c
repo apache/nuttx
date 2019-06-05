@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 #include "lpc43_wdt.h"
-#include "chip/lpc43_wwdt.h"
+#include "hardware/lpc43_wwdt.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_LPC43_WWDT)
 

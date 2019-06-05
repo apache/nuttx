@@ -47,15 +47,11 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "nvic.h"
 
 #include "stm32.h"
 #include "stm32_gpio.h"
 #include "stm32_userspace.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
-
 #include "stm32_start.h"
 
 /****************************************************************************

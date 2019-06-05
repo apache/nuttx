@@ -73,9 +73,15 @@
 #define FLASH_OPTKEY2              0x4c5d6e7f
 #define FLASH_ERASEDVALUE          0xff
 
-#if !defined(STM32_FLASH_DUAL_BANK)
+#if defined(STM32_FLASH_DUAL_BANK)
+/* Bank 0 is 512Kb; Bank 1 is up to 512Kb */
+
+#  define STM32_FLASH_BANK0_NPAGES (512 * 1024 / STM32_FLASH_PAGESIZE)
+#  define STM32_FLASH_BANK1_NPAGES (STM32_FLASH_NPAGES - STM32_FLASH_BANK0_NPAGES)
+#else
+/* Bank 0 is up to 512Kb; Bank 1 is not present */
+
 #  define STM32_FLASH_BANK0_NPAGES STM32_FLASH_NPAGES
-#  define STM32_FLASH_BANK0_BASE   STM32_FLASH_BASE
 #endif
 
 /************************************************************************************
@@ -140,9 +146,9 @@ static void flash_lock(uintptr_t base)
 void stm32_flash_unlock(void)
 {
   sem_lock();
-  flash_unlock(STM32_FLASH_BANK0_BASE);
+  flash_unlock(STM32_FLASHIF_BASE);
 #if defined(STM32_FLASH_DUAL_BANK)
-  flash_unlock(STM32_FLASH_BANK1_BASE);
+  flash_unlock(STM32_FLASHIF1_BASE);
 #endif
   sem_unlock();
 }
@@ -150,9 +156,9 @@ void stm32_flash_unlock(void)
 void stm32_flash_lock(void)
 {
   sem_lock();
-  flash_lock(STM32_FLASH_BANK0_BASE);
+  flash_lock(STM32_FLASHIF_BASE);
 #if defined(STM32_FLASH_DUAL_BANK)
-  flash_lock(STM32_FLASH_BANK1_BASE);
+  flash_lock(STM32_FLASHIF1_BASE);
 #endif
   sem_unlock();
 }
@@ -246,17 +252,17 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   if (block >= STM32_FLASH_BANK0_NPAGES)
     {
-      base = STM32_FLASH_BANK1_BASE;
+      base = STM32_FLASHIF1_BASE;
     }
   else
 #endif
     {
-      base = STM32_FLASH_BANK0_BASE;
+      base = STM32_FLASHIF_BASE;
     }
 
   sem_lock();
 
-  if ((getreg32(base + STM32_RCC_CR_OFFSET) & RCC_CR_HSION) == 0)
+  if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
       sem_unlock();
       return -EPERM;
@@ -306,12 +312,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   if (page >= STM32_FLASH_BANK0_NPAGES)
     {
-      base = STM32_FLASH_BANK1_BASE;
+      base = STM32_FLASHIF1_BASE;
     }
   else
 #endif
     {
-      base = STM32_FLASH_BANK0_BASE;
+      base = STM32_FLASHIF_BASE;
     }
 
   /* STM32 requires half-word access */
@@ -335,7 +341,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   sem_lock();
 
-  if ((getreg32(base + STM32_RCC_CR_OFFSET) & RCC_CR_HSION) == 0)
+  if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
       sem_unlock();
       return -EPERM;

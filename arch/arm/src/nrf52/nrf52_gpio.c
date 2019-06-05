@@ -48,7 +48,7 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "chip/nrf52_gpio.h"
+#include "hardware/nrf52_gpio.h"
 #include "nrf52_gpio.h"
 
 /****************************************************************************

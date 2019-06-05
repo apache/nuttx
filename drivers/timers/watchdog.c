@@ -119,11 +119,9 @@ static const struct file_operations g_wdogops =
   wdog_close, /* close */
   wdog_read,  /* read */
   wdog_write, /* write */
-  0,          /* seek */
-  wdog_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0         /* poll */
-#endif
+  NULL,       /* seek */
+  wdog_ioctl, /* ioctl */
+  NULL        /* poll */
 };
 
 /****************************************************************************

@@ -58,7 +58,7 @@
 #define EZ80_Z_FLAG            0x40        /* Bit 5: Zero flag */
 #define EZ80_S_FLAG            0x80        /* Bit 7: Sign flag */
 
-/* Include chip-specific regiser definitions */
+/* Include chip-specific register definitions */
 
 #if defined(CONFIG_ARCH_CHIP_EZ80F91)
 #  include "ez80f91.h"

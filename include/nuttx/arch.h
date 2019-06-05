@@ -523,9 +523,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
 void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
-#endif
 
 /****************************************************************************
  * Name: up_task_start
@@ -617,7 +615,7 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  ****************************************************************************/
 
 #if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+     defined(CONFIG_BUILD_KERNEL)
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
                         FAR siginfo_t *info, FAR void *ucontext);
 #endif
@@ -641,8 +639,7 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)) && \
-    !defined(CONFIG_DISABLE_SIGNALS)
+#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__))
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
                        FAR siginfo_t *info, FAR void *ucontext)
        noreturn_function;

@@ -61,6 +61,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+
 /* The Nucleo-144  board provides the following clock sources:
  *
  *   MCO: 8 MHz from MCO output of ST-LINK is used as input clock
@@ -142,8 +143,6 @@
 #define STM32_RCC_DCKCFGR1_TIMPRESRC   0
 #define STM32_RCC_DCKCFGR1_DFSDM1SRC   0
 #define STM32_RCC_DCKCFGR1_ADFSDM1SRC  0
-
-
 
 /* Configure factors for  PLLI2S clock */
 
@@ -253,7 +252,9 @@
 #  define GPIO_SDMMC2_D2 GPIO_SDMMC2_D2_1
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
+
 /* DMA Channl/Stream Selections *****************************************************/
+
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *
@@ -287,6 +288,7 @@
 #define BOARD_FLASH_WAITSTATES 7
 
 /* LED definitions ******************************************************************/
+
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
  * LED and LD3 a Red LED, that can be controlled by software. The following
  * definitions assume the default Solder Bridges are installed.
@@ -338,6 +340,7 @@
  */
 
 /* Button definitions ***************************************************************/
+
 /* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User", is
  * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
  */
@@ -347,6 +350,13 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
+
+/* TIM */
+
+#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_1
+#define GPIO_TIM2_CH1OUT GPIO_TIM2_CH1OUT_1
+#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
+#define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_1
 
 #if defined(CONFIG_NUCLEO_CONSOLE_ARDUINO)
 /* USART6:
@@ -369,7 +379,7 @@
 
 /* USART3:
  * Use  USART3 and the USB virtual COM port
-*/
+ */
 
 #if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
  # define GPIO_USART3_RX GPIO_USART3_RX_3
@@ -391,18 +401,18 @@
  *   -------  --------- -----
  */
 
- # define GPIO_UART4_RX GPIO_UART4_RX_1
- # define GPIO_UART4_TX GPIO_UART4_TX_1
+#  define GPIO_UART4_RX GPIO_UART4_RX_1
+#  define GPIO_UART4_TX GPIO_UART4_TX_1
 
 /* USART3 seems to be forced selected by the Nucleo-F746ZG kconfig - bug */
 
- # define GPIO_USART3_RX GPIO_USART3_RX_1
- # define GPIO_USART3_TX GPIO_USART3_TX_1
+#  define GPIO_USART3_RX GPIO_USART3_RX_1
+#  define GPIO_USART3_TX GPIO_USART3_TX_1
 
 /* USART6 seems to be forced selected by the Nucleo-F722E kconfig - bug */
 
- # define GPIO_USART6_RX GPIO_USART6_RX_2
- # define GPIO_USART6_TX GPIO_USART6_TX_2
+#  define GPIO_USART6_RX GPIO_USART6_RX_2
+#  define GPIO_USART6_TX GPIO_USART6_TX_2
 
 #endif
 
@@ -416,6 +426,7 @@
  */
 
 /* DMA channels *************************************************************/
+
 /* ADC */
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1
@@ -500,3 +511,4 @@
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
 
 #endif  /* __CONFIG_NUCLEO_144_INCLUDE_BOARD_H */
+

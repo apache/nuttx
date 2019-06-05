@@ -583,8 +583,7 @@ Pre-requisites:
     that it supports arch_phy_irq().  This logic can be found at
     nuttx/configs/same70-xplained/src/sam_ethernet.c.
 
-  - And a few other things: UDP support is required (CONFIG_NET_UDP) and
-    signals must not be disabled (CONFIG_DISABLE_SIGNALS).
+  - One other thing: UDP support is required.
 
 Given those prerequisites, the network monitor can be selected with these
 additional settings.
@@ -1654,3 +1653,45 @@ Configuration sub-directories
     STATUS:
     2015-03-28: HSMCI TX DMA is disabled.  There are some issues with the TX
       DMA that need to be corrected.
+
+  twm4nx:
+
+    This configuration exercises the port of TWM to NuttX.  A description of
+    that port is available at apps/graphics/twm4nx/README.txt.  This
+    configuration uses the NuttX VNC server to provide a remote desktop for
+    use with VNC client on a PC.  No display, mouse, or keyboard devices are
+    needed.
+
+    NOTES:
+
+    1. Network configuration:  IP address 10.0.0.2.  The is easily changed
+       via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
+
+    2. The default (local) framebuffer configuration is 800x600 with 16-bit
+       RGB color.
+
+    3. There are complicated interactions between VNC and the network
+       configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
+       size of update messages.  That is 1024 bytes in that configuration
+       (the full message with the header will be a little larger).  The
+       CONFIG_NET_ETH_PKTSIZE is set to 590 so that a full update will
+       require several packets.
+
+       Write buffering also effects network performance.  This will break
+       up the large updates into small (196 byte) groups.  When we run out
+       of read-ahead buffers, then partial updates may be sent causing a
+       loss of synchronization.
+
+    STATUS:
+      2019-04-28:  Configuration created.  Not verified.
+      2019-05-04:  Only partially functional.  VNC is a difficult way to
+         debug Twm4Nx because it has its own level of complexities due to
+         networking, mysterious VNC client behavior, and fragile VNC
+         configurations.  I am setting this on the shelf for the time
+         being.  I will stabilize Twm4Nx on another platform first.  Just
+         too many degrees of freedom.
+      2019-05-04:  Testing on hardware reveals that VNC is the source of
+         most of the issues.  Things look good on real, local hardware
+         (see configs/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
+         enough for this kind of usage at this time.
+

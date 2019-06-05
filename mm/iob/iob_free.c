@@ -54,20 +54,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_IOB_NOTIFIER_DIV) || CONFIG_IOB_NOTIFIER_DIV < 2
-#  define IOB_DIVIDER 1
-#elif CONFIG_IOB_NOTIFIER_DIV < 4
-#  define IOB_DIVIDER 2
-#elif CONFIG_IOB_NOTIFIER_DIV < 8
-#  define IOB_DIVIDER 4
-#elif CONFIG_IOB_NOTIFIER_DIV < 16
-#  define IOB_DIVIDER 8
-#elif CONFIG_IOB_NOTIFIER_DIV < 32
-#  define IOB_DIVIDER 16
-#elif CONFIG_IOB_NOTIFIER_DIV < 64
-#  define IOB_DIVIDER 32
-#else
-#  define IOB_DIVIDER 64
+#ifdef CONFIG_IOB_NOTIFIER
+#  if !defined(CONFIG_IOB_NOTIFIER_DIV) || CONFIG_IOB_NOTIFIER_DIV < 2
+#    define IOB_DIVIDER 1
+#  elif CONFIG_IOB_NOTIFIER_DIV < 4
+#    define IOB_DIVIDER 2
+#  elif CONFIG_IOB_NOTIFIER_DIV < 8
+#    define IOB_DIVIDER 4
+#  elif CONFIG_IOB_NOTIFIER_DIV < 16
+#    define IOB_DIVIDER 8
+#  elif CONFIG_IOB_NOTIFIER_DIV < 32
+#    define IOB_DIVIDER 16
+#  elif CONFIG_IOB_NOTIFIER_DIV < 64
+#    define IOB_DIVIDER 32
+#  else
+#    define IOB_DIVIDER 64
+#  endif
 #endif
 
 #define IOB_MASK      (IOB_DIVIDER - 1)

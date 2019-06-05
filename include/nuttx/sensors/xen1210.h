@@ -54,15 +54,8 @@
  *
  * CONFIG_SCHED_WORKQUEUE - Work queue support is required
  *
- * Settings that effect the driver: CONFIG_DISABLE_POLL
- *
- * CONFIG_SENSORS_XEN1210
- *   Enables support for the XEN1210 driver
+ * CONFIG_SENSORS_XEN1210 - Enables support for the XEN1210 driver
  */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
-#endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
@@ -71,6 +64,7 @@
 /* The XEN1210 interfaces with the target CPU via a SPI interface. */
 
 /* SPI **************************************************************************************/
+
 /* The device always operates in mode 1 */
 
 #define XEN1210_SPI_MODE            SPIDEV_MODE1 /* Mode 1 */

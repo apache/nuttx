@@ -1058,9 +1058,6 @@ Configurations
           System Type -> Peripherals:
             CONFIG_STM32_SPI2=y                : Enable support for SPI2
 
-          RTOS Features:
-            CONFIG_DISABLE_SIGNALS=n           : Signals are required
-
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y           : Work queue support required
 

@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam_mclk.h"
+#include "hardware/sam_mclk.h"
 
 /****************************************************************************
  * Pre-processor Definitions

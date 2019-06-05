@@ -54,8 +54,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "chip.h"
-#include "chip/lpc43_creg.h"
-#include "chip/lpc43_rtc.h"
+#include "hardware/lpc43_creg.h"
+#include "hardware/lpc43_rtc.h"
 #include "lpc43_rtc.h"
 
 #ifdef CONFIG_RTC

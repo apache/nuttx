@@ -394,7 +394,6 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
    * message queue
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes)
     {
       struct sigevent event;
@@ -416,7 +415,6 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
       DEBUGVERIFY(nxsig_notification(pid, &event,
                                      SI_MESGQ, &msgq->ntwork));
     }
-#endif
 
   /* Check if any tasks are waiting for the MQ not empty event. */
 

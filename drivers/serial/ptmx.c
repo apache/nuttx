@@ -103,10 +103,8 @@ static const struct file_operations g_ptmx_fops =
   ptmx_read,     /* read */
   ptmx_write,    /* write */
   NULL,          /* seek */
-  NULL           /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
-#endif
+  NULL,          /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif

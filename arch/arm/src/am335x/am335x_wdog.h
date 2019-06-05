@@ -49,7 +49,7 @@
 
 #include "up_internal.h"
 #include "chip.h"
-#include "chip/am335x_wdog.h"
+#include "hardware/am335x_wdog.h"
 
 /****************************************************************************
  * Public Types

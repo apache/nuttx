@@ -104,7 +104,13 @@ static inline void rcc_reset(void)
   regval  = getreg32(STM32_RCC_CR);
   regval &= ~(RCC_CR_HSEON | RCC_CR_HSI48ON |
               RCC_CR_CSION | RCC_CR_PLL1ON |
-              RCC_CR_PLL2ON | RCC_CR_PLL3ON);
+              RCC_CR_PLL2ON | RCC_CR_PLL3ON |
+              RCC_CR_HSIDIV_MASK);
+
+  /* Set HSI predivider to default (4, 16MHz) */
+
+  regval |= RCC_CR_HSIDIV_4;
+
   putreg32(regval, STM32_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
@@ -170,6 +176,13 @@ static inline void rcc_enableahb1(void)
 #endif
 #endif
 
+#ifdef CONFIG_STM32H7_ETHMAC
+  /* Enable ethernet clocks */
+
+  regval |= (RCC_AHB1ENR_ETH1MACEN | RCC_AHB1ENR_ETH1TXEN |
+             RCC_AHB1ENR_ETH1RXEN);
+#endif
+
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
@@ -218,6 +231,12 @@ static inline void rcc_enableahb3(void)
   /* MDMA clock enable */
 
   regval |= RCC_AHB3ENR_MDMAEN;
+#endif
+
+#ifdef CONFIG_STM32H7_SDMMC1
+  /* SDMMC clock enable */
+
+  regval |= RCC_AHB3ENR_SDMMC1EN;
 #endif
 
   // TODO: ...
@@ -396,7 +415,11 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SPI5EN;
 #endif
 
-  // TODO: ...
+#ifdef CONFIG_STM32H7_SDMMC2
+  /* SDMMC2 clock enable */
+
+  regval |= RCC_APB2ENR_SDMMC2EN;
+#endif
 
   putreg32(regval, STM32_RCC_APB2ENR);   /* Enable peripherals */
 }

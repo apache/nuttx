@@ -78,10 +78,8 @@ static const struct file_operations motor_fops =
   motor_read,                    /* read */
   motor_write,                   /* write */
   NULL,                          /* seek */
-  motor_ioctl                    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL                         /* poll */
-#endif
+  motor_ioctl,                   /* ioctl */
+  NULL                           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                         /* unlink */
 #endif

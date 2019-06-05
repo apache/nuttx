@@ -43,8 +43,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_emac.h"
-#include "chip/sam_gmac.h"
+#include "hardware/sam_emac.h"
+#include "hardware/sam_gmac.h"
 
 /************************************************************************************
  * Pre-processor Definitions

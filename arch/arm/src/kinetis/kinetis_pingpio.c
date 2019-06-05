@@ -49,7 +49,7 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_gpio.h"
+#include "hardware/kinetis_gpio.h"
 
 /****************************************************************************
  * Public Functions

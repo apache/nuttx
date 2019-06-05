@@ -264,7 +264,7 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_gpio_initialize
+ * Name: stm32l4_gpio_initialize
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio

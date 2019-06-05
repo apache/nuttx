@@ -59,7 +59,7 @@
  * is we set aside more DMA channels/streams.
  */
 
-/* Values defined in arch/arm/src/stm32l4/chip/stm32l4x6xx_dma.h */
+/* Values defined in arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h */
 
 /* XXX are these used on disco? */
 
@@ -77,11 +77,14 @@
 #endif
 
 /* ADC measurements
- * Default is ADC1_IN9 (PA4) connected to STMod+ connector CN1 pin 13.
+ *
+ * Some of the choices are:
+ *   ADC1_IN9 (PA4) connected to STMod+ connector CN1 pin 13.
+ *   ADC1_IN12 (PA7) connected to Arduino A0.
  */
 
-#define ADC1_MEASURE_CHANNEL     9
-#define GPIO_MEASURE_ADC         (GPIO_ADC1_IN9)
+#define ADC1_MEASURE_CHANNEL     12
+#define GPIO_MEASURE_ADC         (GPIO_ADC1_IN12)
 
 /* Alternate function pin selections ************************************************/
 
@@ -119,7 +122,7 @@
 
 /* I2C
  *
- * The optional _GPIO configurations allow the I2C driver to manually
+ * The optional GPIO configurations allow the I2C driver to manually
  * reset the bus to clear stuck slaves.  They match the pin configuration,
  * but are normally-high GPIOs.
  *
@@ -131,24 +134,24 @@
  */
 
 #define GPIO_I2C1_SCL    (GPIO_I2C1_SCL_1|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
-#define GPIO_I2C1_SDA    (GPIO_I2C1_SDA_1|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
+#define GPIO_I2C1_SDA    (GPIO_I2C1_SDA_3|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
 #define GPIO_I2C1_SCL_GPIO \
    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN6)
 #define GPIO_I2C1_SDA_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
+   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN13)
 
 /* XXX Is I2C2 used on Disco? */
 
-#if 0
+/* I2C3 connects to Arduino Uno V3 connector pins D15 (I2C3_SCL) and D14 (I2C3_SDA). */
 
-#define GPIO_I2C2_SCL    (GPIO_I2C2_SCL_1|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
-#define GPIO_I2C2_SDA    (GPIO_I2C2_SDA_1|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
-#define GPIO_I2C2_SCL_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN10)
-#define GPIO_I2C2_SDA_GPIO \
-   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_I2C3_SCL    (GPIO_I2C3_SCL_2|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
+#define GPIO_I2C3_SDA    (GPIO_I2C3_SDA_2|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET)
+#define GPIO_I2C3_SCL_GPIO \
+   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN7)
+#define GPIO_I2C3_SDA_GPIO \
+   (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN8)
 
-#endif
+/* XXX Is I2C4 used on Disco? */
 
 /* SPI */
 
@@ -158,11 +161,35 @@
 #define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
-/* XXX is SPI2 used on Disco? */
+/* SPI2 connects to Arduino Uno V3 connector pins D10-D13,
+ * also to DSI display.
+ */
 
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_3
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_3
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_3
+#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
+#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_1
+
+/* XXX is SPI3 used on Disco? */
+
+#if 0
+#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_3
+#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_3
+#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_3
+#endif
+
+/* DFSDM1
+ *
+ * DFSDM is connected to two MEMS microphones (MP34DT01) by default.
+ *   PC2  -> CKOUT
+ *   PB12 -> DATIN1
+ *   PH2  -> MIC_VDD GPIO
+ */
+
+#define GPIO_DFSDM_DATIN1   GPIO_DFSDM_DATIN1_1
+#define GPIO_DFSDM_CKOUT    GPIO_DFSDM_CKOUT_1
+
+#define GPIO_MIC_VDD       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTH | GPIO_PIN2)
 
 /* LEDs
  *

@@ -56,8 +56,6 @@
 
 #include "inode/inode.h"
 
-#ifndef CONFIG_DISABLE_POLL
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -130,7 +128,8 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
  *
  ****************************************************************************/
 
-static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
+static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
+                             FAR sem_t *sem)
 {
   unsigned int i;
   unsigned int j;
@@ -542,4 +541,3 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   return count;
 }
 
-#endif /* CONFIG_DISABLE_POLL */

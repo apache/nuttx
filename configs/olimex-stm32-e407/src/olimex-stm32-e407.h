@@ -94,8 +94,7 @@
 #endif
 
 #if !defined(CONFIG_NSH_NETINIT_THREAD) || !defined(CONFIG_ARCH_PHY_INTERRUPT) || \
-    !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP) || \
-     defined(CONFIG_DISABLE_SIGNALS)
+    !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP)
 #  undef HAVE_NETMONITOR
 #endif
 

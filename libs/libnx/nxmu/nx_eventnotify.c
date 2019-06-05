@@ -48,8 +48,6 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -87,5 +85,3 @@ int nx_eventnotify(NXHANDLE handle, int signo)
 
   return mq_notify(conn->crdmq, &se);
 }
-
-#endif /* CONFIG_DISABLE_SIGNALS */

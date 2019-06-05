@@ -40,12 +40,15 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/video/cursor.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxmu.h>
 #include <nuttx/nx/nxcursor.h>
 
-#ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
 /****************************************************************************
  * Public Functions
@@ -68,7 +71,7 @@
 
 int nxcursor_enable(NXHANDLE hnd, bool enable)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curenable_s outmsg;
   int ret;
 
@@ -82,7 +85,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;
@@ -94,15 +97,21 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
  * Description:
  *   Set the cursor image.
  *
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit encoding
+ *   is as follows:
+ *
+ *   00 - The transparent background
+ *   01 - Color1:  The main color of the cursor
+ *   10 - Color2:  The color of any border
+ *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ *
  *   NOTE: The NX logic will reference the user image buffer repeatedly.
  *   That image buffer must persist for as long as the NX server connection
  *   persists.
  *
  * Input Parameters:
  *   hnd   - The server handle returned by nx_connect()
- *   image - Describes the cursor image in the expected format.  For a
- *           software cursor, this is the format used with the display.  The
- *           format may be different if a hardware cursor is used.
+ *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -110,9 +119,9 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
+int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curimage_s outmsg;
   int ret;
 
@@ -121,9 +130,13 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
   /* Send the new cursor image to the server */
 
   outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
-  outmsg.image.width  = image->width;
-  outmsg.image.height = image->height;
+  outmsg.image.size.w = image->size.w;
+  outmsg.image.size.h = image->size.h;
   outmsg.image.image  = image->image;  /* The user pointer is sent, no data */
+
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
 
   /* We will finish the teardown upon receipt of the DISCONNECTED message */
 
@@ -132,7 +145,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;
@@ -154,9 +167,9 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
+int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curpos_s outmsg;
   int ret;
 
@@ -175,7 +188,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;
@@ -201,7 +214,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
  *
  ****************************************************************************/
 
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos)
+int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos)
 {
   /* REVISIT:  The cursor position is not accessible from here.  It is in hnd,
    * be we don't have the definitions exposed to get it.

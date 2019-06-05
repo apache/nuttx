@@ -195,7 +195,6 @@
 
 struct xcptcontext
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-NULL if there are pending signals
    * to be processed.
    */
@@ -214,14 +213,12 @@ struct xcptcontext
   uint32_t saved_epc;     /* Trampoline PC */
   uint32_t saved_int_ctx; /* Interrupt context with interrupts disabled. */
 
-# ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
 
   uint32_t sigreturn;
-
-# endif
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL

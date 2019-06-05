@@ -251,7 +251,7 @@ pid_t up_vfork(const struct vfork_s *context)
 #endif
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 #ifdef MIPS32_SAVE_GP
-  child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
+  child->cmn.xcp.regs[REG_GP]  = context->gp;  /* Global pointer */
 #endif
 
   /* And, finally, start the child task.  On a failure, nxtask_vforkstart()

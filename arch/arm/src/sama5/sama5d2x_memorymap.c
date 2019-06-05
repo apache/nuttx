@@ -41,7 +41,7 @@
 
 #include "mmu.h"
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 #include "sam_lcd.h"
 #include "sam_memorymap.h"
 

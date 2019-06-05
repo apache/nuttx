@@ -53,7 +53,7 @@
  * this file for the proper setup.
  */
 
-#include "chip/lpc11_memorymap.h"
+#include "hardware/lpc11_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

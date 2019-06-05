@@ -59,8 +59,8 @@
 #include "sam_periphclks.h"
 #include "sam_spi.h"
 
-#include "chip/sam_spi.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_spi.h"
+#include "hardware/sam_pinmap.h"
 #include <arch/board/board.h>
 
 #ifdef CONFIG_SAMV7_SPI_SLAVE

@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_isi.h"
+#include "hardware/sam_isi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

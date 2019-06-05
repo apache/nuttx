@@ -47,7 +47,7 @@
 #include "chip.h"
 
 #ifdef CONFIG_ARCH_CHIP_SAM4CM
-#  include "chip/sam4cm_aes.h"
+#  include "hardware/sam4cm_aes.h"
 #else
 #  error "Unknown chip for AES"
 #endif

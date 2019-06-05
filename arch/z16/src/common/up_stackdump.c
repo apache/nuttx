@@ -41,7 +41,7 @@
 
 #include <debug.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "sched/sched.h"
 #include "up_internal.h"
 

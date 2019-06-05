@@ -59,7 +59,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc43_gpio.h"
+#include "hardware/lpc43_gpio.h"
 
 #ifdef CONFIG_LPC43_GPIO_IRQ
 

@@ -136,8 +136,8 @@
 #include "up_arch.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_smc.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_smc.h"
 #include "sam4e-ek.h"
 
 #ifdef CONFIG_LCD

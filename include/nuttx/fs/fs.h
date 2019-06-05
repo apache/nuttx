@@ -240,9 +240,7 @@ struct file_operations
 
   /* The two structures need not be common after this point */
 
-#ifndef CONFIG_DISABLE_POLL
   int     (*poll)(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int     (*unlink)(FAR struct inode *inode);
 #endif

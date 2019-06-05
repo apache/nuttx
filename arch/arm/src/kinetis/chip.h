@@ -48,7 +48,7 @@
 
 #include <arch/irq.h>
 #include <arch/kinetis/chip.h>
-#include "chip/kinetis_memorymap.h"
+#include "hardware/kinetis_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

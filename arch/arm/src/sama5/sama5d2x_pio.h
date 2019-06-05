@@ -46,7 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_qspi.h
+ * arch/arm/src/stm32f7/stm32_qspi.h
  *
  *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com

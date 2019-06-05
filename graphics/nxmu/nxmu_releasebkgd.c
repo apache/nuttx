@@ -80,5 +80,5 @@ void nxmu_releasebkgd(FAR struct nxmu_state_s *nxmu)
 
   /* Redraw the background window */
 
-  nxmu_redrawreq(&be->bkgd, &be->bkgd.bounds);
+  nxmu_redraw(&be->bkgd, &be->bkgd.bounds);
 }

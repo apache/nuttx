@@ -221,10 +221,10 @@ functions (r/w). */
 
 #define LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT         0
 #define LSM6DSL_SENSOR_SYNC_RES_RATIO_MASK          (3 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT)
-#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_11       (0 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT) 
-#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_12       (1 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT) 
-#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_13       (2 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT) 
-#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_14       (3 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT) 
+#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_11       (0 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT)
+#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_12       (1 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT)
+#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_13       (2 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT)
+#define LSM6DSL_SENSOR_SYNC_RES_RATIO_RR_2_14       (3 << LSM6DSL_SENSOR_SYNC_RES_RATIO_SHIFT)
 
 #define LSM6DSL_FIFO_CTRL1_SHIFT                    0
 #define LSM6DSL_FIFO_CTRL1_MASK                     (255 << LSM6DSL_FIFO_CTRL1_SHIFT)
@@ -289,14 +289,14 @@ functions (r/w). */
 #define LSM6DSL_CTRL1_XL_LPF1_BW_SEL                (1 << 1)
 #define LSM6DSL_CTRL1_XL_FS_XL_SHIFT                2
 #define LSM6DSL_CTRL1_XL_FS_XL_MASK                 (3 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT)
-#define LSM6DSL_CTRL1_XL_FS_XL_2G                   (0 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT) 
-#define LSM6DSL_CTRL1_XL_FS_XL_16G                  (1 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT) 
-#define LSM6DSL_CTRL1_XL_FS_XL_4G                   (2 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT) 
-#define LSM6DSL_CTRL1_XL_FS_XL_8G                   (3 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT) 
+#define LSM6DSL_CTRL1_XL_FS_XL_2G                   (0 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT)
+#define LSM6DSL_CTRL1_XL_FS_XL_16G                  (1 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT)
+#define LSM6DSL_CTRL1_XL_FS_XL_4G                   (2 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT)
+#define LSM6DSL_CTRL1_XL_FS_XL_8G                   (3 << LSM6DSL_CTRL1_XL_FS_XL_SHIFT)
 #define LSM6DSL_CTRL1_XL_ODR_XL_SHIFT               4
 #define LSM6DSL_CTRL1_XL_ODR_XL_MASK                (15 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT)
 
-#define LSM6DSL_CTRL1_XL_ODR_XL_POWER_DOWN          (0 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT) 
+#define LSM6DSL_CTRL1_XL_ODR_XL_POWER_DOWN          (0 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT)
 #define LSM6DSL_CTRL1_XL_ODR_XL_1_6HZ_12_5HZ        (11 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT)
 #define LSM6DSL_CTRL1_XL_ODR_XL_12_5HZ_12_5HZ       (1 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT)
 #define LSM6DSL_CTRL1_XL_ODR_XL_26HZ_26HZ           (2 << LSM6DSL_CTRL1_XL_ODR_XL_SHIFT)
@@ -313,14 +313,14 @@ functions (r/w). */
 #define LSM6DSL_CTRL2_G_FS_125                      (1 << 1)
 #define LSM6DSL_CTRL2_G_FS_G_SHIFT                  2
 #define LSM6DSL_CTRL2_G_FS_G_MASK                   (3 << LSM6DSL_CTRL2_G_FS_G_SHIFT)
-#define LSM6DSL_CTRL2_G_FS_G_250DPS                 (0 << LSM6DSL_CTRL2_G_FS_G_SHIFT) 
-#define LSM6DSL_CTRL2_G_FS_G_500DPS                 (1 << LSM6DSL_CTRL2_G_FS_G_SHIFT) 
-#define LSM6DSL_CTRL2_G_FS_G_1000DPS                (2 << LSM6DSL_CTRL2_G_FS_G_SHIFT) 
-#define LSM6DSL_CTRL2_G_FS_G_2000DPS                (3 << LSM6DSL_CTRL2_G_FS_G_SHIFT) 
+#define LSM6DSL_CTRL2_G_FS_G_250DPS                 (0 << LSM6DSL_CTRL2_G_FS_G_SHIFT)
+#define LSM6DSL_CTRL2_G_FS_G_500DPS                 (1 << LSM6DSL_CTRL2_G_FS_G_SHIFT)
+#define LSM6DSL_CTRL2_G_FS_G_1000DPS                (2 << LSM6DSL_CTRL2_G_FS_G_SHIFT)
+#define LSM6DSL_CTRL2_G_FS_G_2000DPS                (3 << LSM6DSL_CTRL2_G_FS_G_SHIFT)
 #define LSM6DSL_CTRL2_G_ODR_G_SHIFT                 4
 #define LSM6DSL_CTRL2_G_ODR_G_MASK                  (15 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 
-#define LSM6DSL_CTRL2_G_ODR_G_POWER_DOWN            (0 << LSM6DSL_CTRL2_G_ODR_G_SHIFT) 
+#define LSM6DSL_CTRL2_G_ODR_G_POWER_DOWN            (0 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 #define LSM6DSL_CTRL2_G_ODR_G_1_6HZ_12_5HZ          (11 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 #define LSM6DSL_CTRL2_G_ODR_G_12_5HZ_12_5HZ         (1 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 #define LSM6DSL_CTRL2_G_ODR_G_26HZ_26HZ             (2 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
@@ -333,7 +333,7 @@ functions (r/w). */
 #define LSM6DSL_CTRL2_G_ODR_G_3_3kHz_3_3kHZ         (9 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 #define LSM6DSL_CTRL2_G_ODR_G_6_6kHZ_6_6kHZ         (10 << LSM6DSL_CTRL2_G_ODR_G_SHIFT)
 
-#define LSM6DSL_CTRL3_C_SHIFT                       0  
+#define LSM6DSL_CTRL3_C_SHIFT                       0
 #define LSM6DSL_CTRL3_C_MASK                        (0 << LSM6DSL_CTRL3_C_SHIFT)
 #define LSM6DSL_CTRL3_C_SW_RESET                    (1 << 0)
 #define LSM6DSL_CTRL3_C_BLE                         (1 << 1)
@@ -439,139 +439,139 @@ functions (r/w). */
 #define LSM6DSL_CTRL5_C_SHIFT                       0
 #define LSM6DSL_CTRL5_C_ST_XL_MASK                  (3 << LSM6DSL_CTRL5_C_SHIFT)
 
-#define LSM6DSL_OUT_TEMP_L_TEMP_SHIFT               0 
+#define LSM6DSL_OUT_TEMP_L_TEMP_SHIFT               0
 #define LSM6DSL_OUT_TEMP_L_TEMP_MASK                (255 << LSM6DSL_OUT_TEMP_L_TEMP_SHIFT)
 #define LSM6DSL_OUT_TEMP_H_TEMP_SHIFT               0
 #define LSM6DSL_OUT_TEMP_H_TEMP_MASK                (255 << LSM6DSL_OUT_TEMP_H_TEMP_SHIFT)
 
-#define LSM6DSL_OUTX_L_G_SHIFT                      0 
+#define LSM6DSL_OUTX_L_G_SHIFT                      0
 #define LSM6DSL_OUTX_L_G_MASK                       (255 << LSM6DSL_OUTX_L_G_SHIFT)
 
-#define LSM6DSL_OUTX_H_G_SHIFT                      0 
+#define LSM6DSL_OUTX_H_G_SHIFT                      0
 #define LSM6DSL_OUTX_H_G_MASK                       (255 << LSM6DSL_OUTX_H_G_SHIFT)
 
-#define LSM6DSL_OUTY_L_G_SHIFT                      0 
+#define LSM6DSL_OUTY_L_G_SHIFT                      0
 #define LSM6DSL_OUTY_L_G_MASK                       (255 << LSM6DSL_OUTY_L_G_SHIFT)
 
-#define LSM6DSL_OUTY_H_G_SHIFT                      0 
+#define LSM6DSL_OUTY_H_G_SHIFT                      0
 #define LSM6DSL_OUTY_H_G_MASK                       (255 << LSM6DSL_OUTY_H_G_SHIFT)
 
-#define LSM6DSL_OUTZ_L_G_SHIFT                      0 
+#define LSM6DSL_OUTZ_L_G_SHIFT                      0
 #define LSM6DSL_OUTZ_L_G_MASK                       (255 << LSM6DSL_OUTZ_L_G_SHIFT)
 
-#define LSM6DSL_OUTZ_H_G_SHIFT                      0 
+#define LSM6DSL_OUTZ_H_G_SHIFT                      0
 #define LSM6DSL_OUTZ_H_G_MASK                       (255 << LSM6DSL_OUTZ_H_G_SHIFT)
 
-#define LSM6DSL_OUTX_L_XL_SHIFT                     0 
+#define LSM6DSL_OUTX_L_XL_SHIFT                     0
 #define LSM6DSL_OUTX_L_XL_MASK                      (255 << LSM6DSL_OUTX_L_XL_SHIFT)
 
-#define LSM6DSL_OUTX_H_XL_SHIFT                     0 
+#define LSM6DSL_OUTX_H_XL_SHIFT                     0
 #define LSM6DSL_OUTX_H_XL_MASK                      (255 << LSM6DSL_OUTX_H_XL_SHIFT)
 
-#define LSM6DSL_OUTY_L_XL_SHIFT                     0 
+#define LSM6DSL_OUTY_L_XL_SHIFT                     0
 #define LSM6DSL_OUTY_L_XL_MASK                      (255 << LSM6DSL_OUTY_L_XL_SHIFT)
 
-#define LSM6DSL_OUTY_H_XL_SHIFT                     0 
+#define LSM6DSL_OUTY_H_XL_SHIFT                     0
 #define LSM6DSL_OUTY_H_XL_MASK                      (255 << LSM6DSL_OUTY_H_XL_SHIFT)
 
-#define LSM6DSL_OUTZ_L_XL_SHIFT                     0 
+#define LSM6DSL_OUTZ_L_XL_SHIFT                     0
 #define LSM6DSL_OUTZ_L_XL_MASK                      (255 << LSM6DSL_OUTZ_L_XL_SHIFT)
 
-#define LSM6DSL_OUTZ_H_XL_SHIFT                     0 
+#define LSM6DSL_OUTZ_H_XL_SHIFT                     0
 #define LSM6DSL_OUTZ_H_XL_MASK                      (255 << LSM6DSL_OUTZ_H_XL_SHIFT)
 
-#define LSM6DSL_SENSORHUB1_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB1_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB1_REG_MASK                 (255 << LSM6DSL_SENSORHUB1_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB2_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB2_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB2_REG_MASK                 (255 << LSM6DSL_SENSORHUB2_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB3_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB3_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB3_REG_MASK                 (255 << LSM6DSL_SENSORHUB3_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB4_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB4_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB4_REG_MASK                 (255 << LSM6DSL_SENSORHUB4_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB5_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB5_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB5_REG_MASK                 (255 << LSM6DSL_SENSORHUB5_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB6_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB6_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB6_REG_MASK                 (255 << LSM6DSL_SENSORHUB6_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB7_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB7_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB7_REG_MASK                 (255 << LSM6DSL_SENSORHUB7_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB8_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB8_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB8_REG_MASK                 (255 << LSM6DSL_SENSORHUB8_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB9_REG_SHIFT                0 
+#define LSM6DSL_SENSORHUB9_REG_SHIFT                0
 #define LSM6DSL_SENSORHUB9_REG_MASK                 (255 << LSM6DSL_SENSORHUB9_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB10_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB10_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB10_REG_MASK                (255 << LSM6DSL_SENSORHUB10_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB11_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB11_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB11_REG_MASK                (255 << LSM6DSL_SENSORHUB11_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB12_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB12_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB12_REG_MASK                (255 << LSM6DSL_SENSORHUB12_REG_SHIFT)
 
-#define LSM6DSL_FIFO_STATUS1_SHIFT                  0 
+#define LSM6DSL_FIFO_STATUS1_SHIFT                  0
 #define LSM6DSL_FIFO_STATUS1_MASK                   (255 << LSM6DSL_FIFO_STATUS1_SHIFT)
 
-#define LSM6DSL_FIFO_STATUS2_DIFF_FIFO_SHIFT        0 
+#define LSM6DSL_FIFO_STATUS2_DIFF_FIFO_SHIFT        0
 #define LSM6DSL_FIFO_STATUS2_DIFF_FIFO_MASK         (7 << LSM6DSL_FIFO_STATUS2_DIFF_FIFO_SHIFT)
 #define LSM6DSL_FIFO_STATUS2_FIFO_EMPTY             (1 << 1)
 #define LSM6DSL_FIFO_STATUS2_FIFO_FULL_ART          (1 << 1)
 #define LSM6DSL_FIFO_STATUS2_OVER_RUN               (1 << 2)
 #define LSM6DSL_FIFO_STATUS2_WaterM                 (1 << 3)
 
-#define LSM6DSL_FIFO_STATUS3_SHIFT                  0 
+#define LSM6DSL_FIFO_STATUS3_SHIFT                  0
 #define LSM6DSL_FIFO_STATUS3_MASK                   (255 << LSM6DSL_FIFO_STATUS3_SHIFT)
 
-#define LSM6DSL_FIFO_STATUS4_SHIFT                  0 
+#define LSM6DSL_FIFO_STATUS4_SHIFT                  0
 #define LSM6DSL_FIFO_STATUS4_MASK                   (3 << LSM6DSL_FIFO_STATUS4_SHIFT)
 
-#define LSM6DSL_FIFO_DATA_OUT_L_SHIFT               0 
+#define LSM6DSL_FIFO_DATA_OUT_L_SHIFT               0
 #define LSM6DSL_FIFO_DATA_OUT_L_MASK                (255 << LSM6DSL_FIFO_DATA_OUT_L_SHIFT)
 
-#define LSM6DSL_FIFO_DATA_OUT_H_SHIFT               0 
+#define LSM6DSL_FIFO_DATA_OUT_H_SHIFT               0
 #define LSM6DSL_FIFO_DATA_OUT_H_MASK                (255 << LSM6DSL_FIFO_DATA_OUT_H_SHIFT)
 
-#define LSM6DSL_TIMESTAMP0_REG_SHIFT                0 
+#define LSM6DSL_TIMESTAMP0_REG_SHIFT                0
 #define LSM6DSL_TIMESTAMP0_REG_MASK                 (255 << LSM6DSL_TIMESTAMP0_REG_SHIFT)
 
-#define LSM6DSL_TIMESTAMP1_REG_SHIFT                0 
+#define LSM6DSL_TIMESTAMP1_REG_SHIFT                0
 #define LSM6DSL_TIMESTAMP1_REG_MASK                 (255 << LSM6DSL_TIMESTAMP1_REG_SHIFT)
 
-#define LSM6DSL_TIMESTAMP2_REG_SHIFT                0 
+#define LSM6DSL_TIMESTAMP2_REG_SHIFT                0
 #define LSM6DSL_TIMESTAMP2_REG_MASK                 (255 << LSM6DSL_TIMESTAMP2_REG_SHIFT)
 
-#define LSM6DSL_STEP_TIMESTAMP_L_SHIFT              0 
+#define LSM6DSL_STEP_TIMESTAMP_L_SHIFT              0
 #define LSM6DSL_STEP_TIMESTAMP_L_MASK               (255 << LSM6DSL_STEP_TIMESTAMP_L_SHIFT)
 
-#define LSM6DSL_STEP_TIMESTAMP_H_SHIFT              0 
+#define LSM6DSL_STEP_TIMESTAMP_H_SHIFT              0
 #define LSM6DSL_STEP_TIMESTAMP_H_MASK               (255 << LSM6DSL_STEP_TIMESTAMP_H_SHIFT)
 
-#define LSM6DSL_STEP_COUNTER_L_SHIFT                0 
+#define LSM6DSL_STEP_COUNTER_L_SHIFT                0
 #define LSM6DSL_STEP_COUNTER_L_MASK                 (255 << LSM6DSL_STEP_COUNTER_L_SHIFT)
 
-#define LSM6DSL_SENSORHUB13_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB13_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB13_REG_MASK                (255 << LSM6DSL_SENSORHUB13_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB14_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB14_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB14_REG_MASK                (255 << LSM6DSL_SENSORHUB14_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB15_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB15_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB15_REG_MASK                (255 << LSM6DSL_SENSORHUB15_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB16_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB16_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB16_REG_MASK                (255 << LSM6DSL_SENSORHUB16_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB17_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB17_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB17_REG_MASK                (255 << LSM6DSL_SENSORHUB17_REG_SHIFT)
 
-#define LSM6DSL_SENSORHUB18_REG_SHIFT               0 
+#define LSM6DSL_SENSORHUB18_REG_SHIFT               0
 #define LSM6DSL_SENSORHUB18_REG_MASK                (255 << LSM6DSL_SENSORHUB18_REG_SHIFT)
 
 #define LSM6DSL_FUNC_SRC1_SENSORHUB_END_OP          (1 << 0)
@@ -589,7 +589,7 @@ functions (r/w). */
 #define LSM6DSL_FUNC_SRC2_SLAVE2_NACK               (1 << 5)
 #define LSM6DSL_FUNC_SRC2_SLAVE3_NACK               (1 << 6)
 
-#define LSM6DSL_WRIST_TILT_IA_SHIFT                 2 
+#define LSM6DSL_WRIST_TILT_IA_SHIFT                 2
 #define LSM6DSL_WRIST_TILT_IA_MASK                  (63 << LSM6DSL_WRIST_TILT_IA_SHIFT)
 
 #define LSM6DSL_TAP_CFG_LIR                         (1 << 0)
@@ -597,13 +597,13 @@ functions (r/w). */
 #define LSM6DSL_TAP_CFG_TAP_Y_EN                    (1 << 2)
 #define LSM6DSL_TAP_CFG_TAP_X_EN                    (1 << 3)
 #define LSM6DSL_TAP_CFG_SLOPE_FDS                   (1 << 4)
-#define LSM6DSL_TAP_CFG_INACT_EN_SHIFT              2 
+#define LSM6DSL_TAP_CFG_INACT_EN_SHIFT              2
 #define LSM6DSL_TAP_CFG_INACT_EN_MASK               (3 << LSM6DSL_TAP_CFG_INACT_EN_SHIFT)
 #define LSM6DSL_TAP_CFG_INTERRUPTS_ENABLE           (1 << 7)
 
-#define LSM6DSL_TAP_THS_6D_TAP_THS_SHIFT            0 
+#define LSM6DSL_TAP_THS_6D_TAP_THS_SHIFT            0
 #define LSM6DSL_TAP_THS_6D_TAP_THS_MASK             (31 << LSM6DSL_TAP_THS_6D_TAP_THS_SHIFT)
-#define LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT           5 
+#define LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT           5
 #define LSM6DSL_TAP_THS_6D_SIXD_THS_MASK            (3 << LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT)
 #define LSM6DSL_TAP_THS_6D_SIXD_THS_80DEGR          (0 << LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT)
 #define LSM6DSL_TAP_THS_6D_SIXD_THS_70DEGR          (1 << LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT)
@@ -611,27 +611,27 @@ functions (r/w). */
 #define LSM6DSL_TAP_THS_6D_SIXD_THS_50DEGR          (3 << LSM6DSL_TAP_THS_6D_SIXD_THS_SHIFT)
 #define LSM6DSL_TAP_THS_6D_D4D_EN                   (1 << 7)
 
-#define LSM6DSL_INT_DUR2_SHOCK_SHIFT                0 
+#define LSM6DSL_INT_DUR2_SHOCK_SHIFT                0
 #define LSM6DSL_INT_DUR2_SHOCK_MASK                 (3 << LSM6DSL_INT_DUR2_SHOCK_SHIFT)
-#define LSM6DSL_INT_DUR2_QUIET_SHIFT                2 
+#define LSM6DSL_INT_DUR2_QUIET_SHIFT                2
 #define LSM6DSL_INT_DUR2_QUIET_MASK                 (3 << LSM6DSL_INT_DUR2_QUIET_SHIFT)
-#define LSM6DSL_INT_DUR2_DUR_SHIFT                  4 
+#define LSM6DSL_INT_DUR2_DUR_SHIFT                  4
 #define LSM6DSL_INT_DUR2_DUR_MASK                   (7 << LSM6DSL_INT_DUR2_QUIET_SHIFT)
 
-#define LSM6DSL_WAKE_UP_THS_WK_THS_SHIFT            0 
+#define LSM6DSL_WAKE_UP_THS_WK_THS_SHIFT            0
 #define LSM6DSL_WAKE_UP_THS_WK_THS_MASK             (31 << LSM6DSL_WAKE_UP_THS_WK_THS_SHIFT)
 #define LSM6DSL_WAKE_UP_THS_SINGLE_DOUBLE_TAP4D_EN  (1 << 7)
 
-#define LSM6DSL_WAKE_UP_DUR_SLEEP_DUR_SHIFT         0 
+#define LSM6DSL_WAKE_UP_DUR_SLEEP_DUR_SHIFT         0
 #define LSM6DSL_WAKE_UP_DUR_SLEEP_DUR_MASK          (15 << LSM6DSL_WAKE_UP_DUR_SLEEP_DUR_SHIFT)
 #define LSM6DSL_WAKE_UP_DUR_TIMER_HR                (1 << 4)
-#define LSM6DSL_WAKE_UP_DUR_WAKE_DUR_SHIFT          5 
+#define LSM6DSL_WAKE_UP_DUR_WAKE_DUR_SHIFT          5
 #define LSM6DSL_WAKE_UP_DUR_WAKE_DUR_MASK           (15 << LSM6DSL_WAKE_UP_DUR_WAKE_DUR_SHIFT)
 #define LSM6DSL_WAKE_UP_DUR_FF_DUR5                 (1 << 7)
 
-#define LSM6DSL_FREE_FALL_FF_THS_SHIFT              0 
+#define LSM6DSL_FREE_FALL_FF_THS_SHIFT              0
 #define LSM6DSL_FREE_FALL_FF_THS_MASK               (7 << LSM6DSL_FREE_FALL_FF_THS_SHIFT)
-#define LSM6DSL_FREE_FALL_FF_DUR_SHIFT              4 
+#define LSM6DSL_FREE_FALL_FF_DUR_SHIFT              4
 #define LSM6DSL_FREE_FALL_FF_DUR_MASK               (31 << LSM6DSL_FREE_FALL_FF_DUR_SHIFT)
 
 #define LSM6DSL_MD1_CFG_INT1_TIMER                  (1 << 0)
@@ -652,165 +652,165 @@ functions (r/w). */
 #define LSM6DSL_MD2_CFG_INT1_SINGLE_TAP             (1 << 6)
 #define LSM6DSL_MD2_CFG_INT1_INACT_STATE            (1 << 7)
 
-#define LSM6DSL_MASTER_CMD_CODE_SHIFT               0 
+#define LSM6DSL_MASTER_CMD_CODE_SHIFT               0
 #define LSM6DSL_MASTER_CMD_CODE_MASK                (255 << LSM6DSL_MASTER_CMD_CODE_SHIFT)
 
-#define LSM6DSL_SENS_SYNC_SPI_ERROR_CODE_SHIFT      0 
+#define LSM6DSL_SENS_SYNC_SPI_ERROR_CODE_SHIFT      0
 #define LSM6DSL_SENS_SYNC_SPI_ERROR_CODE_MASK       (255 << LSM6DSL_SENS_SYNC_SPI_ERROR_CODE_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_X_L_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_X_L_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_X_L_MASK                (255 << LSM6DSL_OUT_MAG_RAW_X_L_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_X_H_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_X_H_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_X_H_MASK                (255 << LSM6DSL_OUT_MAG_RAW_X_H_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_Y_L_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_Y_L_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_Y_L_MASK                (255 << LSM6DSL_OUT_MAG_RAW_Y_L_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_Y_H_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_Y_H_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_Y_H_MASK                (255 << LSM6DSL_OUT_MAG_RAW_Y_H_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_Z_L_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_Z_L_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_Z_L_MASK                (255 << LSM6DSL_OUT_MAG_RAW_Z_L_SHIFT)
 
-#define LSM6DSL_OUT_MAG_RAW_Z_H_SHIFT               0 
+#define LSM6DSL_OUT_MAG_RAW_Z_H_SHIFT               0
 #define LSM6DSL_OUT_MAG_RAW_Z_H_MASK                (255 << LSM6DSL_OUT_MAG_RAW_Z_H_SHIFT)
 
-#define LSM6DSL_X_OFS_USR_SHIFT                     0 
+#define LSM6DSL_X_OFS_USR_SHIFT                     0
 #define LSM6DSL_X_OFS_USR_MASK                      (255 << LSM6DSL_X_OFS_USR_SHIFT)
 
-#define LSM6DSL_Y_OFS_USR_SHIFT                     0 
+#define LSM6DSL_Y_OFS_USR_SHIFT                     0
 #define LSM6DSL_Y_OFS_USR_MASK                      (255 << LSM6DSL_Y_OFS_USR_SHIFT)
 
-#define LSM6DSL_Z_OFS_USR_SHIFT                     0 
+#define LSM6DSL_Z_OFS_USR_SHIFT                     0
 #define LSM6DSL_Z_OFS_USR_MASK                      (255 << LSM6DSL_Z_OFS_USR_SHIFT)
 
 /* Embedded functions registers description - Bank A */
 
 #define LSM6DSL_SLV0_ADD_rw_0                       (1 << 0)
-#define LSM6DSL_SLV0_ADD_Slave0_add_SHIFT           1 
+#define LSM6DSL_SLV0_ADD_Slave0_add_SHIFT           1
 #define LSM6DSL_SLV0_ADD_Slave0_add_MASK            (127 << LSM6DSL_SLV0_ADD_Slave0_add_SHIFT)
 
-#define LSM6DSL_SLV0_SUBADD_SHIFT                   0 
+#define LSM6DSL_SLV0_SUBADD_SHIFT                   0
 #define LSM6DSL_SLV0_SUBADD_MASK                    (255 << LSM6DSL_SLV0_SUBADD_SHIFT)
 
-#define LSM6DSL_SLAVE0_CONFIG_Slave0_numop_SHIFT    0 
+#define LSM6DSL_SLAVE0_CONFIG_Slave0_numop_SHIFT    0
 #define LSM6DSL_SLAVE0_CONFIG_Slave0_numop_MASK     (7 << LSM6DSL_SLAVE0_CONFIG_Slave0_numop_SHIFT)
 #define LSM6DSL_SLAVE0_CONFIG_Src_mode              (1 << 3)
-#define LSM6DSL_SLAVE0_CONFIG_Aux_sens_on_SHIFT     4 
+#define LSM6DSL_SLAVE0_CONFIG_Aux_sens_on_SHIFT     4
 #define LSM6DSL_SLAVE0_CONFIG_Aux_sens_on_MASK      (3 << LSM6DSL_SLAVE0_CONFIG_Aux_sens_on_SHIFT)
-#define LSM6DSL_SLAVE0_CONFIG_Slave0_rate_SHIFT     6 
+#define LSM6DSL_SLAVE0_CONFIG_Slave0_rate_SHIFT     6
 #define LSM6DSL_SLAVE0_CONFIG_Slave0_rate_MASK      (3 << LSM6DSL_SLAVE0_CONFIG_Slave0_rate_SHIFT)
 
 #define LSM6DSL_SLV1_ADD_r_1                        (1 << 0)
-#define LSM6DSL_SLV1_ADD_Slave1_add_SHIFT           1 
+#define LSM6DSL_SLV1_ADD_Slave1_add_SHIFT           1
 #define LSM6DSL_SLV1_ADD_Slave1_add_MASK            (127 << LSM6DSL_SLV1_ADD_Slave1_add_SHIFT)
 
-#define LSM6DSL_SLV1_SUBADD_SHIFT                   0 
+#define LSM6DSL_SLV1_SUBADD_SHIFT                   0
 #define LSM6DSL_SLV1_SUBADD_MASK                    (255 << LSM6DSL_SLV1_SUBADD_SHIFT)
 
-#define LSM6DSL_SLAVE1_CONFIG_Slave1_numop_SHIFT    0 
+#define LSM6DSL_SLAVE1_CONFIG_Slave1_numop_SHIFT    0
 #define LSM6DSL_SLAVE1_CONFIG_Slave1_numop_MASK     (7 << LSM6DSL_SLAVE1_CONFIG_Slave1_numop_SHIFT)
 #define LSM6DSL_SLAVE1_CONFIG_write_once            (1 << 5)
-#define LSM6DSL_SLAVE1_CONFIG_Slave1_rate_SHIFT     6 
+#define LSM6DSL_SLAVE1_CONFIG_Slave1_rate_SHIFT     6
 #define LSM6DSL_SLAVE1_CONFIG_Slave1_rate_MASK      (3 << LSM6DSL_SLAVE1_CONFIG_Slave1_rate_SHIFT)
 
 #define LSM6DSL_SLV2_ADD_r_2                        (1 << 0)
-#define LSM6DSL_SLV2_ADD_Slave2_add_SHIFT           1 
+#define LSM6DSL_SLV2_ADD_Slave2_add_SHIFT           1
 #define LSM6DSL_SLV2_ADD_Slave2_add_MASK            (127 << LSM6DSL_SLV2_ADD_Slave2_add_SHIFT)
 
-#define LSM6DSL_SLV2_SUBADD_SHIFT                   0 
+#define LSM6DSL_SLV2_SUBADD_SHIFT                   0
 #define LSM6DSL_SLV2_SUBADD_MASK                    (255 << LSM6DSL_SLV2_SUBADD_SHIFT)
 
-#define LSM6DSL_SLAVE2_CONFIG_Slave2_numop_SHIFT    0 
+#define LSM6DSL_SLAVE2_CONFIG_Slave2_numop_SHIFT    0
 #define LSM6DSL_SLAVE2_CONFIG_Slave2_numop_MASK     (7 << LSM6DSL_SLAVE1_CONFIG_Slave1_numop_SHIFT)
-#define LSM6DSL_SLAVE2_CONFIG_Slave2_rate_SHIFT     6 
+#define LSM6DSL_SLAVE2_CONFIG_Slave2_rate_SHIFT     6
 #define LSM6DSL_SLAVE2_CONFIG_Slave2_rate_MASK      (3 << LSM6DSL_SLAVE1_CONFIG_Slave1_rate_SHIFT)
 
 #define LSM6DSL_SLV3_ADD_r_3                        (1 << 0)
-#define LSM6DSL_SLV3_ADD_Slave3_add_SHIFT           1 
+#define LSM6DSL_SLV3_ADD_Slave3_add_SHIFT           1
 #define LSM6DSL_SLV3_ADD_Slave3_add_MASK            (127 << LSM6DSL_SLV3_ADD_Slave3_add_SHIFT)
 
-#define LSM6DSL_SLV3_SUBADD_SHIFT                   0 
+#define LSM6DSL_SLV3_SUBADD_SHIFT                   0
 #define LSM6DSL_SLV3_SUBADD_MASK                    (255 << LSM6DSL_SLV2_SUBADD_SHIFT)
 
-#define LSM6DSL_SLAVE3_CONFIG_Slave3_numop_SHIFT    0 
+#define LSM6DSL_SLAVE3_CONFIG_Slave3_numop_SHIFT    0
 #define LSM6DSL_SLAVE3_CONFIG_Slave3_numop_MASK     (7 << LSM6DSL_SLAVE1_CONFIG_Slave1_numop_SHIFT)
-#define LSM6DSL_SLAVE3_CONFIG_Slave3_rate_SHIFT     6 
+#define LSM6DSL_SLAVE3_CONFIG_Slave3_rate_SHIFT     6
 #define LSM6DSL_SLAVE3_CONFIG_Slave3_rate_MASK      (3 << LSM6DSL_SLAVE1_CONFIG_Slave1_rate_SHIFT)
 
-#define LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0_SHIFT   0 
+#define LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0_SHIFT   0
 #define LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0_MASK    (255 << LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0_SHIFT)
 
-#define LSM6DSL_CONFIG_PEDO_THS_MIN_ths_min_SHIFT   0 
+#define LSM6DSL_CONFIG_PEDO_THS_MIN_ths_min_SHIFT   0
 #define LSM6DSL_CONFIG_PEDO_THS_MIN_ths_min_MASK    (31 << LSM6DSL_CONFIG_PEDO_THS_MIN_ths_min_SHIFT)
 #define LSM6DSL_CONFIG_PEDO_THS_MIN_PEDO_FS         (1 << 7>
 
-#define LSM6DSL_SM_THS_SHIFT                        0 
+#define LSM6DSL_SM_THS_SHIFT                        0
 #define LSM6DSL_SM_THS_MASK                         (255 << LSM6DSL_SM_THS_SHIFT)
 
-#define LSM6DSL_PEDO_DEB_REG_DEB_STEP_SHIFT         0 
+#define LSM6DSL_PEDO_DEB_REG_DEB_STEP_SHIFT         0
 #define LSM6DSL_PEDO_DEB_REG_DEB_STEP_MASK          (7 << LSM6DSL_PEDO_DEB_REG_DEB_STEP_SHIFT)
-#define LSM6DSL_PEDO_DEB_REG_DEB_TIME_SHIFT         3 
+#define LSM6DSL_PEDO_DEB_REG_DEB_TIME_SHIFT         3
 #define LSM6DSL_PEDO_DEB_REG_DEB_TIME_MASK          (31 << LSM6DSL_PEDO_DEB_REG_DEB_TIME_SHIFT)
 
-#define LSM6DSL_STEP_COUNT_DELTA_SHIFT              0 
+#define LSM6DSL_STEP_COUNT_DELTA_SHIFT              0
 #define LSM6DSL_STEP_COUNT_DELTA_MASK               (255 << LSM6DSL_STEP_COUNT_DELTA_SHIFT)
 
-#define LSM6DSL_MAG_SI_XX_SHIFT                     0 
+#define LSM6DSL_MAG_SI_XX_SHIFT                     0
 #define LSM6DSL_MAG_SI_XX_MASK                      (255 << LSM6DSL_MAG_SI_XX_SHIFT)
 
-#define LSM6DSL_MAG_SI_XY_SHIFT                     0 
+#define LSM6DSL_MAG_SI_XY_SHIFT                     0
 #define LSM6DSL_MAG_SI_XY_MASK                      (255 << LSM6DSL_MAG_SI_XY_SHIFT)
 
-#define LSM6DSL_MAG_SI_XZ_SHIFT                     0 
+#define LSM6DSL_MAG_SI_XZ_SHIFT                     0
 #define LSM6DSL_MAG_SI_XZ_MASK                      (255 << LSM6DSL_MAG_SI_XZ_SHIFT)
 
-#define LSM6DSL_MAG_SI_YX_SHIFT                     0 
+#define LSM6DSL_MAG_SI_YX_SHIFT                     0
 #define LSM6DSL_MAG_SI_YX_MASK                      (255 << LSM6DSL_MAG_SI_YX_SHIFT)
 
-#define LSM6DSL_MAG_SI_YY_SHIFT                     0 
+#define LSM6DSL_MAG_SI_YY_SHIFT                     0
 #define LSM6DSL_MAG_SI_YY_MASK                      (255 << LSM6DSL_MAG_SI_YY_SHIFT)
 
-#define LSM6DSL_MAG_SI_YZ_SHIFT                     0 
+#define LSM6DSL_MAG_SI_YZ_SHIFT                     0
 #define LSM6DSL_MAG_SI_YZ_MASK                      (255 << LSM6DSL_MAG_SI_YZ_SHIFT)
 
-#define LSM6DSL_MAG_SI_ZX_SHIFT                     0 
+#define LSM6DSL_MAG_SI_ZX_SHIFT                     0
 #define LSM6DSL_MAG_SI_ZX_MASK                      (255 << LSM6DSL_MAG_SI_ZX_SHIFT)
 
-#define LSM6DSL_MAG_SI_ZY_SHIFT                     0 
+#define LSM6DSL_MAG_SI_ZY_SHIFT                     0
 #define LSM6DSL_MAG_SI_ZY_MASK                      (255 << LSM6DSL_MAG_SI_ZY_SHIFT)
 
-#define LSM6DSL_MAG_SI_ZZ_SHIFT                     0 
+#define LSM6DSL_MAG_SI_ZZ_SHIFT                     0
 #define LSM6DSL_MAG_SI_ZZ_MASK                      (255 << LSM6DSL_MAG_SI_ZZ_SHIFT)
 
-#define LSM6DSL_MAG_OFFX_L_SHIFT                    0 
+#define LSM6DSL_MAG_OFFX_L_SHIFT                    0
 #define LSM6DSL_MAG_OFFX_L_MASK                     (255 << LSM6DSL_MAG_OFFX_L_SHIFT)
 
-#define LSM6DSL_MAG_OFFX_H_SHIFT                    0 
+#define LSM6DSL_MAG_OFFX_H_SHIFT                    0
 #define LSM6DSL_MAG_OFFX_H_MASK                     (255 << LSM6DSL_MAG_OFFX_H_SHIFT)
 
-#define LSM6DSL_MAG_OFFY_L_SHIFT                    0 
+#define LSM6DSL_MAG_OFFY_L_SHIFT                    0
 #define LSM6DSL_MAG_OFFY_L_MASK                     (255 << LSM6DSL_MAG_OFFY_L_SHIFT)
 
-#define LSM6DSL_MAG_OFFY_H_SHIFT                    0 
+#define LSM6DSL_MAG_OFFY_H_SHIFT                    0
 #define LSM6DSL_MAG_OFFY_H_MASK                     (255 << LSM6DSL_MAG_OFFY_H_SHIFT)
 
-#define LSM6DSL_MAG_OFFZ_L_SHIFT                    0 
+#define LSM6DSL_MAG_OFFZ_L_SHIFT                    0
 #define LSM6DSL_MAG_OFFZ_L_MASK                     (255 << LSM6DSL_MAG_OFFZ_L_SHIFT)
 
-#define LSM6DSL_MAG_OFFZ_H_SHIFT                    0 
+#define LSM6DSL_MAG_OFFZ_H_SHIFT                    0
 #define LSM6DSL_MAG_OFFZ_H_MASK                     (255 << LSM6DSL_MAG_OFFZ_H_SHIFT)
 
 /* Embedded functions registers description - Bank B */
 
-#define LSM6DSL_A_WRIST_TILT_LAT_SHIFT              0 
+#define LSM6DSL_A_WRIST_TILT_LAT_SHIFT              0
 #define LSM6DSL_A_WRIST_TILT_LAT_MASK               (255 << LSM6DSL_A_WRIST_TILT_LAT_SHIFT)
 
-#define LSM6DSL_A_WRIST_TILT_THS_SHIFT              0 
+#define LSM6DSL_A_WRIST_TILT_THS_SHIFT              0
 #define LSM6DSL_A_WRIST_TILT_THS_MASK               (255 << LSM6DSL_A_WRIST_TILT_THS_SHIFT)
 
-#define LSM6DSL_A_WRIST_TILT_Mask_SHIFT             2 
+#define LSM6DSL_A_WRIST_TILT_Mask_SHIFT             2
 #define LSM6DSL_A_WRIST_TILT_Mask_MASK              (63 << LSM6DSL_A_WRIST_TILT_Mask_SHIFT)
 
 /****************************************************************************************************

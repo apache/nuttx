@@ -51,7 +51,7 @@
 
 #include "sam_pio.h"
 #include "sam_adc.h"
-#include "chip/sam_adc.h"
+#include "hardware/sam_adc.h"
 #include "sama5d3-xplained.h"
 
 /****************************************************************************

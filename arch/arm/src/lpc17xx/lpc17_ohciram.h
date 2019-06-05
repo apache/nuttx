@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc17_memorymap.h"
+#include "hardware/lpc17_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -150,7 +150,7 @@
 #  error "Insufficent TDs"
 #endif
 
-/* Derived size of user trasnfer descriptor (TD) memory. */
+/* Derived size of user transfer descriptor (TD) memory. */
 
 #define LPC17_TDFREE_SIZE (CONFIG_LP17_USBHOST_NTDS * LPC17_TD_SIZE)
 

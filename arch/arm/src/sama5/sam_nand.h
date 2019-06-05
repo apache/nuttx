@@ -52,7 +52,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/sam_hsmc.h"
+#include "hardware/sam_hsmc.h"
 
 #include "sam_dmac.h"
 

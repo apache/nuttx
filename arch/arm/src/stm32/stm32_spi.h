@@ -45,7 +45,7 @@
 #include <nuttx/spi/spi.h>
 
 #include "chip.h"
-#include "chip/stm32_spi.h"
+#include "hardware/stm32_spi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

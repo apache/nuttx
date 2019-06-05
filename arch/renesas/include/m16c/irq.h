@@ -242,7 +242,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there are pending signals
    * to be processed.
    */
@@ -259,7 +258,6 @@ struct xcptcontext
 
   uint8_t saved_pc[2];
   uint8_t saved_flg;
-#endif
 
   /* Register save area */
 

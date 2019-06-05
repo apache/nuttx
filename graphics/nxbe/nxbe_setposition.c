@@ -88,7 +88,7 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
   nxmu_reportposition(wnd);
 
   /* Then redraw this window AND all windows below it. Having moved the
-   * window, we may have exposed previoulsy obscured portions of windows
+   * window, we may have exposed previously obscured portions of windows
    * below this one.
    */
 

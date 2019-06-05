@@ -46,9 +46,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/video/cursor.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxtypes.h>
 
-#ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -63,11 +64,66 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/* The current software cursor implementation is only available under the
+ * following conditions:
+ *
+ * 1. Using a framebuffer hardware interface.  This is because the logic to
+ *    implement this feature on top of the LCD interface has not been
+ *    implemented.
+ * 2. Pixel depth is greater then or equal to 8-bits (8-bpp, 16-bpp,
+ *    24/32/-bpp).  This is because the logic to handle pixels smaller than
+ *    1-byte has not been implemented,
+ * 3. For FLAT and PROTECTED builds only.  In those builds, the cursor
+ *    image resides in the common application space and is assumed to pesist
+ *    as long as needed.  But with the KERNEL build, the image will lie in
+ *    a process space and will not be generally available.  In that case,
+ *    we could keep the image in a shared memory region or perhaps copy the
+ *    image into a kernel internal buffer.  Neither of those are implemented.
+ */
+
+#if (defined(CONFIG_NX_SWCURSOR) && \
+    (defined(CONFIG_NX_LCDDRIVER) || !defined(CONFIG_NX_DISABLE_1BPP) || \
+    !defined(CONFIG_NX_DISABLE_2BPP) || !defined(CONFIG_NX_DISABLE_4BPP) || \
+     defined(CONFIG_BUILD_KERNEL)))
+#  undef CONFIG_NX_NOCURSOR
+#  undef CONFIG_NX_SWCURSOR
+#  define CONFIG_NX_NOCURSOR 1
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/* For cursor controllers that support custem cursor images, this structure
+ * is used to provide the cursor image.
+ *
+ * The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ * is as followings:
+ *
+ * 00 - The transparent background
+ * 01 - Color1:  The main color of the cursor
+ * 10 - Color2:  The color of any border
+ * 11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ */
+
+struct nx_cursorimage_s
+{
+  struct nxgl_size_s size;                  /* The size of the cursor image */
+  nxgl_mxpixel_t color1[CONFIG_NX_NPLANES]; /* Color1 is main color of the cursor */
+  nxgl_mxpixel_t color2[CONFIG_NX_NPLANES]; /* Color2 is color of any border */
+  nxgl_mxpixel_t color3[CONFIG_NX_NPLANES]; /* Color3 is the blended color */
+  FAR const uint8_t *image;                 /* Pointer to bitmap image data */
+};
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: nxcursor_enable
  *
  * Description:
- *   Enable/disable presentation of the cursor
+ *   Enable/disable presentation of the cursor.
  *
  * Input Parameters:
  *   hnd    - The server handle returned by nx_connect()
@@ -86,15 +142,21 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  * Description:
  *   Set the cursor image.
  *
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit encoding
+ *   is as follows:
+ *
+ *   00 - The transparent background.
+ *   01 - Color1:  The main color of the cursor.
+ *   10 - Color2:  The color of any border.
+ *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ *
  *   NOTE: The NX logic will reference the user image buffer repeatedly.
  *   That image buffer must persist for as long as the NX server connection
  *   persists.
  *
  * Input Parameters:
  *   hnd   - The server handle returned by nx_connect()
- *   image - Describes the cursor image in the expected format.  For a
- *           software cursor, this is the format used with the display.  The
- *           format may be different if a hardware cursor is used.
+ *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -102,7 +164,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
+int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image);
 #endif
 
 /****************************************************************************
@@ -116,11 +178,11 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
  *   pos - The new cursor position
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
+int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxcursor_get_position
@@ -142,7 +204,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
  *
  ****************************************************************************/
 
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos);
+int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos);
 
 #undef EXTERN
 #if defined(__cplusplus)

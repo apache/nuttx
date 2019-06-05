@@ -50,7 +50,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/saml_usb.h"
+#include "hardware/saml_usb.h"
 
 /*****************************************************************************
  * Public Function Prototypes

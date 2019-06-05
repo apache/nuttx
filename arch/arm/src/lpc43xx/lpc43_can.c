@@ -55,8 +55,8 @@
 
 #include "chip.h"
 #include "lpc43_gpio.h"
-#include "chip/lpc43_can.h"
-#include "chip/lpc43_rgu.h"
+#include "hardware/lpc43_can.h"
+#include "hardware/lpc43_rgu.h"
 #include "lpc43_ccu.h"
 #include "lpc43_cgu.h"
 

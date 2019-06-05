@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/pic32mz-ioport.h"
+#include "hardware/pic32mz-ioport.h"
 #include "pic32mz-gpio.h"
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ

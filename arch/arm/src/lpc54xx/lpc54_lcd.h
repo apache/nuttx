@@ -50,7 +50,7 @@
 
 #include <nuttx/nx/nxglib.h>
 
-#include "chip/lpc54_lcd.h"
+#include "hardware/lpc54_lcd.h"
 
 /****************************************************************************
  * Pre-processor Definitions

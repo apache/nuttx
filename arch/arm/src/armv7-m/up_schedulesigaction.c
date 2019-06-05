@@ -55,8 +55,6 @@
 
 #include "irq/irq.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -448,5 +446,3 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
   leave_critical_section(flags);
 }
 #endif /* CONFIG_SMP */
-
-#endif /* !CONFIG_DISABLE_SIGNALS */

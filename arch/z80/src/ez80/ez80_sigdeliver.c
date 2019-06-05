@@ -46,13 +46,13 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "chip/switch.h"
 #include "sched/sched.h"
 #include "up_internal.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Public Functions
@@ -70,7 +70,6 @@
 
 void up_sigdeliver(void)
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   FAR struct tcb_s *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];
 
@@ -142,7 +141,4 @@ void up_sigdeliver(void)
 
   board_autoled_off(LED_SIGNAL);
   ez80_restorecontext(regs);
-#endif
 }
-
-#endif /* CONFIG_DISABLE_SIGNALS */

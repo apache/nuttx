@@ -44,7 +44,7 @@
 #include <nuttx/progmem.h>
 
 #include "chip.h"
-#include "chip/stm32_flash.h"
+#include "hardware/stm32_flash.h"
 
 /************************************************************************************
  * Public Function Prototypes

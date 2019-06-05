@@ -38,8 +38,8 @@
 
 #include <nuttx/config.h>
 
-#include <chip/kinetis_k64memorymap.h>
-#include <chip/kinetis_sim.h>
+#include "hardware/kinetis_k64memorymap.h"
+#include "hardware/kinetis_sim.h"
 #include "kinetis_uid.h"
 
 #ifdef CONFIG_BOARDCTL_UNIQUEID

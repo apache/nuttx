@@ -105,7 +105,6 @@ static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data);
 static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
 
 static void stm32_extmemgpios(const uint16_t *gpios, int ngpios);
-static void stm32_enablefsmc(void);
 
 /**************************************************************************************
  * Private Data
@@ -372,7 +371,7 @@ static void stm32_selectlcd(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration */
 
@@ -413,29 +412,6 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
   {
     stm32_configgpio(gpios[i]);
   }
-}
-
-/************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-#ifndef CONFIG_STM32_FSMC
-#  error CONFIG_STM32_FSMC is required for LCD support
-#endif
-
-static void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
 }
 
 /**************************************************************************************

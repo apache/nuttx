@@ -63,7 +63,7 @@
 
 /* Conditions for support TCP poll/select operations */
 
-#if !defined(CONFIG_DISABLE_POLL) && defined(CONFIG_NET_TCP_READAHEAD)
+#ifdef CONFIG_NET_TCP_READAHEAD
 #  define HAVE_TCP_POLL
 #endif
 
@@ -1161,7 +1161,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCPBACKLOG) && !defined(CONFIG_DISABLE_POLL)
+#ifdef CONFIG_NET_TCPBACKLOG
 bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
 #else
 #  define tcp_backlogavailable(c) (false);

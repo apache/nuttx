@@ -59,7 +59,7 @@
 
 #include "chip.h"
 #include "nrf52_config.h"
-#include "chip/nrf52_uarte.h"
+#include "hardware/nrf52_uarte.h"
 #include "nrf52_clockconfig.h"
 #include "nrf52_lowputc.h"
 #include "nrf52_serial.h"

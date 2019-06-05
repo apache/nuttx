@@ -53,6 +53,7 @@
 
 #include "group/group.h"
 #include "sched/sched.h"
+#include "task/task.h"
 #include "signal/signal.h"
 
 /****************************************************************************
@@ -188,6 +189,61 @@ static void nxsig_null_action(int signo)
 static void nxsig_abnormal_termination(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+
+  /* Check to see if this task has the non-cancelable bit set in its
+   * flags. Suppress context changes for a bit so that the flags are stable.
+   * (the flags should not change in interrupt handling).
+   */
+
+  sched_lock();
+  if ((rtcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+    {
+      /* Then we cannot cancel the thread now.  Here is how this is
+       * supposed to work:
+       *
+       * "When cancelability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancelability.
+       *  When cancelability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancelability, calls
+       *  a function which is a cancellation point or calls pthread_testcancel(),
+       *  thus creating a cancellation point. When cancelability is asynchronous,
+       *  all cancels are acted upon immediately, interrupting the thread with its
+       *  processing."
+       *
+       * REVISIT:  Does this rule apply to equally to both SIGKILL and SIGINT?
+       */
+
+      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
+      sched_unlock();
+      return;
+    }
+
+#ifdef CONFIG_CANCELLATION_POINTS
+  /* Check if this task supports deferred cancellation */
+
+  if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+    {
+      /* Then we cannot cancel the task asynchronously.  Mark the cancellation
+       * as pending.
+       */
+
+      rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
+
+      /* If the task is waiting at a cancellation point, then notify of the
+       * cancellation thereby waking the task up with an ECANCELED error.
+       */
+
+      if (rtcb->cpcount > 0)
+        {
+          nxnotify_cancellation(rtcb);
+        }
+
+      sched_unlock();
+      return;
+    }
+#endif
+
+   sched_unlock();
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.

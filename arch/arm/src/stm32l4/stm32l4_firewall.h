@@ -48,13 +48,13 @@
 /* Include the correct firewall register definitions for this STM32L4 family */
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
-#  include "chip/stm32l4x3xx_firewall.h"
+#  include "hardware/stm32l4x3xx_firewall.h"
 #elif defined(CONFIG_STM32L4_STM32L4X5)
-#  include "chip/stm32l4x5xx_firewall.h"
+#  include "hardware/stm32l4x5xx_firewall.h"
 #elif defined(CONFIG_STM32L4_STM32L4X6)
-#  include "chip/stm32l4x6xx_firewall.h"
+#  include "hardware/stm32l4x6xx_firewall.h"
 #elif defined(CONFIG_STM32L4_STM32L4XR)
-#  include "chip/stm32l4xrxx_firewall.h"
+#  include "hardware/stm32l4xrxx_firewall.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

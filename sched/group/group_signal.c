@@ -49,8 +49,6 @@
 #include "group/group.h"
 #include "signal/signal.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -274,5 +272,3 @@ errout:
 
 #endif
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */

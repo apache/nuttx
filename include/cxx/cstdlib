@@ -53,6 +53,7 @@ namespace std
 
   using ::srand;
   using ::rand;
+  using ::random;
 
 #ifndef CONFIG_DISABLE_ENVIRON
   // Environment variable support

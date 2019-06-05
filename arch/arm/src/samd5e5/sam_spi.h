@@ -40,7 +40,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "chip/sam_spi.h"
+#include "hardware/sam_spi.h"
 
 #ifdef SAMD5E5_HAVE_SPI
 

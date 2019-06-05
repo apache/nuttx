@@ -115,9 +115,7 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
 
   /* Signal handler trampoline */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   .signal_handler   = up_signal_handler,
-#endif
 
   /* User-space work queue support (declared in include/nuttx/wqueue.h) */
 

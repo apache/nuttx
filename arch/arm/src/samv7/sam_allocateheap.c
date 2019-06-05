@@ -59,6 +59,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* All SAM's have SRAM.  In addition, they may have external SRAM or SDRAM */
 
 #define HAVE_SDRAM_REGION     0 /* Assume no external SDRAM */
@@ -72,31 +73,31 @@
  */
 
 #if !defined(CONFIG_SAMV7_SDRAMC) || !defined(CONFIG_SAMV7_SDRAMHEAP)
-#  undef CONFIG_SAMV7_SDRAMSIZE
+#  undef  CONFIG_SAMV7_SDRAMSIZE
 #  define CONFIG_SAMV7_SDRAMSIZE 0
 #endif
 
-/* Check if external SRAM is supported and, if so, it is is intended
- * to be used as heap.
+/* Check if external SRAM is supported and, if so, is it intended to be used
+ * as heap memory?
  */
 
 #if !defined(CONFIG_SAMV7_EXTSRAM0) || !defined(CONFIG_SAMV7_EXTSRAM0HEAP)
-#  undef CONFIG_SAMV7_EXTSRAM0SIZE
+#  undef  CONFIG_SAMV7_EXTSRAM0SIZE
 #  define CONFIG_SAMV7_EXTSRAM0SIZE 0
 #endif
 
 #if !defined(CONFIG_SAMV7_EXTSRAM1) || !defined(CONFIG_SAMV7_EXTSRAM1HEAP)
-#  undef CONFIG_SAMV7_EXTSRAM1SIZE
+#  undef  CONFIG_SAMV7_EXTSRAM1SIZE
 #  define CONFIG_SAMV7_EXTSRAM1SIZE 0
 #endif
 
 #if !defined(CONFIG_SAMV7_EXTSRAM2) || !defined(CONFIG_SAMV7_EXTSRAM2HEAP)
-#  undef CONFIG_SAMV7_EXTSRAM2SIZE
+#  undef  CONFIG_SAMV7_EXTSRAM2SIZE
 #  define CONFIG_SAMV7_EXTSRAM2SIZE 0
 #endif
 
 #if !defined(CONFIG_SAMV7_EXTSRAM3) || !defined(CONFIG_SAMV7_EXTSRAM3HEAP)
-#  undef CONFIG_SAMV7_EXTSRAM3SIZE
+#  undef  CONFIG_SAMV7_EXTSRAM3SIZE
 #  define CONFIG_SAMV7_EXTSRAM3SIZE 0
 #endif
 
@@ -164,14 +165,6 @@
 #elif CONFIG_RAM_END < (SRAM_BASE+SAMV7_SRAM_SIZE)
 #  warning "CONFIG_RAM_END is before end of SRAM... not all of SRAM used"
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

@@ -38,10 +38,11 @@
 
 #include <nuttx/config.h>
 
-#include <chip/kinetis_k66memorymap.h>
-#include <chip/kinetis_sim.h>
 #include <stddef.h>
 #include <errno.h>
+
+#include "hardware/kinetis_k66memorymap.h"
+#include "hardware/kinetis_sim.h"
 #include "kinetis_uid.h"
 
 #include <nuttx/board.h>

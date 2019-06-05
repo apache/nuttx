@@ -109,11 +109,9 @@ static const struct file_operations g_pwmops =
   pwm_close, /* close */
   pwm_read,  /* read */
   pwm_write, /* write */
-  0,         /* seek */
-  pwm_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
-#endif
+  NULL,      /* seek */
+  pwm_ioctl, /* ioctl */
+  NULL       /* poll */
 };
 
 /****************************************************************************

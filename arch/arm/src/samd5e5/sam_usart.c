@@ -45,8 +45,8 @@
 #include <arch/irq.h>
 #include <arch/samd5e5/chip.h>
 
-#include "chip/sam_memorymap.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_memorymap.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_gclk.h"
 #include "sam_sercom.h"
 #include "sam_usart.h"

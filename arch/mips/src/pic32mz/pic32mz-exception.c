@@ -53,7 +53,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/pic32mz-int.h"
+#include "hardware/pic32mz-int.h"
 
 /****************************************************************************
  * Public Functions

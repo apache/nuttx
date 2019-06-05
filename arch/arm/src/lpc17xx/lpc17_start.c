@@ -50,15 +50,11 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "nvic.h"
 
 #include "lpc17_clockconfig.h"
 #include "lpc17_lowputc.h"
 #include "lpc17_userspace.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
-
 #include "lpc17_start.h"
 
 /****************************************************************************

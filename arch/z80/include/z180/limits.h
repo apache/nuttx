@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/include/z180/limits.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,10 @@
 #define LONG_MIN    (-LONG_MAX - 1)
 #define LONG_MAX    2147483647L
 #define ULONG_MAX   4294967295UL
+
+#define LLONG_MIN   (-LLONG_MAX - 1)
+#define LLONG_MAX   9223372036854775807LL
+#define ULLONG_MAX  18446744073709551615ULL
 
 /* A pointer is 2 bytes */
 

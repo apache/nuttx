@@ -55,7 +55,7 @@
 #include "chip.h"
 #include "stm32l4_gpio.h"
 
-#include "chip/stm32l4_syscfg.h"
+#include "hardware/stm32l4_syscfg.h"
 
 /****************************************************************************
  * Public Data

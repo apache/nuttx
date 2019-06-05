@@ -47,7 +47,7 @@
 #include "up_arch.h"
 
 #include "up_internal.h"
-#include "chip/sam4l_pm.h"
+#include "hardware/sam4l_pm.h"
 
 #include "sam4l_periphclks.h"
 

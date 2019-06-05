@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_lowputc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,10 @@
 
 #include "up_arch.h"
 
-#include "chip/imxrt_iomuxc.h"
-#include "chip/imxrt_pinmux.h"
-#include "chip/imxrt_ccm.h"
-#include "chip/imxrt_lpuart.h"
+#include "hardware/imxrt_iomuxc.h"
+#include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_lpuart.h"
 #include "imxrt_config.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_iomuxc.h"
@@ -118,7 +118,8 @@
 #endif
 
 /* Clocking *****************************************************************/
-/* the UART module receives two clocks, a peripheral_clock (ipg_clk) and the
+
+/* The UART module receives two clocks, a peripheral_clock (ipg_clk) and the
  * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
  * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
  * control input pins. It must always be running when UART is enabled.
@@ -234,7 +235,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART1_CTS);
 #endif
-#ifdef CONFIG_LPUART1_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART1_RTS);
 #endif
 #endif
@@ -250,7 +252,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART2_CTS);
 #endif
-#ifdef CONFIG_LPUART2_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART2_RTS);
 #endif
 #endif
@@ -266,7 +269,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART3_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART3_CTS);
 #endif
-#ifdef CONFIG_LPUART3_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART3_RTS);
 #endif
 #endif
@@ -282,7 +286,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART4_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART4_CTS);
 #endif
-#ifdef CONFIG_LPUART4_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART4_RTS);
 #endif
 #endif
@@ -298,7 +303,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART5_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART5_CTS);
 #endif
-#ifdef CONFIG_LPUART5_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART5_RTS);
 #endif
 #endif
@@ -314,7 +320,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART6_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART6_CTS);
 #endif
-#ifdef CONFIG_LPUART6_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART6_RTS);
 #endif
 #endif
@@ -330,7 +337,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART7_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART7_CTS);
 #endif
-#ifdef CONFIG_LPUART7_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART7_RTS);
 #endif
 #endif
@@ -346,7 +354,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART8_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART8_CTS);
 #endif
-#ifdef CONFIG_LPUART8_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART8_RTS);
 #endif
 #endif
@@ -458,12 +467,12 @@ int imxrt_lpuart_configure(uint32_t base,
 
   if (baud_diff > ((config->baud / 100) * 3))
     {
-      /* Unacceptable baud rate difference of more than 3%*/
+      /* Unacceptable baud rate difference of more than 3% */
 
       return ERROR;
     }
 
-  /* Enable lpuart clock*/
+  /* Enable lpuart clock */
 
   imxrt_lpuart_clock_enable(base);
 
@@ -471,10 +480,40 @@ int imxrt_lpuart_configure(uint32_t base,
 
   regval  = getreg32(base + IMXRT_LPUART_GLOBAL_OFFSET);
   regval |= LPUART_GLOBAL_RST;
-  putreg32(regval,base + IMXRT_LPUART_GLOBAL_OFFSET);
+  putreg32(regval, base + IMXRT_LPUART_GLOBAL_OFFSET);
 
   regval &= ~LPUART_GLOBAL_RST;
-  putreg32(regval,base + IMXRT_LPUART_GLOBAL_OFFSET);
+  putreg32(regval, base + IMXRT_LPUART_GLOBAL_OFFSET);
+
+  /* Construct MODIR register */
+
+  regval = 0;
+
+  if (config->userts)
+    {
+      regval |= LPUART_MODIR_RXRTSE;
+    }
+  else if (config->users485)
+    {
+      /* Both TX and RX side can't control RTS, so this gives
+       * the RX side precidence. This should have been filtered
+       * in layers above anyway, but it's just a precaution.
+       */
+
+      regval |= LPUART_MODIR_TXRTSE;
+    }
+
+  if (config->usects)
+    {
+      regval |= LPUART_MODIR_TXCTSE;
+    }
+
+  if (config->invrts)
+    {
+      regval |= LPUART_MODIR_TXRTSPOL;
+    }
+
+  putreg32(regval, base + IMXRT_LPUART_MODIR_OFFSET);
 
   regval = 0;
 
@@ -524,20 +563,21 @@ int imxrt_lpuart_configure(uint32_t base,
 }
 #endif /* HAVE_LPUART_DEVICE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from U-
+ *   Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_LPUART_DEVICE) && defined(CONFIG_DEBUG_FEATURES)
 void imxrt_lowputc(int ch)
 {
-  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+         LPUART_STAT_TDRE) == 0)
     {
     }
 
@@ -549,11 +589,12 @@ void imxrt_lowputc(int ch)
 
       putreg32((uint32_t)'\r', IMXRT_CONSOLE_BASE + IMXRT_LPUART_DATA_OFFSET);
 
-      /* Wait for the transmit register to be emptied. When the TXFE bit is non-zero,
-       * the TX Buffer FIFO is empty.
+      /* Wait for the transmit register to be emptied. When the TXFE bit is
+       * non-zero, the TX Buffer FIFO is empty.
        */
 
-      while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+      while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+             LPUART_STAT_TDRE) == 0)
         {
         }
     }
@@ -562,11 +603,12 @@ void imxrt_lowputc(int ch)
 
   putreg32((uint32_t)ch, IMXRT_CONSOLE_BASE + IMXRT_LPUART_DATA_OFFSET);
 
-  /* Wait for the transmit register to be emptied. When the TXFE bit is non-zero,
-   * the TX Buffer FIFO is empty.
+  /* Wait for the transmit register to be emptied. When the TXFE bit is
+   * non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+         LPUART_STAT_TDRE) == 0)
     {
     }
 }

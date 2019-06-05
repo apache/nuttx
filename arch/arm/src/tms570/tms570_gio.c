@@ -51,7 +51,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/tms570_gio.h"
+#include "hardware/tms570_gio.h"
 #include "tms570_gio.h"
 
 /****************************************************************************

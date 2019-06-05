@@ -427,14 +427,14 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_RNDIS) && defined(CONFIG_NSH_MACADDR)
+#if defined(CONFIG_RNDIS) && defined(CONFIG_NETINIT_MACADDR)
   uint8_t mac[6];
   mac[0] = 0xa0; /* TODO */
-  mac[1] = (CONFIG_NSH_MACADDR >> (8 * 4)) & 0xff;
-  mac[2] = (CONFIG_NSH_MACADDR >> (8 * 3)) & 0xff;
-  mac[3] = (CONFIG_NSH_MACADDR >> (8 * 2)) & 0xff;
-  mac[4] = (CONFIG_NSH_MACADDR >> (8 * 1)) & 0xff;
-  mac[5] = (CONFIG_NSH_MACADDR >> (8 * 0)) & 0xff;
+  mac[1] = (CONFIG_NETINIT_MACADDR >> (8 * 4)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR >> (8 * 0)) & 0xff;
   usbdev_rndis_initialize(mac);
 #endif
 

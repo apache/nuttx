@@ -177,9 +177,7 @@ struct tsc2007_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_TSC2007_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -204,9 +202,7 @@ static int tsc2007_open(FAR struct file *filep);
 static int tsc2007_close(FAR struct file *filep);
 static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len);
 static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -221,10 +217,8 @@ static const struct file_operations tsc2007_fops =
   tsc2007_read,    /* read */
   0,               /* write */
   0,               /* seek */
-  tsc2007_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , tsc2007_poll   /* poll */
-#endif
+  tsc2007_ioctl,   /* ioctl */
+  tsc2007_poll     /* poll */
 };
 
 /* If only a single TSC2007 device is supported, then the driver state
@@ -250,9 +244,7 @@ static struct tsc2007_dev_s *g_tsc2007list;
 
 static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -273,7 +265,6 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_TSC2007_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -284,7 +275,6 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1106,7 +1096,6 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: tsc2007_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1195,11 +1184,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

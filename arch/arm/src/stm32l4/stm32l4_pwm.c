@@ -1623,25 +1623,25 @@ static void stm32l4pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv, bool on)
 #endif
 #ifdef CONFIG_STM32L4_TIM2_PWM
       case 2:
-        regaddr  = STM32L4_RCC_APB1ENR;
-        en_bit   = RCC_APB1ENR_TIM2EN;
+        regaddr  = STM32L4_RCC_APB1ENR1;
+        en_bit   = RCC_APB1ENR1_TIM2EN;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM3_PWM
       case 3:
-        regaddr  = STM32L4_RCC_APB1ENR;
+        regaddr  = STM32L4_RCC_APB1ENR1;
         en_bit   = RCC_APB1ENR_TIM3EN;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM4_PWM
       case 4:
-        regaddr  = STM32L4_RCC_APB1ENR;
-        en_bit   = RCC_APB1ENR_TIM4EN;
+        regaddr  = STM32L4_RCC_APB1ENR1;
+        en_bit   = RCC_APB1ENR1_TIM4EN;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM5_PWM
       case 5:
-        regaddr  = STM32L4_RCC_APB1ENR;
+        regaddr  = STM32L4_RCC_APB1ENR1;
         en_bit   = RCC_APB1ENR_TIM5EN;
         break;
 #endif
@@ -1953,25 +1953,25 @@ static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 #endif
 #ifdef CONFIG_STM32L4_TIM2_PWM
       case 2:
-        regaddr  = STM32L4_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM2RST;
+        regaddr  = STM32L4_RCC_APB1RSTR1;
+        resetbit = RCC_APB1RSTR1_TIM2RST;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM3_PWM
       case 3:
-        regaddr  = STM32L4_RCC_APB1RSTR;
+        regaddr  = STM32L4_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR_TIM3RST;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM4_PWM
       case 4:
-        regaddr  = STM32L4_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM4RST;
+        regaddr  = STM32L4_RCC_APB1RSTR1;
+        resetbit = RCC_APB1RSTR1_TIM4RST;
         break;
 #endif
 #ifdef CONFIG_STM32L4_TIM5_PWM
       case 5:
-        regaddr  = STM32L4_RCC_APB1RSTR;
+        regaddr  = STM32L4_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR_TIM5RST;
         break;
 #endif

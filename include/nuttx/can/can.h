@@ -1,7 +1,8 @@
 /************************************************************************************
  * include/nuttx/can/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2012, 2015-2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +49,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 
+#include <nuttx/list.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -62,6 +64,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* CONFIG_CAN - Enables CAN support (MCU-specific selections are also required.  For
  *   STM32, as an example, one or both of CONFIG_STM32_CAN1 or CONFIG_STM32_CAN2
  *   must also be defined)
@@ -106,6 +109,7 @@
 #endif
 
 /* Ioctl Commands *******************************************************************/
+
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
@@ -360,6 +364,7 @@
 #endif /* CONFIG_CAN_ERRORS */
 
 /* CAN filter support ***************************************************************/
+
 /* Some CAN hardware supports a notion of prioritizing messages that match filters.
  * Only two priority levels are currently supported and are encoded as defined
  * below:
@@ -377,6 +382,7 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
 /* CAN-message Format (without Extended ID support)
  *
  *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
@@ -431,6 +437,7 @@ begin_packed_struct struct can_hdr_s
   uint8_t      ch_extid  : 1; /* Extended ID indication */
   uint8_t      ch_unused : 1; /* Unused */
 } end_packed_struct;
+
 #else
 begin_packed_struct struct can_hdr_s
 {
@@ -550,21 +557,27 @@ struct can_ops_s
  * The common logic will initialize all semaphores.
  */
 
+struct can_reader_s
+{
+  struct list_node     list;
+  sem_t                read_sem;
+  FAR struct file     *filep;
+  struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
+};
+
 struct can_dev_s
 {
   uint8_t              cd_ocount;        /* The number of times the device has been opened */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
   volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
+  struct list_node     cd_readers;       /* Number of readers */
 #ifdef CONFIG_CAN_ERRORS
   uint8_t              cd_error;         /* Flags to indicate internal device errors */
 #endif
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
-#ifndef CONFIG_DISABLE_POLL
   sem_t                cd_pollsem;       /* Manages exclusive access to cd_fds[] */
-#endif
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
-  struct can_rxfifo_s  cd_recv;          /* Describes receive FIFO */
 #ifdef CONFIG_CAN_TXREADY
   struct work_s        cd_work;          /* Use to manage can_txready() work */
 #endif
@@ -573,9 +586,7 @@ struct can_dev_s
   FAR const struct can_ops_s *cd_ops;    /* Arch-specific operations */
   FAR void            *cd_priv;          /* Used by the arch-specific logic */
 
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd   *cd_fds[CONFIG_CAN_NPOLLWAITERS];
-#endif
 };
 
 /* Structures used with ioctl calls */

@@ -48,7 +48,7 @@
 #include <nuttx/sensors/ina226.h>
 #include <arch/board/board.h>
 
-#include <chip.h>
+#include "chip.h"
 #include <stm32l4.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_STM32L4_I2C1) && defined(CONFIG_SENSORS_INA226) 

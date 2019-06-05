@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 
-#include "chip/lpc54_rtc.h"
+#include "hardware/lpc54_rtc.h"
 #include "lpc54_rtc.h"
 
 #ifdef CONFIG_RTC_DRIVER

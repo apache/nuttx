@@ -78,21 +78,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Worker thread is needed, unfortunately, to handle some cornercase failure
  * conditions.  This is kind of wasteful and begs for a re-design.
  */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#endif
-
-/* Signals must not be disabled as they are needed for nxsig_kill.  Need to
- * have CONFIG_DISABLE_SIGNALS=n
- */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Signal support is required (CONFIG_DISABLE_SIGNALS)"
 #endif
 
 /* Provide some default values for other configuration settings */
@@ -172,6 +166,7 @@
 #define INVALID_POSITION_B16 (0x7fffffff)
 
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/mouse[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -193,6 +188,7 @@
 #define USBHOST_MAX_CREFS   0x7fff
 
 /* Debug ********************************************************************/
+
 /* Both CONFIG_DEBUG_INPUT and CONFIG_DEBUG_USB could apply to this file.
  * We assume here that CONFIG_DEBUG_INPUT might be enabled separately, but
  * CONFIG_DEBUG_USB implies both.
@@ -297,9 +293,7 @@ struct usbhost_state_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_HIDMOUSE_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -313,11 +307,7 @@ static void usbhost_takesem(sem_t *sem);
 
 /* Polling support */
 
-#ifndef CONFIG_DISABLE_POLL
 static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
-#else
-#  define usbhost_pollnotify(dev)
-#endif
 
 /* Memory allocation services */
 
@@ -389,10 +379,8 @@ static ssize_t usbhost_read(FAR struct file *filep,
                             FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
                              FAR const char *buffer, size_t len);
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -428,11 +416,9 @@ static const struct file_operations g_hidmouse_fops =
   usbhost_close,           /* close     */
   usbhost_read,            /* read      */
   usbhost_write,           /* write     */
-  0,                       /* seek      */
-  0                        /* ioctl     */
-#ifndef CONFIG_DISABLE_POLL
-  , usbhost_poll           /* poll      */
-#endif
+  NULL,                    /* seek      */
+  NULL,                    /* ioctl     */
+  usbhost_poll             /* poll      */
 };
 
 /* This is a bitmap that is used to allocate device names /dev/mouse0-31. */
@@ -481,7 +467,6 @@ static void usbhost_takesem(sem_t *sem)
  * Name: usbhost_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
 {
   int i;
@@ -500,7 +485,6 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
         }
     }
 }
-#endif
 
 /****************************************************************************
  * Name: usbhost_allocclass
@@ -686,9 +670,7 @@ static void usbhost_destroy(FAR void *arg)
 
 static void usbhost_notify(FAR struct usbhost_state_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -705,7 +687,6 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_HIDMOUSE_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -716,7 +697,6 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -2451,7 +2431,6 @@ static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -2536,7 +2515,6 @@ errout:
   nxsem_post(&priv->exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

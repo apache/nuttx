@@ -80,10 +80,8 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
-endif
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
@@ -116,10 +114,26 @@ ifeq ($(CONFIG_STM32H7_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif
 
+ifeq ($(CONFIG_STM32H7_SDMMC),y)
+CHIP_CSRCS += stm32_sdmmc.c
+endif
+
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += stm32_otgdev.c
 endif
 
 ifeq ($(CONFIG_USBHOST),y)
 CHIP_CSRCS += stm32_otghost.c
+endif
+
+ifeq ($(CONFIG_STM32H7_TIM),y)
+CHIP_CSRCS += stm32_tim.c
+endif
+
+ifeq ($(CONFIG_STM32H7_PWM),y)
+CHIP_CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_STM32H7_ETHMAC),y)
+CHIP_CSRCS += stm32_ethernet.c
 endif

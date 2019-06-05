@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxterm_bkgd.c
+ * nuttx/graphics/nxterm/nxterm_redraw.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

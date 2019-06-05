@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_mcan.h"
+#include "hardware/sam_mcan.h"
 
 #include <nuttx/can/can.h>
 

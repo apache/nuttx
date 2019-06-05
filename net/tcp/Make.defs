@@ -52,12 +52,10 @@ ifeq ($(CONFIG_NET_SENDFILE),y)
 SOCK_CSRCS += tcp_sendfile.c
 endif
 
-ifneq ($(CONFIG_DISABLE_POLL),y)
 ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
 SOCK_CSRCS += tcp_netpoll.c
 ifeq ($(CONFIG_TCP_NOTIFIER),y)
 SOCK_CSRCS += tcp_notifier.c
-endif
 endif
 endif
 

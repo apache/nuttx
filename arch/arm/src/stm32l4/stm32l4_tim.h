@@ -49,7 +49,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32l4_tim.h"
+#include "hardware/stm32l4_tim.h"
 
 /************************************************************************************
  * Pre-processor Definitions

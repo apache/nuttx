@@ -60,7 +60,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/efm32_cmu.h"
+#include "hardware/efm32_cmu.h"
 
 #include "efm32_usb.h"
 

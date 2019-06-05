@@ -133,6 +133,18 @@ EXTERN struct mm_heap_s g_dtcm_heap;
 }
 #endif
 
+/****************************************************************************
+ * Name: dtcm_procfs_register
+ *
+ * Description:
+ *   Register the DTCM procfs file system entry
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_DTCM_PROCFS
+int dtcm_procfs_register(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* HAVE_DTCM_HEAP */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_DTCM_H */

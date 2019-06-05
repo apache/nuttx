@@ -53,7 +53,7 @@
 #include "up_internal.h"
 #include "kinetis_config.h"
 #include "chip.h"
-#include "chip/kinetis_port.h"
+#include "hardware/kinetis_port.h"
 
 /************************************************************************************
  * Pre-processor Definitions

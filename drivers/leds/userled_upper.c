@@ -117,17 +117,15 @@ static int     userled_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations userled_fops =
 {
-  userled_open,  /* open */
-  userled_close, /* close */
-  NULL,          /* read */
-  userled_write, /* write */
-  NULL,          /* seek */
-  userled_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
-#endif
+  userled_open,   /* open */
+  userled_close,  /* close */
+  NULL,           /* read */
+  userled_write,  /* write */
+  NULL,           /* seek */
+  userled_ioctl,  /* ioctl */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL         /* unlink */
+  , NULL          /* unlink */
 #endif
 };
 
@@ -461,7 +459,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Verify that a valid LED set was provided */
 
-        if ((ledset & priv->lu_supported) == ledset)
+        if ((ledset & ~priv->lu_supported) == 0)
           {
             /* Update the LED state */
 

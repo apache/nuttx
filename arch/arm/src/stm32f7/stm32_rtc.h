@@ -52,7 +52,7 @@
  * the RTCC in these families.
  */
 
-#include "chip/stm32_rtcc.h"
+#include "hardware/stm32_rtcc.h"
 #include "stm32_alarm.h"
 
 /****************************************************************************

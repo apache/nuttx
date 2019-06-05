@@ -72,10 +72,8 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t hcsr04_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
-#endif
 
 /****************************************************************************
  * Private Types
@@ -89,9 +87,7 @@ struct hcsr04_dev_s
   int time_start_pulse;
   int time_finish_pulse;
   volatile bool rising;
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -105,10 +101,8 @@ static const struct file_operations g_hcsr04ops =
   hcsr04_read,   /* read */
   hcsr04_write,  /* write */
   NULL,          /* seek */
-  hcsr04_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , hcsr04_poll  /* poll */
-#endif
+  hcsr04_ioctl,  /* ioctl */
+  hcsr04_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -316,7 +310,6 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-#ifndef CONFIG_DISABLE_POLL
 static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
 {
   int done;
@@ -439,7 +432,6 @@ out:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
 {
@@ -477,9 +469,7 @@ static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
     }
 
   hcsr04_dbg("HC-SR04 interrupt\n");
-#ifndef CONFIG_DISABLE_POLL
   hcsr04_notify(priv);
-#endif
 
   return OK;
 }

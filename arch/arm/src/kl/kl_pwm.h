@@ -71,7 +71,7 @@
     defined(CONFIG_KL_TPM2_PWM)
 
 #include <arch/board/board.h>
-#include "chip/kl_pinmux.h"
+#include "hardware/kl_pinmux.h"
 
 /* For each timer that is enabled for PWM usage, we need the following additional
  * configuration settings:

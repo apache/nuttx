@@ -214,9 +214,7 @@ struct mxt_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_MXT_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -271,9 +269,7 @@ static int  mxt_close(FAR struct file *filep);
 static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer,
               size_t len);
 static int  mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int  mxt_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /* Initialization */
 
@@ -293,10 +289,8 @@ static const struct file_operations mxt_fops =
   mxt_read,    /* read */
   0,           /* write */
   0,           /* seek */
-  mxt_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , mxt_poll   /* poll */
-#endif
+  mxt_ioctl,   /* ioctl */
+  mxt_poll     /* poll */
 };
 
 /****************************************************************************
@@ -598,9 +592,7 @@ static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
 
 static void mxt_notify(FAR struct mxt_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -621,7 +613,6 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_MXT_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -632,7 +623,6 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1560,7 +1550,6 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: mxt_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1648,7 +1637,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: mxt_getinfo

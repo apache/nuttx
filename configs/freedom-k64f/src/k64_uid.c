@@ -38,12 +38,13 @@
 
 #include <nuttx/config.h>
 
-#include <chip/kinetis_k64memorymap.h>
-#include <chip/kinetis_sim.h>
 #include <errno.h>
-#include "kinetis_uid.h"
 
 #include <nuttx/board.h>
+
+#include "hardware/kinetis_k64memorymap.h"
+#include "hardware/kinetis_sim.h"
+#include "kinetis_uid.h"
 
 #if defined(CONFIG_BOARDCTL_UNIQUEID)
 

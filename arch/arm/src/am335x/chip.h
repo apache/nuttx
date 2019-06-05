@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

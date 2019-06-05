@@ -1,18 +1,11 @@
 <html>
 <head>
 <title>NuttX</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body background="backgd.gif">
-<hr><hr>
-<table width ="100%">
-  <tr align="center" bgcolor="#e4e4e4">
-    <td>
-      <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 25, 2019</p>
-    </td>
-  </tr>
-</table>
-<hr><hr>
+<div class="container">
+<div class="toc">
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
@@ -21,7 +14,7 @@
   </tr>
 </table>
 
-<center><table width ="80%">
+<table width ="80%" class="toc_table">
 <tr>
 <td>
 <table>
@@ -102,7 +95,20 @@
 </table>
 </td>
 </tr>
-</table></center>
+</table>
+</div>
+
+<div class="main">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
+      <p>Last Updated: May 19, 2019</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1461,11 +1467,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.29.
-  NuttX 7.29 is the 129<sup>th</sup> release of NuttX.
-  It was released on March 25, 2019, and is available for download from the
+  The current release is NuttX 7.30.
+  NuttX 7.30 is the 130<sup>th</sup> release of NuttX.
+  It was released on May 19, 2019, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.29.tar.gz</code> and <code>apps-7.29.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.30.tar.gz</code> and <code>apps-7.30.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1474,7 +1480,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.29 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.30 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1482,7 +1488,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.29 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.30 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1540,8 +1546,8 @@
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (2)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (39)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (55)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (13)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (56)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (14)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1753,6 +1759,11 @@
     <ul>
       <li><a href="#efm32g">EFM32 Gecko</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#efm32gg">EFM32 Giant Gecko</a> <small>(ARM Cortex-M3)</small></li>
+    </ul>
+  </li>
+  <li>Sony.
+    <ul>
+      <li><a href="#cxd56xx">CXD56<i>xx</i></a> <small>(6 x ARM Cortex-M4)</small></li>
     </ul>
   </li>
   <li>STMicroelectronics
@@ -3197,32 +3208,7 @@ nsh>
         Contributed by Juha Niskanen in NuttX-7.21.
       </li>
     </ul>
-    <p>
-      <b>STATUS:</b>
-    </p>
-    <ul>
-      <li>
-        <b>NuttX-7.21</b>.
-        In this initial release, the level of support for the STM32 F0 family is minimal.
-        Certainly enough is in place to support a robust NSH configuration.
-        There are also unverified I2C and USB device drivers available in
-        NuttX-7.21.
-      </li>
-      <li>
-        <b>NuttX-7.28</b>
-        Added support for GPIO EXTI.  From Mateusz Sfafoni.
-      </li>
-      <li>
-        <b>NuttX-7.29</b>
-        Added an SPI driver.  From Mateusz Sfafoni.
-      </li>
-    </p>
   </td>
-</tr>
-
-<tr>
-  <td><br></td>
-  <td><hr></td>
 </tr>
 <tr>
   <td><br></td>
@@ -3242,9 +3228,39 @@ nsh>
         Contributed byMateusz Sfafoni in NuttX-7.28.
       </li>
     </ul>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>STATUS:</b>
+      Status for both the STM32F0xx and STM32L0xx is show together since the two parts share many drivers in common.
+    </p>
+    <ul>
+      <li>
+        <b>NuttX-7.21</b>.
+        In this initial release, the level of support for the STM32 F0 family is minimal.
+        Certainly enough is in place to support a robust NSH configuration.
+        There are also unverified I2C and USB device drivers available in
+        NuttX-7.21.
+      </li>
+      <li>
+        <b>NuttX-7.28</b>
+        Added support for GPIO EXTI.  From Mateusz Sfafoni.
+      </li>
+      <li>
+        <b>NuttX-7.29</b>
+        Added an SPI driver.  From Mateusz Sfafoni.
+      </li>
+      <li>
+        <b>NuttX-7.30</b>
+        Added ADC and I2C drivers.  From Mateusz Szafoni.
+        Add AES and RND drivers for the L0.  From Mateusz Szafoni.
+        Add support for HS148 for L0.  From Mateusz Szafoni.
+      </li>
+    </p>
   </td>
 </tr>
-
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -3906,7 +3922,7 @@ nsh>
   <td>
     <p>
       <a name="lc823450"><b>ON Semiconductor LC823450 (Dual core ARM Cortex-M3)</b>.</a>
-      In NuttX-7.22, Masayuki Ishakawa contributed support for both the LC823450 architecture and for ON Semiconductor's <b>LC823450XGEVK board</b>:
+      In NuttX-7.22, Masayuki Ishikawa contributed support for both the LC823450 architecture and for ON Semiconductor's <b>LC823450XGEVK board</b>:
     </p>
     <blockquote>
       The LC823450XGEVK is an audio processing system Evaluation Board Kit used to demonstrate the LC823450.  This part can record and playback, and offers High-Resolution 32-bit & 192 kHz audio processing capability.  It is possible to cover most of the functions necessary for a portable audio with only this LSI as follows.  It has Dual CPU and DSP with High processing capability, and internal 1656K-Byte SRAM, which make it possible to implement large scale program.  And it has integrated analog functions (low-power Class D HP amplifier, PLL, ADC etc.) so that PCB space and cost is reduced, and it has various interface (USB, SD, SPI, UART, etc.) to make extensibility high.  Also it is provided with various function including SBC/AAC codec by DSP and UART and ASRC (Asynchronous Sample Rate Converter) for Bluetooth® audio. It is very small chip size in spite of the multi-funciton as described above and it realizes the low power consumption. Therefore, it is applicable to portable audio markets such as Wireless headsets and will show high performance.
@@ -3917,8 +3933,8 @@ nsh>
     </p>
     <p>
       This port is intended to test LC823450 features including SMP. Supported peripherals include UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
-      ADC, Watchdog, IPC2, and I2S support was added by Masayuki Ishakawa in NuttX-7.23.
-      Bluetooth, SPI, and <i>PROTECTED</i> build support were added by Masayuki Ishakawa in NuttX-7.26.
+      ADC, Watchdog, IPC2, and I2S support was added by Masayuki Ishikawa in NuttX-7.23.
+      Bluetooth, SPI, and <i>PROTECTED</i> build support were added by Masayuki Ishikawa in NuttX-7.26.
       Support for for SPI flash boot was added in NuttX-7.28.
     </p>
   </td>
@@ -4208,6 +4224,7 @@ nsh>
   </td>
 </tr>
 </tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -4216,8 +4233,32 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f302x"><b>STMicro STM32 F302 (STM32 F3 family)</b>.</a>
-      Architecture (only) support for the STM32 F302 was contributed in NuttX-7.10 by Ben Dyer (vi the PX4 team and David Sidrane).
+      <a name="cxd56xx"><b>Sony CXD56<i>xx</i></a></b> (6 x ARM Cortex-M4).</a>
+      Support for the CXD56<i>xx</i> was introduced by Nobuto Kobayashi in NuttX-7.30.
+    </p>
+    <p>
+      <b>Sony Spresence</b>.</a>
+      Basic support for the Sony Spresense board was include in the contribution of Nobuto Kobayashi in NuttX-7.30.  <i>NOTE</i>:  This is a bare bone basic Spresense port sufficient for running a NuttShell (NSH) and should not be confused with the full Spresence SDK offered from Sony.
+    </p>
+      Spresense is a compact development board based on Sony’s power-efficient multicore microcontroller CXD5602.  Features:
+    </p>
+    <ul>
+      <li>Integrated GPS:  Embedded GNSS with support for GPS, QZSS.</li>
+      <li>Hi-res audio output and multi mic inputs"  Advanced 192kHz/24 bit audio codec and amplifier for audio output, and support for up to 8 mic input channels.</li>
+      <li>Multicore microcontroller:  Spresense is powered by Sony's CXD5602 microcontroller (ARM® Cortex®-M4F × 6 cores), with a clock speed of 156 MHz.</li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f302x"><b>STMicro STM32 F302</b> (STM32 F3 family).</a>
+      Architecture (only) support for the STM32 F302 was contributed in NuttX-7.10 by Ben Dyer (via the PX4 team and David Sidrane).
     </p>
     <p>
       Support for the Nucleo-F302R8 board was added by raiden00pl in NuttX-7.27.
@@ -4233,7 +4274,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f303x"><b>STMicro STM32 F303 (STM32 F3 family)</b>.</a>
+      <a name="stm32f303x"><b>STMicro STM32 F303</b> (STM32 F3 family).</a>
     <p>
     <ul>
     <li><p>
@@ -4273,7 +4314,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f334x"><b>STMicro STM32 F334 (STM32 F3 family, ARM Cortex-M4)</b>.</a>
+      <a name="stm32f334x"><b>STMicro STM32 F334</b> (STM32 F3 family, ARM Cortex-M4).</a>
     </p>
     <p>
       Support for the STMicro <b>STM32F334-Disco</b> board was contributed by Mateusz Szafoni in NuttX-7.22 and for the <b>Nucleo-STM32F334R8</b> was contributed in an earlier release.
@@ -4289,7 +4330,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f372x"><b>STMicro STM32 F372/F373 (Cortex-M4)</b>.</a>
+      <a name="stm32f372x"><b>STMicro STM32 F372/F373</b> (ARM Cortex-M4).</a>
     <p>
     <p>
       Basic architecture support for the STM32F372/F373 was contributed by Marten Svanfeldt in NuttX 7.9.
@@ -4306,7 +4347,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f4x1"><b>STMicro STM324x1 (STM32 F4 family)</b>.</a>
+      <a name="stm32f4x1"><b>STMicro STM324x1</b> (STM32 F4 family).</a>
     <p>
     <ul>
     <p>
@@ -4347,7 +4388,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f410"><b>STMicro STM32410 (STM32 F4 family)</b>.</a>
+      <a name="stm32f410"><b>STMicro STM32410</b> (STM32 F4 family).</a>
     <p>
     <ul>
     <p>
@@ -4364,7 +4405,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f407x"><b>STMicro STM32405x/407x (STM32 F4 family)</b>.</a>
+      <a name="stm32f407x"><b>STMicro STM32405x/407x</b> (STM32 F4 family).</a>
     <p>
     <ul>
     <p>
@@ -4761,6 +4802,10 @@ nsh>
     <ul>
       <li>DAC and ADC drivers were contributed by Juha Niskanen.</li>
     </ul>
+    <p>
+      <b>NuttX-7.30</b>.
+    <ul>
+      <li>Added USB FS device driver, CRS and HSI38 support from Juha Niskanen.</li>
     </p>
   </td>
 </tr>
@@ -5537,6 +5582,9 @@ Mem:         29232       5920      23312      23312
         See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
       </p>
     </ul>
+    <p><b>STATUS</b>:
+      See <a href="#stm32f7drivers">below</a> for STM32 F7 driver availability.
+    </p>
   </td>
 </tr>
 
@@ -5556,6 +5604,7 @@ Mem:         29232       5920      23312      23312
         <p>
           <b>STM32F746G Discovery</b>.
            One port uses the STMicro STM32F746G-DISCO development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6  is a 216MHz Cortex-M7 operation with 1024Kb Flash.
+           The first release of the STM32F746G_DISCO port was available in NuttX-7.11.
            Refer to the <a href="http://www.st.com/stm32f7-discovery">STMicro web site</a> for further information about this board.
         </p>
       </li>
@@ -5569,17 +5618,8 @@ Mem:         29232       5920      23312      23312
     <ul>
       <p>
         <b>STATUS:</b>
-      </p>
-      <ul>
-        <p>
-          The basic STM32F746G-DISCO port is complete and there are two, verified configurations available.
-          Both configurations use the NuttShell (NSH) and a serial console; one includes Ethernet support.
-          The first release of the STM32F746G_DISCO port was available in NuttX-7.11.
-        </p>
-        </p>
           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32f746g-disco/README.txt" target="_blank">README</a> file for further information.
-        </p>
-      </ul>
+      </p>
     </ul>
     <p>
       <a name="stm32f7drivers"><b>STM32 F7 Driver Status:</b></a>
@@ -5597,8 +5637,21 @@ Mem:         29232       5920      23312      23312
         Lok Tep contribed SPI, I2c, ADC, SDMMC, and USB device driver support.
       </li>
       <li>
+        <p><b>NuttX-7.22</b>.
+          Titus von Boxberg also contributed LTDC support for the onboard LCD in NuttX-7.22.
+        </p>
+      </li>
+      <li>
         <p><b>NuttX-7.29</b>.
-        In NuttX-7.29, Valmantas Paliksa added a timer lowerhalf driver for STM32F7, ITM syslog support, a CAN driver with support for three bxCAN interfaces, and STM32F7 Quad SPI support.
+          In NuttX-7.29, Valmantas Paliksa added a timer lowerhalf driver for STM32F7, ITM syslog support, a CAN driver with support for three bxCAN interfaces, and STM32F7 Quad SPI support.
+          Support for DMA and USB OTG was added by Mateusz Szafoni in NuttX-7.29.
+        </p>
+      </li>
+      <li>
+        <p><b>NuttX-7.30</b>.
+          From Eduard Niesner contributed a PWM driver.
+          Added UID access from Valmantas Paliksa.
+          USB High speed driver was added for STM32F7 series by Ramtin Amin.
       </li>
     </ul>
   </td>
@@ -5663,15 +5716,12 @@ Mem:         29232       5920      23312      23312
           <li>Ethernet connector compliant with IEEE-802.3-2002 and PoE</li>
         </ul>
         <p>
-          Refer to the http://www.st.com website for further information about this board (search keyword: stm32f769i-disco)
-        </p>
-        <p>
-          Titus von Boxberg also contributed LTDC support for the onboard LCD in NuttX-7.22.
-          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
+          Refer to the http://www.st.com website for further information about this board (search keyword: stm32f769i-disco).
+          See also the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
         </p>
       </li>
     </ul>
-    <p>
+    <p><b>STATUS</b>:
       See <a href="#stm32f7drivers">above</a> for STM32 F7 driver availability.
     </p>
   </td>
@@ -5696,15 +5746,29 @@ Mem:         29232       5920      23312      23312
           This is a member of the Nucleo-144 board family.
           Support for this board was also added NuttX-7.26.
           See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-h743zi/README.txt">README.txt</a> file for further information.
+        </p>
         <p>
           The basic NSH configuration is fully, thanks to the bring-up efforts of Mateusz Szafoni.
           This port is port is still a work in progress and additional drivers are being ported from the F7 family.
         </p>
       </li>
     </ul>
-    <p>
-      <b>NuttX-7.29</b>
-      Support for DMA and USB OTG was added by Mateusz Szafoni in NuttX-7.29.
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p><b>Driver Availability</b>:</p>
+    <ul>
+      <li>
+         <p><b>NuttX-7.27</b>.
+         Add I2C and SPI support for the STM32H7.  From Mateusz Szafoni.
+         </p>
+      </li>
+      <li>
+        <p><b>NuttX-7.30</b>.
+         Added support for Ethernet, SDMMC, and Timer drivers.  All from Jukka Laitinen.
+        </p>
+      </li>
     </p>
   </td>
 </tr>
@@ -5733,8 +5797,12 @@ Mem:         29232       5920      23312      23312
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/imxrt1050-evk/README.txt" target="_blank">README</a> file for further information.
       </p></li>
       <li><p>
-        The basic IMXRT1060-EVK port is complete but un-verified as of NuttX-7.27.
+        The basic IMXRT1060-EVK port was complete but un-verified as of NuttX-7.27 but has been fully verified since NuttX-7.27
         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/imxrt1060-evk/README.txt" target="_blank">README</a> file for more current status information.
+      </p></li>
+      <li><p>
+        Architecture-only support for the IMXRT1020 family was contributed in NuttX-7.30 by Dave Marples.
+        Board support is anticipated in the next release.
       </p></li>
     </ul>
     <p>
@@ -7046,5 +7114,7 @@ if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
 </p>
 </small>
 
+</div>
+</div>
 </body>
 </html>

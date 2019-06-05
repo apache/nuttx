@@ -43,8 +43,6 @@
 #include <spawn.h>
 #include <assert.h>
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -74,6 +72,3 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
   attr->sigmask = *sigmask;
   return OK;
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-

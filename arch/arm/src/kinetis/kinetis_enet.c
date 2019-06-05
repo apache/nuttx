@@ -68,10 +68,10 @@
 #include "chip.h"
 #include "kinetis.h"
 #include "kinetis_config.h"
-#include "chip/kinetis_pinmux.h"
-#include "chip/kinetis_sim.h"
-#include "chip/kinetis_mpu.h"
-#include "chip/kinetis_enet.h"
+#include "hardware/kinetis_pinmux.h"
+#include "hardware/kinetis_sim.h"
+#include "hardware/kinetis_mpu.h"
+#include "hardware/kinetis_enet.h"
 
 #if defined(KINETIS_NENET) && KINETIS_NENET > 0
 

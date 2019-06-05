@@ -50,8 +50,8 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/chip/nuc_gcr.h"
-#include "chip/chip/nuc_clk.h"
+#include "hardware/nuc_gcr.h"
+#include "hardware/nuc_clk.h"
 
 #include "nuc_clockconfig.h"
 

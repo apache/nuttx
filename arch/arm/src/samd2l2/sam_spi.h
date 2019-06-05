@@ -48,9 +48,9 @@
 #include "sam_config.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_spi.h"
+#  include "hardware/samd_spi.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_spi.h"
+#  include "hardware/saml_spi.h"
 #endif
 
 #ifdef SAMD2L2_HAVE_SPI

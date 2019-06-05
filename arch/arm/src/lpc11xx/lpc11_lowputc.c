@@ -47,8 +47,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/lpc11_syscon.h"
-#include "chip/lpc11_uart.h"
+#include "hardware/lpc11_syscon.h"
+#include "hardware/lpc11_uart.h"
 
 #include "lpc11_gpio.h"
 #include "lpc11_lowputc.h"

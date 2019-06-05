@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/am335x_timer.h"
+#include "hardware/am335x_timer.h"
 
 /****************************************************************************
  * Pre-processor Definitions

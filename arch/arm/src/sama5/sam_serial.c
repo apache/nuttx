@@ -63,7 +63,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/sam_uart.h"
+#include "hardware/sam_uart.h"
 #include "sam_config.h"
 #include "sam_dbgu.h"
 #include "sam_serial.h"

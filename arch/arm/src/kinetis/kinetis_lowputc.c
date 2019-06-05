@@ -51,10 +51,10 @@
 
 #include "kinetis_config.h"
 #include "kinetis.h"
-#include "chip/kinetis_uart.h"
-#include "chip/kinetis_lpuart.h"
-#include "chip/kinetis_sim.h"
-#include "chip/kinetis_pinmux.h"
+#include "hardware/kinetis_uart.h"
+#include "hardware/kinetis_lpuart.h"
+#include "hardware/kinetis_sim.h"
+#include "hardware/kinetis_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions

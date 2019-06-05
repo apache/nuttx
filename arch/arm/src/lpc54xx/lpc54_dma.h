@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_dma.h"
+#include "hardware/lpc54_dma.h"
 
 #ifdef CONFIG_LPC54_DMA
 

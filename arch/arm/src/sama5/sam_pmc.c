@@ -52,10 +52,10 @@
 #include "chip.h"
 
 #ifdef CONFIG_ARCH_HAVE_SDIO
-#  include "chip/sam_hsmci.h"
+#  include "hardware/sam_hsmci.h"
 #endif
 
-#include "chip/sam_pmc.h"
+#include "hardware/sam_pmc.h"
 #include "sam_pmc.h"
 
 /****************************************************************************

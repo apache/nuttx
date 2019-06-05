@@ -62,8 +62,9 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/am335x_uart.h"
+#include "hardware/am335x_uart.h"
 #include "am335x_gpio.h"
+#include "am335x_pinmux.h"
 #include "am335x_serial.h"
 
 /****************************************************************************

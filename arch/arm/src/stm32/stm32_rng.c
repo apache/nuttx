@@ -51,7 +51,7 @@
 #include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
-#include "chip/stm32_rng.h"
+#include "hardware/stm32_rng.h"
 #include "up_internal.h"
 
 #if defined(CONFIG_STM32_RNG)
@@ -62,10 +62,10 @@
  ****************************************************************************/
 
 static int stm32_rng_initialize(void);
-static int stm32_interrupt(int irq, void *context, FAR void *arg);
-static void stm32_enable(void);
-static void stm32_disable(void);
-static ssize_t stm32_read(struct file *filep, char *buffer, size_t);
+static int stm32_rng_interrupt(int irq, void *context, FAR void *arg);
+static void stm32_rng_enable(void);
+static void stm32_rng_disable(void);
+static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t);
 
 /****************************************************************************
  * Private Types
@@ -89,17 +89,15 @@ static struct rng_dev_s g_rngdev;
 
 static const struct file_operations g_rngops =
 {
-  0,               /* open */
-  0,               /* close */
-  stm32_read,      /* read */
-  0,               /* write */
-  0,               /* seek */
-  0                /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0              /* poll */
-#endif
+  NULL,            /* open */
+  NULL,            /* close */
+  stm32_rng_read,  /* read */
+  NULL,            /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0              /* unlink */
+  , NULL           /* unlink */
 #endif
 };
 
@@ -121,7 +119,7 @@ static int stm32_rng_initialize(void)
 
   nxsem_init(&g_rngdev.rd_devsem, 0, 1);
 
-  if (irq_attach(STM32_IRQ_RNG, stm32_interrupt, NULL))
+  if (irq_attach(STM32_IRQ_RNG, stm32_rng_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -142,10 +140,10 @@ static int stm32_rng_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32_enable
+ * Name: stm32_rng_enable
  ****************************************************************************/
 
-static void stm32_enable(void)
+static void stm32_rng_enable(void)
 {
   uint32_t regval;
 
@@ -157,10 +155,10 @@ static void stm32_enable(void)
 }
 
 /****************************************************************************
- * Name: stm32_disable
+ * Name: stm32_rng_disable
  ****************************************************************************/
 
-static void stm32_disable(void)
+static void stm32_rng_disable(void)
 {
   uint32_t regval;
   regval = getreg32(STM32_RNG_CR);
@@ -169,10 +167,10 @@ static void stm32_disable(void)
 }
 
 /****************************************************************************
- * Name: stm32_interrupt
+ * Name: stm32_rng_interrupt
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_rng_interrupt(int irq, void *context, FAR void *arg)
 {
   uint32_t rngsr;
   uint32_t data;
@@ -233,7 +231,7 @@ static int stm32_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Buffer filled, stop further interrupts. */
 
-      stm32_disable();
+      stm32_rng_disable();
       nxsem_post(&g_rngdev.rd_readsem);
     }
 
@@ -241,10 +239,10 @@ static int stm32_interrupt(int irq, void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: stm32_read
+ * Name: stm32_rng_read
  ****************************************************************************/
 
-static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
+static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t buflen)
 {
   int ret;
 
@@ -270,7 +268,7 @@ static ssize_t stm32_read(struct file *filep, char *buffer, size_t buflen)
 
   /* Enable RNG with interrupts */
 
-  stm32_enable();
+  stm32_rng_enable();
 
   /* Wait until the buffer is filled */
 

@@ -70,6 +70,16 @@
 #  undef HAVE_AT24
 #endif
 
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define STM32_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /* If we are going to mount the AT24, then they user must also have told
  * us what to do with it by setting one of these.
  */

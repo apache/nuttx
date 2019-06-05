@@ -548,6 +548,24 @@ static inline void rcc_enableccip(void)
 
   regval = getreg32(STM32L4_RCC_CCIPR);
 
+#if defined(STM32L4_I2C_USE_HSI16)
+#ifdef CONFIG_STM32L4_I2C1
+  /* Select HSI16 as I2C1 clock source. */
+
+  regval |= RCC_CCIPR_I2C1SEL_HSI;
+#endif
+#ifdef CONFIG_STM32L4_I2C2
+  /* Select HSI16 as I2C2 clock source. */
+
+  regval |= RCC_CCIPR_I2C2SEL_HSI;
+#endif
+#ifdef CONFIG_STM32L4_I2C3
+  /* Select HSI16 as I2C3 clock source. */
+
+  regval |= RCC_CCIPR_I2C3SEL_HSI;
+#endif
+#endif /* STM32L4_I2C_USE_HSI16 */
+
 #if defined(STM32L4_USE_CLK48)
   /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
    * and then we can also do away with STM32L4_USE_CLK48, and give better
@@ -588,7 +606,7 @@ static void stm32l4_stdclockconfig(void)
   uint32_t regval;
   volatile int32_t timeout;
 
-#ifdef STM32L4_BOARD_USEHSI
+#if defined(STM32L4_BOARD_USEHSI) || defined(STM32L4_I2C_USE_HSI16)
   /* Enable Internal High-Speed Clock (HSI) */
 
   regval  = getreg32(STM32L4_RCC_CR);
@@ -608,6 +626,10 @@ static void stm32l4_stdclockconfig(void)
           break;
         }
     }
+#endif
+
+#if defined(STM32L4_BOARD_USEHSI)
+  /* Already set above */
 
 #elif defined(STM32L4_BOARD_USEMSI)
   /* Enable Internal Multi-Speed Clock (MSI) */
@@ -900,7 +922,7 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_CR_MSIPLLEN;
       putreg32(regval, STM32L4_RCC_CR);
 #  endif
-#endif
+#endif /* STM32L4_USE_LSE */
     }
 }
 #endif

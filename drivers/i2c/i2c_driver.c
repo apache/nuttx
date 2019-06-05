@@ -106,16 +106,14 @@ static const struct file_operations i2cdrvr_fops =
   i2cdrvr_open,    /* open */
   i2cdrvr_close,   /* close */
 #else
-  0,               /* open */
-  0,               /* close */
+  NULL,            /* open */
+  NULL,            /* close */
 #endif
   i2cdrvr_read,    /* read */
   i2cdrvr_write,   /* write */
-  0,               /* seek */
-  i2cdrvr_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0              /* poll */
-#endif
+  NULL,            /* seek */
+  i2cdrvr_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , i2cdrvr_unlink /* unlink */
 #endif
@@ -241,7 +239,7 @@ static int i2cdrvr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct i2c_transfer_s *transfer;
   int ret;
 
-  i2cinfo("cmd=%d arg=%lu\n", cmd, arg);
+  i2cinfo("cmd=%x arg=%08x\n", cmd, arg);
 
   /* Get our private data structure */
 

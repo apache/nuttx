@@ -38,8 +38,8 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
-#include "chip/esp32_dport.h"
-#include "chip/esp32_rtccntl.h"
+#include "hardware/esp32_dport.h"
+#include "hardware/esp32_rtccntl.h"
 #include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"

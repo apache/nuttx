@@ -317,6 +317,12 @@ config ARCH_CHIP_STM32L0
 	---help---
 		STMicro STM32L0 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_STM32G0
+	bool "STMicro STM32 G0"
+	select ARCH_CORTEXM0
+	---help---
+		STMicro STM32G0 architectures (ARM Cortex-M0).
+
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
 	select ARCH_CORTEXM7
@@ -328,6 +334,8 @@ config ARCH_CHIP_STM32F7
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
 
@@ -399,6 +407,18 @@ config ARCH_CHIP_XMC4
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
+
+config ARCH_CHIP_CXD56XX
+	bool "Sony CXD56xx"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_SDIO if MMCSD
+	---help---
+		Sony CXD56XX (ARM Cortex-M4) architectures
 
 endchoice
 
@@ -663,13 +683,14 @@ config ARCH_CHIP
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
-	default "stm32f0l0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
+	default "stm32f0l0g0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
+	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -792,6 +813,19 @@ config ARM_SEMIHOSTING_HOSTFS
 	---help---
 		Mount HostFS through semihosting.
 
+config ARM_LWL_CONSOLE
+	bool "Lightweight Link Console Support"
+	default n
+	depends on DEV_CONSOLE && ARCH_CHIP_STM32
+	---help---
+		Use the lightweight link console which provides console over a
+		debug channel by means of shared memory.  A terminal application
+		for openocd as the debugger is available in tools/ocdconsole.py.
+
+		Currently only available for STM32 architectures, but easily
+		added to other ARM architectures be addd up_low_console.c to the
+		architecture Make.defs file.
+
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif
@@ -894,8 +928,8 @@ endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
 endif
-if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
-source arch/arm/src/stm32f0l0/Kconfig
+if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
+source arch/arm/src/stm32f0l0g0/Kconfig
 endif
 if ARCH_CHIP_STM32F7
 source arch/arm/src/stm32f7/Kconfig
@@ -914,6 +948,9 @@ source arch/arm/src/tms570/Kconfig
 endif
 if ARCH_CHIP_XMC4
 source arch/arm/src/xmc4/Kconfig
+endif
+if ARCH_CHIP_CXD56XX
+source arch/arm/src/cxd56xx/Kconfig
 endif
 
 endif # ARCH_ARM

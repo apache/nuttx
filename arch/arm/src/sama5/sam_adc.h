@@ -44,7 +44,7 @@
 
 #include <nuttx/analog/adc.h>
 
-#include "chip/sam_adc.h"
+#include "hardware/sam_adc.h"
 
 #ifdef CONFIG_SAMA5_ADC
 

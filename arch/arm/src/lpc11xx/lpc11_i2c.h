@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
-#include "chip/lpc11_i2c.h"
+#include "hardware/lpc11_i2c.h"
 
 /****************************************************************************
  * Public Functions

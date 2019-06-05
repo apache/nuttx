@@ -51,8 +51,8 @@
 
 #include "sam_periphclks.h"
 #include "sam_clockconfig.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_sfr.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_sfr.h"
 
 /****************************************************************************
  * Pre-processor Definitions

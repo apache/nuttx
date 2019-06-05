@@ -144,25 +144,6 @@ static const uint32_t g_sramconfig[] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *   Enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-static void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHB3ENR);
-  regval |= RCC_AHB3ENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}
-
-/************************************************************************************
  * Name: stm32_sramgpios
  *
  * Description:
@@ -220,7 +201,7 @@ void stm32_stram_configure(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration
    *

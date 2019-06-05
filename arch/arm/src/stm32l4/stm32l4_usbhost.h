@@ -51,9 +51,9 @@
 #if defined(CONFIG_STM32L4_OTGFS) && defined(CONFIG_USBHOST)
 
 #if defined(CONFIG_STM32L4_STM32L4X5)
-#  include "chip/stm32l4x5xx_otgfs.h"
+#  include "hardware/stm32l4x5xx_otgfs.h"
 #elif defined(CONFIG_STM32L4_STM32L4X6)
-#  include "chip/stm32l4x6xx_otgfs.h"
+#  include "hardware/stm32l4x6xx_otgfs.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

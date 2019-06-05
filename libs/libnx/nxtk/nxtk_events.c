@@ -204,7 +204,7 @@ static void nxtk_position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
 
 #ifdef CONFIG_NX_XYINPUT
 static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                          uint8_t buttons, FAR void *arg)
+                         uint8_t buttons, FAR void *arg)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
   struct nxgl_point_s abspos;
@@ -256,15 +256,50 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 
   /* Is the mouse position inside of the client window region? */
 
-  if (fwnd->fwcb->mousein && nxgl_rectinside(&fwnd->fwrect, &fwnd->mpos))
+  if (fwnd->fwcb->mousein != NULL &&
+      nxgl_rectinside(&fwnd->fwrect, &fwnd->mpos))
     {
       nxgl_vectsubtract(&relpos, &abspos, &fwnd->fwrect.pt1);
       fwnd->fwcb->mousein((NXTKWINDOW)fwnd, &relpos, buttons, fwnd->fwarg);
     }
 
-  /* If the mouse position inside the toobar region? */
+  /* If the mouse position inside the toolbar region? */
 
-  else if (fwnd->tbcb->mousein && nxgl_rectinside(&fwnd->tbrect, &fwnd->mpos))
+  else if (fwnd->tbcb->mousein != NULL &&
+           nxgl_rectinside(&fwnd->tbrect, &fwnd->mpos))
+    {
+      nxgl_vectsubtract(&relpos, &abspos, &fwnd->tbrect.pt1);
+      fwnd->tbcb->mousein((NXTKWINDOW)fwnd, &relpos, buttons, fwnd->tbarg);
+    }
+
+  /* REVISIT: Missing logic to detect border events.
+   *
+   * NOTE that the following logic is completely redundant!  All of the
+   * above tests could be eliminated and only the following performed with
+   * the same result.  These tests are separated from the above only to
+   * guarantee a spot for future border mouse event event detection which
+   * would go about here.
+   */
+
+  /* As a complexity, when dragging mouse events outside of the containing
+   * raw window will be sent to this function as well.  We will need to pass
+   * these outside-the-window reports as well.
+   *
+   * If the mouse report is below the toolbar, then we will report this
+   * as a main window event.
+   */
+
+  else if (fwnd->fwcb->mousein != NULL &&
+           pos->y >= fwnd->tbheight + CONFIG_NXTK_BORDERWIDTH)
+    {
+      nxgl_vectsubtract(&relpos, &abspos, &fwnd->fwrect.pt1);
+      fwnd->fwcb->mousein((NXTKWINDOW)fwnd, &relpos, buttons, fwnd->fwarg);
+    }
+
+  /* Otherwise, we will report this as a toolbar event. */
+
+  else if (fwnd->tbcb->mousein != NULL &&
+           pos->y < fwnd->tbheight + CONFIG_NXTK_BORDERWIDTH)
     {
       nxgl_vectsubtract(&relpos, &abspos, &fwnd->tbrect.pt1);
       fwnd->tbcb->mousein((NXTKWINDOW)fwnd, &relpos, buttons, fwnd->tbarg);

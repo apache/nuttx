@@ -210,9 +210,7 @@ struct mbr3108_dev_s
   struct mbr3108_debug_conf_s debug_conf;
   bool int_pending;
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -225,10 +223,8 @@ static ssize_t mbr3108_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t mbr3108_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-#ifndef CONFIG_DISABLE_POLL
 static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-#endif
 
 /****************************************************************************
 * Private Data
@@ -240,11 +236,9 @@ static const struct file_operations g_mbr3108_fileops =
   mbr3108_close,  /* close */
   mbr3108_read,   /* read */
   mbr3108_write,  /* write */
-  0,              /* seek */
-  0               /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , mbr3108_poll  /* poll */
-#endif
+  NULL,           /* seek */
+  NULL,           /* ioctl */
+  mbr3108_poll    /* poll */
 };
 
 /****************************************************************************
@@ -1006,8 +1000,6 @@ static int mbr3108_close(FAR struct file *filep)
   return 0;
 }
 
-#ifndef CONFIG_DISABLE_POLL
-
 static void mbr3108_poll_notify(FAR struct mbr3108_dev_s *priv)
 {
   int i;
@@ -1108,8 +1100,6 @@ out:
   return ret;
 }
 
-#endif /* !CONFIG_DISABLE_POLL */
-
 static int mbr3108_isr_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct mbr3108_dev_s *priv = (FAR struct mbr3108_dev_s *)arg;
@@ -1121,9 +1111,7 @@ static int mbr3108_isr_handler(int irq, FAR void *context, FAR void *arg)
   priv->int_pending = true;
   leave_critical_section(flags);
 
-#ifndef CONFIG_DISABLE_POLL
   mbr3108_poll_notify(priv);
-#endif
   return 0;
 }
 

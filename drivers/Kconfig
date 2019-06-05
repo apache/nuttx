@@ -3,17 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config DISABLE_POLL
-	bool "Disable driver poll interfaces"
-	default n
-	---help---
-		The sizes of drivers can be reduced if the poll() method is not
-		supported.  If you do not use poll() or select(), then you can
-		select DISABLE_POLL to reduce the code footprint by a small amount.
-
-		This selection disables the poll() interface as well as interfaces
-		the derive from poll() such as select().
-
 config DEV_NULL
 	bool "Enable /dev/null"
 	default y

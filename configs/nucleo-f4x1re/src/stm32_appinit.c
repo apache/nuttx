@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-f4x1re/src/stm32_appinit.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
+#include <stdint.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/sdio.h>
-#include <nuttx/mmcsd.h>
-
-#include <stm32.h>
-#include <stm32_uart.h>
-
-#include <arch/board/board.h>
 
 #include "nucleo-f4x1re.h"
 
@@ -71,7 +61,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -86,74 +76,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret = OK;
+  /* Perform board initialization here */
 
-#ifdef HAVE_MMCSD
-  /* First, get an instance of the SDIO interface */
-
-  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!g_sdio)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
-             CONFIG_NSH_MMCSDSLOTNO);
-      return -ENODEV;
-    }
-
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
-      return ret;
-    }
-
-  /* Then let's guess and say that there is a card in the slot. There is no
-   * card detect GPIO.
-   */
-
-  sdio_mediachange(g_sdio, true);
-
-  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
-#endif
-
-#ifdef CONFIG_ADC
-  /* Initialize ADC and register the ADC driver. */
-
-  ret = stm32_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_SENSORS_QENCODER
-  /* Initialize and register the qencoder driver */
-
-  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_NUCLEO_F401RE_QETIMER);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to register the qencoder: %d\n",
-             ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_AJOYSTICK
-  /* Initialize and register the joystick driver */
-
-  ret = board_ajoy_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to register the joystick driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif
-
-  return ret;
+  return stm32_bringup();
 }

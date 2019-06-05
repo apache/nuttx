@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "sched/sched.h"
 #include "up_internal.h"
 

@@ -54,7 +54,6 @@
 
 /* SPI BUS PARAMETERS *******************************************************/
 
-#define MCP2515_SPI_FREQUENCY    (1000000)        /* 1 MHz */
 #define MCP2515_SPI_MODE         (SPIDEV_MODE0)   /* Device uses SPI Mode 0: CPOL=0, CPHA=0 */
 
 /****************************************************************************
@@ -86,10 +85,6 @@ struct mcp2515_config_s
   uint8_t devid;            /* MCP2515 device ID */
   uint8_t mode;             /* See enum mcp2515_canmod_e */
   uint8_t nfilters;         /* Number of standard/extended filters */
-  uint8_t ntxbuffers;       /* Number of TX Buffer available */
-  uint8_t txbuf0[10];       /* Transmit Buffer 0 */
-  uint8_t txbuf1[10];       /* Transmit Buffer 1 */
-  uint8_t txbuf2[10];       /* Transmit Buffer 2 */
 #ifdef MCP2515_LOOPBACK
   bool loopback;            /* True: Loopback mode */
 #endif

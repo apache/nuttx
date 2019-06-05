@@ -425,8 +425,7 @@ f Application Configuration -> Network Utilities
         CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to
         advertise that it supports arch_phy_irq().
 
-        And a few other things: UDP support is required (CONFIG_NET_UDP) and
-        signals must not be disabled (CONFIG_DISABLE_SIGNALS).
+        One other thing: UDP support is required (CONFIG_NET_UDP).
 
   Given those prerequisites, the network monitor can be selected with these
   additional settings.

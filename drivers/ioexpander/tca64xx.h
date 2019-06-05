@@ -71,8 +71,6 @@
  *   CONFIG_IOEXPANDER
  *     Enables I/O expander support
  *
- * Other settings that effect the driver: CONFIG_DISABLE_POLL
- *
  * CONFIG_IOEXPANDER_TCA64XX
  *   Enables support for the TCA64XX driver (Needs CONFIG_INPUT)
  * CONFIG_TCA64XX_MULTIPLE

@@ -49,7 +49,7 @@
 #if defined(CONFIG_STM32_STM32F30XX)
 #  error "OPAMP support for STM32F30XX not implemented yet"
 #elif defined(CONFIG_STM32_STM32F33XX)
-#  include "chip/stm32f33xxx_opamp.h"
+#  include "hardware/stm32f33xxx_opamp.h"
 #endif
 
 #include <nuttx/analog/opamp.h>

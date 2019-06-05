@@ -76,7 +76,7 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
   int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (hfwnd == NULL || size == NULL)
+  if (hfwnd == NULL || size == NULL || size->w < 0 || size->h < 0)
     {
       set_errno(EINVAL);
       return ERROR;

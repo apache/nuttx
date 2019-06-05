@@ -51,11 +51,11 @@
 #include "kl_lowputc.h"
 #include "kl_gpio.h"
 
-#include "chip/kl_uart.h"
-#include "chip/kl_sim.h"
-#include "chip/kl_port.h"
-#include "chip/kl_uart.h"
-#include "chip/kl_pinmux.h"
+#include "hardware/kl_uart.h"
+#include "hardware/kl_sim.h"
+#include "hardware/kl_port.h"
+#include "hardware/kl_uart.h"
+#include "hardware/kl_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions

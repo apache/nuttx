@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NX_NPLANES
@@ -84,6 +85,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Handles ******************************************************************/
 
 /* The interface to the NX server is managed using a opaque handle: */
@@ -148,8 +150,8 @@ struct nx_callback_s
    *            the overall display
    *   bounds - The bounding rectangle that the describes the entire
    *            display
-   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
-   *          nxtk_openwindow, or nxtk_opentoolbar)
+   *   arg    - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *            nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -171,8 +173,8 @@ struct nx_callback_s
    *   hwnd    - Window handle
    *   pos     - The (x,y) position of the mouse
    *   buttons - See NX_MOUSE_* definitions
-   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
-   *          nxtk_openwindow, or nxtk_opentoolbar)
+   *   arg     - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *             nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -239,7 +241,7 @@ struct nx_callback_s
    *     the client and server are fully synchronized.
    *
    * Input Parameters:
-   *   hwnd  - Window handle of the blocked window
+   *   hwnd  - Window handle of window receiving the event
    *   event - The server event
    *   arg1  - User provided argument (see nx_openwindow, nx_requestbkgd,
    *           nxtk_openwindow, or nxtk_opentoolbar)
@@ -392,11 +394,7 @@ int nx_eventhandler(NXHANDLE handle);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
 int nx_eventnotify(NXHANDLE handle, int signo);
-#else
-#  define nx_eventnotify(handle, signo) (OK)
-#endif
 
 /****************************************************************************
  * Name: nx_openwindow
@@ -406,9 +404,11 @@ int nx_eventnotify(NXHANDLE handle, int signo);
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect()
- *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
- *            enabled.  In that case, it may be zero or
- *            NXBE_WINDOW_RAMBACKED
+ *   flags  - Optional flags.  These include:
+ *            NXBE_WINDOW_RAMBACKED:  Creates a RAM backed window.  This
+ *              option is only valid if CONFIG_NX_RAMBACKED is enabled.
+ *            NXBE_WINDOW_HIDDEN:  The window is create in the HIDDEN state
+ *             and can be made visible later with nx_setvisibility().
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -441,8 +441,9 @@ int nx_closewindow(NXWINDOW hwnd);
  * Name: nx_block
  *
  * Description:
- *   This is callback will do to things:  (1) any queue a 'blocked' callback
- *   to the window and then (2) block any further window messaging.
+ *   The response to this function call is two things:  (1) any queued
+ *   callback messages to the window are 'blocked' and then (2) also
+ *   subsequent window messaging is blocked.
  *
  *   The 'event' callback with the NXEVENT_BLOCKED event is the response
  *   from nx_block (or nxtk_block).  Those blocking interfaces are used to
@@ -473,7 +474,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  * Name: nx_synch
  *
  * Description:
- *   This interface can be used to syncrhonize the window client with the
+ *   This interface can be used to synchronize the window client with the
  *   NX server.  It really just implements an 'echo':  A synch message is
  *   sent from the window client to the server which then responds
  *   immediately by sending the NXEVENT_SYNCHED back to the windows client.
@@ -503,13 +504,13 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  *           }
  *       }
  *
- *   When the windwo listener thread receives the NXEVENT_SYNCHED event, it
+ *   When the window listener thread receives the NXEVENT_SYNCHED event, it
  *   would set g_synched to true and post g_synch_sem, waking up the above
  *   loop.
  *
  * Input Parameters:
  *   wnd - The window to be synched
- *   arg - An argument that will accompany the block messages (This is arg2
+ *   arg - An argument that will accompany the synch messages (This is arg2
  *         in the event callback).
  *
  * Returned Value:
@@ -679,6 +680,46 @@ int nx_lower(NXWINDOW hwnd);
  ****************************************************************************/
 
 int nx_modal(NXWINDOW hwnd, bool modal);
+
+/****************************************************************************
+ * Name: nx_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present and will update normally, but will not be visible on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hwnd - The window to be modified
+ *   hide - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nx_setvisibility(NXWINDOW hwnd, bool hide);
+
+/****************************************************************************
+ * Name: nx_ishidden
+ *
+ * Description:
+ *   Return true if the window is hidden.
+ *
+ *   NOTE:  There will be a delay between the time that the visibility of
+ *   the window is changed via nx_setvisibily() before that new setting is
+ *   reported by nx_ishidden().  nx_synch() may be used if temporal
+ *   synchronization is required.
+ *
+ * Input Parameters:
+ *   hwnd - The window to be queried
+ *
+ * Returned Value:
+ *   True: the window is hidden, false: the window is visible
+ *
+ ****************************************************************************/
+
+bool nx_ishidden(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_setpixel

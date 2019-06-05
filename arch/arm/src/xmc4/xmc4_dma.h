@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include "chip/xmc4_dma.h"
+#include "hardware/xmc4_dma.h"
 
 /****************************************************************************
  * Pre-processor Declarations

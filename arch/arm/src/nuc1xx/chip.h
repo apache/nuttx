@@ -54,7 +54,7 @@
  * this file for the proper setup.
  */
 
-#include "chip/nuc_memorymap.h"
+#include "hardware/nuc_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

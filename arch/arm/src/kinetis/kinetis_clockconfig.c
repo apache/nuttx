@@ -43,13 +43,13 @@
 #include "up_arch.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_mcg.h"
-#include "chip/kinetis_sim.h"
-#include "chip/kinetis_fmc.h"
-#include "chip/kinetis_pmc.h"
-#include "chip/kinetis_llwu.h"
-#include "chip/kinetis_pinmux.h"
-#include "chip/kinetis_osc.h"
+#include "hardware/kinetis_mcg.h"
+#include "hardware/kinetis_sim.h"
+#include "hardware/kinetis_fmc.h"
+#include "hardware/kinetis_pmc.h"
+#include "hardware/kinetis_llwu.h"
+#include "hardware/kinetis_pinmux.h"
+#include "hardware/kinetis_osc.h"
 
 #include <arch/board/board.h>
 

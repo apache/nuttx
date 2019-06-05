@@ -58,7 +58,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "chip/stm32_pwr.h"
+#include "hardware/stm32_pwr.h"
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
@@ -4926,15 +4926,15 @@ static int stm32_pullup(struct usbdev_s *dev, bool enable)
   if (enable)
     {
       /* Connect the device by clearing the soft disconnect bit in the DCTL
-       * register
+       * register.
        */
 
       regval &= ~OTG_DCTL_SDIS;
     }
   else
     {
-      /* Connect the device by setting the soft disconnect bit in the DCTL
-       * register
+      /* Disconnect the device by setting the soft disconnect bit in the DCTL
+       * register.
        */
 
       regval |= OTG_DCTL_SDIS;

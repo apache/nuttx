@@ -45,12 +45,12 @@
 
 #include "up_arch.h"
 
-#include "chip/sam_pm.h"
-#include "chip/sam_supc.h"
-#include "chip/sam_oscctrl.h"
-#include "chip/sam_osc32kctrl.h"
-#include "chip/sam_gclk.h"
-#include "chip/sam_nvmctrl.h"
+#include "hardware/sam_pm.h"
+#include "hardware/sam_supc.h"
+#include "hardware/sam_oscctrl.h"
+#include "hardware/sam_osc32kctrl.h"
+#include "hardware/sam_gclk.h"
+#include "hardware/sam_nvmctrl.h"
 #include "sam_gclk.h"
 
 #include "sam_periphclks.h"

@@ -80,8 +80,8 @@
 #include "up_arch.h"
 
 #include "efm32_gpio.h"
-#include "chip/efm32_cmu.h"
-#include "chip/efm32_i2c.h"
+#include "hardware/efm32_cmu.h"
+#include "hardware/efm32_i2c.h"
 
 /* At least one I2C peripheral must be enabled */
 

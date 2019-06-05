@@ -281,12 +281,10 @@ static const struct file_operations g_mpu_fops =
   mpu_read,
   mpu_write,
   mpu_seek,
-  mpu_ioctl
-#ifndef CONFIG_DISABLE_POLL
-    , NULL
-#endif
+  mpu_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    , NULL
+  , NULL
 #endif
 };
 

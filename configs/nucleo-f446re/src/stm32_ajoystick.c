@@ -51,7 +51,7 @@
 
 #include "stm32_gpio.h"
 #include "stm32_adc.h"
-#include "chip/stm32_adc.h"
+#include "hardware/stm32_adc.h"
 #include "nucleo-f446re.h"
 
 /****************************************************************************

@@ -359,7 +359,6 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
           nxsem_wait_irq(tcb, ECANCELED);
         }
 
-#ifndef CONFIG_DISABLE_SIGNALS
       /* If the thread is blocked waiting on a signal, then the
        * thread must be unblocked to handle the cancellation.
        */
@@ -368,7 +367,6 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
         {
           nxsig_wait_irq(tcb, ECANCELED);
         }
-#endif
 
 #ifndef CONFIG_DISABLE_MQUEUE
       /* If the thread is blocked waiting on a message queue, then the

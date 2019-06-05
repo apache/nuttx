@@ -66,8 +66,8 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/lpc43_scu.h"
-#include "chip/lpc43_gpio.h"
+#include "hardware/lpc43_scu.h"
+#include "hardware/lpc43_gpio.h"
 #include "lpc43_gpio.h"
 #include "lpc43_gpioint.h"
 

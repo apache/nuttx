@@ -114,10 +114,8 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
                              size_t len);
 static int max11802_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int max11802_poll(FAR struct file *filep, struct pollfd *fds,
                          bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -132,10 +130,8 @@ static const struct file_operations max11802_fops =
   max11802_read,    /* read */
   0,                /* write */
   0,                /* seek */
-  max11802_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , max11802_poll   /* poll */
-#endif
+  max11802_ioctl,   /* ioctl */
+  max11802_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , 0               /* unlink */
 #endif
@@ -256,9 +252,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
 static void max11802_notify(FAR struct max11802_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -279,7 +273,6 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
    * all try to read the data, then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_MAX11802_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -290,7 +283,6 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1041,7 +1033,6 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: max11802_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1127,7 +1118,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

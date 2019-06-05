@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
-#include "chip/lpc43_ssp.h"
+#include "hardware/lpc43_ssp.h"
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
 

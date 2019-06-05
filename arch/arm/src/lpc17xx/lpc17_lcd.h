@@ -46,7 +46,7 @@
 
 #include <nuttx/nx/nxglib.h>
 
-#include "chip/lpc17_lcd.h"
+#include "hardware/lpc17_lcd.h"
 
 /************************************************************************************
  * Pre-processor Definitions

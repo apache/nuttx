@@ -98,6 +98,14 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
+/* 48MHz clock configuration */
+
+#if defined(CONFIG_STM32F0L0G0_USB) || defined(CONFIG_STM32F0L0G0_RNG)
+#  define STM32_USE_CLK48       1
+#  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
+#  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
+
 /* TODO: timers */
 
 /* LED definitions **********************************************************/
@@ -243,11 +251,11 @@
 /* I2C1 */
 
 #define GPIO_I2C1_SDA  GPIO_I2C1_SDA_2 /* PB9 */
-#define GPIO_I2C1_SCLK GPIO_I2C1_SCL_2 /* PB8 */
+#define GPIO_I2C1_SCL  GPIO_I2C1_SCL_2 /* PB8 */
 
 /* DMA channels *************************************************************/
 /* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1    /* DMA1_CH1 */
 
 #endif /* __CONFIG_NUCLEO_LO73RZ_INCLUDE_BOARD_H */

@@ -64,8 +64,8 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_lpuart.h"
-#include "chip/kinetis_pinmux.h"
+#include "hardware/kinetis_lpuart.h"
+#include "hardware/kinetis_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions

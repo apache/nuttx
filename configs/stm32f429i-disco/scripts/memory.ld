@@ -55,7 +55,7 @@
  * Alignment of the user space FLASH partition is also a critical factor:
  * The user space FLASH partition will be spanned with a single region of
  * size 2**n bytes.  The alignment of the user-space region must be the same.
- * As a consequence, as the user-space increases in size, the alignmment
+ * As a consequence, as the user-space increases in size, the alignment
  * requirement also increases.
  *
  * This alignment requirement means that the largest user space FLASH region

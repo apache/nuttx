@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/lpc43_usb0.h"
+#include "hardware/lpc43_usb0.h"
 
 /************************************************************************************
  * Public Functions

@@ -106,8 +106,8 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/sam_pinmap.h"
-#include "chip/sam_fuses.h"
+#include "hardware/sam_pinmap.h"
+#include "hardware/sam_fuses.h"
 #include "sam_gclk.h"
 #include "sam_port.h"
 #include "sam_periphclks.h"

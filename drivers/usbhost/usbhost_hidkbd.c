@@ -80,7 +80,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* This determines how often the USB keyboard will be polled in units of
  * of microseconds.  The default is 100MS.
  */
@@ -95,14 +97,6 @@
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#endif
-
-/* Signals must not be disabled as they are needed by nxsig_usleep.  Need to have
- * CONFIG_DISABLE_SIGNALS=n
- */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Signal support is required (CONFIG_DISABLE_SIGNALS)"
 #endif
 
 /* Provide some default values for other configuration settings */
@@ -154,6 +148,7 @@
 #endif
 
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/kbd[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -172,6 +167,7 @@
 #define USBHOST_MAX_CREFS   0x7fff
 
 /* Debug ********************************************************************/
+
 /* Both CONFIG_DEBUG_INPUT and CONFIG_DEBUG_USB could apply to this file.
  * We assume here that CONFIG_DEBUG_INPUT might be enabled separately, but
  * CONFIG_DEBUG_USB implies both.
@@ -234,9 +230,7 @@ struct usbhost_state_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_HIDKBD_NPOLLWAITERS];
-#endif
 
   /* Buffer used to collect and buffer incoming keyboard characters */
 
@@ -266,11 +260,7 @@ static void usbhost_takesem(sem_t *sem);
 
 /* Polling support */
 
-#ifndef CONFIG_DISABLE_POLL
 static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
-#else
-#  define usbhost_pollnotify(dev)
-#endif
 
 /* Memory allocation services */
 
@@ -337,10 +327,8 @@ static ssize_t usbhost_read(FAR struct file *filep,
                             FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
                              FAR const char *buffer, size_t len);
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -364,23 +352,21 @@ static const struct usbhost_id_s g_hidkbd_id =
 
 static struct usbhost_registry_s g_hidkbd =
 {
-  NULL,                    /* flink     */
-  usbhost_create,          /* create    */
-  1,                       /* nids      */
-  &g_hidkbd_id             /* id[]      */
+  NULL,                     /* flink     */
+  usbhost_create,           /* create    */
+  1,                        /* nids      */
+  &g_hidkbd_id              /* id[]      */
 };
 
 static const struct file_operations g_hidkbd_fops =
 {
-  usbhost_open,            /* open      */
-  usbhost_close,           /* close     */
-  usbhost_read,            /* read      */
-  usbhost_write,           /* write     */
-  0,                       /* seek      */
-  0                        /* ioctl     */
-#ifndef CONFIG_DISABLE_POLL
-  , usbhost_poll           /* poll      */
-#endif
+  usbhost_open,             /* open      */
+  usbhost_close,            /* close     */
+  usbhost_read,             /* read      */
+  usbhost_write,            /* write     */
+  NULL,                     /* seek      */
+  NULL,                     /* ioctl     */
+  usbhost_poll              /* poll      */
 };
 
 /* This is a bitmap that is used to allocate device names /dev/kbda-z. */
@@ -621,7 +607,6 @@ static void usbhost_takesem(sem_t *sem)
  * Name: usbhost_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
 {
   int i;
@@ -640,7 +625,6 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
         }
     }
 }
-#endif
 
 /****************************************************************************
  * Name: usbhost_allocclass
@@ -2322,7 +2306,6 @@ static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -2407,7 +2390,6 @@ errout:
   nxsem_post(&priv->exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

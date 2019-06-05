@@ -52,9 +52,9 @@
 #include "sam_periphclks.h"
 #include "sam_lowputc.h"
 
-#include "chip/sam_uart.h"
-#include "chip/sam_pinmap.h"
-#include "chip/sam_matrix.h"
+#include "hardware/sam_uart.h"
+#include "hardware/sam_pinmap.h"
+#include "hardware/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions

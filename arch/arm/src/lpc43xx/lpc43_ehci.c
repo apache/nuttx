@@ -62,12 +62,12 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "chip/lpc43_usb0.h"
+#include "hardware/lpc43_usb0.h"
 #include "up_arch.h"
 
 #include "lpc43_cgu.h"
-#include "chip/lpc43_creg.h"
-#include "chip/lpc43_evntrtr.h"
+#include "hardware/lpc43_creg.h"
+#include "hardware/lpc43_evntrtr.h"
 
 #if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
 

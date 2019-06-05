@@ -55,14 +55,14 @@
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
-#  undef CONFIG_STM32F0L0_SPI1
-#  undef CONFIG_STM32F0L0_SPI2
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI1
+#  undef CONFIG_STM32F0L0G0_SPI2
+#  undef CONFIG_STM32F0L0G0_SPI3
 #elif STM32_NSPI < 2
-#  undef CONFIG_STM32F0L0_SPI2
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI2
+#  undef CONFIG_STM32F0L0G0_SPI3
 #elif STM32_NSPI < 3
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI3
 #endif
 
 /* STM32F0Discovery GPIOs ***************************************************************************/

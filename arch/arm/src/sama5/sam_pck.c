@@ -45,7 +45,7 @@
 
 #include <arch/board/board.h>
 
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 
 #include "up_arch.h"
 #include "sam_pio.h"

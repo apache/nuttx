@@ -62,6 +62,7 @@ SECTIONS
       _etext = ABSOLUTE(.);
     } > flash
 
+  . = ALIGN(4);
   .init_section :
     {
       _sinit = ABSOLUTE(.);
@@ -74,6 +75,7 @@ SECTIONS
       *(.ARM.extab*)
     } > flash
 
+  . = ALIGN(4);
   __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
     {
@@ -83,6 +85,7 @@ SECTIONS
 
   _eronly = ABSOLUTE(LOADADDR(.data));
 
+  . = ALIGN(4);
   .data :
     {
       _sdata = ABSOLUTE(.);

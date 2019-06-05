@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/samd_pm.h"
+#include "hardware/samd_pm.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 

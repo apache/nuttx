@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/kinetis_dspi.h"
+#include "hardware/kinetis_dspi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

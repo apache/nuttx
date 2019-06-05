@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include "up_arch.h"
-#include "chip/imx_ccm.h"
+#include "hardware/imx_ccm.h"
 #include "imx_config.h"
 #include "imx_clockconfig.h"
 

@@ -105,19 +105,20 @@
 #define uart_send(dev,ch)        dev->ops->send(dev,ch)
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
 #define uart_dmasend(dev)      \
   ((dev)->ops->dmasend ? (dev)->ops->dmasend(dev) : -ENOSYS)
 
+#define uart_dmatxavail(dev)   \
+  ((dev)->ops->dmatxavail ? (dev)->ops->dmatxavail(dev) : -ENOSYS)
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
 #define uart_dmareceive(dev)   \
   ((dev)->ops->dmareceive ? (dev)->ops->dmareceive(dev) : -ENOSYS)
 
 #define uart_dmarxfree(dev)    \
   ((dev)->ops->dmarxfree ? (dev)->ops->dmarxfree(dev) : -ENOSYS)
-
-#define uart_dmatxavail(dev)   \
-  ((dev)->ops->dmatxavail ? (dev)->ops->dmatxavail(dev) : -ENOSYS)
-
 #endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -143,7 +144,7 @@ struct uart_buffer_s
   FAR char        *buffer; /* Pointer to the allocated buffer memory */
 };
 
-#ifdef CONFIG_SERIAL_DMA
+#if defined(CONFIG_SERIAL_RXDMA) || defined(CONFIG_SERIAL_TXDMA)
 struct uart_dmaxfer_s
 {
   FAR char        *buffer;  /* First DMA buffer */
@@ -152,7 +153,7 @@ struct uart_dmaxfer_s
   size_t           nlength; /* Length of next DMA buffer */
   size_t           nbytes;  /* Bytes actually transferred by DMA from both buffers */
 };
-#endif /* CONFIG_SERIAL_DMA */
+#endif /* CONFIG_SERIAL_RXDMA || CONFIG_SERIAL_TXDMA */
 
 /* This structure defines all of the operations providd by the architecture specific
  * logic.  All fields must be provided with non-NULL function pointers by the
@@ -226,11 +227,13 @@ struct uart_ops_s
                              unsigned int nbuffered, bool upper);
 #endif
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
   /* Start transfer bytes from the TX circular buffer using DMA */
 
   CODE void (*dmasend)(FAR struct uart_dev_s *dev);
+#endif
 
+#ifdef CONFIG_SERIAL_RXDMA
   /* Start transfer bytes from the TX circular buffer using DMA */
 
   CODE void (*dmareceive)(FAR struct uart_dev_s *dev);
@@ -238,7 +241,9 @@ struct uart_ops_s
   /* Notify DMA that there is free space in the RX buffer */
 
   CODE void (*dmarxfree)(FAR struct uart_dev_s *dev);
+#endif
 
+#ifdef CONFIG_SERIAL_TXDMA
   /* Notify DMA that there is data to be transferred in the TX buffer */
 
   CODE void (*dmatxavail)(FAR struct uart_dev_s *dev);
@@ -305,20 +310,19 @@ struct uart_dev_s
   sem_t                closesem;     /* Locks out new open while close is in progress */
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
-#ifndef CONFIG_DISABLE_POLL
   sem_t                pollsem;      /* Manages exclusive access to fds[] */
-#endif
 
   /* I/O buffers */
 
   struct uart_buffer_s xmit;         /* Describes transmit buffer */
   struct uart_buffer_s recv;         /* Describes receive buffer */
 
-#ifdef CONFIG_SERIAL_DMA
-
   /* DMA transfers */
 
+#ifdef CONFIG_SERIAL_TXDMA
   struct uart_dmaxfer_s dmatx;       /* Describes transmit DMA transfer */
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
   struct uart_dmaxfer_s dmarx;       /* Describes receive DMA transfer */
 #endif
 
@@ -332,9 +336,7 @@ struct uart_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
-#endif
 };
 
 typedef struct uart_dev_s uart_dev_t;
@@ -449,7 +451,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_dma(FAR uart_dev_t *dev);
 #endif
 
@@ -463,7 +465,7 @@ void uart_xmitchars_dma(FAR uart_dev_t *dev);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
 void uart_xmitchars_done(FAR uart_dev_t *dev);
 #endif
 
@@ -475,7 +477,7 @@ void uart_xmitchars_done(FAR uart_dev_t *dev);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_dma(FAR uart_dev_t *dev);
 #endif
 
@@ -489,7 +491,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
 void uart_recvchars_done(FAR uart_dev_t *dev);
 #endif
 

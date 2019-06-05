@@ -54,9 +54,9 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/lpc11_syscon.h"
+#include "hardware/lpc11_syscon.h"
 #include "lpc11_timer.h"
-#include "chip/lpc116x_pinconfig.h"
+#include "hardware/lpc116x_pinconfig.h"
 #include "lpc11_gpio.h"
 #include "lpc116x_gpio.h"
 

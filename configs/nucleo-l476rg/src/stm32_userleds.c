@@ -197,11 +197,11 @@ void board_userled_all(uint8_t ledset)
 }
 
 /****************************************************************************
- * Name: stm32_led_pminitialize
+ * Name: stm32l4_led_pminitialize
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32_led_pminitialize(void)
+void stm32l4_led_pminitialize(void)
 {
   /* Register to receive power management callbacks */
 

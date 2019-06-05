@@ -115,10 +115,8 @@ static const struct file_operations g_lm75fops =
   lm75_read,
   lm75_write,
   NULL,
-  lm75_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lm75_ioctl,
+  NULL
 };
 
 /****************************************************************************
@@ -449,7 +447,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Wrtie to the configuration register. Arg:  uint8_t value */
+      /* Write to the configuration register. Arg:  uint8_t value */
 
       case SNIOC_WRITECONF:
         ret = lm75_writeconf(priv, (uint8_t)arg);

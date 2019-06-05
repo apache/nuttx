@@ -54,7 +54,7 @@
 #include "up_internal.h"
 
 #include "tms570_gio.h"
-#include "chip/tms570_gio.h"
+#include "hardware/tms570_gio.h"
 
 #ifdef CONFIG_TMS570_GIO_IRQ
 

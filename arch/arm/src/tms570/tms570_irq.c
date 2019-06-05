@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/tms570_vim.h"
+#include "hardware/tms570_vim.h"
 #include "tms570_gio.h"
 #include "tms570_esm.h"
 #include "tms570_irq.h"

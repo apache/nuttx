@@ -638,6 +638,15 @@ struct usbhid_descriptor_s
   uint8_t ndesc;      /* Number of descriptors (>=1) */
   uint8_t classdesc;  /* Class descriptor type (See 7.1) */
   uint8_t desclen[2]; /* Size of the report descriptor */
+                      /* Optional descriptors may follow */
+};
+
+/* The HID descriptior is can be variable length.  It may be include an
+ * arbitray number of optional descriptors.
+ */
+
+struct usbhid_optdesc_s
+{
   uint8_t optdesc;    /* Type of optional descriptor */
   uint8_t optlen[2];  /* Size of the optional descriptor */
 };

@@ -46,16 +46,16 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32L15XX)
-#  include "chip/stm32l15xxx_uart.h"
+#  include "hardware/stm32l15xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32f10xxx_uart.h"
+#  include "hardware/stm32f10xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_uart.h"
+#  include "hardware/stm32f20xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX)
-#  include "chip/stm32f30xxx_uart.h"
+#  include "hardware/stm32f30xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "chip/stm32f40xxx_uart.h"
+#  include "hardware/stm32f40xxx_uart.h"
 #else
 #  error "Unsupported STM32 UART"
 #endif

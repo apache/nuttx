@@ -49,6 +49,16 @@ config ARCH_BOARD_AVR32DEV1
 		Atmel website.  STATUS: This port is functional but very basic.  There
 		are configurations for NSH and the OS test.
 
+config ARCH_BOARD_AXOLOTI
+	bool "Axoloti board"
+	depends on ARCH_CHIP_STM32F427I
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Axoloti synthesizer board based on the STMicro STM32F427IGH6 MCU.
+		See: http://www.axoloti.com/
+
 config ARCH_BOARD_C5471EVM
 	bool "Spectrum Digital C5471 evaluation board"
 	depends on ARCH_CHIP_C5471
@@ -601,6 +611,17 @@ config ARCH_BOARD_LPC1766STK
 		This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
 		Linux or Cygwin.  STATUS: Complete and mature.
 
+config ARCH_BOARD_MAKERLISP
+	bool "MakerLisp"
+	depends on ARCH_CHIP_EZ80F91
+	select ARCH_HAVE_LEDS
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the MakerLips machine
+		based on an eZ80F091 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under Windows. A
+		Windows native development environment is available but has not
+		been verified.
+
 config ARCH_BOARD_MAPLE
 	bool "maple board"
 	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
@@ -1033,6 +1054,16 @@ config ARCH_BOARD_NUCLEO_F446RE
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F446RE in the NuttX source tree.
+
+config ARCH_BOARD_NUCLEO_G071RB
+	bool "STM32G071 Nucleo G071RB"
+	depends on ARCH_CHIP_STM32G071RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		Nucleo G071RB in the NuttX source tree.
 
 config ARCH_BOARD_NUCLEO_H743ZI
 	bool "STM32H743 Nucleo H743ZI"
@@ -1492,7 +1523,7 @@ config ARCH_BOARD_STM32L_DISCOVERY
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32L-Discovery board based on the STMicro STM32L152RBT6 or
-		STM32L1 MCUs.
+		STM32L152RCT6 MCUs.
 
 config ARCH_BOARD_STM32VL_DISCOVERY
 	bool "STMicro STM32VL-Discovery board"
@@ -1713,6 +1744,16 @@ config ARCH_BOARD_ZKITARM
 		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
 		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
 
+config ARCH_BOARD_SPRESENSE
+	bool "Sony Spresense Board"
+	depends on ARCH_CHIP_CXD56XX
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_HAVE_POWEROFF
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	depends on ARCH_SIM
@@ -1794,6 +1835,7 @@ config ARCH_BOARD
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
+	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
@@ -1839,6 +1881,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "maple"                    if ARCH_BOARD_MAPLE
+	default "makerlisp"                if ARCH_BOARD_MAKERLISP
 	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
 	default "mbed"                     if ARCH_BOARD_MBED
 	default "mcb1700"                  if ARCH_BOARD_MCB1700
@@ -1863,6 +1906,7 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
+	default "nucleo-g071rb"            if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-l073rz"            if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"            if ARCH_BOARD_NUCLEO_L152RE
@@ -1959,6 +2003,7 @@ config ARCH_BOARD
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
+	default "spresense"                if ARCH_BOARD_SPRESENSE
 
 comment "Common Board Options"
 
@@ -2136,6 +2181,9 @@ endif
 if ARCH_BOARD_LPCXPRESSO_LPC54628
 source "configs/lpcxpresso-lpc54628/Kconfig"
 endif
+if ARCH_BOARD_MAKERLISP
+source "configs/makerlisp/Kconfig"
+endif
 if ARCH_BOARD_MAPLE
 source "configs/maple/Kconfig"
 endif
@@ -2216,6 +2264,9 @@ source "configs/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F410RB
 source "configs/nucleo-f410rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_G071RB
+source "configs/nucleo-g071rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "configs/nucleo-h743zi/Kconfig"
@@ -2483,6 +2534,9 @@ source "configs/zp214xpa/Kconfig"
 endif
 if ARCH_BOARD_ZKITARM
 source "configs/zkit-arm-1769/Kconfig"
+endif
+if ARCH_BOARD_SPRESENSE
+source "configs/spresense/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"

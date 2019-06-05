@@ -140,10 +140,8 @@ static const struct file_operations g_adxl372_fops =
   adxl372_read,
   adxl372_write,
   adxl372_seek,
-  adxl372_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  adxl372_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
-#include "chip/sam_emac.h"
+#include "hardware/sam_emac.h"
 
 /************************************************************************************
  * Pre-processor Definitions

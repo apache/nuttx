@@ -71,8 +71,8 @@ struct nxbe_fill_s
  ****************************************************************************/
 
 static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
-                        FAR struct nxbe_plane_s *plane,
-                        FAR const struct nxgl_rect_s *rect)
+                          FAR struct nxbe_plane_s *plane,
+                          FAR const struct nxgl_rect_s *rect)
 {
   struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
 
@@ -119,12 +119,26 @@ static inline void nxbe_fill_dev(FAR struct nxbe_window_s *wnd,
     {
       DEBUGASSERT(wnd->be->plane[i].dev.fillrectangle != NULL);
 
+      /* Fill the visible part of the rectangle */
+
       info.cops.visible  = nxbe_clipfill;
       info.cops.obscured = nxbe_clipnull;
       info.color         = color[i];
 
       nxbe_clipper(wnd->above, rect, NX_CLIPORDER_DEFAULT,
                    &info.cops, &wnd->be->plane[i]);
+
+#ifdef CONFIG_NX_SWCURSOR
+      /* Backup and redraw the cursor in the affected region.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipfill().  It is here only because the struct nxbe_state_s
+       * (wnd->be) is not available at that point.  This may result in an
+       * excessive number of cursor updates.
+       */
+
+      nxbe_cursor_backupdraw_dev(wnd->be, rect, i);
+#endif
     }
 }
 
@@ -223,8 +237,13 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
         }
 #endif
 
-      /* Rend the bitmap directly to the graphics device in any case */
+      /* Don't update hidden windows */
 
-      nxbe_fill_dev(wnd, &remaining, color);
+      if (!NXBE_ISHIDDEN(wnd))
+        {
+          /* Rend the bitmap directly to the graphics device */
+
+          nxbe_fill_dev(wnd, &remaining, color);
+        }
     }
 }

@@ -49,12 +49,12 @@
 #include "up_internal.h"
 
 #include "sam_clockconfig.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_eefc.h"
-#include "chip/sam_wdt.h"
-#include "chip/sam_supc.h"
-#include "chip/sam_matrix.h"
-#include "chip/sam_utmi.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_eefc.h"
+#include "hardware/sam_wdt.h"
+#include "hardware/sam_supc.h"
+#include "hardware/sam_matrix.h"
+#include "hardware/sam_utmi.h"
 
 /****************************************************************************
  * Pre-processor Definitions

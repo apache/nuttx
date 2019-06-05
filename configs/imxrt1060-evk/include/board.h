@@ -1,9 +1,10 @@
 /************************************************************************************
  * configs/imxrt1060/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Dave Marples <dave@marples.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -196,6 +197,15 @@
 
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+/* ETH Disambiguation ***************************************************************/
+
+#define GPIO_ENET_MDIO                  GPIO_ENET_MDIO_3
+#define GPIO_ENET_MDC                   GPIO_ENET_MDC_3
+#define GPIO_ENET_RX_EN                 GPIO_ENET_RX_EN_1
+#define GPIO_ENET_RX_ER                 GPIO_ENET_RX_ER_1
+#define GPIO_ENET_TX_CLK                GPIO_ENET_TX_CLK_1
+#define GPIO_ENET_TX_EN                 GPIO_ENET_TX_EN_1
 
 /* PIO Disambiguation ***************************************************************/
 /* LPUARTs

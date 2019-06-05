@@ -133,9 +133,7 @@ FAR struct task_group_s *task_getgroup(pid_t pid);
 
 /* Signaling group members */
 
-#ifndef CONFIG_DISABLE_SIGNALS
-int  group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
-#endif
+int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
 
 /* Parent/child data management */
 

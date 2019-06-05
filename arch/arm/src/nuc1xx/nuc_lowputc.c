@@ -49,10 +49,10 @@
 
 #include "chip.h"
 #include "nuc_config.h"
-#include "chip/chip/nuc_clk.h"
-#include "chip/chip/nuc_uart.h"
+#include "hardware/nuc_clk.h"
+#include "hardware/nuc_uart.h"
 
-#include "chip/nuc_gcr.h"
+#include "hardware/nuc_gcr.h"
 #include "nuc_lowputc.h"
 
 /****************************************************************************

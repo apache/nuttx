@@ -51,7 +51,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/lpc54_syscon.h"
+#include "hardware/lpc54_syscon.h"
 
 /****************************************************************************
  * Pre-processor Definitions

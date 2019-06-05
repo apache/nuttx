@@ -136,7 +136,7 @@ static struct stm32l4_lptim_priv_s stm32l4_lptim1_priv =
   .ops        = &stm32l4_lptim_ops,
   .mode       = STM32L4_LPTIM_MODE_UNUSED,
   .base       = STM32L4_LPTIM1_BASE,
-  .freq       = STM32L4_LPTIM1_FREQUENCY,  /* Must be efined in board.h */
+  .freq       = STM32L4_LPTIM1_FREQUENCY,  /* Must be defined in board.h */
 };
 #endif
 
@@ -146,7 +146,7 @@ static struct stm32l4_lptim_priv_s stm32l4_lptim2_priv =
   .ops        = &stm32l4_lptim_ops,
   .mode       = STM32L4_LPTIM_MODE_UNUSED,
   .base       = STM32L4_LPTIM2_BASE,
-  .freq       = STM32L4_LPTIM2_FREQUENCY,  /* Must be efined in board.h */
+  .freq       = STM32L4_LPTIM2_FREQUENCY,  /* Must be defined in board.h */
 };
 #endif
 

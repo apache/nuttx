@@ -47,10 +47,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <debug.h>
-
-#ifndef CONFIG_DISABLE_POLL
-#  include <poll.h>
-#endif
+#include <poll.h>
 
 #include <arpa/inet.h>
 
@@ -139,13 +136,8 @@ struct tun_device_s
   bool              read_wait;
   WDOG_ID           txpoll;    /* TX poll timer */
   struct work_s     work;      /* For deferring poll work to the work queue */
-
   FAR struct file  *filep;
-
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd *poll_fds;
-#endif
-
   sem_t             waitsem;
   sem_t             read_wait_sem;
   size_t            read_d_len;
@@ -226,10 +218,8 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen);
 static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int tun_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -244,13 +234,11 @@ static const struct file_operations g_tun_file_ops =
   tun_close,    /* close */
   tun_read,     /* read */
   tun_write,    /* write */
-  0,            /* seek */
+  NULL,         /* seek */
   tun_ioctl,    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
   tun_poll,     /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  0,            /* unlink */
+  NULL,         /* unlink */
 #endif
 };
 
@@ -326,7 +314,6 @@ static void tun_unlock(FAR struct tun_device_s *priv)
  * Name: tun_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void tun_pollnotify(FAR struct tun_device_s *priv,
                            pollevent_t eventset)
 {
@@ -345,9 +332,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
       nxsem_post(fds->sem);
     }
 }
-#else
-#  define tun_pollnotify(dev, event)
-#endif
 
 /****************************************************************************
  * Name: tun_fd_transmit
@@ -1399,7 +1383,6 @@ out:
  * Name: tun_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
@@ -1458,7 +1441,6 @@ errout:
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: tun_ioctl

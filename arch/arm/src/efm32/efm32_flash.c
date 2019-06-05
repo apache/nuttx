@@ -80,8 +80,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/efm32_msc.h"
-#include "chip/efm32_devinfo.h"
+#include "hardware/efm32_msc.h"
+#include "hardware/efm32_devinfo.h"
 
 #include "efm32_bitband.h"
 

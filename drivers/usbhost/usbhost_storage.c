@@ -261,7 +261,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd,
  * device.
  */
 
-static const const struct usbhost_id_s g_id =
+static const struct usbhost_id_s g_id =
 {
   USB_CLASS_MASS_STORAGE, /* base     */
   USBMSC_SUBCLASS_SCSI,  /* subclass */

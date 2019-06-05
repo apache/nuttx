@@ -62,7 +62,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/lpc17_uart.h"
+#include "hardware/lpc17_uart.h"
 #include "lpc17_gpio.h"
 #include "lpc17_serial.h"
 

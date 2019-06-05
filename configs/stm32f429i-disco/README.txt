@@ -41,7 +41,7 @@ Contents
   - Ser
   - Timer Inputs/Outputs
   - FPU
-  - FSMC SRAM
+  - FMC SDRAM
   - STM32F429I-DISCO-specific Configuration Options
   - Configurations
 
@@ -323,7 +323,7 @@ FMC SDRAM
 On-board SDRAM
 --------------
 The STM32F429I-DISCO has 8 MBytes on-board SDRAM connected to the MCU's
-SDRAM Bank 2 connections (Bank 6 of the FSMC).  This means the 8 MBytes
+SDRAM Bank 2 connections (Bank 6 of the FMC).  This means the 8 MiB
 (when enabled) is mapped to address 0xD0000000-0xD07FFFFF.  The port for
 the STM32F429I-DISCO board includes support for using the onboard 8M SDRAM.
 
@@ -336,20 +336,20 @@ to exclude CCM SRAM from the heap:
 
   CONFIG_STM32_CCMEXCLUDE    : Exclude CCM SRAM from the HEAP
 
-In addition to internal SRAM, SRAM may also be available through the FSMC.
-In order to use FSMC SRAM, the following additional things need to be
+In addition to internal SRAM, SRAM may also be available through the FMC.
+In order to use FMC SDRAM, the following additional things need to be
 present in the NuttX configuration file:
 
-  CONFIG_STM32_FSMC=y        : Enables the FSMC and the 8MByte SDRAM
-  CONFIG_STM32_FSMC_SRAM=y   : Indicates that SRAM is available via the
-                               FSMC (as opposed to an LCD or FLASH).
-  CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
-                               address space.  This should be 0xD0000000.
-  CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
-                               address space.  This should be 8388608.
-  CONFIG_MM_REGIONS          : Must be set to a large enough value to
-                               include the FSMC SDRAM (1, 2 or 3 depending
-                               if the CCM RAM and/or FSCM SDRAM are enabled).
+  CONFIG_STM32_FMC=y          : Enables the FMC and the 8MiB SDRAM
+  CONFIG_STM32_EXTERNAL_RAM=y : Indicates that RAM is available via the
+                                FMC (as opposed to an LCD or FLASH).
+  CONFIG_HEAP2_BASE           : The base address of the RAM in the FMC
+                                address space.  This should be 0xD0000000.
+  CONFIG_HEAP2_SIZE           : The size of the RAM in the FMC
+                                address space.  This should be 8388608.
+  CONFIG_MM_REGIONS           : Must be set to a large enough value to
+                                include the FMC SDRAM (1, 2 or 3 depending
+                                if the CCM RAM and/or FMC SDRAM are enabled).
 
 SRAM Configurations
 --------------------
@@ -357,19 +357,19 @@ There are 4 possible SRAM configurations:
 
   Configuration 1. System SRAM (only)
                    CONFIG_MM_REGIONS == 1
-                   CONFIG_STM32_FSMC_SRAM NOT defined
+                   CONFIG_STM32_EXTERNAL_RAM NOT defined
                    CONFIG_STM32_CCMEXCLUDE defined
   Configuration 2. System SRAM and CCM SRAM
                    CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM NOT defined
+                   CONFIG_STM32_EXTERNAL_RAM NOT defined
                    CONFIG_STM32_CCMEXCLUDE NOT defined
-  Configuration 3. System SRAM and FSMC SRAM
+  Configuration 3. System SRAM and FMC SDRAM
                    CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM defined
+                   CONFIG_STM32_EXTERNAL_RAM defined
                    CONFIG_STM32_CCMEXCLUDE defined
-  Configuration 4. System SRAM, CCM SRAM, and FSMC SRAM
+  Configuration 4. System SRAM, CCM SRAM, and FMC SDRAM
                    CONFIG_MM_REGIONS == 3
-                   CONFIG_STM32_FSMC_SRAM defined
+                   CONFIG_STM32_EXTERNAL_RAM defined
                    CONFIG_STM32_CCMEXCLUDE NOT defined
 
 STM32F429I-DISCO-specific Configuration Options
@@ -427,16 +427,16 @@ STM32F429I-DISCO-specific Configuration Options
 
     CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
 
-    In addition to internal SRAM, SRAM may also be available through the FSMC.
-    In order to use FSMC SRAM, the following additional things need to be
+    In addition to internal SRAM, SDRAM may also be available through the FMC.
+    In order to use FMC SDRAM, the following additional things need to be
     present in the NuttX configuration file:
 
-    CONFIG_STM32_FSMC_SRAM - Indicates that SRAM is available via the
-      FSMC (as opposed to an LCD or FLASH).
+    CONFIG_STM32_EXTERNAL_RAM - Indicates that SDRAM is available via the
+      FMC (as opposed to an LCD or FLASH).
 
-    CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)
+    CONFIG_HEAP2_BASE - The base address of the SDRAM in the FMC address space (hex)
 
-    CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
+    CONFIG_HEAP2_SIZE - The size of the SDRAM in the FMC address space (decimal)
 
     CONFIG_ARCH_FPU - The STM32F429I-DISCO supports a floating point unit (FPU)
 
@@ -476,7 +476,7 @@ STM32F429I-DISCO-specific Configuration Options
 
     AHB3
     ----
-    CONFIG_STM32_FSMC
+    CONFIG_STM32_FMC
 
     APB1
     ----

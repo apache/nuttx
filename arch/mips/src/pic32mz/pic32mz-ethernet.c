@@ -72,7 +72,7 @@
 #include "up_internal.h"
 
 #include "pic32mz-config.h"
-#include "chip/pic32mz-ethernet.h"
+#include "hardware/pic32mz-ethernet.h"
 
 /* Does this chip have and Ethernet controller? */
 

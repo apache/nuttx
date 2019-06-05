@@ -95,6 +95,7 @@ config ARCH_CHIP_STM32F723RE
 config ARCH_CHIP_STM32F723VC
 	bool "STM32F723VC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_V
 	---help---
@@ -103,6 +104,7 @@ config ARCH_CHIP_STM32F723VC
 config ARCH_CHIP_STM32F723VE
 	bool "STM32F723VE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_V
 	---help---
@@ -111,6 +113,7 @@ config ARCH_CHIP_STM32F723VE
 config ARCH_CHIP_STM32F723ZC
 	bool "STM32F723ZC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_Z
 	---help---
@@ -119,6 +122,7 @@ config ARCH_CHIP_STM32F723ZC
 config ARCH_CHIP_STM32F723ZE
 	bool "STM32F723ZE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_Z
 	---help---
@@ -127,6 +131,7 @@ config ARCH_CHIP_STM32F723ZE
 config ARCH_CHIP_STM32F723IC
 	bool "STM32F723IC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_I
 	---help---
@@ -135,6 +140,7 @@ config ARCH_CHIP_STM32F723IC
 config ARCH_CHIP_STM32F723IE
 	bool "STM32F723IE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_I
 	---help---
@@ -666,6 +672,7 @@ config STM32F7_STM32F722XX
 	select STM32F7_HAVE_SPI5 if !(STM32F7_IO_CONFIG_R || STM32F7_IO_CONFIG_V)
 	select STM32F7_HAVE_CRYP
 	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_R
+	select STM32F7_HAVE_EXTERNAL_ULPI
 
 config STM32F7_STM32F723XX
 	bool
@@ -724,6 +731,7 @@ config STM32F7_STM32F746XX
 	select STM32F7_HAVE_DMA2D
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
+	select STM32F7_HAVE_EXTERNAL_ULPI
 
 config STM32F7_STM32F756XX
 	bool
@@ -1110,6 +1118,27 @@ config STM32F7_FLASH_ART_ACCELERATOR
 		Enable if code and/or read-only data is accessed through ITCM bus instead of
 		AXIM bus.
 
+config STM32F7_PROGMEM
+	bool "Flash progmem support"
+	default n
+	---help---
+		Add progmem support, start block and end block options are provided to 
+		obtain an uniform flash memory mapping.
+
+if STM32F7_PROGMEM
+
+config STM32F7_PROGMEM_STARTBLOCK
+	int "First mapped progmem block"
+	default 0
+	range 0 64
+
+config STM32F7_PROGMEM_LASTBLOCK
+	int "Last mapped progmem block"
+	default -1
+	range -1 64
+
+endif # STM32F7_PROGMEM
+
 menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
@@ -1196,6 +1225,14 @@ config STM32F7_HAVE_HASH
 	default n
 
 config STM32F7_HAVE_DFSDM1
+	bool
+	default n
+
+config STM32F7_HAVE_INTERNAL_ULPI
+	bool
+	default n
+
+config STM32F7_HAVE_EXTERNAL_ULPI
 	bool
 	default n
 
@@ -1427,8 +1464,8 @@ config STM32F7_OTGFS
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
-config STM32F7_OTGHS
-	bool "OTG HS"
+config STM32F7_OTGFSHS
+	bool "OTG FS/HS"
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
@@ -1953,6 +1990,33 @@ endif
 
 endmenu # U[S]ART Configuration
 
+menu "STM32F7_OTG_HS Configuration"
+	depends on STM32F7_OTGFSHS
+
+choice
+	prompt "ULPI Selection"
+	default STM32F7_NO_ULPI
+
+config STM32F7_NO_ULPI
+	bool "No External ULPI"
+	---help---
+	Select to enable the presence of an external ULPI PHY
+
+config STM32F7_EXTERNAL_ULPI
+	 bool "External ULPI"
+	depends on STM32F7_HAVE_EXTERNAL_ULPI
+	---help---
+		Select to enable the presence of an external ULPI PHY
+
+config STM32F7_INTERNAL_ULPI
+	bool "Internal ULPI PHY"
+	depends on STM32F7_HAVE_INTERNAL_ULPI
+	---help---
+		Select to enable the internal ULPI for USB HS
+endchoice #"ULPI Selection"
+
+endmenu # OTG_HS Config
+
 menu "QuadSPI Configuration"
 	depends on STM32F7_QUADSPI
 
@@ -2103,7 +2167,7 @@ config STM32F7_SPI_DMA
 	default n
 	---help---
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
-		
+
 config STM32F7_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
@@ -2405,6 +2469,27 @@ config STM32F7_DMACAPABLE
 		attempt the DMA or fall back to a different transfer method.
 
 menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config STM32F7_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 2
+	range 1 14
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config STM32F7_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
 
 config STM32F7_TIM1_PWM
 	bool "TIM1 PWM"

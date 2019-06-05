@@ -36,19 +36,28 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
-# These are the directories where the ZDS-II toolchain is installed.  NOTE
-# that short 8.3 path names are used in order to avoid spaces.  On my machine
-# I have:
+# These are the default directories where the ZDS-II toolchain is installed.
+# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
+# machine I have:
 #
-# C:\PROGRA~1\ = C:\Profram Files\
-# C:\PROGRA~2\ = C:\Program Files (x86)\
+# Versions 5.0.1
+#   C:\PROGRA~1\ = C:\Program Files\
+#   C:\PROGRA~2\ = C:\Program Files (x86)\
 #
 # Your PC may be configured differently.
+#
+# Version 5.2.1, the default install location is C:\ZiLOG
 
-ZDSVERSION = 5.0.1
+ifeq ($(CONFIG_Z16F_ZDSII_V511),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
+ZDSVERSION := 5.0.1
+else ifeq ($(CONFIG_Z16F_ZDSII_V521),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.2.1
+endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
+  ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
   INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
   ZDSBINDIR = $(INSTALLDIR)\bin
   ZDSSTDINCDIR = $(INSTALLDIR)\include\std
@@ -64,7 +73,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCHUSRINCLUDES = -usrinc:.
 else
   WINTOOL = y
-  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
+  ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
   INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
   ZDSBINDIR = $(INSTALLDIR)/bin
   ZDSSTDINCDIR = $(INSTALLDIR)/include/std
@@ -147,11 +156,11 @@ LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)configs$(DELIM)z16f2800100zcog$(DELIM)scripts
 # Tool names/pathes
 
 CROSSDEV =
-CC = zneocc.exe
+CC = $(ZDSBINDIR)$(DELIM)zneocc.exe
 CPP = gcc -E
-LD = zneolink.exe
-AS = zneoasm.exe
-AR = zneolib.exe
+LD = $(ZDSBINDIR)$(DELIM)zneolink.exe
+AS = $(ZDSBINDIR)$(DELIM)zneoasm.exe
+AR = $(ZDSBINDIR)$(DELIM)zneolib.exe
 
 # File extensions
 
@@ -180,9 +189,8 @@ define ASSEMBLE
 endef
 
 define MOVEOBJ
-	$(Q) $(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(Q) $(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	-$(Q) $(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
 endef
 
 define ARCHIVE
@@ -207,17 +215,16 @@ define PREPROCESS
 endef
 
 define COMPILE
-	$(Q) (wfile=`cygpath -w "$1"`; "$(CC)" $(CFLAGS) $$wfile)
+	$(Q) "$(CC)" $(CFLAGS) `cygpath -w "$1"`
 endef
 
 define ASSEMBLE
-	$(Q) (wfile=`cygpath -w "$1"`; "$(AS)" $(AFLAGS) $$wfile)
+	$(Q) "$(AS)" $(AFLAGS) `cygpath -w "$1"`
 endef
 
 define MOVEOBJ
-	$(Q) $(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(Q) $(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	-$(Q) $(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
 endef
 
 define ARCHIVE
@@ -243,7 +250,8 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
   # Windows-native host tools
 
-  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  #MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 else
 
 # Linux/Cygwin host tool definitions
@@ -255,7 +263,7 @@ else
 
   # This is the tool to use for dependencies (i.e., none)
 
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 
   # ZDS-II cannot follow Cygwin soft links, so we will have to use directory copies
 

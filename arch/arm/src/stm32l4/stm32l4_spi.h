@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32l4_spi.h"
+#include "hardware/stm32l4_spi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

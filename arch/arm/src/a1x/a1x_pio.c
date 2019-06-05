@@ -53,7 +53,7 @@
 
 #include "chip.h"
 #include "a1x_pio.h"
-#include "chip/a1x_pio.h"
+#include "hardware/a1x_pio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -118,10 +118,8 @@ static const struct file_operations g_mlx90393_fops =
   mlx90393_read,
   mlx90393_write,
   NULL,
-  mlx90393_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  mlx90393_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

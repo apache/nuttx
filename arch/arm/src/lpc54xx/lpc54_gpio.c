@@ -48,8 +48,8 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "chip/lpc54_iocon.h"
-#include "chip/lpc54_gpio.h"
+#include "hardware/lpc54_iocon.h"
+#include "hardware/lpc54_gpio.h"
 #include "lpc54_gpio.h"
 
 /****************************************************************************

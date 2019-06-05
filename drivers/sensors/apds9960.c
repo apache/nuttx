@@ -144,10 +144,8 @@ static const struct file_operations g_apds9960_fops =
   apds9960_read,   /* read */
   apds9960_write,  /* write */
   NULL,            /* seek */
-  NULL             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL           /* poll */
-#endif
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
 #endif
@@ -1251,7 +1249,7 @@ int apds9960_register(FAR const char *devpath,
   /* Initialize the APDS9960 device structure */
 
   FAR struct apds9960_dev_s *priv =
-    (FAR struct apds9960_dev_s *)kmm_malloc(sizeof(struct apds9960_dev_s));
+    (FAR struct apds9960_dev_s *)kmm_zalloc(sizeof(struct apds9960_dev_s));
 
   if (priv == NULL)
     {
@@ -1260,7 +1258,6 @@ int apds9960_register(FAR const char *devpath,
     }
 
   priv->config         = config;
-  priv->work.worker    = NULL;
   priv->gesture_motion = DIR_NONE;
   nxsem_init(&priv->sample_sem, 0, 0);
 

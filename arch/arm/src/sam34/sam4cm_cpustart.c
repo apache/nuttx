@@ -55,9 +55,9 @@
 #include "sched/sched.h"
 #include "init/init.h"
 #include "up_internal.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_rstc.h"
-#include "chip/sam4cm_ipc.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_rstc.h"
+#include "hardware/sam4cm_ipc.h"
 #include "sam4cm_periphclks.h"
 
 #ifdef CONFIG_SMP

@@ -45,7 +45,7 @@
 
 #include "up_arch.h"
 
-#include "chip/imxrt_wdog.h"
+#include "hardware/imxrt_wdog.h"
 #include "imxrt_config.h"
 #include <arch/board/board.h> /* Include last:  has dependencies */
 

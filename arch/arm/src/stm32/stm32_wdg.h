@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_wdg.h"
+#include "hardware/stm32_wdg.h"
 
 #ifdef CONFIG_WATCHDOG
 

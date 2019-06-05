@@ -47,7 +47,7 @@
 
 #include "sam_config.h"
 #include "sam_port.h"
-#include "chip/sam_eic.h"
+#include "hardware/sam_eic.h"
 
 #ifdef CONFIG_SAMD5E5_EIC
 

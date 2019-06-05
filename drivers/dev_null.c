@@ -57,10 +57,8 @@ static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-#ifndef CONFIG_DISABLE_POLL
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -73,10 +71,8 @@ static const struct file_operations devnull_fops =
   devnull_read,  /* read */
   devnull_write, /* write */
   NULL,          /* seek */
-  NULL           /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , devnull_poll /* poll */
-#endif
+  NULL,          /* ioctl */
+  devnull_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -108,7 +104,6 @@ static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer, siz
  * Name: devnull_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -123,7 +118,6 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

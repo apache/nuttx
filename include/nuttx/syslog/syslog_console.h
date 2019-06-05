@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/syslog/ramlog.h
+ * include/nuttx/syslog/syslog_console.h
  *
  *   Copyright (C) 2015 Pierre-noel Bouteville. All rights reserved.
  *   Author: Pierre-noel Bouteville <pnb990@gmail.com>

@@ -44,6 +44,7 @@
 
 #include "stm32l4_pwr.h"
 #include "stm32l4_flash.h"
+#include "stm32l4_hsi48.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,6 +66,14 @@
 /* HSE divisor to yield ~1MHz RTC clock */
 
 #define HSE_DIVISOR (STM32L4_HSE_FREQUENCY + 500000) / 1000000
+
+/* Determine if board wants to use HSI48 as 48 MHz oscillator. */
+
+#if defined(CONFIG_STM32L4_HAVE_HSI48) && defined(STM32L4_USE_CLK48)
+#  if STM32L4_CLK48_SEL == RCC_CCIPR_CLK48SEL_HSI48
+#    define STM32L4_USE_HSI48
+#  endif
+#endif
 
 /****************************************************************************
  * Private Data
@@ -403,6 +412,15 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_CAN1EN;
 #endif
 
+#ifdef STM32L4_USE_HSI48
+  if (STM32L4_HSI48_SYNCSRC != SYNCSRC_NONE)
+    {
+      /* Clock Recovery System clock enable */
+
+      regval |= RCC_APB1ENR1_CRSEN;
+    }
+#endif
+
   /* Power interface clock enable.  The PWR block is always enabled so that
    * we can set the internal voltage regulator as required.
    */
@@ -568,6 +586,24 @@ static inline void rcc_enableccip(void)
 
   regval = getreg32(STM32L4_RCC_CCIPR);
 
+#if defined(STM32L4_I2C_USE_HSI16)
+#ifdef CONFIG_STM32L4_I2C1
+  /* Select HSI16 as I2C1 clock source. */
+
+  regval |= RCC_CCIPR_I2C1SEL_HSI;
+#endif
+#ifdef CONFIG_STM32L4_I2C2
+  /* Select HSI16 as I2C2 clock source. */
+
+  regval |= RCC_CCIPR_I2C2SEL_HSI;
+#endif
+#ifdef CONFIG_STM32L4_I2C3
+  /* Select HSI16 as I2C3 clock source. */
+
+  regval |= RCC_CCIPR_I2C3SEL_HSI;
+#endif
+#endif /* STM32L4_I2C_USE_HSI16 */
+
 #if defined(STM32L4_USE_CLK48)
   /* XXX sanity if sdmmc1 or usb or rng, then we need to set the clk48 source
    * and then we can also do away with STM32L4_USE_CLK48, and give better
@@ -588,6 +624,14 @@ static inline void rcc_enableccip(void)
   /* Some peripherals have their clock selection in CCIPR2 register. */
 
   regval = getreg32(STM32L4_RCC_CCIPR2);
+
+#if defined(STM32L4_I2C_USE_HSI16)
+#ifdef CONFIG_STM32L4_I2C4
+  /* Select HSI16 as I2C4 clock source. */
+
+  regval |= RCC_CCIPR2_I2C4SEL_HSI;
+#endif
+#endif
 
 #ifdef CONFIG_STM32L4_DFSDM1
   /* Select SAI1 as DFSDM audio clock source. */
@@ -618,7 +662,7 @@ static void stm32l4_stdclockconfig(void)
   uint32_t regval;
   volatile int32_t timeout;
 
-#ifdef STM32L4_BOARD_USEHSI
+#if defined(STM32L4_BOARD_USEHSI) || defined(STM32L4_I2C_USE_HSI16)
   /* Enable Internal High-Speed Clock (HSI) */
 
   regval  = getreg32(STM32L4_RCC_CR);
@@ -638,6 +682,10 @@ static void stm32l4_stdclockconfig(void)
           break;
         }
     }
+#endif
+
+#if defined(STM32L4_BOARD_USEHSI)
+  /* Already set above */
 
 #elif defined(STM32L4_BOARD_USEMSI)
   /* Enable Internal Multi-Speed Clock (MSI) */
@@ -708,21 +756,20 @@ static void stm32l4_stdclockconfig(void)
   if (timeout > 0)
     {
 #warning todo: regulator voltage according to clock freq
-#if 0
       /* Ensure Power control is enabled before modifying it. */
 
-      regval  = getreg32(STM32L4_RCC_APB1ENR);
-      regval |= RCC_APB1ENR_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR);
+      regval  = getreg32(STM32L4_RCC_APB1ENR1);
+      regval |= RCC_APB1ENR1_PWREN;
+      putreg32(regval, STM32L4_RCC_APB1ENR1);
 
-      /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 168 MHz.
+      /* Switch to Range 1 boost mode to support system
+       * frequencies up to 120 MHz. Range 2 is not supported.
        */
 
-      regval  = getreg32(STM32L4_PWR_CR);
-      regval &= ~PWR_CR_VOS_MASK;
-      regval |= PWR_CR_VOS_SCALE_1;
-      putreg32(regval, STM32L4_PWR_CR);
+#if STM32L4_SYSCLK_FREQUENCY > 80000000
+      regval  = getreg32(STM32L4_PWR_CR5);
+      regval &= ~PWR_CR5_R1MODE;
+      putreg32(regval, STM32L4_PWR_CR5);
 #endif
 
       /* Set the HCLK source/divider */
@@ -915,15 +962,6 @@ static void stm32l4_stdclockconfig(void)
        * XXX and other cases, like automatic trimming of MSI for USB use
        */
 
-      /* ensure Power control is enabled since it is indirectly required
-       * to alter the LSE parameters.
-       */
-      stm32l4_pwr_enableclk(true);
-
-      /* XXX other LSE settings must be made before turning on the oscillator
-       * and we need to ensure it is first off before doing so.
-       */
-
       /* Turn on the LSE oscillator
        * XXX this will almost surely get moved since we also want to use
        * this for automatically trimming MSI, etc.
@@ -938,7 +976,7 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_CR_MSIPLLEN;
       putreg32(regval, STM32L4_RCC_CR);
 #  endif
-#endif
+#endif /* STM32L4_USE_LSE */
     }
 }
 #endif
@@ -955,6 +993,12 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb3();
   rcc_enableapb1();
   rcc_enableapb2();
+
+#ifdef STM32L4_USE_HSI48
+  /* Enable HSI48 clocking to to support USB transfers or RNG */
+
+  stm32l4_enable_hsi48(STM32L4_HSI48_SYNCSRC);
+#endif
 }
 
 /****************************************************************************

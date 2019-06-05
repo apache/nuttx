@@ -70,15 +70,15 @@
 #  include "sam_dmac.h"
 #endif
 
-#include "chip/sam_pmc.h"
-#include "chip/sam_hsmci.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_hsmci.h"
+#include "hardware/sam_pinmap.h"
 
 #ifdef CONFIG_SAM34_DMAC
-#  include "chip/sam_dmac.h"
+#  include "hardware/sam_dmac.h"
 #endif
 #ifdef CONFIG_SAM34_PDCA
-#  include "chip/sam_pdc.h"
+#  include "hardware/sam_pdc.h"
 #endif
 
 #ifdef CONFIG_SAM34_HSMCI

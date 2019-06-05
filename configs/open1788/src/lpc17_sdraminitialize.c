@@ -47,7 +47,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/lpc17_syscon.h"
+#include "hardware/lpc17_syscon.h"
 #include "lpc17_emc.h"
 
 #include "open1788.h"

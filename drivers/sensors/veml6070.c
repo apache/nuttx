@@ -102,10 +102,8 @@ static const struct file_operations g_veml6070_fops =
   veml6070_read,   /* read */
   veml6070_write,  /* write */
   NULL,            /* seek */
-  NULL             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL           /* poll */
-#endif
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
 #endif

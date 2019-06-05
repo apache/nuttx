@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/scripts/memory.ld
+ * configs/stm32l476vg-disco/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,14 +47,14 @@
  * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
  * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
  * should fit into 64KB and, of course, can be optimized as needed (See
- * also configs/stm32f4discovery/scripts/kernel-space.ld).  Allowing the
+ * also configs/stm32l476vg-disco/scripts/kernel-space.ld).  Allowing the
  * additional does permit addition debug instrumentation to be added to the
  * kernel space without overflowing the partition.
  *
  * Alignment of the user space FLASH partition is also a critical factor:
  * The user space FLASH partition will be spanned with a single region of
  * size 2**n bytes.  The alignment of the user-space region must be the same.
- * As a consequence, as the user-space increases in size, the alignmment
+ * As a consequence, as the user-space increases in size, the alignment
  * requirement also increases.
  *
  * This alignment requirement means that the largest user space FLASH region
@@ -95,6 +95,6 @@ MEMORY
     /* 96Kb of contiguous SRAM */
 
     ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 8K
-    usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 8K
-    xsram (rwx)      : ORIGIN = 0x20002000, LENGTH = 80K
+    usram (rwx)      : ORIGIN = 0x20002000, LENGTH = 8K
+    xsram (rwx)      : ORIGIN = 0x20004000, LENGTH = 80K
 }

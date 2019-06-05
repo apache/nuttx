@@ -67,7 +67,6 @@ config RAMLOG_NONBLOCKING
 config RAMLOG_NPOLLWAITERS
 	int "RAMLOG number of poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		The maximum number of threads that may be waiting on the poll method.
 

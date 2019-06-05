@@ -52,8 +52,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -148,5 +146,3 @@ void up_sigdeliver(void)
   board_autoled_off(LED_SIGNAL);
   up_fullcontextrestore(regs);
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */

@@ -190,10 +190,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32L4_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32_SPI2
+#ifdef CONFIG_STM32L4_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 
@@ -230,6 +230,18 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
  ************************************************************************************/
 
 int stm32l4_dac_setup(void);
+
+/************************************************************************************
+ * Name: stm32_dfsdm_setup
+ *
+ * Description:
+ *   Initialize DFSDM and register the ADC drivers for DFSDM filters.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32L4_DFSDM)
+int stm32_dfsdm_setup(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_spiinitialize

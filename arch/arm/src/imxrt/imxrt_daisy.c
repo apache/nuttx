@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include "chip.h"
 #include "up_arch.h"
-#include "chip/imxrt_daisy.h"
+#include "hardware/imxrt_daisy.h"
 #include "imxrt_iomuxc.h"
 
 /****************************************************************************
@@ -79,7 +79,9 @@ struct imxrt_daisy_t
 
 /* Include chip-specific daisy input selection */
 
-#if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include "imxrt102x_daisy.c"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
 #  include "imxrt105x_daisy.c"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
 #  include "imxrt106x_daisy.c"

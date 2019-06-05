@@ -145,9 +145,7 @@ struct pty_dev_s
   tcflag_t pd_oflag;            /* Terminal output modes */
 #endif
 
-#ifndef CONFIG_DISABLE_POLL
   struct pty_poll_s pd_poll[CONFIG_DEV_PTY_NPOLLWAITERS];
-#endif
 };
 
 /* This structure describes the pipe pair */
@@ -185,10 +183,8 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     pty_unlink(FAR struct inode *inode);
 #endif
@@ -209,10 +205,8 @@ static const struct file_operations g_pty_fops =
   pty_read,      /* read */
   pty_write,     /* write */
   NULL,          /* seek */
-  pty_ioctl      /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , pty_poll     /* poll */
-#endif
+  pty_ioctl,     /* ioctl */
+  pty_poll       /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pty_unlink   /* unlink */
 #endif
@@ -934,7 +928,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: pty_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
@@ -1017,7 +1010,6 @@ errout:
   pty_semgive(devpair);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: pty_unlink

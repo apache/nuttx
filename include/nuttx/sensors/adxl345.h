@@ -53,8 +53,6 @@
  *
  * CONFIG_SCHED_WORKQUEUE - Work queue support is required
  *
- * Settings that effect the driver: CONFIG_DISABLE_POLL
- *
  * CONFIG_SENSORS_ADXL345
  *   Enables support for the ADXL345 driver
  * CONFIG_ADXL345_SPI
@@ -68,10 +66,6 @@
  * CONFIG_ADXL345_REGDEBUG
  *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
  */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
-#endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."

@@ -114,6 +114,10 @@
 #define GPIO_SX127X_CRF2  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN2)
 #define GPIO_SX127X_CRF3  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN1)
 
+/* Oled configuration */
+
+#define OLED_I2C_PORT   1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -146,7 +150,7 @@ int stm32_bringup(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32F0L0_SPI
+#ifdef CONFIG_STM32F0L0G0_SPI
 void stm32_spidev_initialize(void);
 #endif
 
@@ -159,6 +163,18 @@ void stm32_spidev_initialize(void);
 
 #ifdef CONFIG_LPWAN_SX127X
 int stm32_lpwaninitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
 #endif
 
 #endif /* __CONFIGS_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H */

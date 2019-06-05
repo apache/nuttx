@@ -49,7 +49,7 @@
 #include "stm32_spi.h"
 #include "nucleo-l073rz.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32F0L0_SPI2) && defined(CONFIG_CL_MFRC522)
+#if defined(CONFIG_SPI) && defined(CONFIG_STM32F0L0G0_SPI2) && defined(CONFIG_CL_MFRC522)
 
 /************************************************************************************
  * Pre-processor Definitions

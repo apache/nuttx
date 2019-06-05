@@ -56,7 +56,7 @@
 #include "up_arch.h"
 #include "sam_pio.h"
 #include "sam_usbhost.h"
-#include "chip/sam_ohci.h"
+#include "hardware/sam_ohci.h"
 #include "sama5d3-xplained.h"
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)

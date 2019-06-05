@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-CSRCS += nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redrawreq.c
+CSRCS += nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redraw.c
 CSRCS += nxmu_releasebkgd.c nxmu_requestbkgd.c nxmu_reportposition.c
 CSRCS += nxmu_sendclient.c nxmu_sendclientwindow.c nxmu_server.c
 CSRCS += nxmu_start.c

@@ -55,7 +55,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/lpc17_syscon.h"
+#include "hardware/lpc17_syscon.h"
 #include "lpc17_gpio.h"
 #include "lpc17_ssp.h"
 

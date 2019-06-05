@@ -119,9 +119,7 @@ static int ads7843e_open(FAR struct file *filep);
 static int ads7843e_close(FAR struct file *filep);
 static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len);
 static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int ads7843e_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -136,10 +134,8 @@ static const struct file_operations ads7843e_fops =
   ads7843e_read,    /* read */
   0,                /* write */
   0,                /* seek */
-  ads7843e_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , ads7843e_poll   /* poll */
-#endif
+  ads7843e_ioctl,   /* ioctl */
+  ads7843e_poll     /* poll */
 };
 
 /* If only a single ADS7843E device is supported, then the driver state
@@ -292,9 +288,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -315,7 +309,6 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_ADS7843E_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -326,7 +319,6 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1035,7 +1027,6 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: ads7843e_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1121,11 +1112,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

@@ -40,8 +40,7 @@
 
 #include <nuttx/config.h>
 
-#include <chip/stm32l4_memorymap.h>
-
+#include "hardware/stm32l4_memorymap.h"
 #include "stm32l4_uid.h"
 
 #ifdef STM32L4_SYSMEM_UID

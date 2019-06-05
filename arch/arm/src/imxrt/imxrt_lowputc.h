@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_lowputc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,10 @@ struct uart_config_s
   uint8_t  parity;        /* 0=none, 1=odd, 2=even */
   uint8_t  bits;          /* Number of bits (5-9) */
   bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
+  bool     userts;        /* True: Assert RTS when there are data to be sent */
+  bool     invrts;        /* True: Invert sense of RTS pin (true=active high) */
+  bool     usects;        /* True: Condition transmission on CTS asserted */
+  bool     users485;      /* True: Assert RTS while transmission progresses */
 };
 #endif
 
@@ -84,27 +88,28 @@ struct uart_config_s
 
 void imxrt_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lpuart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_LPUART_DEVICE
-int imxrt_lpuart_configure(uint32_t base, FAR const struct uart_config_s *config);
+int imxrt_lpuart_configure(uint32_t base,
+                           FAR const struct uart_config_s *config);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from U-
+ *   Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_LPUART_DEVICE) && defined(CONFIG_DEBUG_FEATURES)
 void imxrt_lowputc(int ch);

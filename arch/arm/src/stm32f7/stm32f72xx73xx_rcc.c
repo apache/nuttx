@@ -227,8 +227,8 @@ static inline void rcc_enableahb1(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F7_OTGHS
-#ifdef BOARD_ENABLE_USBOTG_HSULPI
+#ifdef CONFIG_STM32F7_OTGFSHS
+#if defined(CONFIG_STM32F7_INTERNAL_ULPI) || defined(CONFIG_STM32F7_EXTERNAL_ULPI)
   /* Enable clocking for  USB OTG HS and external PHY */
 
   regval |= (RCC_AHB1ENR_OTGHSEN | RCC_AHB1ENR_OTGHSULPIEN);
@@ -237,7 +237,7 @@ static inline void rcc_enableahb1(void)
 
   regval |= RCC_AHB1ENR_OTGHSEN;
 #endif
-#endif  /* CONFIG_STM32F7_OTGHS */
+#endif  /* CONFIG_STM32F7_OTGFSHS */
 
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
@@ -657,6 +657,13 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_LTDCEN;
 #endif
 
+#ifdef CONFIG_STM32F7_OTGFSHS
+#ifdef CONFIG_STM32F7_INTERNAL_ULPI
+  regval |= RCC_APB2ENR_OTGPHYCEN;
+
+#endif
+#endif
+
   putreg32(regval, STM32_RCC_APB2ENR);   /* Enable peripherals */
 }
 
@@ -833,8 +840,8 @@ static void stm32_stdclockconfig(void)
       regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
 
 #ifdef CONFIG_STM32F7_FLASH_ART_ACCELERATOR
-      /* The Flash memory interface accelerates code execution with a system of
-       * instruction prefetch and cache lines on ITCM interface (ART
+      /* The Flash memory interface accelerates code execution with a system
+       * of instruction prefetch and cache lines on ITCM interface (ART
        * Accelerator™).
        */
 
@@ -862,7 +869,7 @@ static void stm32_stdclockconfig(void)
        /* Configure PLLSAI */
 
       regval = getreg32(STM32_RCC_PLLSAICFGR);
-      regval &= ~(  RCC_PLLSAICFGR_PLLSAIN_MASK
+      regval &= ~(RCC_PLLSAICFGR_PLLSAIN_MASK
                   | RCC_PLLSAICFGR_PLLSAIP_MASK
                   | RCC_PLLSAICFGR_PLLSAIQ_MASK
 #  if defined(CONFIG_STM32F7_LTDC)
@@ -899,7 +906,6 @@ static void stm32_stdclockconfig(void)
 
       putreg32(regval, STM32_RCC_DCKCFGR1);
 
-
       /* Enable PLLSAI */
 
       regval = getreg32(STM32_RCC_CR);
@@ -917,7 +923,7 @@ static void stm32_stdclockconfig(void)
       /* Configure PLLI2S */
 
       regval = getreg32(STM32_RCC_PLLI2SCFGR);
-      regval &= ~(  RCC_PLLI2SCFGR_PLLI2SN_MASK
+      regval &= ~(RCC_PLLI2SCFGR_PLLI2SN_MASK
 #  if !defined(CONFIG_STM32F7_STM32F72XX) && !defined(CONFIG_STM32F7_STM32F73XX)
                   | RCC_PLLI2SCFGR_PLLI2SP_MASK
 #  endif
@@ -932,7 +938,7 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
 
       regval  = getreg32(STM32_RCC_DCKCFGR2);
-      regval &= ~(  RCC_DCKCFGR2_USART1SEL_MASK
+      regval &= ~(RCC_DCKCFGR2_USART1SEL_MASK
                   | RCC_DCKCFGR2_USART2SEL_MASK
                   | RCC_DCKCFGR2_UART4SEL_MASK
                   | RCC_DCKCFGR2_UART5SEL_MASK
@@ -951,7 +957,7 @@ static void stm32_stdclockconfig(void)
                   | RCC_DCKCFGR2_SDMMCSEL_MASK
                   | RCC_DCKCFGR2_SDMMC2SEL_MASK);
 
-      regval |= (  STM32_RCC_DCKCFGR2_USART1SRC
+      regval |= (STM32_RCC_DCKCFGR2_USART1SRC
                  | STM32_RCC_DCKCFGR2_USART2SRC
                  | STM32_RCC_DCKCFGR2_UART4SRC
                  | STM32_RCC_DCKCFGR2_UART5SRC

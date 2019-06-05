@@ -82,9 +82,7 @@ struct fusb301_dev_s
   volatile bool int_pending;            /* Interrupt received but handled */
   sem_t devsem;                         /* Manages exclusive access */
   FAR struct fusb301_config_s *config;  /* Platform specific configuration */
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd *fds[CONFIG_FUSB301_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -97,11 +95,9 @@ static ssize_t fusb301_read(FAR struct file *, FAR char *, size_t);
 static ssize_t fusb301_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
 static void fusb301_notify(FAR struct fusb301_dev_s *priv);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -114,13 +110,11 @@ static const struct file_operations g_fusb301ops =
   fusb301_read,  /* read */
   fusb301_write, /* write */
   NULL,          /* seek */
-  fusb301_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , fusb301_poll /* poll */
-#endif
+  fusb301_ioctl, /* ioctl */
+  fusb301_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
- #endif
+#endif
 };
 
 /****************************************************************************
@@ -410,7 +404,7 @@ static int fusb301_set_state(FAR struct fusb301_dev_s *priv,
  * Name: fusb301_read_status
  *
  * Description:
- *   Clear read status register
+ *   Read status register
  *
  ****************************************************************************/
 
@@ -666,7 +660,6 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   This routine is called during FUSB301 device poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode;
@@ -779,7 +772,6 @@ static void fusb301_notify(FAR struct fusb301_dev_s *priv)
         }
     }
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: fusb301_callback
@@ -799,9 +791,7 @@ static int fusb301_int_handler(int irq, FAR void *context, FAR void *arg)
   flags = enter_critical_section();
   priv->int_pending = true;
 
-#ifndef CONFIG_DISABLE_POLL
   fusb301_notify(priv);
-#endif
   leave_critical_section(flags);
 
   return OK;
@@ -848,7 +838,11 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Prepare interrupt line and handler. */
 
-  priv->config->irq_clear(config);
+  if (priv->config->irq_clear)
+    {
+      priv->config->irq_clear(config);
+    }
+
   priv->config->irq_attach(config, fusb301_int_handler, priv);
   priv->config->irq_enable(config, false);
 

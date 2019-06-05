@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
 
@@ -192,6 +193,33 @@
 #  define CONFIG_NXTERM_NPOLLWAITERS 0
 #endif
 
+/* IOCTL commands ***********************************************************/
+
+/* CMD:           NXTERMIOC_NXTERM_REDRAW
+ * DESCRIPTION:   Re-draw a portion of the NX console.  This function
+ *                should be called from the appropriate window callback
+ *                logic.
+ * ARG:           A reference readable instance of struct
+ *                nxtermioc_redraw_s
+ * CONFIGURATION: CONFIG_NXTERM
+ *
+ * CMD:           NXTERMIOC_NXTERM_KBDIN
+ * DESCRIPTION:   Provide NxTerm keyboard input to NX.
+ * ARG:           A reference readable instance of struct nxtermioc_kbdin_s
+ * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
+ *
+ * CMD:           NXTERMIOC_NXTERM_RESIZE
+ * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
+ *                changed
+ * ARG:           A reference readable instance of struct nxtermioc_resize_s
+ * CONFIGURATION: CONFIG_NXTERM
+ */
+
+#define _NXTERMIOC(nr)    _IOC(_NXTERMBASE,nr)
+#define NXTERMIOC_NXTERM_REDRAW     _NXTERMIOC(0x0000)
+#define NXTERMIOC_NXTERM_KBDIN      _NXTERMIOC(0x0001)
+#define NXTERMIOC_NXTERM_RESIZE     _NXTERMIOC(0x0002)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -211,6 +239,34 @@ struct nxterm_window_s
   nxgl_mxpixel_t fcolor[CONFIG_NX_NPLANES]; /* Font color */
   struct nxgl_size_s wsize;                 /* Window/Sub-window size */
   int fontid;                               /* The ID of the font to use */
+};
+
+/* Arguments passed with the NXTERMIOC_NXTERM_REDRAW command */
+
+struct nxtermioc_redraw_s
+{
+  NXTERM handle;                            /* NxTerm handle */
+  struct nxgl_rect_s rect;                  /* Rectangle to be re-drawn */
+  bool more;                                /* True: More redraw commands follow */
+};
+
+#ifdef CONFIG_NXTERM_NXKBDIN
+/* Arguments passed with the NXTERMIOC_NXTERM_KBDIN command */
+
+struct nxtermioc_kbdin_s
+{
+  NXTERM handle;                            /* NxTerm handle */
+  FAR const uint8_t *buffer;                /* Buffered keyboard data */
+  uint8_t buflen;                           /* Amount of data in buffer */
+};
+#endif
+
+/* Arguments passed with the NXTERMIOC_NXTERM_RESIZE command */
+
+struct nxtermioc_resize_s
+{
+  NXTERM handle;                            /* NxTerm handle */
+  struct nxgl_size_s size;                  /* New Window Size */
 };
 
 /****************************************************************************
@@ -315,64 +371,21 @@ NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
                        int minor);
 
 /****************************************************************************
- * Name: nxterm_redraw
+ * Name: nxterm_ioctl_tap
  *
  * Description:
- *   Re-draw a portion of the NX console.  This function should be called
- *   from the appropriate window callback logic.
+ *   Execute an NXTERM IOCTL command from an external caller.
  *
- *   This is an internal NuttX interface and should not be called directly
- *   from applications.  Application access is supported only indirectly via
- *   the boardctl(BOARDIOC_REDRAW) interface.
+ * NOTE:  We don't need driver context here because the NXTERM handle
+ * provided within each of the NXTERM IOCTL command data.  Mutual
+ * exclusion is similar managed by the IOCTL cmmand hendler.
  *
- * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
- *   rect - The rectangle that needs to be re-drawn (in window relative
- *          coordinates)
- *   more - true:  More re-draw requests will follow
- *
- * Returned Value:
- *   None
+ * This permits the IOCTL to be called in abnormal context (such as
+ * from boardctl())
  *
  ****************************************************************************/
 
-void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
-                   bool more);
-
-/****************************************************************************
- * Name: nxterm_kbdin
- *
- * Description:
- *   This function should be driven by the window kbdin callback function
- *   (see nx.h).  When the NxTerm is the top window and keyboard input is
- *   received on the top window, that window callback should be directed to
- *   this function.  This function will buffer the keyboard data and make
- *   it available to the NxTerm as stdin.
- *
- *   If CONFIG_NXTERM_NXKBDIN is not selected, then the NxTerm will
- *   receive its input from stdin (/dev/console).  This works great but
- *   cannot be shared between different windows.  Chaos will ensue if you
- *   try to support multiple NxTerm windows without CONFIG_NXTERM_NXKBDIN
- *
- *   This is an internal NuttX interface and should not be called directly
- *   from applications.  Application access is supported only indirectly via
- *   the boardctl(BOARDIOC_KBDIN) interface.
- *
- * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
- *   buffer   - The array of characters
- *   buflen  - The number of characters that are available in buffer[]
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NXTERM_NXKBDIN
-void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen);
-#endif
+int nxterm_ioctl_tap(int cmd, uintptr_t arg);
 
 #undef EXTERN
 #if defined(__cplusplus)

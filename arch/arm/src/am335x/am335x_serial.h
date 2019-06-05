@@ -43,10 +43,10 @@
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 
-#include "chip/am335x_uart.h"
+#include "hardware/am335x_uart.h"
 
 #include "am335x_config.h"
-#include "chip/am335x_gpio.h"
+#include "hardware/am335x_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

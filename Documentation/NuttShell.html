@@ -1,18 +1,11 @@
 <html>
 <head>
 <title>NuttShell</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body background="backgd.gif">
-<hr><hr>
-<table width ="100%">
-  <tr align="center" bgcolor="#e4e4e4">
-    <td>
-      <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  February 11, 2019</p>
-    </td>
-  </tr>
-</table>
-<hr><hr>
+<div class="container">
+<div class="toc">
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
@@ -21,7 +14,7 @@
   </tr>
 </table>
 
-<center><table width ="80%">
+<table width ="80%" class="toc_table">
 <tr>
 <td>
 <table>
@@ -626,7 +619,21 @@
     <a href="#index">Index</a>
   </td>
 </tr>
-</table></center>
+</table></table>
+</div>
+
+<div class="main">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
+      <p>Last Updated:  February 11, 2019</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
+
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1494,7 +1501,7 @@ date [-s &quot;MMM DD HH:MM:SS YYYY&quot;]
   Only one format is used both on display and when setting the date/time:
   <code>MMM DD HH:MM:SS YYYY</code>.  For example,
 <ul><pre>
-data -s &quot;Sep 1 11:30:00 2011&quot;
+date -s &quot;Sep 1 11:30:00 2011&quot;
 </pre></ul>
 </p>
 <p>
@@ -3731,7 +3738,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>kill</code></b></td>
-    <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_KILL</code></td>
   </tr>
   <tr>
@@ -3881,7 +3888,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>sleep</code></b></td>
-    <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_SLEEP</code></td>
   </tr>
   <tr>
@@ -3941,7 +3948,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>usleep</code></b></td>
-    <td>!<code>CONFIG_DISABLE_SIGNALS</code></td>
+    <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_USLEEP</code></td>
   </tr>
   <tr>
@@ -3996,12 +4003,12 @@ nsh&gt;
   <tr>
     <td><b><code>ping</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMP</code> &amp;&amp;
-        <code>CONFIG_NET_ICMP_SOCKET</code> &amp;&amp; <code>CONFIG_SYSTEM_PING</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code> &amp;&amp; !<code>CONFIG_DISABLE_POLL</code></td>
+        <code>CONFIG_NET_ICMP_SOCKET</code> &amp;&amp; <code>CONFIG_SYSTEM_PING</code></td>
   </tr>
   <tr>
     <td><b><code>ping6</code></b></td>
     <td><code>CONFIG_NET</code> &amp;&amp; <code>CONFIG_NET_ICMPv6</code> &amp;&amp;
-        <code>CONFIG_NET_ICMPv6_SOCKET</code> &amp;&amp; <code>CONFIG_SYSTEM_PING6</code> &amp;&amp; !<code>CONFIG_DISABLE_SIGNALS</code> &amp;&amp; !<code>CONFIG_DISABLE_POLL</code></td>
+        <code>CONFIG_NET_ICMPv6_SOCKET</code> &amp;&amp; <code>CONFIG_SYSTEM_PING6</code></td>
   </tr>
 </table></center>
 
@@ -5912,5 +5919,7 @@ xxd -i romfs_img >nsh_romfsimg.h
 </ul></td>
 </tr></table>
 
+</div>
+</div>
 </body>
 </html>

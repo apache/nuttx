@@ -132,12 +132,12 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 /* Current cursor position */
 
 #ifdef CONFIG_FB_HWCURSOR
-static struct cursor_pos_s g_cpos;
+static struct fb_cursorpos_s g_cpos;
 
 /* Current cursor size */
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-static struct cursor_size_s g_csize;
+static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 
@@ -871,7 +871,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
 
   DEBUGASSERT(pinfo != NULL && rect != NULL);
 
-  /* Recover the session informatin from the display number in the planeinfo
+  /* Recover the session information from the display number in the planeinfo
    * structure.
    */
 

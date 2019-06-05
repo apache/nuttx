@@ -46,7 +46,7 @@
 #include "mpu.h"
 #include "barriers.h"
 
-#include "chip/imxrt_memorymap.h"
+#include "hardware/imxrt_memorymap.h"
 
 #include "imxrt_mpuinit.h"
 

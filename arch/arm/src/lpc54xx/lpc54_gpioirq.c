@@ -46,9 +46,9 @@
 
 #include "up_arch.h"
 
-#include "chip/lpc54_syscon.h"
-#include "chip/lpc54_inputmux.h"
-#include "chip/lpc54_pint.h"
+#include "hardware/lpc54_syscon.h"
+#include "hardware/lpc54_inputmux.h"
+#include "hardware/lpc54_pint.h"
 #include "lpc54_gpio.h"
 
 #ifdef CONFIG_LPC54_GPIOIRQ

@@ -1,2 +1,16 @@
-/.depend
 /Make.dep
+/.depend
+/up_mem.h
+/*.sym
+/*.asm
+/*.rel
+/*.lst
+/*.adb
+/*.rst
+/*.lib
+/*.lnk
+/*.map
+/*.mem
+/*.ihx
+/*.hex
+

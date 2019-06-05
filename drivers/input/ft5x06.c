@@ -144,14 +144,12 @@ struct ft5x06_dev_s
 #endif
   uint8_t touchbuf[FT5x06_TOUCH_DATA_LEN];  /* Raw touch data */
 
-#ifndef CONFIG_DISABLE_POLL
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
    */
 
   struct pollfd *fds[CONFIG_FT5X06_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -180,10 +178,8 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
                            size_t len);
 static int  ft5x06_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int  ft5x06_poll(FAR struct file *filep, struct pollfd *fds,
                         bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -198,10 +194,8 @@ static const struct file_operations ft5x06_fops =
   ft5x06_read,    /* read */
   NULL,           /* write */
   NULL,           /* seek */
-  ft5x06_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , ft5x06_poll   /* poll */
-#endif
+  ft5x06_ioctl,   /* ioctl */
+  ft5x06_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */
 #endif
@@ -227,9 +221,7 @@ static const uint8_t g_event_map[4] =
 
 static void ft5x06_notify(FAR struct ft5x06_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -244,7 +236,6 @@ static void ft5x06_notify(FAR struct ft5x06_dev_s *priv)
       nxsem_post(&priv->waitsem);
     }
 
-#ifndef CONFIG_DISABLE_POLL
   /* If there are threads waiting on poll() for FT5x06 data to become available,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
    * do not know that they are going to do.  If they all try to read the data,
@@ -261,7 +252,6 @@ static void ft5x06_notify(FAR struct ft5x06_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1034,7 +1024,6 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: ft5x06_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1055,7 +1044,7 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was cancelled by an signal */
+      /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
       DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
@@ -1123,7 +1112,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -1177,7 +1165,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   priv = (FAR struct ft5x06_dev_s *)kmm_zalloc(sizeof(struct ft5x06_dev_s));
   if (!priv)
     {
-      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
+      ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
       return -ENOMEM;
     }
 

@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/z80/src/ez80/ez80f91_spi.h
- * arch/z80/src/chip/ez80f91_spi.h
  *
  *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +60,7 @@
  * No bit definitions -- These two 8-bit registers set the 16-bit BRG divider value
  */
 
-/* SPI Control (CTL} Register Definitions */
+/* SPI Control (CTL) Register Definitions */
 
 #define SPI_CTL_IRQEN    (1 << 7) /* Bit 7: 1=SPI system interrupt is enabled */
 #define SPI_CTL_SPIEN    (1 << 5) /* Bit 5: 1=SPI is enabled */

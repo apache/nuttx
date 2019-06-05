@@ -123,10 +123,8 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
                   size_t buflen);
 static int     mtdconfig_ioctl(FAR struct file *filep, int cmd,
                   unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
                   bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -139,10 +137,8 @@ static const struct file_operations mtdconfig_fops =
   mtdconfig_read,  /* read */
   0,               /* write */
   0,               /* seek */
-  mtdconfig_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , mtdconfig_poll /* poll */
-#endif
+  mtdconfig_ioctl, /* ioctl */
+  mtdconfig_poll   /* poll */
 };
 
 /****************************************************************************
@@ -1661,7 +1657,6 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
  * Name: mtdconfig_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup)
 {
@@ -1676,7 +1671,6 @@ static int mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

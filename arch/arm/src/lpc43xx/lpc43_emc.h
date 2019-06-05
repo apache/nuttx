@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc43_emc.h"
+#include "hardware/lpc43_emc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

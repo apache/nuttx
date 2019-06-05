@@ -65,8 +65,8 @@
 #include "lpc17_gpio.h"
 #include "lpc17_sdcard.h"
 
-#include "chip/lpc17_syscon.h"
-#include "chip/lpc17_pinconfig.h"
+#include "hardware/lpc17_syscon.h"
+#include "hardware/lpc17_pinconfig.h"
 
 #ifdef CONFIG_LPC17_SDCARD
 

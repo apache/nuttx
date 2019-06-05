@@ -48,6 +48,7 @@
 
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nxcursor.h>
 #include <nuttx/nx/nxbe.h>
 
 /****************************************************************************
@@ -64,7 +65,7 @@
 
 /* Server flags and helper macros:
  *
- * NXBE_STATE_MODAL     - One window is in a focused, modal state
+ * NXBE_STATE_MODAL  - One window is in a focused, modal state
  */
 
 #define NXBE_STATE_MODAL     (1 << 0) /* Bit 0: One window is in a focused,
@@ -146,18 +147,44 @@ struct nxbe_pwfb_vtable_s
 };
 #endif
 
+#ifdef CONFIG_NX_SWCURSOR
+/* A vtable of raster operation function pointers.  The types of the
+ * function points must match the cursor rasterizer types exported by
+ * nxglib.
+ */
+
+struct nxbe_cursorops_s
+{
+  CODE void (*draw)(FAR struct nxbe_state_s *be,
+                    FAR const struct nxgl_rect_s *bounds,
+                    int planeno);
+  CODE void (*erase)(FAR struct nxbe_state_s *be,
+                     FAR const struct nxgl_rect_s *bounds,
+                     int planeno);
+  CODE void (*backup)(FAR struct nxbe_state_s *be,
+                      FAR const struct nxgl_rect_s *bounds,
+                      int planeno);
+};
+#endif
+
 /* Encapsulates everything needed support window rasterization commands. */
 
 struct nxbe_plane_s
 {
-  /* Raster device operation callbacks */
+  /* Raster device operations */
 
   struct nxbe_dev_vtable_s dev;
 
 #ifdef CONFIG_NX_RAMBACKED
-  /* Raster per-window framebuffer operation callbacks */
+  /* Raster per-window framebuffer operations */
 
   struct nxbe_pwfb_vtable_s pwfb;
+#endif
+
+#ifdef CONFIG_NX_SWCURSOR
+  /* Cursor device operations */
+
+  struct nxbe_cursorops_s cursor;
 #endif
 
   /* Framebuffer plane info describing destination video plane */
@@ -173,14 +200,38 @@ struct nxbe_plane_s
 
 struct nxbe_clipops_s
 {
-  void (*visible)(FAR struct nxbe_clipops_s *cops,
-                  FAR struct nxbe_plane_s *plane,
-                  FAR const struct nxgl_rect_s *rect);
+  CODE void (*visible)(FAR struct nxbe_clipops_s *cops,
+                       FAR struct nxbe_plane_s *plane,
+                       FAR const struct nxgl_rect_s *rect);
 
-  void (*obscured)(FAR struct nxbe_clipops_s *cops,
-                   FAR struct nxbe_plane_s *plane,
-                   FAR const struct nxgl_rect_s *rect);
+  CODE void (*obscured)(FAR struct nxbe_clipops_s *cops,
+                        FAR struct nxbe_plane_s *plane,
+                        FAR const struct nxgl_rect_s *rect);
 };
+
+/* Cursor *******************************************************************/
+
+/* Cursor state structure */
+
+#if defined(CONFIG_NX_SWCURSOR)
+struct nxbe_cursor_s
+{
+  bool visible;                    /* True: the cursor is visible */
+  struct nxgl_rect_s bounds;       /* Cursor image bounding box */
+  nxgl_mxpixel_t color1[CONFIG_NX_NPLANES]; /* Color1 is main color of the cursor */
+  nxgl_mxpixel_t color2[CONFIG_NX_NPLANES]; /* Color2 is color of any border */
+  nxgl_mxpixel_t color3[CONFIG_NX_NPLANES]; /* Color3 is the blended color */
+  size_t allocsize;                /* Size of the background allocation */
+  FAR const uint8_t *image;        /* Cursor image at 2-bits/pixel */
+  FAR nxgl_mxpixel_t *bkgd;        /* Cursor background in device pixels */
+};
+#elif defined(CONFIG_NX_HWCURSOR)
+struct nxbe_cursor_s
+{
+  bool visible;                    /* True: the cursor is visible */
+  struct nxgl_point_s pos;         /* The current cursor position */
+};
+#endif
 
 /* Back-end state ***********************************************************/
 
@@ -193,14 +244,7 @@ struct nxbe_state_s
 #if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
   /* Cursor support */
 
-  struct
-  {
-    bool visible;                    /* True: the cursor is visible */
-    struct cursor_pos_s pos;         /* The current cursor position */
-#ifdef CONFIG_NX_SWCURSOR
-    FAR struct cursor_image_s image; /* Cursor image */
-#endif
-  } cursor;
+  struct nxbe_cursor_s cursor;       /* Cursor support */
 #endif
 
   /* The window list (with the background window always at the bottom) */
@@ -291,11 +335,17 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
  * Description:
  *   Set the cursor image
  *
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ *   is as followings:
+ *
+ *   00 - The transparent background
+ *   01 - Color1:  The main color of the cursor
+ *   10 - Color2:  The color of any border
+ *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ *
  * Input Parameters:
  *   be  - The back-end state structure instance
- *   image - Describes the cursor image in the expected format.  For a
- *           software cursor, this is the format used with the display.  The
- *           format may be different if a hardware cursor is used.
+ *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
  *   None
@@ -304,11 +354,11 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
 void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
-                          FAR struct cursor_image_s *image);
+                          FAR struct nx_cursorimage_s *image);
 #endif
 
 /****************************************************************************
- * Name: nxcursor_setposition
+ * Name: nxbe_cursor_setposition
  *
  * Description:
  *   Move the cursor to the specified position
@@ -322,9 +372,62 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-void nxcursor_setposition(FAR struct nxbe_state_s *be,
-                          FAR const struct cursor_pos_s *pos);
+void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
+                             FAR const struct nxgl_point_s *pos);
+
 #endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
+
+#ifdef CONFIG_NX_SWCURSOR
+/****************************************************************************
+ * Name: nxbe_cursor_backupdraw and nxbe_cursor_backupdraw_dev
+ *
+ * Description:
+ *   Called after any modification to the display (in window coordinate
+ *   frame) to perform the backup-draw operation on one color plane.
+ *
+ * Input Parameters:
+ *   be    - The back-end state structure instance, or
+ *   wnd   - Window state structure
+ *   rect  - The modified region of the window.  In windows coordinates for
+ *           nxbe_cursor_backupdraw(); in graphics device corrdinates for
+ *           nxbe_cursor_backupdraw_dev().
+ *   plane - The plane number to use.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_cursor_backupdraw(FAR struct nxbe_window_s *wnd,
+                            FAR const struct nxgl_rect_s *rect, int plane);
+void nxbe_cursor_backupdraw_dev(FAR struct nxbe_state_s *be,
+                                FAR const struct nxgl_rect_s *rect,
+                                int plane);
+
+/****************************************************************************
+ * Name: nxbe_cursor_backupdraw_all and nxbe_cursor_backupdraw_devall
+ *
+ * Description:
+ *   Called after any modification to the display to perform the backup-draw
+ *   operation on all color planes.
+ *
+ * Input Parameters:
+ *   be    - The back-end state structure instance, or
+ *   wnd   - Window state structure
+ *   rect  - The modified region of the window.  In windows coordinates for
+ *           nxbe_cursor_backupdraw(); in graphics device corrdinates for
+ *           nxbe_cursor_backupdraw_dev().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_cursor_backupdraw_all(FAR struct nxbe_window_s *wnd,
+                                FAR const struct nxgl_rect_s *rect);
+void nxbe_cursor_backupdraw_devall(FAR struct nxbe_state_s *be,
+                                   FAR const struct nxgl_rect_s *rect);
+#endif /*  */
 
 /****************************************************************************
  * Name: nxbe_closewindow
@@ -396,6 +499,25 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 void nxbe_modal(FAR struct nxbe_window_s *wnd, bool enable);
+
+/****************************************************************************
+ * Name: nxbe_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   wnd  - The window to be modified
+ *   hide - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_setvisibility(FAR struct nxbe_window_s *wnd, bool hide);
 
 /****************************************************************************
  * Name: nxbe_setpixel
@@ -517,7 +639,7 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -548,7 +670,7 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -567,33 +689,6 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
                  unsigned int stride);
 
 /****************************************************************************
- * Name: nxbe_sprite_refresh
- *
- * Description:
- *   Prior to calling nxbe_bitmap_dev(), update any "sprites" tht need to
- *   be overlaid on the per-window frambuffer.  This could include such
- *   things as OSD functionality, a software cursor, selection boxes, etc.
- *
- * Input Parameters (same as for nxbe_bitmap_dev):
- *   wnd    - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that was
- *            modified (in device coordinates)
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_RAMBACKED
-#if 0 /* There are none yet */
-void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_rect_s *dest);
-#else
-#  define nxbe_sprite_refresh(wnd, dest)
-#endif
-#endif
-
-/****************************************************************************
  * Name: nxbe_flush
  *
  * Description:
@@ -601,23 +696,22 @@ void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
  *   be written to device graphics memory.  That function is managed by this
  *   simple function.  It does the following:
  *
- *   1) It calls nxbe_sprite_refresh() to update any "sprite" graphics on top
- *      of the RAM framebuffer.   This could include such things as OSD
- *      functionality, a software cursor, selection boxes, etc.
- *   2) Then it calls nxbe_bitmap_dev() to copy the modified per-window
- *      frambuffer into device memory.
- *
- *   This the "sprite" image is always on top of the device display, this
- *   supports flicker-free software sprites.
+ *   1) It calls nxbe_bitmap_dev() to copy the modified per-window
+ *      framebuffer into device graphics memory.
+ *   2) If CONFIG_NX_SWCURSOR is enabled, it calls the cursor "draw"
+ *      renderer to update re-draw the currsor image if any portion of
+ *      graphics display update overwrote the cursor.  Since these
+ *      operations are performed back-to-back, any resulting flicker
+ *      should be minimized.
  *
  * Input Parameters (same as for nxbe_bitmap_dev):
  *   wnd    - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *   dest   - Describes the rectangular region in the window that will
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
+ *            Both dest and origin are in window coordinates, however,
+ *            origin may lie outside of the display.
  *   stride - The width of the full source image in bytes.
  *
  * Returned Value:
@@ -662,7 +756,7 @@ void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
                       FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
- * Name: nxbe_visible
+ * Name: nxbe_isvisible
  *
  * Description:
  *   Return true if the point, pt, in window wnd is visible.  pt is in
@@ -670,8 +764,8 @@ void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-bool nxbe_visible(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_point_s *pos);
+bool nxbe_isvisible(FAR struct nxbe_window_s *wnd,
+                    FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxbe_clipper

@@ -296,7 +296,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifdef CONFIG_SCHED_HAVE_PARENT
 #ifdef HAVE_GROUP_MEMBERS
 static inline void nxtask_sigchild(gid_t pgid, FAR struct tcb_s *ctcb,
                                    int status)
@@ -423,11 +423,11 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
-#else /* CONFIG_SCHED_HAVE_PARENT && !CONFIG_DISABLE_SIGNALS */
+#else /* CONFIG_SCHED_HAVE_PARENT */
 
 #  define nxtask_sigchild(x,ctcb,status)
 
-#endif /* CONFIG_SCHED_HAVE_PARENT && !CONFIG_DISABLE_SIGNALS */
+#endif /* CONFIG_SCHED_HAVE_PARENT */
 
 /****************************************************************************
  * Name: nxtask_signalparent
@@ -700,11 +700,9 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   group_leave(tcb);
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Deallocate anything left in the TCB's queues */
 
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
-#endif
 
   /* This function can be re-entered in certain cases.  Set a flag
    * bit in the TCB to not that we have already completed this exit

@@ -147,9 +147,7 @@ struct pipe_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *d_fds[CONFIG_DEV_PIPE_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -174,10 +172,8 @@ int     pipecommon_close(FAR struct file *filep);
 ssize_t pipecommon_read(FAR struct file *, FAR char *, size_t);
 ssize_t pipecommon_write(FAR struct file *, FAR const char *, size_t);
 int     pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 int     pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 int     pipecommon_unlink(FAR struct inode *priv);
 #endif

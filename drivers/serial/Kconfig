@@ -6,8 +6,7 @@
 config DEV_LOWCONSOLE
 	bool "Low-level console support"
 	default n
-	depends on ARCH_LOWPUTC
-	depends on DEV_CONSOLE
+	depends on ARCH_LOWPUTC && DEV_CONSOLE
 	---help---
 		Use the simple, low-level, write-only serial console driver (minimal support)
 
@@ -72,7 +71,7 @@ config STANDARD_SERIAL
 config SERIAL_NPOLLWAITERS
 	int "Number of poll threads"
 	default 2
-	depends on !DISABLE_POLL && STANDARD_SERIAL
+	depends on STANDARD_SERIAL
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2
@@ -81,11 +80,21 @@ config SERIAL_IFLOWCONTROL
 	bool
 	default n
 
+config SERIAL_RS485CONTROL
+	bool
+	default n
+	---help---
+		Use RTS pin to control RS485 direction (Asserted while transmitting).
+
 config SERIAL_OFLOWCONTROL
 	bool
 	default n
 
-config SERIAL_DMA
+config SERIAL_TXDMA
+	bool
+	default n
+
+config SERIAL_RXDMA
 	bool
 	default n
 
@@ -152,7 +161,7 @@ config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
 	select SIG_SIGKILL_ACTION
-	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
@@ -197,7 +206,7 @@ config TTY_SIGSTP
 	bool "Support SIGSTP"
 	default n
 	select CONFIG_SIG_SIGSTOP_ACTION
-	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-z event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
@@ -466,10 +475,17 @@ config UART_OFLOWCONTROL
 	---help---
 		Enable UART CTS flow control
 
-config UART_DMA
-	bool "UART DMA support"
+config UART_TXDMA
+	bool "UART Tx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	---help---
+		Enable DMA transfers on UART
+
+config UART_RXDMA
+	bool "UART Rx DMA support"
+	default n
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on UART
 

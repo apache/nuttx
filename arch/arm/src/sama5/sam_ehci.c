@@ -65,8 +65,8 @@
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "sam_usbhost.h"
-#include "chip/sam_sfr.h"
-#include "chip/sam_ehci.h"
+#include "hardware/sam_sfr.h"
+#include "hardware/sam_ehci.h"
 
 #ifdef CONFIG_SAMA5_EHCI
 

@@ -50,10 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "barriers.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "nvic.h"
 
 #include "imxrt_clockconfig.h"
 #include "imxrt_mpuinit.h"

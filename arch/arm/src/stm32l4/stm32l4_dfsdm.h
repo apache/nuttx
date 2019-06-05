@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
-#include "chip/stm32l4_dfsdm.h"
+#include "hardware/stm32l4_dfsdm.h"
 
 /************************************************************************************
  * Pre-processor Definitions

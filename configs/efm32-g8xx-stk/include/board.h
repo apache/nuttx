@@ -44,8 +44,8 @@
 
 #include <stdbool.h>
 
-#include "chip/efm32_cmu.h"
-#include "chip/efm32_usart.h"
+#include "hardware/efm32_cmu.h"
+#include "hardware/efm32_usart.h"
 
 /****************************************************************************
  * Pre-processor Definitions

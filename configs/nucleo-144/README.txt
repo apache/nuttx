@@ -71,7 +71,7 @@ Common Board Features:
                   provide a ST-Link for programming, debug similar to the
                   OpenOcd FTDI function - USB to JTAG front-end.
 
-  Expansion I/F:  ST Zio and Extended Ardino and Morpho Headers
+  Expansion I/F:  ST Zio and Extended Arduino and Morpho Headers
 
 Nucleo F746ZG
 =============
@@ -94,10 +94,10 @@ NUCLEO-F746ZG Features:
   ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
                   triple interleaved mode
   DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
-  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
+  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit low power),
                   two 32-bit timers, 2x watchdogs, SysTick
   GPIO:           114 I/O ports with interrupt capability
-  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
+  LCD:            LCD-TFT Controller with (DMA2D), Parallel interface
   I2C:            4 × I2C interfaces (SMBus/PMBus)
   U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
                   modem control)
@@ -142,10 +142,10 @@ NUCLEO-F767ZI Features:
   ADC:            3×12-bit, 2.4 MSPS ADC: up to 24 channels and 7.2 MSPS in
                   triple interleaved mode
   DMA:            2 X 16-stream DMA controllers with FIFOs and burst support
-  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit lowpower),
+  Timers:         Up to 18 timers: up to thirteen 16-bit (1x 16-bit low power),
                   two 32-bit timers, 2x watchdogs, SysTick
   GPIO:           114 I/O ports with interrupt capability
-  LCD:            LCD-TFT Controllerwith (DMA2D), Parallel interface
+  LCD:            LCD-TFT Controller with (DMA2D), Parallel interface
   I2C:            4 × I2C interfaces (SMBus/PMBus)
   U[S]ARTs:       4 USARTs, 4 UARTs (27 Mbit/s, ISO7816 interface, LIN, IrDA,
                   modem control)
@@ -166,9 +166,11 @@ NUCLEO-F767ZI Features:
   TRG:            True random number generator
   RTC             subsecond accuracy, hardware calendar
 
-As of this writting the NUCLEO-F767ZI is not available on developer.mbed.org
-However, See https://developer.mbed.org/platforms/ST-Nucleo-F746ZG  for additional
-useful information.
+For pinout and details Check NUCLEO-F767ZI page on developer.mbed.org:
+https://os.mbed.com/platforms/ST-Nucleo-F767ZI/
+
+Also https://developer.mbed.org/platforms/ST-Nucleo-F746ZG 
+may contain some related useful information.
 
 Development Environment
 =======================
@@ -347,7 +349,7 @@ Serial Consoles
   USART6 (CONFIG_NUCLEO_CONSOLE_ARDUINO)
   ------
                 STM32F7
-    ARDUIONO FUNCTION  GPIO
+    ARDUINO FUNCTION  GPIO
     -- ----- --------- -----
     DO RX    USART6_RX PG9
     D1 TX    USART6_TX PG14
@@ -436,15 +438,15 @@ Serial Consoles
 
 SPI
 ---
-  Since this board is so generic, having a quick way to vet the SPI
+  Since this board is so generic, having a quick way to set the SPI
   configuration seams in order. So the board provides a quick test
-  that can be selected vi CONFIG_NUCLEO_SPI_TEST that will initalise
+  that can be selected vi CONFIG_NUCLEO_SPI_TEST that will initialize
   the selected buses (SPI1-SPI3) and send some text on the bus at
-  application initalization time board_app_initialize.
+  application initialization time board_app_initialize.
 
 SDIO
 ----
-  To test the SD performace one can use a SparkFun microSD Sniffer
+  To test the SD performance one can use a SparkFun microSD Sniffer
   from https://www.sparkfun.com/products/9419 or similar board
   and connect it as follows:
 

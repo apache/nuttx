@@ -49,8 +49,8 @@
 
 #include <arch/lpc54xx/chip.h>
 
-#include "chip/lpc54_gpio.h"
-#include "chip/lpc54_iocon.h"
+#include "hardware/lpc54_gpio.h"
+#include "hardware/lpc54_iocon.h"
 
 /************************************************************************************
  * Pre-processor Definitions

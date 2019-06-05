@@ -132,10 +132,8 @@ static const struct file_operations g_fops =
   lsm6dsl_read,
   lsm6dsl_write,
   NULL,
-  lsm6dsl_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lsm6dsl_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #  endif

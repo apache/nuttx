@@ -46,7 +46,7 @@
 #  include <nuttx/arch.h>
 #endif
 
-#include "chip/imx_memorymap.h"
+#include "hardware/imx_memorymap.h"
 #include "imx_irq.h"
 
 /****************************************************************************

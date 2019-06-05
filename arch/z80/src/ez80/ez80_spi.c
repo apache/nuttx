@@ -111,8 +111,14 @@ static const struct spi_ops_s g_spiops =
  * array with one 'struct spi_dev_s' instance per bus.
  */
 
-static struct spi_dev_s g_spidev = {&g_spiops};
-static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access */
+static struct spi_dev_s g_spidev =
+{
+  &g_spiops
+};
+
+/* Semaphore supports mutually exclusive access */
+
+static sem_t g_exclsem = SEM_INITIALIZER(1);
 
 /****************************************************************************
  * Private Functions
@@ -183,10 +189,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
-  /* We want select divisor to provide the highest frequency (SPIR) that does NOT
-   * exceed the requested frequency.:
+  /* We want select divisor to provide the highest frequency (SPIR) that does
+   * NOT exceed the requested frequency.:
    *
    *   SPIR <= System Clock Frequency / (2 * BRG)
    *
@@ -195,7 +202,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *   BRG >= System Clock Frequency / (2 * SPIR)
    */
 
-  uint32_t brg = ((EZ80_SYS_CLK_FREQ+1)/2 + frequency - 1) / frequency;
+  uint32_t brg = ((EZ80_SYS_CLK_FREQ + 1) / 2 + frequency - 1) / frequency;
 
   /* "When configured as a Master, the 16-bit divisor value must be between
    * 0003h and FFFFh, inclusive. When configured as a Slave, the 16-bit
@@ -214,7 +221,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   outp(EZ80_SPI_BRG_L, brg & 0xff);
   outp(EZ80_SPI_BRG_L, (brg >> 8) & 0xff);
 
-  return ((EZ80_SYS_CLK_FREQ+1)/2 + brg - 1) / brg;
+  return ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
 }
 
 /****************************************************************************
@@ -241,32 +248,32 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
   switch (mode)
     {
-    case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
-      modebits = 0;
-      break;
+      case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+        modebits = 0;
+        break;
 
-    case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
-      modebits = SPI_CTL_CPHA;
-      break;
+      case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+        modebits = SPI_CTL_CPHA;
+        break;
 
-    case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
-      modebits = SPI_CTL_CPOL;
-      break;
+      case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+        modebits = SPI_CTL_CPOL;
+        break;
 
-    case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-      modebits = (SPI_CTL_CPOL|SPI_CTL_CPHA);
-      break;
+      case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+        modebits = (SPI_CTL_CPOL | SPI_CTL_CPHA);
+        break;
 
-    default:
-      return;
+      default:
+        return;
     }
 
-    /* Then set those bits in the CTL register */
+  /* Then set those bits in the CTL register */
 
-    regval = inp(EZ80_SPI_CTL);
-    regval &= ~(SPI_CTL_CPOL|SPI_CTL_CPHA);
-    regval |= modebits;
-    outp(EZ80_SPI_CTL, regval);
+  regval  = inp(EZ80_SPI_CTL);
+  regval &= ~(SPI_CTL_CPOL | SPI_CTL_CPHA);
+  regval |= modebits;
+  outp(EZ80_SPI_CTL, regval);
 }
 
 /****************************************************************************
@@ -294,9 +301,10 @@ static uint8_t spi_waitspif(void)
 
   do
     {
-      status = inp(EZ80_SPI_SR) & (SPI_SR_SPIF|SPI_SR_WCOL|SPI_SR_MODF);
+      status = inp(EZ80_SPI_SR) & (SPI_SR_SPIF | SPI_SR_WCOL | SPI_SR_MODF);
     }
   while (status == 0);
+
   return status;
 }
 
@@ -320,7 +328,7 @@ static uint8_t spi_transfer(uint8_t ch)
 
   /* Send the byte, repeating if some error occurs */
 
-  for (;;)
+  for (; ; )
     {
       outp(EZ80_SPI_TSR, ch);
 
@@ -378,7 +386,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t buflen)
 {
-  FAR const uint8_t *ptr = (FAR const uint8_t*)buffer;
+  FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
 
   /* Loop while there are bytes remaining to be sent */
 
@@ -397,20 +405,21 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into
- *            uint16_t's
+ *   buflen - The length of data that can be received in the buffer in
+ *            number of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t buflen)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 
   /* Loop while thre are bytes remaining to be sent */
 
@@ -501,7 +510,7 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
    * NOTE 2: Initial mode is mode=0.
    */
 
-  outp(EZ80_SPI_CTL, SPI_CTL_SPIEN|SPI_CTL_MASTEREN);
+  outp(EZ80_SPI_CTL, SPI_CTL_SPIEN | SPI_CTL_MASTEREN);
 
   return &g_spidev;
 }

@@ -91,11 +91,9 @@ static const struct file_operations g_apa102fops =
   apa102_close,  /* close */
   apa102_read,   /* read */
   apa102_write,  /* write */
-  0,             /* seek */
-  0,             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,             /* poll */
-#endif
+  NULL,          /* seek */
+  NULL,          /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif

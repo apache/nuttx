@@ -67,9 +67,9 @@
 #include "sam_xdmac.h"
 #include "sam_periphclks.h"
 #include "sam_ssc.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_ssc.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_ssc.h"
+#include "hardware/sam_pinmap.h"
 
 #if defined(CONFIG_SAMV7_SSC0) || defined(CONFIG_SAMV7_SSC1)
 

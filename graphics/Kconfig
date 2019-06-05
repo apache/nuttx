@@ -62,7 +62,17 @@ config NX_RAMBACKED
 
 		Redraw requests in other cases are also suppressed:  Changes to window
 		position, size, etc.  As a consequence, some manual updates will be
-		required when certain events occurr (like removing a toolbar from a
+		required when certain events occur (like removing a toolbar from a
+		window).
+
+		An exception is the case when the window is resized to a wider and/or
+		taller size.  In that case, the redraw callback will till occur.
+		It is necessary in that case to provide new graphic content for the
+		extended window area.
+
+		Redraw requests in other cases are also suppressed:  Changes to window
+		position, size, etc.  As a consequence, some manual updates will be
+		required when certain events occur (like removing a toolbar from a
 		window).
 
 		NOTE:  A significant amount of RAM, usually external SDRAM, may be
@@ -77,11 +87,31 @@ config NX_NOCURSOR
 
 config NX_SWCURSOR
 	bool "Software cursor support"
-	depends on NX_RAMBACKED && EXPERIMENTAL
+	depends on !NX_LCDDRIVER && NX_DISABLE_1BPP && NX_DISABLE_2BPP && NX_DISABLE_4BPP && !BUILD_KERNEL
+	---help---
+		Software cursor support has several dependencies are due to un-
+		implemented cursor capabilities.  This assumes the following:
+
+		  1. You are using a framebuffer hardware interface.  This is
+		     because the logic to implement this feature on top of the LCD
+		     interface has not been implemented.
+		  2. The pixel depth is greater then or equal to 8-bits (8-bpp,
+		     16-bpp, 24/32/-bpp).  This is because the logic to handle
+		     pixels smaller than 1-byte has not been implemented,
+		  3. For FLAT and PROTECTED builds only.  In those builds, the
+		     cursor image resides in the common application space and is
+		     assumed to pesist as long as needed.  But with the KERNEL
+		     build, the image will lie in a process space and will not be
+		     generally available.  In that case, we could keep the image in
+		     a shared memory region or perhaps copy the image into a kernel
+		     internal buffer.  Neither of  those are implemented.
 
 config NX_HWCURSOR
 	bool "Software cursor support"
 	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
+	---help---
+		Hardware cursor support has not been implemented, hence the
+		EXPERIMENTAL dependency.
 
 endchoice # Cursor support
 
@@ -402,6 +432,21 @@ config NXTERM_NXKBDIN
 		the interface nxterm_kdbin() is enabled.  That interface may be driven
 		by window callback functions so that keyboard input *only* goes to the
 		top window.
+
+		NOTE: nxterm_kdbin() is an internal OS API.  It can be accessed by
+		applications via the boardctl(BOARDIOC_NXTERM) interface.
+
+		The logic path is complex in this case:  (1) The keyboard input is
+		received by an application listener thread and injected into NX via
+		nx_kbdin().  NX sends (2) the keyboard input to single the NX window
+		that has focus.  That window then (3) gives the keyboard input to the
+		single NxTerm associated with the window via boardctl(BOARDIOC_NXTERM).
+
+		NOTE:  If CONFIG_NXTERM_NXKBDIN not defined, then NxTerm input coming
+		directly from /dev/console.  That works well if there is only a single
+		NxTerm window.  But if there are multiple NxTerm windows, then it is
+		anyone's guess which will receive the keyboard input.  That does not
+		work well in such cases.
 
 config NXTERM_KBDBUFSIZE
 	int "Keyboard Input Buffer Size"

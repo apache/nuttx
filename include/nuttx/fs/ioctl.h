@@ -93,6 +93,7 @@
 #define _MAC802154BASE  (0x2600) /* 802.15.4 MAC ioctl commands */
 #define _PWRBASE        (0x2700) /* Power-related ioctl commands */
 #define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
+#define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -467,8 +468,13 @@
 
 /* Frame buffer character drivers *******************************************/
 
-#define _FBIOCVALID(c)   (_IOC_TYPE(c)==_FBIOCBASE)
-#define _FBIOC(nr)       _IOC(_FBIOCBASE,nr)
+#define _FBIOCVALID(c)    (_IOC_TYPE(c)==_FBIOCBASE)
+#define _FBIOC(nr)        _IOC(_FBIOCBASE,nr)
+
+/* NxTerm character drivers *************************************************/
+
+#define _NXTERMVALID(c)   (_IOC_TYPE(c)==_NXTERMBASE)
+#define _NXTERMIOC(nr)    _IOC(_NXTERMBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 

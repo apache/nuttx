@@ -49,16 +49,12 @@
 #include "nvic.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/xmc4_flash.h"
+#include "hardware/xmc4_flash.h"
 
 #include "xmc4_clockconfig.h"
 #include "xmc4_lowputc.h"
 #include "xmc4_userspace.h"
 #include "xmc4_start.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
 
 /****************************************************************************
  * Private Function prototypes

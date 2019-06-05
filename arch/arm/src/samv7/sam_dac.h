@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/analog/dac.h>
-#include "chip/sam_dacc.h"
+#include "hardware/sam_dacc.h"
 
 #if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
 

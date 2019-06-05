@@ -76,10 +76,8 @@ static int        ieee802154_connect(FAR struct socket *psock,
 static int        ieee802154_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        ieee802154_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    ieee802154_send(FAR struct socket *psock,
                    FAR const void *buf, size_t len, int flags);
 static ssize_t    ieee802154_sendto(FAR struct socket *psock,
@@ -102,9 +100,7 @@ const struct sock_intf_s g_ieee802154_sockif =
   ieee802154_listen,      /* si_listen */
   ieee802154_connect,     /* si_connect */
   ieee802154_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   ieee802154_poll_local,  /* si_poll */
-#endif
   ieee802154_send,        /* si_send */
   ieee802154_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -626,7 +622,6 @@ int ieee802154_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int ieee802154_poll_local(FAR struct socket *psock,
                                  FAR struct pollfd *fds, bool setup)
 {
@@ -637,7 +632,6 @@ static int ieee802154_poll_local(FAR struct socket *psock,
 #warning Missing logic
   return -ENOSYS;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: ieee802154_send

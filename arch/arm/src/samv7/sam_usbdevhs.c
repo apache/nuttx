@@ -74,7 +74,7 @@
 
 #include "chip.h"
 #include "sam_periphclks.h"
-#include "chip/sam_usbhs.h"
+#include "hardware/sam_usbhs.h"
 #include "sam_clockconfig.h"
 #include "sam_usbdev.h"
 

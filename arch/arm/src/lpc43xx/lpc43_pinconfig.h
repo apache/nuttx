@@ -45,7 +45,7 @@
 /* Include the chip capabilities and SCU definitions file */
 
 #include "chip.h"
-#include "chip/lpc43_scu.h"
+#include "hardware/lpc43_scu.h"
 
 /********************************************************************************************
  * Pre-processor Definitions

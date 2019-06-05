@@ -143,9 +143,9 @@
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_xdmac.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_smc.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_smc.h"
+#include "hardware/sam_pinmap.h"
 
 #include "samv71-xult.h"
 #include "atmxt-xpro.h"

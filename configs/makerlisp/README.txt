@@ -1,0 +1,298 @@
+README.txt
+==========
+
+The MakerLisp machine is a portable, modular computer system, designed to
+recapture the feel of classic computing, with modern hardware.
+
+The machine centers on a 2" x 3.5" business card-sized CPU, which can be used
+stand-alone, or plugged in to a 2" x 8" main board, for expansion into a full
+computer system.  A laser-cut wood enclosure holds a small keyboard, an LCD
+monitor, the circuit boards, and a prototyping area with a breadboard for
+electronics experimentation and development.
+
+The CPU is a Zilog eZ80 running at 50 MHz, with up to 16 Mb of zero-wait state
+RAM. A VGA display adapter provides an IBM PC-like color text-mode display. A
+USB Host Controller supports a USB keyboard and other USB communications.
+Data storage and interchange is accomplished by a micro-SD card supporting the
+FAT file system. All four of these circuit boards (shown on the web site's cover
+page) are new MakerLisp products, and will be available as part of the first
+product offering
+
+Contents
+========
+
+  o ZDS-II Compiler Versions
+  o Serial Console
+    - UARTs
+    - Serial Keyboard and VGA Display
+  o LEDs and Buttons
+    - LEDs
+    - Buttons
+  o Configurations
+    - Common Configuration Notes
+    - Configuration Subdirectories
+
+ZDS-II Compiler Versions
+========================
+
+Version 5.3.0
+
+  The initial bring-up of the MakerLisp board used the ZiLOG ZDS-II 5.3.0
+  toolchain.  To use this toolchain, I had to suppress the gmtime() and
+  gmtimer() because these were causing an internal compiler error:
+
+    time\lib_gmtimer.c
+    P2: Internal Error(0xB47E59):
+            Please contact Technical Support
+
+  This is the change to suppress building these files:
+
+    diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
+    index 5c9b746778..8327e287f4 100644
+    --- a/libs/libc/time/Make.defs
+    +++ b/libs/libc/time/Make.defs
+    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
+     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+     else
+    -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
+    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
+     ifdef CONFIG_TIME_EXTENDED
+     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+
+  And there is also this:
+
+     stdlib\lib_strtof.c
+     stdlib\lib_strtof.c     (76,36) :       WARNING (32) Division by zero encountered
+     stdlib\lib_strtof.c     (102,36) :      WARNING (32) Division by zero encountered
+
+   Which can be worked around by removing it from the build
+
+  The consequence is, of course, that these interfaces will not be available
+  to applications.
+
+  Alternatively, you can use 'make -i' to build the system.  The above
+  errors will occur, but will not stop the build (unless the failed build
+  objects are brought into the link).  The has the negative side effects
+  that (1) the archives will always be rebuild in the directories where
+  the error occur, and (2) you might miss other, real compilation error
+  since these will no longer stop the compilation.
+
+Other Versions
+  If you use any version of ZDS-II other than 5.3.0 or if you install ZDS-II
+  at any location other than the default location, you will have to modify
+  three files:  (1) arch/arm/z80/src/ez80/Kconfig, (2)
+  configs/makerlisp/scripts/Make.defs and, perhaps, (3)
+  arch/z80/src/ez80/Toolchain.defs.
+
+Serial Console
+==============
+
+  There are two options for a serial console:  (1) A UART connected to a
+  terminal program or (2) the MakerLisp Serial Keyboard and VGA display.
+
+UARTs
+-----
+
+  The eZ80 has two UART peripherals:
+
+  UART 0:  All of Port D pins can support UART0 functions when configured
+  for the alternate function 7.  For typical configurations only RXD and TXD
+  need be configured.
+
+    eZ80 PIN        BOARD SIGNAL CN1 ACCESS
+    =======================================
+    PD0/TXD0/IR_IXD CN1_TX0      Pin 61
+    PD1/RXD0/IR_RXD CN1_RX0      Pin 59
+    PD2/RTS0        CN1_RTS0     Pin 63
+    PD3/CTS0        CN1_CTS0     Pin 65
+    PD4/DTR0        CN1_DTR0     Pin 67
+    PD5/DSR0        CN1_DSR0     Pin 69
+    PD6/DCD0        CN1_DCD0     Pin 71
+    PD7/RIO0        CN1_RI0      Pin 73
+
+  UART 0:  All of Port C pins can support UART1 functions when configured
+  for the alternate function 7.  For typical configurations only RXD and TXD
+  need be configured.
+
+    eZ80 PIN        BOARD SIGNAL CN1 ACCESS
+    =======================================
+    PC0/TXD1        CN1_TX1      Pin 62
+    PC1/RXD1        CN1_RX1      Pin 60
+    PC2/RTS1        CN1_RTS1     Pin 64
+    PC3/CTS1        CN1_CTS1     Pin 66
+    PC4/DTR1        CN1_DTR1     Pin 68
+    PC5/DSR1        CN1_DSR1     Pin 70
+    PC6/DCD1        CN1_DCD1     Pin 72
+    PC7/RIO1        CN1_RI1      Pin 74
+
+  For use with a host terminal emulation, it will be necessary to connect
+  either a TTL-to-RS232 or a TTL-to-USB Serial adapter to CN1 pins 59 and
+  61, and 60 and 62, depending on the selected UART.
+
+Serial Keyboard and VGA Display
+-------------------------------
+
+  The serial console can also be implemented using the MakerLisp USB
+  Keyboard Controller Board and VGA Display Controller.  These are accessed
+  via the one UART port, UART0.
+
+  In the default MakerLisp configuration.  These boards are connected as
+  follows:
+
+  1. VGA display controller connections (UART0 TX)
+
+     Board interface header
+     5  – 5V regulated power input
+     RX – VGA Display Controller serial input
+     C  – VGA Display Controller ready output
+     TX – VGA Display Controller serial output
+     G  – GND
+
+     Connections:
+
+     a. 5V '5' pin on VGA board to expansion board power distribution 5V.
+     b. Ground 'G' pin on VGA board to expansion board power distribution
+        ground.
+     c. Receive 'RX' pin on VGA board to expansion board GPIO PD0 (TXD0).
+     d. Communication, terminal ready indicator 'C' pin on VGA board to
+        expansion board GPIO PB1.
+     e. Transmit 'TX' pin on VGA board to USB keyboard controller 'R'
+
+     To use the VGA display controller with stdout and stderr, you also
+     need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
+     enables a required VGA initialization sequence.
+
+  2. USB keyboard controller (UART0 RX)
+
+     Board interface header
+
+     5 – 5V regulated power input
+     R – USB Keyboard Controller serial input
+     T – USB Keyboard Controller serial output
+     G – GND
+
+     Connections:
+
+     a. 5V '5' pin on USB board to (other) expansion board power
+        distribution 5V.
+     b. Ground 'G' pin on USB board to (other) expansion board power
+        distribution ground.
+     c. Receive 'R' pin on USB board to VGA board 'TX' (see above).
+     d. Transmit 'T' pin on USB board to expansion board GPIO PD1 (RXD0).
+
+     If your keyboard does not seem to be doing anything, check the 'RX'
+     jumper on the expansion board. For input from a USB keyboard, and NOT
+     the USB/UART connection, you want this jumper REMOVED, not bridging the
+     two header pins front to back.
+
+  TBD:  What is the UART configuration when used with the VGA and Keyboard
+        adapters?
+
+Default Serial Console
+----------------------
+
+  UART0 is the default serial console in all configurations unless
+  otherwise noted in the description of the configuration.
+
+LEDs and Buttons
+================
+
+LEDs
+----
+
+  Three LEDs are available on the CPU Card, but none are available for
+  general use by applications:
+
+  D2 RED:    CPU Card power.  Not under eZ80 control
+  D3 GREEN:  Driven by CPU GPI/O pin.  However, it has some additional
+             properties:
+
+             1. On input, it will be '1' if the I/O expansion board is
+                present.
+             2. Setting it to an output of '0' will generate a system reset.
+             3. Setting it to an output of '1' will not only illuminate the
+                LED take the card out of reset and enable power to the SD
+                card slot.
+
+             As a consequence, the GREEN LED will not be illuminated if
+             SD card support or SPI is disabled.  The only effect of
+             CONFIG_ARCH_LEDS is that the GREEN LED will turned off in
+             the event of a crash.
+
+  D1 AMBER:  Controlled by the on-board MCP2221A USB bridge and provides USB
+             enumeration status.  Not under eZ80 control.
+
+Buttons
+-------
+
+  The MakerLisp CPU board has no on-board buttons that can be sensed by the
+  eZ80.
+
+Configurations
+==============
+
+Common Configuration Notes
+--------------------------
+
+  1. src/ and include/
+
+     These directories contain common logic for all MakerLisp
+     configurations.
+
+  2. Variations on the basic MakerLisp configuration are maintained
+     in subdirectories.  To configure any specific configuration, do the
+     following steps:
+
+       tools/configure.sh [OPTIONS] makerlisp/<sub-directory>
+       make
+
+     Where <sub-directory> is the specific board configuration that you
+     wish to build.  Use 'tools/configure.sh -h' to see the possible
+     options.  Typical options are:
+
+       -l Configure for a Linux host
+       -c Configure for a Windows Cygwin host
+       -g Configure for a Windows MYS2 host
+
+     Use configure.bat instead of configure.sh if you are building in a
+     native Windows environment.
+
+     The available board-specific configurations are  summarized in the
+     following paragraphs.
+
+  3. This configuration uses the mconf-based configuration tool.  To
+     change this configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        see additional README.txt files in the NuttX tools repository.
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+Configuration Subdirectories
+----------------------------
+
+  nsh:
+
+    This configuration builds the NuttShell (NSH).  That code can be
+    found in examples/nsh.  For more information see:  examples/nsh/README.txt
+    and Documentation/NuttShell.html.
+
+    NOTES:
+
+    1. A serial console is provided on UART0.  This configuration may work
+       with or without the the VGA and Keyboard adapter boards.  For use
+       with a host terminal emulation without the accessory boards, it will
+       be necessary to connect either a TTL-to-RS232 or a TTL-to-USB Serial
+       adapter to CN1 pins 59 and 61.
+
+       The default baud setting is 57600N1.
+
+       To use the VGA display controller with stdout and stderr, you also
+       need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
+       enables a required VGA initialization sequence.
+
+       TBD:  What is the UART configuration when used with the VGA and
+       Keyboard controllers?

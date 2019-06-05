@@ -49,13 +49,11 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_smc.h"
+#include "hardware/kinetis_smc.h"
 #include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "nvic.h"
 
 #include "kinetis_start.h"
 

@@ -55,14 +55,6 @@
 #ifdef CONFIG_ONESHOT
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 
@@ -106,13 +98,11 @@ static const struct file_operations g_oneshot_ops =
   oneshot_close, /* close */
   oneshot_read,  /* read */
   oneshot_write, /* write */
-  0,             /* seek */
-  oneshot_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0            /* poll */
-#endif
+  NULL,          /* seek */
+  oneshot_ioctl, /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0            /* unlink */
+  , NULL         /* unlink */
 #endif
 };
 

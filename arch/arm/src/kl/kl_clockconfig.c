@@ -47,12 +47,12 @@
 
 #include "chip.h"
 #include "kl_gpio.h"
-#include "chip/kl_mcg.h"
-#include "chip/kl_sim.h"
-#include "chip/kl_osc.h"
-#include "chip/kl_fmc.h"
-#include "chip/kl_llwu.h"
-#include "chip/kl_pinmux.h"
+#include "hardware/kl_mcg.h"
+#include "hardware/kl_sim.h"
+#include "hardware/kl_osc.h"
+#include "hardware/kl_fmc.h"
+#include "hardware/kl_llwu.h"
+#include "hardware/kl_pinmux.h"
 
 /****************************************************************************
  * Private Data

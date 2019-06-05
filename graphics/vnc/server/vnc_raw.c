@@ -164,7 +164,8 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR lfb_color_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  srcleft = (FAR lfb_color_t *)
+    (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -235,7 +236,8 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR lfb_color_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  srcleft = (FAR lfb_color_t *)
+    (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -405,7 +407,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
           updheight = srcheight;
         }
 
-      /* Loop until this horizontal swath has sent to the VNC client.
+      /* Loop until this horizontal swath has been sent to the VNC client.
        * Start with the leftmost pixel and transfer rectangles
        * horizontally with width of destwidth until all srcwidth
        * columns have been transferred (the last rectangle may be

@@ -51,8 +51,8 @@
 
 #include "sched/sched.h"
 #include "xtensa.h"
-#include "chip/esp32_dport.h"
-#include "chip/esp32_rtccntl.h"
+#include "hardware/esp32_dport.h"
+#include "hardware/esp32_rtccntl.h"
 #include "esp32_region.h"
 #include "esp32_cpuint.h"
 #include "esp32_smp.h"

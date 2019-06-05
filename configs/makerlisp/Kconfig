@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_MAKERLISP
+
+config MAKERLISP_VGA
+	bool "VGA Controller attached?"
+	default n
+	---help---
+		Select this option if you have an I/O Controller and a VGA vide card
+		connected.
+
+endif # ARCH_BOARD_MAKERLISP

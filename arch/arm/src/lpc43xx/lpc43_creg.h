@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc43_creg.h"
+#include "hardware/lpc43_creg.h"
 
 /****************************************************************************
  * Pre-processor Definitions

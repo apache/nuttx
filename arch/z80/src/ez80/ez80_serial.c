@@ -53,7 +53,7 @@
 #include <nuttx/serial/serial.h>
 #include <arch/io.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "up_internal.h"
 
 #ifdef USE_SERIALDRIVER
@@ -154,6 +154,7 @@ static uart_dev_t g_uart0port =
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
   { 0 },                    /* recvsem */
+  { 0 },                    /* pollsem */
   {
     { 0 },                  /* xmit.sem */
     0,                      /* xmit.head */
@@ -170,6 +171,7 @@ static uart_dev_t g_uart0port =
   },
   &g_uart_ops,              /* ops */
   &g_uart0priv,             /* priv */
+  NULL,                     /* pollfds */
 };
 #endif
 
@@ -199,6 +201,7 @@ static uart_dev_t g_uart1port =
   { 0 },                    /* closesem */
   { 0 },                    /* xmitsem */
   { 0 },                    /* recvsem */
+  { 0 },                    /* pollsem */
   {
     { 0 },                  /* xmit.sem */
     0,                      /* xmit.head */
@@ -215,6 +218,7 @@ static uart_dev_t g_uart1port =
   },
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
+  NULL,                     /* pollfds */
 };
 #endif
 

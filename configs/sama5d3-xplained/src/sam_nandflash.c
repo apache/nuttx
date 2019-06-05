@@ -59,8 +59,8 @@
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_nand.h"
-#include "chip/sam_hsmc.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_hsmc.h"
+#include "hardware/sam_pinmap.h"
 
 #include "sama5d3-xplained.h"
 

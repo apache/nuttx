@@ -1785,7 +1785,7 @@ static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_RX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
-  DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
+  DEBUGASSERT(priv && priv->samplerate >= 0 && rate > 0);
 
   /* Check if the receiver is driven by the MCK */
 
@@ -1985,7 +1985,7 @@ static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 #if defined(I2S_HAVE_TX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
 
-  DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
+  DEBUGASSERT(priv && priv->samplerate >= 0 && rate > 0);
 
   /* Check if the receiver is driven by the MCK/2 */
 
@@ -2182,7 +2182,7 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
 
   uint16_t pllr = 5, plln = 256, div = 12, odd = 1;
 
-  DEBUGASSERT(priv && priv->samplerate > 0 && priv->datalen > 0);
+  DEBUGASSERT(priv && priv->samplerate >= 0 && priv->datalen > 0);
 
   /* A zero sample rate means to disable the MCK/2 clock */
 

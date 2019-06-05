@@ -59,7 +59,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/pic32mz-i2c.h"
+#include "hardware/pic32mz-i2c.h"
 #include "pic32mz-i2c.h"
 
 /* At least one I2C peripheral must be enabled */

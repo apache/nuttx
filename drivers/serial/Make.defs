@@ -37,7 +37,9 @@
 
 CSRCS += serial.c serial_io.c lowconsole.c
 
-ifeq ($(CONFIG_SERIAL_DMA),y)
+ifeq ($(CONFIG_SERIAL_RXDMA),y)
+  CSRCS += serial_dma.c
+else ifeq ($(CONFIG_SERIAL_TXDMA),y)
   CSRCS += serial_dma.c
 endif
 

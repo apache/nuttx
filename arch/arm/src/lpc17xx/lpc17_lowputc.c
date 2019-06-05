@@ -47,8 +47,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/lpc17_syscon.h"
-#include "chip/lpc17_uart.h"
+#include "hardware/lpc17_syscon.h"
+#include "hardware/lpc17_uart.h"
 
 #include "lpc17_gpio.h"
 #include "lpc17_lowputc.h"

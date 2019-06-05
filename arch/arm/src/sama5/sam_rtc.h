@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_rtc.h"
+#include "hardware/sam_rtc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

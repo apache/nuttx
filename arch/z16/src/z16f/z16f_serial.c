@@ -52,7 +52,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "up_internal.h"
 
 #ifdef USE_SERIALDRIVER

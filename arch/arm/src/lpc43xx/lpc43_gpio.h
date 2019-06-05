@@ -46,7 +46,7 @@
 /* Include the chip capabilities and GPIO definitions file */
 
 #include "chip.h"
-#include "chip/lpc43_gpio.h"
+#include "hardware/lpc43_gpio.h"
 
 /********************************************************************************************
  * Pre-processor Definitions

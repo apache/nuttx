@@ -65,7 +65,7 @@ BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
 # Basic
 
 CONFIG_ASRCS =
-CONFIG_CSRCS =
+CONFIG_CSRCS = dummy.c
 CONFIG_CXXSRCS =
 
 # boardctl support
@@ -83,8 +83,8 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 CXXSRCS = $(CONFIG_CXXSRCS)
 CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS)
+OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
 
 BIN = libconfigs$(LIBEXT)
 
@@ -100,10 +100,10 @@ $(COBJS): %$(OBJEXT): %.c
 $(CXXOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
-$(BIN): $(OBJS) $(CXXOBJS)
-	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
+$(BIN): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS) $(CXXSRCS)
+.depend: Makefile $(SRCS)
 ifneq ($(SRCS),)
 	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif

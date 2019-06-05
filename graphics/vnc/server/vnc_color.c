@@ -155,7 +155,7 @@ uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
    *          RRRGGGBB
    */
 
-  return (uint8_t)(((rgb >> 8) & 0x0070)  |
+  return (uint8_t)(((rgb >> 8) & 0x00e0)  |
                    ((rgb >> 6) & 0x001c)  |
                    ((rgb >> 3) & 0x0003));
 }

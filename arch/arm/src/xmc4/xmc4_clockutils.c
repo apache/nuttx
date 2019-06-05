@@ -56,7 +56,7 @@
 #include <nuttx/config.h>
 
 #include "up_arch.h"
-#include "chip/xmc4_scu.h"
+#include "hardware/xmc4_scu.h"
 #include "xmc4_clockconfig.h"
 
 #include <arch/board/board.h>

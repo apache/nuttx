@@ -71,7 +71,7 @@ int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size)
   struct nxsvrmsg_setsize_s outmsg;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !size)
+  if (wnd == NULL || size == NULL || size->w < 0 || size->h < 0)
     {
       set_errno(EINVAL);
       return ERROR;

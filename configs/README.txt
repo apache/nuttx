@@ -183,6 +183,10 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/axoloti
+  Support for the Axoloti synthesizer board based on the STMicro
+  STM32F427IGH6 MCU.  See: http://www.axoloti.com/
+
 configs/b-l072z-lrwan1
   STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 
@@ -363,6 +367,12 @@ configs/lpc4370-link2
   NuttX port to the NXP LPC4370-Link2 development board featuring the NXP
   LPC4370FET100 MCU.  Based on the LPC4300 Xplorer port and provided by
   Lok Tep.
+
+configs/makerlisp
+  This port use the MakerLips machine based on an eZ80F091 ez80Acclaim!
+  Microcontroller, and the Zilog ZDS-II Windows command line tools.  The
+  development environment is Cygwin under Windows. A Windows native
+  development environment is available but has not been verified.
 
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards

@@ -300,10 +300,8 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
 static ssize_t cc1101_file_write(FAR struct file *filep, FAR const char *buffer,
                                  size_t buflen);
-#ifndef CONFIG_DISABLE_POLL
 static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -316,11 +314,8 @@ static const struct file_operations g_cc1101ops =
   cc1101_file_read,  /* read */
   cc1101_file_write, /* write */
   NULL,              /* seek */
-  NULL               /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  ,
+  NULL,              /* ioctl */
   cc1101_file_poll   /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   ,
   NULL               /* unlink */
@@ -630,7 +625,6 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup)
 {
@@ -704,7 +698,6 @@ errout:
   nxsem_post(&dev->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: cc1101_access_begin
@@ -1580,14 +1573,12 @@ void cc1101_isr_process(FAR void *arg)
           fifo_put(dev, buf, len);
           nxsem_post(&dev->sem_rx);
 
-#ifndef CONFIG_DISABLE_POLL
           if (dev->pfd)
             {
               dev->pfd->revents |= POLLIN; /* Data available for input */
               wlinfo("Wake up polled fd\n");
               nxsem_post(dev->pfd->sem);
             }
-#endif
         }
         break;
 

@@ -167,8 +167,7 @@ static void stm32aes_encryptblock(FAR void *block_out, FAR const void *block_in)
   in++;
   putreg32(*in, STM32_AES_DINR);
 
-  while (!(getreg32(STM32_AES_SR) & AES_SR_CCF))
-    ;
+  while (!(getreg32(STM32_AES_SR) & AES_SR_CCF));
   stm32aes_ccfc();
 
   *out = getreg32(STM32_AES_DOUTR);

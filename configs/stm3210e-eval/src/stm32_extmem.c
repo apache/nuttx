@@ -48,7 +48,6 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
 #include "stm3210e-eval.h"
@@ -149,42 +148,4 @@ void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
     {
       stm32_configgpio(gpios[i]);
     }
-}
-
-/************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
-
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_disablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval &= ~RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
 }

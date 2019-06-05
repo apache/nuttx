@@ -45,7 +45,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "chip/stm32_exti.h"
+#include "hardware/stm32_exti.h"
 
 /****************************************************************************
  * Public Data

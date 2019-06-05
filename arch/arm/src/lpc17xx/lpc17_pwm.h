@@ -41,8 +41,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc17_pwm.h"
-#include "chip/lpc17_mcpwm.h"
+#include "hardware/lpc17_pwm.h"
+#include "hardware/lpc17_mcpwm.h"
 
 /************************************************************************************
  * Pre-processor Definitions

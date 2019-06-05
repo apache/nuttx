@@ -48,8 +48,8 @@
 #include "up_internal.h"
 
 #include "pic32mz-config.h"
-#include "chip/pic32mz-uart.h"
-#include "chip/pic32mz-pps.h"
+#include "hardware/pic32mz-uart.h"
+#include "hardware/pic32mz-pps.h"
 
 #include <arch/board/board.h>
 

@@ -63,7 +63,11 @@
 #  undef  CONFIG_DEV_LOWCONSOLE
 #  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
+#  if defined(CONFIG_ARM_LWL_CONSOLE)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
+#    undef  CONFIG_DEV_LOWCONSOLE
+#  elif defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #    undef  CONFIG_DEV_LOWCONSOLE
@@ -299,7 +303,7 @@ EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -449,10 +453,18 @@ void up_earlyserialinit(void);
 #  define up_earlyserialinit()
 #endif
 
+#ifdef CONFIG_ARM_LWL_CONSOLE
+
+/* Defined in src/common/up_lwl_console.c */
+
+void lwlconsole_init(void);
+
+#elif defined(CONFIG_DEV_LOWCONSOLE)
+
 /* Defined in drivers/lowconsole.c */
 
-#ifdef CONFIG_DEV_LOWCONSOLE
 void lowconsole_init(void);
+
 #else
 # define lowconsole_init()
 #endif

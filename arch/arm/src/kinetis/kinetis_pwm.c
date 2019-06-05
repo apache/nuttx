@@ -60,9 +60,9 @@
 
 #include "kinetis.h"
 #include "kinetis_pwm.h"
-#include "chip/kinetis_gpio.h"
-#include "chip/kinetis_ftm.h"
-#include "chip/kinetis_sim.h"
+#include "hardware/kinetis_gpio.h"
+#include "hardware/kinetis_ftm.h"
+#include "hardware/kinetis_sim.h"
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.

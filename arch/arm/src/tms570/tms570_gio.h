@@ -46,7 +46,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "chip/tms570_gio.h"
+#include "hardware/tms570_gio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

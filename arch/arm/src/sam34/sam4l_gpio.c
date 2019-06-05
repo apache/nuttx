@@ -53,7 +53,7 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
-#include "chip/sam4l_gpio.h"
+#include "hardware/sam4l_gpio.h"
 
 /****************************************************************************
  * Private Data

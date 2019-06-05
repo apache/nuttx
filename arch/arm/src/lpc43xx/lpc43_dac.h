@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/analog/dac.h>
-#include "chip/lpc43_dac.h"
+#include "hardware/lpc43_dac.h"
 
 #ifdef CONFIG_LPC43_DAC
 

@@ -44,7 +44,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "chip/imxrt_lcd.h"
+#include "hardware/imxrt_lcd.h"
 
 #include <nuttx/config.h>
 

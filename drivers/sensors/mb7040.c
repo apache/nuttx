@@ -105,10 +105,8 @@ static const struct file_operations g_fops =
   mb7040_read,
   mb7040_write,
   NULL,
-  mb7040_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  mb7040_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

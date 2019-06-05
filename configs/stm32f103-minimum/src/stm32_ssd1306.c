@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f103-minimum/src/sam_ug2832hsweg04.c
+ * config/stm32f103-minimum/src/stm32_ssd1306.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -105,7 +105,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int devno)
   g_lcddev = ssd1306_initialize(g_i2c, NULL, devno);
   if (!g_lcddev)
     {
-      lcderr("ERROR: Failed to bind SPI port 1 to OLED %d: %d\n", devno);
+      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d: %d\n", devno);
     }
   else
     {

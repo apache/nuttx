@@ -158,12 +158,10 @@ int task_restart(pid_t pid)
   dq_rem((FAR dq_entry_t *)tcb, tasklist);
   tcb->cmn.task_state = TSTATE_TASK_INVALID;
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Deallocate anything left in the TCB's signal queues */
 
   nxsig_cleanup((FAR struct tcb_s *)tcb);  /* Deallocate Signal lists */
   tcb->cmn.sigprocmask = NULL_SIGNAL_SET;  /* Reset sigprocmask */
-#endif
 
   /* Reset the current task priority  */
 

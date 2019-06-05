@@ -61,8 +61,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/sam_matrix.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_matrix.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_periphclks.h"
 #include "sam_gpio.h"
 #include "sam_mcan.h"

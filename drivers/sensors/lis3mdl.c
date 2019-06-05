@@ -119,10 +119,8 @@ static const struct file_operations g_lis3mdl_fops =
   lis3mdl_read,
   lis3mdl_write,
   NULL,
-  lis3mdl_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lis3mdl_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

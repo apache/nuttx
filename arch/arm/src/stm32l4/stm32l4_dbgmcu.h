@@ -46,13 +46,13 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
-#  include "chip/stm32l4x3xx_dbgmcu.h"
+#  include "hardware/stm32l4x3xx_dbgmcu.h"
 #elif defined(CONFIG_STM32L4_STM32L4X5)
-#  include "chip/stm32l4x5xx_dbgmcu.h"
+#  include "hardware/stm32l4x5xx_dbgmcu.h"
 #elif defined(CONFIG_STM32L4_STM32L4X6)
-#  include "chip/stm32l4x6xx_dbgmcu.h"
+#  include "hardware/stm32l4x6xx_dbgmcu.h"
 #elif defined(CONFIG_STM32L4_STM32L4XR)
-#  include "chip/stm32l4xrxx_dbgmcu.h"
+#  include "hardware/stm32l4xrxx_dbgmcu.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

@@ -63,7 +63,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/nuc_uart.h"
+#include "hardware/nuc_uart.h"
 #include "nuc_lowputc.h"
 #include "nuc_serial.h"
 

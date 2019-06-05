@@ -122,9 +122,11 @@ extern "C"
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
- *            enabled.  In that case, it may be zero or
- *            NXBE_WINDOW_RAMBACKED
+ *   flags  - Optional flags.  These include:
+ *            NXBE_WINDOW_RAMBACKED:  Creates a RAM backed window.  This
+ *              option is only valid if CONFIG_NX_RAMBACKED is enabled.
+ *            NXBE_WINDOW_HIDDEN:  The window is create in the HIDDEN state
+ *             and can be made visible later with nxtk_setvisibility().
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NXTK callbacks.
  *
@@ -158,8 +160,9 @@ int nxtk_closewindow(NXTKWINDOW hfwnd);
  * Name: nxtk_block
  *
  * Description:
- *   This is callback will do to things:  (1) any queue a 'blocked' callback
- *   to the window and then (2) block any further window messaging.
+ *   The response to this function call is two things:  (1) any queued
+ *   callback messages to the window are 'blocked' and then (2) also
+ *   subsequent window messaging is blocked.
  *
  *   The 'event' callback with the NXEVENT_BLOCKED event is the response
  *   from nx_block (or nxtk_block).  Those blocking interfaces are used to
@@ -345,6 +348,46 @@ int nxtk_lower(NXTKWINDOW hfwnd);
  ****************************************************************************/
 
 int nxtk_modal(NXTKWINDOW hfwnd, bool modal);
+
+/****************************************************************************
+ * Name: nxtk_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present and will update normally, but will not be on visible on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be modified
+ *   hide  - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nxtk_setvisibility(NXTKWINDOW hfwnd, bool hide);
+
+/****************************************************************************
+ * Name: nxtk_ishidden
+ *
+ * Description:
+ *   Return true if the window is hidden.
+ *
+ *   NOTE:  There will be a delay between the time that the visibility of
+ *   the window is changed via nxtk_setvisibily() before that new setting is
+ *   reported by nxtk_ishidden().  nxtk_synch() may be used if temporal
+ *   synchronization is required.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be queried
+ *
+ * Returned Value:
+ *   True: the window is hidden, false: the window is visible
+ *
+ ****************************************************************************/
+
+bool nxtk_ishidden(NXTKWINDOW hfwnd);
 
 /****************************************************************************
  * Name: nxtk_fillwindow

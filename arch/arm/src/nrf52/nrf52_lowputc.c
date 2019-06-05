@@ -44,8 +44,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/nrf52_memorymap.h"
-#include "chip/nrf52_uarte.h"
+#include "hardware/nrf52_memorymap.h"
+#include "hardware/nrf52_uarte.h"
 
 #include "nrf52_config.h"
 #include "nrf52_clockconfig.h"

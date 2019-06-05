@@ -37,16 +37,16 @@ CSRCS += nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c
 CSRCS += nxbe_closewindow.c nxbe_redraw.c nxbe_redrawbelow.c
 CSRCS += nxbe_setposition.c nxbe_move.c nxbe_getrectangle.c
 CSRCS += nxbe_fill.c nxbe_filltrapezoid.c nxbe_setpixel.c
-CSRCS += nxbe_lower.c nxbe_raise.c nxbe_modal.c
-CSRCS += nxbe_setsize.c nxbe_visible.c
+CSRCS += nxbe_lower.c nxbe_raise.c nxbe_modal.c nxbe_isvisible.c
+CSRCS += nxbe_setsize.c nxbe_setvisibility.c
 
 ifeq ($(CONFIG_NX_RAMBACKED),y)
 CSRCS += nxbe_flush.c
 endif
 
-ifeq ($(CONFIG_NX_HWCURSOR),y)
-CSRCS += nxbe_cursor.c
-else ifeq ($(CONFIG_NX_SWCURSOR),y)
+ifeq ($(CONFIG_NX_SWCURSOR),y)
+CSRCS += nxbe_cursor.c nxbe_cursor_backupdraw.c
+else ifeq ($(CONFIG_NX_HWCURSOR),y)
 CSRCS += nxbe_cursor.c
 endif
 

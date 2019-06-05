@@ -44,7 +44,7 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "chip.h"
-#include "chip/imxrt_lpi2c.h"
+#include "hardware/imxrt_lpi2c.h"
 
 /****************************************************************************
  * Public Function Prototypes

@@ -59,8 +59,8 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/sam_lcdc.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_lcdc.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_pio.h"
 #include "sam_periphclks.h"
 #include "sam_memories.h"
@@ -645,9 +645,9 @@ struct sam_lcdc_s
   struct sam_layer_s layer[LCDC_NLAYERS];
 
 #ifdef CONFIG_FB_HWCURSOR
-  struct cursor_pos_s cpos;       /* Current cursor position */
+  struct fb_cursorpos_s cpos;     /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
-  struct cursor_size_s csize;     /* Current cursor size */
+  struct fb_cursorsize_s csize;   /* Current cursor size */
 #endif
 #endif
 

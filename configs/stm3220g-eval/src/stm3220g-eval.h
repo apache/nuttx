@@ -342,30 +342,6 @@ void stm32_extmemdata(int ndata);
 #endif
 
 /****************************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_enablefsmc(void);
-#endif
-
-/****************************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_disablefsmc(void);
-#endif
-
-/****************************************************************************************************
  * Name: stm32_selectsram
  *
  * Description:

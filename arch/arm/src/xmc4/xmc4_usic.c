@@ -61,8 +61,8 @@
 #include <arch/xmc4/chip.h>
 
 #include "up_arch.h"
-#include "chip/xmc4_usic.h"
-#include "chip/xmc4_scu.h"
+#include "hardware/xmc4_usic.h"
+#include "hardware/xmc4_scu.h"
 #include "xmc4_clockconfig.h"
 #include "xmc4_usic.h"
 

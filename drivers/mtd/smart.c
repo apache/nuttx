@@ -420,15 +420,13 @@ static const struct block_operations g_bops =
 #ifdef CONFIG_SMART_DEV_LOOP
 static const struct file_operations g_fops =
 {
-  0,                /* open */
-  0,                /* close */
+  NULL,             /* open */
+  NULL,             /* close */
   smart_loop_read,  /* read */
   smart_loop_write, /* write */
-  0,                /* seek */
-  smart_loop_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0               /* poll */
-#endif
+  NULL,             /* seek */
+  smart_loop_ioctl, /* ioctl */
+  NULL              /* poll */
 };
 #endif /* CONFIG_SMART_DEV_LOOP */
 

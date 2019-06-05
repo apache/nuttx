@@ -46,7 +46,7 @@
 #  include <arch/sama5/chip.h>
 #endif
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

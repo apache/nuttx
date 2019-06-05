@@ -123,10 +123,8 @@ struct userspace_s
 
   /* Signal handler trampoline */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   CODE void (*signal_handler)(_sa_sigaction_t sighand, int signo,
     FAR siginfo_t *info, FAR void *ucontext);
-#endif
 
   /* User-space work queue support */
 

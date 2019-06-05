@@ -93,9 +93,7 @@ struct max44009_dev_s
   uint8_t addr;
   uint8_t cref;
   bool int_pending;
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_MAX44009_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -109,10 +107,8 @@ static ssize_t max44009_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t max44009_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
 static int max44009_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
-#endif
 
 static int max44009_read_data(FAR struct max44009_dev_s *priv,
                               FAR struct max44009_data_s *data);
@@ -128,10 +124,8 @@ static const struct file_operations g_alsops =
   max44009_read,   /* read */
   max44009_write,  /* write */
   NULL,            /* seek */
-  max44009_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , max44009_poll  /* poll */
-#endif
+  max44009_ioctl,  /* ioctl */
+  max44009_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
 #endif
@@ -794,7 +788,6 @@ static int max44009_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-#ifndef CONFIG_DISABLE_POLL
 static void max44009_notify(FAR struct max44009_dev_s *priv)
 {
   DEBUGASSERT(priv != NULL);
@@ -900,7 +893,6 @@ out:
   nxsem_post(&priv->dev_sem);
   return ret;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 static int max44009_int_handler(int irq, FAR void *context, FAR void *arg)
 {
@@ -912,9 +904,7 @@ static int max44009_int_handler(int irq, FAR void *context, FAR void *arg)
   flags = enter_critical_section();
   priv->int_pending = true;
   leave_critical_section(flags);
-#ifndef CONFIG_DISABLE_POLL
   max44009_notify(priv);
-#endif
   max44009_dbg("MAX44009 interrupt\n");
 
   return OK;

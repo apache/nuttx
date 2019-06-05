@@ -59,7 +59,7 @@
 
 #include "chip.h"
 #include "lpc54_config.h"
-#include "chip/lpc54_usart.h"
+#include "hardware/lpc54_usart.h"
 #include "lpc54_clockconfig.h"
 #include "lpc54_lowputc.h"
 #include "lpc54_serial.h"

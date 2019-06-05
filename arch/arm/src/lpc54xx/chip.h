@@ -48,7 +48,7 @@
 
 #include <arch/irq.h>
 #include <arch/lpc54xx/chip.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /* The common ARMv7-M vector handling logic expects the following definition in this
  * file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of supported external

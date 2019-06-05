@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32f103-minimum/src/stm32_mmcsd.c
+ * configs/nucleo-l476rg/src/stm32_spimmcsd.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -81,24 +81,26 @@ static const int SD_SLOT_NO  = 0; /* There is only one SD slot */
  ****************************************************************************/
 
 /*****************************************************************************
- * Name: stm32_spi1register
+ * Name: stm32l4_spi1register
  *
  * Description:
  *   Registers media change callback
+ *
  ****************************************************************************/
 
 int stm32l4_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
-                       void *arg)
+                         void *arg)
 {
   spiinfo("INFO: Registering spi1 device\n");
   return OK;
 }
 
 /*****************************************************************************
- * Name: stm32_mmcsd_initialize
+ * Name: stm32l4_mmcsd_initialize
  *
  * Description:
  *   Initialize SPI-based SD card and card detect thread.
+ *
  ****************************************************************************/
 
 int stm32l4_mmcsd_initialize(int minor)

@@ -235,9 +235,7 @@ extern volatile dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
-#ifndef CONFIG_DISABLE_SIGNALS
 extern volatile dq_queue_t g_waitingforsignal;
-#endif
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-empty.

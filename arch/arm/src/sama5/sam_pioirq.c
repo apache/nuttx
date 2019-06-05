@@ -53,8 +53,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/sam_pio.h"
-#include "chip/sam_pmc.h"
+#include "hardware/sam_pio.h"
+#include "hardware/sam_pmc.h"
 
 #include "sam_pio.h"
 #include "sam_periphclks.h"

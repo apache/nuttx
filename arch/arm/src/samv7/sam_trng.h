@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_trng.h"
+#include "hardware/sam_trng.h"
 
 #if defined(CONFIG_DEV_RANDOM) && defined(CONFIG_SAMV7_TRNG)
 

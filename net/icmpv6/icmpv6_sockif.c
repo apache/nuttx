@@ -74,10 +74,8 @@ static int        icmpv6_connect(FAR struct socket *psock,
 static int        icmpv6_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        icmpv6_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    icmpv6_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static int        icmpv6_close(FAR struct socket *psock);
@@ -97,9 +95,7 @@ const struct sock_intf_s g_icmpv6_sockif =
   icmpv6_listen,      /* si_listen */
   icmpv6_connect,     /* si_connect */
   icmpv6_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   icmpv6_netpoll,     /* si_poll */
-#endif
   icmpv6_send,        /* si_send */
   icmpv6_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -446,7 +442,6 @@ int icmpv6_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int icmpv6_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -469,7 +464,6 @@ static int icmpv6_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
   return -ENOSYS;
 #endif /* CONFIG_MM_IOB */
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: icmpv6_send

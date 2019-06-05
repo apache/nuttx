@@ -48,7 +48,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/lpc17_syscon.h"
+#include "hardware/lpc17_syscon.h"
 #include "lpc17_gpio.h"
 #include "lpc17_lcd.h"
 
@@ -160,12 +160,12 @@ static const struct fb_planeinfo_s g_planeinfo =
 /* Current cursor position */
 
 #ifdef CONFIG_FB_HWCURSOR
-static struct cursor_pos_s g_cpos;
+static struct fb_cursorpos_s g_cpos;
 
 /* Current cursor size */
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-static struct cursor_size_s g_csize;
+static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 

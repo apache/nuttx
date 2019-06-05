@@ -46,8 +46,8 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/stm32fxxxxx_otgfs.h"
-#include "chip/stm32_otghs.h"
+#include "hardware/stm32fxxxxx_otgfs.h"
+#include "hardware/stm32_otghs.h"
 
 #if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
 
@@ -280,7 +280,7 @@ extern "C"
  *
  ***********************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS_VBUS_CONTROL
+#if defined(CONFIG_STM32_OTGFS_VBUS_CONTROL) || defined(CONFIG_STM32_OTGHS_VBUS_CONTROL)
 void stm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 

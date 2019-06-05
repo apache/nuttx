@@ -1707,8 +1707,12 @@ nuttx/
  |   |
  |   |- arm/
  |   |   `- src
- |   |       |- lpc214x/README.txt
- |   |       `- stm32l4/README.txt
+ |   |       |- common
+ |   |       |   `- README_lwl_console.txt
+ |   |       |- lpc214x
+ |   |       |    `-README.txt
+ |   |       `- stm32l4
+ |   |           `- README.txt
  |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt
@@ -1737,6 +1741,8 @@ nuttx/
  |   |- arduino-due/
  |   |   `- README.txt
  |   |- avr32dev1/
+ |   |   `- README.txt
+ |   |- axoloti/
  |   |   `- README.txt
  |   |- b-l475e-iot01a/
  |   |   `- README.txt
@@ -1826,6 +1832,8 @@ nuttx/
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
  |   |- lpcxpresso-lpc54628/
+ |   |   `- README.txt
+ |   |- makerlisp/
  |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
@@ -1958,6 +1966,8 @@ nuttx/
  |   |- shenzhou/
  |   |   `- README.txt
  |   |- skp16c26/
+ |   |   `- README.txt
+ |   |- spresense/
  |   |   `- README.txt
  |   |- stm3210e-eval/
  |   |   |- RIDE/README.txt

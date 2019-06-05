@@ -44,7 +44,7 @@
 
 #include "chip.h"
 
-#include "chip/efm32_adc.h"
+#include "hardware/efm32_adc.h"
 
 #include <nuttx/analog/adc.h>
 

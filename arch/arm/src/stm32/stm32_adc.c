@@ -3292,15 +3292,19 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x SQR4: 0x%08x\n",
+  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
+        adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
   ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SMPR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
+
+#if defined(STM32_ADC_SQR4_OFFSET)
+  ainfo("SQR4: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
+#endif
 
 #if defined(STM32_ADC_SQR5_OFFSET)
   ainfo("SQR5: 0x%08x\n",

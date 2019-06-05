@@ -52,7 +52,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/_sama5d3x4x_pio.h"
+#include "hardware/_sama5d3x4x_pio.h"
 
 #include "chip.h"
 #include "sam_periphclks.h"

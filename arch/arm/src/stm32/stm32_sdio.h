@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/stm32_sdio.h"
+#include "hardware/stm32_sdio.h"
 
 /************************************************************************************
  * Public Functions

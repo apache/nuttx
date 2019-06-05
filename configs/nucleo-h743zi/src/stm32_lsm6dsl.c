@@ -86,7 +86,7 @@ int stm32_lsm6dsl_initialize(char *devpath)
 
   sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
 
-  ret = lsm6dsl_sensor_register("/dev/lsm6dsl0", i2c, LSM6DSLACCEL_ADDR1);
+  ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);

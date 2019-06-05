@@ -83,10 +83,10 @@
 
 #include "kinetis.h"
 #include "kinetis_spi.h"
-#include "chip/kinetis_memorymap.h"
-#include "chip/kinetis_sim.h"
-#include "chip/kinetis_dspi.h"
-#include "chip/kinetis_pinmux.h"
+#include "hardware/kinetis_memorymap.h"
+#include "hardware/kinetis_sim.h"
+#include "hardware/kinetis_dspi.h"
+#include "hardware/kinetis_pinmux.h"
 
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
     defined(CONFIG_KINETIS_SPI2)

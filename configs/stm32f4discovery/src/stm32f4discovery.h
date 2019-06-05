@@ -171,8 +171,7 @@
 #endif
 
 #if !defined(CONFIG_NSH_NETINIT_THREAD) || !defined(CONFIG_ARCH_PHY_INTERRUPT) || \
-    !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP) || \
-     defined(CONFIG_DISABLE_SIGNALS)
+    !defined(CONFIG_NETDEV_PHY_IOCTL) || !defined(CONFIG_NET_UDP)
 #  undef HAVE_NETMONITOR
 #endif
 
@@ -593,30 +592,6 @@ void stm32_extmemaddr(int naddrs);
 
 #ifdef CONFIG_STM32_FSMC
 void stm32_extmemdata(int ndata);
-#endif
-
-/****************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_enablefsmc(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_disablefsmc(void);
 #endif
 
 /****************************************************************************

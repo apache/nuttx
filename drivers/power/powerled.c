@@ -74,10 +74,8 @@ static const struct file_operations powerled_fops =
   NULL,                         /* read */
   NULL,                         /* write */
   NULL,                         /* seek */
-  powerled_ioctl                /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL                        /* poll */
-#endif
+  powerled_ioctl,               /* ioctl */
+  NULL                          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                        /* unlink */
 #endif

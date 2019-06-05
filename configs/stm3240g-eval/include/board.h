@@ -285,7 +285,7 @@
  * select CAN1 or CAN2 if fitted; neither if not fitted.
  */
 
-#if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_FSMC_SRAM)
+#if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_EXTERNAL_RAM)
 #  if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2)
 #    error "The STM3240G-EVAL cannot support both CAN and FSMC SRAM"
 #  endif

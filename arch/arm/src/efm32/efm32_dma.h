@@ -47,7 +47,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/efm32_dma.h"
+#include "hardware/efm32_dma.h"
 
 /************************************************************************************
  * Pre-processor Definitions

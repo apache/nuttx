@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "kinetis.h"
 #include "kinetis_usbotg.h"
-#include "chip/kinetis_sim.h"
+#include "hardware/kinetis_sim.h"
 #include "freedom-k28f.h"
 
 /************************************************************************************

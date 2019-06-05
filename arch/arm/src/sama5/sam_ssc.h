@@ -44,7 +44,7 @@
 #include <nuttx/audio/i2s.h>
 
 #include "chip.h"
-#include "chip/sam_ssc.h"
+#include "hardware/sam_ssc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

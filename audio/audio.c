@@ -122,11 +122,9 @@ static const struct file_operations g_audioops =
   audio_close, /* close */
   audio_read,  /* read */
   audio_write, /* write */
-  0,           /* seek */
-  audio_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0          /* poll */
-#endif
+  NULL,        /* seek */
+  audio_ioctl, /* ioctl */
+  NULL         /* poll */
 };
 
 /****************************************************************************

@@ -196,8 +196,8 @@ ssize_t vnc_rre32(FAR struct vnc_session_s *session,
  *   rect  - Describes the rectangle in the local framebuffer.
  *
  * Returned Value:
- *   Zero is returned if RRE coding was not performed (but not error was)
- *   encountered.  Otherwise, the size of the framebuffer update message
+ *   Zero is returned if RRE coding was not performed (but no error was
+ *   encountered).  Otherwise, the size of the framebuffer update message
  *   is returned on success or a negated errno value is returned on failure
  *   that indicates the nature of the failure.  A failure is only
  *   returned in cases of a network failure and unexpected internal failures.

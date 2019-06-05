@@ -42,7 +42,7 @@
 #include "up_arch.h"
 #if 0
 /* TODO: add clock register module */
-#include "chip/am335x_ccm.h"
+#include "hardware/am335x_ccm.h"
 #endif
 #include "am335x_config.h"
 #include "am335x_clockconfig.h"

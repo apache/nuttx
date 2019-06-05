@@ -54,6 +54,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "hardware/imxrt_ccm.h"
 
 /****************************************************************************
  * Pre-processor Definitions

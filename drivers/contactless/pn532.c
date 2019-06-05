@@ -137,13 +137,11 @@ static const struct file_operations g_pn532fops =
   _close,
   _read,
   _write,
-  0,
-  _ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , 0
-#endif
+  NULL,
+  _ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0
+  , NULL
 #endif
 };
 

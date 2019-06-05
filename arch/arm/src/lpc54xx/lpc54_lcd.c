@@ -50,8 +50,8 @@
 #include <nuttx/video/fb.h>
 
 #include "up_arch.h"
-#include "chip/lpc54_syscon.h"
-#include "chip/lpc54_pinmux.h"
+#include "hardware/lpc54_syscon.h"
+#include "hardware/lpc54_pinmux.h"
 #include "lpc54_config.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_gpio.h"
@@ -147,12 +147,12 @@ static const struct fb_planeinfo_s g_planeinfo =
 /* Current cursor position */
 
 #ifdef CONFIG_FB_HWCURSOR
-static struct cursor_pos_s g_cpos;
+static struct fb_cursorpos_s g_cpos;
 
 /* Current cursor size */
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-static struct cursor_size_s g_csize;
+static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 

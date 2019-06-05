@@ -47,7 +47,7 @@
 #include <nuttx/spi/spi.h>
 
 #include "chip.h"
-#include "chip/imxrt_lpspi.h"
+#include "hardware/imxrt_lpspi.h"
 
 /************************************************************************************
  * Public Functions

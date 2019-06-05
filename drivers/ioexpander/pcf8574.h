@@ -67,8 +67,6 @@
  *   CONFIG_IOEXPANDER
  *     Enables I/O expander support
  *
- * Other settings that effect the driver: CONFIG_DISABLE_POLL
- *
  * CONFIG_IOEXPANDER_PCF8574
  *   Enables support for the PCF8574 driver (Needs CONFIG_INPUT)
  * CONFIG_PCF8574_MULTIPLE

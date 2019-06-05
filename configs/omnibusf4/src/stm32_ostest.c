@@ -61,8 +61,7 @@
 #if defined(CONFIG_ARCH_FPU) && \
     !defined(CONFIG_TESTING_OSTEST_FPUTESTDISABLE) && \
     defined(CONFIG_TESTING_OSTEST_FPUSIZE) && \
-    defined(CONFIG_SCHED_WAITPID) && \
-    !defined(CONFIG_DISABLE_SIGNALS)
+    defined(CONFIG_SCHED_WAITPID)
 #    define HAVE_FPU 1
 #endif
 

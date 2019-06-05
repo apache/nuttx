@@ -133,10 +133,8 @@ static const struct file_operations g_fops =
   lsm303agr_read,
   lsm303agr_write,
   NULL,
-  lsm303agr_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lsm303agr_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

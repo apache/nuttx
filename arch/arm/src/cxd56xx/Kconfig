@@ -1,0 +1,118 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "CXD56xx Configuration Options"
+
+config CXD56_ARCH_OPTS
+	bool
+	default y
+	select ARCH_DMA
+	select SDIO_DMA if MMCSD
+
+menu "CXD56xx Package Configuration"
+
+choice
+	prompt "CXD56xx package selection"
+	default CXD56_FCBGA if !CXD56_100PIN
+	default CXD56_WLCSP if CXD56_100PIN
+
+config CXD56_FCBGA
+	bool "FCBGA 185 pin package"
+
+config CXD56_WLCSP
+	bool "WLCSP 100 pin package"
+
+endchoice
+endmenu
+
+comment "Basic Options"
+
+config CXD56_XOSC_CLOCK
+	int
+	default 26000000
+
+config CXD56_PMIC
+	bool
+	default y
+
+config CXD56_CPUFIFO
+	bool
+
+config CXD56_ICC
+	bool
+	default y
+
+menu "CXD56xx Peripheral Support"
+
+config CXD56_GPIO_IRQ
+	bool "GPIO interrupt"
+	default y
+	---help---
+		Enable support for GPIO interrupts
+
+config CXD56_UART1
+	bool "UART1"
+	default y
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART interface in the communication subsystem. This doesn't have any
+		hardware flow control, and is mainly used for debug console.
+
+config CXD56_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	---help---
+		UART interface with hardware flow control in the application subsystem.
+
+config CXD56_USBDEV
+	bool "USB"
+	default n
+	---help---
+		Enables USB
+
+menuconfig CXD56_SDIO
+	bool "SDIO SD Card"
+	default n
+	select ARCH_HAVE_SDIO
+	select SDIO_BLOCKSETUP
+	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
+
+if CXD56_SDIO
+
+config CXD56_SDIO_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
+config CXD56_SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config CXD56_SDIO_DISABLE_CD_WP
+	bool "Disable the CD and WP pin for SDIO"
+	default y
+	---help---
+		Disable the CD and WP pin for Embedded SDIO.If the CD pin is not disable,
+		the SDIO initialization will be failed.
+
+config CXD56_SDIO_ENABLE_MULTIFUNCTION
+	bool "Enable SDIO multi-function"
+	default n
+	---help---
+		Support multi-function with SDIO interfaced peripheral other than SD Card.
+
+endif # SDIO Configuration
+
+endmenu

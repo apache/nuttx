@@ -47,14 +47,11 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "nvic.h"
 
 #include "lpc11_clockconfig.h"
 #include "lpc11_lowputc.h"
 #include "lpc11_userspace.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
 
 #include "lpc11_start.h"
 

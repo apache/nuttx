@@ -47,10 +47,10 @@
 
 #include "up_arch.h"
 
-#include "chip/efm32_memorymap.h"
-#include "chip/efm32_usart.h"
-#include "chip/efm32_leuart.h"
-#include "chip/efm32_cmu.h"
+#include "hardware/efm32_memorymap.h"
+#include "hardware/efm32_usart.h"
+#include "hardware/efm32_leuart.h"
+#include "hardware/efm32_cmu.h"
 
 #include "efm32_gpio.h"
 #include "efm32_lowputc.h"

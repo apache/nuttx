@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 #include "chip.h"
 #include "kl_gpio.h"
-#include "chip/kl_pinmux.h"
+#include "hardware/kl_pinmux.h"
 
 #include "up_arch.h"
 #include "teensy-lc.h"

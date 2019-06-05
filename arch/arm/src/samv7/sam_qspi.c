@@ -66,10 +66,10 @@
 #include "sam_xdmac.h"
 #include "sam_periphclks.h"
 #include "sam_qspi.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_xdmac.h"
-#include "chip/sam_qspi.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_xdmac.h"
+#include "hardware/sam_qspi.h"
+#include "hardware/sam_pinmap.h"
 
 #ifdef CONFIG_SAMV7_QSPI
 

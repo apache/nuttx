@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include "chip.h"
-#include "chip/sam_tc.h"
+#include "hardware/sam_tc.h"
 
 #if defined(CONFIG_SAM34_TC0) || defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2)
 

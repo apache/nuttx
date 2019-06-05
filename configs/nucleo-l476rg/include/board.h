@@ -62,7 +62,7 @@
  * is we set aside more DMA channels/streams.
  */
 
-/* Values defined in arch/arm/src/stm32l4/chip/stm32l4x6xx_dma.h */
+/* Values defined in arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h */
 
 #define DMACHAN_SDMMC DMACHAN_SDMMC_1     /* 2 choices */
 

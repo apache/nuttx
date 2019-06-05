@@ -35,7 +35,7 @@
 
 CSRCS += group_create.c group_join.c group_leave.c group_find.c
 CSRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
-CSRCS += group_foreachchild.c group_killchildren.c
+CSRCS += group_foreachchild.c group_killchildren.c group_signal.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 CSRCS += task_reparent.c
@@ -58,10 +58,6 @@ endif
 
 ifeq ($(CONFIG_BINFMT_LOADABLE),y)
 CSRCS += group_exitinfo.c
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CSRCS += group_signal.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

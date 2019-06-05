@@ -100,10 +100,8 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
-#ifndef CONFIG_DISABLE_POLL
 static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -116,10 +114,8 @@ static const struct file_operations g_urand_fops =
   devurand_read,                /* read */
   devurand_write,               /* write */
   NULL,                         /* seek */
-  NULL                          /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , devurand_poll               /* poll */
-#endif
+  NULL,                         /* ioctl */
+  devurand_poll                 /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                        /* unlink */
 #endif
@@ -304,7 +300,6 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
  * Name: devurand_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
@@ -319,7 +314,6 @@ static int devurand_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -49,7 +49,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/nuc_gpio.h"
+#include "hardware/nuc_gpio.h"
 
 #include "nuc_gpio.h"
 

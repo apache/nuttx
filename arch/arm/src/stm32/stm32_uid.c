@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <chip/stm32_memorymap.h>
-
+#include "hardware/stm32_memorymap.h"
 #include "stm32_uid.h"
 
 #ifdef STM32_SYSMEM_UID /* Not defined for the STM32L */
