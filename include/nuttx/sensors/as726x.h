@@ -55,58 +55,67 @@
 
 /* Device I2C Address */
 
-// #define AS726X_I2C_DATA_LSB_CMD_ADDR  0x38
-// #define AS726X_I2C_DATA_MSB_ADDR      0x39
+#if 0
+#define AS726X_I2C_DATA_LSB_CMD_ADDR  0x38
+#define AS726X_I2C_DATA_MSB_ADDR      0x39
+#endif
 
-#define AS726X_I2C_ADDR 0x49 //7-bit unshifted default I2C Address
-#define SENSORTYPE_AS7262 0x3E
-#define SENSORTYPE_AS7263 0x3F
+#define AS726X_I2C_ADDR         0x49 /* 7-bit unshifted default I2C Address */
+#define SENSORTYPE_AS7262       0x3e
+#define SENSORTYPE_AS7263       0x3f
 
-//Register addresses
-#define AS726x_DEVICE_TYPE 0x00
-#define AS726x_HW_VERSION 0x01
-#define AS726x_CONTROL_SETUP 0x04
-#define AS726x_INT_T 0x05
-#define AS726x_DEVICE_TEMP 0x06
-#define AS726x_LED_CONTROL 0x07
+/* Register addresses */
+
+#define AS726x_DEVICE_TYPE      0x00
+#define AS726x_HW_VERSION       0x01
+#define AS726x_CONTROL_SETUP    0x04
+#define AS726x_INT_T            0x05
+#define AS726x_DEVICE_TEMP      0x06
+#define AS726x_LED_CONTROL      0x07
 
 #define AS72XX_SLAVE_STATUS_REG 0x00
-#define AS72XX_SLAVE_WRITE_REG 0x01
-#define AS72XX_SLAVE_READ_REG 0x02
+#define AS72XX_SLAVE_WRITE_REG  0x01
+#define AS72XX_SLAVE_READ_REG   0x02
 
-//The same register locations are shared between the AS7262 (V,B,G,Y,O,R) and AS7263 (R,S,T,U,V,W)
-//AS7262 and AS7263 registers
-#define AS726X_V_R 0x08
-#define AS726X_B_S 0x0A
-#define AS726X_G_T 0x0C
-#define AS726X_Y_U 0x0E
-#define AS726X_O_V 0x10
-#define AS726X_R_W 0x12
-#define AS726X_V_R_CAL 0x14
-#define AS726X_B_S_CAL 0x18
-#define AS726X_G_T_CAL 0x1C
-#define AS726X_Y_U_CAL 0x20
-#define AS726X_O_V_CAL 0x24
-#define AS726X_R_W_CAL 0x28
+/* The same register locations are shared between the AS7262 (V,B,G,Y,O,R)
+ * and AS7263 (R,S,T,U,V,W) AS7262 and AS7263 registers
+ */
 
-#define AS72XX_SLAVE_TX_VALID 0x02
-#define AS72XX_SLAVE_RX_VALID 0x01
+#define AS726X_V_R              0x08
+#define AS726X_B_S              0x0a
+#define AS726X_G_T              0x0c
+#define AS726X_Y_U              0x0e
+#define AS726X_O_V              0x10
+#define AS726X_R_W              0x12
+#define AS726X_V_R_CAL          0x14
+#define AS726X_B_S_CAL          0x18
+#define AS726X_G_T_CAL          0x1c
+#define AS726X_Y_U_CAL          0x20
+#define AS726X_O_V_CAL          0x24
+#define AS726X_R_W_CAL          0x28
 
-#define SENSORTYPE_AS7262 0x3E
-#define SENSORTYPE_AS7263 0x3F
+#define AS72XX_SLAVE_TX_VALID   0x02
+#define AS72XX_SLAVE_RX_VALID   0x01
 
-#define AS726X_POLLING_DELAY 5000 //Amount of ms to wait between checking for virtual register changes
+#define SENSORTYPE_AS7262       0x3e
+#define SENSORTYPE_AS7263       0x3f
 
-// #define AS726X_CMD_SD           0x01 /* Shutdown command */
-// #define AS726X_CMD_RSV          0x02
-// #define AS726X_CMD_IT_0_5T      0x00 /* IT1=0 : IT0=0 */
-// #define AS726X_CMD_IT_1T        0x04 /* IT1=0 : IT0=1 */
-// #define AS726X_CMD_IT_2T        0x08 /* IT1=1 : IT0=0 */
-// #define AS726X_CMD_IT_4T        0x0c /* IT1=1 : IT0=1 */
-// #define AS726X_CMD_ACK_THD      0x10 /* Acknowledge thresold:
-//                                           0 = 102 steps
-//                                           1 = 145 steps */
-// #define AS726X_CMD_ACK          0x20 /* Acknowledge activity */
+/* Amount of ms to wait between checking for virtual register changes */
+
+#define AS726X_POLLING_DELAY    5000
+
+#if 0
+#define AS726X_CMD_SD           0x01 /* Shutdown command */
+#define AS726X_CMD_RSV          0x02
+#define AS726X_CMD_IT_0_5T      0x00 /* IT1=0 : IT0=0 */
+#define AS726X_CMD_IT_1T        0x04 /* IT1=0 : IT0=1 */
+#define AS726X_CMD_IT_2T        0x08 /* IT1=1 : IT0=0 */
+#define AS726X_CMD_IT_4T        0x0c /* IT1=1 : IT0=1 */
+#define AS726X_CMD_ACK_THD      0x10 /* Acknowledge thresold:
+                                      *   0 = 102 steps
+                                      *   1 = 145 steps */
+#define AS726X_CMD_ACK          0x20 /* Acknowledge activity */
+#endif
 
 /****************************************************************************
  * Public Types

@@ -106,7 +106,8 @@ static void stm32_i2c_register(int bus)
     ret = i2c_register(i2c, bus);
     if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",bus, ret);
+      syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+             bus, ret);
       stm32l4_i2cbus_uninitialize(i2c);
     }
   }
@@ -133,7 +134,6 @@ static void stm32_i2ctool(void)
 #else
 #  define stm32_i2ctool()
 #endif
-
 
 /****************************************************************************
  * Name: board_app_initialize
@@ -265,7 +265,6 @@ int board_app_initialize(uintptr_t arg)
       return ret;
     }
 #endif
-
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
