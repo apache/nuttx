@@ -11,6 +11,22 @@ config CXD56_ARCH_OPTS
 	select ARCH_DMA
 	select SDIO_DMA if MMCSD
 
+menu "CXD56xx Package Configuration"
+
+choice
+	prompt "CXD56xx package selection"
+	default CXD56_FCBGA if !CXD56_100PIN
+	default CXD56_WLCSP if CXD56_100PIN
+
+config CXD56_FCBGA
+	bool "FCBGA 185 pin package"
+
+config CXD56_WLCSP
+	bool "WLCSP 100 pin package"
+
+endchoice
+endmenu
+
 comment "Basic Options"
 
 config CXD56_XOSC_CLOCK
