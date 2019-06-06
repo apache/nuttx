@@ -480,7 +480,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
     }
 
   value  = ret;
-  value &= 0 b11001111;         /* Clear GAIN bits */
+  value &= 0b11001111;         /* Clear GAIN bits */
   value |= (AS726X_GAIN << 4);  /* Set GAIN bits with user's choice */
 
   as726x_write8(priv, AS726x_CONTROL_SETUP, value);
@@ -493,7 +493,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
     }
 
   value  = ret;
-  value &= 0 b11110011;                     /* Clear BANK bits */
+  value &= 0b11110011;                     /* Clear BANK bits */
   value |= (AS726X_MEASURMENT_MODE << 2);   /* Set BANK bits with user's
                                              * choice */
 
