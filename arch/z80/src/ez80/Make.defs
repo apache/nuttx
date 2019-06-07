@@ -55,11 +55,11 @@ CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
 CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c ez80_lowuart.c
 CHIP_CSRCS += ez80_timerisr.c ez80_serial.c ez80_registerdump.c
 
-ifneq ($(CONFIG_EZ80_I2C),y)
+ifeq ($(CONFIG_EZ80_I2C),y)
 CHIP_CSRCS += ez80_i2c.c
 endif
 
-ifneq ($(CONFIG_EZ80_SPI),y)
+ifeq ($(CONFIG_EZ80_SPI),y)
 CHIP_CSRCS += ez80_spi.c
 endif
 
