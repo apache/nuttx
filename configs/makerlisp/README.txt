@@ -187,8 +187,8 @@ Serial Keyboard and VGA Display
      the USB/UART connection, you want this jumper REMOVED, not bridging the
      two header pins front to back.
 
-  TBD:  What is the UART configuration when used with the VGA and Keyboard
-        adapters?
+  The PC terminal software should be configured as described in the MakerLisp
+  Putty HOWTO document:  115200N1 BAUD.
 
 Default Serial Console
 ----------------------
@@ -294,5 +294,6 @@ Configuration Subdirectories
        need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
        enables a required VGA initialization sequence.
 
-       TBD:  What is the UART configuration when used with the VGA and
-       Keyboard controllers?
+       The PC terminal software should be configured as described in the
+       MakerLisp Putty HOWTO document:  115200N1 BAUD.
+
