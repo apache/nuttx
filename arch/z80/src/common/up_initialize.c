@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
+ *    the documentation and/or otherr materials provided with the
  *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
@@ -98,6 +98,12 @@ void up_initialize(void)
   /* Initialize the interrupt subsystem */
 
   up_irqinitialize();
+
+#ifdef CONFIG_RTC_ALARM
+  /* Enable RTC alarm interrupts */
+
+  ez80_rtc_irqinitialize();
+#endif
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* Initialize the system timer interrupt */

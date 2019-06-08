@@ -116,6 +116,10 @@ extern "C"
 
 void up_irqinitialize(void);
 
+#ifdef CONFIG_RTC_ALARM
+void ez80_rtc_irqinitialize(void);
+#endif
+
 #ifdef USE_LOWSERIALINIT
 void up_lowserialinit(void);
 #endif

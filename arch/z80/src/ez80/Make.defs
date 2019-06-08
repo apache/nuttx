@@ -63,6 +63,10 @@ ifeq ($(CONFIG_EZ80_SPI),y)
 CHIP_CSRCS += ez80_spi.c
 endif
 
+ifeq ($(CONFIG_EZ80_RTC),y)
+CHIP_CSRCS += ez80_rtc.c
+endif
+
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 ifeq ($(CONFIG_EZ80_EMAC),y)
 CHIP_CSRCS += ez80_emac.c
