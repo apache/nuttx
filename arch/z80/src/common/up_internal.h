@@ -114,10 +114,10 @@ extern "C"
 
 /* Supplied by chip- or board-specific logic */
 
-void up_irqinitialize(void);
+void z80_irq_initialize(void);
 
 #ifdef CONFIG_RTC_ALARM
-void ez80_rtc_irqinitialize(void);
+void z80_rtc_irqinitialize(void);
 #endif
 
 #ifdef USE_LOWSERIALINIT
@@ -132,9 +132,9 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs);
 
 void up_sigdeliver(void);
 
+#ifdef CONFIG_ARCH_ADDRENV
 /* Defined in CPU-specific logic (only for Z180) */
 
-#ifdef CONFIG_ARCH_ADDRENV
 int up_mmuinit(void);
 #endif
 

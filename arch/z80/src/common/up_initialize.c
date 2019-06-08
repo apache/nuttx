@@ -97,12 +97,12 @@ void up_initialize(void)
 
   /* Initialize the interrupt subsystem */
 
-  up_irqinitialize();
+  z80_irq_initialize();
 
 #ifdef CONFIG_RTC_ALARM
   /* Enable RTC alarm interrupts */
 
-  ez80_rtc_irqinitialize();
+  z80_rtc_irqinitialize();
 #endif
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)

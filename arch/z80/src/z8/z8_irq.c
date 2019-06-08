@@ -60,10 +60,10 @@ struct z8_irqstate_s g_z8irqstate;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: z80_irq_initialize
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void z80_irq_initialize(void)
 {
   /* Clear and disable all interrupts.  Set all to priority 0. */
 

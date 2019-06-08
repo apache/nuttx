@@ -523,11 +523,11 @@ int up_rtc_initialize(void)
 }
 
 /************************************************************************************
- * Name: ez80_rtc_irqinitialize
+ * Name: z80_rtc_irqinitialize
  *
  * Description:
  *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
- *   up_irqinitialize is called later.
+ *   z80_irq_initialize is called later.
  *
  * Input Parameters:
  *   None
@@ -538,7 +538,7 @@ int up_rtc_initialize(void)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int ez80_rtc_irqinitialize(void)
+int z80_rtc_irqinitialize(void)
 {
   DEBUGVERIFY(irq_attach(EZ80_RTC_IRQ, ez80_alarm_interrupt, NULL));
 }
