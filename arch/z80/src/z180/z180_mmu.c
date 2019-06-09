@@ -126,7 +126,7 @@ static inline FAR struct z180_cbr_s *z180_mmu_alloccbr(void)
  *   called very early in the boot process to get the basic operating
  *   memory configuration correct.  This function does *not* perform all
  *   necessray MMU initialization... only the basics needed at power-up.
- *   up_mmuinit() must be called later to complete the entire MMU
+ *   z80_mmu_initialize() must be called later to complete the entire MMU
  *   initialization.
  *
  ****************************************************************************/
@@ -151,7 +151,7 @@ void z180_mmu_lowinit(void) __naked
 }
 
 /****************************************************************************
- * Name: up_mmuinit
+ * Name: z80_mmu_initialize
  *
  * Description:
  *   Perform higher level initialization of the MMU and physical memory
@@ -159,7 +159,7 @@ void z180_mmu_lowinit(void) __naked
  *
  ****************************************************************************/
 
-int up_mmuinit(void)
+int z80_mmu_initialize(void)
 {
   /* Here we use the granule allocator as a page allocator.  We lie and
    * say that 1 page is 1 byte.

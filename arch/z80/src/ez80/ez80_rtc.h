@@ -97,11 +97,11 @@ struct alm_setalarm_s
 
 #undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
+#  define EXTERN extern "C"
 extern "C"
 {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -205,4 +205,5 @@ int ez80_rtc_rdalarm(FAR struct rtc_time *almtime);
 int ez80_rtc_cancelalarm(void);
 
 #endif /* CONFIG_RTC_ALARM */
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_EZ80_SRC_EZ80_RTC_H */

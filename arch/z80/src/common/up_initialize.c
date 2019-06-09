@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
@@ -126,7 +127,7 @@ void up_initialize(void)
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  (void)up_mmuinit();
+  (void)z80_mmu_initialize();
 #endif
 
 #ifdef CONFIG_MM_IOB
@@ -165,7 +166,7 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
-  up_serialinit();
+  z80_serial_initialize();
 #endif
 
   /* Initialize the console device driver (if it is other than the standard

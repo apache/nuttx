@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_doirq.c
+ * arch/z80/src/common/z80_doirq.c
  *
  *   Copyright (C) 2007-2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,7 +58,7 @@
  * Public Functions
  ****************************************************************************/
 
-FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
+FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 

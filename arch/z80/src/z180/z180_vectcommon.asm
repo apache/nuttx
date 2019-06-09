@@ -56,7 +56,7 @@
 ; Global symbols used
 ;**************************************************************************
 
-	.globl	_up_doirq			; Interrupt decoding logic
+	.globl	_z80_doirq			; Interrupt decoding logic
 
 ;**************************************************************************
 ; Vector Handlers
@@ -178,7 +178,7 @@ _up_vectcommon::
 	push	hl				; Place argument #2 at the top of stack
 	push	bc				; Argument #1 is the Reset number
 	inc		sp				; (make byte sized)
-	call	_up_doirq		; Decode the IRQ
+	call	_z80_doirq		; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
 	; Note that (1) the arguments pushed on the stack are not popped, and (2) the

@@ -70,10 +70,10 @@ extern uint32_t get_freq(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowserialinit
+ * Name: z80_lowserial_initialize
  ****************************************************************************/
 
-void up_lowserialinit(void)
+void z80_lowserial_initialize(void)
 {
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) || \
    (defined(EZ8_UART1) && defined(CONFIG_UART1_SERIAL_CONSOLE))

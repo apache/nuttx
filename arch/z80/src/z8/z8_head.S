@@ -71,7 +71,7 @@
 	xref	_board_autoled_initialize:ROM
 #endif
 	xref	_nx_start:ROM
-	xref	_up_doirq:ROM
+	xref	_z80_doirq:ROM
 	xref	_low_nearbss
 	xref	_len_nearbss
 	xref	_low_farbss

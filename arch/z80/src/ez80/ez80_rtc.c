@@ -69,42 +69,6 @@
 #  error "CONFIG_RTC_DATETIME must be set to use this driver"
 #endif
 
-#ifdef CONFIG_RTC_HIRES
-#  error "CONFIG_RTC_HIRES must NOT be set with this driver"
-#endif
-
-/* Constants ****************************************************************/
-
-#define SYNCHRO_TIMEOUT      (0x00020000)
-#define INITMODE_TIMEOUT     (0x00010000)
-
-/* Proxy definitions to make the same code work for all the EZ80 series ****/
-
-# define EZ80_RCC_XXX       EZ80_RCC_BDCR
-# define RCC_XXX_YYYRST      RCC_BDCR_BDRST
-# define RCC_XXX_RTCEN       RCC_BDCR_RTCEN
-# define RCC_XXX_RTCSEL_MASK RCC_BDCR_RTCSEL_MASK
-# define RCC_XXX_RTCSEL_LSE  RCC_BDCR_RTCSEL_LSE
-# define RCC_XXX_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
-# define RCC_XXX_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
-
-/* Time conversions */
-
-#define MINUTES_IN_HOUR 60
-#define HOURS_IN_DAY 24
-
-#define hours_add(parm_hrs) \
-  time->tm_hour += parm_hrs;\
-  if ((HOURS_IN_DAY-1) < (time->tm_hour))\
-    {\
-      time->tm_hour = (parm_hrs - HOURS_IN_DAY);\
-    }
-
-#define RTC_ALRMR_DIS_MASK            (RTC_ALRMR_MSK4 | RTC_ALRMR_MSK3 | \
-                                       RTC_ALRMR_MSK2 | RTC_ALRMR_MSK1)
-#define RTC_ALRMR_DIS_DATE_MASK       (RTC_ALRMR_MSK4)
-#define RTC_ALRMR_ENABLE              (0)
-
 /****************************************************************************
  * Private Types
  *****************************************************************************/
@@ -783,6 +747,7 @@ int ez80_rtc_cancelalarm(void)
 
 #ifdef CONFIG_RTC_ALARM
 int ez80_rtc_rdalarm(FAR struct rtc_time *almtime)
+{
   struct rtc_almregs_s almregs;
   int ret = -EINVAL;
 

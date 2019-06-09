@@ -109,7 +109,7 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       regs[XCPT_IRQCTL] = 0x0080; /* IRQE bit will enable interrupts */
 
       /* The g_z8irqstate.regs pointer is the value of the stack pointer at
-       * the time that up_doirq() was called.  Therefore, we can calculate
+       * the time that z80_doirq() was called.  Therefore, we can calculate
        * the correct value for the stack pointer on return from interrupt:
        */
 

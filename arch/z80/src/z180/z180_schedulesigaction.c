@@ -74,7 +74,7 @@ static void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
 
   /* Then set up to vector to the trampoline with interrupts disabled */
 
-  regs[XCPT_PC]  = (chipreg_t)up_sigdeliver;
+  regs[XCPT_PC]  = (chipreg_t)z80_sigdeliver;
   regs[XCPT_I]   = 0;
 }
 

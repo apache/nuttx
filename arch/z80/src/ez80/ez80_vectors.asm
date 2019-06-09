@@ -57,7 +57,7 @@ EZ80_UNUSED	EQU	40h
 ;**************************************************************************
 
 	xref	_ez80_startup
-	xref	_up_doirq
+	xref	_z80_doirq
 
 ;**************************************************************************
 ; Global Symbols Exported
@@ -241,7 +241,7 @@ _ez80_rstcommon:
         ld      bc, #0			; BC = reset number
 	ld	c, a			;   Save the reset number in C
 	push	bc			; Argument #1 is the Reset number
-	call	_up_doirq		; Decode the IRQ
+	call	_z80_doirq		; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
 	; Note that (1) the arguments pushed on the stack are not popped, and (2) the

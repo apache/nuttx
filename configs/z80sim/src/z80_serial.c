@@ -309,29 +309,14 @@ static bool up_txempty(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: z80_serial_initialize
  *
  * Description:
- *   Performs the low level UART initialization early in
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before up_serialinit.
+ *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
-{
-}
-
-/****************************************************************************
- * Name: up_serialinit
- *
- * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
- *
- ****************************************************************************/
-
-void up_serialinit(void)
+void z80_serial_initialize(void)
 {
   (void)uart_register("/dev/console", &g_uartport);
   (void)uart_register("/dev/ttyS0", &g_uartport);
