@@ -1834,6 +1834,7 @@ nuttx/
  |   |- lpcxpresso-lpc54628/
  |   |   `- README.txt
  |   |- makerlisp/
+ |   |   |- nsh/README.txt
  |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
