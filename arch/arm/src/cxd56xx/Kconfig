@@ -44,6 +44,36 @@ config CXD56_ICC
 	bool
 	default y
 
+config CXD56_FARAPI
+	bool
+	default y
+	select CXD56_CPUFIFO
+
+menu "Far API Configuration"
+	depends on CXD56_FARAPI
+
+config CXD56_FARAPI_VERSION_CHECK
+	bool "Far API Version Compatibility Check"
+	default y
+	---help---
+		Enable the Far API version compatibility check. If the version
+		mismatch is deteced during system bootup, the target system shows
+		the message to update the loader and gnssfw firmwares.
+
+if CXD56_FARAPI_VERSION_CHECK
+
+config CXD56_FARAPI_VERSION_FAILED_PANIC
+	bool "Far API Version Check Failed to PANIC"
+	default n
+	---help---
+		If the version mismatch is detected, do PANIC() to stop the system.
+endif
+
+config CXD56_FARAPI_DEBUG
+	bool "Debug Far API"
+
+endmenu # Far API Configuration
+
 menu "CXD56xx Peripheral Support"
 
 config CXD56_GPIO_IRQ

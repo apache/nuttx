@@ -83,6 +83,8 @@ CMN_CSRCS += up_copyarmstate.c
 endif
 endif
 
+CHIP_ASRCS += cxd56_farapistub.S
+
 CHIP_CSRCS  = cxd56_allocateheap.c cxd56_idle.c
 CHIP_CSRCS += cxd56_serial.c cxd56_uart.c cxd56_irq.c
 CHIP_CSRCS += cxd56_start.c
@@ -93,6 +95,8 @@ CHIP_CSRCS += cxd56_gpio.c
 CHIP_CSRCS += cxd56_pmic.c
 CHIP_CSRCS += cxd56_cpufifo.c
 CHIP_CSRCS += cxd56_icc.c
+CHIP_CSRCS += cxd56_powermgr.c
+CHIP_CSRCS += cxd56_farapi.c
 
 ifeq ($(CONFIG_CXD56_GPIO_IRQ),y)
 CHIP_CSRCS += cxd56_gpioint.c
