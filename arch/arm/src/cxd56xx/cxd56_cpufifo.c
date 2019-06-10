@@ -80,6 +80,7 @@ static void cpufifo_reserve(uint32_t data[2]);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Only for SYS, GNSS CPUs */
 
 static sq_queue_t          g_pushqueue;

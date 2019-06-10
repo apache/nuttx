@@ -62,6 +62,7 @@
 enum pmic_cmd_type_e
 {
   /* basic */
+
   PMIC_CMD_READ = 0x00,
   PMIC_CMD_WRITE,
   PMIC_CMD_GPO,
@@ -72,7 +73,9 @@ enum pmic_cmd_type_e
   PMIC_CMD_GETPREVSYS,
   PMIC_CMD_SETVSYS,
   PMIC_CMD_GETVSYS,
+
   /* charger */
+
   PMIC_CMD_GAUGE = 0x10,
   PMIC_CMD_GET_USB_PORT_TYPE,
   PMIC_CMD_GET_CHG_STATE,
@@ -90,7 +93,9 @@ enum pmic_cmd_type_e
   PMIC_CMD_CHG_PAUSE,
   PMIC_CMD_CHG_ENABLE,
   PMIC_CMD_CHG_DISABLE,
+
   /* power monitor */
+
   PMIC_CMD_POWER_MONITOR_ENABLE = 0x30,
   PMIC_CMD_POWER_MONITOR_STATUS,
   PMIC_CMD_POWER_MONITOR_SET,
@@ -142,6 +147,7 @@ enum pmic_cmd_type_e
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* FarAPI interface structures */
 
 struct pmic_afe_s
@@ -173,13 +179,13 @@ static struct work_s g_irqwork;
  ****************************************************************************/
 
 #ifdef CONFIG_CXD56_PMIC_INT
-/************************************************************************************
+/****************************************************************************
  * Name: is_notify_registerd
  *
  * Description:
  *   Return whether any notification is registered or not
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static bool is_notify_registerd(void)
 {
@@ -195,13 +201,13 @@ static bool is_notify_registerd(void)
   return false;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pmic_int_worker
  *
  * Description:
  *   Work queue for pmic interrupt
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void pmic_int_worker(void *arg)
 {
@@ -236,13 +242,13 @@ static void pmic_int_worker(void *arg)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pmic_int_handler
  *
  * Description:
  *   Interrupt handler for pmic interrupt
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int pmic_int_handler(int irq, void *context, void *arg)
 {
@@ -451,7 +457,7 @@ int cxd56_pmic_set_gpo_hiz(uint8_t chset)
  *   chset : GPO Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are high. Otherwise, return false
+ *   Return true if all of the specified chset are high. Else, return false
  *
  ****************************************************************************/
 
@@ -691,17 +697,19 @@ int cxd56_pmic_get_rtc(uint64_t *count)
   ret = cxd56_pmic_write(PMIC_REG_RRQ_TIME, &data, sizeof(data));
   if (ret) goto error;
 
-  do {
+  do
+  {
     ret = cxd56_pmic_read(PMIC_REG_RRQ_LRQ_STATUS, &data, sizeof(data));
     if (ret) goto error;
-  } while (!(RRQ_TIME_STATE & data));
+  }
+  while (!(RRQ_TIME_STATE & data));
 
   ret = cxd56_pmic_read(PMIC_REG_RTC, rtc, sizeof(rtc));
   if (ret) goto error;
 
   *count =
-    (((uint64_t)((rtc[5] << 24) | (rtc[4] << 16) | (rtc[3] << 8) | rtc[2]) << 15) |
-     ((rtc[1] << 8) | rtc[0]));
+    (((uint64_t)((rtc[5] << 24) | (rtc[4] << 16) | (rtc[3] << 8) |
+     rtc[2]) << 15) | ((rtc[1] << 8) | rtc[0]));
 
 error:
   return ret;
@@ -1112,7 +1120,7 @@ int cxd56_pmic_setchargecompcurrent(int current)
         break;
     }
 
-  return PM_PmicControl(PMIC_CMD_SET_CHG_IFIN, (void*)val);
+  return PM_PmicControl(PMIC_CMD_SET_CHG_IFIN, (void *)val);
 }
 
 /****************************************************************************

@@ -65,8 +65,8 @@
 
 /* GPIO Interrupt Polarity Definitions */
 
-//#define GPIOINT_INSTANT_HIGH      (0) /* Not supported */
-//#define GPIOINT_INSTANT_LOW       (1) /* Not supported */
+/* #define GPIOINT_INSTANT_HIGH      (0) */ /* Not supported */
+/* #define GPIOINT_INSTANT_LOW       (1) */ /* Not supported */
 #define GPIOINT_LEVEL_HIGH          (2) /* High Level */
 #define GPIOINT_LEVEL_LOW           (3) /* Low Level */
 #define GPIOINT_EDGE_RISE           (4) /* Rising Edge */
@@ -75,9 +75,11 @@
 #define GPIOINT_PSEUDO_EDGE_RISE    (GPIOINT_LEVEL_HIGH | \
                                      GPIOINT_TOGGLE_MODE_MASK)
                                         /* Rising Edge without clear */
+
 #define GPIOINT_PSEUDO_EDGE_FALL    (GPIOINT_LEVEL_LOW | \
                                      GPIOINT_TOGGLE_MODE_MASK)
                                         /* Falling Edge without clear */
+
 #define GPIOINT_PSEUDO_EDGE_BOTH    (GPIOINT_TOGGLE_MODE_MASK | \
                                      GPIOINT_TOGGLE_BOTH_MASK)
                                         /* Both Edge without clear */
@@ -209,7 +211,7 @@ void cxd56_gpioint_disable(uint32_t pin);
 
 void cxd56_gpioint_invert(uint32_t pin);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cxd56_gpioint_status
  *
  * Description:
@@ -218,7 +220,7 @@ void cxd56_gpioint_invert(uint32_t pin);
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cxd56_gpioint_status(uint32_t pin, cxd56_gpioint_status_t *stat);
 

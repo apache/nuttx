@@ -450,9 +450,9 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
 
   /* set GPIO interrupt configuration */
 
-  if (gpiocfg & GPIOINT_TOGGLE_BOTH_MASK) {
-
-    /* set GPIO pseudo both edge interrupt */
+  if (gpiocfg & GPIOINT_TOGGLE_BOTH_MASK)
+  {
+   /* set GPIO pseudo both edge interrupt */
 
     flags = enter_critical_section();
     g_bothedge |= (1 << slot);
@@ -460,9 +460,12 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
 
     /* detect the change from the current signal */
 
-    if (true == cxd56_gpio_read(pin)) {
+    if (true == cxd56_gpio_read(pin))
+    {
       gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_LOW);
-    } else {
+    }
+    else
+    {
       gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_HIGH);
     }
   }

@@ -123,13 +123,6 @@ static void cxd56_dumpnvic(const char *msg, int irq)
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  INTCTRL:    %08x VECTAB: %08x\n", getreg32(NVIC_INTCTRL),
           getreg32(NVIC_VECTAB));
-#  if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-          getreg32(NVIC_SYSHCON_MEMFAULTENA),
-          getreg32(NVIC_SYSHCON_BUSFAULTENA),
-          getreg32(NVIC_SYSHCON_USGFAULTENA),
-          getreg32(NVIC_SYSTICK_CTRL_ENABLE));
-#  endif
   irqinfo("  IRQ ENABLE: %08x %08x\n", getreg32(NVIC_IRQ0_31_ENABLE),
           getreg32(NVIC_IRQ32_63_ENABLE));
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
@@ -360,6 +353,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ARCH_IRQPRIO
   /* up_prioritize_irq(CXD56_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
+
 #ifdef CONFIG_ARMV7M_USEBASEPRI
   cxd56_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
