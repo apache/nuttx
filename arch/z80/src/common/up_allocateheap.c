@@ -48,7 +48,7 @@
 #include <nuttx/mm/mm.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef SDCC
 /* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file

@@ -138,7 +138,7 @@ void z180_mmu_lowinit(void) __naked;
  *
  * Description:
  *   Perform higher level initialization of the MMU and physical memory
- *   memory management logic.  More correctly prototypes in up_internal.h.
+ *   memory management logic.  More correctly prototypes in z80_internal.h.
  *
  ****************************************************************************/
 

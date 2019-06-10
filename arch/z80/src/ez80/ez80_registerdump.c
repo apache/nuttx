@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 
 #include "chip/switch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 

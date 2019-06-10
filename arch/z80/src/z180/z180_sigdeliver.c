@@ -48,7 +48,7 @@
 
 #include "chip/switch.h"
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Functions

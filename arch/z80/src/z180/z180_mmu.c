@@ -50,7 +50,7 @@
 #include <arch/irq.h>
 #include <arch/io.h>
 
-#include "up_internal.h"
+#include "z80_internal.h"
 #include "z180_mmu.h"
 
 /****************************************************************************

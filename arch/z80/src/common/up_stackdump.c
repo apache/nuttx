@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 

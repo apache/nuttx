@@ -52,7 +52,7 @@
 #include <nuttx/serial/serial.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef USE_SERIALDRIVER
 

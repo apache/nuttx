@@ -49,7 +49,7 @@
 #include <nuttx/board.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Private Types

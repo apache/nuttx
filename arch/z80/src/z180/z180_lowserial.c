@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "common/up_internal.h"
+#include "common/z80_internal.h"
 
 #include "z180_config.h"
 #include "z180_serial.h"

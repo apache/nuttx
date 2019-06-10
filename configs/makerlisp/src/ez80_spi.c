@@ -43,7 +43,7 @@
 #include <arch/chip/io.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 #include "ez80f91_spi.h"
 #include "makerlisp.h"
 

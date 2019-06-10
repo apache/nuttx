@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

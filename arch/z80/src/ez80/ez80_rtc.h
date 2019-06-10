@@ -179,7 +179,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  *   Return the current alarm setting.
  *
  * Input Parameters:
- *  almtime - Location to retun the current alarm ime.
+ *  almtime - Location to return the current alarm time.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure

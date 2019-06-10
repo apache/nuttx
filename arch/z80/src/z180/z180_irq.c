@@ -48,7 +48,7 @@
 
 #include "switch.h"
 #include "z180_iomap.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Data

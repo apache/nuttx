@@ -44,7 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /********************************************************************************
  * Pre-processor Definitions

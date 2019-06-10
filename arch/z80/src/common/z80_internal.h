@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_internal.h
+ * arch/z80/src/common/z80_internal.h
  *
  *   Copyright (C) 2007-2009, 2015, 2017-2018 Gregory Nutt. All rights
  *     reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z80_SRC_COMMON_UP_INTERNAL_H
-#define __ARCH_Z80_SRC_COMMON_UP_INTERNAL_H
+#ifndef __ARCH_Z80_SRC_COMMON_Z80_INTERNAL_H
+#define __ARCH_Z80_SRC_COMMON_Z80_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -211,4 +211,4 @@ void up_stackdump(void);
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_COMMON_UP_INTERNAL_H */
+#endif  /* __ARCH_Z80_SRC_COMMON_Z80_INTERNAL_H */

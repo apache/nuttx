@@ -47,7 +47,7 @@
 #include <nuttx/sched.h>
 
 #include "chip.h"
-#include "common/up_internal.h"
+#include "common/z80_internal.h"
 #include "z180_config.h"
 
 #if defined(USE_LOWSERIALINIT) && defined(HAVE_SCC)

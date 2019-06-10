@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Private Types
