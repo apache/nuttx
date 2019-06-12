@@ -3,3 +3,5 @@ README.txt
 
 nsh.zdsproj is a simple ZDS-II project that will allow you
   to use the ZDS-II debugger.
+nsh.zfpproj is a simple project that will allow you to use the Smart Flash
+  Programming.

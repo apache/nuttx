@@ -217,8 +217,9 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
       tmp = (leapyear ? 366 : 365);
     }
 
-  /* At this point, value has the year and days has number days into this
-   * year
+  /* At this point, 'value' has the years since 1970 and 'days' has number
+   * of days into that year.  'leapyear' is true if the year in 'value' is
+   * a leap year.
    */
 
   *year = 1970 + value;
