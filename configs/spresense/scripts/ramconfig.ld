@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/cxd56evb/scripts/ramconfig.ld
+ * configs/spresense/scripts/ramconfig.ld
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

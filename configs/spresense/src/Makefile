@@ -37,10 +37,15 @@
 DEPPATH = --dep-path .
 
 ASRCS =
-CSRCS = cxd56_boot.c cxd56_bringup.c
+CSRCS =
+
+CSRCS += cxd56_boot.c
+CSRCS += cxd56_clock.c
+CSRCS += cxd56_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += cxd56_appinit.c
+CSRCS += cxd56_power.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
@@ -53,6 +58,14 @@ endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cxd56_leds.c
+endif
+
+ifeq ($(CONFIG_CXD56_SDIO),y)
+CSRCS += cxd56_sdcard.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += cxd56_usbmsc.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

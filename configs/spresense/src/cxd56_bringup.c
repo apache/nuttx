@@ -44,6 +44,36 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include <arch/chip/pm.h>
+#include "chip.h"
+
+#include "cxd56_sysctl.h"
+#include "cxd56_powermgr.h"
+#include "cxd56_uart.h"
+#include "cxd56_timerisr.h"
+#include "cxd56_gpio.h"
+#include "cxd56_pinconfig.h"
+
+#ifdef CONFIG_CXD56_CPUFIFO
+#include "cxd56_cpufifo.h"
+#endif
+
+#ifdef CONFIG_CXD56_ICC
+#include "cxd56_icc.h"
+#endif
+
+#ifdef CONFIG_CXD56_FARAPI
+#include "cxd56_farapi.h"
+#endif
+
+#ifdef CONFIG_USBDEV
+#include "cxd56_usbdev.h"
+#endif
+
 #include "spresense.h"
 
 /****************************************************************************
@@ -55,11 +85,37 @@
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
-#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
-#    define CXD56_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
-#  else
-#    define CXD56_PROCFS_MOUNTPOINT "/proc"
-#  endif
+ #ifdef CONFIG_NSH_PROC_MOUNTPOINT
+ #define CXD56_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+ #else
+ #define CXD56_PROCFS_MOUNTPOINT "/proc"
+ #endif
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_CPUFIFO
+static int nsh_cpucom_initialize(void)
+{
+  int ret = OK;
+
+  cxd56_cfinitialize();
+
+#ifdef CONFIG_CXD56_ICC
+  cxd56_iccinitialize();
+#endif
+#ifdef CONFIG_CXD56_FARAPI
+  cxd56_farapiinitialize();
+#endif
+
+  cxd56_sysctlinitialize();
+
+  return ret;
+}
+#else
+#  define nsh_cpucom_initialize() (OK)
 #endif
 
 /****************************************************************************
@@ -82,11 +138,56 @@
 
 int cxd56_bringup(void)
 {
+  struct pm_cpu_wakelock_s wlock;
   int ret;
 
-  (void) ret;
+  ret = nsh_cpucom_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize cpucom.\n");
+    }
+
+  ret = cxd56_pm_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize powermgr.\n");
+    }
+
+  wlock.info = PM_CPUWAKELOCK_TAG('C', 'A', 0);
+  wlock.count = 0;
+  up_pm_acquire_wakelock(&wlock);
+
+  cxd56_uart_initialize();
+  cxd56_timerisr_initialize();
+
+#ifdef CONFIG_CXD56_CPUFIFO
+  ret = cxd56_pm_bootup();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to powermgr bootup.\n");
+    }
+#endif
+
+  /* Initialize CPU clock to max frequency */
+
+  board_clock_initialize();
+
+  /* Setup the power of external device */
+
+  board_power_setup(0);
 
 #ifdef CONFIG_FS_PROCFS
+
+#ifdef CONFIG_FS_PROCFS_REGISTER
+  /* register usbdev procfs */
+
+  ret = cxd56_usbdev_procfs_register();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to register usbdev.\n");
+    }
+#endif
+
   ret = mount(NULL, CXD56_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
@@ -94,5 +195,44 @@ int cxd56_bringup(void)
     }
 #endif
 
-  return OK;
+  /* In order to prevent Hi-Z from being input to the SD Card controller,
+   * Initialize SDIO pins to GPIO low output with internal pull-down.
+   */
+
+  CXD56_PIN_CONFIGS(PINCONFS_SDIOA_GPIO);
+  cxd56_gpio_write(PIN_SDIO_CLK, false);
+  cxd56_gpio_write(PIN_SDIO_CMD, false);
+  cxd56_gpio_write(PIN_SDIO_DATA0, false);
+  cxd56_gpio_write(PIN_SDIO_DATA1, false);
+  cxd56_gpio_write(PIN_SDIO_DATA2, false);
+  cxd56_gpio_write(PIN_SDIO_DATA3, false);
+
+#if defined(CONFIG_CXD56_SDIO) && !defined(CONFIG_CXD56_SPISD)
+  ret = board_sdcard_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze sdhci. \n");
+    }
+#endif
+
+#ifdef CONFIG_CXD56_SPISD
+  /* Mount the SPI-based MMC/SD block driver */
+
+  ret = board_spisd_initialize(0, 4);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to initialize SPI device to MMC/SD: %d\n",
+           ret);
+    }
+#endif
+
+#ifdef CONFIG_CPUFREQ_RELEASE_LOCK
+  /* Enable dynamic clock control and CPU clock down for power saving */
+
+  board_clock_enable();
+#endif
+
+  up_pm_release_wakelock(&wlock);
+
+  return 0;
 }

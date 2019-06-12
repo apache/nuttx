@@ -5,4 +5,27 @@
 
 if ARCH_BOARD_SPRESENSE
 
+config SDCARD_TXS02612
+	bool "SD Card TXS02612 port expander with voltage level translation"
+	default y
+	---help---
+		Enable TXS02612 Dual Voltage Level Translator for SD-Card interface.
+		This device is used in SPD-003C board.
+
+if SDCARD_TXS02612
+
+choice
+	prompt "TXS02612 port"
+	default SDCARD_TXS02612_PORT0
+
+config SDCARD_TXS02612_PORT0
+	bool "Port 0"
+
+config SDCARD_TXS02612_PORT1
+	bool "Port 1"
+
+endchoice # "TXS02612 port"
+
+endif # SDCARD_TXS02612
+
 endif
