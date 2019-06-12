@@ -3112,7 +3112,6 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
       pwm_soft_update(dev);
 
-#if 0
       /* Now set the value of the RCR that will be loaded on the next
        * update event.
        */
@@ -3120,7 +3119,6 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
       priv->count = info->count;
       priv->curr  = pwm_pulsecount(info->count - priv->prev);
       pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
-#endif
     }
 
   /* Otherwise, just clear the repetition counter */
