@@ -3094,9 +3094,6 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           ferr("ERROR: Failed to initialize card: %d\n", ret);
-#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
-          SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
-#endif
         }
       else
         {
@@ -3130,22 +3127,25 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 
               finfo("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
-
-#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
-              /* Set up to receive asynchronous, media removal events */
-
-              SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
-#endif
             }
-
-          /* REVISIT: There is a problem here.  If mmcsd_initialize() returns a
-           * failure, then no events are initialized.
-           */
         }
 
       /* In any event, we have probed this card */
 
       priv->probed = true;
+
+      /* Regardless of whether or not a card was successfully initialized, there
+       * is appartently a card inserted. If it wasn't successfully initialized,
+       * there's nothing we can do about it now. Perhaps it's a bad card? The best
+       * we can do is wait for the card to be ejected and re-inserted. Then we
+       * can try to initialize again.
+       */
+
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+      /* Set up to receive asynchronous, media removal events */
+
+      SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
+#endif
     }
   else
     {
