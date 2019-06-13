@@ -62,6 +62,7 @@ config CXD56_FARAPI_VERSION_CHECK
 
 if CXD56_FARAPI_VERSION_CHECK
 
+
 config CXD56_FARAPI_VERSION_FAILED_PANIC
 	bool "Far API Version Check Failed to PANIC"
 	default n
@@ -74,7 +75,34 @@ config CXD56_FARAPI_DEBUG
 
 endmenu # Far API Configuration
 
+comment "Timer Options"
+
+menuconfig CXD56_RTC
+	bool "Real Time Clock (RTC)"
+	default y
+	---help---
+		Support RTC
+
+if CXD56_RTC
+
+config CXD56_RTC_LATEINIT
+	bool "Late RTC initialization"
+	default y
+	---help---
+		Enable the late RTC initialization after waiting until the external
+		CXD5247 RTC clock is stable. It will take 2 seconds typically at the
+		initial boot by power on reset.
+
+endif # CXD56_RTC
+
 menu "CXD56xx Peripheral Support"
+
+config CXD56_DMAC
+	bool "DMAC"
+	default y
+	---help---
+		Enables DMAC
+		Currently supports SPI4 TX/RX and SPI5 TX/RX
 
 config CXD56_GPIO_IRQ
 	bool "GPIO interrupt"
@@ -97,6 +125,171 @@ config CXD56_UART2
 	select UART2_SERIALDRIVER
 	---help---
 		UART interface with hardware flow control in the application subsystem.
+
+config CXD56_SPI
+	bool "SPI"
+
+if CXD56_SPI
+
+config CXD56_SPI0
+	bool "SPI0"
+
+menuconfig CXD56_SPI3
+	bool "SPI3"
+
+if CXD56_SPI3
+
+config CXD56_SPI3_SCUSEQ
+	bool "SCU Sequencer"
+	default y
+	depends on CXD56_SCU
+	---help---
+		Use the sensor control unit (SCU) sequencer.
+
+config CXD56_SPI3_CS0
+	bool "SPI3 Chip Select 0"
+	default y
+	---help---
+		Enable chip select 0 of SPI3
+
+config CXD56_SPI3_CS1
+	bool "SPI3 Chip Select 1"
+	default n
+	---help---
+		Enable chip select 1 of SPI3
+
+config CXD56_SPI3_CS2
+	bool "SPI3 Chip Select 2"
+	default n
+	---help---
+		Enable chip select 2 of SPI3
+
+endif # CXD56_SPI3
+
+menuconfig CXD56_SPI4
+	bool "SPI4"
+
+if CXD56_SPI4
+
+config CXD56_DMAC_SPI4_TX
+	bool "DMAC support for SPI4 TX"
+	default n
+	select CXD56_DMAC
+	---help---
+		Enables DMAC for SPI4 TX
+
+if CXD56_DMAC_SPI4_TX
+
+config CXD56_DMAC_SPI4_TX_CH
+	int "TX channel"
+	default 2
+	range 2 6
+
+config CXD56_DMAC_SPI4_TX_MAXSIZE
+	int "Max size to be sent in bytes"
+	default 192000
+	range 1 1572864
+	---help---
+		This value should be same as RX.
+
+endif # CXD56_DMAC_SPI4_TX
+
+config CXD56_DMAC_SPI4_RX
+	bool "DMAC support for SPI4 RX"
+	default n
+	select CXD56_DMAC
+
+	---help---
+		Enables DMAC for SPI4 RX
+
+if CXD56_DMAC_SPI4_RX
+
+config CXD56_DMAC_SPI4_RX_CH
+	int "RX channel"
+	default 3
+	range 2 6
+
+config CXD56_DMAC_SPI4_RX_MAXSIZE
+	int "Max size to be received in bytes"
+	default 192000
+	range 1 1572864
+	---help---
+		This value should be same as TX.
+
+endif # CXD56_DMAC_SPI4_RX
+
+endif # CXD56_SPI4
+
+menuconfig CXD56_SPI5
+	bool "SPI5"
+
+if CXD56_SPI5
+
+choice
+	prompt "SPI5 pin configuration"
+	default CXD56_SPI5_PINMAP_EMMC
+
+config CXD56_SPI5_PINMAP_EMMC
+	bool "SPI5 pin assign to eMMC"
+	---help---
+		SPI5 assigns to the shared pins with eMMC.
+
+config CXD56_SPI5_PINMAP_SDIO
+	bool "SPI5 pin assign to SDIO"
+	---help---
+		SPI5 assigns to the shared pins with SDIO.
+endchoice
+
+config CXD56_DMAC_SPI5_TX
+	bool "DMAC support for SPI5 TX"
+	default n
+	select CXD56_DMAC
+	---help---
+		Enables DMAC for SPI5 TX
+
+if CXD56_DMAC_SPI5_TX
+
+config CXD56_DMAC_SPI5_TX_CH
+	int "TX channel"
+	default 4
+	range 2 6
+
+config CXD56_DMAC_SPI5_TX_MAXSIZE
+	int "Max size to be sent in bytes"
+	default 1516
+	range 1 1572864
+	---help---
+		This value should be same as RX.
+
+endif # CXD56_DMAC_SPI5_TX
+
+config CXD56_DMAC_SPI5_RX
+	bool "DMAC support for SPI5 RX"
+	default n
+	select CXD56_DMAC
+
+	---help---
+		Enables DMAC for SPI5 RX
+
+if CXD56_DMAC_SPI5_RX
+
+config CXD56_DMAC_SPI5_RX_CH
+	int "RX channel"
+	default 5
+	range 2 6
+
+config CXD56_DMAC_SPI5_RX_MAXSIZE
+	int "Max size to be received in bytes"
+	default 1516
+	range 1 1572864
+	---help---
+		This value should be same as TX.
+
+endif # CXD56_DMAC_SPI5_RX
+
+endif # CXD56_SPI5
+
+endif
 
 config CXD56_USBDEV
 	bool "USB"

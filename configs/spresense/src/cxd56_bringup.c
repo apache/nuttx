@@ -62,6 +62,11 @@
 #include "cxd56_gpio.h"
 #include "cxd56_pinconfig.h"
 
+#ifdef CONFIG_CXD56_RTC
+#include <nuttx/timers/rtc.h>
+#include "cxd56_rtc.h"
+#endif
+
 #ifdef CONFIG_CXD56_CPUFIFO
 #include "cxd56_cpufifo.h"
 #endif
@@ -160,6 +165,10 @@ int cxd56_bringup(void)
   wlock.info = PM_CPUWAKELOCK_TAG('C', 'A', 0);
   wlock.count = 0;
   up_pm_acquire_wakelock(&wlock);
+
+#ifdef CONFIG_RTC_DRIVER
+  rtc_initialize(0, cxd56_rtc_lowerhalf());
+#endif
 
   cxd56_uart_initialize();
   cxd56_timerisr_initialize();
