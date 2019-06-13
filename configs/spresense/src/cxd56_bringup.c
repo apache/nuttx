@@ -48,6 +48,10 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_RNDIS
+#include <nuttx/usb/rndis.h>
+#endif
+
 #include <arch/chip/pm.h>
 #include "chip.h"
 
@@ -233,6 +237,17 @@ int cxd56_bringup(void)
 #endif
 
   up_pm_release_wakelock(&wlock);
+
+#if defined(CONFIG_RNDIS)
+  uint8_t mac[6];
+  mac[0] = 0xa0; /* TODO */
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
+#endif
 
   return 0;
 }

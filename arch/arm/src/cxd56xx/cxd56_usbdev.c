@@ -104,7 +104,7 @@
 #endif
 
 #ifndef CONFIG_USBDEV_SETUP_MAXDATASIZE
-#  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
+#  define CONFIG_USBDEV_SETUP_MAXDATASIZE (CONFIG_USBDEV_EP0_MAXSIZE * 4)
 #endif
 
 #define CONFIG_DEFAULT_PHY_CFG0 \
@@ -386,6 +386,7 @@ struct cxd56_usbdev_s
 
   uint8_t ep0data[CONFIG_USBDEV_SETUP_MAXDATASIZE];
   uint16_t ep0datlen;
+  uint16_t ep0reqlen;
 
   /* The endpoint list */
 
@@ -1269,6 +1270,8 @@ static inline void cxd56_ep0setup(FAR struct cxd56_usbdev_s *priv)
   value = GETUINT16(priv->ctrl.value);
   len   = GETUINT16(priv->ctrl.len);
 
+  priv->ep0reqlen = len;
+
   uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         priv->ctrl.type, priv->ctrl.req, value, index, len);
 
@@ -1525,6 +1528,7 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
   uint32_t eps;
   uint32_t stat;
   uint32_t ctrl;
+  uint16_t len;
   int n;
 
   eps = getreg32(CXD56_USB_DEV_EP_INTR);
@@ -1670,32 +1674,48 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
                 putreg32(USB_INT_OUT_DATA, CXD56_USB_OUT_EP_STATUS(n));
                 if (n == 0)
                   {
-                    priv->ep0datlen = g_ep0out.status & DESC_SIZE_MASK;
+                    len = g_ep0out.status & DESC_SIZE_MASK;
 
                     /* Reset DMA descriptor for next packet */
 
                     g_ep0out.status = privep->ep.maxpacket | DESC_LAST;
 
-                    /* Ready to receive the next SETUP packet */
-
-                    ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
-                    putreg32(ctrl | USB_SNAK | USB_RRDY,
-                             CXD56_USB_OUT_EP_CONTROL(0));
-
-                    /* Dispatch setup packet and out transaction */
-
-                    if (priv->ep0datlen > 0)
+                    if (0 < len)
                       {
-                        memcpy(priv->ep0data, (const void *)g_ep0out.buf,
-                               priv->ep0datlen);
+                        ASSERT(priv->ep0datlen + len <= sizeof(priv->ep0data));
 
+                        memcpy(priv->ep0data + priv->ep0datlen,
+                               (const void *)g_ep0out.buf,
+                               len);
+
+                        priv->ep0datlen += len;
+                      }
+
+                    /* Dispatch to cxd56_ep0setup if received all OUT data */
+
+                    if (priv->ep0datlen == priv->ep0reqlen)
+                      {
                         if (((priv->ctrl.type & USB_REQ_TYPE_MASK) !=
                              USB_REQ_TYPE_STANDARD) &&
                             USB_REQ_ISOUT(priv->ctrl.type))
                           {
+                            /* Ready to receive the next setup packet */
+
+                            ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
+                            putreg32(ctrl | USB_SNAK | USB_RRDY,
+                                     CXD56_USB_OUT_EP_CONTROL(0));
+
                             cxd56_ep0setup(priv);
                             priv->ep0datlen = 0;
                           }
+                      }
+                    else
+                      {
+                        /* Ready to receive the next OUT packet */
+
+                        ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
+                        putreg32(ctrl | USB_CNAK | USB_RRDY,
+                                 CXD56_USB_OUT_EP_CONTROL(0));
                       }
                   }
                 else

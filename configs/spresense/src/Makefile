@@ -68,4 +68,8 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += cxd56_usbmsc.c
 endif
 
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += cxd56_netinit.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
