@@ -208,6 +208,14 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CXD56_SFC
+  ret = board_flash_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze SPI-Flash. %d\n", errno);
+    }
+#endif
+
   /* In order to prevent Hi-Z from being input to the SD Card controller,
    * Initialize SDIO pins to GPIO low output with internal pull-down.
    */

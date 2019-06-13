@@ -118,6 +118,10 @@ ifeq ($(CONFIG_CXD56_SDIO),y)
 CHIP_CSRCS += cxd56_sdhci.c
 endif
 
+ifeq ($(CONFIG_CXD56_SFC),y)
+CHIP_CSRCS += cxd56_sfc.c
+endif
+
 ifeq ($(CONFIG_CXD56_SPI),y)
 CHIP_CSRCS += cxd56_spi.c
 endif

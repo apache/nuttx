@@ -47,6 +47,7 @@
 
 #include "cxd56_clock.h"
 #include "cxd56_power.h"
+#include "cxd56_flash.h"
 #include "cxd56_sdcard.h"
 
 /****************************************************************************

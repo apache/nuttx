@@ -5,6 +5,14 @@
 
 if ARCH_BOARD_SPRESENSE
 
+config CXD56_SPIFLASHSIZE
+	hex
+	default 0x400000
+	depends on CXD56_SFC
+	---help---
+		Specify the SPI flash total available size for the application.
+		This value is generally set half of SPI flash device capacity.
+
 config SDCARD_TXS02612
 	bool "SD Card TXS02612 port expander with voltage level translation"
 	default y

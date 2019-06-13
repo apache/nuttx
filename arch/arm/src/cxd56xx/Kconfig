@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "CXD56xx Configuration Options"
+comment "CXD56xx Options"
 
 config CXD56_ARCH_OPTS
 	bool
@@ -25,7 +25,6 @@ config CXD56_WLCSP
 	bool "WLCSP 100 pin package"
 
 endchoice
-endmenu
 
 comment "Basic Options"
 
@@ -95,7 +94,9 @@ config CXD56_RTC_LATEINIT
 
 endif # CXD56_RTC
 
-menu "CXD56xx Peripheral Support"
+comment "Peripheral Support"
+
+menu "Peripheral Support"
 
 config CXD56_DMAC
 	bool "DMAC"
@@ -296,6 +297,45 @@ config CXD56_USBDEV
 	default n
 	---help---
 		Enables USB
+endmenu
+
+comment "Storage Options"
+
+menu "Storage Options"
+
+menuconfig CXD56_SFC
+	bool "SPI Flash"
+	default n if CXD56_SUBCORE
+	default y
+	select MTD
+
+if CXD56_SFC
+
+config CXD56_SFC_PAGE_SHIFT_SIZE
+	int "SPI Flash page shift size"
+	default 12
+	range 8 12
+	---help---
+		Specify page shift size to determine block size of SPI flash access.
+		Relationship between page shift size and block size is as follows.
+		page shift size : block size
+			8 : 256
+			9 : 512
+			10 : 1024
+			11 : 2048
+			12 : 4096
+		When file system is SMART file system, please set the value to SMART
+		Device sector size or less.
+		Following equation is satisfied.
+		MTD_SMART_SECTOR_SIZE >= (1 << CXD56_SFC_PAGE_SHIFT_SIZE)
+
+config CXD56_SFC_VERIFY_WRITE
+	bool "Enable write with verify"
+	default n
+	---help---
+		Enalbe SPI flash write function with verify.
+
+endif # CXD56_SFC
 
 menuconfig CXD56_SDIO
 	bool "SDIO SD Card"
@@ -337,5 +377,5 @@ config CXD56_SDIO_ENABLE_MULTIFUNCTION
 		Support multi-function with SDIO interfaced peripheral other than SD Card.
 
 endif # SDIO Configuration
-
+endmenu
 endmenu
