@@ -600,6 +600,7 @@
 #define RCC_AHB2SMENR_GPIOHSMEN     (1 << 7)  /* Bit 7:  IO port H enable during Sleep mode */
 #define RCC_AHB2SMENR_GPIOISMEN     (1 << 8)  /* Bit 8:  IO port I enable during Sleep mode */
 #define RCC_AHB2SMENR_SRAM2SMEN     (1 << 9)  /* Bit 9:  SRAM2 enable during Sleep mode */
+#define RCC_AHB2SMENR_SRAM3SMEN     (1 << 10) /* Bit 10: SRAM3 enable during Sleep mode */
 #define RCC_AHB2SMENR_OTGFSSMEN     (1 << 12) /* Bit 12: USB OTG FS module enable during Sleep mode */
 #define RCC_AHB2SMENR_ADCSMEN       (1 << 13) /* Bit 13: ADC interface enable during Sleep mode (common to all ADCs) */
 #define RCC_AHB2SMENR_DCMISMEN      (1 << 14) /* Bit 14: DCMI interface enable during Sleep mode */

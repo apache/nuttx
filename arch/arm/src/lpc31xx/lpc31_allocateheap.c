@@ -124,7 +124,7 @@
 
 #if CONFIG_MM_REGIONS != LPC31_NEXT_REGIONS
 #  if CONFIG_MM_REGIONS < LPC31_NEXT_REGIONS
-#    error "CONFIG_MM_REGIONS is large enough for the selected memory regions"
+#    error "CONFIG_MM_REGIONS is not large enough for the selected memory regions"
 #  else
 #    error "CONFIG_MM_REGIONS is too large for the selected memory regions"
 #  endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/up_allocateheap.c
+ * arch/arm/src/stm32l4/stm32l4_allocateheap.c
  *
  *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -122,30 +122,23 @@
 #ifdef STM32L4_SRAM3_SIZE
 #  define SRAM3_START  STM32L4_SRAM3_BASE
 #  define SRAM3_END    (SRAM3_START + STM32L4_SRAM3_SIZE)
-#  define CONFIG_STM32L4_SRAM3_HEAP
 #endif
 
-#if defined(CONFIG_STM32L4_SRAM3_HEAP)
-/* TODO: better check here */
-#  if CONFIG_MM_REGIONS < 3
-#    error you need at least 3 memory manager regions to support SRAM2 and SRAM3
-#  endif
+/* Some sanity checking.  If multiple memory regions are defined, verify
+ * that CONFIG_MM_REGIONS is set to match the number of memory regions
+ * that we have been asked to add to the heap.
+ */
+
+#if CONFIG_MM_REGIONS < defined(CONFIG_STM32L4_SRAM2_HEAP) + \
+                        defined(CONFIG_STM32L4_SRAM3_HEAP) + \
+                        defined(CONFIG_STM32L4_FSMC_SRAM_HEAP) + 1
+#  error "You need more memory manager regions to support selected heap components"
 #endif
 
-#if defined(CONFIG_STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
-#  if CONFIG_MM_REGIONS < 3
-#    error you need at least 3 memory manager regions to support SRAM2 and FSMC
-#  endif
-#endif
-
-#if defined(CONFIG_STM32L4_SRAM2_HEAP) || defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
-#  if CONFIG_MM_REGIONS < 2
-#    error you need at least 2 memory manager regions to support SRAM2 or FSMC
-#  endif
-#endif
-
-#if CONFIG_MM_REGIONS < 1
-#  warning you have no heap; malloc() will fail.  are you sure?
+#if CONFIG_MM_REGIONS > defined(CONFIG_STM32L4_SRAM2_HEAP) + \
+                        defined(CONFIG_STM32L4_SRAM3_HEAP) + \
+                        defined(CONFIG_STM32L4_FSMC_SRAM_HEAP) + 1
+#  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
 /* If FSMC SRAM is going to be used as heap, then verify that the starting
@@ -259,7 +252,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-   stm32l4_mpu_uheap((uintptr_t)ubase, usize);
+  stm32l4_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */

@@ -330,7 +330,7 @@ static int local_set_policy(FAR struct file *filep, unsigned long policy)
   ret = file_ioctl(filep, PIPEIOC_POLICY, policy);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to set FIFO buffer policty: %d\n", ret);
+      nerr("ERROR: Failed to set FIFO buffer policy: %d\n", ret);
     }
 
   return ret;

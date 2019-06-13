@@ -857,7 +857,7 @@ config STM32L4_IO_CONFIG_A
 	bool
 	default n
 
-comment "STM32L4 SRAM2 Options"
+comment "STM32L4 SRAM2 and SRAM3 Options"
 
 config STM32L4_SRAM2_HEAP
 	bool "SRAM2 is used for heap"
@@ -884,6 +884,15 @@ config STM32L4_SRAM2_INIT
 		this may be undesirable (because it will destroy the contents).  In that
 		case, the board should handle the initialization itself at the appropriate
 		time.
+
+config STM32L4_SRAM3_HEAP
+	bool "SRAM3 is used for heap"
+	depends on STM32L4_STM32L4XR
+	default y
+	---help---
+		Add the STM32L4 SRAM3 to the heap for use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
 
 comment "STM32L4 Peripherals"
 
