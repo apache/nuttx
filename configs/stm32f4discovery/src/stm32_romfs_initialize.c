@@ -121,7 +121,7 @@ extern const int  romfs_data_size;
 
 int stm32_romfs_initialize(void)
 {
-  uintptr_t romfs_data_len
+  uintptr_t romfs_data_len;
   int  ret;
 
   /* Create a ROM disk for the /etc filesystem */
