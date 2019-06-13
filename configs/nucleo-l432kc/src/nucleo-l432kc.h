@@ -196,6 +196,18 @@ int stm32_ina226initialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: stm32_ina219initialize
+ *
+ * Description:
+ *   Initialize and register the INA219 driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_INA219
+int stm32_ina219initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: board_timer_driver_initialize
  *
  * Description:

@@ -64,6 +64,10 @@ ifeq ($(CONFIG_SENSORS_INA226),y)
 CSRCS += stm32_ina226.c
 endif
 
+ifeq ($(CONFIG_SENSORS_INA219),y)
+CSRCS += stm32_ina219.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
