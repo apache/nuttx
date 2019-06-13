@@ -77,4 +77,8 @@ ifeq ($(CONFIG_STM32F7_BBSRAM),y)
 CSRCS += stm32_bbsram.c
 endif
 
+ifeq ($(CONFIG_STM32_ROMFS),y)
+CSRCS += stm32_romfs_initialize.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

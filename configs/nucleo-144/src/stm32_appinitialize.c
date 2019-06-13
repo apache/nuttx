@@ -48,6 +48,9 @@
 
 #include "nucleo-144.h"
 #include <nuttx/leds/userled.h>
+#ifdef CONFIG_STM32_ROMFS
+#include "stm32_romfs.h"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -90,6 +93,17 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
              STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_ROMFS
+  /* Mount the romfs partition */
+
+  ret = stm32_romfs_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
+             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
     }
 #endif
 
