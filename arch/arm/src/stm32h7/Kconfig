@@ -143,6 +143,20 @@ config STM32H7_USART
 	default n
 
 # These are the peripheral selections proper
+config STM32H7_ADC1
+	bool "ADC1"
+	default n
+	select STM32H7_ADC
+
+config STM32H7_ADC2
+	bool "ADC2"
+	default n
+	select STM32H7_ADC
+
+config STM32H7_ADC3
+	bool "ADC3"
+	default n
+	select STM32H7_ADC
 
 config STM32H7_DMA1
 	bool "DMA1"
@@ -2840,6 +2854,354 @@ config STM32H7_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
 		channels per timer.
+
+config STM32H7_TIM1_ADC
+	bool "TIM1 ADC"
+	default n
+	depends on STM32H7_TIM1 && STM32H7_ADC
+	---help---
+		Reserve timer 1 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM1"
+	default STM32H7_TIM1_ADC1
+	depends on STM32H7_TIM1_ADC
+
+config STM32H7_TIM1_ADC1
+	bool "Use TIM1 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+config STM32H7_TIM1_ADC2
+	bool "Use TIM1 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC2
+
+config STM32H7_TIM1_ADC3
+	bool "Use TIM1 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM2_ADC
+	bool "TIM2 ADC"
+	default n
+	depends on STM32H7_TIM2 && STM32H7_ADC
+	---help---
+		Reserve timer 2 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM2"
+	default STM32H7_TIM2_ADC1
+	depends on STM32H7_TIM2_ADC
+
+config STM32H7_TIM2_ADC1
+	bool "Use TIM2 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+config STM32H7_TIM2_ADC2
+	bool "Use TIM2 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC2
+
+config STM32H7_TIM2_ADC3
+	bool "Use TIM2 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM3_ADC
+	bool "TIM3 ADC"
+	default n
+	depends on STM32H7_TIM3 && STM32H7_ADC
+	---help---
+		Reserve timer 3 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM3"
+	default STM32H7_TIM3_ADC1
+	depends on STM32H7_TIM3_ADC
+
+config STM32H7_TIM3_ADC1
+	bool "Use TIM3 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+config STM32H7_TIM3_ADC2
+	bool "Use TIM3 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC2
+
+config STM32H7_TIM3_ADC3
+	bool "Use TIM3 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM4_ADC
+	bool "TIM4 ADC"
+	default n
+	depends on STM32H7_TIM4 && STM32H7_ADC
+	---help---
+		Reserve timer 4 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM4"
+	default STM32H7_TIM4_ADC1
+	depends on STM32H7_TIM4_ADC
+
+config STM32H7_TIM4_ADC1
+	bool "Use TIM4 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC1
+
+config STM32H7_TIM4_ADC2
+	bool "Use TIM4 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC2
+
+config STM32H7_TIM4_ADC3
+	bool "Use TIM4 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM6_ADC
+	bool "TIM6 ADC"
+	default n
+	depends on STM32H7_TIM6 && STM32H7_ADC
+	---help---
+		Reserve timer 6 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM6 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM6"
+	default STM32H7_TIM6_ADC1
+	depends on STM32H7_TIM6_ADC
+
+config STM32H7_TIM6_ADC1
+	bool "Use TIM6 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC1
+
+config STM32H7_TIM6_ADC2
+	bool "Use TIM6 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC2
+
+config STM32H7_TIM6_ADC3
+	bool "Use TIM6 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM8_ADC
+	bool "TIM8 ADC"
+	default n
+	depends on STM32H7_TIM8 && STM32H7_ADC
+	---help---
+		Reserve timer 8 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM8"
+	default STM32H7_TIM8_ADC1
+	depends on STM32H7_TIM8_ADC
+
+config STM32H7_TIM8_ADC1
+	bool "Use TIM8 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC1
+
+config STM32H7_TIM8_ADC2
+	bool "Use TIM8 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC2
+
+config STM32H7_TIM8_ADC3
+	bool "Use TIM8 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC3
+
+endchoice
+
+config STM32H7_TIM15_ADC
+	bool "TIM15 ADC"
+	default n
+	depends on STM32H7_TIM15 && STM32H7_ADC
+	---help---
+		Reserve timer 15 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H7_TIM15 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM15"
+	default STM32H7_TIM15_ADC1
+	depends on STM32H7_TIM15_ADC
+
+config STM32H7_TIM15_ADC1
+	bool "Use TIM15 for ADC1"
+	depends on STM32H7_ADC1
+	select STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+config STM32H7_TIM15_ADC2
+	bool "Use TIM15 for ADC2"
+	depends on STM32H7_ADC2
+	select STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC2
+
+config STM32H7_TIM15_ADC3
+	bool "Use TIM15 for ADC3"
+	depends on STM32H7_ADC3
+	select STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC3
+
+endchoice
+
+config STM32H7_HAVE_ADC1_TIMER
+	bool
+
+config STM32H7_HAVE_ADC2_TIMER
+	bool
+
+config STM32H7_HAVE_ADC3_TIMER
+	bool
+
+config STM32H7_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	default 100
+	depends on STM32H7_HAVE_ADC1_TIMER
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config STM32H7_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32H7_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32H7_ADC2_SAMPLE_FREQUENCY
+	int "ADC2 Sampling Frequency"
+	default 100
+	depends on STM32H7_HAVE_ADC2_TIMER
+	---help---
+		ADC2 sampling frequency.  Default:  100Hz
+
+config STM32H7_ADC2_TIMTRIG
+	int "ADC2 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32H7_HAVE_ADC2_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32H7_ADC3_SAMPLE_FREQUENCY
+	int "ADC3 Sampling Frequency"
+	default 100
+	depends on STM32H7_HAVE_ADC3_TIMER
+	---help---
+		ADC3 sampling frequency.  Default:  100Hz
+
+config STM32H7_ADC3_TIMTRIG
+	int "ADC3 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32H7_HAVE_ADC3_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
 config STM32H7_TIM1_CAP
 	bool "TIM1 Capture"

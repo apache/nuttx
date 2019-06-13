@@ -186,8 +186,6 @@ void stm32_spidev_initialize(void);
  *
  ************************************************************************************/
 
-// TODO: implement ADC or delete this
-
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
