@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -62,6 +63,18 @@
 #include "cxd56_gpio.h"
 #include "cxd56_pinconfig.h"
 
+#ifdef CONFIG_CXD56_PM_PROCFS
+#include "cxd56_powermgr_procfs.h"
+#endif
+
+#ifdef CONFIG_TIMER
+#include "cxd56_timer.h"
+#endif
+
+#ifdef CONFIG_WDT
+#include "cxd56_wdt.h"
+#endif
+
 #ifdef CONFIG_CXD56_RTC
 #include <nuttx/timers/rtc.h>
 #include "cxd56_rtc.h"
@@ -81,6 +94,10 @@
 
 #ifdef CONFIG_USBDEV
 #include "cxd56_usbdev.h"
+#endif
+
+#ifdef CONFIG_PWM
+#include "cxd56_pwm.h"
 #endif
 
 #include "spresense.h"
@@ -127,6 +144,21 @@ static int nsh_cpucom_initialize(void)
 #  define nsh_cpucom_initialize() (OK)
 #endif
 
+#ifdef CONFIG_TIMER
+static void timer_initialize(void)
+{
+  int i;
+  char devname[16];
+
+  for (i = 0; i < CXD56_TIMER_NUM; i++)
+    {
+      snprintf(devname, sizeof(devname), "/dev/timer%d", i);
+      cxd56_timer_initialize(devname, i);
+    }
+  return;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -162,12 +194,32 @@ int cxd56_bringup(void)
       _err("ERROR: Failed to initialize powermgr.\n");
     }
 
+#ifdef CONFIG_CXD56_PM_PROCFS
+  ret = cxd56_pm_initialize_procfs();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize powermgr.\n");
+    }
+#endif
+
   wlock.info = PM_CPUWAKELOCK_TAG('C', 'A', 0);
   wlock.count = 0;
   up_pm_acquire_wakelock(&wlock);
 
 #ifdef CONFIG_RTC_DRIVER
   rtc_initialize(0, cxd56_rtc_lowerhalf());
+#endif
+
+#ifdef CONFIG_TIMER
+  timer_initialize();
+#endif
+
+#ifdef CONFIG_CXD56_WDT
+  ret = cxd56_wdt_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize WDT.\n");
+    }
 #endif
 
   cxd56_uart_initialize();
@@ -205,6 +257,14 @@ int cxd56_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount the procfs: %d\n", errno);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  ret = board_pwm_setup();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze pwm. \n");
     }
 #endif
 

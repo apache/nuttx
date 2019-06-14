@@ -99,6 +99,10 @@ CHIP_CSRCS += cxd56_powermgr.c
 CHIP_CSRCS += cxd56_farapi.c
 CHIP_CSRCS += cxd56_sysctl.c
 
+ifeq ($(CONFIG_CXD56_PM_PROCFS),y)
+CHIP_CSRCS += cxd56_powermgr_procfs.c
+endif
+
 ifeq ($(CONFIG_CXD56_RTC),y)
 CHIP_CSRCS += cxd56_rtc.c
 ifeq ($(CONFIG_RTC_DRIVER),y)
@@ -128,4 +132,16 @@ endif
 
 ifeq ($(CONFIG_CXD56_DMAC),y)
 CHIP_CSRCS += cxd56_dmac.c
+endif
+
+ifeq ($(CONFIG_CXD56_PWM),y)
+CHIP_CSRCS += cxd56_pwm.c
+endif
+
+ifeq ($(CONFIG_CXD56_TIMER),y)
+CHIP_CSRCS += cxd56_timer.c
+endif
+
+ifeq ($(CONFIG_CXD56_WDT),y)
+CHIP_CSRCS += cxd56_wdt.c
 endif

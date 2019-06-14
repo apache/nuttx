@@ -61,7 +61,6 @@ config CXD56_FARAPI_VERSION_CHECK
 
 if CXD56_FARAPI_VERSION_CHECK
 
-
 config CXD56_FARAPI_VERSION_FAILED_PANIC
 	bool "Far API Version Check Failed to PANIC"
 	default n
@@ -75,6 +74,8 @@ config CXD56_FARAPI_DEBUG
 endmenu # Far API Configuration
 
 comment "Timer Options"
+
+menu "Timer Options"
 
 menuconfig CXD56_RTC
 	bool "Real Time Clock (RTC)"
@@ -93,6 +94,74 @@ config CXD56_RTC_LATEINIT
 		initial boot by power on reset.
 
 endif # CXD56_RTC
+
+menuconfig CXD56_TIMER
+	bool "Timer"
+	default y
+	select TIMER
+
+if CXD56_TIMER
+
+choice
+	prompt "Timer divider selection"
+	default CXD56_TIMER_DIVIDER_1
+	---help---
+		Timer divider selects 1, 16 or 256. The smaller the divider, the higher
+		time resolution, but the shorter the maximum time until wrap-around.
+
+config CXD56_TIMER_DIVIDER_1
+	bool "Divider 1"
+
+config CXD56_TIMER_DIVIDER_16
+	bool "Divider 16"
+
+config CXD56_TIMER_DIVIDER_256
+	bool "Divider 256"
+
+endchoice
+endif # CXD56_TIMER
+
+menuconfig CXD56_WDT
+	bool "Watchdog Timer (WDT)"
+	default y
+	select WATCHDOG
+
+if CXD56_WDT
+
+config CXD56_WDT_INTERRUPT
+	bool "Interrupt on timeout"
+	default y
+	---help---
+		This watchdog timer run 2 laps as long as the counter is not reloaded.
+		In the first lap, the watchdog interrupt occurs. Without interrupt
+		clear, The reset signal is asserted in the second timeout. This setting
+		enables the first interrupt.
+
+config CXD56_WDT_REGDEBUG
+	bool "Register level debug"
+	default n
+	---help---
+		Enable low-level register debug output
+
+endif # CXD56_WDT
+
+endmenu
+
+comment "Power Management Options"
+
+menuconfig CXD56_PM
+	bool "Power Management"
+	default y
+
+if CXD56_PM
+
+config CXD56_PM_PROCFS
+	bool "Power Management PROCFS support"
+	default n
+	---help---
+		Enable the power domain status or the clock frequency monitor.
+
+endif # CXD56_PM
 
 comment "Peripheral Support"
 
@@ -297,6 +366,37 @@ config CXD56_USBDEV
 	default n
 	---help---
 		Enables USB
+
+config CXD56_PWM
+	bool "PWM"
+
+if CXD56_PWM
+
+config CXD56_PWM0
+	bool "PWM0"
+	default n
+	---help---
+		Enable PWM channel 0
+
+config CXD56_PWM1
+	bool "PWM1"
+	default n
+	---help---
+		Enable PWM channel 1
+
+config CXD56_PWM2
+	bool "PWM2"
+	default n
+	---help---
+		Enable PWM channel 2
+
+config CXD56_PWM3
+	bool "PWM3"
+	default n
+	---help---
+		Enable PWM channel 3
+
+endif # CXD56_PWM
 endmenu
 
 comment "Storage Options"

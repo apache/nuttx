@@ -60,8 +60,16 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cxd56_leds.c
 endif
 
+ifeq ($(CONFIG_CXD56_PWM),y)
+CSRCS += cxd56_pwm.c
+endif
+
 ifeq ($(CONFIG_CXD56_SFC),y)
 CSRCS += cxd56_flash.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += cxd56_spi.c
 endif
 
 ifeq ($(CONFIG_CXD56_SDIO),y)
