@@ -135,6 +135,7 @@ extern "C"
  *   pin - Pin number defined in cxd56_pinconfig.h
  *   gpiocfg - GPIO Interrupt Polarity and Noise Filter Configuration Value
  *   isr - Interrupt handler
+ *   arg - Argument for the interrupt handler
  *
  * Returned Value:
  *   IRQ number on success; a negated errno value on failure.
@@ -144,7 +145,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr);
+int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
+                         FAR void *arg);
 
 /****************************************************************************
  * Name: cxd56_gpioint_irq

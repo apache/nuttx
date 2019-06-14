@@ -312,7 +312,8 @@ static int board_sdcard_detect_int(int irq, FAR void *context, FAR void *arg)
                            inserted ?
                            GPIOINT_PSEUDO_EDGE_RISE :
                            GPIOINT_PSEUDO_EDGE_FALL,
-                           board_sdcard_detect_int);
+                           board_sdcard_detect_int,
+                           NULL);
     }
 
    return OK;
@@ -357,7 +358,8 @@ int board_sdcard_initialize(void)
   cxd56_pin_config(PINCONF_SDIO_CD_GPIO);
   ret = cxd56_gpioint_config(PIN_SDIO_CD,
                              GPIOINT_PSEUDO_EDGE_FALL,
-                             board_sdcard_detect_int);
+                             board_sdcard_detect_int,
+                             NULL);
   if (ret < 0)
     {
       _err("ERROR: Failed to configure GPIO int. \n");
