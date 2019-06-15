@@ -302,7 +302,7 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount romfs at %s: %d\n",
-           STM32_ROMFS_MOUNTPOINT, ret);
+           CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
     }
 #endif
 
