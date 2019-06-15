@@ -116,9 +116,11 @@ $(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
-	$(Q) $(AR) $@
 ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
+	$(call ARCHIVE, $@, $(OBJS))
+endif
+ifneq ($(CXXOBJS),)
+	$(call ARCHIVE, $@, $(CXXOBJS))
 endif
 
 .depend: Makefile $(SRCS) $(CXXSRCS)

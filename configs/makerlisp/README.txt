@@ -75,7 +75,16 @@ UARTs
     PD6/DCD0        CN1_DCD0     Pin 71
     PD7/RIO0        CN1_RI0      Pin 73
 
-  UART 0:  All of Port C pins can support UART1 functions when configured
+  UART0 (as well as I2C) is also available via a USB using the on-board
+  MCP2221A USB adapter.  CN1_USBUART_TX_EN and CN1_USBUART_RX_EN are pulled
+  low poll on the CPU board in order to connect CN1_RX0 and CN1_TX0 to
+  MCP_RX and MCP_TX.
+
+  When the I/O expander board is connected, jumpers J1 and J2 control this
+  functionality.  These can pull the CN1_USBUART_TX_EN and CN1_USBUART_RX_EN
+  pins high and so that UART0 can be used for other purposes.
+
+  UART 1:  All of Port C pins can support UART1 functions when configured
   for the alternate function 7.  For typical configurations only RXD and TXD
   need be configured.
 
@@ -90,9 +99,10 @@ UARTs
     PC6/DCD1        CN1_DCD1     Pin 72
     PC7/RIO1        CN1_RI1      Pin 74
 
-  For use with a host terminal emulation, it will be necessary to connect
-  either a TTL-to-RS232 or a TTL-to-USB Serial adapter to CN1 pins 59 and
-  61, and 60 and 62, depending on the selected UART.
+  With the I/O exanpander board (and J1 and J2 open), these UARTs can be
+  used with a host terminal emulation, by connecting either a TTL-to-RS232
+  or a TTL-to-USB Serial adapter to CN1 pins 59 and 61, and 60 and 62,
+  depending on the selected UART.
 
 Serial Keyboard and VGA Display
 -------------------------------
@@ -245,13 +255,16 @@ Configuration Subdirectories
 
     NOTES:
 
-    1. A serial console is provided on UART0.  This configuration may work
-       with or without the the VGA and Keyboard adapter boards.  For use
-       with a host terminal emulation without the accessory boards, it will
-       be necessary to connect either a TTL-to-RS232 or a TTL-to-USB Serial
-       adapter to CN1 pins 59 and 61.
+    1. A serial console is provided on UART0.  This configuration should work
+       with or without the the VGA and Keyboard adapter boards.  Normal
+       connectivity is via host serical console connected through the USB
+       serial console.
 
-       The default baud setting is 57600N1.
+       Withe the I/O expansion board, the serial console can also be sued with
+       either a TTL-to-RS232 or a TTL-to-USB Serial adapter connected by CN1
+       pins 59 and 61.
+
+       The default baud setting is 115200N1.
 
        To use the VGA display controller with stdout and stderr, you also
        need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
