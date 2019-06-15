@@ -272,4 +272,3 @@ Configuration Subdirectories
 
        The PC terminal software should be configured as described in the
        MakerLisp Putty HOWTO document:  115200N1 BAUD.
-

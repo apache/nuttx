@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Target name="eZ80F910300KITG_Flash" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Schemas/target.tsd" xsi:type="TargetEZ80">
+<Target name="eZ80F910300KITG_RAM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Schemas/target.tsd" xsi:type="TargetEZ80">
    <Clock>
       <PLL>
          <changeFrequencyOnReset>true</changeFrequencyOnReset>
@@ -12,16 +12,16 @@
    </Clock>
    <ControlReg>
       <pc>0</pc>
-      <splStackPtr>140000</splStackPtr>
-      <spsStackPtr>FFFF</spsStackPtr>
+      <splStackPtr>100000</splStackPtr>
+      <spsStackPtr>ffff</spsStackPtr>
       <useAdlMode>true</useAdlMode>
    </ControlReg>
    <ExtFlash>
       <device />
       <externalAddress>200000</externalAddress>
       <externalAutoSelect>false</externalAutoSelect>
-      <externalRamLower>40000</externalRamLower>
-      <externalRamUpper>13FFFF</externalRamUpper>
+      <externalRamLower>000000</externalRamLower>
+      <externalRamUpper>FFFFF</externalRamUpper>
       <manufacturer />
       <units>1</units>
       <usingExternal>false</usingExternal>
@@ -32,18 +32,18 @@
          <CS0>
             <busMode>0</busMode>
             <controlRegister>8</controlRegister>
-            <lower>4</lower>
-            <upper>B</upper>
+            <lower>0</lower>
+            <upper>7</upper>
          </CS0>
          <CS1>
             <busMode>0</busMode>
             <controlRegister>8</controlRegister>
-            <lower>C</lower>
-            <upper>13</upper>
+            <lower>8</lower>
+            <upper>F</upper>
          </CS1>
          <CS2>
             <busMode>0</busMode>
-            <controlRegister>88</controlRegister>
+            <controlRegister>28</controlRegister>
             <lower>20</lower>
             <upper>9F</upper>
          </CS2>
@@ -57,7 +57,7 @@
       <Internal>
          <mapFlashToPage>0</mapFlashToPage>
          <mapRamToPage>AF</mapRamToPage>
-         <useFlashRam>true</useFlashRam>
+         <useFlashRam>false</useFlashRam>
          <useInternalDataRam>true</useInternalDataRam>
          <useMaccRam>false</useMaccRam>
       </Internal>
