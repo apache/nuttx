@@ -504,51 +504,6 @@ err_out:
 }
 
 /****************************************************************************
- * Name: fusb303_toggle_control1_enable
- *
- * Description:
- *   Switch enable flag off and then on.
- *
- ****************************************************************************/
-
-static int fusb303_toggle_control1_enable(FAR struct fusb303_dev_s *priv)
-{
-  int regval;
-  int ret;
-
-  regval = fusb303_getreg(priv, FUSB303_CONTROL1_REG);
-  if (regval < 0)
-    {
-      fusb303_err("ERROR: Failed to read CONTROL1 register\n");
-      return -1;
-    }
-
-  if (!(regval & CONTROL1_ENABLE))
-    {
-      /* Not enabled, skip toggling. */
-
-      return 0;
-    }
-
-  ret = fusb303_putreg(priv, FUSB303_CONTROL1_REG,
-                       regval & ~CONTROL1_ENABLE);
-  if (ret < 0)
-    {
-      fusb303_err("ERROR: Failed to write CONTROL1 register\n");
-      return -1;
-    }
-
-  ret = fusb303_putreg(priv, FUSB303_CONTROL1_REG, regval);
-  if (ret < 0)
-    {
-      fusb303_err("ERROR: Failed to write CONTROL1 register\n");
-      return -1;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: fusb303_set_mode
  *
  * Description:
@@ -776,6 +731,10 @@ static ssize_t fusb303_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  flags = enter_critical_section();
+  priv->int_pending = false;
+  leave_critical_section(flags);
+
   ptr->status = fusb303_getreg(priv, FUSB303_STATUS_REG);
   ptr->status1 = fusb303_getreg(priv, FUSB303_STATUS1_REG);
   ptr->dev_type = fusb303_getreg(priv, FUSB303_TYPE_REG);
@@ -783,22 +742,6 @@ static ssize_t fusb303_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_DEBUG_FUSB303
   fusb303_dumpregs("fusb303_read", priv);
 #endif
-
-  if (!(ptr->status & STATUS_ATTACH) ||
-      (ptr->status & STATUS_BC_LVL_3000) == STATUS_BC_LVL_UNATT)
-    {
-      /* Toggle enable bit when USB is not attached. This is needed to
-       * enable attach interrupt when orientation of USB-C cable changes.
-       */
-
-      (void)fusb303_toggle_control1_enable(priv);
-
-      up_mdelay(1); /* Wait for initial interrupt. */
-    }
-
-  flags = enter_critical_section();
-  priv->int_pending = false;
-  leave_critical_section(flags);
 
   (void)fusb303_clear_interrupts(priv);
 
