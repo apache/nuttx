@@ -235,7 +235,25 @@ Common Configuration Notes
      The available board-specific configurations are  summarized in the
      following paragraphs.
 
-  3. This configuration uses the mconf-based configuration tool.  To
+     When the build completes successfully, you will find this files in
+     the top level nuttx directory:
+
+     a. nuttx.hex - A loadable file in Intel HEX format
+     b. nuttx.lod - A loadable file in ZDS-II binary format
+     c. nuttx.map - A linker map file
+
+  3. ZDS-II make be used to write the nuttx.lod file to FLASH.  General
+     instructions:
+
+     a. Start ZDS-II
+     b. Open the project, for example, nsh/nsh.zdsproj
+     c. Select Debug->Connect To Target
+     d. Select Debug->Download code
+
+     There are projects for the ZiLOG Smart Flash Programmer as well but
+     these are not functional as of this writing.
+
+  4. This configuration uses the mconf-based configuration tool.  To
      change this configurations using that tool, you should:
 
      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt

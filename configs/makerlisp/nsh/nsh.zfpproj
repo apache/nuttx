@@ -74,7 +74,7 @@
 </tool>
 <tool name="Debugger">
 <options>
-<option name="target" type="string" change-action="rebuild">nsh</option>
+<option name="target" type="string" change-action="rebuild">nsh_flash</option>
 <option name="debugtool" type="string" change-action="none">USBSmartCable</option>
 <option name="debugtoolnames" type="string" change-action="none">ZPAKII</option>
 <option name="SmartEthernetNumbers" type="string" change-action="none">ZPAKII</option>
@@ -225,11 +225,11 @@
 </tool>
 <tool name="Debugger">
 <options>
-<option name="target" type="string" change-action="rebuild"></option>
-<option name="debugtool" type="string" change-action="none">ZPAKII</option>
+<option name="target" type="string" change-action="rebuild">nsh_flash</option>
+<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
 <option name="debugtoolnames" type="string" change-action="none">ZPAKII</option>
 <option name="SmartEthernetNumbers" type="string" change-action="none">ZPAKII</option>
-<option name="USBSerialNumbers" type="string" change-action="none">"No USB Device"</option>
+<option name="USBSerialNumbers" type="string" change-action="none"></option>
 </options>
 </tool>
 <tool name="FlashProgrammer">

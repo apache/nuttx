@@ -3,7 +3,11 @@ README.txt
 
 nsh.zdsproj is a simple ZDS-II project that will allow you
   to use the ZDS-II debugger.
-nsh.ztft is the target file that accompanies the ZDS-II project file.  It
-  is identical to configs/scripts/makerlisp_flash.ztgt.
 nsh.zfpproj is a simple project that will allow you to use the Smart Flash
-  Programming.
+  Programming.  NOTE:  As of this writing this project does not work, probably
+  due to RAM configuration in the project.  Use ZDS-II instead as is described
+  in the upper README.txt file
+nsh_flash.ztgt is the target file that accompanies the project files.  This
+  one is identical to configs/scripts/makerlisp_ram.ztgt.
+nsh_ram.ztgt is the target file that accompanies the project files.  This
+  one is identical to configs/scripts/makerlisp_flash.ztgt.
