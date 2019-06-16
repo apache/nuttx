@@ -278,22 +278,46 @@ Configuration Subdirectories
        connectivity is via host serical console connected through the USB
        serial console.
 
-       Withe the I/O expansion board, the serial console can also be sued with
+       With the I/O expansion board, the serial console can also be used with
        either a TTL-to-RS232 or a TTL-to-USB Serial adapter connected by CN1
        pins 59 and 61.
 
        The default baud setting is 115200N1.
 
-       To use the VGA display controller with stdout and stderr, you also
-       need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
-       enables a required VGA initialization sequence.
+       To use the VGA display controller with stdin, stdout and stderr, you
+       also need to selection CONFIG_MAKERLISP_VGA=y in your configuration.
+       This enables a required VGA initialization sequence.
 
        The PC terminal software should be configured as described in the
        MakerLisp Putty HOWTO document:  115200N1 BAUD.
+
+    2. The eZ80 RTC, the procFS file system, and SD card support in included.
+       The procFS file system will be auto-mounted at /proc when the board
+       boots.
+
+       The RTC can be read and set from the NSH date command.
+
+         nsh> date
+         Thu, Dec 19 20:53:29 2086
+         nsh> help date
+         date usage:  date [-s "MMM DD HH:MM:SS YYYY"]
+         nsh> date -s "Jun 16 15:09:00 2019"
+         nsh> date
+         Sun, Jun 16 15:09:01 2019
+
+       The SD card can be be mounted with the following NSH mount command:
+
+         nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+       NOTE:  The is no card detect signal so the microSD card must be
+       placed in the card slot before the system is started.
 
     STATUS:
       2109-06-16:  The basic NSH configuration appears to be fully functional
         using only the CPU and I/O expansion card.  Console is provided over
         USB.
 
-        Added support for SPI-based SD cards, the RTC and procFS.
+        Added support for SPI-based SD cards, the RTC and procFS.  There are
+        still a few issues at the end-of-the-day:  (1) the SD card block driver
+        is not being registered, and (2) RTC does not preserve time across a
+        power cycle.

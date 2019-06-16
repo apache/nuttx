@@ -62,14 +62,13 @@
 
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map
  * (see arch/z80/src/ez80/ez80f91.h)
+ *
+ * - Chip select 0 is for RAM 0 to (512k - 1), starting at address 0x40000
+ *   (after the flash).
+ * - Chip select 1 is for 512k to (1M - 1), at address 0xc0000.
+ *
+ * All RAM has zero wait states.
  */
-                                   /* CS0: 0x000000 256Kb of on-chip flash */
-#define EZ80_OFFCHIPFLASH 0x400000 /* CS0: Off chip flash (Up to 4Mb-256Kb) */
-#define EZ80_LEDGPIOCNTRL 0x800000 /* CS2: (See below) */
-#define EZ80_PLTFMSRAM    0xb80000 /* CS2: Platform SRAM (512Kb) */
-#define EZ80_MODULESRAM   0xc00000 /* CS1: Module SRAM (up to 2Mb) */
-                                   /* 0xffc000 On-chip EMAC SRAM (8Kb) */
-                                   /* 0xffe000 On-chip SRAM (8Kb) */
 
 /* LED and port emulation memory register addresses */
 
@@ -83,32 +82,6 @@
 #define EZ80_GPIOD5       (1 << 5)
 #define EZ80_GPIOD6       (1 << 6)
 #define EZ80_GPIOD7       (1 << 7)
-
-/* Modem Signals:
- *
- * DCD:
- *   The Data Carrier Detect (DCD) signal at D1 indicates that a good carrier
- *   signal is being received from the remove mode.
- * RX:
- *   The RX signal at D2 indicates that data is received from the modem.
- * DTR:
- *   The Data Terminal Ready (DTR) signal at D3 informs the modem that the PC
- *   is ready.
- * TX:
- *   The TX signal at D4 indicates that data is transmitted to the modem.
- */
-
- /* Push buttons:
-  *
-  * PB0   SW1 Bit 0 of GPIO Port B
-  * PB1   SW2 Bit 1 of GPIO Port B
-  * PB2   SW3 Bit 2 of GPIO Port B
-  * RESET SW4
-  */
-
-#define EZ80_PB0_IRQ EZ80_PORTB0_IRQ  /* Vector Oxa0 */
-#define EZ80_PB1_IRQ EZ80_PORTB1_IRQ  /* Vector Oxa4 */
-#define EZ80_PB2_IRQ EZ80_PORTB2_IRQ  /* Vector Oxa8 */
 
 /****************************************************************************
  * Public Data
