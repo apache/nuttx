@@ -77,7 +77,7 @@
 ;**************************************************************************
 
 _ez80_startup:
-	; Set up the stack pointer at the location determined the lincmd
+	; Set up the stack pointer at the location determined the linkcmd
 	; file
 
 	ld		sp, __stack
@@ -122,7 +122,7 @@ _ez80_bssdone:
 	jr		z, _ez80_datadone	; __len_data is zero-length ...
 	ld		hl, __low_romdata	; [hl] = data_copy
 	ld		de, __low_data		; [de] = data
-	ldir				; Copy the data section
+	ldir						; Copy the data section
 _ez80_datadone:
 
 	; Copy CODE (which may be in FLASH) to RAM if the

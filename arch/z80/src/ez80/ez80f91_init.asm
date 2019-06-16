@@ -78,35 +78,35 @@ PLL_ENABLE    EQU %01
 ;**************************************************************************
 
 ; Exported symbols
-	xdef _ez80_init
-	xdef _ez80_initsysclk
+	xdef	_ez80_init
+	xdef	_ez80_initsysclk
 
 ; Imported symbols
-	xref __CS0_LBR_INIT_PARAM
-	xref __CS0_UBR_INIT_PARAM
-	xref __CS0_CTL_INIT_PARAM
-	xref __CS1_LBR_INIT_PARAM
-	xref __CS1_UBR_INIT_PARAM
-	xref __CS1_CTL_INIT_PARAM
-	xref __CS2_LBR_INIT_PARAM
-	xref __CS2_UBR_INIT_PARAM
-	xref __CS2_CTL_INIT_PARAM
-	xref __CS3_LBR_INIT_PARAM
-	xref __CS3_UBR_INIT_PARAM
-	xref __CS3_CTL_INIT_PARAM
-	xref __CS0_BMC_INIT_PARAM
-	xref __CS1_BMC_INIT_PARAM
-	xref __CS2_BMC_INIT_PARAM
-	xref __CS3_BMC_INIT_PARAM
-	xref __FLASH_CTL_INIT_PARAM
-	xref __FLASH_ADDR_U_INIT_PARAM
-	xref __RAM_CTL_INIT_PARAM
-	xref __RAM_ADDR_U_INIT_PARAM
-	xref _SYS_CLK_SRC
-	xref _SYS_CLK_FREQ
-	xref _OSC_FREQ
-	xref _OSC_FREQ_MULT
-	xref __PLL_CTL0_INIT_PARAM
+	xref	__CS0_LBR_INIT_PARAM
+	xref	__CS0_UBR_INIT_PARAM
+	xref	__CS0_CTL_INIT_PARAM
+	xref	__CS1_LBR_INIT_PARAM
+	xref	__CS1_UBR_INIT_PARAM
+	xref	__CS1_CTL_INIT_PARAM
+	xref	__CS2_LBR_INIT_PARAM
+	xref	__CS2_UBR_INIT_PARAM
+	xref	__CS2_CTL_INIT_PARAM
+	xref	__CS3_LBR_INIT_PARAM
+	xref	__CS3_UBR_INIT_PARAM
+	xref	__CS3_CTL_INIT_PARAM
+	xref	__CS0_BMC_INIT_PARAM
+	xref	__CS1_BMC_INIT_PARAM
+	xref	__CS2_BMC_INIT_PARAM
+	xref	__CS3_BMC_INIT_PARAM
+	xref	__FLASH_CTL_INIT_PARAM
+	xref	__FLASH_ADDR_U_INIT_PARAM
+	xref	__RAM_CTL_INIT_PARAM
+	xref	__RAM_ADDR_U_INIT_PARAM
+	xref	_SYS_CLK_SRC
+	xref	_SYS_CLK_FREQ
+	xref	_OSC_FREQ
+	xref	_OSC_FREQ_MULT
+	xref	__PLL_CTL0_INIT_PARAM
 
 ;**************************************************************************
 ; Chip-specific initialization logic
@@ -120,12 +120,12 @@ PLL_ENABLE    EQU %01
 _ez80_init:
 	; Disable internal peripheral interrupt sources
 
-	ld	a, %ff
-	out0	(PA_DDR), a		; GPIO
+	ld		a, %ff
+	out0	(PA_DDR), a			; GPIO
 	out0	(PB_DDR), a
 	out0	(PC_DDR), a
 	out0	(PD_DDR), a
-	ld	a, %00
+	ld		a, %00
 	out0	(PA_ALT1), a
 	out0	(PB_ALT1), a
 	out0	(PC_ALT1), a
@@ -144,60 +144,60 @@ _ez80_init:
 	out0	(I2C_CTL), a		; I2C
 	out0	(EMAC_IEN), a		; EMAC
 	out0	(FLASH_IRQ), a		; Flash
-	ld	a, %04
+	ld		a, %04
 	out0	(SPI_CTL), a		; SPI
-	in0	a, (RTC_CTRL)		; RTC,
-	and	a, %be
+	in0		a, (RTC_CTRL)		; RTC,
+	and		a, %be
 	out0	(RTC_CTRL), a
 
 	; Configure external memory/io
 
-	ld	a, __CS0_LBR_INIT_PARAM
+	ld		a, __CS0_LBR_INIT_PARAM
 	out0	(CS0_LBR), a
-	ld	a, __CS0_UBR_INIT_PARAM
+	ld		a, __CS0_UBR_INIT_PARAM
 	out0	(CS0_UBR), a
-	ld	a, __CS0_BMC_INIT_PARAM
+	ld		a, __CS0_BMC_INIT_PARAM
 	out0	(CS0_BMC), a
-	ld	a, __CS0_CTL_INIT_PARAM
+	ld		a, __CS0_CTL_INIT_PARAM
 	out0	(CS0_CTL), a
 
-	ld	a, __CS1_LBR_INIT_PARAM
+	ld		a, __CS1_LBR_INIT_PARAM
 	out0	(CS1_LBR), a
-	ld	a, __CS1_UBR_INIT_PARAM
+	ld		a, __CS1_UBR_INIT_PARAM
 	out0	(CS1_UBR), a
-	ld	a, __CS1_BMC_INIT_PARAM
+	ld		a, __CS1_BMC_INIT_PARAM
 	out0	(CS1_BMC), a
-	ld	a, __CS1_CTL_INIT_PARAM
+	ld		a, __CS1_CTL_INIT_PARAM
 	out0	(CS1_CTL), a
 
-	ld	a, __CS2_LBR_INIT_PARAM
+	ld		a, __CS2_LBR_INIT_PARAM
 	out0	(CS2_LBR), a
- 	ld	a, __CS2_UBR_INIT_PARAM
+ 	ld		a, __CS2_UBR_INIT_PARAM
 	out0	(CS2_UBR), a
-	ld	a, __CS2_BMC_INIT_PARAM
+	ld		a, __CS2_BMC_INIT_PARAM
 	out0	(CS2_BMC), a
-	ld	a, __CS2_CTL_INIT_PARAM
+	ld		a, __CS2_CTL_INIT_PARAM
 	out0	(CS2_CTL), a
 
-	ld	a, __CS3_LBR_INIT_PARAM
+	ld		a, __CS3_LBR_INIT_PARAM
 	out0	(CS3_LBR), a
-	ld	a, __CS3_UBR_INIT_PARAM
+	ld		a, __CS3_UBR_INIT_PARAM
 	out0	(CS3_UBR), a
-	ld	a, __CS3_BMC_INIT_PARAM
+	ld		a, __CS3_BMC_INIT_PARAM
 	out0	(CS3_BMC), a
-	ld	a, __CS3_CTL_INIT_PARAM
+	ld		a, __CS3_CTL_INIT_PARAM
 	out0	(CS3_CTL), a
 
 	; Enable internal memory
 
-	ld	a, __FLASH_ADDR_U_INIT_PARAM
+	ld		a, __FLASH_ADDR_U_INIT_PARAM
 	out0	(FLASH_ADDR_U), a
-	ld	a, __FLASH_CTL_INIT_PARAM
+	ld		a, __FLASH_CTL_INIT_PARAM
 	out0	(FLASH_CTRL), a
 
-	ld	a, __RAM_ADDR_U_INIT_PARAM
+	ld		a, __RAM_ADDR_U_INIT_PARAM
 	out0	(RAM_ADDR_U), a
-	ld	a, __RAM_CTL_INIT_PARAM
+	ld		a, __RAM_CTL_INIT_PARAM
 	out0	(RAM_CTL), a
 	ret
 
@@ -207,51 +207,53 @@ _ez80_init:
 
 _ez80_initsysclk:
 	; check if the PLL should be used
-	ld	a, (_ez80_sysclksrc)
-	cp	a, PLL
-	jr	nz, _ez80_initsysclkdone
+
+	ld		a, (_ez80_sysclksrc)
+	cp		a, PLL
+	jr		nz, _ez80_initsysclkdone
 
 	; Load PLL divider
 
-	ld	a, (_ez80_oscfreqmult)		;CR 6202
+	ld		a, (_ez80_oscfreqmult)		;CR 6202
 	out0	(PLL_DIV_L), a
-	ld	a, (_ez80_oscfreqmult+1)
+	ld		a, (_ez80_oscfreqmult+1)
 	out0	(PLL_DIV_H), a
 	
 	; Set charge pump and lock criteria
 
-	ld	a, __PLL_CTL0_INIT_PARAM
-	and	a, %CC  ; mask off reserved and clock source bits
+	ld		a, __PLL_CTL0_INIT_PARAM
+	and		a, %CC  ; mask off reserved and clock source bits
 	out0	(PLL_CTL0), a
 
 	; Enable PLL
 
-	in0	a, (PLL_CTL1)
-	set	0, a
+	in0		a, (PLL_CTL1)
+	set		0, a
 	out0	(PLL_CTL1), a
 
 	; Wait for PLL to lock
+
 _ez80_initsysclkwait:
-	in0	a, (PLL_CTL1)
-	and	a, LCK_STATUS
-	cp	a, LCK_STATUS
-	jr	nz, _ez80_initsysclkwait
+	in0		a, (PLL_CTL1)
+	and		a, LCK_STATUS
+	cp		a, LCK_STATUS
+	jr		nz, _ez80_initsysclkwait
 
 	; Select PLL as system clock source
 
-	ld	a, __PLL_CTL0_INIT_PARAM
-	set	0, a
+	ld		a, __PLL_CTL0_INIT_PARAM
+	set		0, a
 	out0	(PLL_CTL0), a
 
 _ez80_initsysclkdone:
 	ret
 
 ;_ez80_oscfreq:
-;	dl _OSC_FREQ
+;	dl		_OSC_FREQ
 _ez80_oscfreqmult:
-	dw _OSC_FREQ_MULT
+	dw		_OSC_FREQ_MULT
 ;_ez80_sysclkfreq:
-;	dl _SYS_CLK_FREQ
+;	dl		_SYS_CLK_FREQ
 _ez80_sysclksrc:
-	db _SYS_CLK_SRC
+	db		_SYS_CLK_SRC
 	end

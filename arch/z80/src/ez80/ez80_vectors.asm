@@ -134,8 +134,8 @@ _nmi:
 ; Interrupt Vector Handling
 ;**************************************************************************
 
-					; Symbol           Val VecNo Addr
-					;----------------- --- ----- -----
+						; Symbol           Val VecNo Addr
+						;----------------- --- ----- -----
 _ez80_handlers:
 	irqhandler	 0		; EZ80_EMACRX_IRQ   0    0   0x040
 	handlersize equ $-_ez80_handlers
@@ -147,8 +147,8 @@ _ez80_handlers:
 	irqhandler	 6		; EZ80_TIMER1_IRQ   6    6   0x058
 	irqhandler	 7		; EZ80_TIMER2_IRQ   7    7   0x05c
 	irqhandler	 8		; EZ80_TIMER3_IRQ   8    8   0x060
-	irqhandler	EZ80_UNUSED	;                        9   0x064
-	irqhandler	EZ80_UNUSED+1	;                       10   0x068
+	irqhandler	EZ80_UNUSED		;                9   0x064
+	irqhandler	EZ80_UNUSED+1	;               10   0x068
 	irqhandler	 9		; EZ80_RTC_IRQ      9   11   0x06C
 	irqhandler	10		; EZ80_UART0_IRQ   10   12   0x070
 	irqhandler	11		; EZ80_UART1_IRQ   11   13   0x074
@@ -186,22 +186,22 @@ _ez80_handlers:
 	irqhandler	43		; EZ80_PORTD5_IRQ  43   45   0x0f4
 	irqhandler	44		; EZ80_PORTD6_IRQ  44   46   0x0f8
 	irqhandler	45		; EZ80_PORTD7_IRQ  45   47   0x0fc
-	irqhandler	EZ80_UNUSED+1	;                       48   0x100
-	irqhandler	EZ80_UNUSED+2	;                       49   0x104
-	irqhandler	EZ80_UNUSED+3	;                       50   0x108
-	irqhandler	EZ80_UNUSED+4	;                       51   0x10c
-	irqhandler	EZ80_UNUSED+5	;                       52   0x110
-	irqhandler	EZ80_UNUSED+6	;                       53   0x114
-	irqhandler	EZ80_UNUSED+7	;                       54   0x118
-	irqhandler	EZ80_UNUSED+8	;                       55   0x11c
-	irqhandler	EZ80_UNUSED+9	;                       56   0x120
-	irqhandler	EZ80_UNUSED+10	;                       57   0x124
-	irqhandler	EZ80_UNUSED+11	;                       58   0x128
-	irqhandler	EZ80_UNUSED+12	;                       59   0x12c
-	irqhandler	EZ80_UNUSED+13	;                       60   0x130
-	irqhandler	EZ80_UNUSED+14	;                       61   0x134
-	irqhandler	EZ80_UNUSED+15	;                       62   0x138
-	irqhandler	EZ80_UNUSED+16	;                       63   0x13c
+	irqhandler	EZ80_UNUSED+1	;               48   0x100
+	irqhandler	EZ80_UNUSED+2	;               49   0x104
+	irqhandler	EZ80_UNUSED+3	;               50   0x108
+	irqhandler	EZ80_UNUSED+4	;               51   0x10c
+	irqhandler	EZ80_UNUSED+5	;               52   0x110
+	irqhandler	EZ80_UNUSED+6	;               53   0x114
+	irqhandler	EZ80_UNUSED+7	;               54   0x118
+	irqhandler	EZ80_UNUSED+8	;               55   0x11c
+	irqhandler	EZ80_UNUSED+9	;               56   0x120
+	irqhandler	EZ80_UNUSED+10	;               57   0x124
+	irqhandler	EZ80_UNUSED+11	;               58   0x128
+	irqhandler	EZ80_UNUSED+12	;               59   0x12c
+	irqhandler	EZ80_UNUSED+13	;               60   0x130
+	irqhandler	EZ80_UNUSED+14	;               61   0x134
+	irqhandler	EZ80_UNUSED+15	;               62   0x138
+	irqhandler	EZ80_UNUSED+16	;               63   0x13c
 
 ;**************************************************************************
 ; Common Interrupt handler
@@ -216,72 +216,72 @@ _ez80_rstcommon:
 	;
 	; IRQ number is in A
 
-	push	hl			; Offset 6: HL
-	ld	hl, #(3*3)		;    HL is the value of the stack pointer before
-	add	hl, sp			;    the interrupt occurred (3 for PC, AF, HL)
-	push	hl			; Offset 5: Stack pointer
-	push	iy			; Offset 4: IY
-	push	ix			; Offset 3: IX
-	push	de			; Offset 2: DE
-	push	bc			; Offset 1: BC
+	push	hl					; Offset 6: HL
+	ld		hl, #(3*3)			;    HL is the value of the stack pointer before
+	add		hl, sp				;    the interrupt occurred (3 for PC, AF, HL)
+	push	hl					; Offset 5: Stack pointer
+	push	iy					; Offset 4: IY
+	push	ix					; Offset 3: IX
+	push	de					; Offset 2: DE
+	push	bc					; Offset 1: BC
 
 	; At this point, we know that interrupts were enabled (or we wouldn't be here
-	; so we can save a fake indicationn that will cause interrupts to restored when
+	; so we can save a fake indication that will cause interrupts to restored when
 	; this context is restored
 
-	ld	bc, #EZ80_PV_FLAG	; Parity bit.  1=parity odd, IEF2=1
-	push	bc			; Offset 0: I with interrupt state in parity
-	di				; (not necessary)
+	ld		bc, #EZ80_PV_FLAG	; Parity bit.  1=parity odd, IEF2=1
+	push	bc					; Offset 0: I with interrupt state in parity
+	di							; (not necessary)
 
 	; Call the interrupt decode logic. SP points to the beggining of the reg structure
 
-	ld	hl, #0			; Argument #2 is the beginning of the reg structure
-	add	hl, sp			;
-	push	hl			; Place argument #2 at the top of stack
-        ld      bc, #0			; BC = reset number
-	ld	c, a			;   Save the reset number in C
-	push	bc			; Argument #1 is the Reset number
-	call	_z80_doirq		; Decode the IRQ
+	ld		hl, #0				; Argument #2 is the beginning of the reg structure
+	add		hl, sp				;
+	push	hl					; Place argument #2 at the top of stack
+	ld		bc, #0				; BC = reset number
+	ld		c, a				;   Save the reset number in C
+	push	bc					; Argument #1 is the Reset number
+	call	_z80_doirq			; Decode the IRQ
 
 	; On return, HL points to the beginning of the reg structure to restore
 	; Note that (1) the arguments pushed on the stack are not popped, and (2) the
 	; original stack pointer is lost.  In the normal case (no context switch),
 	; HL will contain the value of the SP before the arguments were pushed.
 
-	ld	sp, hl			; Use the new stack pointer
+	ld		sp, hl				; Use the new stack pointer
 
 	; Restore registers.  HL points to the beginning of the reg structure to restore
 
-	ex	af, af'			; Select alternate AF
-	pop	af			; Offset 0: AF' = I with interrupt state in parity
-	ex	af, af'			;   Restore original AF
-	pop	bc			; Offset 1: BC
-	pop	de			; Offset 2: DE
-	pop	ix			; Offset 3: IX
-	pop	iy			; Offset 4: IY
-	exx				;   Use alternate BC/DE/HL
-	pop	hl			; Offset 5: HL' = Stack pointer after return
-	exx				;   Restore original BC/DE/HL
-	pop	hl			; Offset 6: HL
-	pop	af			; Offset 7: AF
+	ex		af, af'				; Select alternate AF
+	pop		af					; Offset 0: AF' = I with interrupt state in parity
+	ex		af, af'				;   Restore original AF
+	pop		bc					; Offset 1: BC
+	pop		de					; Offset 2: DE
+	pop		ix					; Offset 3: IX
+	pop		iy					; Offset 4: IY
+	exx							;   Use alternate BC/DE/HL
+	pop		hl					; Offset 5: HL' = Stack pointer after return
+	exx							;   Restore original BC/DE/HL
+	pop		hl					; Offset 6: HL
+	pop		af					; Offset 7: AF
 
 	; Restore the stack pointer
 
-	exx				; Use alternate BC/DE/HL
-	pop	de			; Offset 8: Return address
-	ld	sp, hl			; Set SP = saved stack pointer value before return
-	push	de			; Set up for reti
-	exx				; Restore original BC/DE/HL
+	exx							; Use alternate BC/DE/HL
+	pop		de					; Offset 8: Return address
+	ld		sp, hl				; Set SP = saved stack pointer value before return
+	push	de					; Set up for reti
+	exx							; Restore original BC/DE/HL
 
 	; Restore interrupt state
 
-	ex	af, af'			; Recover interrupt state
-	jp	po, nointenable		; Odd parity, IFF2=0, means disabled
-	ex	af, af'			; Restore AF (before enabling interrupts)
-	ei				; yes
+	ex		af, af'				; Recover interrupt state
+	jp		po, nointenable		; Odd parity, IFF2=0, means disabled
+	ex		af, af'				; Restore AF (before enabling interrupts)
+	ei							; yes
 	reti
 nointenable:
-	ex	af, af'			; Restore AF
+	ex		af, af'				; Restore AF
 	reti
 
 ;**************************************************************************
@@ -291,37 +291,37 @@ nointenable:
 _ez80_initvectors:
 	; Initialize the vector table
 
-	ld	iy, _ez80_vectable
-	ld	ix, 4
-	ld	bc, 4
-	ld	b, NVECTORS
-	xor	a, a			; Clear carry
-	ld	hl, handlersize
-	ld	de, _ez80_handlers
-	sbc	hl, de			; Length of irq handler in hl
-	ld	d, h
-	ld	e, l
-	ld	hl, _ez80_handlers 	; Start of handlers in hl
+	ld		iy, _ez80_vectable
+	ld		ix, 4
+	ld		bc, 4
+	ld		b, NVECTORS
+	xor		a, a				; Clear carry
+	ld		hl, handlersize
+	ld		de, _ez80_handlers
+	sbc		hl, de				; Length of irq handler in hl
+	ld		d, h
+	ld		e, l
+	ld		hl, _ez80_handlers 	; Start of handlers in hl
 
-	ld	a, 0
+	ld		a, 0
 $1:
-	ld	(iy), hl		; Store IRQ handler
-	ld	(iy+3), a		; Pad to 4 bytes
-	add	hl, de			; Point to next handler
+	ld		(iy), hl			; Store IRQ handler
+	ld		(iy+3), a			; Pad to 4 bytes
+	add		hl, de				; Point to next handler
 	push	de
-	ld	de, 4
-	add	iy, de			; Point to next entry in vector table
-	pop	de
-	djnz	$1			; Loop until all vectors have been written
+	ld		de, 4
+	add		iy, de				; Point to next entry in vector table
+	pop		de
+	djnz	$1					; Loop until all vectors have been written
 
 	; Select interrupt mode 2
 
-	im	2			; Interrupt mode 2
+	im	2						; Interrupt mode 2
 
 	; Write the address of the vector table into the interrupt vector base
 
-	ld	hl, _ez80_vectable >> 8
-	ld	i, hl
+	ld		hl, _ez80_vectable >> 8
+	ld		i, hl
 	ret
 
 ;**************************************************************************
