@@ -48,6 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/timers/rtc.h>
 
 #include <arch/io.h>
 
@@ -142,15 +143,13 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg);
 static void rtc_unlock(void);
 static void rtc_lock(void);
 
-static void get_raw_time(struct rtc_timeregs_s *rtcregs);
-static void set_raw_time(const struct rtc_timeregs_s *rtcregs);
+static void get_raw_time(FAR struct rtc_timeregs_s *rtcregs);
+static void set_raw_time(FAR const struct rtc_timeregs_s *rtcregs);
 
 #ifdef CONFIG_RTC_ALARM
-static void get_raw_alarm(struct rtc_timeregs_s *almregs);
-static void set_raw_alarm(const struct rtc_timeregs_s *almregs);
-static int ez80_alarm_interrupt(int irq, void *context, void *arg);
-static int ez80_rtc_getalarmdatetime(const struct rtc_almregs_s almregs
-                                     FAR struct tm *tp);
+static void get_raw_alarm(FAR struct rtc_almregs_s *almregs);
+static void set_raw_alarm(FAR const struct rtc_almregs_s *almregs);
+static int ez80_alarm_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -197,6 +196,9 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
   rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
   rtcinfo("  tm_min: %08x\n", tp->tm_min);
   rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+  rtcinfo(" tm_wday: %08x\n", tp->tm_wday);
+#endif
   rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
   rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
   rtcinfo(" tm_year: %08x\n", tp->tm_year);
@@ -265,7 +267,7 @@ static void rtc_lock(void)
  *
  ****************************************************************************/
 
-static void get_raw_time(struct rtc_timeregs_s *rtcregs)
+static void get_raw_time(FAR struct rtc_timeregs_s *rtcregs)
 {
   rtcregs->sec = inp(EZ80_RTC_SEC);
   rtcregs->min = inp(EZ80_RTC_MIN);
@@ -291,7 +293,7 @@ static void get_raw_time(struct rtc_timeregs_s *rtcregs)
  *
  ****************************************************************************/
 
-static void set_raw_time(const struct rtc_timeregs_s *rtcregs)
+static void set_raw_time(FAR const struct rtc_timeregs_s *rtcregs)
 {
   rtc_unlock();
   outp(EZ80_RTC_SEC, rtcregs->sec);
@@ -319,7 +321,7 @@ static void set_raw_time(const struct rtc_timeregs_s *rtcregs)
  *
  ****************************************************************************/
 
-static void get_raw_alarm(struct rtc_timeregs_s *almregs)
+static void get_raw_alarm(FAR struct rtc_almregs_s *almregs)
 {
   almregs->sec = inp(EZ80_RTC_ASEC);
   almregs->min = inp(EZ80_RTC_AMIN);
@@ -341,7 +343,7 @@ static void get_raw_alarm(struct rtc_timeregs_s *almregs)
  *
  ****************************************************************************/
 
-static void set_raw_alarm(const struct rtc_timeregs_s *almregs)
+static void set_raw_alarm(FAR const struct rtc_almregs_s *almregs)
 {
   rtc_unlock();
   outp(EZ80_RTC_ASEC, almregs->sec);
@@ -367,15 +369,18 @@ static void set_raw_alarm(const struct rtc_timeregs_s *almregs)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int ez80_alarm_interrupt(int irq, void *context, void *arg)
+static int ez80_alarm_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  uint_t regval;
+  uint8_t regval;
 
-  /* Verify that the alarm iinterrupt is pending */
+  /* Verify that the alarm interrupt is pending */
 
   regval = inp(EZ80_RTC_CTRL);
   if ((regval & EZ80_RTC_ALARM) != 0)
     {
+      alm_callback_t cb;
+      FAR void *cb_arg;
+
       /* Disable the alarm and disable the alarm interrupt */
 
       rtc_unlock();
@@ -386,58 +391,18 @@ static int ez80_alarm_interrupt(int irq, void *context, void *arg)
       outp(EZ80_RTC_CTRL, regval);
       rtc_lock();
 
-      up_irq_disble(EZ80_RTC_IRQ);
+      up_disable_irq(EZ80_RTC_IRQ);
 
       /* Perform the alarm callback */
 
       cb               = g_alarmcb.ac_cb;
-      cb_arg           = (FAR void *)g_alarmcb.ac_arg;
+      cb_arg           = g_alarmcb.ac_arg;
 
       g_alarmcb.ac_cb  = NULL;
       g_alarmcb.ac_arg = NULL;
 
       cb(cb_arg);
     }
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: ez80_rtc_getalarmdatetime
- *
- * Description:
- *   Get the current date and time for a RTC alarm.
- *
- * Input Parameters:
- *   reg - RTC alarm register
- *   tp - The location to return the high resolution time value.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-static int ez80_rtc_getalarmdatetime(const struct rtc_almregs_s almregs
-                                     FAR struct tm *tp)
-{
-  uint32_t data, tmp;
-
-  DEBUGASSERT(tp != NULL);
-
-  /* Sample the data time register. */
-
-  data = inp(reg);
-
-  /* Convert the RTC time to fields in struct tm format.  All of the EZ80
-   * ranges of values correspond between struct tm and the time register.
-   */
-
-  tp->tm_sec  = xxx(tmp);
-  tp->tm_min  = xxx(tmp);
-  tp->tm_hour = xxx(tmp);
-  tp->tm_mday = xxx(tmp);
 
   return OK;
 }
@@ -504,7 +469,7 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_ALARM
 int z80_rtc_irqinitialize(void)
 {
-  DEBUGVERIFY(irq_attach(EZ80_RTC_IRQ, ez80_alarm_interrupt, NULL));
+  return irq_attach(EZ80_RTC_IRQ, ez80_alarm_interrupt, NULL);
 }
 #endif
 
@@ -530,9 +495,11 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   struct rtc_timeregs_s timeregs;
   struct rtc_timeregs_s tmpregs;
 
+  rtc_dumpregs("Reading Time");
+
   /* Sample the data time registers.  There is a race condition here... ,
    * for example, we sample the time just before midnight on December 31,
-   * the date couldbe wrong because the day rolled over while were
+   * the date could be wrong because the day rolled over while were
    * sampling. Thus loop for checking wrap here is needed.
    */
 
@@ -547,8 +514,6 @@ int up_rtc_getdatetime(FAR struct tm *tp)
          tmpregs.mon != timeregs.mon &&
          tmpregs.yr  != timeregs.yr &&
          tmpregs.cen != timeregs.cen);
-
-  rtc_dumpregs("Reading Time");
 
   /* Convert the RTC time to fields in struct tm format.  All of the EZ80
    * ranges of values correspond between struct tm and the time register.
@@ -655,6 +620,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 {
   struct rtc_almregs_s almregs;
+  uint8_t regval;
   int ret = -EINVAL;
 
   DEBUGASSERT(alminfo != NULL);
@@ -668,19 +634,21 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   /* Set the alarm time */
 
-  almregs.sec = alminfo->as_time.sec;
-  almregs.min = alminfo->as_time.min;
-  almregs.hrs = alminfo->as_time.hrs;
-  almregs.dow = alminfo->as_time.dow;
+  almregs.sec = alminfo->as_time.tm_sec;
+  almregs.min = alminfo->as_time.tm_min;
+  almregs.hrs = alminfo->as_time.tm_hour;
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+  almregs.dow = alminfo->as_time.tm_wday;
+#endif
 
-  set_raw_alarm(&alarmregs);
+  set_raw_alarm(&almregs);
 
   /* Enable the alarm */
 
   rtc_unlock();
   outp(EZ80_RTC_ACTRL, EZ80_RTX_AALL);
 
-  regval = inp(EZ80_RTC_CTRL);
+  regval  = inp(EZ80_RTC_CTRL);
   regval |= ~EZ80_RTC_INTEN;
   outp(EZ80_RTC_CTRL, regval);
   rtc_lock();
@@ -689,7 +657,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
   /* Enable the alarm interrupt at the interrupt controller */
 
-  up_irq_enable(EZ80_RTC_IRQ);
+  up_enable_irq(EZ80_RTC_IRQ);
   return OK;
 }
 #endif
@@ -701,7 +669,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  *   Cancel an alarm.
  *
  * Input Parameters:
- *  alarmid - Identifies the alarm to be cancelled
+ *  None
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -711,10 +679,12 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 #ifdef CONFIG_RTC_ALARM
 int ez80_rtc_cancelalarm(void)
 {
+  uint8_t regval;
+
   /* Cancel the global callback function */
 
-  g_alarmcb[alarmid].ac_cb  = NULL;
-  g_alarmcb[alarmid].ac_arg = NULL;
+  g_alarmcb.ac_cb  = NULL;
+  g_alarmcb.ac_arg = NULL;
 
   /* Disable RTC alarm and and the alarm interrupt */
 
@@ -726,7 +696,7 @@ int ez80_rtc_cancelalarm(void)
   outp(EZ80_RTC_CTRL, regval);
   rtc_lock();
 
-  up_irq_disable(EZ80_RTC_IRQ);
+  up_disable_irq(EZ80_RTC_IRQ);
   return OK;
 }
 #endif
@@ -738,7 +708,7 @@ int ez80_rtc_cancelalarm(void)
  *   Return the current alarm setting.
  *
  * Input Parameters:
- *  almtime - Location to retun the current alarm ime.
+ *  almtime - Location to return the current alarm time.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -746,20 +716,38 @@ int ez80_rtc_cancelalarm(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int ez80_rtc_rdalarm(FAR struct rtc_time *almtime)
+int ez80_rtc_rdalarm(FAR struct tm *almtime)
 {
   struct rtc_almregs_s almregs;
   int ret = -EINVAL;
 
-  DEBUGASSERT(almtime != NULL);
+  rtc_dumpregs("Reading Alarm");
 
-  /* Read the alarm time from the RTC */
+  /* Get the current time for the month and year */
+
+  ret = up_rtc_getdatetime(almtime);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Sample the alarm time registers.  There is no race condition in this
+   * case.
+   */
 
   get_raw_alarm(&almregs);
 
-  /* A return that as struct tm */
+  /* Overwrite to get the full alarm time */
 
-  return ez80_rtc_getalarmdatetime(&almregs, almtime);
+  almtime->tm_sec  = almregs.sec;
+  almtime->tm_min  = almregs.min;
+  almtime->tm_hour = almregs.hrs;
+#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
+  almtime->tm_wday = almregs.dow;
+#endif
+
+  rtc_dumptime((FAR const struct tm *)almtime, "Returning");
+  return OK;
 }
 #endif
 

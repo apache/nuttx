@@ -41,7 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
-#include <debug.h>
+#include <syslog.h>
 
 /****************************************************************************
  * Public Functions
@@ -71,7 +71,7 @@ int ez80_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      serr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
 
@@ -81,7 +81,7 @@ int ez80_bringup(void)
   ret = ez80_mmcsd_initialize(void);
   if (ret < 0)
     {
-      serr("ERROR: Failed to initialize SD card: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SD card: %d\n", ret);
     }
 #endif
 

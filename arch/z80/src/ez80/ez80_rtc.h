@@ -186,7 +186,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  *
  ****************************************************************************/
 
-int ez80_rtc_rdalarm(FAR struct rtc_time *almtime);
+int ez80_rtc_rdalarm(FAR struct tm *almtime);
 
 /****************************************************************************
  * Name: ez80_rtc_cancelalarm

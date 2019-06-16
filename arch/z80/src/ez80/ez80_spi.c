@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_spi.c
  *
- *   Copyright (C) 2009-2010, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2016-2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +62,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_EZ80F91
-# define GPIOB_SPI_PINSET  0x38  /* MISO+MSOI+SCK. Excludes SS */
+#  define GPIOB_SPI_PINSET  0x38  /* MISO+MSOI+SCK. Excludes SS */
 #else
 #  error "Check GPIO initialization for this chip"
 #endif
@@ -75,10 +76,16 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                 uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+#ifdef CONFIG_SPI_EXCHANGE
+static void   spi_exchange(FAR struct spi_dev_s *dev,
+                FAR const void *txbuffer, FAR void *rxbuffer,
+                size_t nwords);
+#else
 static void   spi_sndblock(FAR struct spi_dev_s *dev,
                 FAR const uint8_t *buffer, size_t buflen);
 static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR uint8_t *buffer,
                 size_t buflen);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -86,26 +93,36 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR uint8_t *buffer,
 
 static const struct spi_ops_s g_spiops =
 {
-  spi_lock,
-  ez80_spiselect,      /* select: Provided externally by board logic */
-  spi_setfrequency,
+  spi_lock,            /* lock() */
+  ez80_spiselect,      /* select(): Provided externally by board logic */
+  spi_setfrequency,    /* setfrequency() */
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+  NULL,                /* setdelay() */
+#endif
   spi_setmode,
-  NULL,                /* setbits: Variable number of bits not implemented */
+  NULL,                /* setbits() */
 #ifdef CONFIG_SPI_HWFEATURES
-  NULL,                /* hwfeatures: Not supported */
+  NULL,                /* hwfeatures() */
 #endif
-  ez80_spistatus,      /* status: Provided externally by board logic */
+  ez80_spistatus,      /* status(): Provided externally by board logic */
 #ifdef CONFIG_SPI_CMDDATA
-  ez80_spicmddata,
+  ez80_spicmddata,     /* cmddata(): Provided externally by board logic */
 #endif
-  spi_send,
-  spi_sndblock,
-  spi_recvblock,
-  0                    /* registercallback: Not yet implemented */
+  spi_send,            /* send() */
+#ifdef CONFIG_SPI_EXCHANGE
+  spi_exchange,        /* exchange() */
+#else
+  spi_sndblock,        /* sndblock() */
+  spi_recvblock,       /* recvblock() */
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+  NULL,                /* trigger() */
+#endif
+  NULL                 /* registercallback() */
 };
 
 /* This supports is only a single SPI bus/port.  If you port this to an
- * architecture with multiple SPI busses/ports, then (1) you must create
+ * architecture with multiple SPI buses/ports, then (1) you must create
  * a structure, say ez80_spidev_s, containing both struct spi_dev_s and
  * the mutual exclusion semaphored, and (2) the following must become an
  * array with one 'struct spi_dev_s' instance per bus.
@@ -128,8 +145,8 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
@@ -364,6 +381,57 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 }
 
 /****************************************************************************
+ * Name: spi_exchange
+ *
+ * Description:
+ *   Exchange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to receive data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_EXCHANGE
+static void spi_exchange(FAR struct spi_dev_s *dev,
+                         FAR const void *txbuffer, FAR void *rxbuffer,
+                         size_t nwords)
+{
+  FAR const uint8_t *inptr = (FAR const uint8_t *)txbuffer;
+  FAR uint8_t *outptr = (FAR const uint8_t *)rxbuffer;
+
+  /* Loop while there are bytes remaining to be sent */
+
+  while (nwords-- > 0)
+    {
+      /* Send 0xff if there is no outgoing TX stream */
+
+      uint8_t outword = (inptr == NULL) ? 0xff : *inptr++;
+
+      /* Send the outgoing word and obtain the respoonse */
+
+      uint8_t inword = spi_transfer(outword);
+
+      /* Save the response if there is an incoming RX stream */
+
+      if (outptr != NULL)
+        {
+          *outptr++ = inword;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -383,6 +451,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t buflen)
 {
@@ -395,6 +464,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
       (void)spi_transfer(*ptr++);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: spi_recvblock
@@ -416,6 +486,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_EXCHANGE
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                           size_t buflen)
 {
@@ -428,6 +499,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
       *ptr++ = spi_transfer(0xff);
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -459,9 +531,9 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 {
   uint8_t regval;
 
+#ifdef CONFIG_DEBUG_FEATURES
   /* Only the SPI1 interface is supported */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (port != 1)
     {
       return NULL;
@@ -501,7 +573,7 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 #  error "Check GPIO initialization for this chip"
 #endif
 
-  /* Set the initial clock frequency for indentification mode < 400kHz */
+  /* Set the initial clock frequency for identification mode < 400kHz */
 
   spi_setfrequency(NULL, 400000);
 

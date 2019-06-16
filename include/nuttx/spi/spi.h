@@ -386,7 +386,7 @@
  * Name: SPI_EXCHANGE
  *
  * Description:
- *   Exahange a block of data from SPI. Required.
+ *   Exchange a block of data from SPI. Required.
  *
  * Input Parameters:
  *   dev      - Device-specific state data

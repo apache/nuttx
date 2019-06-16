@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/mount/fs_procfs_mount.c
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -483,6 +483,7 @@ static ssize_t mount_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen)
 {
   FAR struct mount_file_s *procfile;
+  struct mount_info_s info;
   foreach_mountpoint_t handler;
   ssize_t ret;
 
@@ -494,8 +495,6 @@ static ssize_t mount_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(procfile);
 
   /* Provide the requested data */
-
-  struct mount_info_s info;
 
   memset(&info, 0, sizeof(struct mount_info_s));
   info.line      = procfile->line;

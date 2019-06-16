@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-int ez80_mmcsd_initialize(void)
+void ez80_spidev_initialize(void)
 {
 #ifdef HAVE_MMCSD
   uint8_t regval;
@@ -163,5 +163,3 @@ int ez80_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
-
-#endif /* HAVE_MMCSD */

@@ -290,3 +290,10 @@ Configuration Subdirectories
 
        The PC terminal software should be configured as described in the
        MakerLisp Putty HOWTO document:  115200N1 BAUD.
+
+    STATUS:
+      2109-06-16:  The basic NSH configuration appears to be fully functional
+        using only the CPU and I/O expansion card.  Console is provided over
+        USB.
+
+        Added support for SPI-based SD cards, the RTC and procFS.
