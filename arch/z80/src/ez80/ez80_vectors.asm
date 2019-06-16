@@ -78,6 +78,7 @@ EZ80_UNUSED	EQU	40h
 ;  1. Disable interrupts
 ;  2. Dlear mixed memory mode (MADL) flag
 ;  3. jump to initialization procedure with jp.lil to set ADL
+
 rstvector: macro
 	di
 	rsmix
@@ -85,13 +86,14 @@ rstvector: macro
 	endmac	rstvector
 
 ; Define one interrupt handler
+
 irqhandler: macro vectno
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
-					; Offset 8: Return PC is already on the stack
-	push	af			; Offset 7: AF (retaining flags)
-	ld	a, #vectno		; A = vector number
-	jp	_ez80_rstcommon		; Remaining RST handling is common
+								; Offset 8: Return PC is already on the stack
+	push	af					; Offset 7: AF (retaining flags)
+	ld		a, #vectno			; A = vector number
+	jp		_ez80_rstcommon		; Remaining RST handling is common
 	endmac	irqhandler
 
 ;**************************************************************************
@@ -208,6 +210,7 @@ _ez80_handlers:
 ;**************************************************************************
 
 _ez80_rstcommon:
+
 	; Create a register frame.  SP points to top of frame + 4, pushes
 	; decrement the stack pointer.  Already have
 	;
@@ -289,6 +292,7 @@ nointenable:
 ;**************************************************************************
 
 _ez80_initvectors:
+
 	; Initialize the vector table
 
 	ld		iy, _ez80_vectable
@@ -296,11 +300,7 @@ _ez80_initvectors:
 	ld		bc, 4
 	ld		b, NVECTORS
 	xor		a, a				; Clear carry
-	ld		hl, handlersize
-	ld		de, _ez80_handlers
-	sbc		hl, de				; Length of irq handler in hl
-	ld		d, h
-	ld		e, l
+	ld		de, handlersize		; Length of one irq handler in de
 	ld		hl, _ez80_handlers 	; Start of handlers in hl
 
 	ld		a, 0
@@ -327,6 +327,7 @@ $1:
 ;**************************************************************************
 ; Vector Table
 ;**************************************************************************
+
 ; This segment must be aligned on a 512 byte boundary anywhere in RAM
 ; Each entry will be a 3-byte address in a 4-byte space
 
@@ -334,6 +335,7 @@ $1:
 	segment	.IVECTS
 
 	; The first 64 bytes are not used... the vectors actually start at +0x40
+
 _ez80_vecreserve:
 	ds	64
 _ez80_vectable:
