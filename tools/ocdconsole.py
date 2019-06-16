@@ -215,7 +215,7 @@ class oocd:
         return data
 
     def readVariable(self, address):
-        raw = self.send("ocd_mdw 0x%x" % address).split(": ")
+        raw = self.send("mdw 0x%x" % address).split(": ")
         return None if (len(raw) < 2) else strToHex(raw[1])
 
     def writeVariable(self, address, value):
