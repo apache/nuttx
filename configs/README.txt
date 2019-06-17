@@ -607,6 +607,10 @@ configs/pic32mz-starterkit
 
   See www.microchip.com for further information.
 
+configs/pnev5180b
+  NXP Semiconductors' PN5180 NFC Frontend Development Kit.  This board is
+  based on the NXP LPC1769 MCU.
+
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
