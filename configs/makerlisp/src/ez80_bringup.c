@@ -43,6 +43,8 @@
 #include <sys/mount.h>
 #include <syslog.h>
 
+#include "makerlisp.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -78,7 +80,7 @@ int ez80_bringup(void)
 #ifdef HAVE_MMCSD
   /* Initialize SPI-based SD card slot */
 
-  ret = ez80_mmcsd_initialize(void);
+  ret = ez80_mmcsd_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD card: %d\n", ret);

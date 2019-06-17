@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_stackdump.c
  *
- *   Copyright (C) 2007-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,29 +49,24 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-#warning TO BE PROVIDED
 
 /****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
-static void up_stackdump(void)
+void up_stackdump(void)
 {
-  struct tcb_s *rtcb = this_task();
-  uint16_t sp = up_getsp();
-  uint16_t stack_base = (uint16_t)rtcb->adj_stack_ptr;
-  uint16_t stack_size = (uint16_t)rtcb->adj_stack_size;
-  uint16_t stack;
+  FAR struct tcb_s *rtcb = this_task();
+  uintptr_t sp = z80_getsp();
+  uintptr_t stack_base = (uintptr_t)rtcb->adj_stack_ptr;
+  uintptr_t stack_size = (uintptr_t)rtcb->adj_stack_size;
+  uintptr_t stack;
 
-  _alert("stack_base: %04x\n", stack_base);
-  _alert("stack_size: %04x\n", stack_size);
-  _alert("sp:         %04x\n", sp);
+  _alert("stack_base: %06x\n", stack_base);
+  _alert("stack_size: %06x\n", stack_size);
+  _alert("sp:         %06x\n", sp);
 
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
@@ -83,12 +78,17 @@ static void up_stackdump(void)
       stack = sp;
     }
 
-  for (stack = stack & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16_t))
+  for (stack = stack & ~0x0f; stack < stack_base; stack += 16)
     {
-      uint16_t *ptr = (uint16_t*)stack;
-      _alert("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-            stack, ptr[0], ptr[1], ptr[2], ptr[3],
-            ptr[4], ptr[5], ptr[6], ptr[7]);
+      FAR uint8_t *ptr = (FAR uint8_t*)stack;
+
+      _alert("%06x: %02x %02x %02x %02x %02x %02x %02x %02x  ",
+             "%02x %02x %02x %02x %02x %02x %02x %02x\n",
+             stack,
+             ptr[0],  ptr[1],  ptr[2],  ptr[3],
+             ptr[4],  ptr[5],  ptr[6],  ptr[7],
+             ptr[8],  ptr[9],  ptr[10], ptr[11],
+             ptr[12], ptr[13], ptr[14], ptr[15]);
     }
 }
 

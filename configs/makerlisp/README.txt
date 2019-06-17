@@ -313,11 +313,19 @@ Configuration Subdirectories
        placed in the card slot before the system is started.
 
     STATUS:
-      2109-06-16:  The basic NSH configuration appears to be fully functional
+      2019-06-16:  The basic NSH configuration appears to be fully functional
         using only the CPU and I/O expansion card.  Console is provided over
         USB.
 
         Added support for SPI-based SD cards, the RTC and procFS.  There are
-        still a few issues at the end-of-the-day:  (1) the SD card block driver
-        is not being registered, and (2) RTC does not preserve time across a
+        still a few issues at the end-of-the-day:  (1) the SD card initialization
+        hangs and prevents booting, and (2) RTC does not preserve time across a
         power cycle.
+
+      2019-06-17:  The SD initialization is due to some error in the SPI driver:
+        It waits for a byte transfer to complete but it never receives the
+        indication that the transfer completed.  The SPI problem has not been
+        fixed, but timeout logic was added to avoid the hang.
+
+        The MMC/SD start-up failures do effect the boot-up time.  You might want
+        to disable SPI to avoid start-up delays.

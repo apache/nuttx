@@ -145,7 +145,7 @@ uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
-#ifdef HAVE_MMCSD_SPI
+#ifdef HAVE_MMCSD
   if (devid == SPIDEV_MMCSD(0))
     {
        /* No card detect pin.. Always claim that the card is present in

@@ -76,7 +76,7 @@
 #define LED_STACKCREATED            0
 #define LED_IDLE                    0
 #define LED_INIRQ                   0
-#define LED_ASSERTION               1
+#define LED_ASSERTION               0
 #define LED_SIGNAL                  0
 #define LED_PANIC                   1
 

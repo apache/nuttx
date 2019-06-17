@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_registerdump.c
  *
- *   Copyright (C) 2008-2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,24 +50,20 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: z80_registerdump
  ****************************************************************************/
 
-static void ez80_registerdump(void)
+void ez80_registerdump(void)
 {
   volatile chipreg_t *regs = g_current_regs;
 
@@ -93,7 +89,7 @@ static void ez80_registerdump(void)
         regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
   _alert("IX: %06x IY: %06x\n",
         regs[XCPT_IX], regs[XCPT_IY]);
-  _alert("SP: %06x PC: %06x\n"
+  _alert("SP: %06x PC: %06x\n",
         regs[XCPT_SP], regs[XCPT_PC]);
 #endif
 }
