@@ -86,6 +86,7 @@ endif
 CHIP_ASRCS += cxd56_farapistub.S
 
 CHIP_CSRCS  = cxd56_allocateheap.c cxd56_idle.c
+CHIP_CSRCS += cxd56_uid.c
 CHIP_CSRCS += cxd56_serial.c cxd56_uart.c cxd56_irq.c
 CHIP_CSRCS += cxd56_start.c
 CHIP_CSRCS += cxd56_timerisr.c

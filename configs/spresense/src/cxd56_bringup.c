@@ -268,6 +268,14 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_USERLED_LOWER
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze led. \n");
+    }
+#endif
+
 #ifdef CONFIG_CXD56_SFC
   ret = board_flash_initialize();
   if (ret < 0)

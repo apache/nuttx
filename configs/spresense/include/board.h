@@ -119,12 +119,16 @@
 
 #define BOARD_LED1          (0)
 #define BOARD_LED2          (1)
-#define BOARD_NLEDS         (2)
+#define BOARD_LED3          (2)
+#define BOARD_LED4          (3)
+#define BOARD_NLEDS         (4)
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT      (1 << BOARD_LED1)
 #define BOARD_LED2_BIT      (1 << BOARD_LED2)
+#define BOARD_LED3_BIT      (1 << BOARD_LED3)
+#define BOARD_LED4_BIT      (1 << BOARD_LED4)
 
 /* LED pattern for use with board_autoled_on() and board_autoled_off()
  *           ON            OFF

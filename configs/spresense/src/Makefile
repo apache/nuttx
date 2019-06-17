@@ -58,6 +58,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cxd56_leds.c
+else
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += cxd56_userleds.c
+endif
 endif
 
 ifeq ($(CONFIG_CXD56_PWM),y)
