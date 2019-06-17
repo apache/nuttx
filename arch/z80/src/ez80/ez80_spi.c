@@ -369,8 +369,6 @@ static int spi_transfer(uint8_t chout, FAR uint8_t *chin)
   uint8_t response;
   int ret;
 
-  spiinfo("chout: %02x\n", chout);
-
   /* Send the byte, repeating if some error occurs */
 
   for (; ; )

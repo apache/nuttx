@@ -111,7 +111,7 @@ static int ez80_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct lower_setrelative_s *alarminfo);
-static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower);
+static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid);
 static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
                          FAR struct lower_rdalarm_s *alarminfo);
 #endif
@@ -124,24 +124,24 @@ static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 static const struct rtc_ops_s g_rtc_ops =
 {
-  .rdtime         = ez80_rdtime,
-  .settime        = ez80_settime,
-  .havesettime    = ez80_havesettime,
+    ez80_rdtime,        /* rdtime */
+    ez80_settime,       /* settime */
+    ez80_havesettime    /* havesettime */
 #ifdef CONFIG_RTC_ALARM
-  .setalarm       = ez80_setalarm,
-  .setrelative    = ez80_setrelative,
-  .cancelalarm    = ez80_cancelalarm,
-  .rdalarm        = ez80_rdalarm,
+  , ez80_setalarm,      /* setalarm */
+    ez80_setrelative,   /* setrelative */
+    ez80_cancelalarm,   /* cancelalarm */
+    ez80_rdalarm        /* rdalarm */
 #endif
 #ifdef CONFIG_RTC_PERIODIC
-  .setperiodic    = NULL,
-  .cancelperiodic = NULL,
+  , NULL,               /* setperiodic */
+    NULL                /* cancelperiodic */
 #endif
 #ifdef CONFIG_RTC_IOCTL
-  .ioctl          = NULL,
+  , NULL                /* ioctl */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .destroy        = NULL,
+  , NULL                /* destroy */
 #endif
 };
 
@@ -149,7 +149,7 @@ static const struct rtc_ops_s g_rtc_ops =
 
 static struct ez80_lowerhalf_s g_rtc_lowerhalf =
 {
-  .ops            = &g_rtc_ops,
+  &g_rtc_ops           /* ops */
 };
 
 /****************************************************************************
@@ -197,7 +197,7 @@ static void ez80_alarm_callback(FAR void *arg)
 
   if (cb != NULL)
     {
-      cb(priv);
+      cb(priv, 0);
     }
 }
 #endif
@@ -326,7 +326,7 @@ static int ez80_settime(FAR struct rtc_lowerhalf_s *lower,
  *   Implements the havesettime() method of the RTC driver interface
  *
  * Input Parameters:
- *   lower   - A reference to RTC lower half driver state structure
+ *   lower - A reference to RTC lower half driver state structure
  *
  * Returned Value:
  *   Returns true if RTC date-time have been previously set.
@@ -335,7 +335,7 @@ static int ez80_settime(FAR struct rtc_lowerhalf_s *lower,
 
 static bool ez80_havesettime(FAR struct rtc_lowerhalf_s *lower)
 {
-  return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
+  return true;
 }
 
 /****************************************************************************
@@ -367,7 +367,8 @@ static int ez80_setalarm(FAR struct rtc_lowerhalf_s *lower,
   /* ID0-> Alarm A; ID1 -> Alarm B */
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  DEBUGASSERT(alarminfo->id == 0);
+
   priv = (FAR struct ez80_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);
@@ -381,11 +382,9 @@ static int ez80_setalarm(FAR struct rtc_lowerhalf_s *lower,
   cbinfo            = &priv->cbinfo;
   cbinfo->cb        = alarminfo->cb;
   cbinfo->priv      = alarminfo->priv;
-  cbinfo->id        = alarminfo->id;
 
   /* Set the alarm */
 
-  lowerinfo.as_id   = alarminfo->id;
   lowerinfo.as_cb   = ez80_alarm_callback;
   lowerinfo.as_arg  = priv;
   memcpy(&lowerinfo.as_time, &alarminfo->time, sizeof(struct tm));
@@ -431,49 +430,42 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
   time_t seconds;
   int ret = -EINVAL;
 
-  DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
 
-  if ((alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB) &&
-      alarminfo->reltime > 0)
+  /* Disable pre-emption while we do this so that we don't have to worry
+   * about being suspended and working on an old time.
+   */
+
+  sched_lock();
+
+  /* Get the current time in broken out format */
+
+  ret = up_rtc_getdatetime(&time);
+  if (ret >= 0)
     {
-      /* Disable pre-emption while we do this so that we don't have to worry
-       * about being suspended and working on an old time.
+      /* Convert to seconds since the epoch */
+
+      seconds = mktime(&time);
+
+      /* Add the seconds offset.  Add one to the number of seconds
+       * because we are unsure of the phase of the timer.
        */
 
-      sched_lock();
+      seconds += (alarminfo->reltime + 1);
 
-      /* Get the current time in broken out format */
+      /* And convert the time back to broken out format */
 
-      ret = up_rtc_getdatetime(&time);
-      if (ret >= 0)
-        {
-          /* Convert to seconds since the epoch */
+      (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
 
-          seconds = mktime(&time);
+      /* The set the alarm using this absolute time */
 
-          /* Add the seconds offset.  Add one to the number of seconds
-           * because we are unsure of the phase of the timer.
-           */
+      setalarm.cb   = alarminfo->cb;
+      setalarm.priv = alarminfo->priv;
 
-          seconds += (alarminfo->reltime + 1);
-
-          /* And convert the time back to broken out format */
-
-          (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
-
-          /* The set the alarm using this absolute time */
-
-          setalarm.id   = alarminfo->id;
-          setalarm.cb   = alarminfo->cb;
-          setalarm.priv = alarminfo->priv;
-
-          ret = ez80_setalarm(lower, &setalarm);
-        }
-
-      sched_unlock();
+      ret = ez80_setalarm(lower, &setalarm);
     }
 
+  sched_unlock();
   return ret;
 }
 #endif
@@ -486,8 +478,8 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
  *   method of the RTC driver interface
  *
  * Input Parameters:
- *   lower - A reference to RTC lower half driver state structure
- *   alarminfo - Provided information needed to set the alarm
+ *   lower   - A reference to RTC lower half driver state structure
+ *   alarmid - Must be zero
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -496,13 +488,14 @@ static int ez80_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower)
+static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
   FAR struct ez80_lowerhalf_s *priv;
   FAR struct ez80_cbinfo_s *cbinfo;
   int ret;
 
-  DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(lower != NULL && alarmid == 0);
+
   priv = (FAR struct ez80_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);
@@ -533,7 +526,7 @@ static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower)
  *   Query the RTC alarm.
  *
  * Input Parameters:
- *   lower - A reference to RTC lower half driver state structure
+ *   lower     - A reference to RTC lower half driver state structure
  *   alarminfo - Provided information needed to query the alarm
  *
  * Returned Value:
@@ -544,24 +537,19 @@ static int ez80_cancelalarm(FAR struct rtc_lowerhalf_s *lower)
 
 #ifdef CONFIG_RTC_ALARM
 static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct lower_rdalarm_s *alarminfo)
+                        FAR struct lower_rdalarm_s *alarminfo)
 {
-  struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
 
-  DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
-  DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
+  DEBUGASSERT(lower != NULL && alarminfo != NULL &&
+              alarminfo->time != NULL && alarminfo->id == 0);
 
   /* Disable pre-emption while we do this so that we don't have to worry
    * about being suspended and working on an old time.
    */
 
   sched_lock();
-
-  lowerinfo.ar_id   = alarminfo->id;
-  lowerinfo.ar_time = alarminfo->time;
-
-  ret = ez80_rtc_rdalarm(&lowerinfo);
+  ret = ez80_rtc_rdalarm((FAR struct tm *)alarminfo->time);
   sched_unlock();
 
   return ret;

@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/z80/src/ez80/ez80f91.h
- * arch/z80/src/chip/ez80f91.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -315,7 +314,7 @@
 #define EZ80_SPI_CTL           0xba
 #define EZ80_SPI_SR            0xbb
 #define EZ80_SPI_RBR           0xbc
-#define EZ80_SPI_TSR           0xbd
+#define EZ80_SPI_TSR           0xbc
 
 /* UART Register Offsets *************************************************************/
                                            /* DLAB=0: */

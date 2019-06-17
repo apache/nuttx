@@ -305,9 +305,35 @@ Configuration Subdirectories
          nsh> date
          Sun, Jun 16 15:09:01 2019
 
-       The SD card can be be mounted with the following NSH mount command:
+       When the system boots, it will probe the SD card and create a
+       block driver called mmcsd0:
+
+         nsh> ls /dev
+         /dev:
+          console
+          mmcsd0
+          null
+          ttyS0
+         nsh> mount
+           /proc type procfs
+
+       The SD card can be mounted with the following NSH mount command:
 
          nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+         nsh> ls /mnt
+         /mnt:
+          sdcard/
+         nsh> mount
+           /mnt/sdcard type vfat
+           /proc type procfs
+         nsh> ls -lR /mnt/sdcard
+         /mnt/sdcard:
+          drw-rw-rw-       0 System Volume Information/
+         /mnt/sdcard/System Volume Information:
+          -rw-rw-rw-      76 IndexerVolumeGuid
+          -rw-rw-rw-      12 WPSettings.dat
+
+       You can they use the SD card as any other file system.
 
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
@@ -322,10 +348,11 @@ Configuration Subdirectories
         hangs and prevents booting, and (2) RTC does not preserve time across a
         power cycle.
 
-      2019-06-17:  The SD initialization is due to some error in the SPI driver:
+      2019-06-17:  The SD initialization was due to some error in the SPI driver:
         It waits for a byte transfer to complete but it never receives the
-        indication that the transfer completed.  The SPI problem has not been
-        fixed, but timeout logic was added to avoid the hang.
+        indication that the transfer completed.  That SPI problem has been
+        fixed and now the SD card is partially functional.
 
-        The MMC/SD start-up failures do effect the boot-up time.  You might want
-        to disable SPI to avoid start-up delays.
+        Reads from the SD are successful, but writes to the SD card (creating
+        files, creating directories, etc) hang.
+
