@@ -90,7 +90,7 @@
 /* See include/nuttx/wireless/nrf24l01.h */
 
 #define NRF24L01_FIRST      (WL_FIRST + WL_NCMDS)
-#define NRF24L01_NCMDS      14
+#define NRF24L01_NCMDS      16
 
 /* See include/nuttx/wireless/lpwan/sx127x.h */
 

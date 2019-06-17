@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #ifdef CONFIG_DEBUG_FEATURES
-#include <nuttx/debug.h>
+#include <debug.h>
 #endif
 #include <nuttx/arch.h>
 
