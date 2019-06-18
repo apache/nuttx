@@ -97,6 +97,11 @@
 #define SX127X_FIRST        (NRF24L01_FIRST + NRF24L01_NCMDS)
 #define SX127X_NCMDS        11
 
+/* See include/nuttx/wireless/gs2200m.h */
+
+#define GS2200M_FIRST       (SX127X_FIRST + SX127X_NCMDS)
+#define GS2200M_NCMDS       7
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

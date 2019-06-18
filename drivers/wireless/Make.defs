@@ -66,6 +66,10 @@ CSRCS += cc1101.c ISM1_868MHzGFSK100kbps.c ISM2_905MHzGFSK250kbps.c
 CSRCS += ISM2_433MHzMSK500kbps.c
 endif
 
+ifeq ($(CONFIG_WL_GS2200M),y)
+CSRCS += gs2200m.c
+endif
+
 ifeq ($(CONFIG_WL_SPIRIT),y)
 include wireless$(DELIM)spirit$(DELIM)Make.defs
 endif

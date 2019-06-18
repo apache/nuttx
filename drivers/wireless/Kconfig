@@ -23,6 +23,12 @@ config CC1101_SPIDEV
 
 endif
 
+config WL_GS2200M
+	bool "Telit GS2200M Wi-Fi support"
+	default n
+	select SPI
+	select LIBC_SCANSET
+
 source drivers/wireless/spirit/Kconfig
 
 menuconfig DRIVERS_IEEE802154
