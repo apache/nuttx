@@ -369,28 +369,26 @@ static int spi_transfer(uint8_t chout, FAR uint8_t *chin)
   uint8_t response;
   int ret;
 
-  /* Send the byte, repeating if some error occurs */
+  /* Send the byte */
 
-  for (; ; )
+  outp(EZ80_SPI_TSR, chout);
+
+  /* Wait for the device to be ready to accept another byte */
+
+  ret = spi_waitspif();
+  if (ret < 0)
     {
-      outp(EZ80_SPI_TSR, chout);
-
-      /* Wait for the device to be ready to accept another byte */
-
-      ret = spi_waitspif();
-      if (ret < 0)
-        {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
-          return ret;
-        }
-
-      response = inp(EZ80_SPI_RBR);
-      if (chin != NULL)
-        {
-          *chin = response;
-          return OK;
-        }
+      spierr("ERROR: spi_waitspif returned %d\n", ret);
+      return ret;
     }
+
+  response = inp(EZ80_SPI_RBR);
+  if (chin != NULL)
+    {
+      *chin = response;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
