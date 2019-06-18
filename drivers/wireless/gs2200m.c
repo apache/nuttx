@@ -93,7 +93,8 @@
  * Private Data Types
  ****************************************************************************/
 
-enum pkt_state_e {
+enum pkt_state_e
+{
   PKT_START = 0,
   PKT_EVENT,
   PKT_ESC_START,
