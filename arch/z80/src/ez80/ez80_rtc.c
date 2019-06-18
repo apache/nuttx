@@ -135,8 +135,10 @@ volatile bool g_rtc_enabled = false;
 
 /* Debug */
 
+#ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumpregs(FAR const char *msg);
 static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg);
+#endif
 
 /* Register access */
 
@@ -302,7 +304,7 @@ static void set_raw_time(FAR const struct rtc_timeregs_s *rtcregs)
   outp(EZ80_RTC_DOW, rtcregs->dow);
   outp(EZ80_RTC_DOM, rtcregs->dom);
   outp(EZ80_RTC_MON, rtcregs->mon);
-  outp(EZ80_RTC_YR, rtcregs->yr);
+  outp(EZ80_RTC_YR,  rtcregs->yr);
   outp(EZ80_RTC_CEN, rtcregs->cen);
   rtc_unlock();
 }
@@ -508,22 +510,23 @@ int up_rtc_getdatetime(FAR struct tm *tp)
        get_raw_time(&tmpregs);
        get_raw_time(&timeregs);
     }
-  while (tmpregs.min != timeregs.min &&
-         tmpregs.hrs != timeregs.hrs &&
-         tmpregs.dom != timeregs.dom &&
-         tmpregs.mon != timeregs.mon &&
-         tmpregs.yr  != timeregs.yr &&
+  while (tmpregs.min != timeregs.min ||
+         tmpregs.hrs != timeregs.hrs ||
+         tmpregs.dom != timeregs.dom ||
+         tmpregs.mon != timeregs.mon ||
+         tmpregs.yr  != timeregs.yr ||
          tmpregs.cen != timeregs.cen);
 
-  /* Convert the RTC time to fields in struct tm format.  All of the EZ80
-   * ranges of values correspond between struct tm and the time register.
+  /* Convert the RTC time to fields in struct tm format.  Most of the EZ80
+   * ranges of values correspond between struct tm and the time registers.
+   * Exceptions:  Month and year.
    */
 
   tp->tm_sec  = timeregs.sec;
   tp->tm_min  = timeregs.min;
-  tp->tm_hour = timeregs.min;
+  tp->tm_hour = timeregs.hrs;
   tp->tm_mday = timeregs.dom;
-  tp->tm_mon  = timeregs.dom - 1;  /* Range is 0-11 */
+  tp->tm_mon  = timeregs.mon - 1;  /* Range is 0-11 */
 
   /* Years since 1900 */
 
@@ -555,16 +558,18 @@ int ez80_rtc_setdatetime(FAR const struct tm *tp)
   uint16_t year;
   uint16_t cen;
 
+  rtc_dumptime(tp, "Requested time");
+
   timeregs.sec = tp->tm_sec;
   timeregs.min = tp->tm_min;
-  timeregs.min = tp->tm_hour;
+  timeregs.hrs = tp->tm_hour;
   timeregs.dom = tp->tm_mday;
-  timeregs.dom = tp->tm_mon + 1;  /* Range is 1-12 */
+  timeregs.mon = tp->tm_mon + 1;  /* Range is 1-12 */
 
   /* Years AD */
 
   year         = tp->tm_year + 1900;
-  cen          = year * 100;
+  cen          = year / 100;
 
   timeregs.cen = cen;
   timeregs.yr  = year - 100 * cen;
@@ -646,7 +651,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   /* Enable the alarm */
 
   rtc_unlock();
-  outp(EZ80_RTC_ACTRL, EZ80_RTX_AALL);
+  outp(EZ80_RTC_ACTRL, EZ80_RTC_AALL);
 
   regval  = inp(EZ80_RTC_CTRL);
   regval |= ~EZ80_RTC_INTEN;

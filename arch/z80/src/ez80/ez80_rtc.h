@@ -62,7 +62,7 @@
 #define EZ80_RTC_AMINEN            (1 << 1)  /* Bit 1:  Enable minutes alarm */
 #define EZ80_RTC_AHRSEN            (1 << 2)  /* Bit 4:  Enable hours alarm */
 #define EZ80_RTC_ADOWEN            (1 << 3)  /* Bit 3:  Enable day-of-week alarm */
-#define EZ80_RTX_AALL              0x0f      /* All times */
+#define EZ80_RTC_AALL              0x0f      /* All times */
 
 /* CTRL register */
 

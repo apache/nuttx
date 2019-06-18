@@ -356,3 +356,4 @@ Configuration Subdirectories
         Reads from the SD are successful, but writes to the SD card (creating
         files, creating directories, etc) hang.
 
+      2019-06-18:  The RTC now appears to be fully functional.
