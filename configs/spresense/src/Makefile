@@ -88,4 +88,8 @@ ifeq ($(CONFIG_NETDEVICES),y)
 CSRCS += cxd56_netinit.c
 endif
 
+ifeq ($(CONFIG_WL_GS2200M),y)
+CSRCS += cxd56_gs2200m.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
