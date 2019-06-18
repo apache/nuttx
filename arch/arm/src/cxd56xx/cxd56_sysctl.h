@@ -32,9 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/**
- * @file cxd56_sysctl.h
- */
 
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_SYSCTL_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_SYSCTL_H

@@ -32,9 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/**
- * @file       pm.h
- */
 
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_PM_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_PM_H

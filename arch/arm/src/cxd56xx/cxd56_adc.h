@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * arch/arm/src/cxd56xx/cxd56_adc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,47 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-
-#include <nuttx/timers/timer.h>
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_ADC_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_ADC_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/*
- * Set callback handler
- *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
+#include <nuttx/config.h>
 
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
+#include <stdint.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
+#ifndef __ASSEMBLY__
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+#else
+#define EXTERN extern
+#endif
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cxd56_adc_getinterval
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_ADC
+void cxd56_adc_getinterval(int adctype, uint32_t *interval, uint16_t *adjust);
+#else
+#define cxd56_adc_getinterval(adctype, interval, adjust)
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_ADC_H */

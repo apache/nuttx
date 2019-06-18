@@ -53,6 +53,10 @@
 #include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_USERLED_LOWER
+#include <nuttx/leds/userled.h>
+#endif
+
 #include <arch/chip/pm.h>
 #include "chip.h"
 

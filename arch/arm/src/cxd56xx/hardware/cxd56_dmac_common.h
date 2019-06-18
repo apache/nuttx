@@ -33,9 +33,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/**
- * @file       cxd56_dmac_common.h
- */
 
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_COMMON_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_COMMON_H

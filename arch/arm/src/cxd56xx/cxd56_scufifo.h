@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * arch/arm/src/cxd56xx/cxd56_scufifo.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,52 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-
-#include <nuttx/timers/timer.h>
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_SCUFIFO_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_SCUFIFO_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * include files
  ****************************************************************************/
 
-/*
- * Set callback handler
+#define FIFOMEM_INVALID 0xffff
+
+/****************************************************************************
+ * Name: scufifo_initialize
  *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
-
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
-
-/****************************************************************************
- * Public Types
+ * Description:
+ *   Initialize SCU FIFO memory management
+ *
  ****************************************************************************/
 
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
+void scufifo_initialize(void);
 
-struct timer_sethandler_s
-{
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+/****************************************************************************
+ * Name: scufifo_memalloc
+ *
+ * Description:
+ *   Allocate SCU FIFO memory
+ *
+ * Input Parameters:
+ *   size - Request memory size
+ *
+ * Returned Value:
+ *   Allocated FIFO memory start offset. If error, return FIFOMEM_INVALID.
+ *
+ ****************************************************************************/
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+uint16_t scufifo_memalloc(uint16_t size);
+
+/****************************************************************************
+ * Name: scufifo_memfree
+ *
+ * Description:
+ *   Free allocated SCU FIFO memory
+ *
+ * Input Parameters:
+ *   start - Start offset of FIFO memory
+ *
+ ****************************************************************************/
+
+void scufifo_memfree(uint16_t start);
+
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_SCUFIFO_H */

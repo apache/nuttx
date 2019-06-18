@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * configs/spresense/src/cxd56_i2cdev.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,51 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-
-#include <nuttx/timers/timer.h>
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/*
- * Set callback handler
+#include <nuttx/config.h>
+
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include "cxd56_i2c.h"
+
+#if defined(CONFIG_CXD56_I2C) && defined(CONFIG_I2C_DRIVER)
+
+/****************************************************************************
+ * Name: board_i2cdev_initialize
  *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
-
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
-
-/****************************************************************************
- * Public Types
+ * Description:
+ *   Initialize and register i2c driver for the specified i2c port
+ *
  ****************************************************************************/
 
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
+int board_i2cdev_initialize(int port)
 {
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+  int ret;
+  FAR struct i2c_master_s *i2c;
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+  _info("Initializing /dev/i2c%d..\n", port);
+
+  /* Initialize i2c deivce */
+
+  i2c = cxd56_i2cbus_initialize(port);
+  if (!i2c)
+    {
+      _err("ERROR: Failed to initialize i2c%d.\n", port);
+      return -ENODEV;
+    }
+
+  ret = i2c_register(i2c, port);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
+    }
+
+  return ret;
+}
+
+#endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * arch/arm/include/cxd56xx/adc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,64 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H
 
-#include <nuttx/timers/timer.h>
+/****************************************************************************
+ * include files
+ ***************************************************************************/
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <nuttx/analog/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * Set callback handler
+#define ANIOC_USER                 (AN_FIRST + AN_NCMDS)
+
+/* Start sampling
  *
- * param A pointer to struct timer_sethandler_s
+ * param None
  * return ioctl return value provides success/failure indication
  */
 
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
+#define ANIOC_CXD56_START          _ANIOC(ANIOC_USER + 0)
+
+/* Stop sampling
+ *
+ * param None
+ * return ioctl return value provides success/failure indication
+ */
+
+#define ANIOC_CXD56_STOP           _ANIOC(ANIOC_USER + 1)
+
+/* Set sampling frequency
+ *
+ * param None
+ * return ioctl return value provides success/failure indication
+ */
+
+#define ANIOC_CXD56_FREQ           _ANIOC(ANIOC_USER + 2)
+
+/* Set fifo size
+ *
+ * param None
+ * return ioctl return value provides success/failure indication
+ */
+
+#define ANIOC_CXD56_FIFOSIZE       _ANIOC(ANIOC_USER + 3)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
+/* Initialize valid ADC channels
+ *
+ * return OK(0) is success. negative value is failure.
+ */
 
-struct timer_sethandler_s
-{
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+int cxd56_adcinitialize(void);
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H */

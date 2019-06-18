@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * arch/arm/src/cxd56xx/hardware/cxd56_scuseq.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,23 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H
+#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H
 
-#include <nuttx/timers/timer.h>
+#define SCUSEQ_SRC_SEL                      (CXD56_SCU_SEQ_DRAM_BASE + 0x00c)
+#define SCUSEQ_PROPERTY(s)                  (CXD56_SCU_SEQ_DRAM_BASE + 0x020 + ((s) * 0x20))
+#define SCUSEQ_OUT_FORMAT(s)                (CXD56_SCU_SEQ_DRAM_BASE + 0x024 + ((s) * 0x20))
+#define SCUSEQ_MATH_PROC_OFST_GAIN_X(s)     (CXD56_SCU_SEQ_DRAM_BASE + 0x028 + ((s) * 0x20))
+#define SCUSEQ_MATH_PROC_OFST_GAIN_Y(s)     (CXD56_SCU_SEQ_DRAM_BASE + 0x02c + ((s) * 0x20))
+#define SCUSEQ_MATH_PROC_OFST_GAIN_Z(s)     (CXD56_SCU_SEQ_DRAM_BASE + 0x030 + ((s) * 0x20))
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#define SCUSEQ_INSTRUCTION(x)               (CXD56_SCU_SEQ_DRAM_BASE + 0x160 + ((x) * 2))
+#define SCUSEQ_ADC_PROPERTY                 (CXD56_SCU_SEQ_DRAM_BASE + 0x260)
+#define SCUSEQ_ADC_MATH_PROC_OFST_GAIN(s)   (CXD56_SCU_SEQ_DRAM_BASE + 0x264 + ((s) * 4))
+#define SCUSEQ_FIFOWREVNTCTRL(x)            (CXD56_SCU_SEQ_DRAM_BASE + 0x280 + ((x) * 4))
+#define SCUSEQ_FIFOSRAMPOWCTRL              (CXD56_SCU_SEQ_DRAM_BASE + 0x2C0)
+#define SCUSEQ_SYNCRO_CPU2ISOP              (CXD56_SCU_SEQ_DRAM_BASE + 0x2C4)
+#define SCUSEQ_SYNCRO_ISOP2CPU              (CXD56_SCU_SEQ_DRAM_BASE + 0x2C8)
+#define SCUSEQ_RAM_OUT_DATA0                (CXD56_SCU_SEQ_DRAM_BASE + 0x2CC)
 
-/*
- * Set callback handler
- *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
-
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
-{
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
-
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H */

@@ -58,26 +58,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Check if the following are defined in the board.h */
-
-#ifndef BOARD_LED1_BIT
-#error "BOARD_LED1_BIT must be defined in board.h !!"
-#endif
-#ifndef BOARD_LED2_BIT
-#error "BOARD_LED2_BIT must be defined in board.h !!"
-#endif
-#ifndef BOARD_LED3_BIT
-#error "BOARD_LED3_BIT must be defined in board.h !!"
-#endif
-#ifndef BOARD_LED4_BIT
-#error "BOARD_LED4_BIT must be defined in board.h !!"
-#endif
-
-#define GPIO_LED1           (PIN_I2S1_BCK)
-#define GPIO_LED2           (PIN_I2S1_LRCK)
-#define GPIO_LED3           (PIN_I2S1_DATA_IN)
-#define GPIO_LED4           (PIN_I2S1_DATA_OUT)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -88,10 +68,10 @@
 
 void board_userled_initialize(void)
 {
-  cxd56_gpio_write(GPIO_LED1, false);
-  cxd56_gpio_write(GPIO_LED2, false);
-  cxd56_gpio_write(GPIO_LED3, false);
-  cxd56_gpio_write(GPIO_LED4, false);
+  cxd56_gpio_config(GPIO_LED1, false);
+  cxd56_gpio_config(GPIO_LED2, false);
+  cxd56_gpio_config(GPIO_LED3, false);
+  cxd56_gpio_config(GPIO_LED4, false);
 }
 
 /****************************************************************************
@@ -100,7 +80,7 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  board_gpio_write(ledcfg, ledon);
+  cxd56_gpio_write(led, ledon);
 }
 
 /****************************************************************************

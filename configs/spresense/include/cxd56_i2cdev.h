@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * configs/spresense/include/cxd56_i2cdev.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-
-#include <nuttx/timers/timer.h>
+#ifndef __BOARD_COMMON_INCLUDE_CXD56_I2CDEV_H
+#define __BOARD_COMMON_INCLUDE_CXD56_I2CDEV_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/*
- * Set callback handler
- *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
-
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
+#ifndef __ASSEMBLY__
 
-struct timer_sethandler_s
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+#else
+#define EXTERN extern
+#endif
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_i2cdev_initialize
+ *
+ * Description:
+ *   Initialize i2c driver and register the /dev/i2c device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSTEM_I2CTOOL
+int board_i2cdev_initialize(int bus);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARD_COMMON_INCLUDE_CXD56_I2CDEV_H */

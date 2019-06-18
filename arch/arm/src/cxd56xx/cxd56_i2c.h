@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/timer.h
+ * arch/arm/src/cxd56xx/cxd56_i2c.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,34 +33,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
-
-#include <nuttx/timers/timer.h>
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_I2C_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_I2C_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/*
- * Set callback handler
- *
- * param A pointer to struct timer_sethandler_s
- * return ioctl return value provides success/failure indication
- */
+#include <nuttx/config.h>
+#include <nuttx/i2c/i2c_master.h>
+#include "hardware/cxd56_i2c.h"
 
-#define TCIOC_SETHANDLER _TCIOC(0x0020)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
-
-struct timer_sethandler_s
+#ifndef __ASSEMBLY__
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  FAR void    *arg;            /* An argument */
-  CODE tccb_t handler;         /* The timer interrupt handler */
-};
+#else
+#define EXTERN extern
+#endif
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cxd56_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct i2c_master_s *cxd56_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: cxd56_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the cxd56_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int cxd56_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_I2C_H */

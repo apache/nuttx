@@ -117,6 +117,11 @@
 
 /* LED definitions *********************************************************/
 
+#define GPIO_LED1           (PIN_I2S1_BCK)
+#define GPIO_LED2           (PIN_I2S1_LRCK)
+#define GPIO_LED3           (PIN_I2S1_DATA_IN)
+#define GPIO_LED4           (PIN_I2S1_DATA_OUT)
+
 #define BOARD_LED1          (0)
 #define BOARD_LED2          (1)
 #define BOARD_LED3          (2)
@@ -130,27 +135,16 @@
 #define BOARD_LED3_BIT      (1 << BOARD_LED3)
 #define BOARD_LED4_BIT      (1 << BOARD_LED4)
 
-/* LED pattern for use with board_autoled_on() and board_autoled_off()
- *           ON            OFF
- *       LED1   LED2   LED1   LED2
- * PTN0: OFF    OFF     -      -
- * PTN1: ON     OFF     -      -
- * PTN2: -      ON      -      OFF
- *
- */
+/* LED pattern for use with board_autoled_on() and board_autoled_off() */
 
-#define LED_AUTOLED_PTN0    (0)
-#define LED_AUTOLED_PTN1    (1)
-#define LED_AUTOLED_PTN2    (2)
-
-#define LED_STARTED         (LED_AUTOLED_PTN0)
-#define LED_HEAPALLOCATE    (LED_AUTOLED_PTN1)
-#define LED_IRQSENABLED     (LED_AUTOLED_PTN1)
-#define LED_STACKCREATED    (LED_AUTOLED_PTN1)
-#define LED_INIRQ           (LED_AUTOLED_PTN2)
-#define LED_SIGNAL          (LED_AUTOLED_PTN2)
-#define LED_ASSERTION       (LED_AUTOLED_PTN2)
-#define LED_PANIC           (LED_AUTOLED_PTN2)
+#define LED_STARTED             (BOARD_LED1_BIT)
+#define LED_HEAPALLOCATE        (BOARD_LED2_BIT)
+#define LED_IRQSENABLED         (BOARD_LED1_BIT | BOARD_LED2_BIT)
+#define LED_STACKCREATED        (BOARD_LED3_BIT)
+#define LED_INIRQ               (BOARD_LED1_BIT | BOARD_LED3_BIT)
+#define LED_SIGNAL              (BOARD_LED2_BIT | BOARD_LED3_BIT)
+#define LED_ASSERTION           (BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT)
+#define LED_PANIC               (BOARD_LED4_BIT)
 
 /* Buttons definitions *****************************************************/
 
