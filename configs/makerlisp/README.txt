@@ -335,8 +335,35 @@ Configuration Subdirectories
 
        You can they use the SD card as any other file system.
 
+         nsh> ls /mnt/sdcard
+         /mnt/sdcard:
+          System Volume Information/
+         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
+         nsh> ls /mnt/sdcard
+         /mnt/sdcard:
+          System Volume Information/
+          atest.txt
+         nsh> cat /mnt/sdcard/atest.txt
+         This is a test
+
+       Don't forget to un-mount the volume before power cycling:
+
+         nsh> mount
+           /mnt/sdcard type vfat
+           /proc type procfs
+         nsh> umount /mnt/sdcard
+         nsh> mount
+           /proc type procfs
+
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
+
+    3. Optimizations:
+
+       - The stack sizes have not been tuned and, hence, are probably too
+         large.
+       - Currently the code runs out of FLASH.  Running out of the zero-
+         wait-state RAM would be much faster!
 
     STATUS:
       2019-06-16:  The basic NSH configuration appears to be fully functional
