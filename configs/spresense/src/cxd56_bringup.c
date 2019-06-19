@@ -103,6 +103,9 @@
 #ifdef CONFIG_PWM
 #include "cxd56_pwm.h"
 #endif
+#ifdef CONFIG_CXD56_ADC
+#include <arch/chip/adc.h>
+#endif
 
 #include "spresense.h"
 
@@ -272,6 +275,14 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CXD56_ADC
+  ret = cxd56_adcinitialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze adc. \n");
+    }
+#endif
+
 #ifdef CONFIG_USERLED_LOWER
   ret = userled_lower_initialize("/dev/userleds");
   if (ret < 0)
@@ -300,22 +311,11 @@ int cxd56_bringup(void)
   cxd56_gpio_write(PIN_SDIO_DATA2, false);
   cxd56_gpio_write(PIN_SDIO_DATA3, false);
 
-#if defined(CONFIG_CXD56_SDIO) && !defined(CONFIG_CXD56_SPISD)
+#if defined(CONFIG_CXD56_SDIO)
   ret = board_sdcard_initialize();
   if (ret < 0)
     {
       _err("ERROR: Failed to initialze sdhci. \n");
-    }
-#endif
-
-#ifdef CONFIG_CXD56_SPISD
-  /* Mount the SPI-based MMC/SD block driver */
-
-  ret = board_spisd_initialize(0, 4);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to initialize SPI device to MMC/SD: %d\n",
-           ret);
     }
 #endif
 
