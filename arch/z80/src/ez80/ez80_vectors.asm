@@ -76,7 +76,7 @@ EZ80_UNUSED	EQU	40h
 
 ; Define one reset handler
 ;  1. Disable interrupts
-;  2. Dlear mixed memory mode (MADL) flag
+;  2. Clear mixed memory mode (MADL) flag
 ;  3. jump to initialization procedure with jp.lil to set ADL
 
 rstvector: macro

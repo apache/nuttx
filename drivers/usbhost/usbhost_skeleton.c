@@ -176,7 +176,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
  * used to associate the USB class driver to a connected USB device.
  */
 
-static const const struct usbhost_id_s g_id =
+static const struct usbhost_id_s g_id =
 {
   0,  /* base -- Must be one of the USB_CLASS_* definitions in usb.h */
   0,  /* subclass -- depends on the device */

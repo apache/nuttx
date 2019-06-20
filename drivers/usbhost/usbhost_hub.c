@@ -190,7 +190,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *hubclass);
  * used to associate the USB host hub class to a connected USB hub.
  */
 
-static const const struct usbhost_id_s g_id =
+static const struct usbhost_id_s g_id =
 {
   USB_CLASS_HUB,  /* base     */
   0,              /* subclass */
