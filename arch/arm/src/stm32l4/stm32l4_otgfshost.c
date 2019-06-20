@@ -1925,7 +1925,7 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
 
                   /* Wait a bit before retrying after a NAK. */
 
-                  if (chan->eptype == OTGFS_HCCHAR_EPTYP_INTR)
+                  if (chan->eptype == OTGFS_EPTYPE_INTR)
                     {
                       /* For interrupt (and isochronous) endpoints, the
                        * polling rate is determined by the bInterval field
