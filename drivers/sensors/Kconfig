@@ -49,6 +49,36 @@ config SENSORS_BMG160
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
 
+
+config SENSORS_BMI160
+	bool "Bosch BMI160 Inertial Measurement Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Bosch BMI160 Inertial
+		 Measurement sensor
+
+if SENSORS_BMI160
+
+choice
+	prompt "BMI160 Interface"
+	default SENSORS_BMI160_SPI
+
+config SENSORS_BMI160_I2C
+	bool "BMI160 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+config SENSORS_BMI160_SPI
+	bool "BMI160 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+endchoice
+endif
+
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n

@@ -346,5 +346,13 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMI160_I2C
+  ret = board_bmi160_initialize(0);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze BMI160. \n");
+    }
+#endif
+
   return 0;
 }

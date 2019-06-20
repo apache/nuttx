@@ -92,4 +92,8 @@ ifeq ($(CONFIG_WL_GS2200M),y)
 CSRCS += cxd56_gs2200m.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMI160_I2C),y)
+CSRCS += cxd56_bmi160_i2c.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
