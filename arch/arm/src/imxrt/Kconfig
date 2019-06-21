@@ -428,7 +428,7 @@ config IMXRT_GPIO5_16_31_IRQ
 	default n
 
 config IMXRT_GPIO6_0_15_IRQ
-	bool "GPIO6 Pins 8-15 interrupts"
+	bool "GPIO6 Pins 0-15 interrupts"
 	default n
 	depends on IMXRT_HIGHSPEED_GPIO
 
