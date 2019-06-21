@@ -1177,7 +1177,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          int count;
+          unsigned int count;
           int blresult;
 
           /* iob_copyin might wait for buffers to be freed, but if network is
