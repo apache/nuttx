@@ -63,6 +63,7 @@
 #endif
 
 /* Nucleo-144 GPIO Pin Definitions **************************************************/
+
 /* LED
  *
  * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a

@@ -68,7 +68,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -157,13 +157,13 @@ int board_app_initialize(uintptr_t arg)
   ret = stm32_spidev_bus_test();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n",
+             ret);
       return ret;
     }
 #endif
 
 #if defined(CONFIG_MMCSD)
-  /* Configure SDIO */
   /* Initialize the SDIO block driver */
 
   ret = stm32_sdio_initialize();
