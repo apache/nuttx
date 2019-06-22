@@ -458,13 +458,13 @@ static int usbhost_createconfig(FAR struct usbhost_member_s *member,
     }
 
   memcpy(buffer, configdesc, USB_SIZEOF_CFGDESC);
+  cfgdesc = (FAR struct usb_cfgdesc_s *)buffer;
   cfgsize = USB_SIZEOF_CFGDESC;
   buffer += USB_SIZEOF_CFGDESC;
   buflen -= USB_SIZEOF_CFGDESC;
 
   /* Modify the copied configuration descriptor */
 
-  cfgdesc              = (FAR struct usb_cfgdesc_s *)buffer;
   cfgdesc->len         = USB_SIZEOF_CFGDESC;
   cfgdesc->ninterfaces = member->nifs;
 
