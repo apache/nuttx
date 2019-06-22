@@ -114,14 +114,29 @@ int pnev5180b_bringup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_CDCACM
+#ifndef CONFIG_BOARDCTL_USBDEVCTRL
+#  ifdef CONFIG_CDCACM
   ret = cdcacm_initialize(0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: cdcacm_initialize() failed: %d\n", ret);
       goto done;
     }
-#endif
+#  endif
+
+#  if defined(CONFIG_NET_CDCECM) && !defined(CONFIG_CDCECM_COMPOSITE)
+  ret = cdcecm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: cdcecm_initialize() failed: %d\n", ret);
+      goto done;
+    }
+#  endif
+
+#  if defined(CONFIG_CDCECM_COMPOSITE)
+  board_composite_connect(0, 0);
+#  endif
+#endif /* CONFIG_BOARDCTL_USBDEVCTRL */
 
 #ifdef CONFIG_USBMONITOR
   ret = usbmonitor_start();
@@ -130,19 +145,6 @@ int pnev5180b_bringup(void)
       syslog(LOG_ERR, "ERROR: usbmonitor_start() failed: %d\n", ret);
       goto done;
     }
-#endif
-
-#if defined(CONFIG_NET_CDCECM) && !defined(CONFIG_CDCECM_COMPOSITE)
-  ret = cdcecm_initialize(0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: cdcecm_initialize() failed: %d\n", ret);
-      goto done;
-    }
-#endif
-
-#if defined(CONFIG_CDCECM_COMPOSITE)
-  board_composite_connect(0, 0);
 #endif
 
 #ifdef CONFIG_ELF
@@ -166,6 +168,10 @@ int pnev5180b_bringup(void)
 #if defined(CONFIG_ELF) || defined(CONFIG_NXFLAT)
   exec_setsymtab(lpc17_exports, lpc17_nexports);
 #endif
+
+  /* To avoid 'unused label' compiler warnings in specific configuration. */
+
+  goto done;
 
 done:
   return ret;

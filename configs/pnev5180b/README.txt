@@ -85,7 +85,7 @@ selected as follow:
 Where <subdir> is one of the following:
 
   nsh:
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configures the NuttShell (nsh) located at apps/system/nsh.  The
     Configuration enables the serial NSH interface.
 
     NOTES:
@@ -98,3 +98,7 @@ Where <subdir> is one of the following:
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
+
+  nsh-usbconsole:
+    Configures the NuttShell (nsh) located at apps/system/nsh.  The
+    Configuration enables the CDC/ACM based NSH interface on /dev/ttyACM0.
