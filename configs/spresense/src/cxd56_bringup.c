@@ -229,6 +229,32 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SYSTEM_I2CTOOL
+  #ifdef CONFIG_CXD56_I2C0
+  ret = board_i2cdev_initialize(0);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize I2C0.\n");
+    }
+  #endif
+
+  #ifdef CONFIG_CXD56_I2C1
+  ret = board_i2cdev_initialize(1);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize I2C1.\n");
+    }
+  #endif
+
+  #ifdef CONFIG_CXD56_I2C2
+  ret = board_i2cdev_initialize(2);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize I2C2.\n");
+    }
+  #endif
+#endif
+
   cxd56_uart_initialize();
   cxd56_timerisr_initialize();
 

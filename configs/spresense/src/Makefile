@@ -64,6 +64,10 @@ CSRCS += cxd56_userleds.c
 endif
 endif
 
+ifeq ($(CONFIG_CXD56_GPIO_IRQ),y)
+CSRCS += cxd56_gpioif.c
+endif
+
 ifeq ($(CONFIG_CXD56_PWM),y)
 CSRCS += cxd56_pwm.c
 endif
@@ -94,6 +98,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_BMI160_I2C),y)
 CSRCS += cxd56_bmi160_i2c.c
+endif
+
+ifeq ($(CONFIG_SYSTEM_I2CTOOL),y)
+CSRCS += cxd56_i2cdev.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

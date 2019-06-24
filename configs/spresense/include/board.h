@@ -49,9 +49,11 @@
 #include "cxd56_power.h"
 #include "cxd56_flash.h"
 #include "cxd56_gs2200m.h"
+#include "cxd56_i2cdev.h"
 #include "cxd56_bmi160.h"
 #include "cxd56_sdcard.h"
 #include "cxd56_wdt.h"
+#include "cxd56_gpioif.h"
 
 /****************************************************************************
  * Pre-processor Definitions

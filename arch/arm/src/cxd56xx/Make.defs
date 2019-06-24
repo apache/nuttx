@@ -92,6 +92,7 @@ CHIP_CSRCS += cxd56_start.c
 CHIP_CSRCS += cxd56_timerisr.c
 CHIP_CSRCS += cxd56_pinconfig.c
 CHIP_CSRCS += cxd56_clock.c
+CHIP_CSRCS += cxd56_delay.c
 CHIP_CSRCS += cxd56_gpio.c
 CHIP_CSRCS += cxd56_pmic.c
 CHIP_CSRCS += cxd56_cpufifo.c
