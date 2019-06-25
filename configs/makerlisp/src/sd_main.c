@@ -89,7 +89,7 @@ int sd_main(int argc, char *argv)
    * Intel HEX stream into SRAM.
    */
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board-level initialization.  This should include registering
    * the MMC/SD block driver at /dev/mmcsd0.
    */
@@ -129,7 +129,7 @@ int sd_main(int argc, char *argv)
                 0);
   if (ret < 0)
     {
-      /* We failed the load */
+      /* We failed to load the HEX image */
 
       printf("ERROR: Intel HEX file load failed: %d\n", ret);
       goto halt_with_hexfile;
