@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/cxd56_i2cdev.c
+ * configs/spresense/include/cxd56_charger.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,47 +33,62 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H
+#define __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#include "cxd56_i2c.h"
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: board_i2cdev_initialize
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_charger_initialize
  *
  * Description:
- *   Initialize and register i2c driver for the specified i2c port
+ *   Initialize battery charger driver
  *
  ****************************************************************************/
 
-int board_i2cdev_initialize(int port)
-{
-  int ret;
-  FAR struct i2c_master_s *i2c;
+int board_charger_initialize(FAR const char *devpath);
 
-  _info("Initializing /dev/i2c%d..\n", port);
+/****************************************************************************
+ * Name: board_charger_uninitialize
+ *
+ * Description:
+ *   Uninitialize battery charger driver
+ *
+ ****************************************************************************/
 
-  /* Initialize i2c deivce */
+int board_charger_uninitialize(FAR const char *devpath);
 
-  i2c = cxd56_i2cbus_initialize(port);
-  if (!i2c)
-    {
-      _err("ERROR: Failed to initialize i2c%d.\n", port);
-      return -ENODEV;
-    }
-
-  ret = i2c_register(i2c, port);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
-    }
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H */

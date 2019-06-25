@@ -152,6 +152,7 @@ comment "Power Management Options"
 menuconfig CXD56_PM
 	bool "Power Management"
 	default y
+	select POWER
 
 if CXD56_PM
 
@@ -161,6 +162,49 @@ config CXD56_PM_PROCFS
 	---help---
 		Enable the power domain status or the clock frequency monitor.
 
+config CXD56_GAUGE
+	bool "CXD5247 battery gauge"
+	default n
+	select BATTERY_GAUGE
+	---help---
+		Enable battery gauge driver.
+		This is not a lower half of power driver, but compatible with NuttX gauge driver.
+
+if CXD56_GAUGE
+
+config CXD56_GAUGE_DEBUG
+	bool "Battery Gauge Debug"
+	default n
+	---help---
+		Enable battery driver debug messages and debug IO command.
+
+endif
+
+config CXD56_CHARGER
+	bool "CXD5247 battery charger"
+	default n
+	select BATTERY_CHARGER
+	---help---
+		Enable battery charger driver.
+		This is not a lower half of power driver, but compatible with NuttX charger driver.
+
+if CXD56_CHARGER
+
+config CXD56_CHARGER_TEMP_PRECISE
+	bool "Precise Temperature"
+	default y
+	---help---
+		Get temperature precisely. If this option is enabled, driver calculate precisely
+		from register value to degrees Celsius.
+		This option requires libm.
+
+config CXD56_CHARGER_DEBUG
+	bool "Battery Charger Debug"
+	default n
+	---help---
+		Enable battery charger driver debug messages.
+
+endif
 endif # CXD56_PM
 
 comment "Peripheral Support"
@@ -396,6 +440,15 @@ endif # CXD56_I2C1
 config CXD56_I2C2
 	bool "I2C2"
 
+config CXD56_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
 endif
 
 config CXD56_USBDEV
@@ -1097,5 +1150,21 @@ config CXD56_SDIO_ENABLE_MULTIFUNCTION
 		Support multi-function with SDIO interfaced peripheral other than SD Card.
 
 endif # SDIO Configuration
+
+menuconfig CXD56_SPISD
+	bool "SPI SD Card"
+	default n
+	select MMCSD_SPI
+
+if CXD56_SPISD
+
+config CXD56_SPISD_SLOT_NO
+	int "SPI SD Card Slot Number"
+	default 0
+	---help---
+		Select spi sd card slot number.
+
+endif # SPISD Configuration
+
 endmenu
 endmenu

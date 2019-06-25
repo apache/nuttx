@@ -229,7 +229,7 @@ int cxd56_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SYSTEM_I2CTOOL
+#ifdef CONFIG_CXD56_I2C_DRIVER
   #ifdef CONFIG_CXD56_I2C0
   ret = board_i2cdev_initialize(0);
   if (ret < 0)

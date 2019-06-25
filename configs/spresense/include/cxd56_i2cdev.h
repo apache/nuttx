@@ -73,7 +73,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSTEM_I2CTOOL
+#ifdef CONFIG_CXD56_I2C_DRIVER
 int board_i2cdev_initialize(int bus);
 #endif
 

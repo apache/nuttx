@@ -48,6 +48,8 @@
 #include "cxd56_clock.h"
 #include "cxd56_power.h"
 #include "cxd56_flash.h"
+#include "cxd56_gauge.h"
+#include "cxd56_charger.h"
 #include "cxd56_gs2200m.h"
 #include "cxd56_i2cdev.h"
 #include "cxd56_bmi160.h"

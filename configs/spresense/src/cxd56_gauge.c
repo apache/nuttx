@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/cxd56_i2cdev.c
+ * configs/spresense/src/cxd56_gauge.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -38,42 +38,67 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <debug.h>
 
 #include <stdio.h>
-#include <debug.h>
 #include <errno.h>
 
-#include "cxd56_i2c.h"
+#include "cxd56_gauge.h"
+
+#if defined(CONFIG_CXD56_GAUGE)
+
+static int g_gaugeinitialized = 0;
 
 /****************************************************************************
- * Name: board_i2cdev_initialize
+ * Name: board_gauge_initialize
  *
  * Description:
- *   Initialize and register i2c driver for the specified i2c port
+ *   Initialize and register battery gauge driver
  *
  ****************************************************************************/
 
-int board_i2cdev_initialize(int port)
+int board_gauge_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
 
-  _info("Initializing /dev/i2c%d..\n", port);
-
-  /* Initialize i2c deivce */
-
-  i2c = cxd56_i2cbus_initialize(port);
-  if (!i2c)
+  if (!g_gaugeinitialized)
     {
-      _err("ERROR: Failed to initialize i2c%d.\n", port);
-      return -ENODEV;
+      ret = cxd56_gauge_initialize(devpath);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to initialize gauge.\n");
+          return -ENODEV;
+        }
+      g_gaugeinitialized = 1;
     }
 
-  ret = i2c_register(i2c, port);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
-    }
-
-  return ret;
+  return OK;
 }
+
+/****************************************************************************
+ * Name: board_gauge_uninitialize
+ *
+ * Description:
+ *   Uninitialize and unregister battery gauge driver
+ *
+ ****************************************************************************/
+
+int board_gauge_uninitialize(FAR const char *devpath)
+{
+  int ret;
+
+  if (g_gaugeinitialized)
+    {
+      ret = cxd56_gauge_uninitialize(devpath);
+      if (ret)
+        {
+          _err("ERROR: Failed to finalize gauge.\n");
+          return -ENODEV;
+        }
+      g_gaugeinitialized = 0;
+    }
+
+  return OK;
+}
+
+#endif

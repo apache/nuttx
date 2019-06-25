@@ -84,6 +84,14 @@ ifeq ($(CONFIG_CXD56_SDIO),y)
 CSRCS += cxd56_sdcard.c
 endif
 
+ifeq ($(CONFIG_CXD56_GAUGE),y)
+CSRCS += cxd56_gauge.c
+endif
+
+ifeq ($(CONFIG_CXD56_CHARGER),y)
+CSRCS += cxd56_charger.c
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += cxd56_usbmsc.c
 endif
@@ -100,7 +108,7 @@ ifeq ($(CONFIG_SENSORS_BMI160_I2C),y)
 CSRCS += cxd56_bmi160_i2c.c
 endif
 
-ifeq ($(CONFIG_SYSTEM_I2CTOOL),y)
+ifeq ($(CONFIG_CXD56_I2C_DRIVER),y)
 CSRCS += cxd56_i2cdev.c
 endif
 

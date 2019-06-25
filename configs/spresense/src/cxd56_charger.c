@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/cxd56_i2cdev.c
+ * configs/spresense/src/cxd56_charger.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -38,42 +38,67 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <debug.h>
 
 #include <stdio.h>
-#include <debug.h>
 #include <errno.h>
 
-#include "cxd56_i2c.h"
+#include "cxd56_charger.h"
+
+#if defined(CONFIG_CXD56_CHARGER)
+
+static int g_chargerinitialized = 0;
 
 /****************************************************************************
- * Name: board_i2cdev_initialize
+ * Name: board_charger_initialize
  *
  * Description:
- *   Initialize and register i2c driver for the specified i2c port
+ *   Initialize and register battery charger driver
  *
  ****************************************************************************/
 
-int board_i2cdev_initialize(int port)
+int board_charger_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
 
-  _info("Initializing /dev/i2c%d..\n", port);
-
-  /* Initialize i2c deivce */
-
-  i2c = cxd56_i2cbus_initialize(port);
-  if (!i2c)
+  if (!g_chargerinitialized)
     {
-      _err("ERROR: Failed to initialize i2c%d.\n", port);
-      return -ENODEV;
+      ret = cxd56_charger_initialize(devpath);
+      if (ret < 0)
+        {
+          _err("ERROR: Failed to initialize charger.\n");
+          return -ENODEV;
+        }
+      g_chargerinitialized = 1;
     }
 
-  ret = i2c_register(i2c, port);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
-    }
-
-  return ret;
+  return OK;
 }
+
+/****************************************************************************
+ * Name: board_charger_uninitialize
+ *
+ * Description:
+ *   Uninitialize and unregister battery charger driver
+ *
+ ****************************************************************************/
+
+int board_charger_uninitialize(FAR const char *devpath)
+{
+  int ret;
+
+  if (g_chargerinitialized)
+    {
+      ret = cxd56_charger_uninitialize(devpath);
+      if (ret)
+        {
+          _err("ERROR: Failed to finalize charger.\n");
+          return -ENODEV;
+        }
+      g_chargerinitialized = 0;
+    }
+
+  return OK;
+}
+
+#endif

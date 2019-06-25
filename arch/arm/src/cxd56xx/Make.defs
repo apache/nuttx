@@ -144,6 +144,14 @@ ifeq ($(CONFIG_CXD56_PWM),y)
 CHIP_CSRCS += cxd56_pwm.c
 endif
 
+ifeq ($(CONFIG_CXD56_GAUGE),y)
+CHIP_CSRCS += cxd56_gauge.c
+endif
+
+ifeq ($(CONFIG_CXD56_CHARGER),y)
+CHIP_CSRCS += cxd56_charger.c
+endif
+
 ifeq ($(CONFIG_CXD56_SCU),y)
 CHIP_CSRCS += cxd56_scu.c cxd56_scufifo.c
 ifeq ($(CONFIG_CXD56_ADC),y)
@@ -153,7 +161,6 @@ ifeq ($(CONFIG_CXD56_UDMAC),y)
 CHIP_CSRCS += cxd56_udmac.c
 endif
 endif
-
 
 ifeq ($(CONFIG_CXD56_TIMER),y)
 CHIP_CSRCS += cxd56_timer.c

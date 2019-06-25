@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/cxd56_i2cdev.c
+ * include/arch/chip/battery_ioctl.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,47 +33,83 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H
+#define __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
-
-#include "cxd56_i2c.h"
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
- * Name: board_i2cdev_initialize
- *
- * Description:
- *   Initialize and register i2c driver for the specified i2c port
- *
+ * Pre-processor Definitions
  ****************************************************************************/
 
-int board_i2cdev_initialize(int port)
+/* ioctl commands */
+
+#define BATIOC_GET_CHGVOLTAGE    _BATIOC(0x0010)
+#define BATIOC_GET_CHGCURRENT    _BATIOC(0x0012)
+#define BATIOC_GET_RECHARGEVOL   _BATIOC(0x0013)
+#define BATIOC_SET_RECHARGEVOL   _BATIOC(0x0014)
+#define BATIOC_GET_COMPCURRENT   _BATIOC(0x0015)
+#define BATIOC_SET_COMPCURRENT   _BATIOC(0x0016)
+#define BATIOC_GET_TEMPTABLE     _BATIOC(0x0017)
+#define BATIOC_SET_TEMPTABLE     _BATIOC(0x0018)
+#define BATIOC_GET_CURRENT       _BATIOC(0x0019)
+#define BATIOC_GET_VOLTAGE       _BATIOC(0x001a)
+
+#define BATIOC_MONITOR_ENABLE    _BATIOC(0x0030)
+#define BATIOC_MONITOR_STATUS    _BATIOC(0x0031)
+#define BATIOC_MONITOR_SET       _BATIOC(0x0032)
+#define BATIOC_MONITOR_GET       _BATIOC(0x0033)
+
+#define BATIOC_DEBUG             _BATIOC(0x00db)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct battery_temp_table_s
 {
-  int ret;
-  FAR struct i2c_master_s *i2c;
+  int T60; /* 60 degree C */
+  int T45; /* 45 degree C */
+  int T10; /* 10 degree C */
+  int T00; /*  0 degree C */
+};
 
-  _info("Initializing /dev/i2c%d..\n", port);
+struct bat_monitor_enable_s
+{
+  int on;
+  int interval;
+  int threshold_volt;
+  int threshold_current;
+};
 
-  /* Initialize i2c deivce */
+struct bat_monitor_status_s
+{
+  int run;
+  int index;
+  int latest;
+  int totalwatt;
+  int totaltime;
+};
 
-  i2c = cxd56_i2cbus_initialize(port);
-  if (!i2c)
-    {
-      _err("ERROR: Failed to initialize i2c%d.\n", port);
-      return -ENODEV;
-    }
+struct bat_monitor_set_s
+{
+  int clearbuf;
+  int clearsum;
+};
 
-  ret = i2c_register(i2c, port);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
-    }
+struct bat_monitor_rec_s
+{
+  uint16_t index;
+  uint16_t timestamp;
+  uint16_t voltage;
+  int16_t  current;
+};
 
-  return ret;
-}
+struct bat_monitor_log_s
+{
+  FAR struct bat_monitor_rec_s *rec;
+  int index;
+  int size;
+};
+
+#endif /* __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H */
