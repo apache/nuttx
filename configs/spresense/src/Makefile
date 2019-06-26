@@ -52,6 +52,10 @@ ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += cxd56_ioctl.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += cxd56_uid.c
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += cxd56_ostest.c
 endif
