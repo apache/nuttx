@@ -127,16 +127,6 @@ int lc823450_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
-#if defined(CONFIG_SMP) && defined (CONFIG_RNDIS)
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(1, &cpuset); /* assigned to CPU1 */
-
-  /* NOTE: pid=4 is assumed to be lpwork */
-
-  (void)nxsched_setaffinity(4, sizeof(cpu_set_t), &cpuset);
-#endif
-
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
