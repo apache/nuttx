@@ -228,7 +228,7 @@ _ez80_rstcommon:
 	push	de					; Offset 2: DE
 	push	bc					; Offset 1: BC
 
-	; At this point, we know that interrupts were enabled (or we wouldn't be here
+	; At this point, we know that interrupts were enabled (or we wouldn't be here)
 	; so we can save a fake indication that will cause interrupts to restored when
 	; this context is restored
 

@@ -265,15 +265,24 @@ Common Configuration Notes
 Configuration Subdirectories
 ----------------------------
 
-  nsh:
+  nsh_flash, nsh_ram:
 
-    This configuration builds the NuttShell (NSH).  That code can be
-    found in examples/nsh.  For more information see:  examples/nsh/README.txt
-    and Documentation/NuttShell.html.
+    These configuration build the NuttShell (NSH).  That code can be
+    found in apps/system/nsh and apps/system/nshlib..  For more
+    information see:  apps/system/nsh/README.txt and
+    Documentation/NuttShell.html.
 
     NOTES:
 
-    1. A serial console is provided on UART0.  This configuration should work
+    1. The two configurations different only in that cone builds for
+       execution from FLASH and the other for execution from RAM.  A
+       bootloader of some kind is required to support execution from RAM!
+       This difference is reflected in a single configuration setting:
+
+         CONFIG_BOOT_RUNFROMFLASH=y    # Execute from flash (default)
+         CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
+
+    2. A serial console is provided on UART0.  This configuration should work
        with or without the the VGA and Keyboard adapter boards.  Normal
        connectivity is via host serical console connected through the USB
        serial console.
@@ -291,7 +300,7 @@ Configuration Subdirectories
        The PC terminal software should be configured as described in the
        MakerLisp Putty HOWTO document:  115200N1 BAUD.
 
-    2. The eZ80 RTC, the procFS file system, and SD card support in included.
+    3. The eZ80 RTC, the procFS file system, and SD card support in included.
        The procFS file system will be auto-mounted at /proc when the board
        boots.
 
@@ -358,7 +367,7 @@ Configuration Subdirectories
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
 
-    3. Optimizations:
+    4. Optimizations:
 
        - The stack sizes have not been tuned and, hence, are probably too
          large.
@@ -384,3 +393,6 @@ Configuration Subdirectories
         files, creating directories, etc) hang.
 
       2019-06-18:  The RTC now appears to be fully functional.
+
+      2019-06-26:  Renamed nsh configuration to nsh_flash.  Added nsh_ram
+        configuration.
