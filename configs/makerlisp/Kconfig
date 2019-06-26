@@ -12,4 +12,12 @@ config MAKERLISP_VGA
 		Select this option if you have an I/O Controller and a VGA vide card
 		connected.
 
+config MAKERLISP_SDBOOT
+	bool "Build SD boot loader"
+	default n
+	---help---
+		Select this option only with the configs/makerlisp/sdboot
+		configuration.  This will enable the components needed only by the
+		boot loader.
+
 endif # ARCH_BOARD_MAKERLISP

@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef CONFIG_LIB_HEX2BIN
 

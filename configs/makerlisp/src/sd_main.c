@@ -40,9 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <syslog.h>
 #include <hex2bin.h>
+#include <assert.h>
+#include <errno.h>
 
 #include <arch/irq.h>
 
@@ -56,8 +59,12 @@
 #define MMCSD_MOUNTPT    "/mnt/sdcard"
 #define MMCSD_HEXFILE    "/mnt/sdcard/nuttx.hex"
 
-#define SRAM_RESET       0x040000
-#define SRAM_ENTRY       ((sram_entry_t)SRAM_RESET)
+#define SRAM_START       0x040000
+#define SRAM_SIZE        0x100000
+#define SRAM_END         (SRAM_START + SRAM_SIZE)
+
+#define SRAM_RESET       SRAM_START
+#define SRAM_ENTRY       ((sram_entry_t)SRAM_START)
 
 /****************************************************************************
  * Private Types
@@ -94,7 +101,7 @@ int sd_main(int argc, char *argv)
    * the MMC/SD block driver at /dev/mmcsd0.
    */
 
-  DEBUG_VERIFY(ez80_bringup());
+  DEBUGVERIFY(ez80_bringup());
 #endif
 
   syslog(LOG_INFO, "Loading %s\n", MMCSD_HEXFILE);
@@ -123,15 +130,12 @@ int sd_main(int argc, char *argv)
 
   /* Load the HEX image into memory */
 
-  ret = hex2mem(fd,
-                (uint32_t)SAM_DDRCS_VSECTION,
-                (uint32_t)(SAM_DDRCS_VSECTION + CONFIG_SAMA5_DDRCS_SIZE),
-                0);
+  ret = hex2mem(fd, (uint32_t)SRAM_START, (uint32_t)SRAM_END, 0);
   if (ret < 0)
     {
       /* We failed to load the HEX image */
 
-      printf("ERROR: Intel HEX file load failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Intel HEX file load failed: %d\n", ret);
       goto halt_with_hexfile;
     }
 
@@ -152,6 +156,7 @@ int sd_main(int argc, char *argv)
   /* Then jump into SRAM via the reset vector at 0x040000 */
 
   SRAM_ENTRY();
+  goto halt;
 
 halt_with_hexfile:
   close(fd);

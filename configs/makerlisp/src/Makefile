@@ -53,4 +53,8 @@ CSRCS += ez80_spimmcsd.c
 endif
 endif
 
+ifeq ($(CONFIG_MAKERLISP_SDBOOT),y)
+CSRCS += sd_main.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

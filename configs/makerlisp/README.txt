@@ -274,7 +274,7 @@ Configuration Subdirectories
 
     NOTES:
 
-    1. The two configurations different only in that cone builds for
+    1. The two configurations different only in that one builds for
        execution from FLASH and the other for execution from RAM.  A
        bootloader of some kind is required to support execution from RAM!
        This difference is reflected in a single configuration setting:
@@ -396,3 +396,18 @@ Configuration Subdirectories
 
       2019-06-26:  Renamed nsh configuration to nsh_flash.  Added nsh_ram
         configuration.
+
+  sdboot
+
+    This configuration implements a very simple boot loader.  In runs from
+    FLASH and simply initializes the external SRAM, mounts the FAT file
+    system on the SD card, and checks to see if there is a file called
+    nuttx.hex on the SD card.  If so, it will load the Intel HEX file into
+    memory and jump to address 0x040000.  This, of course, assumes that
+    the application's reset vector resides at address 0x040000 in external
+    SRAM.
+
+    The boot loader source is located at configs/makerlisp/src/sd_main.c.
+
+    STATUS:
+      2019-06-26:  Configuration added.  Not yet verified.
