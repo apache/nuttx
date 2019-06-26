@@ -217,6 +217,16 @@ enum board_power_device
   POWER_IMAGE_SENSOR    = PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(7),
 };
 
+/*
+ * Set signal id for notify USB device connection status and
+ * supply current value.
+ * signal returns "usbdev_notify_s" struct pointer in sival_ptr.
+ *
+ * Arg: Value of sinal number
+ */
+
+#define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
