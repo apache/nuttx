@@ -1,6 +1,6 @@
 /****************************************************************************/
-/* configs/makerlisp/scripts/makerlisp_flash.linkcmd                        */
-/* For configurations running entirely out of FLASH                         */
+/* configs/makerlisp/scripts/makerlisp_copytoram.linkcmd                    */
+/* For configurations booting from flash but otherwise running out of RAM   */
 /*                                                                          */
 /*   Copyright (C) 2019 Gregory Nutt. All rights reserved.                  */
 /*   Author: Gregory Nutt <gnutt@nuttx.org>                                 */
@@ -44,9 +44,10 @@ RANGE EXTIO $000000 : $00FFFF
 RANGE INTIO $000000 : $0000FF
 
 CHANGE TEXT is CODE
-CHANGE STRSECT is ROM
-
+CHANGE CODE is RAM
+CHANGE STRSECT is CODE
 ORDER .RESET,.IVECTS,.STARTUP,CODE,DATA
+COPY CODE ROM
 COPY DATA ROM
 
 DEFINE __low_romdata = copy base of DATA
@@ -60,7 +61,7 @@ DEFINE __heapbot = top of RAM + 1
 DEFINE __low_romcode = copy base of CODE
 DEFINE __low_code = base of CODE
 DEFINE __len_code = length of CODE
-DEFINE __copy_code_to_ram = 0
+DEFINE __copy_code_to_ram = 1
 DEFINE __crtl = 1
 
 DEFINE __CS0_LBR_INIT_PARAM = $04

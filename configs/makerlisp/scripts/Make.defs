@@ -162,6 +162,8 @@ ARFLAGS = -quiet -warn
 
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
   LDSCRIPT = makerlisp_flash.linkcmd
+else ifeq ($(CONFIG_MAKERLISP_COPYTORAM),y)
+  LDSCRIPT = makerlisp_copytoram.linkcmd
 else # ifeq ($(CONFIG_BOOT_RUNFROMEXTSRAM),y)
   LDSCRIPT = makerlisp_ram.linkcmd
 endif
