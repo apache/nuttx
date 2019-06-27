@@ -275,16 +275,28 @@ Configuration Subdirectories
     NOTES:
 
     1. The two configurations different only in that one builds for
-       execution from FLASH and the other for execution from RAM.  A
-       bootloader of some kind is required to support execution from RAM!
-       This difference is reflected in a single configuration setting:
+       execution entirely from FLASH and the other for execution entirely
+       from RAM.  A bootloader of some kind is required to support such
+       execution from RAM!  This difference is reflected in a single
+       configuration setting:
 
          CONFIG_BOOT_RUNFROMFLASH=y    # Execute from flash (default)
          CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
 
+       A third configuration is possible but not formalized with its own
+       defconfig file:  You can also configure the code to boot from FLASH,
+       copy the code to external SRAM, and then execute from RAM.  Such a
+       configuration needs the following settings in the .config file:
+
+         CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
+         CONFIG_MAKERLISP_COPYTORAM=y  # Boot from FLASH but copy to SRAM
+
+       Why execute from SRAM at all?  Because you will get MUCH better
+       performance because of the zero wait state SRAM implementation.
+
     2. A serial console is provided on UART0.  This configuration should work
        with or without the the VGA and Keyboard adapter boards.  Normal
-       connectivity is via host serical console connected through the USB
+       connectivity is via host serial console connected through the USB
        serial console.
 
        With the I/O expansion board, the serial console can also be used with
@@ -387,10 +399,7 @@ Configuration Subdirectories
       2019-06-17:  The SD initialization was due to some error in the SPI driver:
         It waits for a byte transfer to complete but it never receives the
         indication that the transfer completed.  That SPI problem has been
-        fixed and now the SD card is partially functional.
-
-        Reads from the SD are successful, but writes to the SD card (creating
-        files, creating directories, etc) hang.
+        fixed and now the SD card is functional.
 
       2019-06-18:  The RTC now appears to be fully functional.
 
