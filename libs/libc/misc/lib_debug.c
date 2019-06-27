@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: alert, err, warn, and info
+ * Name: _alert, _err, _warn, and _info
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable

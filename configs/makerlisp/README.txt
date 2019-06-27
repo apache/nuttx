@@ -395,7 +395,7 @@ Configuration Subdirectories
       2019-06-18:  The RTC now appears to be fully functional.
 
       2019-06-26:  Renamed nsh configuration to nsh_flash.  Added nsh_ram
-        configuration.
+        configuration.  Not yet verified.
 
   sdboot
 
