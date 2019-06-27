@@ -1166,5 +1166,11 @@ config CXD56_SPISD_SLOT_NO
 
 endif # SPISD Configuration
 
+config CXD56_EMMC
+	bool "eMMC"
+	default n if CXD56_SUBCORE
+	---help---
+		Emmc driver for cxd56xx chip
+
 endmenu
 endmenu
