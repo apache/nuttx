@@ -15,7 +15,7 @@ config MAKERLISP_VGA
 config MAKERLISP_COPYTORAM
 	bool "Copy to RAM"
 	default n
-	depend on BOOT_RUNFROMEXTSRAM
+	depends on BOOT_RUNFROMEXTSRAM
 	---help---
 		This option is available only when running from external SRAM
 		(CONFIG_BOOT_RUNFROMEXTSRAM).  In that case there are two possible
