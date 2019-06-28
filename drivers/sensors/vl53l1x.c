@@ -56,14 +56,14 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_VL53L1X)
 
 /****************************************************************************
- * pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define VLM53L1X_FREQ 100000
 #define VL53L1X_ADDR  0x29
 
 /****************************************************************************
- * Private Type definitions
+ * Private Type Definitions
  ****************************************************************************/
 
 struct vl53l1x_dev_s
@@ -173,7 +173,7 @@ static const uint8_t g_vl51l1x_default_configuration[] =
 };
 
 /****************************************************************************
- * private function prototypes
+ * Private Function Prototypes
  ****************************************************************************/
 
 static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv,
@@ -277,7 +277,7 @@ static ssize_t vl53l1x_write(FAR struct file *filep, FAR const char *buffer,
 static ssize_t vl53l1x_ioctl(FAR struct file *filep, int cmd, uint16_t arg);
 
 /****************************************************************************
- * private data
+ * Private Data
  ****************************************************************************/
 
 static const struct file_operations g_vl53l1xfops =
@@ -297,7 +297,7 @@ static const struct file_operations g_vl53l1xfops =
 };
 
 /****************************************************************************
- * private functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -669,7 +669,7 @@ static void vl53l1x_setintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
  * Name: vl53l1x_getintermeasurementinms
  *
  * Description:
- *   This function returns the intermeasurement period in ms.
+ *   This function returns the inter-measurement period in ms.
  *
  ****************************************************************************/
 
@@ -1025,8 +1025,8 @@ static void vl53l1x_setdistancethreshold(FAR struct vl53l1x_dev_s *priv,
  * Name: vl53l1x_getdistancethresholdwindow
  *
  * Description:
- *  This function returns the window detection mode (0=below; 1=above; 2=out;
- *3=in).
+ *  This function returns the window detection mode (0=below; 1=above;
+ *  2=out; 3=in).
  *
  ****************************************************************************/
 
@@ -1246,7 +1246,7 @@ static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
   vl53l1x_putreg16(priv, ALGO__PART_TO_PART_RANGE_OFFSET_MM, 0x0);
   vl53l1x_putreg16(priv, MM_CONFIG__INNER_OFFSET_MM, 0x0);
   vl53l1x_putreg16(priv, MM_CONFIG__OUTER_OFFSET_MM, 0x0);
-  vl53l1x_startranging(priv);   /* enable vl53l1x sensor */
+  vl53l1x_startranging(priv);   /* Enable vl53l1x sensor */
 
   for (i = 0; i < 50; i++)
     {
@@ -1329,7 +1329,8 @@ static int8_t vl53l1x_calibratextalk(FAR struct vl53l1x_dev_s *priv,
  *
  ****************************************************************************/
 
-static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr)
+static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv,
+                               uint16_t regaddr)
 {
   struct i2c_config_s config;
   uint8_t regval = 0;
@@ -1352,7 +1353,7 @@ static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr)
   ret = i2c_write(priv->i2c, &config, &regaddr, 2);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -1361,7 +1362,7 @@ static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr)
   ret = i2c_read(priv->i2c, &config, &regval, 1);
   if (ret < 0)
     {
-      snerr("error: i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -1403,7 +1404,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
   ret = i2c_write(priv->i2c, &config, &reg_addr_aux, 2);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -1412,7 +1413,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, (FAR uint8_t *)&regval, 2);
   if (ret < 0)
     {
-      snerr("error: i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -1461,7 +1462,7 @@ static uint32_t vl53l1x_getreg32(FAR struct vl53l1x_dev_s *priv,
   ret = i2c_write(priv->i2c, &config, &regaddr, 2);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -1470,7 +1471,7 @@ static uint32_t vl53l1x_getreg32(FAR struct vl53l1x_dev_s *priv,
   ret = i2c_read(priv->i2c, &config, (FAR uint8_t *) & regval, 4);
   if (ret < 0)
     {
-      snerr("error: i2c_read failed: %d\n", ret);
+      snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -1516,7 +1517,7 @@ static void vl53l1x_putreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
   ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 3);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return;
     }
 
@@ -1554,7 +1555,7 @@ static void vl53l1x_putreg16(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
   ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 4);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return;
     }
 
@@ -1594,7 +1595,7 @@ static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
   ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 7);
   if (ret < 0)
     {
-      snerr("error: i2c_write failed: %d\n", ret);
+      snerr("ERROR: i2c_write failed: %d\n", ret);
       return;
     }
 
@@ -1697,7 +1698,7 @@ static ssize_t vl53l1x_ioctl(FAR struct file *filep, int cmd, uint16_t arg)
 }
 
 /****************************************************************************
- * public functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -1727,7 +1728,7 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv = (FAR struct vl53l1x_dev_s *)kmm_malloc(sizeof(struct vl53l1x_dev_s));
   if (!priv)
     {
-      snerr("error: failed to allocate instance\n");
+      snerr("ERROR: failed to allocate instance\n");
       return -enomem;
     }
 
@@ -1740,7 +1741,7 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   vl53l1x_getsensorid(priv, &sensorid);
   if (sensorid != 0xeacc)
     {
-      snerr("error: failed sensor id %04x\n", sensorid);
+      snerr("ERROR: failed sensor id %04x\n", sensorid);
       kmm_free(priv);
       return 0;
     }
@@ -1748,7 +1749,7 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   register_driver(devpath, &g_vl53l1xfops, 0666, priv);
   if (ret < 0)
     {
-      snerr("error: failed to register driver: %d\n", ret);
+      snerr("ERROR: failed to register driver: %d\n", ret);
       kmm_free(priv);
       return 0;
     }
