@@ -724,6 +724,13 @@ config VEML6070_I2C_FREQUENCY
 	default 100000
 	depends on SENSORS_VEML6070
 
+config SENSORS_VL53L1X
+	bool "ST VL53L1X TOF sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the VL53L1X Time Of Flight sensor.
+
 config SENSORS_XEN1210
 	bool "Sensixs XEN1210 Magnetometer"
 	default n
