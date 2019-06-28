@@ -302,7 +302,7 @@
 #define ETH_MACMDIOAR_RDA_SHIFT       (16)       /* Bits 16-20: MII register */
 #define ETH_MACMDIOAR_RDA_MASK        (31 << ETH_MACMDIOAR_RDA_SHIFT)
 #  define ETH_MACMDIOAR_RDA(n)        ((uint32_t)(n) << ETH_MACMDIOAR_RDA_SHIFT)
-#define ETH_MACMDIOAR_PA_SHIFT        (11)      /* Bits 11-15: PHY address */
+#define ETH_MACMDIOAR_PA_SHIFT        (21)      /* Bits 21-25: PHY address */
 #define ETH_MACMDIOAR_PA_MASK         (31 << ETH_MACMDIOAR_PA_SHIFT)
 #  define ETH_MACMDIOAR_PA(n)         ((uint32_t)(n) << ETH_MACMDIOAR_PA_SHIFT)
 #define ETH_MACMDIOAR_BTB             (1 << 26)  /* Bit 26: Back to Back transactions */
