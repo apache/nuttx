@@ -290,11 +290,11 @@ void pic32mz_gpiowrite(pinset_t pinset, bool value)
 
       if (value)
         {
-          putreg32(1 << pin, base + PIC32MZ_IOPORT_PORTSET_OFFSET);
+          putreg32(1 << pin, base + PIC32MZ_IOPORT_LATSET_OFFSET);
         }
       else
         {
-          putreg32(1 << pin, base + PIC32MZ_IOPORT_PORTCLR_OFFSET);
+          putreg32(1 << pin, base + PIC32MZ_IOPORT_LATCLR_OFFSET);
         }
     }
 }
