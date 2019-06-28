@@ -288,10 +288,10 @@ static const struct file_operations g_vl53l1xfops =
   vl53l1x_write,                /* write */
   null,                         /* seek */
   vl53l1x_ioctl,                /* ioctl */
-#ifndef config_disable_poll
+#ifndef CONFIG_DISABLE_POLL
   null,                         /* poll */
 #endif
-#ifndef config_disable_pseudofs_operations
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   null,                         /* unlink */
 #endif
 };
