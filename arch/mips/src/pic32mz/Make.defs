@@ -111,3 +111,8 @@ endif
 ifeq ($(CONFIG_PIC32MZ_ETHERNET),y)
 CHIP_CSRCS += pic32mz-ethernet.c
 endif
+
+ifeq ($(CONFIG_PIC32MZ_DMA),y)
+CHIP_CSRCS += pic32mz-dma.c
+endif
+

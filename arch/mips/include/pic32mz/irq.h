@@ -52,7 +52,7 @@
 #elif defined(CHIP_PIC32MZEF)
 #  include <arch/pic32mz/irq_pic32mzxxxef.h>
 #else
-#  error "Unknown PIC32MZ family
+#  error "Unknown PIC32MZ family"
 #endif
 
 /****************************************************************************

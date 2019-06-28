@@ -47,7 +47,7 @@
 #elif defined(CONFIG_ARCH_CHIP_PIC32MZEF)
 #  include "hardware/pic32mzef-memorymap.h"
 #else
-#  error Unknown PIC32MZ family
+#  error "Unknown PIC32MZ family"
 #endif
 
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_MEMORYMAP_H */
