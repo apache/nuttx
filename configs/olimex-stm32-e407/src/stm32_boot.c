@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/olimex-stm32-e407/src/stm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,25 +46,26 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "olimex-stm32-e407.h"
 #include "stm32_ccm.h"
-
 #include "stm32.h"
 #include "stm32_i2c.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#include "olimex-stm32-e407.h"
 
-/************************************************************************************
+/****************************************************************************
+ * Public Functions
+ ***************************************************************************/
+
+/****************************************************************************
  * Name: stm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following entry point.  This
+ *   entry point is called early in the intitialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_boardinitialize(void)
 {
@@ -100,7 +101,7 @@ void stm32_boardinitialize(void)
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
  *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_intitialize() is called and just before the
+ *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.
  *
@@ -109,13 +110,8 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+  /* Perform board-specific initialization */
 
-  board_app_initialize();
-#endif
+  (void)stm32_bringup();
 }
 #endif

@@ -122,26 +122,6 @@
 
 #define VL53L1X_I2C_PORTNO 1   /* On I2C1 */
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_vl53l1xinitialize
- *
- * Description:
- *   Initialize and register the VL53L1X distance/light Sensor driver.
- *
- * Input parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/tof0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int stm32_vl53l1xinitialize(FAR const char *devpath)
-
 /* Olimex-STM32-E407 GPIOs ****************************************************/
 /* LEDs */
 
@@ -235,6 +215,22 @@ int stm32_vl53l1xinitialize(FAR const char *devpath)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
@@ -282,6 +278,22 @@ int stm32_sdio_initialize(void);
 #ifdef CONFIG_CAN
 int stm32_can_setup(void);
 #endif
+
+/****************************************************************************
+ * Name: stm32_vl53l1xinitialize
+ *
+ * Description:
+ *   Initialize and register the VL53L1X distance/light Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/tof0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int stm32_vl53l1xinitialize(FAR const char *devpath);
 
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_E407_SRC_INTERNAL_H */
