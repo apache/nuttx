@@ -193,41 +193,41 @@ static void vl53l1x_sensorinit(FAR struct vl53l1x_dev_s *priv);
 static void vl53l1x_clearinterrupt(FAR struct vl53l1x_dev_s *priv);
 static void vl53l1x_setinterruptpolarity(FAR struct vl53l1x_dev_s *priv,
                                          uint8_t intpol);
-static void vl53l1x_getinterruptpolarity(FAR uint8_t * pintpol);
+static void vl53l1x_getinterruptpolarity(FAR uint8_t *pintpol);
 static void vl53l1x_startranging(FAR struct vl53l1x_dev_s *priv);
 static void vl53l1x_stopranging(FAR struct vl53l1x_dev_s *priv);
 static void vl53l1x_checkfordataready(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint8_t * isdataready);
+                                      FAR uint8_t *isdataready);
 static void vl53l1x_settimingbudgetinms(FAR struct vl53l1x_dev_s *priv,
                                         uint16_t timingbudgetinms);
 static void vl53l1x_gettimingbudgetinms(FAR struct vl53l1x_dev_s *priv,
-                                        FAR uint16_t * ptimingbudgetinms);
+                                        FAR uint16_t *ptimingbudgetinms);
 static void vl53l1x_setdistancemode(FAR struct vl53l1x_dev_s *priv,
                                     uint16_t distancemode);
 static void vl53l1x_getdistancemode(FAR struct vl53l1x_dev_s *priv,
-                                    FAR uint16_t * pdistancemode);
+                                    FAR uint16_t *pdistancemode);
 static void vl53l1x_setintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
                                             uint16_t intermeasurementinms);
 static void vl53l1x_getintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
-                                            FAR uint16_t * pim);
+                                            FAR uint16_t *pim);
 static void vl53l1x_bootstate(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint8_t * state);
+                              FAR uint8_t *state);
 static void vl53l1x_getsensorid(FAR struct vl53l1x_dev_s *priv,
-                                FAR uint16_t * id);
+                                FAR uint16_t *id);
 static void vl53l1x_getdistance(FAR struct vl53l1x_dev_s *priv,
-                                FAR uint16_t * distance);
+                                FAR uint16_t *distance);
 static void vl53l1x_getsignalperspad(FAR struct vl53l1x_dev_s *priv,
-                                     FAR uint16_t * signalpersp);
+                                     FAR uint16_t *signalpersp);
 static void vl53l1x_getambientperspad(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint16_t * amb);
+                                      FAR uint16_t *amb);
 static void vl53l1x_getsignalrate(FAR struct vl53l1x_dev_s *priv,
-                                  FAR uint16_t * signalrate);
+                                  FAR uint16_t *signalrate);
 static void vl53l1x_getspadnb(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint16_t * spnb);
+                              FAR uint16_t *spnb);
 static void vl53l1x_getambientrate(FAR struct vl53l1x_dev_s *priv,
-                                   FAR uint16_t * ambrate);
+                                   FAR uint16_t *ambrate);
 static void vl53l1x_getrangestatus(FAR struct vl53l1x_dev_s *priv,
-                                   FAR uint8_t * rangestatus);
+                                   FAR uint8_t *rangestatus);
 static void vl53l1x_setffset(FAR struct vl53l1x_dev_s *priv,
                              int16_t offsetvalue);
 static void vl53l1x_getoffset(FAR struct vl53l1x_dev_s *priv,
@@ -235,36 +235,36 @@ static void vl53l1x_getoffset(FAR struct vl53l1x_dev_s *priv,
 static void vl53l1x_setxtalk(FAR struct vl53l1x_dev_s *priv,
                              uint16_t xtalkvalue);
 static void vl53l1x_getxtalk(FAR struct vl53l1x_dev_s *priv,
-                             FAR uint16_t * xtalk);
+                             FAR uint16_t *xtalk);
 static void vl53l1x_setdistancethreshold(FAR struct vl53l1x_dev_s *priv,
                                          uint16_t threshlow,
                                          uint16_t threshhigh, uint8_t window,
                                          uint8_t intonnotarget);
 static void vl53l1x_getdistancethresholdwindow(FAR struct vl53l1x_dev_s *priv,
-                                               FAR uint16_t * window);
+                                               FAR uint16_t *window);
 static void vl53l1x_getdistancethresholdlow(FAR struct vl53l1x_dev_s *priv,
-                                            FAR uint16_t * low);
+                                            FAR uint16_t *low);
 static void vl53l1x_getdistancethresholdhigh(FAR struct vl53l1x_dev_s *priv,
-                                             FAR uint16_t * high);
+                                             FAR uint16_t *high);
 static void vl53l1x_setroi(FAR struct vl53l1x_dev_s *priv, uint16_t x,
                            uint16_t y);
 static void vl53l1x_getroi_xy(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint16_t * roi_x, FAR uint16_t * roi_y);
+                              FAR uint16_t *roi_x, FAR uint16_t *roi_y);
 static void vl53l1x_setsignalthreshold(FAR struct vl53l1x_dev_s *priv,
                                        uint16_t signal);
 static void vl53l1x_getsignalthreshold(FAR struct vl53l1x_dev_s *priv,
-                                       FAR uint16_t * signal);
+                                       FAR uint16_t *signal);
 static void vl53l1x_setsigmathreshold(FAR struct vl53l1x_dev_s *priv,
                                       uint16_t sigma);
 static void vl53l1x_getsigmathreshold(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint16_t * signal);
+                                      FAR uint16_t *signal);
 static void vl53l1x_starttemperatureupdate();
 static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
                                     uint16_t targetdistinmm,
                                     FAR int16_t *offset);
 static int8_t vl53l1x_calibratextalk(FAR struct vl53l1x_dev_s *priv,
                                      uint16_t targetdistinmm,
-                                     FAR uint16_t * xtalk);
+                                     FAR uint16_t *xtalk);
 
 /* Character driver methods */
 
@@ -403,7 +403,7 @@ static void vl53l1x_stopranging(FAR struct vl53l1x_dev_s *priv)
  ****************************************************************************/
 
 static void vl53l1x_checkfordataready(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint8_t * isdataready)
+                                      FAR uint8_t *isdataready)
 {
   uint8_t temp;
   uint8_t intpol;
@@ -630,7 +630,7 @@ static void vl53l1x_setdistancemode(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getdistancemode(FAR struct vl53l1x_dev_s *priv,
-                                    FAR uint16_t * dm)
+                                    FAR uint16_t *dm)
 {
   uint8_t tempdm;
 
@@ -674,13 +674,13 @@ static void vl53l1x_setintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
-                                            FAR uint16_t * pim)
+                                            FAR uint16_t *pim)
 {
   uint16_t clockpll;
   uint32_t tmp;
 
   tmp = vl53l1x_getreg32(priv, VL53L1_SYSTEM__INTERMEASUREMENT_PERIOD);
-  *pim = (uint16_t) tmp;
+  *pim = (uint16_t)tmp;
   vl53l1_getreg16(priv, VL53L1_RESULT__OSC_CALIBRATE_VAL, &clockpll);
   clockpll = clockpll & 0x3ff;
   *pim = (uint16_t)(*pim / (clockpll * 1.065));
@@ -696,7 +696,7 @@ static void vl53l1x_getintermeasurementinms(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_bootstate(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint8_t * state)
+                              FAR uint8_t *state)
 {
   uint8_t tmp = 0;
 
@@ -713,7 +713,7 @@ static void vl53l1x_bootstate(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getsensorid(FAR struct vl53l1x_dev_s *priv,
-                                FAR uint16_t * sensorid)
+                                FAR uint16_t *sensorid)
 {
   uint16_t tmp = 0;
 
@@ -730,7 +730,7 @@ static void vl53l1x_getsensorid(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getdistance(FAR struct vl53l1x_dev_s *priv,
-                                FAR uint16_t * distance)
+                                FAR uint16_t *distance)
 {
   uint16_t tmp;
 
@@ -750,7 +750,7 @@ static void vl53l1x_getdistance(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getsignalperspad(FAR struct vl53l1x_dev_s *priv,
-                                     FAR uint16_t * signalrate)
+                                     FAR uint16_t *signalrate)
 {
   uint16_t spnb = 1;
   uint16_t signal;
@@ -772,7 +772,7 @@ static void vl53l1x_getsignalperspad(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getambientperspad(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint16_t * ambpersp)
+                                      FAR uint16_t *ambpersp)
 {
   uint16_t ambientrate;
   uint16_t spnb = 1;
@@ -791,7 +791,7 @@ static void vl53l1x_getambientperspad(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getsignalrate(FAR struct vl53l1x_dev_s *priv,
-                                  FAR uint16_t * signal)
+                                  FAR uint16_t *signal)
 {
   uint16_t tmp;
 
@@ -809,7 +809,7 @@ static void vl53l1x_getsignalrate(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getspadnb(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint16_t * spnb)
+                              FAR uint16_t *spnb)
 {
   uint16_t tmp;
 
@@ -925,7 +925,7 @@ static void vl53l1x_setoffset(FAR struct vl53l1x_dev_s *priv,
   int16_t temp;
 
   temp = (offsetvalue * 4);
-  vl53l1x_putreg16(priv, ALGO__PART_TO_PART_RANGE_OFFSET_MM, (uint16_t) temp);
+  vl53l1x_putreg16(priv, ALGO__PART_TO_PART_RANGE_OFFSET_MM, (uint16_t)temp);
   vl53l1x_putreg16(priv, MM_CONFIG__INNER_OFFSET_MM, 0x0);
   vl53l1x_putreg16(priv, MM_CONFIG__OUTER_OFFSET_MM, 0x0);
 }
@@ -938,7 +938,8 @@ static void vl53l1x_setoffset(FAR struct vl53l1x_dev_s *priv,
  *
  ****************************************************************************/
 
-static void vl53l1x_getoffset(FAR struct vl53l1x_dev_s *priv, FAR int16_t *offset)
+static void vl53l1x_getoffset(FAR struct vl53l1x_dev_s *priv,
+                              FAR int16_t *offset)
 {
   uint16_t temp;
 
@@ -981,7 +982,7 @@ static void vl53l1x_setxtalk(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getxtalk(FAR struct vl53l1x_dev_s *priv,
-                             FAR uint16_t * xtalk)
+                             FAR uint16_t *xtalk)
 {
   uint16_t tmp;
 
@@ -1031,7 +1032,7 @@ static void vl53l1x_setdistancethreshold(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getdistancethresholdwindow(FAR struct vl53l1x_dev_s *priv,
-                                               FAR uint16_t * window)
+                                               FAR uint16_t *window)
 {
   uint8_t tmp;
   tmp = vl53l1x_getreg8(priv, SYSTEM__INTERRUPT_CONFIG_GPIO);
@@ -1047,7 +1048,7 @@ static void vl53l1x_getdistancethresholdwindow(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getdistancethresholdlow(FAR struct vl53l1x_dev_s *priv,
-                                            FAR uint16_t * low)
+                                            FAR uint16_t *low)
 {
   uint16_t tmp;
 
@@ -1064,7 +1065,7 @@ static void vl53l1x_getdistancethresholdlow(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getdistancethresholdhigh(FAR struct vl53l1x_dev_s *priv,
-                                             FAR uint16_t * high)
+                                             FAR uint16_t *high)
 {
   uint16_t tmp;
 
@@ -1116,7 +1117,7 @@ static void vl53l1x_setroi(FAR struct vl53l1x_dev_s *priv, uint16_t x,
  ****************************************************************************/
 
 static void vl53l1x_getroi_xy(FAR struct vl53l1x_dev_s *priv,
-                              FAR uint16_t * roi_x, FAR uint16_t * roi_y)
+                              FAR uint16_t *roi_x, FAR uint16_t *roi_y)
 {
   uint8_t tmp;
 
@@ -1149,7 +1150,7 @@ static void vl53l1x_setsignalthreshold(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getsignalthreshold(FAR struct vl53l1x_dev_s *priv,
-                                       FAR uint16_t * signal)
+                                       FAR uint16_t *signal)
 {
   uint16_t tmp;
 
@@ -1187,7 +1188,7 @@ static void vl53l1x_setsigmathreshold(FAR struct vl53l1x_dev_s *priv,
  ****************************************************************************/
 
 static void vl53l1x_getsigmathreshold(FAR struct vl53l1x_dev_s *priv,
-                                      FAR uint16_t * sigma)
+                                      FAR uint16_t *sigma)
 {
   uint16_t tmp;
 
@@ -1236,7 +1237,8 @@ static void vl53l1x_starttemperatureupdate(FAR struct vl53l1x_dev_s *priv)
  ****************************************************************************/
 
 static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
-                                    uint16_t targetdistinmm, FAR int16_t *offset)
+                                    uint16_t targetdistinmm,
+                                    FAR int16_t *offset)
 {
   uint8_t i = 0;
   uint8_t tmp;
@@ -1278,7 +1280,7 @@ static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
 
 static int8_t vl53l1x_calibratextalk(FAR struct vl53l1x_dev_s *priv,
                                      uint16_t targetdistinmm,
-                                     FAR uint16_t * xtalk)
+                                     FAR uint16_t *xtalk)
 {
   uint8_t i;
   uint8_t tmp = 0;
@@ -1592,7 +1594,7 @@ static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 7);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&data, 7);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -1637,7 +1639,7 @@ static ssize_t vl53l1x_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct vl53l1x_dev_s *priv = inode->i_private;
-  FAR FAR uint16_t *aux = (FAR FAR uint16_t *) buffer;
+  FAR FAR uint16_t *aux = (FAR FAR uint16_t *)buffer;
 
   vl53l1x_startranging(priv);
   vl53l1x_getdistance(priv, aux);
