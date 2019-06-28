@@ -59,6 +59,7 @@
 #define HAVE_SDIO       1
 #define HAVE_RTC_DRIVER 1
 #define HAVE_NETMONITOR 1
+#define HAVE_VL53L1     1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -107,6 +108,39 @@
 #    define STM32_PROCFS_MOUNTPOINT "/proc"
 #  endif
 #endif
+
+/* VL53L1 */
+
+#if !defined(CONFIG_I2C) || !defined(CONFIG_SENSORS_VL53L1X) || \
+    !defined(CONFIG_STM32_I2C1)
+#  undef HAVE_VL53L1
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define VL53L1X_I2C_PORTNO 1   /* On I2C1 */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_vl53l1xinitialize
+ *
+ * Description:
+ *   Initialize and register the VL53L1X distance/light Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/tof0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int stm32_vl53l1xinitialize(FAR const char *devpath)
 
 /* Olimex-STM32-E407 GPIOs ****************************************************/
 /* LEDs */

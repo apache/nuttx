@@ -196,13 +196,13 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_ADC
-  /* Initialize ADC and register the ADC driver. */
+#ifdef HAVE_VL53L1
+  /* Initialize ADC and register the VL53L1X distance/light Sensor driver. */
 
-  ret = stm32_adc_setup();
+  ret = stm32_vl53l1xinitialize("/dev/vl53l1");
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_vl53l1xinitialize failed: %d\n", ret);
     }
 #endif
 

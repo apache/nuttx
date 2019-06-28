@@ -1,7 +1,7 @@
 ############################################################################
 # configs/olimex-stm32-e407/src/Makefile
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
-CSRCS +=  stm32_adc.c
+CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_CAN),y)
@@ -78,6 +78,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
+endif
+
+ifeq ($(CONFIG_SENSORS_VL53L1X),y)
+CSRCS += stm32_vl53l1x.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

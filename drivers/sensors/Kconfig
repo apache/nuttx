@@ -728,6 +728,7 @@ config SENSORS_VL53L1X
 	bool "ST VL53L1X TOF sensor"
 	default n
 	select I2C
+	depends on EXPERIMENTAL
 	---help---
 		Enable driver support for the VL53L1X Time Of Flight sensor.
 
