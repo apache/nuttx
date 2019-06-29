@@ -135,7 +135,7 @@ int pnev5180b_bringup(void)
     }
 #endif
 
-#ifndef CONFIG_BOARDCTL_USBDEVCTRL
+#if !defined(CONFIG_BOARDCTL_USBDEVCTRL) && !defined(CONFIG_USBDEV_COMPOSITE)
 #  ifdef CONFIG_CDCACM
   ret = cdcacm_initialize(0, NULL);
   if (ret < 0)
@@ -145,7 +145,7 @@ int pnev5180b_bringup(void)
     }
 #  endif
 
-#  if defined(CONFIG_NET_CDCECM) && !defined(CONFIG_CDCECM_COMPOSITE)
+#  ifdef CONFIG_NET_CDCECM
   ret = cdcecm_initialize(0, NULL);
   if (ret < 0)
     {
@@ -153,11 +153,11 @@ int pnev5180b_bringup(void)
       goto done;
     }
 #  endif
-
-#  if defined(CONFIG_CDCECM_COMPOSITE)
-  board_composite_connect(0, 0);
-#  endif
 #endif /* CONFIG_BOARDCTL_USBDEVCTRL */
+
+#if defined(CONFIG_USBDEV_COMPOSITE)
+  board_composite_connect(0, 0);
+#endif
 
 #ifdef CONFIG_USBMONITOR
   ret = usbmonitor_start();
