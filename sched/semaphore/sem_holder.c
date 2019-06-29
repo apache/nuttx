@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
- *   Copyright (C) 2009-2011, 2013, 2016-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2009-2011, 2013, 2016-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -876,7 +876,7 @@ void nxsem_initholders(void)
  * Name: nxsem_destroyholder
  *
  * Description:
- *   Called from nxsem_destroyholder() to handle any holders of a semaphore
+ *   Called from nxsem_destroy() to handle any holders of a semaphore
  *   when it is destroyed.
  *
  * Input Parameters:
@@ -891,31 +891,37 @@ void nxsem_initholders(void)
 
 void nxsem_destroyholder(FAR sem_t *sem)
 {
-  /* It is an error if a semaphore is destroyed while there are any holders
-   * (except perhaps the thread release the semaphore itself).  Hmmm.. but
-   * we actually have to assume that the caller knows what it is doing because
-   * could have killed another thread that is the actual holder of the semaphore.
-   * We cannot make any assumptions about the state of the semaphore or the
-   * state of any of the holder threads.
+  /* It might be an error if a semaphore is destroyed while there are any
+   * holders of the semaphore (except perhaps the thread that release the
+   * semaphore itself).  We actually have to assume that the caller knows
+   * what it is doing because could have killed another thread that is the
+   * actual holder of the semaphore.
    *
-   * So just recover any stranded holders and hope the task knows what it is
-   * doing.
+   * It is also a standard practice to destroy the semaphore while the
+   * caller holds it.  Of course, the caller MUST assure that there are no
+   * other holders of the semaphore in this case.  This occurs, for example,
+   * when a driver is unlink'ed and the driver instance must be destroyed.
+   *
+   * Therefore, we cannot make any assumptions about the state of the
+   * semaphore or the state of any of the holder threads.  So just recover
+   * any stranded holders and hope the task knows what it is doing.
    */
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   if (sem->hhead != NULL)
     {
-      serr("ERROR: Semaphore destroyed with holders\n");
-      DEBUGPANIC();
+      /* There may be an issue if there are multiple holders of
+       * the semaphore.
+       */
+
+      DEBUGASSERT(sem->hhead->flink == NULL);
       (void)nxsem_foreachholder(sem, nxsem_recoverholders, NULL);
     }
 
 #else
-  if (sem->holder[0].htcb != NULL || sem->holder[1].htcb != NULL)
-    {
-      serr("ERROR: Semaphore destroyed with holder\n");
-      DEBUGPANIC();
-    }
+  /* There may be an issue if there are multiple holders of the semaphore. */
+
+  DEBUGASSERT(sem->holder[0].htcb == NULL || sem->holder[1].htcb == NULL);
 
   sem->holder[0].htcb = NULL;
   sem->holder[1].htcb = NULL;
