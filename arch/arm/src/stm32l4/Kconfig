@@ -1490,7 +1490,7 @@ config STM32L4_SDMMC1
 	bool "SDMMC1"
 	default n
 	select ARCH_HAVE_SDIO
-	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
 	select STM32L4_SAI1PLL
 	select STM32L4_SDMMC
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
@@ -1548,7 +1548,7 @@ config STM32L4_SAI1_A
 	default n
 	select AUDIO
 	select I2S
-	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
 	select STM32L4_SAI
 	depends on STM32L4_SAI1
 
@@ -1557,7 +1557,7 @@ config STM32L4_SAI1_B
 	default n
 	select AUDIO
 	select I2S
-	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
 	select STM32L4_SAI
 	depends on STM32L4_SAI1
 
@@ -1571,7 +1571,7 @@ config STM32L4_SAI2_A
 	default n
 	select AUDIO
 	select I2S
-	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
 	select STM32L4_SAI
 	depends on STM32L4_SAI2
 
@@ -1580,7 +1580,7 @@ config STM32L4_SAI2_B
 	default n
 	select AUDIO
 	select I2S
-	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
 	select STM32L4_SAI
 	depends on STM32L4_SAI2
 
