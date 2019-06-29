@@ -195,16 +195,6 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef HAVE_VL53L1
-  /* Initialize ADC and register the VL53L1X distance/light Sensor driver. */
-
-  ret = stm32_vl53l1xinitialize("/dev/vl53l1");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_vl53l1xinitialize failed: %d\n", ret);
-    }
-#endif
-
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.

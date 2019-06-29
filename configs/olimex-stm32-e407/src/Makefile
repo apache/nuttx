@@ -80,8 +80,5 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += stm32_ostest.c
 endif
 
-ifeq ($(CONFIG_SENSORS_VL53L1X),y)
-CSRCS += stm32_vl53l1x.c
-endif
-
 include $(TOPDIR)/configs/Board.mk
+
