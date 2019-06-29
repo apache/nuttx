@@ -48,6 +48,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 
 #include <arch/board/board.h>
 

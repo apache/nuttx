@@ -1563,10 +1563,10 @@ int main(int argc, char **argv, char **envp)
           else if (indent > 0)
             {
               /* REVISIT: Generates false alarms when a statement continues on
-               * the next line.  The bstatm check limits to lines beginnnig with
+               * the next line.  The bstatm check limits to lines beginning with
                * C keywords.
                * REVISIT:  The bstatm check will not detect statements that
-               * do not begin with a C keyword (such as assignement statements).
+               * do not begin with a C keyword (such as assignment statements).
                * REVISIT: Generates false alarms on comments at the end of
                * the line if there is nothing preceding (such as the aligned
                * comments with a structure field definition).  So disabled for

@@ -86,6 +86,11 @@
 #  define CONSOLE_2STOP    CONFIG_UART3_2STOP
 #elif defined(HAVE_CONSOLE)
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#  define CONSOLE_BASE     LPC17_UART0_BASE
+#  define CONSOLE_BAUD     115200
+#  define CONSOLE_BITS     8
+#  define CONSOLE_PARITY   0
+#  define CONSOLE_2STOP    0
 #endif
 
 /* Get word length setting for the console */
@@ -99,7 +104,7 @@
 #elif CONSOLE_BITS == 8
 #  define CONSOLE_LCR_WLS UART_LCR_WLS_8BIT
 #elif defined(HAVE_CONSOLE)
-#  error "Invalid CONFIG_UARTn_BITS setting for console "
+#  error "Invalid CONFIG_UARTn_BITS setting for console"
 #endif
 
 /* Get parity setting for the console */
@@ -115,7 +120,7 @@
 #elif CONSOLE_PARITY == 4
 #  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
 #elif defined(HAVE_CONSOLE)
-#    error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
+#  error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
 #endif
 
 /* Get stop-bit setting for the console and UART0-3 */
