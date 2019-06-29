@@ -64,7 +64,7 @@ static void show_usage(char *progname, int exitcode)
 static void check_spaces_left(char *line, int lineno, int ndx)
 {
   /* Unary operator should generally be preceded by a space but make also
-   * follow a left parenthesis at the beginning of a parthentical list or
+   * follow a left parenthesis at the beginning of a parenthetical list or
    * expression or follow a right parentheses in the case of a cast.
    */
 
@@ -110,8 +110,8 @@ int main(int argc, char **argv, char **envp)
   bool bswitch;         /* True: Within a switch statement */
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
-  bool bblank;          /* Used to verify block comment termintor */
-  bool ppline;          /* True: The next line the continuation of a precessor command */
+  bool bblank;          /* Used to verify block comment terminator */
+  bool ppline;          /* True: The next line the continuation of a pre-processor command */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -529,11 +529,11 @@ int main(int argc, char **argv, char **envp)
       /* STEP 3: Parse each character on the line */
 
       bquote = false;   /* True: Backslash quoted character next */
-      bblank = true;    /* Used to verify block comment termintor */
+      bblank = true;    /* Used to verify block comment terminator */
 
       for (; line[n] != '\n' && line[n] != '\0'; n++)
         {
-          /* Skip over indentifiers */
+          /* Skip over identifiers */
 
           if (ncomment == 0 && !bstring && (line[n] == '_' || isalpha(line[n])))
             {
@@ -788,7 +788,7 @@ int main(int argc, char **argv, char **envp)
 
           if (ncomment == 0)
             {
-              /* Backslash quoted charater */
+              /* Backslash quoted character */
 
               if (line[n] == '\\')
                 {
@@ -796,7 +796,7 @@ int main(int argc, char **argv, char **envp)
                   n++;
                 }
 
-              /* Check for quoated characters: \" in string */
+              /* Check for quoted characters: \" in string */
 
               if (line[n] == '"' && !bquote)
                 {
@@ -823,7 +823,9 @@ int main(int argc, char **argv, char **envp)
                   {
                     if (n > indent)
                       {
-                        if (dnest == 0)
+                        /* REVISIT: dest is always > 0 here if bfunctions == false */
+
+                        if (dnest == 0 || !bfunctions)
                           {
                             fprintf(stderr,
                                     "Left bracket not on separate line at %d:%d\n",
@@ -1585,7 +1587,7 @@ int main(int argc, char **argv, char **envp)
                     }
                 }
 
-              /* Crazy cases.  There should be no small odd alignements
+              /* Crazy cases.  There should be no small odd alignments
                * outside of comment/string.  Odd alignments are possible
                * on continued lines, but not if they are small.
                */
