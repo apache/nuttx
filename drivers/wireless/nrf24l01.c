@@ -116,7 +116,7 @@
 #define FIFO_PKTLEN_MASK  0x1F   /* 5 ls bits used to store packet length */
 #define FIFO_PKTLEN_SHIFT 0
 #define FIFO_PIPENO_MASK  0xE0   /* 3 ms bits used to store pipe # */
-#define FIFO_PIPENO_SHIFT 4
+#define FIFO_PIPENO_SHIFT 5
 
 #define FIFO_PKTLEN(dev) \
   (((dev->rx_fifo[dev->nxt_read] & FIFO_PKTLEN_MASK) >> FIFO_PKTLEN_SHIFT) + 1)
