@@ -1599,9 +1599,15 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+  if (!bfunctions)
+    {
+      fprintf(stderr, "ERROR: \"Private/Public Functions\" not found!\n");
+      fprintf(stderr, "       File could not be checked.\n");
+    }
+
   if (ncomment > 0 || bstring)
     {
-      fprintf(stderr, "In a comment/string at end of file\n");
+      fprintf(stderr, "ERROR: In a comment/string at end of file\n");
     }
 
   fclose(instream);
