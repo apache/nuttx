@@ -252,7 +252,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
           ret = nxsched_setparam(pid, &param);
           if (ret < 0)
             {
-             return ret;
+              return ret;
             }
         }
     }

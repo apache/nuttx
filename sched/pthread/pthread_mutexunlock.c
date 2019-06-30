@@ -94,13 +94,14 @@ static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
  *   mutex's type attribute. If there are threads blocked on the mutex object
  *   referenced by mutex when pthread_mutex_unlock() is called, resulting in
  *   the mutex becoming available, the scheduling policy is used to determine
- *   which thread shall acquire the mutex. (In the case of PTHREAD_MUTEX_RECURSIVE
- *   mutexes, the mutex becomes available when the count reaches zero and the
- *   calling thread no longer has any locks on this mutex).
+ *   which thread shall acquire the mutex. (In the case of
+ *   PTHREAD_MUTEX_RECURSIVE mutexes, the mutex becomes available when the
+ *   count reaches zero and the calling thread no longer has any locks on
+ *   this mutex).
  *
- *   If a signal is delivered to a thread waiting for a mutex, upon return from
- *   the signal handler the thread resumes waiting for the mutex as if it was
- *   not interrupted.
+ *   If a signal is delivered to a thread waiting for a mutex, upon return
+ *   from the signal handler the thread resumes waiting for the mutex as if
+ *   it was not interrupted.
  *
  * Input Parameters:
  *   None
@@ -203,9 +204,9 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
       if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
         {
-          /* This is a recursive mutex and we there are multiple locks held. Retain
-           * the mutex lock, just decrement the count of locks held, and return
-           * success.
+          /* This is a recursive mutex and we there are multiple locks held.
+           * Retain the mutex lock, just decrement the count of locks held,
+           * and return success.
            */
 
           mutex->nlocks--;
@@ -215,14 +216,14 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
-        /* This is either a non-recursive mutex or is the outermost unlock of
-         * a recursive mutex.
-         *
-         * In the case where the calling thread is NOT the holder of the thread,
-         * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
-         * We allow the other thread to release the mutex even though it does
-         * not own it.
-         */
+      /* This is either a non-recursive mutex or is the outermost unlock of
+       * a recursive mutex.
+       *
+       * In the case where the calling thread is NOT the holder of the thread,
+       * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
+       * We allow the other thread to release the mutex even though it does
+       * not own it.
+       */
 
         {
           /* Nullify the pid and lock count then post the semaphore */

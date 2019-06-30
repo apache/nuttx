@@ -429,6 +429,11 @@ int main(int argc, char **argv, char **envp)
                strncmp(&line[indent], "void ", 5) == 0 ||
                strncmp(&line[indent], "volatile ", 9) == 0)
         {
+          /* bfunctions:  True:  Processing private or public functions.
+           * bnest:       Brace nesting level on this line
+           * dnest:       Data declaration nesting level on this line
+           */
+
           /* REVISIT: Also picks up function return types */
           /* REVISIT: Logic problem for nested data/function declarations */
 
@@ -843,7 +848,7 @@ int main(int argc, char **argv, char **envp)
                   {
                     if (n > indent)
                       {
-                        /* REVISIT: dest is always > 0 here if bfunctions == false */
+                        /* REVISIT: dnest is always > 0 here if bfunctions == false */
 
                         if (dnest == 0 || !bfunctions)
                           {
@@ -1525,7 +1530,7 @@ int main(int argc, char **argv, char **envp)
 
       /* Check for various alignment outside of the comment block */
 
-      else if ((ncomment > 0 || prevncomment > 0) && !bstring)
+      else if ((ncomment == 0 && prevncomment == 0) && !bstring)
         {
           if (indent == 0 && strchr("\n#{}", line[0]) == NULL)
             {
@@ -1564,9 +1569,17 @@ int main(int argc, char **argv, char **envp)
             }
           else if (line[indent] == '{')
             {
-              /* REVISIT:  False alarms in data initializers and switch statements */
+              /* REVISIT:  Possible false alarms in compound statements
+               * without a preceding conditional.  That usage often violates
+               * the coding standard.
+               */
 
-              if ((indent & 3) != 0 && !bswitch && dnest == 0)
+              if (!bfunctions && (indent & 1) != 0)
+                {
+                  fprintf(stderr, "Bad left brace alignment at line %d:%d\n",
+                          lineno, indent);
+                }
+              else if ((indent & 3) != 0 && !bswitch && dnest == 0)
                 {
                   fprintf(stderr, "Bad left brace alignment at line %d:%d\n",
                           lineno, indent);
@@ -1574,9 +1587,17 @@ int main(int argc, char **argv, char **envp)
             }
           else if (line[indent] == '}')
             {
-              /* REVISIT:  False alarms in data initializers and switch statements */
+              /* REVISIT:  Possible false alarms in compound statements
+               * without a preceding conditional.  That usage often violates
+               * the coding standard.
+               */
 
-              if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
+              if (!bfunctions && (indent & 1) != 0)
+                {
+                  fprintf(stderr, "right left brace alignment at line %d:%d\n",
+                          lineno, indent);
+                }
+              else if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
                 {
                   fprintf(stderr, "Bad right brace alignment at line %d:%d\n",
                           lineno, indent);

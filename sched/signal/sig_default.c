@@ -110,25 +110,25 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 static const struct nxsig_defaction_s g_defactions[] =
 {
 #ifdef CONFIG_SIG_SIGUSR1_ACTION
-   { SIGUSR1, 0,                nxsig_abnormal_termination },
+  { SIGUSR1, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGUSR2_ACTION
-   { SIGUSR2, 0,                nxsig_abnormal_termination },
+  { SIGUSR2, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGALRM_ACTION
-   { SIGALRM, 0,                nxsig_abnormal_termination },
+  { SIGALRM, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
-   { SIGPOLL, 0,                nxsig_abnormal_termination },
+  { SIGPOLL, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-   { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
-   { SIGSTP,  0,                nxsig_stop_task },
-   { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
+  { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
+  { SIGSTP,  0,                nxsig_stop_task },
+  { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
 #endif
 #ifdef CONFIG_SIG_SIGKILL_ACTION
-   { SIGINT,  0,                nxsig_abnormal_termination },
-   { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination }
+  { SIGINT,  0,                nxsig_abnormal_termination },
+  { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination }
 #endif
 };
 
@@ -204,13 +204,14 @@ static void nxsig_abnormal_termination(int signo)
        * "When cancelability is disabled, all cancels are held pending
        *  in the target thread until the thread changes the cancelability.
        *  When cancelability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancelability, calls
-       *  a function which is a cancellation point or calls pthread_testcancel(),
-       *  thus creating a cancellation point. When cancelability is asynchronous,
-       *  all cancels are acted upon immediately, interrupting the thread with its
-       *  processing."
+       *  the target thread until the thread changes the cancelability,
+       *  calls a function which is a cancellation point or calls
+       *  pthread_testcancel(), thus creating a cancellation point.  When
+       *  cancelability is asynchronous, all cancels are acted upon
+       *  immediately, interrupting the thread with its processing."
        *
-       * REVISIT:  Does this rule apply to equally to both SIGKILL and SIGINT?
+       * REVISIT:  Does this rule apply to equally to both SIGKILL and
+       * SIGINT?
        */
 
       rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
@@ -243,7 +244,7 @@ static void nxsig_abnormal_termination(int signo)
     }
 #endif
 
-   sched_unlock();
+  sched_unlock();
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
@@ -352,7 +353,7 @@ static void nxsig_stop_task(int signo)
           /* Wake up the thread */
 
           nxsem_post(&group->tg_exitsem);
-         }
+        }
     }
 #endif
 
@@ -538,7 +539,7 @@ bool nxsig_iscatchable(int signo)
  *
  ****************************************************************************/
 
- _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
+_sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
 {
   FAR struct task_group_s *group;
   _sa_handler_t handler = SIG_IGN;
@@ -584,8 +585,8 @@ bool nxsig_iscatchable(int signo)
  * Name: nxsig_default_initialize
  *
  * Description:
- *   Set all signals to their default action.  This is called from nxtask_start
- *   to configure the newly started task.
+ *   Set all signals to their default action.  This is called from
+ *   nxtask_start() to configure the newly started task.
  *
  * Input Parameters:
  *   tcb - Identifies the thread associated with the default handlers

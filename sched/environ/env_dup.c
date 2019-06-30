@@ -120,7 +120,7 @@ int env_dup(FAR struct task_group_s *group)
             }
           else
             {
-             /* Duplicate the parent environment. */
+              /* Duplicate the parent environment. */
 
               memcpy(envp, ptcb->group->tg_envp, envlen);
             }
