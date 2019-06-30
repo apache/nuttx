@@ -54,6 +54,18 @@
 #ifdef CONFIG_NETDB_HOSTFILE
 
 /****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+/* This is the layout of the caller provided memory area */
+
+struct hostent_info_s
+{
+  FAR char *hi_addrlist[CONFIG_NETDB_DNSCLIENT_MAXIP + 1];
+  char hi_data[1];
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -113,7 +125,7 @@ static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr6 *ipv6addr;
 
-  if (type == AF_INE6T && len >= sizeof(struct in_addr6))
+  if (type == AF_INET6 && len >= sizeof(struct in_addr6))
     {
       ipv6addr = (FAR struct in_addr6 *)addr;
       return net_ipv6addr_cmp(ipv6addr->sin6_addr.s6_addr16, g_lo_ipv6addr);
@@ -159,6 +171,9 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
   int herrnocode;
   int namelen;
 
+  memset(host, 0, sizeof(struct hostent));
+  memset(buf, 0, buflen);
+
   if (lib_lo_ipv4match(addr, len, type))
     {
       /* Setup to transfer the IPv4 address */
@@ -197,8 +212,6 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
   dest             = info->hi_data;
   buflen          -= (sizeof(struct hostent_info_s) - 1);
 
-  memset(host, 0, sizeof(struct hostent));
-  memset(info, 0, sizeof(struct hostent_info_s));
   memcpy(dest, src, addrlen);
 
   info->hi_addrlist[0] = dest;
@@ -218,6 +231,8 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
     }
 
   strncpy(dest, g_lo_hostname, buflen);
+  host->h_name = dest;
+
   return 0;
 
 errorout_with_herrnocode:
@@ -314,7 +329,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
               ninfo("Comparing addresses...\n");
               if (memcmp(addr, hostaddr, len) == 0)
                 {
-                   /* We have a match */
+                  /* We have a match */
 
                   fclose(stream);
                   return OK;
@@ -356,8 +371,8 @@ errorout_with_herrnocode:
  *   pointer to a struct of a type depending on the address type, for example
  *   a struct in_addr *  for address type AF_INET.
  *
- *   gethostbyaddr_r() is *not* POSIX but is similar to a Glibc extension and is
- *   used internally by NuttX to implement the POSIX gethostbyaddr().
+ *   gethostbyaddr_r() is *not* POSIX but is similar to a Glibc extension and
+ *   is used internally by NuttX to implement the POSIX gethostbyaddr().
  *
  * Input Parameters:
  *   addr - The address of the host to find.
@@ -379,10 +394,6 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
                     FAR struct hostent *host, FAR char *buf,
                     size_t buflen, int *h_errnop)
 {
-  FAR FILE *stream;
-  int herrnocode;
-  int nread;
-
   DEBUGASSERT(addr != NULL && host != NULL && buf != NULL);
   DEBUGASSERT(type == AF_INET || type == AF_INET6);
 

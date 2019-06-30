@@ -1,8 +1,12 @@
 /****************************************************************************
- * libs/libc/net/lib_netdb.h
+ * libs/libc/netdb/lib_getservbyportr.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Michael Jung <mijung@gmx.net>
+ *
+ * Based on libs/libc/netdb/lib_getservbynamer.c
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,78 +37,96 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBS_LIBC_NETDB_LIB_NETDB_H
-#define __LIBS_LIBC_NETDB_LIB_NETDB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <assert.h>
+#include <nuttx/net/ip.h>
+
 #include <netdb.h>
+
+#include "lib_netdb.h"
 
 #ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-/* This is the maximum number of alternate host names supported by this
- * implementation:
- */
-
-#ifndef CONFIG_NETDB_MAX_ALTNAMES
-#  define CONFIG_NETDB_MAX_ALTNAMES 4
-#endif
-
-/* This is the path to the system hosts file */
-
-#ifndef CONFIG_NETDB_HOSTCONF_PATH
-#  define CONFIG_NETDB_HOSTCONF_PATH "/etc/hosts"
-#endif
-
-/* Size of the buffer available for host data */
-
-#ifndef CONFIG_NETDB_BUFSIZE
-#  define CONFIG_NETDB_BUFSIZE 128
-#endif
 
 /****************************************************************************
- * Public Types
+ * Name: getservbyport_r
  ****************************************************************************/
 
-struct services_db_s
+int getservbyport_r(int port, FAR const char *proto,
+                    FAR struct servent *result_buf, FAR char *buf,
+                    size_t buflen, FAR struct servent **result)
 {
-  FAR const char *s_name;
-  int s_port;
-  int s_protocol;
-};
+  int protocol;
+  int i;
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+  DEBUGASSERT(buf != NULL);
+  DEBUGASSERT(result_buf != NULL && result != NULL);
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+  /* Linux man page says result must be NULL in case of failure. */
 
-EXTERN struct hostent g_hostent;
-EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
-EXTERN const struct services_db_s g_services_db[];
+  *result = NULL;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  /* We need space for two pointers for hostalias strings. */
 
-#undef EXTERN
-#ifdef __cplusplus
+  if (buflen < 2 * sizeof(char *))
+    {
+      return ERANGE;
+    }
+
+  if (proto == NULL)
+    {
+      protocol = 0;
+    }
+  else if (strcmp(proto, "tcp") == 0)
+    {
+      protocol = IPPROTO_TCP;
+    }
+  else if (strcmp(proto, "udp") == 0)
+    {
+      protocol = IPPROTO_UDP;
+    }
+  else
+    {
+      return EINVAL;
+    }
+
+  for (i = 0; g_services_db[i].s_name; i++)
+    {
+      if (port == g_services_db[i].s_port &&
+          (protocol == 0 || protocol == g_services_db[i].s_protocol))
+        {
+          result_buf->s_name = (char *)g_services_db[i].s_name;
+          result_buf->s_aliases = (void *)buf;
+          result_buf->s_aliases[0] = (char *)g_services_db[i].s_name;
+          result_buf->s_aliases[1] = NULL;
+          result_buf->s_port = HTONS(g_services_db[i].s_port);
+
+          if (g_services_db[i].s_protocol == IPPROTO_TCP)
+            {
+              result_buf->s_proto = "tcp";
+            }
+          else
+            {
+              result_buf->s_proto = "udp";
+            }
+
+          *result = result_buf;
+          return 0;
+        }
+    }
+
+  return ENOENT;
 }
-#endif
 
 #endif /* CONFIG_LIBC_NETDB */
-#endif /* __LIBS_LIBC_NETDB_LIB_NETDB_H */

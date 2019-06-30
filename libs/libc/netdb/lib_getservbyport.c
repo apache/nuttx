@@ -1,8 +1,12 @@
 /****************************************************************************
- * libs/libc/net/lib_netdb.h
+ * libs/libc/netdb/lib_getservbyport.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Michael Jung <mijung@gmx.net>
+ *
+ * Based on libs/libc/netdb/lib_getservbyname.c
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,9 +37,6 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBS_LIBC_NETDB_LIB_NETDB_H
-#define __LIBS_LIBC_NETDB_LIB_NETDB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -47,64 +48,22 @@
 #ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-/* This is the maximum number of alternate host names supported by this
- * implementation:
- */
-
-#ifndef CONFIG_NETDB_MAX_ALTNAMES
-#  define CONFIG_NETDB_MAX_ALTNAMES 4
-#endif
-
-/* This is the path to the system hosts file */
-
-#ifndef CONFIG_NETDB_HOSTCONF_PATH
-#  define CONFIG_NETDB_HOSTCONF_PATH "/etc/hosts"
-#endif
-
-/* Size of the buffer available for host data */
-
-#ifndef CONFIG_NETDB_BUFSIZE
-#  define CONFIG_NETDB_BUFSIZE 128
-#endif
 
 /****************************************************************************
- * Public Types
+ * Name: getservbyport
  ****************************************************************************/
 
-struct services_db_s
+FAR struct servent *getservbyport(int port, FAR const char *proto)
 {
-  FAR const char *s_name;
-  int s_port;
-  int s_protocol;
-};
+  static struct servent ent;
+  static FAR char *buf[2];
+  struct servent *res;
+  int ret;
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-EXTERN struct hostent g_hostent;
-EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
-EXTERN const struct services_db_s g_services_db[];
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#ifdef __cplusplus
+  ret = getservbyport_r(port, proto, &ent, (FAR void *)buf, sizeof buf, &res);
+  return (ret != OK) ? NULL : res;
 }
-#endif
 
 #endif /* CONFIG_LIBC_NETDB */
-#endif /* __LIBS_LIBC_NETDB_LIB_NETDB_H */
