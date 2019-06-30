@@ -84,8 +84,10 @@
 #  define CONSOLE_BITS     CONFIG_UART3_BITS
 #  define CONSOLE_PARITY   CONFIG_UART3_PARITY
 #  define CONSOLE_2STOP    CONFIG_UART3_2STOP
-#elif defined(HAVE_CONSOLE)
-#  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#else
+#  if defined(HAVE_CONSOLE)
+#    error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
+#  endif
 #  define CONSOLE_BASE     LPC17_UART0_BASE
 #  define CONSOLE_BAUD     115200
 #  define CONSOLE_BITS     8
