@@ -62,4 +62,8 @@ ifeq ($(CONFIG_NXFLAT),y)
 CSRCS += lpc17_symtab.c
 endif
 
+ifeq ($(CONFIG_LPC17_ROMFS),y)
+CSRCS += lpc17_romfs.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

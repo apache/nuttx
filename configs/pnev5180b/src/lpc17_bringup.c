@@ -67,6 +67,10 @@
 #  include <nuttx/board.h>
 #endif
 
+#ifdef CONFIG_LPC17_ROMFS
+#  include "lpc17_romfs.h"
+#endif
+
 #include "lpc17_spi.h"
 #include "pnev5180b.h"
 #include "lpc17_symtab.h"
@@ -157,6 +161,15 @@ int pnev5180b_bringup(void)
 
 #if defined(CONFIG_USBDEV_COMPOSITE)
   board_composite_connect(0, 0);
+#endif
+
+#ifdef CONFIG_LPC17_ROMFS
+  ret = lpc17_romfs_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: lpc17_romfs_initialize() failed: %d\n", ret);
+      goto done;
+    }
 #endif
 
 #ifdef CONFIG_USBMONITOR
