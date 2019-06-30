@@ -103,6 +103,7 @@ int main(int argc, char **argv, char **envp)
   char line[LINE_SIZE]; /* The current line being examined */
   char *filename;       /* Name of the file to open */
   char *lptr;           /* Temporary pointer into line[] */
+  char *ext;            /* Temporary file extension */
   bool btabs;           /* True: TAB characters found on the line */
   bool bfunctions;      /* True: In private or public functions */
   bool bstatm;          /* True: This line is beginning of a statement */
@@ -112,6 +113,7 @@ int main(int argc, char **argv, char **envp)
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
+  bool hdrfile;         /* True: File is a header file */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -172,6 +174,24 @@ int main(int argc, char **argv, char **envp)
     {
       fprintf(stderr, "Failed to open %s\n", argv[1]);
       return 1;
+    }
+
+  /* Are we parsing a header file? */
+
+  hdrfile = false;
+  ext     = strrchr(filename, '.');
+
+  if (ext == 0)
+    {
+      printf("No file extension\n");
+    }
+  else if (strcmp(ext, ".h") == 0)
+    {
+      hdrfile = true;
+    }
+  else if (strcmp(ext, ".c") != 0)
+    {
+      printf("Unrecognized file extension: \"%s\"\n", ext + 1);
     }
 
   btabs          = false; /* True: TAB characters found on the line */
@@ -1601,7 +1621,7 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-  if (!bfunctions)
+  if (!bfunctions && !hdrfile)
     {
       fprintf(stderr, "ERROR: \"Private/Public Functions\" not found!\n");
       fprintf(stderr, "       File could not be checked.\n");
