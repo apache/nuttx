@@ -114,6 +114,7 @@ int main(int argc, char **argv, char **envp)
   bool bblank;          /* Used to verify block comment terminator */
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool hdrfile;         /* True: File is a header file */
+  bool bexternc;        /* True: Within 'extern "C"' */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -127,6 +128,7 @@ int main(int argc, char **argv, char **envp)
   int blank_lineno;     /* Line number of the last blank line */
   int noblank_lineno;   /* A blank line is not needed after this line */
   int lbrace_lineno;    /* Line number of last left brace */
+  int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
   int maxline;          /* Lines longer that this generate warnings */
   int n;
@@ -199,6 +201,7 @@ int main(int argc, char **argv, char **envp)
   bswitch        = false; /* True: Within a switch statement */
   bstring        = false; /* True: Within a string */
   ppline         = false; /* True: Continuation of a pre-processor line */
+  bexternc       = false; /* True: Within 'extern "C"' */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
   bnest          = 0;     /* Brace nesting level on this line */
@@ -208,6 +211,7 @@ int main(int argc, char **argv, char **envp)
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
   lbrace_lineno  = -1;    /* Line number of last left brace */
+  externc_lineno = -1;    /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
 
@@ -429,6 +433,15 @@ int main(int argc, char **argv, char **envp)
                strncmp(&line[indent], "void ", 5) == 0 ||
                strncmp(&line[indent], "volatile ", 9) == 0)
         {
+          /* Check if this is extern "C";  We don't typically indent following
+           * this.
+           */
+
+          if (strncmp(&line[indent], "extern \"C\"", 10) == 0)
+            {
+              externc_lineno = lineno;
+            }
+
           /* bfunctions:  True:  Processing private or public functions.
            * bnest:       Brace nesting level on this line
            * dnest:       Data declaration nesting level on this line
@@ -873,6 +886,17 @@ int main(int argc, char **argv, char **envp)
                         dnest++;
                       }
 
+                    /* Check if we are within 'extern "C"', we don't
+                     * normally indent in that case because the 'extern "C"'
+                     * is conditioned on __cplusplus.
+                     */
+
+                    if (lineno == externc_lineno ||
+                        lineno - 1 == externc_lineno)
+                      {
+                        bexternc = true;
+                      }
+
                     /* Suppress error for comment following a left brace */
 
                     noblank_lineno = lineno;
@@ -903,6 +927,7 @@ int main(int argc, char **argv, char **envp)
                     if (dnest < 3)
                       {
                         dnest = 0;
+                        bexternc = false;
                       }
                     else
                       {
@@ -1442,7 +1467,7 @@ int main(int argc, char **argv, char **envp)
 
       if ((ncomment > 0 || prevncomment > 0) && !bstring)
         {
-          if (indent == 0 && line[0] != '/')
+          if (indent == 0 && line[0] != '/' && !bexternc)
             {
               fprintf(stderr, "No indentation line %d:%d\n",
                       lineno, indent);
@@ -1546,7 +1571,7 @@ int main(int argc, char **argv, char **envp)
                       blabel = (line[i] == ':');
                     }
 
-                  if (!blabel)
+                  if (!blabel && !bexternc)
                     {
                       fprintf(stderr, "No indentation line %d:%d\n",
                               lineno, indent);
