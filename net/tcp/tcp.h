@@ -1758,7 +1758,7 @@ struct timespec;
 int tcp_txdrain(FAR struct socket *psock,
                 FAR const struct timespec *abstime);
 #else
-# define udp_txdrain(conn, abstime) (0)
+# define tcp_txdrain(conn, abstime) (0)
 #endif
 
 #undef EXTERN

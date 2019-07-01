@@ -421,7 +421,6 @@ static inline int udp_close(FAR struct socket *psock)
   struct timespec abstime;
   bool linger;
 #endif
-  int ret;
 
   /* Interrupts are disabled here to avoid race conditions */
 
@@ -446,6 +445,8 @@ static inline int udp_close(FAR struct socket *psock)
   linger = _SO_GETOPT(psock->s_options, SO_LINGER);
   if (linger)
     {
+      int ret;
+
       /* Get the current time */
 
       ret = clock_gettime(CLOCK_REALTIME, &abstime);
