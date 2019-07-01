@@ -402,6 +402,24 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 #ifdef CONFIG_NET_SOLINGER
      /* A non-NULL value of the priv field means that lingering is
       * enabled.
+      *
+      * REVISIT:  SO_LINGER is not really implemented.  Per OpenGroup.org:
+      *
+      *   SO_LINGER
+      *     Lingers on a close() if data is present. This option
+      *     controls the action taken when unsent messages queue
+      *     on a socket and close() is performed. If SO_LINGER
+      *     is set, the system shall block the calling thread
+      *     during close() until it can transmit the data or
+      *     until the time expires. If SO_LINGER is not specified,
+      *     and close() is issued, the system handles the call
+      *     in a way that allows the calling thread to continue
+      *     as quickly as possible. This option takes a linger
+      *     structure, as defined in the <sys/socket.h> header,
+      *     to specify the state of the option and linger interval.
+      *
+      * Here is merely adds a pointless timeout on top of the normal
+      * close operation.
       */
 
       linger = _SO_GETOPT(psock->s_options, SO_LINGER);
