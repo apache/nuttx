@@ -68,43 +68,44 @@
 #include "cxd56_pinconfig.h"
 
 #ifdef CONFIG_CXD56_PM_PROCFS
-#include "cxd56_powermgr_procfs.h"
+#  include "cxd56_powermgr_procfs.h"
 #endif
 
 #ifdef CONFIG_TIMER
-#include "cxd56_timer.h"
+#  include "cxd56_timer.h"
 #endif
 
 #ifdef CONFIG_WDT
-#include "cxd56_wdt.h"
+#  include "cxd56_wdt.h"
 #endif
 
 #ifdef CONFIG_CXD56_RTC
-#include <nuttx/timers/rtc.h>
-#include "cxd56_rtc.h"
+#  include <nuttx/timers/rtc.h>
+#  include "cxd56_rtc.h"
 #endif
 
 #ifdef CONFIG_CXD56_CPUFIFO
-#include "cxd56_cpufifo.h"
+#  include "cxd56_cpufifo.h"
 #endif
 
 #ifdef CONFIG_CXD56_ICC
-#include "cxd56_icc.h"
+#  include "cxd56_icc.h"
 #endif
 
 #ifdef CONFIG_CXD56_FARAPI
-#include "cxd56_farapi.h"
+#  include "cxd56_farapi.h"
 #endif
 
-#ifdef CONFIG_USBDEV
-#include "cxd56_usbdev.h"
+#if defined(CONFIG_USBDEV) && defined(CONFIG_FS_PROCFS_REGISTER)
+#  include "cxd56_usbdev.h"
 #endif
 
 #ifdef CONFIG_PWM
-#include "cxd56_pwm.h"
+#  include "cxd56_pwm.h"
 #endif
+
 #ifdef CONFIG_CXD56_ADC
-#include <arch/chip/adc.h>
+#  include <arch/chip/adc.h>
 #endif
 
 #include "spresense.h"
@@ -276,8 +277,8 @@ int cxd56_bringup(void)
 
 #ifdef CONFIG_FS_PROCFS
 
-#ifdef CONFIG_FS_PROCFS_REGISTER
-  /* register usbdev procfs */
+#if defined(CONFIG_USBDEV) && defined(CONFIG_FS_PROCFS_REGISTER)
+  /* Register usbdev procfs */
 
   ret = cxd56_usbdev_procfs_register();
   if (ret < 0)
@@ -289,7 +290,7 @@ int cxd56_bringup(void)
   ret = mount(NULL, CXD56_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      serr("ERROR: Failed to mount the procfs: %d\n", errno);
+      _err("ERROR: Failed to mount the procfs: %d\n", errno);
     }
 #endif
 
@@ -341,7 +342,7 @@ int cxd56_bringup(void)
   ret = board_sdcard_initialize();
   if (ret < 0)
     {
-      _err("ERROR: Failed to initialze sdhci. \n");
+      _err("ERROR: Failed to initialize sdhci. \n");
     }
 #endif
 
