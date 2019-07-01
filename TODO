@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 29, 2019)
+NuttX TODO List (Last updated July 1, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -19,7 +19,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
- (18)  Network (net/, drivers/net)
+ (17)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
@@ -1652,23 +1652,6 @@ o Network (net/, drivers/net)
   Priority:    Medium.  I have never heard of this problem being reported
                before, so I suspect it might not be so prevalent as one
                might expect.
-
-  Title:       TCP SOCKETS CLOSED TOO QUICKLY
-  Description: When a socket is closed, the resources are torn down
-               immediately (unless the SO_LINGER option is selected).  As a
-               result, the socket does not send the FIN and this looks like
-               an unexpected, abnormal loss of connection to the remote peer.
-
-               Actually, it is worse than this:  The is NO logic to send
-               FIN in when the file is close.  This is pretty easy to do,
-               however:
-
-                 - Wait for a TCP poll, then
-                 - Call tcp_append with TCP_CLOSE in the flags.  There is
-                   already logic in tcp_appsend to send the FIN in this case,
-                   it is just not being use.
-  Status:      Open
-  Priority:    Medium-Low.
 
   Title:       LOCAL DATAGRAM RECVFROM RETURNS WRONG SENDER ADDRESS
   Description: The recvfrom logic for local datagram sockets returns the

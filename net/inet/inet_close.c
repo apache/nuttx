@@ -213,7 +213,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }
-
 #endif /* CONFIG_NET_SOLINGER */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -327,6 +326,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   FAR struct tcp_conn_s *conn;
 #ifdef CONFIG_NET_SOLINGER
   struct timespec abstime;
+  bool linger;
 #endif
   int ret = OK;
 
@@ -400,21 +400,31 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       /* Wait for the disconnect event */
 
 #ifdef CONFIG_NET_SOLINGER
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
+     /* A non-NULL value of the priv field means that lingering is
+      * enabled.
+      */
 
-      /* NOTE: s_linger's unit is deciseconds,
-       * so we don't need to update abstime.tv_nsec here.
-       */
-
-      abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
-
-      if (-ETIMEDOUT == net_timedwait(&state.cl_sem, &abstime))
+      linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+      if (linger)
         {
-          state.cl_result = -ETIMEDOUT;
+          DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
+
+          /* NOTE: s_linger's unit is deciseconds,
+           * so we don't need to update abstime.tv_nsec here.
+           */
+
+          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+          if (-ETIMEDOUT == net_timedwait(&state.cl_sem, &abstime))
+            {
+              state.cl_result = -ETIMEDOUT;
+            }
         }
+      else
 #else
-      (void)net_timedwait(&state.cl_sem, NULL);
-#endif
+        {
+          (void)net_timedwait(&state.cl_sem, NULL);
+        }
 
       /* We are now disconnected */
 
