@@ -142,7 +142,7 @@ static void   usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 /* Initialization/Uninitialization ******************************************/
 
 static void   usbmsc_lununinitialize(struct usbmsc_lun_s *lun);
-#ifdef CONFIG_USBMSC_COMPOSITE
+#if !defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 static int    usbmsc_exportluns(FAR void *handle);
 #endif
 
@@ -1664,7 +1664,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBMSC_COMPOSITE
+#if !defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 static
 #endif
 int usbmsc_exportluns(FAR void *handle)
