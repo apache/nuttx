@@ -418,8 +418,9 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       *     structure, as defined in the <sys/socket.h> header,
       *     to specify the state of the option and linger interval.
       *
-      * Here is merely adds a pointless timeout on top of the normal
-      * close operation.
+      * Here it merely adds a pointless timeout on top of the normal
+      * close operation.  It should first wait for all data in the
+      * protocol-specific write buffers to drain.
       */
 
       linger = _SO_GETOPT(psock->s_options, SO_LINGER);
