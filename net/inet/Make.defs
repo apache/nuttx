@@ -35,6 +35,8 @@
 
 # PF_INET/PF_INET6 socket address families
 
+SOCK_CSRCS += inet_txdrain.c
+
 ifeq ($(CONFIG_NET_IPv4),y)
 SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_close.c
 SOCK_CSRCS += inet_globals.c
@@ -50,10 +52,6 @@ endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
 SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c
-endif
-
-ifeq ($(CONFIG_NET_SOLINGER),y)
-SOCK_CSRCS += inet_txdrain.c
 endif
 
 # Include inet build support

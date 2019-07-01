@@ -60,8 +60,7 @@
  * Name: inet_txdrain
  *
  * Description:
- *   Wait for any buffered Tx data to be sent from the socket.  This is part
- *   of the implementation of SO_LINGER
+ *   Wait for any buffered Tx data to be sent from the socket.
  *
  * Parameters:
  *   psock   - Pointer to the socket structure instance
@@ -84,7 +83,7 @@ int inet_txdrain(FAR struct socket *psock,
 
   switch (psock->s_type)
     {
-#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+#if defined(NET_TCP_HAVE_STACK)
       case SOCK_STREAM:
         {
           ret = tcp_txdrain(psock, abstime);
@@ -92,7 +91,7 @@ int inet_txdrain(FAR struct socket *psock,
         break;
 #endif
 
-#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_UDP_WRITE_BUFFERS)
+#if defined(NET_UDP_HAVE_STACK)
       case SOCK_DGRAM:
         {
           ret = udp_txdrain(psock, abstime);

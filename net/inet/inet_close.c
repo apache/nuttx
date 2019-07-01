@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -290,24 +289,26 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     {
       /* Get the current time */
 
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-      /* NOTE: s_linger's unit is deciseconds so we don't need to update
-       * abstime.tv_nsec here.
-       */
-
-      abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
-
-      /* Wait until abstime for the buffered TX data to be sent. */
-
-      ret = inet_txdrain(psock, &abstime);
-      if (ret < 0)
-        {
-          /* inet_txdrain may fail, but that won't stop us from closing the
-           * socket.
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret >= 0)
+       {
+          /* NOTE: s_linger's unit is deciseconds so we don't need to update
+           * abstime.tv_nsec here.
            */
 
-          nerr("ERROR: inet_txdrain() failed: %d\n", ret);
+          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+          /* Wait until abstime for the buffered TX data to be sent. */
+
+          ret = tcp_txdrain(psock, &abstime);
+          if (ret < 0)
+            {
+              /* tcp_txdrain may fail, but that won't stop us from closing
+               * the socket.
+               */
+
+              nerr("ERROR: tcp_txdrain() failed: %d\n", ret);
+            }
         }
     }
 #endif
@@ -396,6 +397,101 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 #endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
+ * Name: udp_close
+ *
+ * Description:
+ *   Break any current UDP connection
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+#ifdef NET_UDP_HAVE_STACK
+static inline int udp_close(FAR struct socket *psock)
+{
+  FAR struct udp_conn_s *conn;
+#ifdef CONFIG_NET_SOLINGER
+  struct timespec abstime;
+  bool linger;
+#endif
+  int ret;
+
+  /* Interrupts are disabled here to avoid race conditions */
+
+  net_lock();
+
+  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+#ifdef CONFIG_NET_SOLINGER
+  /* SO_LINGER
+   *   Lingers on a close() if data is present. This option controls the
+   *   action taken when unsent messages queue on a socket and close() is
+   *   performed. If SO_LINGER is set, the system shall block the calling
+   *   thread during close() until it can transmit the data or until the
+   *   time expires. If SO_LINGER is not specified, and close() is issued,
+   *   the system handles the call in a way that allows the calling thread
+   *   to continue as quickly as possible. This option takes a linger
+   *   structure, as defined in the <sys/socket.h> header, to specify the
+   *   state of the option and linger interval.
+   */
+
+  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+  if (linger)
+    {
+      /* Get the current time */
+
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret >= 0)
+        {
+          /* NOTE: s_linger's unit is deciseconds so we don't need to update
+           * abstime.tv_nsec here.
+           */
+
+          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+          /* Wait until abstime for the buffered TX data to be sent. */
+
+          ret = udp_txdrain(psock, &abstime);
+          if (ret < 0)
+            {
+              /* udp_txdrain may fail, but that won't stop us from closing
+               * the socket.
+               */
+
+              nerr("ERROR: udp_txdrain() failed: %d\n", ret);
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+  /* Free any semi-permanent write buffer callback in place. */
+
+  if (psock->s_sndcb != NULL)
+    {
+      udp_callback_free(conn->dev, conn, psock->s_sndcb);
+      psock->s_sndcb = NULL;
+    }
+#endif
+
+  /* And free the connection structure */
+
+  conn->crefs = 0;
+  udp_free(psock->s_conn);
+  net_unlock();
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -441,7 +537,7 @@ int inet_close(FAR struct socket *psock)
               tcp_unlisten(conn); /* No longer accepting connections */
               conn->crefs = 0;    /* Discard our reference to the connection */
 
-              /* Break any current connections */
+              /* Break any current connections and close the socket */
 
               ret = tcp_close_disconnect(psock);
               if (ret < 0)
@@ -481,6 +577,7 @@ int inet_close(FAR struct socket *psock)
         {
 #ifdef NET_UDP_HAVE_STACK
           FAR struct udp_conn_s *conn = psock->s_conn;
+          int ret;
 
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
@@ -488,21 +585,18 @@ int inet_close(FAR struct socket *psock)
 
           if (conn->crefs <= 1)
             {
-              /* Yes... */
+              /* Yes... Clost the socket */
 
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-              /* Free any semi-permanent write buffer callback in place. */
-
-              if (psock->s_sndcb != NULL)
+              ret = udp_close(psock);
+              if (ret < 0)
                 {
-                  udp_callback_free(conn->dev, conn, psock->s_sndcb);
-                  psock->s_sndcb = NULL;
-                }
-#endif
-              /* And free the connection structure */
+                  /* This would normally occur only if there is a timeout
+                   * from a lingering close.
+                   */
 
-              conn->crefs = 0;
-              udp_free(psock->s_conn);
+                  nerr("ERROR: udp_close failed: %d\n", ret);
+                  return ret;
+                }
             }
           else
             {
@@ -524,4 +618,3 @@ int inet_close(FAR struct socket *psock)
 
   return OK;
 }
-#endif /* CONFIG_NET */

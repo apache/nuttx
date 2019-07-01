@@ -309,8 +309,7 @@ int inet_close(FAR struct socket *psock);
  * Name: inet_txdrain
  *
  * Description:
- *   Wait for any buffered Tx data to be sent from the socket.  This is part
- *   of the implementation of SO_LINGER
+ *   Wait for any buffered Tx data to be sent from the socket.
  *
  * Parameters:
  *   psock   - Pointer to the socket structure instance
@@ -322,11 +321,9 @@ int inet_close(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_SOLINGER
 struct timespec;
 int inet_txdrain(FAR struct socket *psock,
                  FAR const struct timespec *abstime);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
