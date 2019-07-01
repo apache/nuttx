@@ -421,9 +421,9 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
             }
         }
       else
-#else
+#endif
         {
-          (void)net_timedwait(&state.cl_sem, NULL);
+          (void)net_lockedwait(&state.cl_sem);
         }
 
       /* We are now disconnected */

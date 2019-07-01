@@ -19,7 +19,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
- (17)  Network (net/, drivers/net)
+ (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
@@ -1662,6 +1662,29 @@ o Network (net/, drivers/net)
   Priority:    Medium High.  This makes using local datagram sockets in
                anything but a well-known point-to-point configuration
                impossible.
+
+  Title:       SO_LINGER IMPLEMENTATION IS INCORRECT
+  Description: Support for the SO_LINGER socket option is implemented but
+               not correctly.  Currently, it simply adds a timeout to the
+               "normal" delay for the FIN to be sent with an additional
+               timeout.  That is not even close to the required behavior.
+               Per OpenGroup.org:
+
+                 SO_LINGER
+                   Lingers on a close() if data is present. This option
+                   controls the action taken when unsent messages queue
+                   on a socket and close() is performed. If SO_LINGER
+                   is set, the system shall block the calling thread
+                   during close() until it can transmit the data or
+                   until the time expires. If SO_LINGER is not specified,
+                   and close() is issued, the system handles the call
+                   in a way that allows the calling thread to continue
+                   as quickly as possible. This option takes a linger
+                   structure, as defined in the <sys/socket.h> header,
+                   to specify the state of the option and linger interval.
+
+  Status:      Open
+  Priority:    Medium Low.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
