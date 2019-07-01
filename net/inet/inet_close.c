@@ -56,10 +56,6 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
-#ifdef CONFIG_NET_SOLINGER
-#  include <nuttx/clock.h>
-#endif
-
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "tcp/tcp.h"
@@ -81,60 +77,12 @@ struct tcp_close_s
   FAR struct socket           *cl_psock;  /* Reference to the TCP socket */
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
-#ifdef CONFIG_NET_SOLINGER
-  clock_t                      cl_start;  /* Time close started (in ticks) */
-#endif
 };
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tcp_close_timeout
- *
- * Description:
- *   Check for a timeout on a lingering close.
- *
- * Input Parameters:
- *   pstate - close state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_SOLINGER)
-static inline int tcp_close_timeout(FAR struct tcp_close_s *pstate)
-{
-  FAR struct socket *psock = 0;
-
-  /* Make sure that we are performing a lingering close */
-
-  if (pstate != NULL)
-    {
-      /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
-       * If none... we well let the send wait forever.
-       */
-
-      psock = pstate->cl_psock;
-      if (psock && psock->s_linger != 0)
-        {
-          /* Check if the configured timeout has elapsed */
-
-          return net_timeo(pstate->cl_start, psock->s_linger);
-        }
-    }
-
-  /* No timeout */
-
-  return FALSE;
-}
-#endif /* NET_TCP_HAVE_STACK && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
  * Name: tcp_close_eventhandler
@@ -201,19 +149,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
           flags = 0;
         }
     }
-
-#ifdef CONFIG_NET_SOLINGER
-  /* Check for a timeout. */
-
-  else if (pstate && tcp_close_timeout(pstate))
-    {
-      /* Yes.. Wake up the waiting thread and report the timeout */
-
-      nerr("ERROR: CLOSE timeout\n");
-      pstate->cl_result = -ETIMEDOUT;
-      goto end_wait;
-    }
-#endif /* CONFIG_NET_SOLINGER */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
@@ -337,6 +272,46 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+#ifdef CONFIG_NET_SOLINGER
+  /* SO_LINGER
+   *   Lingers on a close() if data is present. This option controls the
+   *   action taken when unsent messages queue on a socket and close() is
+   *   performed. If SO_LINGER is set, the system shall block the calling
+   *   thread during close() until it can transmit the data or until the
+   *   time expires. If SO_LINGER is not specified, and close() is issued,
+   *   the system handles the call in a way that allows the calling thread
+   *   to continue as quickly as possible. This option takes a linger
+   *   structure, as defined in the <sys/socket.h> header, to specify the
+   *   state of the option and linger interval.
+   */
+
+  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+  if (linger)
+    {
+      /* Get the current time */
+
+      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
+
+      /* NOTE: s_linger's unit is deciseconds so we don't need to update
+       * abstime.tv_nsec here.
+       */
+
+      abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+      /* Wait until abstime for the buffered TX data to be sent. */
+
+      ret = inet_txdrain(psock, &abstime);
+      if (ret < 0)
+        {
+          /* inet_txdrain may fail, but that won't stop us from closing the
+           * socket.
+           */
+
+          nerr("ERROR: inet_txdrain() failed: %d\n", ret);
+        }
+    }
+#endif
+
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* If we have a semi-permanent write buffer callback in place, then
    * is needs to be be nullified.
@@ -387,63 +362,13 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       nxsem_init(&state.cl_sem, 0, 0);
       nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
-#ifdef CONFIG_NET_SOLINGER
-      /* Record the time that we started the wait (in ticks) */
-
-      state.cl_start = clock_systimer();
-#endif
-
       /* Notify the device driver of the availability of TX data */
 
       tcp_close_txnotify(psock, conn);
 
       /* Wait for the disconnect event */
 
-#ifdef CONFIG_NET_SOLINGER
-     /* A non-NULL value of the priv field means that lingering is
-      * enabled.
-      *
-      * REVISIT:  SO_LINGER is not really implemented.  Per OpenGroup.org:
-      *
-      *   SO_LINGER
-      *     Lingers on a close() if data is present. This option
-      *     controls the action taken when unsent messages queue
-      *     on a socket and close() is performed. If SO_LINGER
-      *     is set, the system shall block the calling thread
-      *     during close() until it can transmit the data or
-      *     until the time expires. If SO_LINGER is not specified,
-      *     and close() is issued, the system handles the call
-      *     in a way that allows the calling thread to continue
-      *     as quickly as possible. This option takes a linger
-      *     structure, as defined in the <sys/socket.h> header,
-      *     to specify the state of the option and linger interval.
-      *
-      * Here it merely adds a pointless timeout on top of the normal
-      * close operation.  It should first wait for all data in the
-      * protocol-specific write buffers to drain.
-      */
-
-      linger = _SO_GETOPT(psock->s_options, SO_LINGER);
-      if (linger)
-        {
-          DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-          /* NOTE: s_linger's unit is deciseconds,
-           * so we don't need to update abstime.tv_nsec here.
-           */
-
-          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
-
-          if (-ETIMEDOUT == net_timedwait(&state.cl_sem, &abstime))
-            {
-              state.cl_result = -ETIMEDOUT;
-            }
-        }
-      else
-#endif
-        {
-          (void)net_lockedwait(&state.cl_sem);
-        }
+      (void)net_lockedwait(&state.cl_sem);
 
       /* We are now disconnected */
 

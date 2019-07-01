@@ -305,6 +305,29 @@ ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 int inet_close(FAR struct socket *psock);
 
+/****************************************************************************
+ * Name: inet_txdrain
+ *
+ * Description:
+ *   Wait for any buffered Tx data to be sent from the socket.  This is part
+ *   of the implementation of SO_LINGER
+ *
+ * Parameters:
+ *   psock   - Pointer to the socket structure instance
+ *   abstime - The absolute time when the timeout will occur
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated error value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SOLINGER
+struct timespec;
+int inet_txdrain(FAR struct socket *psock,
+                 FAR const struct timespec *abstime);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

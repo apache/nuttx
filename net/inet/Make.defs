@@ -52,6 +52,10 @@ ifeq ($(CONFIG_NET_IPv6),y)
 SOCK_CSRCS += ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c
 endif
 
+ifeq ($(CONFIG_NET_SOLINGER),y)
+SOCK_CSRCS += inet_txdrain.c
+endif
+
 # Include inet build support
 
 DEPPATH += --dep-path inet
