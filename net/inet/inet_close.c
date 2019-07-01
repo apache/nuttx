@@ -78,10 +78,10 @@
 struct tcp_close_s
 {
   FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
-#ifdef CONFIG_NET_SOLINGER
   FAR struct socket           *cl_psock;  /* Reference to the TCP socket */
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
+#ifdef CONFIG_NET_SOLINGER
   clock_t                      cl_start;  /* Time close started (in ticks) */
 #endif
 };
@@ -158,9 +158,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        FAR void *pvconn, FAR void *pvpriv,
                                        uint16_t flags)
 {
-#ifdef CONFIG_NET_SOLINGER
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
-#endif
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
   DEBUGASSERT(conn != NULL);
@@ -178,7 +176,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
     {
       /* The disconnection is complete */
 
-#ifdef CONFIG_NET_SOLINGER
       /* pstate non-NULL means that we are performing a LINGERing close. */
 
       if (pstate != NULL)
@@ -194,7 +191,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        */
 
       else
-#endif
         {
           /* Free connection resources */
 
@@ -247,7 +243,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
   return flags;
 
-#ifdef CONFIG_NET_SOLINGER
 end_wait:
   pstate->cl_cb->flags = 0;
   pstate->cl_cb->priv  = NULL;
@@ -256,7 +251,6 @@ end_wait:
 
   ninfo("Resuming\n");
   return 0;
-#endif
 }
 #endif /* NET_TCP_HAVE_STACK */
 
@@ -332,7 +326,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
 #ifdef CONFIG_NET_SOLINGER
-  bool linger;
+  struct timespec abstime;
 #endif
   int ret = OK;
 
@@ -375,83 +369,72 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
       state.cl_cb->event = tcp_close_eventhandler;
 
+      /* A non-NULL value of the priv field means that lingering is
+       * enabled.
+       */
+
+      state.cl_cb->priv  = (FAR void *)&state;
+
+      /* Set up for the lingering wait */
+
+      state.cl_psock     = psock;
+      state.cl_result    = -EBUSY;
+
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
+
+      nxsem_init(&state.cl_sem, 0, 0);
+      nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
+
 #ifdef CONFIG_NET_SOLINGER
-      /* Check for a lingering close */
+      /* Record the time that we started the wait (in ticks) */
 
-      linger = _SO_GETOPT(psock->s_options, SO_LINGER);
-
-      /* Has a lingering close been requested */
-
-      if (linger)
-        {
-          /* A non-NULL value of the priv field means that lingering is
-           * enabled.
-           */
-
-          state.cl_cb->priv  = (FAR void *)&state;
-
-          /* Set up for the lingering wait */
-
-          state.cl_psock     = psock;
-          state.cl_result    = -EBUSY;
-
-          /* This semaphore is used for signaling and, hence, should not have
-           * priority inheritance enabled.
-           */
-
-          nxsem_init(&state.cl_sem, 0, 0);
-          nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
-
-          /* Record the time that we started the wait (in ticks) */
-
-          state.cl_start = clock_systimer();
-        }
-      else
-#endif /* CONFIG_NET_SOLINGER */
-
-        {
-          /* We will close immediately. The NULL priv field signals this */
-
-          state.cl_cb->priv  = NULL;
-
-          /* No further references on the connection */
-
-          conn->crefs = 0;
-        }
+      state.cl_start = clock_systimer();
+#endif
 
       /* Notify the device driver of the availability of TX data */
 
       tcp_close_txnotify(psock, conn);
 
+      /* Wait for the disconnect event */
+
 #ifdef CONFIG_NET_SOLINGER
-      /* Wait only if we are lingering */
+      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
 
-      if (linger)
+      /* NOTE: s_linger's unit is deciseconds,
+       * so we don't need to update abstime.tv_nsec here.
+       */
+
+      abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+      if (-ETIMEDOUT == net_timedwait(&state.cl_sem, &abstime))
         {
-          /* Wait for the disconnect event */
-
-          (void)net_lockedwait(&state.cl_sem);
-
-          /* We are now disconnected */
-
-          nxsem_destroy(&state.cl_sem);
-          tcp_callback_free(conn, state.cl_cb);
-
-          /* Free the connection */
-
-          conn->crefs = 0;          /* No more references on the connection */
-          tcp_free(conn);           /* Free network resources */
-
-          /* Get the result of the close */
-
-          ret = state.cl_result;
+          state.cl_result = -ETIMEDOUT;
         }
-#endif /* CONFIG_NET_SOLINGER */
+#else
+      (void)net_timedwait(&state.cl_sem, NULL);
+#endif
+
+      /* We are now disconnected */
+
+      nxsem_destroy(&state.cl_sem);
+      tcp_callback_free(conn, state.cl_cb);
+
+      /* Free the connection
+       * No more references on the connection
+       */
+
+      conn->crefs = 0;
+
+      /* Get the result of the close */
+
+      ret = state.cl_result;
     }
-  else
-    {
-      tcp_free(conn);
-    }
+
+  /* Free network resources */
+
+  tcp_free(conn);
 
   net_unlock();
   return ret;
