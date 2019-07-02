@@ -135,6 +135,10 @@ Installing Cygwin
      of the Cygwin utilities that you will need to build NuttX.  The
      build will fail in numerous places because of missing packages.
 
+     NOTE: The last time I installed EVERYTHING, the download was
+     about 5GiB.  The server I selected was also very slow so it took
+     over a day to do the whole install!
+
      NOTE: You don't really have to install EVERYTHING but I cannot
      answer the question "Then what should I install?"  I don't know
      the answer to that and so will continue to recommend installing
@@ -147,16 +151,25 @@ Installing Cygwin
      Perhaps a minimum set would be those packages listed below for the
      "Ubuntu Bash under Windows 10" installation?
 
+     UPDATE:  Sergey Frolov had success with the following minimal
+     Cygwin configuration:
+
+     1. After starting the Cygwin installer, keep the recommended
+        packages that are pre-selected in the default configuration.
+     2. Using the installation tools, add the following packages:
+
+          make (GNU make)  bison        libgmp3-dev
+          gcc-core         byacc        libmpfr-dev
+          gcc-g++          gperf        libmpc-dev
+          flex             gdb          automake-1.15
+          libncurses-dev   libgmp-dev
+
   After installing Cygwin, you will get lots of links for installed
   tools and shells.  I use the RXVT native shell.  It is fast and reliable
   and does not require you to run the Cygwin X server (which is neither
   fast nor reliable).  Unless otherwise noted, the rest of these
   instructions assume that you are at a bash command line prompt in
   either Linux or in Cygwin shell.
-
-  UPDATE: The last time I installed EVERYTHING, the download was
-  about 5GiB.  The server I selected was also very slow so it took
-  over a day to do the whole install!
 
 Using MSYS
 ----------
@@ -456,6 +469,14 @@ Downloading from Repositories
 -----------------------------
 
   Cloning the Repository
+
+    BEFORE cloning repositories on any Windows platform do the following GIT
+    command:
+
+      git config --global core.autocrlf false
+
+    That will avoid conversions of linefeeds (newlines, \n) to carriage
+    return plus linefeed sequences (\r\n)
 
     The current NuttX du jour is available in from a GIT repository.  Here are
     instructions for cloning the core NuttX RTOS (corresponding to the nuttx
