@@ -68,6 +68,10 @@ CSRCS += cxd56_userleds.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += cxd56_buttons.c
+endif
+
 ifeq ($(CONFIG_CXD56_GPIO_IRQ),y)
 CSRCS += cxd56_gpioif.c
 endif
@@ -98,6 +102,10 @@ endif
 
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += cxd56_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += cxd56_composite.c
 endif
 
 ifeq ($(CONFIG_NETDEVICES),y)
