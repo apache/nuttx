@@ -4032,6 +4032,22 @@ config STM32L4_USART_SINGLEWIRE
 		Enable single wire UART support.  The option enables support for the
 		TIOCSSINGLEWIRE ioctl in the STM32L4 serial driver.
 
+config STM32L4_USART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on STM32L4_USART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the STM32L4 serial driver.
+
+config STM32L4_USART_SWAP
+	bool "Swap RX/TX pins support"
+	default n
+	depends on STM32L4_USART
+	---help---
+		Enable RX/TX pin swapping support. The option enables support for the
+		TIOCSSWAP ioctl in the STM32L4 serial driver.
+
 if PM
 
 config STM32L4_PM_SERIAL_ACTIVITY

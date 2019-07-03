@@ -254,6 +254,19 @@ config IMXRT_LPUART8
 
 endmenu # LPUART Peripherals
 
+menu "LPUART Configuration"
+	depends on IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on IMXRT_HAVE_LPUART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the IMXRT serial driver.
+
+endmenu # LPUART Configuration
+
 menu "LPI2C Peripherals"
 
 menuconfig IMXRT_LPI2C1

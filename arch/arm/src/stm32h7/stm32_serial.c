@@ -1558,6 +1558,99 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
      break;
 #endif
 
+#ifdef CONFIG_STM32H7_USART_INVERT
+    case TIOCSINVERT:
+      {
+        uint32_t cr1;
+        uint32_t cr1_ue;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        /* Get the original state of UE */
+
+        cr1    = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        cr1_ue = cr1 & USART_CR1_UE;
+        cr1   &= ~USART_CR1_UE;
+
+        /* Disable UE, {R,T}XINV can only be written when UE=0 */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
+
+        /* Enable/disable signal inversion. */
+
+        uint32_t cr = up_serialin(priv, STM32_USART_CR2_OFFSET);
+
+        if (arg & SER_INVERT_ENABLED_RX)
+          {
+            cr |= USART_CR2_RXINV;
+          }
+        else
+          {
+            cr &= ~USART_CR2_RXINV;
+          }
+
+        if (arg & SER_INVERT_ENABLED_TX)
+          {
+            cr |= USART_CR2_TXINV;
+          }
+        else
+          {
+            cr &= ~USART_CR2_TXINV;
+          }
+
+        up_serialout(priv, STM32_USART_CR2_OFFSET, cr);
+
+        /* Re-enable UE if appropriate */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+        leave_critical_section(flags);
+      }
+     break;
+#endif
+
+#ifdef CONFIG_STM32H7_USART_SWAP
+    case TIOCSSWAP:
+      {
+        uint32_t cr1;
+        uint32_t cr1_ue;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        /* Get the original state of UE */
+
+        cr1    = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        cr1_ue = cr1 & USART_CR1_UE;
+        cr1   &= ~USART_CR1_UE;
+
+        /* Disable UE, SWAP can only be written when UE=0 */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
+
+        /* Enable/disable Swap mode. */
+
+        uint32_t cr = up_serialin(priv, STM32_USART_CR2_OFFSET);
+
+        if (arg == SER_SWAP_ENABLED)
+          {
+            cr |= USART_CR2_SWAP;
+          }
+        else
+          {
+            cr &= ~USART_CR2_SWAP;
+          }
+
+        up_serialout(priv, STM32_USART_CR2_OFFSET, cr);
+
+        /* Re-enable UE if appropriate */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+        leave_critical_section(flags);
+      }
+     break;
+#endif
+
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
