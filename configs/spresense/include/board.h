@@ -217,6 +217,28 @@ enum board_power_device
   POWER_IMAGE_SENSOR    = PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(7),
 };
 
+/* LCD Display clocking ****************************************************/
+
+#define ILI9340_SPI_MAXFREQUENCY    40000000
+
+/* Display device pin definitions ******************************************/
+
+#if defined(CONFIG_LCD_ON_MAIN_BOARD) /* Display connected to main board. */
+
+#define DISPLAY_RST     PIN_I2S0_BCK
+#define DISPLAY_DC      PIN_I2S0_LRCK
+
+#define DISPLAY_SPI     5
+
+#else /* Display is connected through extension board. */
+
+#define DISPLAY_RST     PIN_SPI2_MISO
+#define DISPLAY_DC      PIN_PWM2
+
+#define DISPLAY_SPI     4
+
+#endif
+
 /*
  * Set signal id for notify USB device connection status and
  * supply current value.

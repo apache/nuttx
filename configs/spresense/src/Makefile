@@ -124,4 +124,12 @@ ifeq ($(CONFIG_CXD56_I2C_DRIVER),y)
 CSRCS += cxd56_i2cdev.c
 endif
 
+ifeq ($(CONFIG_LCD_LPM013M091A),y)
+CSRCS += cxd56_lpm013m091a.c
+endif
+
+ifeq ($(CONFIG_LCD_ILI9340),y)
+CSRCS += cxd56_ili9340.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
