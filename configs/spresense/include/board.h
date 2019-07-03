@@ -239,8 +239,7 @@ enum board_power_device
 
 #endif
 
-/*
- * Set signal id for notify USB device connection status and
+/* Set signal id for notify USB device connection status and
  * supply current value.
  * signal returns "usbdev_notify_s" struct pointer in sival_ptr.
  *

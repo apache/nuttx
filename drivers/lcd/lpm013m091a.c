@@ -84,7 +84,7 @@ struct lpm013m091a_dev_s
 
   /* Private lcd-specific information follows */
 
-  struct lpm013m091a_lcd_s* lcd;
+  struct lpm013m091a_lcd_s *lcd;
 
   uint8_t power;                  /* Current power setting */
 };
@@ -172,6 +172,10 @@ static struct lpm013m091a_dev_s g_lpm013m091a_dev =
 };
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name:  lpm013m091a_selectarea
  *
  * Description:
@@ -223,7 +227,7 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
 {
   FAR struct lpm013m091a_lcd_s *lcd = dev->lcd;
 
-  /* soft reset */
+  /* Soft reset */
 
   lcd->sendcmd(lcd, LPM013M091A_SWRESET);
   up_mdelay(10);
@@ -572,8 +576,8 @@ static int lpm013m091a_setcontrast(FAR struct lcd_dev_s *dev,
  * Initialize LCD
  ****************************************************************************/
 
-FAR struct lcd_dev_s* lpm013m091a_initialize(FAR struct lpm013m091a_lcd_s *lcd,
-                                             int devno)
+FAR struct lcd_dev_s *
+  lpm013m091a_initialize(FAR struct lpm013m091a_lcd_s *lcd, int devno)
 {
   FAR struct lpm013m091a_dev_s *priv = &g_lpm013m091a_dev;
 

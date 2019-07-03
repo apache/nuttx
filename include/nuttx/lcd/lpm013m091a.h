@@ -127,8 +127,8 @@ struct lpm013m091a_lcd_s
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s* lpm013m091a_initialize(struct lpm013m091a_lcd_s *lcd,
-                                             int devno);
+FAR struct lcd_dev_s *
+  lpm013m091a_initialize(FAR struct lpm013m091a_lcd_s *lcd, int devno);
 
 #undef EXTERN
 #ifdef __cplusplus
