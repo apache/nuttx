@@ -51,20 +51,15 @@
 #include "up_arch.h"
 #include "hardware/am335x_timer.h"
 
+#define USE_TIMER1MS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef USE_TIMER1MS
-/* Timer 1 clock selects the external 32.768 KHz oscillator/clock */
-
-#  define TMR_CLOCK             (32768)
-
-#else
 /* Timer clock selects system clock CLK_M_OSC (24MHz) */
 
 #  define TMR_CLOCK             (24000000ll)
-#endif
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -78,21 +73,12 @@
 #define TMR_TLDR                (0xffffffff - (TMR_CLOCK / CLK_TCK) + 1)
 #define TMR_TCRR                (0xffffffff - (TMR_CLOCK / CLK_TCK) + 1)
 
-#ifdef USE_TIMER1MS
-#  define TMR_TPIR \
-    (((TMR_CLOCK / CLK_TCK + 1) * 1000000l) - \
-     (TMR_CLOCK * (1000000l / CLK_TCK)))
-#  define TMR_TNIR \
-    (((TMR_CLOCK / CLK_TCK) * 1000000l) - \
-     (TMR_CLOCK * (1000000l / CLK_TCK)))
-#else
-#  define TMR_TPIR \
+#define TMR_TPIR \
     (((TMR_CLOCK / CLK_TCK + 1) * 1000000ll) - \
      (TMR_CLOCK * (1000000ll / CLK_TCK)))
-#  define TMR_TNIR \
+#define TMR_TNIR \
     (((TMR_CLOCK / CLK_TCK) * 1000000ll) - \
      (TMR_CLOCK * (1000000ll / CLK_TCK)))
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -214,6 +200,5 @@ void arm_timer_initialize(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(AM335X_IRQ_TIMER2);
-
 #endif
 }

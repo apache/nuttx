@@ -40,12 +40,38 @@
 #include <nuttx/config.h>
 
 #include "up_arch.h"
-#if 0
-/* TODO: add clock register module */
-#include "hardware/am335x_ccm.h"
-#endif
+#include "hardware/am335x_cm.h"
 #include "am335x_config.h"
 #include "am335x_clockconfig.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: am335x_dmtimer1ms_clockconfig
+ ****************************************************************************/
+
+static inline void am335x_dmtimer1ms_clockconfig(void)
+{
+  putreg32(CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC,
+           AM335X_CM_DPLL_CLKSEL_TIMER1MS_CLK);
+
+  while ((getreg32(AM335X_CM_DPLL_CLKSEL_TIMER1MS_CLK) &
+          CM_DPLL_DMTIMER1MS_CLKSEL_MASK)
+          != CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC)
+    {
+    }
+
+  modifyreg32(AM335X_CM_WKUP_TIMER1_CLKCTRL, CM_WKUP_CLKCTRL_MODULEMODE_MASK,
+              CM_WKUP_CLKCTRL_MODULEMODE_ENABLE);
+
+  while ((getreg32(AM335X_CM_WKUP_TIMER1_CLKCTRL) &
+          (CM_WKUP_CLKCTRL_MODULEMODE_MASK | CM_WKUP_CLKCTRL_IDLEST_MASK))
+         != (CM_WKUP_CLKCTRL_MODULEMODE_ENABLE | CM_WKUP_CLKCTRL_IDLEST_FUNC))
+    {
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -74,6 +100,8 @@ void am335x_clockconfig(void)
    * on load and temperature.  For now, NuttX simply leaves the clocking at
    * 792MHz.
    */
+
+  am335x_dmtimer1ms_clockconfig();
 
 #ifndef CONFIG_AM335X_BOOT_SDRAM
 #  warning Missing logic
