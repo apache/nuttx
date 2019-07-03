@@ -962,6 +962,12 @@ retry:
     {
       wlwarn("*** warning: WR_RESP_NOK received.. retrying. (n=%d) \n", n);
       nxsig_usleep(100 * 1000);
+
+      if (100 < n)
+        {
+          return SPI_TIMEOUT;
+        }
+
       n++;
       goto retry;
     }
@@ -1888,9 +1894,18 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
   gs2200m_set_gpio(dev, LED_GPIO, 1);
 #endif
 
+  if (!_cid_is_set(&dev->valid_cid_bits, msg->cid))
+    {
+      wlinfo("+++ already closed \n");
+      type = TYPE_DISCONNECT;
+      goto errout;
+    }
+
   type = gs2200m_send_bulk(dev, msg->cid, msg->buf, msg->len);
 
   msg->type = type;
+
+errout:
 
   if (type != TYPE_OK)
     {
@@ -2448,6 +2463,14 @@ static void gs2200m_irq_worker(FAR void *arg)
   dev->pkt_q_cnt[c]++;
 
   wlinfo("=== added to qkt_q[%d] t=%d \n", c, t);
+
+  /* When a DISCONNECT packet received, disable the cid */
+
+  if (TYPE_DISCONNECT == t)
+    {
+      wlinfo("=== received DISCONNECT for cid=%c \n", pkt_dat->cid);
+      _enable_cid(&dev->valid_cid_bits, pkt_dat->cid, false);
+    }
 
   /* If accept() is not in progress for the cid, add the packet to notif_q
    *
