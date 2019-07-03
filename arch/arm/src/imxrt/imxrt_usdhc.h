@@ -52,6 +52,25 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: imxrt_usdhc_set_sdio_card_isr
+ *
+ * Description:
+ *   SDIO card generates interrupt via SDIO_DATA_1 pin.
+ *   Called by board-specific logic to register an ISR for SDIO card.
+ *
+ * Input Parameters:
+ *   func      - callback function.
+ *   arg       - arg to be passed to the function.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
+                                   int (*func)(void *), void *arg);
+
+/****************************************************************************
  * Name: imxrt_usdhc_initialize
  *
  * Description:
@@ -61,7 +80,8 @@
  *   slotno - Not used.
  *
  * Returned Value:
- *   A reference to an USDIO interface structure.  NULL is returned on failures.
+ *   A reference to an USDIO interface structure.  NULL is returned on
+ *   failures.
  *
  ****************************************************************************/
 
