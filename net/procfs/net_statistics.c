@@ -425,10 +425,10 @@ static int netprocfs_retransmissions(FAR struct netprocfs_file_s *netfile)
   len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
 #endif
 #ifdef CONFIG_NET_ICMP
-   len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
+  len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
 #endif
 #ifdef CONFIG_NET_ICMPv6
-   len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
+  len += snprintf(&netfile->line[len], NET_LINELEN - len, "  ----");
 #endif
 
   len += snprintf(&netfile->line[len], NET_LINELEN - len, "\n");

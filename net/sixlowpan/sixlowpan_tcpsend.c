@@ -457,11 +457,11 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
 
       DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
-         {
-           /* Report the disconnection event to all socket clones */
+        {
+          /* Report the disconnection event to all socket clones */
 
-           tcp_lost_connection(psock, sinfo->s_cb, flags);
-         }
+          tcp_lost_connection(psock, sinfo->s_cb, flags);
+        }
 
       /* Report not connected to the sender */
 

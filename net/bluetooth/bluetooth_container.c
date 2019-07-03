@@ -167,10 +167,10 @@ FAR struct bluetooth_container_s *bluetooth_container_allocate(void)
 
   if (container != NULL)
     {
-       /* Zero and tag the allocated meta-data structure. */
+      /* Zero and tag the allocated meta-data structure. */
 
-       memset(container, 0, sizeof(struct bluetooth_container_s));
-       container->bn_pool = pool;
+      memset(container, 0, sizeof(struct bluetooth_container_s));
+      container->bn_pool = pool;
     }
 
   return container;

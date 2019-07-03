@@ -238,7 +238,9 @@ FAR struct usrsock_conn_s *usrsock_active(int16_t usockid)
   while ((conn = usrsock_nextconn(conn)) != NULL)
     {
       if (conn->usockid == usockid)
-        return conn;
+        {
+          return conn;
+        }
     }
 
   return NULL;

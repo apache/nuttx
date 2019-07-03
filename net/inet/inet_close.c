@@ -291,7 +291,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
       ret = clock_gettime(CLOCK_REALTIME, &abstime);
       if (ret >= 0)
-       {
+        {
           /* NOTE: s_linger's unit is deciseconds so we don't need to update
            * abstime.tv_nsec here.
            */

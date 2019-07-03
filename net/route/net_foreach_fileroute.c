@@ -90,18 +90,18 @@ int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
        * the traversal.
        */
 
-       if (ret == -ENOENT)
-         {
-           /* The routing table does not exit.. return successful completion */
+      if (ret == -ENOENT)
+        {
+          /* The routing table does not exit.. return successful completion */
 
-           ninfo("The IPv4 routing table file does not exist\n");
-           return OK;
-         }
+          ninfo("The IPv4 routing table file does not exist\n");
+          return OK;
+        }
 
-       /* Some other error occurred. */
+      /* Some other error occurred. */
 
-       nerr("ERROR: Could not open IPv4 routing table: %d\n", ret);
-       return ret;
+      nerr("ERROR: Could not open IPv4 routing table: %d\n", ret);
+      return ret;
     }
 
   /* Read each entry from the routing table */
@@ -159,18 +159,18 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
        * the traversal.
        */
 
-       if (ret == -ENOENT)
-         {
-           /* The routing table does not exit.. return successful completion */
+      if (ret == -ENOENT)
+        {
+          /* The routing table does not exit.. return successful completion */
 
-           ninfo("The IPv6 routing table file does not exist\n");
-           return OK;
-         }
+          ninfo("The IPv6 routing table file does not exist\n");
+          return OK;
+        }
 
-       /* Some other error occurred. */
+      /* Some other error occurred. */
 
-       nerr("ERROR: Could not open IPv6 routing table: %d\n", ret);
-       return ret;
+      nerr("ERROR: Could not open IPv6 routing table: %d\n", ret);
+      return ret;
     }
 
   /* Read each entry from the routing table */

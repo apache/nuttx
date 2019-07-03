@@ -167,10 +167,10 @@ FAR struct ieee802154_container_s *ieee802154_container_allocate(void)
 
   if (container != NULL)
     {
-       /* Zero and tag the allocated meta-data structure. */
+      /* Zero and tag the allocated meta-data structure. */
 
-       memset(container, 0, sizeof(struct ieee802154_container_s));
-       container->ic_pool = pool;
+      memset(container, 0, sizeof(struct ieee802154_container_s));
+      container->ic_pool = pool;
     }
 
   return container;

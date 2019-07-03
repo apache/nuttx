@@ -106,7 +106,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
        * registered.
        */
 
-     if (dev->d_ifindex == ifindex)
+      if (dev->d_ifindex == ifindex)
 #else
       /* NOTE that this option is not a safe way to enumerate network
        * devices:  There could be changes to the list of registered device
@@ -165,7 +165,7 @@ int netdev_nextindex(int ifindex)
 
               net_unlock();
               return ifindex + 1;
-           }
+            }
         }
 
       net_unlock();

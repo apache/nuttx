@@ -97,8 +97,8 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
        * been implemented.
        */
 
-     return -ENOSYS;
-   }
+      return -ENOSYS;
+    }
 
   /* Set the port number */
 

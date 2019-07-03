@@ -179,30 +179,30 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 
   if (conn->backlog)
     {
-       /* Remove the backlog structure reference from the connection */
+      /* Remove the backlog structure reference from the connection */
 
-       blg           = conn->backlog;
-       conn->backlog = NULL;
+      blg           = conn->backlog;
+      conn->backlog = NULL;
 
-       /* Handle any pending connections in the backlog */
+      /* Handle any pending connections in the backlog */
 
-       while ((blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&blg->bl_pending)) != NULL)
-         {
-           blconn = blc->bc_conn;
-           if (blconn)
-             {
-               /* REVISIT -- such connections really need to be gracefully closed */
+      while ((blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&blg->bl_pending)) != NULL)
+        {
+          blconn = blc->bc_conn;
+          if (blconn)
+            {
+              /* REVISIT -- such connections really need to be gracefully closed */
 
-               blconn->blparent = NULL;
-               blconn->backlog  = NULL;
-               blconn->crefs    = 0;
-               tcp_free(blconn);
-             }
-         }
+              blconn->blparent = NULL;
+              blconn->backlog  = NULL;
+              blconn->crefs    = 0;
+              tcp_free(blconn);
+            }
+        }
 
-       /* Then free the entire backlog structure */
+      /* Then free the entire backlog structure */
 
-       kmm_free(blg);
+      kmm_free(blg);
     }
 
   return OK;

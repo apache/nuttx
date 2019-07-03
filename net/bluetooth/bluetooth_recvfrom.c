@@ -163,11 +163,11 @@ static ssize_t bluetooth_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
         }
 
 #if CONFIG_NET_BLUETOOTH_BACKLOG > 0
-       /* Decrement the count of frames in the queue. */
+      /* Decrement the count of frames in the queue. */
 
-       DEBUGASSERT(conn->bc_backlog > 0);
-       conn->bc_backlog--;
-       DEBUGASSERT((int)conn->bc_backlog == bluetooth_count_frames(conn));
+      DEBUGASSERT(conn->bc_backlog > 0);
+      conn->bc_backlog--;
+      DEBUGASSERT((int)conn->bc_backlog == bluetooth_count_frames(conn));
 #endif
 
       /* Extract the IOB containing the frame from the container */

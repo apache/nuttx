@@ -118,9 +118,9 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (tolen < sizeof(sa_family_t) + 2)
     {
-     /* EFAULT - An invalid user space address was specified for a parameter */
+      /* EFAULT - An invalid user space address was specified for a parameter */
 
-     return -EFAULT;
+      return -EFAULT;
     }
 
   /* Make sure that half duplex FIFO has been created.

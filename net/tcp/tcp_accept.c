@@ -193,7 +193,7 @@ static int accept_eventhandler(FAR struct tcp_conn_s *listener,
       listener->accept_private = NULL;
       listener->accept         = NULL;
       ret                      = OK;
-  }
+    }
 
   return ret;
 }

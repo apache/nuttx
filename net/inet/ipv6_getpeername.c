@@ -96,8 +96,8 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
        * been implemented.
        */
 
-     return -ENOSYS;
-   }
+      return -ENOSYS;
+    }
 
   /* Verify that the socket has been connected */
 

@@ -291,7 +291,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   goto done;
                 }
 
-             /* Exponential backoff. */
+              /* Exponential backoff. */
 
               conn->timer = TCP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
               (conn->nrtx)++;

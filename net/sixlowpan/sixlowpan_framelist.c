@@ -151,40 +151,40 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
 
   /* Copy the following protocol header, */
 
-   switch (ipv6hdr->proto)
-     {
+  switch (ipv6hdr->proto)
+    {
 #ifdef CONFIG_NET_TCP
-       case IP_PROTO_TCP:
-         {
-           FAR struct tcp_hdr_s *tcp =
-             &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            &((FAR struct ipv6tcp_hdr_s *)ipv6hdr)->tcp;
 
-           /* The TCP header length is encoded in the top 4 bits of the
-            * tcpoffset field (in units of 32-bit words).
-            */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-           protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-         }
-         break;
+          protosize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-       case IP_PROTO_UDP:
-         protosize = UDP_HDRLEN;
-         break;
+      case IP_PROTO_UDP:
+        protosize = UDP_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-       case IP_PROTO_ICMP6:
-         protosize = ICMPv6_HDRLEN;
-         break;
+      case IP_PROTO_ICMP6:
+        protosize = ICMPv6_HDRLEN;
+        break;
 #endif
 
-       default:
-         nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
-         protosize = 0;
-         break;
-     }
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv6hdr->proto);
+        protosize = 0;
+        break;
+    }
 
   return protosize;
 }
@@ -495,8 +495,8 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
   ret = sixlowpan_radio_framelen(radio);
   if (ret < 0)
     {
-       nerr("ERROR: sixlowpan_radio_framelen() failed: %d\n", ret);
-       return ret;
+      nerr("ERROR: sixlowpan_radio_framelen() failed: %d\n", ret);
+      return ret;
     }
 
   /* Limit to the maximum size supported by the IOBs */
@@ -513,8 +513,8 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
   ret -= SIXLOWPAN_MAC_FCSSIZE;
   if (ret < MAX_MACHDR || ret > UINT16_MAX)
     {
-       nerr("ERROR: Invalid frame size: %d\n", ret);
-       return ret;
+      nerr("ERROR: Invalid frame size: %d\n", ret);
+      return ret;
     }
 
   framelen = (uint16_t)ret;

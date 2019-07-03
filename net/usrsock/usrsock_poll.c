@@ -81,8 +81,10 @@ static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   DEBUGASSERT(!info || (info->psock && info->fds));
 
-  if (!info)
-    return flags;
+  if (info == NULL)
+    {
+      return flags;
+    }
 
   if (flags & USRSOCK_EVENT_ABORT)
     {

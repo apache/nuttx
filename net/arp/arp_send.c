@@ -82,15 +82,15 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
 {
   /* Don't allow any further call backs. */
 
-   state->snd_sent         = true;
-   state->snd_result       = (int16_t)result;
-   state->snd_cb->flags    = 0;
-   state->snd_cb->priv     = NULL;
-   state->snd_cb->event    = NULL;
+  state->snd_sent         = true;
+  state->snd_result       = (int16_t)result;
+  state->snd_cb->flags    = 0;
+  state->snd_cb->priv     = NULL;
+  state->snd_cb->event    = NULL;
 
-   /* Wake up the waiting thread */
+  /* Wake up the waiting thread */
 
-   nxsem_post(&state->snd_sem);
+  nxsem_post(&state->snd_sem);
 }
 
 /****************************************************************************

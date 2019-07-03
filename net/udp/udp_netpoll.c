@@ -378,7 +378,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       fds->revents |= (POLLRDNORM & fds->events);
     }
 
-   if (psock_udp_cansend(psock) >= 0)
+  if (psock_udp_cansend(psock) >= 0)
     {
       /* Normal data may be sent without blocking (at least one byte). */
 

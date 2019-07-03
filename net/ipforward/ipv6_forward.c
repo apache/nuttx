@@ -307,7 +307,7 @@ static int ipv6_packet_conversion(FAR struct net_driver_s *dev,
         }
     }
 
-   /* The packet was not forwarded (or the HOP limit was exceeded) */
+  /* The packet was not forwarded (or the HOP limit was exceeded) */
 
   ipv6_dropstats(ipv6);
   return ret;

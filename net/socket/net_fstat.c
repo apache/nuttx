@@ -186,5 +186,5 @@ int net_fstat(int sockfd, FAR struct stat *buf)
          break;
      }
 
-   return ret;
+  return ret;
 }

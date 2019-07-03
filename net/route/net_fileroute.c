@@ -517,7 +517,7 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
 
           ntotal = nwritten;
           break;
-       }
+        }
 
       ntotal += nwritten;
       src    += nwritten;

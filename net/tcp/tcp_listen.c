@@ -286,7 +286,7 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
 
       if (listener->accept)
         {
-         /* Yes.. accept the connection */
+          /* Yes.. accept the connection */
 
           ret = listener->accept(listener, conn);
         }

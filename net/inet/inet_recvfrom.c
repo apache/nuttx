@@ -255,7 +255,7 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
 #else
       nerr("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
 #endif
-   }
+    }
 
   /* Indicate no data in the buffer */
 

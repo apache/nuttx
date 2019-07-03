@@ -641,9 +641,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-   /* Check if we are being asked to retransmit data */
+  /* Check if we are being asked to retransmit data */
 
-   else if ((flags & TCP_REXMIT) != 0)
+  else if ((flags & TCP_REXMIT) != 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
@@ -872,7 +872,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * be set for this write buffer.
            */
 
-           if (TCP_WBSEQNO(wrb) == (unsigned)-1)
+          if (TCP_WBSEQNO(wrb) == (unsigned)-1)
             {
               TCP_WBSEQNO(wrb) = conn->isn + conn->sent;
             }

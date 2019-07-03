@@ -472,11 +472,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
-         {
-           /* Report not connected */
+        {
+          /* Report not connected */
 
-           tcp_lost_connection(psock, pstate->snd_cb, flags);
-         }
+          tcp_lost_connection(psock, pstate->snd_cb, flags);
+        }
 
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
