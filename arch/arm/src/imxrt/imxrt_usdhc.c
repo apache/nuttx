@@ -77,8 +77,15 @@
 
 /* Configuration ************************************************************/
 
+/* Fixme: This is a temporary fix to default to how this worked before,
+ * and still allow an override to 2 slots for testing.
+ *
+ * Once Dave changes this to be keyed off CONFIG_IMXRT_USDHC1 and 2
+ * delete this.
+ */
+
 #if !defined(CONFIG_IMXRT_MAX_SDHCDEV_SLOTS)
-#  define  CONFIG_IMXRT_MAX_SDHCDEV_SLOTS  2
+#  define  CONFIG_IMXRT_MAX_SDHCDEV_SLOTS  1
 #endif
 
 #if !defined(CONFIG_IMXRT_USDHC_DMA)
@@ -336,8 +343,6 @@ static int  imxrt_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
 static int  imxrt_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  imxrt_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t *rnotimpl);
 
 /* EVENT handler */
 
@@ -2469,16 +2474,6 @@ static int imxrt_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
     }
 
   return ret;
-}
-
-/* MMC responses not supported */
-
-static int imxrt_recvnotimpl(FAR struct sdio_dev_s *dev,
-                             uint32_t cmd, uint32_t *rnotimpl)
-{
-  /* Just return an error */
-
-  return -ENOSYS;
 }
 
 /****************************************************************************
