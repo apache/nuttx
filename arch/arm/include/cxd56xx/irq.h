@@ -218,21 +218,6 @@
 #define NR_VECTORS              CXD56_IRQ_NIRQS
 #define NR_IRQS                 CXD56_IRQ_NIRQS
 
-/* Cortex-M0 External interrupts (vectors >= 16) */
-
-#if 0
-#  define CXD56M0_IRQ_NIRQS     (CXD56_IRQ_EXTINT + CXD56M0_IRQ_NEXTINT)
-#endif
-
-/* Total number of IRQ numbers (This will need to be revisited if/when the
- * Cortex-M0 is supported)
- */
-
-#if 0
-#  define NR_VECTORS            CXD56M0_IRQ_NIRQS
-#  define NR_IRQS               CXD56M0_IRQ_NIRQS
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

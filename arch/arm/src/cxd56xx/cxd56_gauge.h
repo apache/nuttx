@@ -33,12 +33,12 @@
  *
  ****************************************************************************/
 
-#ifndef __SRC_CXD56_GAUGE_H
-#define __SRC_CXD56_GAUGE_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H
 
 /* initialize function */
 
 int cxd56_gauge_initialize(FAR const char *devpath);
 int cxd56_gauge_uninitialize(FAR const char *devpath);
 
-#endif /* __SRC_CXD56_GAUGE_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H */

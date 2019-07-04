@@ -45,8 +45,6 @@
 #include "chip.h"
 #include "hardware/cxd56_wdt.h"
 
-#ifdef CONFIG_CXD56_WDT
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -90,5 +88,4 @@ int cxd56_wdt_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_CXD56_WDT */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_WDT_H */

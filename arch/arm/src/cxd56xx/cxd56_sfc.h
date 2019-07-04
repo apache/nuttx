@@ -63,4 +63,4 @@ FAR struct mtd_dev_s *cxd56_sfc_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_SFC_H */

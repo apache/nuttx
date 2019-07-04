@@ -46,8 +46,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIG_CXD56_PMIC
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -755,7 +753,6 @@ int cxd56_pmic_monitor_get(FAR struct pmic_mon_log_s *ptr);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_CXD56_PMIC */
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_PMIC_H */

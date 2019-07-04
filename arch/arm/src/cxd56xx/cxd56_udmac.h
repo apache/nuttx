@@ -269,5 +269,4 @@ void cxd56_udmainitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_UDMAC_H */

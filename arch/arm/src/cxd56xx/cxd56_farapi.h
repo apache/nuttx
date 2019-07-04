@@ -43,7 +43,7 @@ extern "C"
 {
 #else
 #define EXTERN extern
-#endif
+#endif /* ARCH_ARM_SRC_CXD56XX_CXD56_FARAPI_H */
 
 void cxd56_farapiinitialize(void);
 

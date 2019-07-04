@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56XX_CONFIG_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56XX_CONFIG_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_CONFIG_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -135,4 +135,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56XX_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_CONFIG_H */

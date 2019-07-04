@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H
-#define __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_BATTERY_IOCTL_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_BATTERY_IOCTL_H
 
 #include <nuttx/fs/ioctl.h>
 
@@ -112,4 +112,4 @@ struct bat_monitor_log_s
   int size;
 };
 
-#endif /* __INCLUDE_ARCH_CHIP_BATTERY_IOCTL_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_BATTERY_IOCTL_H */

@@ -42,8 +42,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_TIMER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,5 +93,4 @@ void cxd56_timer_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_TIMER */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_TIMER_H */

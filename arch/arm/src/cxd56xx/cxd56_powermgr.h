@@ -345,6 +345,6 @@ int cxd56_pm_hotsleep(int idletime);
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif /* __ASSEMBLY */
 #endif /* __ARCH_ARM_SRC_CXD56XX_POWERMGR_H */

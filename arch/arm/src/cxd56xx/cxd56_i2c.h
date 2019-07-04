@@ -97,6 +97,6 @@ int cxd56_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_I2C_H */

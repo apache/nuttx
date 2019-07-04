@@ -98,6 +98,6 @@ FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_PWM_H */

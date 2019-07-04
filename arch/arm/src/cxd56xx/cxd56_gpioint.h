@@ -46,8 +46,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_CXD56_GPIO_IRQ
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -230,8 +228,6 @@ int cxd56_gpioint_status(uint32_t pin, cxd56_gpioint_status_t *stat);
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-
-#endif /* CONFIG_CXD56_GPIO_IRQ */
-
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GPIOINT_H */

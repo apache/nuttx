@@ -187,5 +187,6 @@ FAR struct rtc_lowerhalf_s *cxd56_rtc_lowerhalf(void);
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_RTC_H */

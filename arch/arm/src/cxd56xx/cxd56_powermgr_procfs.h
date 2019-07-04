@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_timerisr.h
+ * arch/arm/src/cxd56xx/cxd56_powermgr_procfs.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

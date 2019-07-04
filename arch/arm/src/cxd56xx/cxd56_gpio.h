@@ -153,6 +153,6 @@ int cxd56_gpio_status(uint32_t pin, cxd56_gpio_status_t *stat);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GPIO_H */

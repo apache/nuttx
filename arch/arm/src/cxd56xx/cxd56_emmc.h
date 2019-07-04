@@ -58,5 +58,4 @@ void cxd56_emmcuninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-
-#endif
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_EMMC_H */
