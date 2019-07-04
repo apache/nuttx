@@ -72,7 +72,7 @@
 
 #define GS2200MWORK LPWORK
 
-#define SPI_MAXFREQ  (4000000)  /* 4MHz. */
+#define SPI_MAXFREQ  CONFIG_WL_GS2200M_SPI_FREQUENCY
 #define NRESPMSG     8
 
 #define MAX_PKT_LEN  1500
@@ -861,7 +861,7 @@ retry:
    * workaround to avoid realy receiving an invalid frame response
    */
 
-  usleep(100);
+  up_udelay(100);
 
   /* Read frame response */
 
@@ -1408,7 +1408,7 @@ static enum pkt_type_e gs2200m_get_mac(FAR struct gs2200m_dev_s *dev)
       dev->net_dev.d_mac.ether.ether_addr_octet[n] = (uint8_t)mac[n];
     }
 
- errout:
+errout:
   _release_pkt_dat(&pkt_dat);
   return r;
 }
@@ -1868,6 +1868,13 @@ static int gs2200m_ioctl_connect(FAR struct gs2200m_dev_s *dev,
         break;
 
       default:
+        /* REVISIT:
+         * TYPE_BULK for other sockets might be received here,
+         * if the sockets have heavy bulk traffic.
+         * In this case, the packet should be queued and
+         * wait for a response to the NCTCP command.
+         */
+
         wlerr("+++ error: type=%d \n", type);
         ASSERT(false);
         ret = -EINVAL;

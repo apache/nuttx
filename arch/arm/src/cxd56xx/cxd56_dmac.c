@@ -664,7 +664,7 @@ static int dma_stop(int ch)
  *
  ****************************************************************************/
 
-void weak_function up_dmainitialize(void)
+void weak_function up_dma_initialize(void)
 {
   int i;
 
