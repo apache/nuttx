@@ -41,6 +41,10 @@ ifeq ($(CONFIG_VIDEO_FB),y)
   CSRCS += fb.c
 endif
 
+ifeq ($(CONFIG_VIDEO_STREAM),y)
+  CSRCS += video.c video_framebuff.c
+endif
+
 # These video drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
