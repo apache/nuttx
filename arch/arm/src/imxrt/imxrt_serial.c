@@ -1314,6 +1314,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t stat;
         uint32_t regval;
         irqstate_t flags;
+        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 
         flags  = spin_lock_irqsave();
         ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
