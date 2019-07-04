@@ -1070,6 +1070,11 @@ config CXD56_UDMAC
 		Use DMAC for reading sensing data from SCU FIFO.
 endif # CXD56_SCU
 
+config CXD56_CISIF
+	bool "CMOS image sensor interface"
+	default n
+	---help---
+		CMOS image sensor interface for cx5602 chip
 endmenu
 
 comment "Storage Options"
