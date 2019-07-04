@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/mkexport.sh
 #
-#   Copyright (C) 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014, 2016, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -287,19 +287,19 @@ if [ "X${USRONLY}" != "Xy" ]; then
 
 			cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
 
-			# One architecture has low directory called "chip" that holds the
-			# header files
+			# Most architectures have low directory called "hardware" that
+			# holds the header files
 
-			if [ -d "${ARCHDIR}/${hdir}/chip" ]; then
+			if [ -d "${ARCHDIR}/${hdir}/hardware" ]; then
 
 				# Yes.. create a export sub-directory of the same name
 
-				mkdir "${EXPORTDIR}/arch/${hdir}/chip" || \
-					{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
+				mkdir "${EXPORTDIR}/arch/${hdir}/hardware" || \
+					{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/hardware' failed"; exit 1; }
 
 				# Then copy the header files (only) into the new directory
 
-				cp -f "${ARCHDIR}"/${hdir}/chip/*.h "${EXPORTDIR}"/arch/${hdir}/chip/. 2>/dev/null
+				cp -f "${ARCHDIR}"/${hdir}/hardware/*.h "${EXPORTDIR}"/arch/${hdir}/hardware/. 2>/dev/null
 			fi
 		fi
 	done
