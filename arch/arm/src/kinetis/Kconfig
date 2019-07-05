@@ -1059,6 +1059,14 @@ config KINETIS_UART_SINGLEWIRE
 		Enable single wire UART and LPUART support. The option enables support
 		for the TIOCSSINGLEWIRE ioctl in the Kinetis serial drivers.
 
+config KINETIS_UART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on KINETIS_UART || KINETIS_LPUART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the Kinetis serial driver.
+
 endif # KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
 
 config KINETIS_UARTFIFOS
