@@ -87,7 +87,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: June 5, 2019</p>
+      <p>Last Updated: July 5, 2019</p>
     </td>
   </tr>
 </table>
@@ -1039,6 +1039,16 @@ int animals(int animal)
   <b>Indentation of Pre-Processor Lines</b>.
   C Pre-processor commands following any conditional computation are also indented following basically the indentation same rules, differing in that the <code>#</code> always remains in column 1.
 </p>
+<p>
+  When C pre-processor statements are indented, they should be should be indented by 2 spaces per level-of-indentation following the <code>#</code>.
+  C pre-processor statements should be indented when they are enclosed within C pre-processor conditional logic (<code>#if</code>..<code>#endif</code>).  The level of indentation increases with each level of such nested conditional logic.
+</p>
+<p>
+  C pre-processor statements should always be indented in this way in the <code>Pre-processor Definitions</code> <a href="#cfilestructure">section</a> of each file.
+  C pre-processor statements may be indented in the <code>Public/Private Data</code> and <code>Public/Private Functions</code> sections of the file.
+  However, often the indentation of C pre-processor statements conflicts with the indentation of the C code and makes the code more difficult to read.
+  In such cases, indentation of C pre-processor statements should be ommitted in those sections (only).
+</p>
 
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -1814,6 +1824,10 @@ enum xyz_state_e
   <li>
      <b>Side effects</b>.
      Be careful of side effects.
+  </li>
+  <li>
+     <b>Indentation</b>.
+     See the <a href="#indentation">Indentation of Pre-Processor Lines</a> requirements above.
   </li>
 </ul>
 <p>
