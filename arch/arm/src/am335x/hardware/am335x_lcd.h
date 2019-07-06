@@ -69,7 +69,7 @@
 #define AM335X_LCD_DMA_FB0_CEIL_OFFSET          0x0048
 #define AM335X_LCD_DMA_FB1_BASE_OFFSET          0x004c
 #define AM335X_LCD_DMA_FB1_CEIL_OFFSET          0x0050
-#define AM335X_LCD_SYSCONFIG_OFFSET             0x0054
+#define AM335X_LCD_SYSC_OFFSET                  0x0054
 #define AM335X_LCD_IRQ_STAT_RAW_OFFSET          0x0058
 #define AM335X_LCD_IRQ_STAT_OFFSET              0x005c
 #define AM335X_LCD_IRQ_EN_SET_OFFSET            0x0060
@@ -105,7 +105,7 @@
 #define AM335X_LCD_DMA_FB0_CEIL                 (AM335X_LCD_VADDR + AM335X_LCD_DMA_FB0_CEIL_OFFSET)
 #define AM335X_LCD_DMA_FB1_BASE                 (AM335X_LCD_VADDR + AM335X_LCD_DMA_FB1_BASE_OFFSET)
 #define AM335X_LCD_DMA_FB1_CEIL                 (AM335X_LCD_VADDR + AM335X_LCD_DMA_FB1_CEIL_OFFSET)
-#define AM335X_LCD_SYSCONFIG                    (AM335X_LCD_VADDR + AM335X_LCD_SYSCONFIG_OFFSET)
+#define AM335X_LCD_SYSC                         (AM335X_LCD_VADDR + AM335X_LCD_SYSC_OFFSET)
 #define AM335X_LCD_IRQ_STAT_RAW                 (AM335X_LCD_VADDR + AM335X_LCD_IRQ_STAT_RAW_OFFSET)
 #define AM335X_LCD_IRQ_STAT                     (AM335X_LCD_VADDR + AM335X_LCD_IRQ_STAT_OFFSET)
 #define AM335X_LCD_IRQ_EN_SET                   (AM335X_LCD_VADDR + AM335X_LCD_IRQ_EN_SET_OFFSET)
@@ -256,16 +256,16 @@
 #define LCD_DMA_FB_CEIL_SHIFT                   (2)  /* Bits 2-31:  Frame Buffer Ceiling Address pointer */
 #define LCD_DMA_FB_CEIL_MASK                    (0x3fffffff << LCD_DMA_FB_BASE_SHIFT)
 
-#define LCD_SYSCONFIG_IDLE_SHIFT                (2)  /* Bits 2-3:  Configuration of the local target state management mode */
-#define LCD_SYSCONFIG_IDLE_MASK                 (3 << LCD_SYSCONFIG_IDLE_SHIFT)
-#  define LCD_SYSCONFIG_IDLE_FORCE              (0 << LCD_SYSCONFIG_IDLEMODE_SHIFT) /* Force-idle mode */
-#  define LCD_SYSCONFIG_IDLE_NO                 (1 << LCD_SYSCONFIG_IDLEMODE_SHIFT) /* No-idle mode */
-#  define LCD_SYSCONFIG_IDLE_SMART              (2 << LCD_SYSCONFIG_IDLEMODE_SHIFT) /* Smart-idle mode */
-#define LCD_SYSCONFIG_STANDBY_SHIFT             (4)  /* Bits 4-5:  Configuration of the local initiator state management mode */
-#define LCD_SYSCONFIG_STANDBY_MASK              (3 << LCD_SYSCONFIG_STANDBY_SHIFT)
-#  define LCD_SYSCONFIG_STANDBY_FORCE           (0 << LCD_SYSCONFIG_STANDBY_SHIFT) /* Force-standby mode */
-#  define LCD_SYSCONFIG_STANDBY_NO              (1 << LCD_SYSCONFIG_STANDBY_SHIFT) /* No-standby mode */
-#  define LCD_SYSCONFIG_STANDBY_SMART           (2 << LCD_SYSCONFIG_STANDBY_SHIFT) /* Smart-standby mode */
+#define LCD_SYSC_IDLE_SHIFT                     (2)  /* Bits 2-3:  Configuration of the local target state management mode */
+#define LCD_SYSC_IDLE_MASK                      (3 << LCD_SYSC_IDLE_SHIFT)
+#  define LCD_SYSC_IDLE_FORCE                   (0 << LCD_SYSC_IDLE_SHIFT) /* Force-idle mode */
+#  define LCD_SYSC_IDLE_NO                      (1 << LCD_SYSC_IDLE_SHIFT) /* No-idle mode */
+#  define LCD_SYSC_IDLE_SMART                   (2 << LCD_SYSC_IDLE_SHIFT) /* Smart-idle mode */
+#define LCD_SYSC_STANDBY_SHIFT                  (4)  /* Bits 4-5:  Configuration of the local initiator state management mode */
+#define LCD_SYSC_STANDBY_MASK                   (3 << LCD_SYSC_STANDBY_SHIFT)
+#  define LCD_SYSC_STANDBY_FORCE                (0 << LCD_SYSC_STANDBY_SHIFT) /* Force-standby mode */
+#  define LCD_SYSC_STANDBY_NO                   (1 << LCD_SYSC_STANDBY_SHIFT) /* No-standby mode */
+#  define LCD_SYSC_STANDBY_SMART                (2 << LCD_SYSC_STANDBY_SHIFT) /* Smart-standby mode */
 
 #define LCD_IRQ_DONE                            (1 << 0)  /* Bit 0:  Raster or LIDD Frame Done */
 #define LCD_IRQ_RR_DONE                         (1 << 1)  /* Bit 1:  Raster Mode Frame Done */
