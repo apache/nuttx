@@ -87,7 +87,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: July 5, 2019</p>
+      <p>Last Updated: July 6, 2019</p>
     </td>
   </tr>
 </table>
@@ -2092,7 +2092,14 @@ ptr = (FAR struct somestruct_s *)value;
     As a rule of thumb, the length of a function should be limited so that it would fit on a single page (if you were to print the source code).
   </li>
   <li>
-    <b>Space after the function body</b>
+    <b>Return Statement</b>.
+    The argument of the <code>return</code> statement should <i>not</i> be enclosed in parentheses.
+    A reasonable exception is the case where the returned value argument is a complex expression and where the parentheses improve the readability of the code.
+    Such complex expressions might be Boolean expressions or expressions containing conditions.
+    Simple arithmetic computations would not be considered <i>complex</i> expressions.
+  </li>
+  <li>
+    <b>Space after the function body</b>.
     A one (and only one) blank line must follow the closing right brace of the function body.
   </li>
 </ul>
@@ -2121,7 +2128,7 @@ ptr = (FAR struct somestruct_s *)value;
             }
         }
 
-      return e / a;
+      return (e / a);
     }
 </ul></pre></font>
 </td></tr>
@@ -2129,28 +2136,28 @@ ptr = (FAR struct somestruct_s *)value;
 <p><font color="green"><b>Correct</b></p>
 <ul><pre>
   int myfunction(int a, int b)
-    {
-      int c;
-      int d;
-      int e;
-      int i;
+  {
+    int c;
+    int d;
+    int e;
+    int i;
 
-      c = a
-      d = b;
-      e = c + d;
+    c = a
+    d = b;
+    e = c + d;
 
-      for (i = 0; i &lt; a; i++)
-        {
-          int j;
+    for (i = 0; i &lt; a; i++)
+      {
+        int j;
 
-          for (j = 0; j &lt; b; j++)
-            {
-              e += j * d;
-            }
-        }
+        for (j = 0; j &lt; b; j++)
+          {
+            e += j * d;
+          }
+      }
 
-      return e / a;
-    }
+    return e / a;
+  }
 </ul></pre></font>
 </td></tr>
 </table></center>
