@@ -186,7 +186,7 @@
 #define I2C_SYSC_CLK_MASK                       (3 << I2C_SYSC_CLK_SHIFT)
 #  define I2C_SYSC_CLK_NONE                     (0 << I2C_SYSC_CLK_SHIFT) /* Both clocks can be cut off */
 #  define I2C_SYSC_CLK_OCP                      (1 << I2C_SYSC_CLK_SHIFT) /* Only Interface/OCP clock must be kept active */
-#  define I2C_SYSC_CLK_SYS                      (2 << I2C_SYSC_CLK_SHIFT) /* Only system clock must be kept active */
+#  define I2C_SYSC_CLK_FUNC                     (2 << I2C_SYSC_CLK_SHIFT) /* Only functions clock must be kept active */
 #  define I2C_SYSC_CLK_BOTH                     (3 << I2C_SYSC_CLK_SHIFT) /* Both clocks must be kept active */
 
 #define I2C_IRQ_AL                              (1 << 0)  /* Bit 0:  Arbitration lost */
