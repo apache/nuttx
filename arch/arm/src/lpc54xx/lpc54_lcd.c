@@ -335,7 +335,7 @@ static int lpc54_putcmap(FAR struct fb_vtable_s *vtable,
                        (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
                        (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
 
-      /* Handle the case where the len ends on an odd boudary */
+      /* Handle the case where the len ends on an odd boundary */
 
       if ((i + 1) >= last)
         {
