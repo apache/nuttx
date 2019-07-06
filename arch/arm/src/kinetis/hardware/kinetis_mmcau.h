@@ -49,6 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Register Offsets *****************************************************************/
 
 #define KINETIS_CAU_CASR_OFFSET  0x0000  /* Status Register */
@@ -140,3 +141,4 @@
 
 #endif /* KINETIS_NMMCAU && KINETIS_NMMCAU > 0 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MMCAU_H */
+

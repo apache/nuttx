@@ -1,6 +1,6 @@
 /********************************************************************************************
  * include/nuttx/lcd/edid.h
- *  EDID (Extended Display Identification Data) Format
+ * EDID (Extended Display Identification Data) Format
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
