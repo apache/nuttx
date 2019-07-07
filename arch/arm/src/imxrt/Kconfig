@@ -141,6 +141,10 @@ config ARCH_FAMILY_IMXRT106x
 
 # Peripheral support
 
+config IMXRT_USDHC
+       bool
+       default n
+
 config IMXRT_HAVE_LPUART
 	bool
 	default n
@@ -391,12 +395,21 @@ config IMXRT_SNVS_HPRTC
 	bool "HP RTC"
 	default n
 
-config IMXRT_USDHC
-	bool "USDHC"
+config IMXRT_USDHC1
+	bool "USDHC1"
 	default n
 	select ARCH_HAVE_SDIO
+	select IMXRT_USDHC
 	---help---
-		Support SD host controller
+		Support USDHC host controller 1
+
+config IMXRT_USDHC2
+	bool "USDHC2"
+	default n
+	select ARCH_HAVE_SDIO
+	select IMXRT_USDHC
+	---help---
+		Support USDHC host controller 2
 
 endmenu # i.MX RT Peripheral Selection
 

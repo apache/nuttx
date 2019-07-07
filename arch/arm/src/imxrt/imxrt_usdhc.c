@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_usdhc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Dave Marples <dave@marples.net>
  *
@@ -77,15 +77,13 @@
 
 /* Configuration ************************************************************/
 
-/* Fixme: This is a temporary fix to default to how this worked before,
- * and still allow an override to 2 slots for testing.
- *
- * Once Dave changes this to be keyed off CONFIG_IMXRT_USDHC1 and 2
- * delete this.
- */
-
-#if !defined(CONFIG_IMXRT_MAX_SDHCDEV_SLOTS)
-#  define  CONFIG_IMXRT_MAX_SDHCDEV_SLOTS  1
+#if ((defined(CONFIG_IMXRT_USDHC1) && !defined(CONFIG_IMXRT_USDHC2)) ||	\
+     (defined(CONFIG_IMXRT_USDHC2) && !defined(CONFIG_IMXRT_USDHC1)))
+#  define  IMXRT_MAX_SDHC_DEV_SLOTS  1
+#elif (defined(CONFIG_IMXRT_USDHC1) && defined(CONFIG_IMXRT_USDHC2))
+#  define  IMXRT_MAX_SDHC_DEV_SLOTS  2
+#else
+#error Unrecognised number of SDHC slots
 #endif
 
 #if !defined(CONFIG_IMXRT_USDHC_DMA)
@@ -372,8 +370,9 @@ static void imxrt_callback(void *arg);
  * Private Data
  ****************************************************************************/
 
-struct imxrt_dev_s g_sdhcdev[CONFIG_IMXRT_MAX_SDHCDEV_SLOTS] =
+struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
 {
+#ifdef CONFIG_IMXRT_USDHC1
   {
     .addr               = IMXRT_USDHC1_BASE,
     .dev                =
@@ -423,7 +422,9 @@ struct imxrt_dev_s g_sdhcdev[CONFIG_IMXRT_MAX_SDHCDEV_SLOTS] =
 #endif
     }
   },
-#if (CONFIG_IMXRT_MAX_SDHCDEV_SLOTS > 1)
+#endif
+
+#ifdef CONFIG_IMXRT_USDHC2
   {
     .addr               = IMXRT_USDHC2_BASE,
     .dev                =
@@ -1622,7 +1623,7 @@ static void imxrt_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
    * ORed in.
    */
 
-  regval = getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
+  regval  = getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
   regval &= ~(USDHC_SYSCTL_SDCLKFS_MASK | USDHC_SYSCTL_DVS_MASK);
 
   /* Select the new prescaler and divisor values based on the requested
@@ -2704,7 +2705,7 @@ static int imxrt_registercallback(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
   priv->cbevents = 0;
-  priv->cbarg = arg;
+  priv->cbarg    = arg;
   priv->callback = callback;
   return OK;
 }
@@ -2799,7 +2800,7 @@ static int imxrt_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer = (uint32_t *) buffer;
+  priv->buffer    = (uint32_t *) buffer;
   priv->remaining = buflen;
 
   /* Then set up the SDIO data path */
@@ -2953,7 +2954,7 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
  *   Initialize SDIO for operation.
  *
  * Input Parameters:
- *   slotno - Not used.
+ *   slotno - Slot to be used
  *
  * Returned Value:
  *   A reference to an SDIO interface structure.
@@ -2963,7 +2964,7 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
 
 FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
 {
-  DEBUGASSERT(slotno < CONFIG_IMXRT_MAX_SDHCDEV_SLOTS);
+  DEBUGASSERT(slotno < IMXRT_MAX_SDHC_DEV_SLOTS);
   struct imxrt_dev_s *priv = &g_sdhcdev[slotno];
 
   /* Initialize the USDHC slot structure data structure
@@ -2980,17 +2981,19 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
 
   /* Create a watchdog timer */
 
-  priv->waitwdog = wd_create(); DEBUGASSERT(priv->waitwdog);
+  priv->waitwdog = wd_create();
+  DEBUGASSERT(priv->waitwdog);
 
-  /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is
-   * capable of 8-bit wide bus operation but D4-D7 are not configured). If
-   * bus is multiplexed then there is a custom bus configuration utility
-   * in the scope of the board support package.
-   */
+  switch (priv->addr)
+    {
+    case IMXRT_USDHC1_BASE:
+      /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is
+       * capable of 8-bit wide bus operation but D4-D7 are not configured). If
+       * bus is multiplexed then there is a custom bus configuration utility
+       * in the scope of the board support package.
+       */
 
 #ifndef CONFIG_SDIO_MUXBUS
-  if (slotno == 0)
-    {
       /* Data width 1, 4 */
 
       (void)imxrt_config_gpio(PIN_USDHC1_D0);
@@ -3002,7 +3005,6 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
       (void)imxrt_config_gpio(PIN_USDHC1_D2);
       (void)imxrt_config_gpio(PIN_USDHC1_D3);
 #endif
-
       /* Clocking and CMD pins (all data widths) */
 
       (void)imxrt_config_gpio(PIN_USDHC1_DCLK);
@@ -3013,38 +3015,25 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
       (void)imxrt_config_gpio(PIN_USDHC1_CD);
 #endif
 
-      /* Reset the card and assure that it is in the initial, unconfigured
-       * state.
-       */
-
       imxrt_clockall_usdhc1();
-      imxrt_reset(&priv->dev);
-      imxrt_showregs(priv, "After reset");
-    }
+      break;
 
-#if (CONFIG_IMXRT_MAX_SDHCDEV_SLOTS > 1)
-  else if (slotno == 1)
-    {
+    case IMXRT_USDHC2_BASE:
       (void)imxrt_config_gpio(PIN_USDHC2_D0);
       (void)imxrt_config_gpio(PIN_USDHC2_D1);
       (void)imxrt_config_gpio(PIN_USDHC2_D2);
       (void)imxrt_config_gpio(PIN_USDHC2_D3);
       (void)imxrt_config_gpio(PIN_USDHC2_DCLK);
       (void)imxrt_config_gpio(PIN_USDHC2_CMD);
-
-      /* Reset the card and assure that it is in the initial, unconfigured
-       * state.
-       */
-
       imxrt_clockall_usdhc2();
-      imxrt_reset(&priv->dev);
-      imxrt_showregs(priv, "After reset");
-    }
-#endif
-  else
-    {
+      break;
+
+    default:
       return NULL;
     }
+
+  imxrt_reset(&priv->dev);
+  imxrt_showregs(priv, "After reset");
 
   return &g_sdhcdev[slotno].dev;
 }
