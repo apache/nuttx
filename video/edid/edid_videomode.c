@@ -1,7 +1,7 @@
 /****************************************************************************
  * video/edid/edid_parse.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from logic in FreeBSD which has an equivalent 3-clause BSD

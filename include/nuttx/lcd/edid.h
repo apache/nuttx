@@ -601,9 +601,12 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
  * Name:  edid_sort_modes
  *
  * Description:
- *   Sort video modes by refresh rate, aspect ratio (*), then resolution.
+ *   Sort video modes by refresh rate, aspect ratio, then resolution.
  *   Preferred mode or largest mode is first in the list and other modes
  *   are sorted on closest match to that mode.
+ *
+ *   Note that the aspect ratio calculation treats "close" aspect ratios
+ *   (within 12.5%) as the same for this purpose.
  *
  * Input Parameters:
  *   modes     - A reference to the first entry in a list of video modes
