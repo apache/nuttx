@@ -1684,6 +1684,10 @@ menu "Audio Support"
 source audio/Kconfig
 endmenu
 
+menu "Video Support"
+source video/Kconfig
+endmenu
+
 menu "Wireless Support"
 source wireless/Kconfig
 endmenu

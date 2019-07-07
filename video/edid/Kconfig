@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config VIDEO_EDID
+	bool "EDID Support"
+	default n
+	---help---
+		Enable support for managing EDID data EDID (Extended Display
+		Identification Data).
+

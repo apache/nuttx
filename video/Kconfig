@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Video subsystem"
+
+config VIDEO
+	bool "Video Support"
+	default n
+	---help---
+		Enables overall support for Video library.
+
+if VIDEO
+
+source video/edid/Kconfig
+
+endif # VIDEO

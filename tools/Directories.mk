@@ -142,6 +142,12 @@ else
 OTHERDIRS += audio
 endif
 
+ifeq ($(CONFIG_VIDEO),y)
+NONFSDIRS += video
+else
+OTHERDIRS += video
+endif
+
 ifeq ($(CONFIG_WIRELESS),y)
 NONFSDIRS += wireless
 else

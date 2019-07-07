@@ -49,6 +49,8 @@
  * Included Files
  ********************************************************************************************/
 
+#include <stdint.h>
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
@@ -58,91 +60,95 @@
 /* EDID data offsets ************************************************************************/
 /* Bytes 0-7:  Header Information */
 
-#define EDID_HEADER_MAGIC             0     /* Fixed header pattern: 00 FF FF FF FF FF FF 00 */
-#define EDID_HEADER_MAGIC_SIZE        8
-
+#define EDID_HEADER_MAGIC_OFFSET        0     /* Fixed header pattern: 00 FF FF FF FF FF FF 00 */
+#define EDID_HEADER_MAGIC_SIZE          8
+ 
 /* Bytes 8-17:  Vendor Information */
 
-#define EDID_VENDOR_MANUFACTURER      8     /* Encoded 3-character manufacture ID */
-#define EDID_VENDOR_MANUFACTURER_SIZE 2     /* 16-bit, big endian value */
+#define EDID_VENDOR_MANUFACTURER_OFFSET 8     /* Encoded 3-character manufacture ID */
+#define EDID_VENDOR_MANUFACTURER_SIZE   2     /* 16-bit, big endian value */
 
-#define EDID_VENDOR_PRODUCTCODE       10    /* Product code.  16-bit, little endian value */
-#define EDID_VENDOR_PRODUCTCODE_SIZE  2
+#define EDID_VENDOR_PRODUCTCODE_OFFSET  10    /* Product code.  16-bit, little endian value */
+#define EDID_VENDOR_PRODUCTCODE_SIZE    2
 
-#define EDID_VENDOR_SERIALNO          12    /* Serial number:  32-bit, little endian value */
-#define EDID_VENDOR_SERIALNO_SIZE     4
+#define EDID_VENDOR_SERIALNO_OFFSET     12    /* Serial number:  32-bit, little endian value */
+#define EDID_VENDOR_SERIALNO_SIZE       4
 
-#define EDID_VENDOR_WEEK              16    /* Week of manufacture or model year flag */
-#define EDID_VENDOR_YEAR              17    /* Year of manufacture (minus 1990) */
+#define EDID_VENDOR_WEEK_OFFSET         16    /* Week of manufacture or model year flag */
+#define EDID_VENDOR_YEAR_OFFSET         17    /* Year of manufacture (minus 1990) */
 
 /* Bytes 18-19:  EDID Version */
 
-#define EDID_VERSION_MAJOR            18    /* EDID version, usually 1 (for 1.3)  */
-#define EDID_VERSION_MINOR            19    /* EDID revision, usually 3 (for 1.3)  */
+#define EDID_VERSION_MAJOR_OFFSET       18    /* EDID version, usually 1 (for 1.3)  */
+#define EDID_VERSION_MINOR_OFFSET       19    /* EDID revision, usually 3 (for 1.3)  */
 
 /* Bytes 20-44:  Display Information */
 
-#define EDID_DISPLAY_INPUT            20   /* Video input parameters bitmap */
-#define EDID_DISPLAY_HSIZE            21   /* Horizontal screen size, in centimetres */
-#define EDID_DISPLAY_VSIZE            22   /* Vertical screen size, in centimetres */
-#define EDID_DISPLAY_GAMMA            23   /* Display gamma, factory default */
-#define EDID_DISPLAY_FEATURES         24   /* Support features bitmap */
+#define EDID_DISPLAY_INPUT_OFFSET       20   /* Video input parameters bitmap */
+#define EDID_DISPLAY_HSIZE_OFFSET       21   /* Horizontal screen size, in centimetres */
+#define EDID_DISPLAY_VSIZE_OFFSET       22   /* Vertical screen size, in centimetres */
+#define EDID_DISPLAY_GAMMA_OFFSET       23   /* Display gamma, factory default */
+#define EDID_DISPLAY_FEATURES_OFFSET    24   /* Support features bitmap */
 
 /* Bytes 25-34:  Chromaticity */
 
-#define EDID_CHROMA_RG_LOW            25   /* Red and green least-significant bits (2^9, 2^10) */
-#define EDID_CHROMA_BW_LOW            26   /* Blue and white least-significant 2 bits */
-#define EDID_CHROMA_REDX              27   /* Red x value most significant 8 bits (2^1,...,2^8) */
-#define EDID_CHROMA_REDY              28   /* Red y value most significant 8 bits  */
-#define EDID_CHROMA_GREENX            29   /* Green x value most significant 8 bits */
-#define EDID_CHROMA_GREENY            30   /* Green y value most significant 8 bits */
-#define EDID_CHROMA_BLUEX             31   /* Blue x value most significant 8 bits */
-#define EDID_CHROMA_BLUEY             32   /* Blue y value most significant 8 bits */
-#define EDID_CHROMA_WHITEX            33   /* Default white point x value most significant 8 bits */
-#define EDID_CHROMA_WHITEY            34   /* Default white point y value most significant 8 bits */
+#define EDID_CHROMA_RG_LOW_OFFSET       25   /* Red and green least-significant bits (2^9, 2^10) */
+#define EDID_CHROMA_BW_LOW_OFFSET       26   /* Blue and white least-significant 2 bits */
+#define EDID_CHROMA_REDX_OFFSET         27   /* Red x value most significant 8 bits (2^1,...,2^8) */
+#define EDID_CHROMA_REDY_OFFSET         28   /* Red y value most significant 8 bits  */
+#define EDID_CHROMA_GREENX_OFFSET       29   /* Green x value most significant 8 bits */
+#define EDID_CHROMA_GREENY_OFFSET       30   /* Green y value most significant 8 bits */
+#define EDID_CHROMA_BLUEX_OFFSET        31   /* Blue x value most significant 8 bits */
+#define EDID_CHROMA_BLUEY_OFFSET        32   /* Blue y value most significant 8 bits */
+#define EDID_CHROMA_WHITEX_OFFSET       33   /* Default white point x value most significant 8 bits */
+#define EDID_CHROMA_WHITEY_OFFSET       34   /* Default white point y value most significant 8 bits */
 
 /* Bytes 35-37:  Established timing bitmap */
 
-#define EDID_TIMING_1                 35
-#define EDID_TIMING_2                 36
-#define EDID_TIMING_3                 37
+#define EDID_TIMING_OFFSET_1            35
+#define EDID_TIMING_OFFSET_2            36
+#define EDID_TIMING_OFFSET_3            37
 
 /* Bytes 38-53:  Standard Timing Information */
 
-#define EDID_STDTIMING_1              38   /* Each is size two bytes. */
-#define EDID_STDTIMING_2              40
-#define EDID_STDTIMING_3              42
-#define EDID_STDTIMING_4              44
-#define EDID_STDTIMING_5              45
-#define EDID_STDTIMING_6              48
-#define EDID_STDTIMING_7              50
-#define EDID_STDTIMING_8              52
+#define EDID_STDTIMING_OFFSET           38   /* Each is size two bytes. */
+#define EDID_STDTIMING_OFFSET_1         38
+#define EDID_STDTIMING_OFFSET_2         40
+#define EDID_STDTIMING_OFFSET_3         42
+#define EDID_STDTIMING_OFFSET_4         44
+#define EDID_STDTIMING_OFFSET_5         45
+#define EDID_STDTIMING_OFFSET_6         48
+#define EDID_STDTIMING_OFFSET_7         50
+#define EDID_STDTIMING_OFFSET_8         52
 
-#define EDID_STDTIMING_NUMBER         8
-#define EDID_STDTIMING_SIZE           2
+#define EDID_STDTIMING_NUMBER           8
+#define EDID_STDTIMING_SIZE             2
 
 /* Bytes 54-125:  Descriptor Blocks */
 
-#define EDID_DESCRIPTOR_1             54   /* Each is size 18 bytes */
-#define EDID_DESCRIPTOR_2             72
-#define EDID_DESCRIPTOR_3             90
-#define EDID_DESCRIPTOR_4             108
+#define EDID_DESCRIPTOR_OFFSET          54   /* Each is size 18 bytes */
+#define EDID_DESCRIPTOR_OFFSET_1        54
+#define EDID_DESCRIPTOR_OFFSET_2        72
+#define EDID_DESCRIPTOR_OFFSET_3        90
+#define EDID_DESCRIPTOR_OFFSET_4        108
 
-#define EDID_DESCRIPTOR_NUMBER        4
-#define EDID_DESCRIPTOR_SIZE          18
+#define EDID_DESCRIPTOR_NUMBER          4
+#define EDID_DESCRIPTOR_SIZE            18
 
 /* Bits 126-127:  Trailer */
 
-#define EDID_TRAILER_NEXTENSIONS      126  /* Number of extensions to follow */
-#define EDID_TRAILER_CHECKSUM         127  /* Checksum. Sum of all 128 bytes should equal 0 */
+#define EDID_TRAILER_NEXTENSIONS_OFFSET 126  /* Number of extensions to follow */
+#define EDID_TRAILER_CHECKSUM_OFFSET    127  /* Checksum. Sum of all 128 bytes should equal 0 */
 
 /* EDID Bitfield Definitions ****************************************************************/
 
+#define EDID_MAGIC                        {0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0}
+
 /* Vendor Section: Manufacturer ID */
 
-#define EDID_VENDOR_MANUFACTURER_1(n)     (((n) >> 10) & 0x3f) + 'A')
-#define EDID_VENDOR_MANUFACTURER_2(n)     (((n) >>  5) & 0x3f) + 'A')
-#define EDID_VENDOR_MANUFACTURER_3(n)     ( (n) >>  0  & 0x3f) + 'A')
+#define EDID_VENDOR_MANUFACTURER_1(n)     ((((n) >> 10) & 0x1f) + '@')
+#define EDID_VENDOR_MANUFACTURER_2(n)     ((((n) >>  5) & 0x1f) + '@')
+#define EDID_VENDOR_MANUFACTURER_3(n)     ((((n) >>  0) & 0x1f) + '@')
 
 /* Display Section: Display Input */
 
@@ -213,6 +219,45 @@
 #define EDID_CHROMA_RG_LOW_RED_X_SHIFT    (6)       /* Bits 6-7:  Red x value least-significant 2 bits */
 #define EDID_CHROMA_RG_LOW_RED_X_MASK     (3 << EDID_CHROMA_RG_LOW_RED_X_SHIFT)
 
+#define EDID_CHROMA_BW_LOW_WHITE_Y_SHIFT  (0)       /* Bits 0-1:  White y value least-significant 2 bits */
+#define EDID_CHROMA_BW_LOW_WHITE_Y_MASK   (3 << EDID_CHROMA_BW_LOW_WHITE_Y_SHIFT)
+#define EDID_CHROMA_BW_LOW_WHITE_X_SHIFT  (2)       /* Bits 2-3:  White x value least-significant 2 bits */
+#define EDID_CHROMA_BW_LOW_WHITE_X_MASK   (3 << EDID_CHROMA_BW_LOW_WHITE_X_SHIFT)
+#define EDID_CHROMA_BW_LOW_BLUE_Y_SHIFT   (4)       /* Bits 4-5:  Blue y value least-significant 2 bits */
+#define EDID_CHROMA_BW_LOW_BLUE_Y_MASK    (3 << EDID_CHROMA_BW_LOW_BLUE_Y_SHIFT)
+#define EDID_CHROMA_BW_LOW_BLUE_X_SHIFT   (6)       /* Bits 6-7:  Blue x value least-significant 2 bits */
+#define EDID_CHROMA_BW_LOW_BLUE_X_MASK    (3 << EDID_CHROMA_RG_LOW_RED_X_SHIFT)
+
+#define _CHLO(b,s)                        (((b) >> (s)) & 0x3)
+#define _CHHI(b)                          ((b) << 2)
+#define _CHHILO(p,l,s,h)                  (_CHLO((p)[l], s) | _CHHI((p)[h]))
+#define _CHROMA(p,l,s,h)                  ((_CHHILO(p,l,s,h) * 1000) / 1024)
+
+#define EDID_CHROMA_RED_X(p) \
+  (_CHROMA(p, EDID_CHROMA_RG_LOW_OFFSET, EDID_CHROMA_RG_LOW_RED_X_SHIFT, \
+           EDID_CHROMA_REDX_OFFSET))
+#define EDID_CHROMA_RED_Y(p) \
+  (_CHROMA(p, EDID_CHROMA_RG_LOW_OFFSET, EDID_CHROMA_RG_LOW_RED_Y_SHIFT, \
+           EDID_CHROMA_REDY_OFFSET))
+#define EDID_CHROMA_GREEN_X(p) \
+  (_CHROMA(p, EDID_CHROMA_RG_LOW_OFFSET, EDID_CHROMA_RG_LOW_GREEN_X_SHIFT, \
+           EDID_CHROMA_GREENX_OFFSET))
+#define EDID_CHROMA_GREEN_Y(p) \
+  (_CHROMA(p, EDID_CHROMA_RG_LOW_OFFSET, EDID_CHROMA_RG_LOW_GREEN_Y_SHIFT, \
+           EDID_CHROMA_GREENY_OFFSET))
+#define EDID_CHROMA_BLUE_X(p) \
+  (_CHROMA(p, EDID_CHROMA_BW_LOW_OFFSET, EDID_CHROMA_BW_LOW_BLUE_X_SHIFT, \
+           EDID_CHROMA_BLUEX_OFFSET))
+#define EDID_CHROMA_BLUE_Y(p) \
+  (_CHROMA(p, EDID_CHROMA_BW_LOW_OFFSET, EDID_CHROMA_BW_LOW_BLUE_Y_SHIFT, \
+           EDID_CHROMA_BLUEY_OFFSET))
+#define EDID_CHROMA_WHITE_X(p) \
+  (_CHROMA(p, EDID_CHROMA_BW_LOW_OFFSET, EDID_CHROMA_BW_LOW_WHITE_X_SHIFT, \
+           EDID_CHROMA_WHITEX_OFFSET))
+#define EDID_CHROMA_WHITE_Y(p) \
+  (_CHROMA(p, EDID_CHROMA_BW_LOW_OFFSET, EDID_CHROMA_BW_LOW_WHITE_Y_SHIFT, \
+           EDID_CHROMA_WHITEY_OFFSET))
+
 /* Bytes 35-37:  Established timing bitmap */
 
 #define EDID_TIMING_1_800x600_60Hz        (1 << 0)
@@ -245,11 +290,16 @@
 #define ASPECT_RATIO_16_9                 3         /* Aspect ratio: 16:9 */
 
 #define EDID_STDTIMING_XRES_OFFSET        (0)       /* Byte 0: X resolution, divided by 8, less 31 */
-#define EDID_STDTIMING_INFO_OFFSET        (1)       /* Byte 1: Image Aspect Ratio / Vertical Frequency */
 #  define EDID_STDTIMING_ASPECT_SHIFT     (6)       /* Bits 6-7: Image aspect ratio */
 #  define EDID_STDTIMING_ASPECT_MASK      (3 << EDID_STDTIMING_ASPECT_SHIFT)
+#    define EDID_STDTIMING_ASPECT_16_10   (ASPECT_RATIO_16_10 << EDID_STDTIMING_ASPECT_SHIFT)
+#    define EDID_STDTIMING_ASPECT_4_3     (ASPECT_RATIO_4_3 << EDID_STDTIMING_ASPECT_SHIFT)
+#    define EDID_STDTIMING_ASPECT_5_4     (ASPECT_RATIO_5_4 << EDID_STDTIMING_ASPECT_SHIFT)
+#    define EDID_STDTIMING_ASPECT_16_9    (ASPECT_RATIO_16_9 << EDID_STDTIMING_ASPECT_SHIFT)
 #  define EDID_STDTIMING_VFREQ_SHIFT      (0)       /* Bits 0-5: Vertical frequency, less 60 */
 #  define EDID_STDTIMING_VFREQ_MASK       (0x3f << EDID_STDTIMING_VFREQ_SHIFT)
+
+#define EDID_STDTIMING_INFO_OFFSET        (1)       /* Byte 1: Image Aspect Ratio / Vertical Frequency */
 
 /* Display Descriptor: EDID Detailed Timing Descriptor */
 
@@ -261,29 +311,29 @@
 #define EDID_STEROMODE_LEFT               2         /* Left image on even lines (bit0=1) */
 #define EDID_STEROMODE_SIDEBYSIDE         3         /* Side-by-side (bit0=1) */
 
-#define EDID_DESC_PIXCLOCK                0         /* Bytes 0-1: Pixel clock in 10 kHz units */
-#define EDID_DESC_HPIXELS_LSBITS          2         /* Byte 2: Horizontal active pixels 8 LS bits */
-#define EDID_DESC_HBLANK_LSBITS           3         /* Byte 3: Horizontal blanking pixels 8 LS bits */
-#define EDID_DESC_HMSBITS                 4         /* Byte 4: Horizontal MS bits */
+#define EDID_DESC_PIXCLOCK_OFFSET         0         /* Bytes 0-1: Pixel clock in 10 kHz units */
+#define EDID_DESC_HPIXELS_LSBITS_OFFSET   2         /* Byte 2: Horizontal active pixels 8 LS bits */
+#define EDID_DESC_HBLANK_LSBITS_OFFSET    3         /* Byte 3: Horizontal blanking pixels 8 LS bits */
+#define EDID_DESC_HMSBITS_OFFSET          4         /* Byte 4: Horizontal MS bits */
 #  define EDID_DESC_HBLANK_MSBITS_SHIFT   (0)       /* Bits 0-3: Horizontal blanking pixels 4 MS bits */
-#  define EDID_DESC_HBLANK_MSBITS_MASK    (15 << EDID_DESC_HPIXELS_MSBITS_SHIFT)
+#  define EDID_DESC_HBLANK_MSBITS_MASK    (15 << EDID_DESC_HBLANK_MSBITS_SHIFT)
 #  define EDID_DESC_HPIXELS_MSBITS_SHIFT  (4)       /* Bits 4-7: Horizontal active pixels 4 MS bits */
 #  define EDID_DESC_HPIXELS_MSBITS_MASK   (15 << EDID_DESC_HPIXELS_MSBITS_SHIFT)
-#define EDID_DESC_VLINES_LSBITS           5         /* Byte 5: Vertical active lines 8 LS bits */
-#define EDID_DESC_VBLANK_LSBITS           6         /* Byte 6: Vertical blanking lines 8 LS bits */
-#define EDID_DESC_VMSBITS                 7         /* Byte 7: Vertical MS bits */
+#define EDID_DESC_VLINES_LSBITS_OFFSET    5         /* Byte 5: Vertical active lines 8 LS bits */
+#define EDID_DESC_VBLANK_LSBITS_OFFSET    6         /* Byte 6: Vertical blanking lines 8 LS bits */
+#define EDID_DESC_VMSBITS_OFFSET          7         /* Byte 7: Vertical MS bits */
 #  define EDID_DESC_VBLANK_MSBITS_SHIFT   (0)       /* Bits 0-3: Vertical blanking lines 4 MS bits */
 #  define EDID_DESC_VBLANK_MSBITS_MASK    (15 << EDID_DESC_VBLANK_MSBITS_SHIFT)
 #  define EDID_DESC_VLINES_MSBITS_SHIFT   (4)       /* Bits 4-7: Vertical active lines 4 MS bits */
 #  define EDID_DESC_VLINES_MSBITS_MASK    (15 << EDID_DESC_VLINES_MSBITS_SHIFT)
-#define EDID_DESC_HPORCH_LSBITS           8         /* Byte 8: Horizontal front porch pixels 8 LS bits */
-#define EDID_DESC_HPW_LSBITS              9         /* Byte 9: Horizontal sync pulse width pixels 8 LS bits */
-#define EDID_DESC_VPORCH_LSBITS           10        /* Byte 10: Vertical front porch and pulsewidth LS bits */
+#define EDID_DESC_HPORCH_LSBITS_OFFSET    8         /* Byte 8: Horizontal front porch pixels 8 LS bits */
+#define EDID_DESC_HPW_LSBITS_OFFSET       9         /* Byte 9: Horizontal sync pulse width pixels 8 LS bits */
+#define EDID_DESC_VPORCH_LSBITS_OFFSET    10        /* Byte 10: Vertical front porch and pulsewidth LS bits */
 #  define EDID_DESC_VPW_LSBITS_SHIFT      (0)       /* Bits 0-3: Vertical sync pulsewidth 4 LS bits */
 #  define EDID_DESC_VPW_LSBITS_MASK       (15 << EDID_DESC_VPW_LSBITS_SHIFT)
 #  define EDID_DESC_VPORCH_LSBITS_SHIFT   (4)       /* Bits 4-7: Vertical front portch 4 LS bits */
 #  define EDID_DESC_VPORCH_LSBITS_MASK    (15 << EDID_DESC_VPORCH_LSBITS_SHIFT)
-#define EDID_DESC_PORCH_MSBITS            11        /* Byte 7: Vertical MS bits */
+#define EDID_DESC_PORCH_MSBITS_OFFSET     11        /* Byte 11: Vertical MS bits */
 #  define EDID_DESC_VPW_MSBITS_SHIFT      (0)       /* Bits 0-1: Vertical sync pulsewidth lines 2 MS bits */
 #  define EDID_DESC_VPW_MSBITS_MASK       (3 << EDID_DESC_VPW_MSBITS_SHIFT)
 #  define EDID_DESC_VPORCH_MSBITS_SHIFT   (2)       /* Bits 2-3: Vertical front porch lines 2 MS bits */
@@ -292,16 +342,16 @@
 #  define EDID_DESC_HPW_MSBITS_MASK       (3 << EDID_DESC_HPW_MSBITS_SHIFT)
 #  define EDID_DESC_HPORCH_MSBITS_SHIFT   (6)       /* Bits 6-7: Horizontal front porch pixels 2 MS bits */
 #  define EDID_DESC_HPORCH_MSBITS_MASK    (3 << EDID_DESC_HPORCH_MSBITS_SHIFT)
-#define EDID_DESC_HSIZE_LSBITS            12        /* Byte 12: Horizontal image size, mm, 8 LS bits */
-#define EDID_DESC_VSIZE_LSBITS            13        /* Byte 13: Vertical image size, mm, 8 LS bits */
-#define EDID_DESC_SIZE_MSBITS             14        /* Byte 14: Image size MS bits */
+#define EDID_DESC_HSIZE_LSBITS_OFFSET     12        /* Byte 12: Horizontal image size, mm, 8 LS bits */
+#define EDID_DESC_VSIZE_LSBITS_OFFSET     13        /* Byte 13: Vertical image size, mm, 8 LS bits */
+#define EDID_DESC_SIZE_MSBITS_OFFSET      14        /* Byte 14: Image size MS bits */
 #  define EDID_DESC_VSIZE_MSBITS_SHIFT    (0)       /* Bits 0-3: Vertical image size, mm, 4 MS bits */
 #  define EDID_DESC_VSIZE_MSBITS_MASK     (15 << EDID_DESC_VSIZE_MSBITS_SHIFT)
 #  define EDID_DESC_HSIZE_MSBITS_SHIFT    (4)       /* Bits 4-7: Horizontal image size, mm, 4 MS bits  */
 #  define EDID_DESC_HSIZE_MSBITS_MASK     (15 << EDID_DESC_HSIZE_MSBITS_SHIFT)
-#define EDID_DESC_HBORDER                 15        /* Byte 15: Horizontal border pixels (one side) */
-#define EDID_DESC_VBORDER                 16        /* Byte 16: Vertical border lines (one side) */
-#define EDID_DESC_FEATURES                17        /* Byte 17: Features bitmap */
+#define EDID_DESC_HBORDER_OFFSET          15        /* Byte 15: Horizontal border pixels (one side) */
+#define EDID_DESC_VBORDER_OFFSET          16        /* Byte 16: Vertical border lines (one side) */
+#define EDID_DESC_FEATURES_OFFSET         17        /* Byte 17: Features bitmap */
                                                     /* If bits 5-6=00: */
 #  define EDID_DESC_STEREO_INTERLEAVE     (1 << 0)  /* Bit 0: 2-way line-interleaved or side-by-side
                                                      *        interleaved stereo */
@@ -320,7 +370,49 @@
 #  define EDID_DESC_STEREO_MASK           (3 << EDID_DESC_STEREO_SHIFT)
 #  define EDID_DESC_INTERLACED            (1 << 7)  /* Bit 7: Interlaced */
 
+/* Descriptor helpers */
+
+#define _VACT_LO(p)                       ((p)[EDID_DESC_VLINES_LSBITS_OFFSET])
+#define _VBLK_LO(p)                       ((p)[EDID_DESC_VBLANK_LSBITS_OFFSET])
+#define _VACT_HI(p)                       (((p)[EDID_DESC_VMSBITS_OFFSET] & EDID_DESC_VLINES_MSBITS_MASK) << 4)
+#define _VBLK_HI(p)                       (((p)[EDID_DESC_VMSBITS_OFFSET] & EDID_DESC_VBLANK_MSBITS_MASK) << 8)
+#define EDID_DESC_VACTIVE(p)              (_VACT_LO(p) | _VACT_HI(p))
+#define EDID_DESC_VBLANK(p)               (_VBLK_LO(p) | _VBLK_HI(p))
+
+#define _HACT_LO(p)                       ((p)[EDID_DESC_HPIXELS_LSBITS_OFFSET])
+#define _HBLK_LO(p)                       ((p)[EDID_DESC_HBLANK_LSBITS_OFFSET])
+#define _HACT_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & EDID_DESC_HPIXELS_MSBITS_SHIFT) << 4)
+#define _HBLK_HI(p)                       (((p)[EDID_DESC_HMSBITS_OFFSET] & EDID_DESC_HBLANK_MSBITS_SHIFT) << 8)
+#define EDID_DESC_HACTIVE(p)              (_HACT_LO(p) | _HACT_HI(p))
+#define EDID_DESC_HBLANK(p)               (_HBLK_LO(p) | _HBLK_HI(p))
+
+#define _HOFF_LO(p)                       ((p)[EDID_DESC_HPORCH_LSBITS_OFFSET])
+#define _HWID_LO(p)                       ((p)[EDID_DESC_HPW_LSBITS_OFFSET])
+#define _VOFF_LO(p)                       ((p)[EDID_DESC_VPORCH_LSBITS_OFFSET] >> EDID_DESC_VPORCH_LSBITS_SHIFT)
+#define _VWID_LO(p)                       ((p)[EDID_DESC_VPORCH_LSBITS_OFFSET] & EDID_DESC_VPW_LSBITS_MASK)
+#define _HOFF_HI(p)                       (((p)[EDID_DESC_PORCH_MSBITS_OFFSET] & EDID_DESC_HPORCH_MSBITS_MASK) << 2)
+#define _HWID_HI(p)                       (((p)[EDID_DESC_PORCH_MSBITS_OFFSET] & EDID_DESC_HPW_MSBITS_MASK) << 4)
+#define _VOFF_HI(p)                       (((p)[EDID_DESC_PORCH_MSBITS_OFFSET] & EDID_DESC_VPORCH_MSBITS_MASK) << 2)
+#define _VWID_HI(p)                       (((p)[EDID_DESC_PORCH_MSBITS_OFFSET] & EDID_DESC_VPW_MSBITS_MASK) << 4)
+#define EDID_DESC_HSYNC_OFFSET(p)         (_HOFF_LO(p) | _HOFF_HI(p))
+#define EDID_DESC_HSYNC_WIDTH(p)          (_HWID_LO(p) | _HWID_HI(p))
+#define EDID_DESC_VSYNC_OFFSET(p)         (_VOFF_LO(p) | _VOFF_HI(p))
+#define EDID_DESC_VSYNC_WIDTH(p)          (_VWID_LO(p) | _VWID_HI(p))
+
+#define _HSZ_LO(p)                        ((p)[EDID_DESC_HSIZE_LSBITS_OFFSET])
+#define _VSZ_LO(p)                        ((p)[EDID_DESC_VSIZE_LSBITS_OFFSET])
+#define _HSZ_HI(p)                        (((p)[EDID_DESC_SIZE_MSBITS_OFFSET] & EDID_DESC_HSIZE_MSBITS_MASK) << 4)
+#define _VSZ_HI(p)                        (((p)[EDID_DESC_SIZE_MSBITS_OFFSET] & EDID_DESC_VSIZE_MSBITS_MASK) << 8)
+#define EDID_DESC_HSIZE(p)                (_HSZ_LO(p) | _HSZ_HI(p))
+#define EDID_DESC_VSIZE(p)                (_VSZ_LO(p) | _VSZ_HI(p))
+
 /* Display Descriptor: EDID Other Monitor Descriptors */
+
+#define EDID_DESC_ZERO_1                  0         /* Bytes 0-1: Zero=not a detailed timing descriptor */
+#define EDID_DESC_ZERO_2                  2         /* Byte 2: Zero */
+#define EDID_DESC_DESCTYPE                3         /* Byte 3: Descriptor type */
+#define EDID_DESC_ZERO_3                  4         /* Byte 4: Zero */
+#define EDID_DESC_INFO                    5         /* Bytes 5-17: Determined by descriptor type */
 
                                                     /* 0x00-0x0f:  Manufacturer reserved descriptors */
 #define EDID_DESCTYPE_DUMMY               0x10      /* Dummy identifier */
@@ -334,11 +426,35 @@
 #define EDID_DESCTYPE_TEXT                0xfe      /* Unspecified text (ASCII text) */
 #define EDID_DESCTYPE_SERIALNO            0xff      /* Display serial number (ASCII text) */
 
-#define EDID_DESC_ZERO_1                  0         /* Bytes 0-1: Zero=not a detailed timing descriptor */
-#define EDID_DESC_ZERO_2                  2         /* Byte 2: Zero */
-#define EDID_DESC_DESCTYPE                3         /* Byte 3: Descriptor type */
-#define EDID_DESC_ZERO_3                  4         /* Byte 4: Zero */
-#define EDID_DESC_INFO                    5         /* Bytes 5-17: Determined by descriptor type */
+/* Used for descriptors 0xff, 0xfe, and 0xfc */
+
+#define EDID_DESC_ASCII_DATA_OFFSET       5
+#define EDID_DESC_ASCII_DATA_LEN          13
+
+#define EDID_DESC_RANGE_MIN_VFREQ(p)      ((p)[5])        /* Hz */
+#define EDID_DESC_RANGE_MAX_VFREQ(p)      ((p)[6])        /* Hz */
+#define EDID_DESC_RANGE_MIN_HFREQ(p)      ((p)[7])        /* kHz */
+#define EDID_DESC_RANGE_MAX_HFREQ(p)      ((p)[8])        /* kHz */
+#define EDID_DESC_RANGE_MAX_CLOCK(p)      (((p)[9]) * 10) /* MHz */
+#define EDID_DESC_RANGE_HAVE_GTF2(p)      (((p)[10]) == 0x02)
+#define EDID_DESC_RANGE_GTF2_HFREQ(p)     (((p)[12]) * 2)
+#define EDID_DESC_RANGE_GTF2_C(p)         (((p)[13]) / 2)
+#define EDID_DESC_RANGE_GTF2_M(p)         ((p)[14] + ((p)[15] << 8))
+#define EDID_DESC_RANGE_GTF2_K(p)         ((p)[16])
+#define EDID_DESC_RANGE_GTF2_J(p)         ((p)[17] / 2)
+
+#define EDID_DESC_COLOR_WHITEX(p)
+#define EDID_DESC_COLOR_WHITE_INDEX_1(p)  ((p)[5])
+#define EDID_DESC_COLOR_WHITEX_1(p)       _CHROMA(p, 6, 2, 7)
+#define EDID_DESC_COLOR_WHITEY_1(p)       _CHROMA(p, 6, 0, 8)
+#define EDID_DESC_COLOR_GAMMA_1(p)        _GAMMA(p[9])
+#define EDID_DESC_COLOR_WHITE_INDEX_2(p)  ((p)[10])
+#define EDID_DESC_COLOR_WHITEX_2(p)       _CHROMA(p, 11, 2, 12)
+#define EDID_DESC_COLOR_WHITEY_2(p)       _CHROMA(p, 11, 0, 13)
+#define EDID_DESC_COLOR_GAMMA_2(p)        _GAMMA(p[14])
+
+#define EDID_DESC_STD_TIMING_START_OFFSET 5
+#define EDID_DESC_STD_TIMING_COUNT_OFFSET 6
 
 /* Extended EDID data offsets ****************************************************************/
 /* To be provided */
@@ -388,16 +504,16 @@
 
 struct edid_videomode_s
 {
-  int dotclock;     /* Dot clock frequency in kHz. */
-  int hdisplay;
-  int hsync_start;
-  int hsync_end;
-  int htotal;
-  int vdisplay;
-  int vsync_start;
-  int vsync_end;
-  int vtotal;
-  int flags;        /* Video mode flags; see above. */
+  uint32_t dotclock;     /* Dot clock frequency in kHz. */
+  uint16_t flags;        /* Video mode flags; see above. */
+  uint16_t hdisplay;
+  uint16_t hsync_start;
+  uint16_t hsync_end;
+  uint16_t htotal;
+  uint16_t vdisplay;
+  uint16_t vsync_start;
+  uint16_t vsync_end;
+  uint16_t vtotal;
   FAR const char *name;
   int hskew;
 };
@@ -433,22 +549,19 @@ struct edid_range_s
 
 struct edid_info_s
 {
-  uint8_t  edid_vendor[4];
-  char     edid_vendorname[16];
-  char     edid_productname[16];
-  char     edid_comment[16];
-  char     edid_serial[16];
-  uint16_t edid_product;
+  uint8_t  edid_manufacturer[4];
   uint8_t  edid_version;
   uint8_t  edid_revision;
-  int      edid_year;
-  int      edid_week;
   uint8_t  edid_video_input;
   uint8_t  edid_max_hsize;    /* in cm */
   uint8_t  edid_max_vsize;    /* in cm */
   uint8_t  edid_gamma;
   uint8_t  edid_features;
   uint8_t  edid_ext_block_count;
+  uint16_t edid_product;
+  uint32_t edid_serial;
+  int      edid_year;
+  int      edid_week;
   int      edid_have_range;
 
   struct edid_range_s  edid_range;
@@ -475,8 +588,11 @@ struct edid_info_s
  * Input Parameters:
  *   data - A reference to the raw EDID data
  *   edid - The location to return the digested EDID data.
- *   
- * 
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; otherwise a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
  ********************************************************************************************/
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
@@ -494,9 +610,22 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
  *   preferred - A pointer to the pointer to the preferred mode in the list
  *   nmodes    - The number of modes in the list
  *
+ * Returned Value:
+ *   None
+ *
  ********************************************************************************************/
 
-int edid_sort_modes(FAR struct edid_videomode_s *modes,
-                    FAR struct edid_videomode_s **preferred, unsigned int nmodes);
+void edid_sort_modes(FAR struct edid_videomode_s *modes,
+                     FAR struct edid_videomode_s **preferred, unsigned int nmodes);
+
+/********************************************************************************************
+ * Name:  edid_mode_lookup
+ *
+ * Description:
+ *   Find the video mode in a look-up table
+ *
+ ********************************************************************************************/
+
+FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name);
 
 #endif /* __INCLUDE_NUTTX_LCD_EDID_H */

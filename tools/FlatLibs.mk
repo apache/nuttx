@@ -118,6 +118,12 @@ ifeq ($(CONFIG_AUDIO),y)
 NUTTXLIBS += staging$(DELIM)libaudio$(LIBEXT)
 endif
 
+# Add libraries for the Video sub-system
+
+ifeq ($(CONFIG_VIDEO),y)
+NUTTXLIBS += staging$(DELIM)libvideo$(LIBEXT)
+endif
+
 # Add libraries for the Wireless sub-system
 
 ifeq ($(CONFIG_WIRELESS),y)
