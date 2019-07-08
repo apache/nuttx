@@ -111,6 +111,9 @@ static int am335x_setcursor(FAR struct fb_vtable_s *vtable,
 
 static int  am335x_lcd_interrupt(int irq, void *context, void *arg);
 static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t frequency);
+static int  am335x_set_refclk(uint32_t frequency);
+static int  am335x_get_refclk(uint32_t *frequency);
+static int  am335x_lcdc_enableclk(void);
 
 /****************************************************************************
  * Private Data
@@ -462,6 +465,35 @@ static int am335x_get_refclk(uint32_t *frequency)
 }
 
 /****************************************************************************
+ * Name: am335x_lcdc_enableclk
+ ****************************************************************************/
+
+static int am335x_lcdc_enableclk(void)
+{
+  /* Set MODULEMODE to ENABLE(2) */
+
+  putreg32(AM335X_CM_PER_LCDC_CLKCTRL, CM_WKUP_CLKCTRL_MODULEMODE_ENABLE);
+
+  /* Wait for MODULEMODE to reflect that it is enabled */
+
+  while ((getreg32(AM335X_CM_PER_LCDC_CLKCTRL) & CM_WKUP_CLKCTRL_MODULEMODE_MASK)
+         != CM_WKUP_CLKCTRL_MODULEMODE_ENABLE)
+    {
+      up_udelay(10);
+    }
+
+  /* Wait for IDLEST to become fully functional */
+
+  while ((getreg32(AM335X_CM_PER_LCDC_CLKCTRL) & CM_WKUP_CLKCTRL_IDLEST_MASK)
+         != CM_WKUP_CLKCTRL_IDLEST_FUNC)
+    {
+      up_udelay(10);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -600,22 +632,20 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
       lcderr("ERROR:  Failed to attach LCDC interrupt.");
     }
 
-  /* Enable clocking to the LCD peripheral.  Set the initial reference clock
-   * to twice the VGA pixel clock for now.
-   */
+  /* Set the initial reference clock to twice the VGA pixel clock for now. */
 
   (void)am335x_set_refclk(2 * 25175000);
 
-  /* REVISIT:  Need to (1) set the initial pixel clock and (2) set
-   * LCDC related bits in PRCM to enable clocking to the LCDC.
-   * Reference: http://fxr.watson.org/fxr/source/arm/ti/am335x/am335x_prcm.c#L819
-   */
+  /* Enable clocking to the LCD peripheral. */
 
   lcdinfo("Enable clocking to the LCD controller\n");
-#if 0 /* FIXEME */
-  ti_prcm_clk_enable(LCDC_CLK);
-#endif
-#warning Missing logic
+
+  ret = am335x_lcdc_enableclk();
+  if (ret < 0)
+    {
+      lcderr("ERROR:  Failed to enable clocking\n");
+      return ret;
+    }
 
   /* Adjust reference clock to get double of requested pixel clock frequency
    * HDMI/DVI displays are very sensitive to error in frequency value.
@@ -624,7 +654,7 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
   ret = am335x_set_refclk(2 * priv->panel.pixclk);
   if (ret < 0)
     {
-      lcderr("ERROR:  Can't set source frequency\n");
+      lcderr("ERROR:  Failed to set source frequency\n");
       return ret;
     }
 
@@ -633,7 +663,7 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
   ret = am335x_get_refclk(&reffreq);
   if (ret < 0)
     {
-      lcderr("ERROR:  Can't get reference frequency\n");
+      lcderr("ERROR:  Failed to get reference frequency\n");
       return ret;
     }
 
@@ -879,11 +909,9 @@ void up_fbuninitialize(int display)
   am335x_backlight(false);
 #endif
 
-  /* Disable the LCD controller */
-#warning Missing Logic
-
+  /* Reset/Disable the LCD controller */
   /* Disable clocking to the LCD peripheral */
-#warning Missing Logic
+  /* Detach and disable the LCDC interrupt */
 }
 
 /****************************************************************************
