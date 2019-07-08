@@ -56,12 +56,21 @@
 #include <nuttx/video/fb.h>
 
 #include "up_arch.h"
+#include "hardware/am335x_cm.h"
 #include "am335x_pinmux.h"
 #include "am335x_config.h"
 #include "am335x_gpio.h"
+#include "am335x_sysclk.h"
 #include "am335x_lcdc.h"
 
 #include <arch/board/board.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define DPLL_MAX_MUL            0x800
+#define DPLL_MAX_DIV            0x80
 
 /****************************************************************************
  * Private Function Prototypes
@@ -101,7 +110,7 @@ static int am335x_setcursor(FAR struct fb_vtable_s *vtable,
 /* Miscellaneous internal functions */
 
 static int  am335x_lcd_interrupt(int irq, void *context, void *arg);
-static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t freq);
+static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t frequency);
 
 /****************************************************************************
  * Private Data
@@ -325,21 +334,21 @@ done:
  * Name: am335x_lcd_divisor
  ****************************************************************************/
 
-static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t freq)
+static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t frequency)
 {
   uint32_t div;
   uint32_t delta;
   uint32_t mindelta;
   int i;
 
-  mindelta = freq;
+  mindelta = frequency;
   div      = 255;
 
   /* Raster mode case: divisors are in range from 2 to 255 */
 
   for (i = 2; i < 255; i++)
     {
-      delta = reference / i - freq;
+      delta = reference / i - frequency;
       if (delta < 0)
         {
           delta    = -delta;
@@ -353,6 +362,103 @@ static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t freq)
     }
 
   return div;
+}
+
+/****************************************************************************
+ * Name: am335x_set_refclk
+ ****************************************************************************/
+
+static int am335x_set_refclk(uint32_t frequency)
+{
+  uint32_t sysclk;
+  uint32_t mul;
+  uint32_t div;
+  uint32_t delta;
+  uint32_t mindelta;
+  int timeout;
+  int i;
+  int j;
+
+  sysclk = am335x_get_sysclk();
+
+  /* Bypass mode */
+
+  putreg32(AM335X_CM_WKUP_CLKMODE_DPLL_DISP, 0x4);
+
+  /* Make sure it's in bypass mode */
+
+  while ((getreg32(AM335X_CM_WKUP_IDLEST_DPLL_DISP) & (1 << 8)) == 0)
+    {
+      up_udelay(10);
+    }
+
+  /* Dumb and non-optimal implementation */
+
+  mul      = 0;
+  div      = 0;
+  mindelta = frequency;
+
+  for (i = 1; i < DPLL_MAX_MUL; i++)
+    {
+      for (j = 1; j < DPLL_MAX_DIV; j++)
+        {
+          delta = frequency - i * (sysclk / j);
+          if (delta < 0)
+            {
+              delta    = -delta;
+           }
+
+          if (delta < mindelta)
+            {
+              mul      = i;
+              div      = j;
+              mindelta = delta;
+            }
+
+          if (mindelta == 0)
+            {
+              break;
+            }
+         }
+    }
+
+  putreg32(AM335X_CM_WKUP_CLKSEL_DPLL_DISP, (mul << 8) | (div - 1));
+
+  /* Locked mode */
+
+  putreg32(AM335X_CM_WKUP_CLKMODE_DPLL_DISP, 0x7);
+
+  timeout = 10000;
+  while ((getreg32(AM335X_CM_WKUP_IDLEST_DPLL_DISP) & (1 << 0)) == 0 &&
+         timeout-- > 0)
+    {
+      up_udelay(10);
+    }
+
+  return timeout > 0 ? OK : -ETIMEDOUT;
+}
+
+/****************************************************************************
+ * Name: am335x_get_refclk
+ ****************************************************************************/
+
+static int am335x_get_refclk(uint32_t *frequency)
+{
+  uint32_t regval;
+  uint32_t sysclk;
+
+  regval = getreg32(AM335X_CM_WKUP_CLKMODE_DPLL_DISP);
+
+  /* Check if we are running in bypass */
+
+  if ((regval & (1 << 23)) != 0)
+    {
+      return -ENXIO;
+    }
+
+  sysclk     = am335x_get_sysclk();
+  *frequency = ((regval >> 8) & 0x7ff) * (sysclk / ((regval & 0x7f) + 1));
+  return OK;
 }
 
 /****************************************************************************
@@ -494,7 +600,12 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
       lcderr("ERROR:  Failed to attach LCDC interrupt.");
     }
 
-  /* Enable clocking to the LCD peripheral */
+  /* Enable clocking to the LCD peripheral.  Set the initial reference clock
+   * to twice the VGA pixel clock for now.
+   */
+
+  (void)am335x_set_refclk(2 * 25175000);
+
   /* REVISIT:  Need to (1) set the initial pixel clock and (2) set
    * LCDC related bits in PRCM to enable clocking to the LCDC.
    * Reference: http://fxr.watson.org/fxr/source/arm/ti/am335x/am335x_prcm.c#L819
@@ -506,30 +617,24 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
 #endif
 #warning Missing logic
 
-  /* Adjust clock to get double of requested pixel clock frequency
+  /* Adjust reference clock to get double of requested pixel clock frequency
    * HDMI/DVI displays are very sensitive to error in frequency value.
-   * Reference: http://fxr.watson.org/fxr/source/arm/ti/am335x/am335x_prcm.c#L718
    */
 
-#warning Missing logic
-#if 0 /* FIXEME */
-  if (ti_prcm_clk_set_source_freq(LCDC_CLK, priv->panel.pixclk * 2))
-#endif
+  ret = am335x_set_refclk(2 * priv->panel.pixclk);
+  if (ret < 0)
     {
       lcderr("ERROR:  Can't set source frequency\n");
-      return -ENXIO;
+      return ret;
     }
 
   /* Read back the actual reference clock frequency */
-  /* Reference: http://fxr.watson.org/fxr/source/arm/ti/am335x/am335x_prcm.c#L701 */
 
-#warning Missing logic
-#if 0 /* FIXEME */
-  if (ti_prcm_clk_get_source_freq(LCDC_CLK, &reffreq))
-#endif
+  ret = am335x_get_refclk(&reffreq);
+  if (ret < 0)
     {
       lcderr("ERROR:  Can't get reference frequency\n");
-      return -ENXIO;
+      return ret;
     }
 
   /* Panel initialization */
