@@ -202,13 +202,13 @@ uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32H7_SPI6
-void stm32_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi6select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %08lx CS: %s\n",
           (unsigned long)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
