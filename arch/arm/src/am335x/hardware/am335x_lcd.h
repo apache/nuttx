@@ -74,6 +74,7 @@
 #define AM335X_LCD_IRQ_STAT_OFFSET              0x005c
 #define AM335X_LCD_IRQ_EN_SET_OFFSET            0x0060
 #define AM335X_LCD_IRQ_EN_CLEAR_OFFSET          0x0064
+#define AM335X_LCD_END_INT_OFFSET               0x0068
 #define AM335X_LCD_CLKC_ENABLE_OFFSET           0x006c
 #define AM335X_LCD_CLKC_RESET_OFFSET            0x0070
 
@@ -110,6 +111,7 @@
 #define AM335X_LCD_IRQ_STAT                     (AM335X_LCD_VADDR + AM335X_LCD_IRQ_STAT_OFFSET)
 #define AM335X_LCD_IRQ_EN_SET                   (AM335X_LCD_VADDR + AM335X_LCD_IRQ_EN_SET_OFFSET)
 #define AM335X_LCD_IRQ_EN_CLEAR                 (AM335X_LCD_VADDR + AM335X_LCD_IRQ_EN_CLEAR_OFFSET)
+#define AM335X_LCD_END_INT                      (AM335X_LCD_VADDR + AM335X_LCD_END_INT_OFFSET)
 #define AM335X_LCD_CLKC_ENABLE                  (AM335X_LCD_VADDR + AM335X_LCD_CLKC_ENABLE_OFFSET)
 #define AM335X_LCD_CLKC_RESET                   (AM335X_LCD_VADDR + AM335X_LCD_CLKC_RESET_OFFSET)
 
@@ -122,6 +124,8 @@
 /* Register bit field definitions ***************************************************/
 
 #define LCD_CTRL_MODE_SEL                       (1 << 0)  /* Bit 0:  LCD Mode select */
+#  define LCD_CTRL_MODE_LIDD                    (0)
+#  define LCD_CTRL_MODE_RASTER                  LCD_CTRL_MODE_SEL
 #define LCD_CTRL_AUTO_UFLOW_RESTART             (1 << 1)  /* Bit 1:  Underflow restart selection */
 #define LCD_CTRL_CLKDIV_SHIFT                   (8)       /* Bits 8-15: Clock divisor */
 #define LCD_CTRL_CLKDIV_MASK                    (255 << LCD_CTRL_CLKDIV_SHIFT)
@@ -169,7 +173,7 @@
 #define LCD_RASTER_CTRL_MONO_8B                 (1 << 9)  /* Bit 9:  Mono 8 bit */
 #define LCD_RASTER_CTRL_REQDLY_SHIFT            (12)  /* Bits 12-19:  Palette Loading Delay When loading the Palette from DDR */
 #define LCD_RASTER_CTRL_REQDLY_MASK             (255 << LCD_RASTER_CTRL_REQDLY_SHIFT)
-#define LCD_RASTER_CTRL_PALMODE_SHIFT           (0)  /* Bits 20-21:  Palette Loading Mode */
+#define LCD_RASTER_CTRL_PALMODE_SHIFT           (20)  /* Bits 20-21:  Palette Loading Mode */
 #define LCD_RASTER_CTRL_PALMODE_MASK            (3 << LCD_RASTER_CTRL_PALMODE_SHIFT)
 #  define LCD_RASTER_CTRL_PALLET_DATA           (0 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette and data loading */
 #  define LCD_RASTER_CTRL_PALLET                (1 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette loading only */
@@ -213,8 +217,9 @@
 #define LCD_RASTER_TIMING_2_IEO                 (1 << 23)  /* Bit 23:  Invert Output Enable */
 #define LCD_RASTER_TIMING_2_PHSVS_RF            (1 << 24)  /* Bit 24:  Program HSYNC/VSYNC Rise or Fall */
 #define LCD_RASTER_TIMING_2_PHSVS_ON            (1 << 25)  /* Bit 25:  Hsync/Vsync Pixel Clock Control On/Off */
-#define LCD_RASTER_TIMING_2_LPP_B10             (1 << 26)  /* Bit 26:  Lines Per Panel Bit 10 */
-#define LCD_RASTER_TIMING_2_HSW_HBITS_SHITF     (27)  /* Bits 27-30:  Bits 9 to 6 of the horizontal sync width field */
+#define LCD_RASTER_TIMING_2_LPP_B10_SHIFT       (26)       /* Bit 26:  Lines Per Panel Bit 10 */
+#define LCD_RASTER_TIMING_2_LPP_B10_MASK        (1 << LCD_RASTER_TIMING_2_LPP_B10_SHIFT)
+#define LCD_RASTER_TIMING_2_HSW_HBITS_SHIFT     (27)  /* Bits 27-30:  Bits 9 to 6 of the horizontal sync width field */
 #define LCD_RASTER_TIMING_2_HSW_HBITS_MASK      (15 << LCD_RASTER_TIMING_2_HSW_HBITS_SHITF)
 
 #define LCD_RASTER_SUBPANEL_DPDLSB_SHIFT        (0)  /* Bits 0-15:  Default Pixel Data LSB */
@@ -273,7 +278,7 @@
 #define LCD_IRQ_ACB                             (1 << 3)  /* Bit 3:  For Passive Matrix Panels Only AC Bias Count */
 #define LCD_IRQ_FUF                             (1 << 5)  /* Bit 5:  DMA FIFO Underflow */
 #define LCD_IRQ_PL                              (1 << 6)  /* Bit 6:  DMA Palette Loaded */
-#define LCD_IRQ_OEF0                            (1 << 8)  /* Bit 8:  DMA End-of-Frame 0 */
+#define LCD_IRQ_EOF0                            (1 << 8)  /* Bit 8:  DMA End-of-Frame 0 */
 #define LCD_IRQ_EOF1                            (1 << 9)  /* Bit 9:  DMA End-of-Frame 1 */
 
 #define LCD_CLKC_ENABLE_CORE                    (1 << 0)  /* Bit 0:  Software Clock Enable for the DMA submodule */
