@@ -175,8 +175,8 @@
 #define LCD_RASTER_CTRL_REQDLY_MASK             (255 << LCD_RASTER_CTRL_REQDLY_SHIFT)
 #define LCD_RASTER_CTRL_PALMODE_SHIFT           (20)  /* Bits 20-21:  Palette Loading Mode */
 #define LCD_RASTER_CTRL_PALMODE_MASK            (3 << LCD_RASTER_CTRL_PALMODE_SHIFT)
-#  define LCD_RASTER_CTRL_PALLET_DATA           (0 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette and data loading */
-#  define LCD_RASTER_CTRL_PALLET                (1 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette loading only */
+#  define LCD_RASTER_CTRL_PALETTE_DATA          (0 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette and data loading */
+#  define LCD_RASTER_CTRL_PALETTE               (1 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Palette loading only */
 #  define LCD_RASTER_CTRL_DATA                  (2 << LCD_RASTER_CTRL_PALMODE_SHIFT) /* Data loading only For Raw Data (12/16/24 bpp) framebuffers, no palette lookup is employed */
 #define LCD_RASTER_CTRL_NIB_MODE                (1 << 22)  /* Bit 22:  Nibble Mode */
 #define LCD_RASTER_CTRL_TFT_MAP                 (1 << 23)  /* Bit 23:  TFT Mode Alternate Signal Mapping for Palettized framebuffer */

@@ -94,16 +94,18 @@ config AM335X_GPIO
 	bool "GPIO"
 	default n
 
+config AM335X_LCDC
+	bool "LCD controller"
+	default n
+	depends on VIDEO && EXPERIMENTAL
+	select VIDEO_EDID
+
 config AM335X_TSC
 	bool "Touchscreen Controller"
 	default n
 
-config AM335X_LCDC
-	bool "LCD Controller"
-	default n
-
 config AM335X_CPSW
-	bool "Ethernet subsustem"
+	bool "Ethernet subsystem"
 	default n
 
 config AM335X_PWMSS
@@ -248,4 +250,121 @@ config AM335X_DDR_MAPSIZE
 			plus the size of the available heap.  NOTE that RAM_SIZE may not
 			include all of SDRAM up to the end of mapped region.
 
+menu "LCD Configuration"
+	depends on AM335X_LCDC
+
+config AM335X_LCDC_VRAMBASE
+	hex "Video RAM base address"
+	default 0xa0010000
+	---help---
+		Base address of the video RAM frame buffer.  The default is
+		(AM335X_EXTDRAM_CS0 + 0x00010000)
+
+config AM335X_LCDC_USE_CLKIN
+	bool "Use optional input clock"
+	default n
+
+config AM335X_LCDC_CLKIN_FREQUENCY
+	int "Input clock frequency"
+	default 0
+	depends on AM335X_LCDC_USE_CLKIN
+
+config AM335X_LCDC_REFRESH_FREQ
+	int "LCD refesh rate (Hz)"
+	default 50
+	---help---
+		LCD refesh rate (Hz)
+
+choice
+	prompt "Bits per pixel"
+	default AM335X_LCDC_BPP16_565
+
+config AM335X_LCDC_BPP1
+	bool "1 BPP"
+
+config AM335X_LCDC_BPP2
+	bool "2 BPP"
+
+config AM335X_LCDC_BPP4
+	bool "4 BPP"
+
+config AM335X_LCDC_BPP8
+	bool "8 BPP"
+
+config AM335X_LCDC_BPP12_444
+	bool "12 bpp, 4:4:4 mode"
+
+config AM335X_LCDC_BPP16_565
+	bool "16 BPP, 5:6:5 mode"
+
+config AM335X_LCDC_BPP24
+	bool "24 BPP, 8:8:8 mode (packed)"
+
+config AM335X_LCDC_BPP32
+	bool "32 BPP, 8:8:8 mode (unpacked)"
+
+endchoice
+
+config AM335X_LCDC_BGR
+	bool "Blue-Green-Red color order"
+	default n
+	depends on !AM335X_LCDC_MONOCHROME
+	---help---
+		This option selects BGR color order vs. default RGB
+
+config AM335X_LCDC_BACKCOLOR
+	hex "Initial background color"
+	default 0x0
+	---help---
+		Initial background color
+
+config AM335X_LCDC_ACBIAS
+	int "AC bias pin frequency"
+	default 255
+	range 0 255
+
+config AM335X_LCDC_ACBIAS_PINT
+	int "AC bias pin transitions per interrupt"
+	default 0
+	range 0 15
+
+choice
+	prompt "DMA burst size"
+	default AM335X_LCDC_DMA_BURST16
+
+config AM335X_LCDC_DMA_BURST1
+	bool "1"
+
+config AM335X_LCDC_DMA_BURST2
+	bool "2"
+
+config AM335X_LCDC_DMA_BURST4
+	bool "4"
+
+config AM335X_LCDC_DMA_BURST8
+	bool "8"
+
+config AM335X_LCDC_DMA_BURST16
+	bool "16"
+
+endchoice
+
+config AM335X_LCDC_FDD
+	int "Palette loading delay"
+	default 128
+	range 0 255
+
+config AM335X_LCDC_SYNC_EDGE
+	bool "HSYNC/VSYNC rise or fall"
+	default n
+
+config AM335X_LCDC_SYNC_CTRL
+	bool "Hsync/Vsync pixel clock control on/off"
+	default y
+
+config AM335X_LCDC_PIXCLK_INVERT
+	bool "Invert pixel clock"
+	default y
+
+endmenu # LCD Configuration
 endif # ARCH_CHIP_AM335X
