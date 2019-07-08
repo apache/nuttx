@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-#include <nuttx/lcd/edid.h>
+#include <nuttx/video/edid.h>
 
 /****************************************************************************
  * Pre-processor Definitions

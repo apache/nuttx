@@ -1,5 +1,5 @@
 /********************************************************************************************
- * include/nuttx/lcd/edid.h
+ * include/nuttx/video/edid.h
  * EDID (Extended Display Identification Data) Format
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -42,8 +42,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LCD_EDID_H
-#define __INCLUDE_NUTTX_LCD_EDID_H
+#ifndef __INCLUDE_NUTTX_VIDEO_EDID_H
+#define __INCLUDE_NUTTX_VIDEO_EDID_H
 
 /********************************************************************************************
  * Included Files
@@ -631,4 +631,4 @@ void edid_sort_modes(FAR struct edid_videomode_s *modes,
 
 FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name);
 
-#endif /* __INCLUDE_NUTTX_LCD_EDID_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_EDID_H */

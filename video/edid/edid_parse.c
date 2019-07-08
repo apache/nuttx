@@ -51,7 +51,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/lcd/edid.h>
+#include <nuttx/video/edid.h>
 
 /****************************************************************************
  * Pre-processor Definitions
