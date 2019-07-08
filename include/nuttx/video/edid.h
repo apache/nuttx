@@ -500,12 +500,13 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-/* This structure represents one video mode extracted from the EDID */
+/* This structure represents one video mode extracted from the EDID.  CAREFUL:  Fields
+ * may not change without also modification to initializer in edid_videomode.c.
+ */
 
 struct edid_videomode_s
 {
   uint32_t dotclock;     /* Dot clock frequency in kHz. */
-  uint16_t flags;        /* Video mode flags; see above. */
   uint16_t hdisplay;
   uint16_t hsync_start;
   uint16_t hsync_end;
@@ -514,8 +515,8 @@ struct edid_videomode_s
   uint16_t vsync_start;
   uint16_t vsync_end;
   uint16_t vtotal;
+  uint16_t flags;        /* Video mode flags; see above. */
   FAR const char *name;
-  int hskew;
 };
 
 /* These structures is a user-friendly digest of the EDID data. */

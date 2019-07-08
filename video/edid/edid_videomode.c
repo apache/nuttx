@@ -65,7 +65,7 @@
 
 #define M(nm,hr,vr,clk,hs,he,ht,vs,ve,vt,f) \
   { \
-    clk, hr, hs, he, ht, vr, vs, ve, vt, f, nm, 0 \
+    clk, hr, hs, he, ht, vr, vs, ve, vt, f, nm \
   }
 
 /****************************************************************************
