@@ -215,6 +215,15 @@ Configurations
   Configuration Sub-directories
   -----------------------------
 
+  lcd:
+
+    This is an NSH configuration based on the nsh configuration belong but with LCD
+    support enabled.  This configuration will be used for developing and verifying
+    basic LCD functionality.
+
+    The framebuffer is assumed to reside at address 0x80000000 and has size
+    0x0a000000.
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  There are
