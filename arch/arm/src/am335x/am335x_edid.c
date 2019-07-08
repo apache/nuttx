@@ -113,8 +113,7 @@ static uint32_t
  ****************************************************************************/
 
 static bool
-  am335x_videomode_valid(FAR const struct edid_videomode_s *videomode,
-                         FAR const struct am335x_fbinfo_s *fbinfo)
+  am335x_videomode_valid(FAR const struct edid_videomode_s *videomode)
 {
   size_t fbstride;
   size_t fbsize;
@@ -193,7 +192,7 @@ static bool
   fbstride = (videomode->hdisplay * AM335X_BPP + 7) >> 3;
   fbsize   = videomode->vdisplay * fbstride;
 
-  if (fbsize > fbinfo->fbsize)
+  if (fbsize > AM335X_LCDC_FB_SIZE)
     {
       return false;
     }
@@ -218,8 +217,7 @@ static bool
  ****************************************************************************/
 
 static const struct edid_videomode_s *
-  am335x_lcd_pickmode(FAR struct edid_info_s *ei,
-                      FAR const struct am335x_fbinfo_s *fbinfo)
+  am335x_lcd_pickmode(FAR struct edid_info_s *ei)
 {
   FAR const struct edid_videomode_s *videomode;
   int n;
@@ -232,7 +230,7 @@ static const struct edid_videomode_s *
 
   if (ei->edid_preferred_mode != NULL)
     {
-      if (am335x_videomode_valid(ei->edid_preferred_mode, fbinfo))
+      if (am335x_videomode_valid(ei->edid_preferred_mode))
         {
           videomode = ei->edid_preferred_mode;
           return videomode;
@@ -250,7 +248,7 @@ static const struct edid_videomode_s *
 
   for (n = 0; n < ei->edid_nmodes; n++)
     {
-      if (am335x_videomode_valid(&ei->edid_modes[n], fbinfo))
+      if (am335x_videomode_valid(&ei->edid_modes[n]))
         {
           videomode = &ei->edid_modes[n];
           break;
@@ -347,8 +345,6 @@ void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
  *   len      - The length of the EDID data in bytes
  *   panel    - A user provided location to receive the panel data.
  *   selected - A user provided location to receive the selected video mode.
- *   fbinfo   - Provides information about the pre-allocate framebuffer
- *              memory.
  *
  * Returned value:
  *   None.  Always succeeds.  The logic will fallback to VGA mode if no
@@ -359,8 +355,7 @@ void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
 
 void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
                      FAR struct am335x_panel_info_s *panel,
-                     FAR struct edid_videomode_s *selected,
-                     FAR const struct am335x_fbinfo_s *fbinfo)
+                     FAR struct edid_videomode_s *selected)
 {
   FAR const struct edid_videomode_s *videomode = NULL;
   struct edid_info_s ei;
@@ -373,7 +368,7 @@ void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
 
       if (edid_parse(edid, &ei) == 0)
         {
-          videomode = am335x_lcd_pickmode(&ei, fbinfo);
+          videomode = am335x_lcd_pickmode(&ei);
         }
       else
         {

@@ -134,8 +134,6 @@ struct am335x_lcd_dev_s
   sem_t exclsem;        /* Assure mutually exclusive access */
   nxgl_coord_t stride;  /* Width of framebuffer in bytes */
   size_t fbsize;        /* Size of the framebuffer allocation */
-  FAR void *fbmem;      /* Allocated framebuffer memory (virtual) */
-  FAR void *fbphys;     /* Allocated framebuffer memory (physical) */
 };
 
 /****************************************************************************
@@ -192,9 +190,9 @@ static int am335x_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
   if (vtable != NULL && planeno == 0 && pinfo != NULL)
     {
 #ifdef CONFIG_BUILD_KERNEL
-      pinfo->fbmem   = priv->fbphys;
+      pinfo->fbmem   = (FAR void *)CONFIG_AM335X_LCDC_FB_PBASE;
 #else
-      pinfo->fbmem   = priv->fbmem;
+      pinfo->fbmem   = (FAR void *)CONFIG_AM335X_LCDC_FB_VBASE;
 #endif
       pinfo->fblen   = priv->fbsize;
       pinfo->stride  = priv->stride;
@@ -286,17 +284,17 @@ static int am335x_lcd_interrupt(int irq, void *context, void *arg)
 
   if ((regval & LCD_IRQ_EOF0) != 0)
     {
-      putreg32(AM335X_LCD_DMA_FB0_BASE, priv->fbphys);
+      putreg32(AM335X_LCD_DMA_FB0_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
       putreg32(AM335X_LCD_DMA_FB0_CEIL,
-               priv->fbphys + priv->fbsize - 1);
+               CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
       regval &= ~LCD_IRQ_EOF0;
     }
 
   if ((regval & LCD_IRQ_EOF1) != 0)
     {
-      putreg32(AM335X_LCD_DMA_FB1_BASE, priv->fbphys);
+      putreg32(AM335X_LCD_DMA_FB1_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
       putreg32(AM335X_LCD_DMA_FB1_CEIL,
-               priv->fbphys + priv->fbsize - 1);
+               CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
       regval &= ~LCD_IRQ_EOF1;
     }
 
@@ -393,8 +391,6 @@ static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t freq)
  *
  * Input Parameters:
  *   panel  - Provides information about the connect LCD panel.
- *   fbinfo - Provides information about the pre-allocate framebuffer
- *            memory.
  *
  * Returned value:
  *   Zero (OK) is returned on success; a negated errno value is returned in
@@ -402,8 +398,7 @@ static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t freq)
  *
  ****************************************************************************/
 
-int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel,
-                          FAR const struct am335x_fbinfo_s *fbinfo)
+int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
 {
   struct am335x_lcd_dev_s *priv = &g_lcddev;
   uint32_t regval;
@@ -423,7 +418,7 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel,
   int div;
   int ret;
 
-  DEBUGASSERT(panel != NULL && fbinfo != NULL);
+  DEBUGASSERT(panel != NULL);
 
   /* Configure LCD pins */
 
@@ -487,11 +482,9 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel,
 
   /* Save framebuffer information */
 
-  priv->fbmem  = fbinfo->fbmem;
-  priv->fbphys = fbinfo->fbphys;
   priv->stride = (priv->panel.width * priv->panel.bpp + 7) >> 3;
   priv->fbsize = priv->stride * priv->panel.height;
-  DEBUGASSERT(priv->fbsize <= fbinfo->fbsize);
+  DEBUGASSERT(priv->fbsize <= AM335X_LCDC_FB_SIZE);
 
   /* Attach the LCD interrupt */
 
@@ -671,10 +664,10 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel,
   regval |= (0 << LCD_DMA_CTRL_TH_FIFO_RDY_SHIFT);
   putreg32(AM335X_LCD_DMA_CTRL, regval);
 
-  putreg32(AM335X_LCD_DMA_FB0_BASE, priv->fbphys);
-  putreg32(AM335X_LCD_DMA_FB0_BASE, priv->fbphys + priv->fbsize - 1);
-  putreg32(AM335X_LCD_DMA_FB1_BASE, priv->fbphys);
-  putreg32(AM335X_LCD_DMA_FB1_CEIL, priv->fbphys + priv->fbsize - 1);
+  putreg32(AM335X_LCD_DMA_FB0_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
+  putreg32(AM335X_LCD_DMA_FB0_BASE, CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
+  putreg32(AM335X_LCD_DMA_FB1_BASE, CONFIG_AM335X_LCDC_FB_PBASE);
+  putreg32(AM335X_LCD_DMA_FB1_CEIL, CONFIG_AM335X_LCDC_FB_PBASE + priv->fbsize - 1);
 
   /* Enable LCD */
 
@@ -803,16 +796,17 @@ void am335x_lcdclear(nxgl_mxpixel_t color)
 {
   struct am335x_lcd_dev_s *priv = &g_lcddev;
 #if AM335X_BPP > 16
-  uint32_t *dest = (uint32_t *)priv->fbmem;
+  uint32_t *dest = (uint32_t *)CONFIG_AM335X_LCDC_FB_VBASE;
   int incr = sizeof(uint32_t);
 #else
-  uint16_t *dest = (uint16_t *)priv->fbmem;
+  uint16_t *dest = (uint16_t *)CONFIG_AM335X_LCDC_FB_VBASE;
   int incr = sizeof(uint16_t);
 #endif
   int i;
 
-  lcdinfo("Clearing display: color=%04x VRAM=%p size=%lu\n",
-          color, priv->fbmem, (unsigned long)priv->fbsize);
+  lcdinfo("Clearing display: color=%04x VRAM=%08lx size=%lu\n",
+          color, (unsigned long)CONFIG_AM335X_LCDC_FB_VBASE,
+          (unsigned long)priv->fbsize);
 
   for (i = 0; i < priv->fbsize; i += incr)
     {

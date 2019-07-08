@@ -66,6 +66,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* If the LCDC is enabled, then this will provide the number of sections
+ * to map for the framebuffer.
+ */
+
+#define AM335X_LCDC_FBNSECTIONS \
+  ((CONFIG_AM335X_LCDC_FB_SIZE + 0x000fffff) >> 20)
+
 /****************************************************************************
  * Name: showprogress
  *
@@ -105,9 +112,8 @@
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define SAMA5_LCDC_FBNSECTIONS \
+  ((CONFIG_SAMA5_LCDC_FB_SIZE + 0x000fffff) >> 20)
 
 /****************************************************************************
  * Private Data
@@ -120,31 +126,54 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static const struct section_mapping_s g_section_mapping[] =
 {
-  { AM335X_GPMC_PSECTION,       AM335X_GPMC_VSECTION,  /* Includes vectors and page table */
+  {
+    AM335X_GPMC_PSECTION,       AM335X_GPMC_VSECTION,  /* Includes vectors and page table */
     AM335X_GPMC_MMUFLAGS,       AM335X_GPMC_NSECTIONS
   },
-  { AM335X_BROM_PSECTION,       AM335X_BROM_VSECTION,
+  {
+    AM335X_BROM_PSECTION,       AM335X_BROM_VSECTION,
     AM335X_BROM_MMUFLAGS,       AM335X_BROM_NSECTIONS
   },
-  { AM335X_ISRAM_PSECTION,      AM335X_ISRAM_VSECTION,
+  {
+    AM335X_ISRAM_PSECTION,      AM335X_ISRAM_VSECTION,
     AM335X_ISRAM_MMUFLAGS,      AM335X_ISRAM_NSECTIONS
   },
-  { AM335X_OCMC0_PSECTION,      AM335X_OCMC0_VSECTION,
+  {
+    AM335X_OCMC0_PSECTION,      AM335X_OCMC0_VSECTION,
     AM335X_OCMC0_MMUFLAGS,      AM335X_OCMC0_NSECTIONS
   },
-  { AM335X_PERIPH_PSECTION,     AM335X_PERIPH_VSECTION,
+  {
+    AM335X_PERIPH_PSECTION,     AM335X_PERIPH_VSECTION,
     AM335X_PERIPH_MMUFLAGS,     AM335X_PERIPH_NSECTIONS
   },
-  { AM335X_DDR_PSECTION,        AM335X_DDR_VSECTION,
+  {
+    AM335X_DDR_PSECTION,        AM335X_DDR_VSECTION,
     AM335X_DDR_MMUFLAGS,        AM335X_DDR_NSECTIONS
   }
+
+#ifdef CONFIG_AM335X_LCDC
+  ,
+
+  /* LCDC Framebuffer.  This entry reprograms a part of one of the above
+   * regions, making it non-cache-able and non-buffer-able.
+   */
+
+  {
+    CONFIG_AM335X_LCDC_FB_PBASE, CONFIG_AM335X_LCDC_FB_VBASE,
+    MMU_IOFLAGS, AM335X_LCDC_FBNSECTIONS
+  }
+#endif
 };
 
 #define NMAPPINGS \
   (sizeof(g_section_mapping) / sizeof(struct section_mapping_s))
 
-const size_t g_num_mappings = NMAPPINGS;
+static const size_t g_num_mappings = NMAPPINGS;
 #endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: am335x_setupmappings

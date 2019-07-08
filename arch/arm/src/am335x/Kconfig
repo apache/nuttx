@@ -253,12 +253,26 @@ config AM335X_DDR_MAPSIZE
 menu "LCD Configuration"
 	depends on AM335X_LCDC
 
-config AM335X_LCDC_VRAMBASE
-	hex "Video RAM base address"
-	default 0xa0010000
+config AM335X_LCDC_FB_VBASE
+	hex "Video RAM base address (virtual)"
+	default 0x80000000
 	---help---
-		Base address of the video RAM frame buffer.  The default is
-		(AM335X_EXTDRAM_CS0 + 0x00010000)
+		Base address of the video RAM frame buffer.  The default of 0x80000000
+		assumes that the framebuffer lies at the beginning of DRAM and that
+		a 1-to-1 virtual-to-physical address mapping is used.
+
+config AM335X_LCDC_FB_PBASE
+	hex "Video RAM base address (physical)"
+	default 0x80000000
+	---help---
+		Base address of the video RAM frame buffer.  The default of 0x80000000
+		assumes that the framebuffer lies at the beginning of DRAM.
+
+config AM335X_LCDC_FB_SIZE
+	hex "Video RAM base size"
+	default 0x00100000
+	---help---
+		Size of the video RAM frame buffer.  Default:  1Mb.
 
 config AM335X_LCDC_USE_CLKIN
 	bool "Use optional input clock"

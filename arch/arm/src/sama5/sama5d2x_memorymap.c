@@ -255,7 +255,7 @@ const struct section_mapping_s g_section_mapping[] =
    * regions, making it non-cacheable and non-buffereable.
    *
    * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
-   * until after the SDRAM remapping (since the framebuffer problem resides) in
+   * until after the SDRAM remapping since the framebuffer probablyresides in
    * SDRAM.
    */
 

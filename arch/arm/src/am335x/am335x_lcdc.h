@@ -137,6 +137,13 @@
 #  define CONFIG_AM335X_LCDC_FDD 128
 #endif
 
+#if (CONFIG_AM335X_LCDC_FB_SIZE & 0x000fffff) != 0
+#  warning "Framebuffer size must be a multiple of 1Mb"
+#endif
+
+#define AM335X_LCDC_FB_SIZE \
+    ((CONFIG_AM335X_LCDC_FB_SIZE + 0x000fffff) & ~0x000fffff)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -166,19 +173,6 @@ struct am335x_panel_info_s
   uint32_t dma_burstsz;     /* DMA burst size */
   uint32_t bpp;             /* Bits per pixel */
   uint32_t fdd;             /* Palette loading delay */
-};
-
-/* A special memory region is set aside for the framebuffer.  This region
- * must be set aside in the linker script and assigned a virtual address
- * during initialization.  The framebuffer memory region must be non-
- * cached.
- */
-
-struct am335x_fbinfo_s
-{
-  FAR void *fbmem;          /* Virtual address of the framebuffer */
-  FAR void *fbphys;         /* Physical address of the framebuffer */
-  size_t    fbsize;         /* Size of the framebuffer region */
 };
 
 /****************************************************************************
@@ -217,8 +211,6 @@ struct am335x_fbinfo_s
  *
  * Input Parameters:
  *   panel  - Provides information about the connect LCD panel.
- *   fbinfo - Provides information about the pre-allocate framebuffer
- *            memory.
  *
  * Returned value:
  *   Zero (OK) is returned on success; a negated errno value is returned in
@@ -226,8 +218,7 @@ struct am335x_fbinfo_s
  *
  ****************************************************************************/
 
-int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel,
-                          FAR const struct am335x_fbinfo_s *fbinfo);
+int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel);
 
 /****************************************************************************
  * Name:  am335x_lcdclear
@@ -280,8 +271,6 @@ void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
  *   len      - The length of the EDID data in bytes
  *   panel    - A user provided location to receive the panel data.
  *   selected - A user provided location to receive the selected video mode.
- *   fbinfo   - Provides information about the pre-allocate framebuffer
- *              memory.
  *
  * Returned value:
  *   None.  Always succeeds.  The logic will fallback to VGA mode if no
@@ -292,8 +281,7 @@ void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
 
 void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
                      FAR struct am335x_panel_info_s *panel,
-                     FAR struct edid_videomode_s *selected,
-                     FAR const struct am335x_fbinfo_s *fbinfo);
+                     FAR struct edid_videomode_s *selected);
 
 /****************************************************************************
  * Name: am335x_backlight
