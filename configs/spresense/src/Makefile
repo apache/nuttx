@@ -39,6 +39,7 @@ DEPPATH = --dep-path .
 ASRCS =
 CSRCS =
 
+CSRCS += cxd56_main.c
 CSRCS += cxd56_boot.c
 CSRCS += cxd56_clock.c
 CSRCS += cxd56_bringup.c
