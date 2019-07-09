@@ -369,9 +369,15 @@ void up_addregion(void)
 
   /* Yes.. allow user-mode access to the AHB SRAM user heap memory */
 
-  lpc17_mpu_uheap((uintptr_t)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
-
+#if defined(LPC17_BANK0_HEAPBASE) && defined(LPC17_BANK0_HEAPSIZE)
+  lpc17_mpu_uheap((uintptr_t)LPC17_BANK0_HEAPBASE, LPC17_BANK0_HEAPSIZE);
 #endif
+
+#if defined(LPC17_BANK1_HEAPBASE) && defined(LPC17_BANK1_HEAPSIZE)
+  lpc17_mpu_uheap((uintptr_t)LPC17_BANK1_HEAPBASE, LPC17_BANK1_HEAPSIZE);
+#endif
+
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
 
   /* Add the AHB SRAM user heap region. */
 
