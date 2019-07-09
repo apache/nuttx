@@ -1025,3 +1025,12 @@ zipme.sh
   I use this script to create the nuttx-xx.yy.tar.gz tarballs for
   release on Bitbucket.org.  It is handy because it also does the
   kind of clean that you need to do to make a clean code release.
+
+flash_writter.py
+----------------
+
+  This flash writter is using the xmodem for firmware transfer on
+  boards based on cxd56 chip (Ex. Spresense)
+
+  for flashing the .spk image to the board please use:
+  tools/flash_writer.py -s -c /dev/ttyUSB0 -d -b 115200 -n nuttx.spk
