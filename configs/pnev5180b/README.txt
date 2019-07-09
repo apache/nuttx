@@ -111,3 +111,8 @@ Where <subdir> is one of the following:
     This configuration includes a USB Composite Device with both CDC/ACM and
     CDC/ECM.  NuttShell provides a terminal via CDC/ACM.  A network interface
     (eth0) is also provided via CDC/ECM.
+
+  knsh:
+    This is identical to the nsh configuratio above except that NuttX
+    is built as a kernel-mode, monolithic module and the user applications
+    are built separately.

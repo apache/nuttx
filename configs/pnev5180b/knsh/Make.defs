@@ -1,14 +1,13 @@
 ############################################################################
-# configs/pnev5180b/scripts/Make.defs
+# configs/pnev5180b/knsh/Make.defs
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Michael Jung <mijung@gmx.net>
 #
-# Based on configs/zkit-arm-1769/scripts/Make.defs
+# Based on configs/open1788/knsh/Make.defs
 #
-#   Copyright (C) 2013 Zilogic Systems. All rights reserved.
-#   Author: BabuSubashChandar <code@zilogic.com>
-#           Manikandan <code@zilogic.com>
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -50,13 +49,15 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)flash.ld}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)memory.ld}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)kernel-space.ld}"
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include -isystem $(TOPDIR)$(DELIM)include$(DELIM)cxx
-  ARCHSCRIPT = -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)flash.ld
+  ARCHSCRIPT = -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)memory.ld
+  ARCHSCRIPT += -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)kernel-space.ld
 endif
 
 CC = $(CROSSDEV)gcc
