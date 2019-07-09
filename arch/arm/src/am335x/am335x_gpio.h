@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "hardware/am335x_control.h"
+#include "hardware/am335x_scm.h"
 #include "hardware/am335x_gpio.h"
 
 /************************************************************************************
