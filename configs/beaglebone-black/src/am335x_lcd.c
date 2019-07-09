@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/lcd/tda19988.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/edid.h>
 
