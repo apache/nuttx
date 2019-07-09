@@ -162,7 +162,7 @@ int up_fbinitialize(int display)
 
    am335x_lcd_videomode(videomode, &panel);
 
-  /* Initialize the LCD controller using this video mode */
+  /* Initialize the LCD controller using this panel configuration */
 
   ret = am335x_lcd_initialize(&panel);
   if (ret < 0)
