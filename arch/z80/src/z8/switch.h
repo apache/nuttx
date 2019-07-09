@@ -46,7 +46,7 @@
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
 #endif
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -68,7 +68,7 @@
  *   value[0] = RP (MS byte) and Flags (LS) byte
  *   value[1] = PC
  *
- * The pointer to the save structure is a stack pointer at the time that up_doirq()
+ * The pointer to the save structure is a stack pointer at the time that z80_doirq()
  * was called:
  *
  *         PC[7:0]

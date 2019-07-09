@@ -53,6 +53,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
 ifeq ($(CONFIG_SPI),y)
 CSRCS += stm32_spi.c
 endif
@@ -75,6 +79,14 @@ endif
 
 ifeq ($(CONFIG_STM32F7_BBSRAM),y)
 CSRCS += stm32_bbsram.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += stm32_reset.c
+endif
+
+ifeq ($(CONFIG_STM32_ROMFS),y)
+CSRCS += stm32_romfs_initialize.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

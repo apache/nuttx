@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -55,10 +54,6 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
-
-#ifdef CONFIG_NET_SOLINGER
-#  include <nuttx/clock.h>
-#endif
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -78,63 +73,15 @@
 struct tcp_close_s
 {
   FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
-#ifdef CONFIG_NET_SOLINGER
   FAR struct socket           *cl_psock;  /* Reference to the TCP socket */
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
-  clock_t                      cl_start;  /* Time close started (in ticks) */
-#endif
 };
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tcp_close_timeout
- *
- * Description:
- *   Check for a timeout on a lingering close.
- *
- * Input Parameters:
- *   pstate - close state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_SOLINGER)
-static inline int tcp_close_timeout(FAR struct tcp_close_s *pstate)
-{
-  FAR struct socket *psock = 0;
-
-  /* Make sure that we are performing a lingering close */
-
-  if (pstate != NULL)
-    {
-      /* Yes Check for a timeout configured via setsockopts(SO_LINGER).
-       * If none... we well let the send wait forever.
-       */
-
-      psock = pstate->cl_psock;
-      if (psock && psock->s_linger != 0)
-        {
-          /* Check if the configured timeout has elapsed */
-
-          return net_timeo(pstate->cl_start, psock->s_linger);
-        }
-    }
-
-  /* No timeout */
-
-  return FALSE;
-}
-#endif /* NET_TCP_HAVE_STACK && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
  * Name: tcp_close_eventhandler
@@ -158,9 +105,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        FAR void *pvconn, FAR void *pvpriv,
                                        uint16_t flags)
 {
-#ifdef CONFIG_NET_SOLINGER
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
-#endif
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
   DEBUGASSERT(conn != NULL);
@@ -178,7 +123,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
     {
       /* The disconnection is complete */
 
-#ifdef CONFIG_NET_SOLINGER
       /* pstate non-NULL means that we are performing a LINGERing close. */
 
       if (pstate != NULL)
@@ -194,7 +138,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        */
 
       else
-#endif
         {
           /* Free connection resources */
 
@@ -205,20 +148,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
           flags = 0;
         }
     }
-
-#ifdef CONFIG_NET_SOLINGER
-  /* Check for a timeout. */
-
-  else if (pstate && tcp_close_timeout(pstate))
-    {
-      /* Yes.. Wake up the waiting thread and report the timeout */
-
-      nerr("ERROR: CLOSE timeout\n");
-      pstate->cl_result = -ETIMEDOUT;
-      goto end_wait;
-    }
-
-#endif /* CONFIG_NET_SOLINGER */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
@@ -247,7 +176,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
   return flags;
 
-#ifdef CONFIG_NET_SOLINGER
 end_wait:
   pstate->cl_cb->flags = 0;
   pstate->cl_cb->priv  = NULL;
@@ -256,7 +184,6 @@ end_wait:
 
   ninfo("Resuming\n");
   return 0;
-#endif
 }
 #endif /* NET_TCP_HAVE_STACK */
 
@@ -332,6 +259,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
 #ifdef CONFIG_NET_SOLINGER
+  struct timespec abstime;
   bool linger;
 #endif
   int ret = OK;
@@ -342,6 +270,48 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
+
+#ifdef CONFIG_NET_SOLINGER
+  /* SO_LINGER
+   *   Lingers on a close() if data is present. This option controls the
+   *   action taken when unsent messages queue on a socket and close() is
+   *   performed. If SO_LINGER is set, the system shall block the calling
+   *   thread during close() until it can transmit the data or until the
+   *   time expires. If SO_LINGER is not specified, and close() is issued,
+   *   the system handles the call in a way that allows the calling thread
+   *   to continue as quickly as possible. This option takes a linger
+   *   structure, as defined in the <sys/socket.h> header, to specify the
+   *   state of the option and linger interval.
+   */
+
+  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+  if (linger)
+    {
+      /* Get the current time */
+
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret >= 0)
+        {
+          /* NOTE: s_linger's unit is deciseconds so we don't need to update
+           * abstime.tv_nsec here.
+           */
+
+          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+          /* Wait until abstime for the buffered TX data to be sent. */
+
+          ret = tcp_txdrain(psock, &abstime);
+          if (ret < 0)
+            {
+              /* tcp_txdrain may fail, but that won't stop us from closing
+               * the socket.
+               */
+
+              nerr("ERROR: tcp_txdrain() failed: %d\n", ret);
+            }
+        }
+    }
+#endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* If we have a semi-permanent write buffer callback in place, then
@@ -375,88 +345,152 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
       state.cl_cb->event = tcp_close_eventhandler;
 
-#ifdef CONFIG_NET_SOLINGER
-      /* Check for a lingering close */
+      /* A non-NULL value of the priv field means that lingering is
+       * enabled.
+       */
 
-      linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+      state.cl_cb->priv  = (FAR void *)&state;
 
-      /* Has a lingering close been requested */
+      /* Set up for the lingering wait */
 
-      if (linger)
-        {
-          /* A non-NULL value of the priv field means that lingering is
-           * enabled.
-           */
+      state.cl_psock     = psock;
+      state.cl_result    = -EBUSY;
 
-          state.cl_cb->priv  = (FAR void *)&state;
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
 
-          /* Set up for the lingering wait */
-
-          state.cl_psock     = psock;
-          state.cl_result    = -EBUSY;
-
-          /* This semaphore is used for signaling and, hence, should not have
-           * priority inheritance enabled.
-           */
-
-          nxsem_init(&state.cl_sem, 0, 0);
-          nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
-
-          /* Record the time that we started the wait (in ticks) */
-
-          state.cl_start = clock_systimer();
-        }
-      else
-#endif /* CONFIG_NET_SOLINGER */
-
-        {
-          /* We will close immediately. The NULL priv field signals this */
-
-          state.cl_cb->priv  = NULL;
-
-          /* No further references on the connection */
-
-          conn->crefs = 0;
-        }
+      nxsem_init(&state.cl_sem, 0, 0);
+      nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
 
       /* Notify the device driver of the availability of TX data */
 
       tcp_close_txnotify(psock, conn);
 
-#ifdef CONFIG_NET_SOLINGER
-      /* Wait only if we are lingering */
+      /* Wait for the disconnect event */
 
-      if (linger)
-        {
-          /* Wait for the disconnect event */
+      (void)net_lockedwait(&state.cl_sem);
 
-          (void)net_lockedwait(&state.cl_sem);
+      /* We are now disconnected */
 
-          /* We are now disconnected */
+      nxsem_destroy(&state.cl_sem);
+      tcp_callback_free(conn, state.cl_cb);
 
-          nxsem_destroy(&state.cl_sem);
-          tcp_callback_free(conn, state.cl_cb);
+      /* Free the connection
+       * No more references on the connection
+       */
 
-          /* Free the connection */
+      conn->crefs = 0;
 
-          conn->crefs = 0;          /* No more references on the connection */
-          tcp_free(conn);           /* Free network resources */
+      /* Get the result of the close */
 
-          /* Get the result of the close */
-
-          ret = state.cl_result;
-        }
-#endif /* CONFIG_NET_SOLINGER */
+      ret = state.cl_result;
     }
-  else
-    {
-      tcp_free(conn);
-    }
+
+  /* Free network resources */
+
+  tcp_free(conn);
 
   net_unlock();
   return ret;
 }
 #endif /* NET_TCP_HAVE_STACK */
+
+/****************************************************************************
+ * Name: udp_close
+ *
+ * Description:
+ *   Break any current UDP connection
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+#ifdef NET_UDP_HAVE_STACK
+static inline int udp_close(FAR struct socket *psock)
+{
+  FAR struct udp_conn_s *conn;
+#ifdef CONFIG_NET_SOLINGER
+  struct timespec abstime;
+  bool linger;
+#endif
+
+  /* Interrupts are disabled here to avoid race conditions */
+
+  net_lock();
+
+  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+#ifdef CONFIG_NET_SOLINGER
+  /* SO_LINGER
+   *   Lingers on a close() if data is present. This option controls the
+   *   action taken when unsent messages queue on a socket and close() is
+   *   performed. If SO_LINGER is set, the system shall block the calling
+   *   thread during close() until it can transmit the data or until the
+   *   time expires. If SO_LINGER is not specified, and close() is issued,
+   *   the system handles the call in a way that allows the calling thread
+   *   to continue as quickly as possible. This option takes a linger
+   *   structure, as defined in the <sys/socket.h> header, to specify the
+   *   state of the option and linger interval.
+   */
+
+  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
+  if (linger)
+    {
+      int ret;
+
+      /* Get the current time */
+
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret >= 0)
+        {
+          /* NOTE: s_linger's unit is deciseconds so we don't need to update
+           * abstime.tv_nsec here.
+           */
+
+          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
+
+          /* Wait until abstime for the buffered TX data to be sent. */
+
+          ret = udp_txdrain(psock, &abstime);
+          if (ret < 0)
+            {
+              /* udp_txdrain may fail, but that won't stop us from closing
+               * the socket.
+               */
+
+              nerr("ERROR: udp_txdrain() failed: %d\n", ret);
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+  /* Free any semi-permanent write buffer callback in place. */
+
+  if (psock->s_sndcb != NULL)
+    {
+      udp_callback_free(conn->dev, conn, psock->s_sndcb);
+      psock->s_sndcb = NULL;
+    }
+#endif
+
+  /* And free the connection structure */
+
+  conn->crefs = 0;
+  udp_free(psock->s_conn);
+  net_unlock();
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -504,7 +538,7 @@ int inet_close(FAR struct socket *psock)
               tcp_unlisten(conn); /* No longer accepting connections */
               conn->crefs = 0;    /* Discard our reference to the connection */
 
-              /* Break any current connections */
+              /* Break any current connections and close the socket */
 
               ret = tcp_close_disconnect(psock);
               if (ret < 0)
@@ -544,6 +578,7 @@ int inet_close(FAR struct socket *psock)
         {
 #ifdef NET_UDP_HAVE_STACK
           FAR struct udp_conn_s *conn = psock->s_conn;
+          int ret;
 
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
@@ -551,21 +586,18 @@ int inet_close(FAR struct socket *psock)
 
           if (conn->crefs <= 1)
             {
-              /* Yes... */
+              /* Yes... Clost the socket */
 
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-              /* Free any semi-permanent write buffer callback in place. */
-
-              if (psock->s_sndcb != NULL)
+              ret = udp_close(psock);
+              if (ret < 0)
                 {
-                  udp_callback_free(conn->dev, conn, psock->s_sndcb);
-                  psock->s_sndcb = NULL;
-                }
-#endif
-              /* And free the connection structure */
+                  /* This would normally occur only if there is a timeout
+                   * from a lingering close.
+                   */
 
-              conn->crefs = 0;
-              udp_free(psock->s_conn);
+                  nerr("ERROR: udp_close failed: %d\n", ret);
+                  return ret;
+                }
             }
           else
             {
@@ -587,4 +619,3 @@ int inet_close(FAR struct socket *psock)
 
   return OK;
 }
-#endif /* CONFIG_NET */

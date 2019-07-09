@@ -37,47 +37,10 @@ ZDS-II Compiler Versions
 
 Version 5.3.0
 
-  The initial bring-up of the MakerLisp board used the ZiLOG ZDS-II 5.3.0
-  toolchain.  To use this toolchain, I had to suppress the gmtime() and
-  gmtimer() because these were causing an internal compiler error:
-
-    time\lib_gmtimer.c
-    P2: Internal Error(0xB47E59):
-            Please contact Technical Support
-
-  This is the change to suppress building these files:
-
-    diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
-    index 5c9b746778..8327e287f4 100644
-    --- a/libs/libc/time/Make.defs
-    +++ b/libs/libc/time/Make.defs
-    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
-     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
-     else
-    -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
-    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
-     ifdef CONFIG_TIME_EXTENDED
-     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
-
-  And there is also this:
-
-     stdlib\lib_strtof.c
-     stdlib\lib_strtof.c     (76,36) :       WARNING (32) Division by zero encountered
-     stdlib\lib_strtof.c     (102,36) :      WARNING (32) Division by zero encountered
-
-   Which can be worked around by removing it from the build
-
-  The consequence is, of course, that these interfaces will not be available
-  to applications.
-
-  Alternatively, you can use 'make -i' to build the system.  The above
-  errors will occur, but will not stop the build (unless the failed build
-  objects are brought into the link).  The has the negative side effects
-  that (1) the archives will always be rebuild in the directories where
-  the error occur, and (2) you might miss other, real compilation error
-  since these will no longer stop the compilation.
+  I verified compilation using 5.30 on June 2, 2019.  To use this version,
+  I had to make spurious modification to the implementation of gmtimer() to
+  work around an internal compiler error.  I have still not verified that
+  are no errors in the compiled code.
 
 Other Versions
   If you use any version of ZDS-II other than 5.3.0 or if you install ZDS-II
@@ -112,7 +75,16 @@ UARTs
     PD6/DCD0        CN1_DCD0     Pin 71
     PD7/RIO0        CN1_RI0      Pin 73
 
-  UART 0:  All of Port C pins can support UART1 functions when configured
+  UART0 (as well as I2C) is also available via a USB using the on-board
+  MCP2221A USB adapter.  CN1_USBUART_TX_EN and CN1_USBUART_RX_EN are pulled
+  low poll on the CPU board in order to connect CN1_RX0 and CN1_TX0 to
+  MCP_RX and MCP_TX.
+
+  When the I/O expander board is connected, jumpers J1 and J2 control this
+  functionality.  These can pull the CN1_USBUART_TX_EN and CN1_USBUART_RX_EN
+  pins high and so that UART0 can be used for other purposes.
+
+  UART 1:  All of Port C pins can support UART1 functions when configured
   for the alternate function 7.  For typical configurations only RXD and TXD
   need be configured.
 
@@ -127,9 +99,10 @@ UARTs
     PC6/DCD1        CN1_DCD1     Pin 72
     PC7/RIO1        CN1_RI1      Pin 74
 
-  For use with a host terminal emulation, it will be necessary to connect
-  either a TTL-to-RS232 or a TTL-to-USB Serial adapter to CN1 pins 59 and
-  61, and 60 and 62, depending on the selected UART.
+  With the I/O exanpander board (and J1 and J2 open), these UARTs can be
+  used with a host terminal emulation, by connecting either a TTL-to-RS232
+  or a TTL-to-USB Serial adapter to CN1 pins 59 and 61, and 60 and 62,
+  depending on the selected UART.
 
 Serial Keyboard and VGA Display
 -------------------------------
@@ -187,8 +160,8 @@ Serial Keyboard and VGA Display
      the USB/UART connection, you want this jumper REMOVED, not bridging the
      two header pins front to back.
 
-  TBD:  What is the UART configuration when used with the VGA and Keyboard
-        adapters?
+  The PC terminal software should be configured as described in the MakerLisp
+  Putty HOWTO document:  115200N1 BAUD.
 
 Default Serial Console
 ----------------------
@@ -262,7 +235,25 @@ Common Configuration Notes
      The available board-specific configurations are  summarized in the
      following paragraphs.
 
-  3. This configuration uses the mconf-based configuration tool.  To
+     When the build completes successfully, you will find this files in
+     the top level nuttx directory:
+
+     a. nuttx.hex - A loadable file in Intel HEX format
+     b. nuttx.lod - A loadable file in ZDS-II binary format
+     c. nuttx.map - A linker map file
+
+  3. ZDS-II make be used to write the nuttx.lod file to FLASH.  General
+     instructions:
+
+     a. Start ZDS-II
+     b. Open the project, for example, nsh/nsh.zdsproj
+     c. Select Debug->Connect To Target
+     d. Select Debug->Download code
+
+     There are projects for the ZiLOG Smart Flash Programmer as well but
+     these are not functional as of this writing.
+
+  4. This configuration uses the mconf-based configuration tool.  To
      change this configurations using that tool, you should:
 
      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
@@ -274,25 +265,175 @@ Common Configuration Notes
 Configuration Subdirectories
 ----------------------------
 
-  nsh:
+  nsh_flash, nsh_ram:
 
-    This configuration builds the NuttShell (NSH).  That code can be
-    found in examples/nsh.  For more information see:  examples/nsh/README.txt
-    and Documentation/NuttShell.html.
+    These configuration build the NuttShell (NSH).  That code can be
+    found in apps/system/nsh and apps/system/nshlib..  For more
+    information see:  apps/system/nsh/README.txt and
+    Documentation/NuttShell.html.
 
     NOTES:
 
-    1. A serial console is provided on UART0.  This configuration may work
-       with or without the the VGA and Keyboard adapter boards.  For use
-       with a host terminal emulation without the accessory boards, it will
-       be necessary to connect either a TTL-to-RS232 or a TTL-to-USB Serial
-       adapter to CN1 pins 59 and 61.
+    1. The two configurations different only in that one builds for
+       execution entirely from FLASH and the other for execution entirely
+       from RAM.  A bootloader of some kind is required to support such
+       execution from RAM!  This difference is reflected in a single
+       configuration setting:
 
-       The default baud setting is 57600N1.
+         CONFIG_BOOT_RUNFROMFLASH=y    # Execute from flash (default)
+         CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
 
-       To use the VGA display controller with stdout and stderr, you also
-       need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
-       enables a required VGA initialization sequence.
+       A third configuration is possible but not formalized with its own
+       defconfig file:  You can also configure the code to boot from FLASH,
+       copy the code to external SRAM, and then execute from RAM.  Such a
+       configuration needs the following settings in the .config file:
 
-       TBD:  What is the UART configuration when used with the VGA and
-       Keyboard controllers?
+         CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
+         CONFIG_MAKERLISP_COPYTORAM=y  # Boot from FLASH but copy to SRAM
+
+       Why execute from SRAM at all?  Because you will get MUCH better
+       performance because of the zero wait state SRAM implementation.
+
+    2. A serial console is provided on UART0.  This configuration should work
+       with or without the the VGA and Keyboard adapter boards.  Normal
+       connectivity is via host serial console connected through the USB
+       serial console.
+
+       With the I/O expansion board, the serial console can also be used with
+       either a TTL-to-RS232 or a TTL-to-USB Serial adapter connected by CN1
+       pins 59 and 61.
+
+       The default baud setting is 115200N1.
+
+       To use the VGA display controller with stdin, stdout and stderr, you
+       also need to selection CONFIG_MAKERLISP_VGA=y in your configuration.
+       This enables a required VGA initialization sequence.
+
+       The PC terminal software should be configured as described in the
+       MakerLisp Putty HOWTO document:  115200N1 BAUD.
+
+    3. The eZ80 RTC, the procFS file system, and SD card support in included.
+       The procFS file system will be auto-mounted at /proc when the board
+       boots.
+
+       The RTC can be read and set from the NSH date command.
+
+         nsh> date
+         Thu, Dec 19 20:53:29 2086
+         nsh> help date
+         date usage:  date [-s "MMM DD HH:MM:SS YYYY"]
+         nsh> date -s "Jun 16 15:09:00 2019"
+         nsh> date
+         Sun, Jun 16 15:09:01 2019
+
+       When the system boots, it will probe the SD card and create a
+       block driver called mmcsd0:
+
+         nsh> ls /dev
+         /dev:
+          console
+          mmcsd0
+          null
+          ttyS0
+         nsh> mount
+           /proc type procfs
+
+       The SD card can be mounted with the following NSH mount command:
+
+         nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+         nsh> ls /mnt
+         /mnt:
+          sdcard/
+         nsh> mount
+           /mnt/sdcard type vfat
+           /proc type procfs
+         nsh> ls -lR /mnt/sdcard
+         /mnt/sdcard:
+          drw-rw-rw-       0 System Volume Information/
+         /mnt/sdcard/System Volume Information:
+          -rw-rw-rw-      76 IndexerVolumeGuid
+          -rw-rw-rw-      12 WPSettings.dat
+
+       You can they use the SD card as any other file system.
+
+         nsh> ls /mnt/sdcard
+         /mnt/sdcard:
+          System Volume Information/
+         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
+         nsh> ls /mnt/sdcard
+         /mnt/sdcard:
+          System Volume Information/
+          atest.txt
+         nsh> cat /mnt/sdcard/atest.txt
+         This is a test
+
+       Don't forget to un-mount the volume before power cycling:
+
+         nsh> mount
+           /mnt/sdcard type vfat
+           /proc type procfs
+         nsh> umount /mnt/sdcard
+         nsh> mount
+           /proc type procfs
+
+       NOTE:  The is no card detect signal so the microSD card must be
+       placed in the card slot before the system is started.
+
+    4. Debugging the RAM version
+
+       You can debug the all RAM version using ZDS-II as follows:
+
+       a. Connect to the debugger,
+       b. Load the nuttx.lod file
+       c. Set the PC to 0x040000
+       d. Single step a few times to make sure things look good, then
+       e. "GO"
+
+    5. Optimizations:
+
+       - The stack sizes have not been tuned and, hence, are probably too
+         large.
+
+    STATUS:
+      2019-06-16:  The basic NSH configuration appears to be fully functional
+        using only the CPU and I/O expansion card.  Console is provided over
+        USB.
+
+        Added support for SPI-based SD cards, the RTC and procFS.  There are
+        still a few issues at the end-of-the-day:  (1) the SD card initialization
+        hangs and prevents booting, and (2) RTC does not preserve time across a
+        power cycle.
+
+      2019-06-17:  The SD initialization was due to some error in the SPI driver:
+        It waits for a byte transfer to complete but it never receives the
+        indication that the transfer completed.  That SPI problem has been
+        fixed and now the SD card is functional.
+
+      2019-06-18:  The RTC now appears to be fully functional.
+
+      2019-06-26:  Renamed nsh configuration to nsh_flash.  Added nsh_ram
+        configuration.  Not yet verified.
+
+      2019-07-09:  The RAM version does not run!  I can single step through
+        the initialization and all looks well, but when I "GO", the system
+        crashes.  The PC is sitting at a crazy address when I break in.  I
+        have not yet debugged this.
+
+        The identical FLASH version, differing only in the selected linker
+        script, works just fine.  This implies some issue with the
+        configuration of SRAM for execution.
+
+  sdboot
+
+    This configuration implements a very simple boot loader.  In runs from
+    FLASH and simply initializes the external SRAM, mounts the FAT file
+    system on the SD card, and checks to see if there is a file called
+    nuttx.hex on the SD card.  If so, it will load the Intel HEX file into
+    memory and jump to address 0x040000.  This, of course, assumes that
+    the application's reset vector resides at address 0x040000 in external
+    SRAM.
+
+    The boot loader source is located at configs/makerlisp/src/sd_main.c.
+
+    STATUS:
+      2019-06-26:  Configuration added.  Not yet verified.

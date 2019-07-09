@@ -1,29 +1,47 @@
-COPYING -- Describes the terms under which Nuttx is distributed. A copy of
-the BSD-style licensing is included in this file. In my words -- I believe
-that you should free to use NuttX in any environment, private, private,
-commercial, open, closed, etc. provided only that you respect the modest
-copyright notices as described in license (below), respect Trademarks, and
-include a copy of the BSD license.  Please feel free to contact me if you
-have any licensing concerns.
+COPYING
+=======
 
-Copyright Date Notation:  Copyright information is provided in the header
-of each file.  This copyright information includes the name of the copyright
-holder and the year(s) in which copyrighted additions to the file were made
-to the file.  A comma (',') is used to separate years in the list of years.
-A hyphen ('-') is used as a more compact notation when additions were made
-over several consecutive years.  So for example, "2007, 2011" would mean
-that copyrighted additions were made during the years of 2007 and 2011
-whereas "2007-2011" would indicate copyrighted additions in the years 2007,
-2008, 2009, 2010, and 2011.
+Describes the terms under which Nuttx is distributed. A copy of the BSD-
+style licensing is included in this file. In my words -- I believe that you
+should free to use NuttX in any environment, private, private, commercial,
+open, closed, etc. provided only that you respect the modest copyright
+notices as described in license (below), respect Trademarks, and include a
+copy of the BSD license.  Please feel free to contact me if you have any 
+icensing concerns.
 
-Copyright Line Continuation:  Copy information which exceeds the usable line
-lengh may be broken and continued on the following line, such as:
+Tool Licenses
+-------------
+
+Tools under the nuttx/tools directory are not intended for binary
+distribution.  You may find other licensing on individual tools in that
+directory.  If you intend to redistribute these tools in binary form, please
+respect the individual license of each tool as identified in the file header
+of the tool source files.
+
+Copyright Date Notation
+-----------------------
+
+Copyright information is provided in the header of each file.  This
+copyright information includes the name of the copyright holder and the
+year(s) in which copyrighted additions to the file were made to the file.
+A comma (',') is used to separate years in the list of years.  A hyphen ('-')
+is used as a more compact notation when additions were made over several
+consecutive years.  So for example, "2007, 2011" would mean that copyrighted
+additions were made during the years of 2007 and 2011 whereas "2007-2011"
+would indicate copyrighted additions in the years 2007, 2008, 2009, 2010,
+and 2011.
+
+Copyright Line Continuation
+---------------------------
+
+Copy information which exceeds the usable line lengh may be broken and
+continued on the following line, such as:
 
    Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt.  All
      rights reserved.
 
 NuttX
-^^^^^
+=====
 
 License for NuttX in general (authorship and copyright dates on individual
 files will vary):
@@ -64,7 +82,7 @@ files will vary):
  ****************************************************************************/
 
 FAT Long File Names
-^^^^^^^^^^^^^^^^^^^
+===================
 
   NOTE:  If CONFIG_FAT_LFN is defined in your NuttX configuration file, then
   there may be some legal, patent issues. The following was extracted from
@@ -99,7 +117,7 @@ FAT Long File Names
   So you have been forewarned:  Use the long filename at your own risk!
 
 uIP
-^^^
+===
 
 Many lower-level networking components of NuttX derive from uIP which
 has a similar BSD style license:
@@ -108,7 +126,7 @@ has a similar BSD style license:
    All rights reserved.
 
 IGMP
-^^^^
+===
 
 IGMP support, if enabled, adds additional logic by Steve Reynolds:
 
@@ -116,7 +134,7 @@ IGMP support, if enabled, adds additional logic by Steve Reynolds:
   All rights reserved.
 
 The HID Parser in drivers/usbhost
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=================================
 
   Adapted from the LUFA Library (MIT license):
 
@@ -144,8 +162,8 @@ The HID Parser in drivers/usbhost
 Certain functions in the NuttX C-library derive from other BSD-compatible
 sources:
 
-fs/nfs:
-^^^^^^^
+fs/nfs
+======
 
    NFS:
 
@@ -166,7 +184,7 @@ fs/nfs:
    California, Berkeley and its contributors."
 
 fs/spiffs
-^^^^^^^^^
+=========
 
   The MIT License (MIT)
 
@@ -189,14 +207,14 @@ fs/spiffs
   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-strtod():
-^^^^^^^^
+strtod()
+========
 
   Copyright (C) 2002 Michael Ringgaard. All rights reserved.
   Copyright (C) 2006-2007 H. Peter Anvin.
 
-dtoa():
-^^^^^^
+dtoa()
+======
 
   If you enable floating point conversions with CONFIG_LIBC_FLOATINGPOINT,
   then some files with an unmodified BSD license will be included.  That
@@ -207,7 +225,7 @@ dtoa():
    California, Berkeley and its contributors."
 
 libc/string/lib_vikmemcpy.c
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+===========================
 
   If you enable CONFIG_MEMCPY_VIK, then you will build with the optimized
   version of memcpy from Daniel Vik.  Licensing information for that version
@@ -236,7 +254,7 @@ libc/string/lib_vikmemcpy.c
      distribution.
 
 libs/libc/math
-^^^^^^^^^^^^^^
+==============
 
   If you enable CONFIG_LIB, you will build the math library at libc/math.
   This library was taken from the math library developed for the Rhombus
@@ -258,7 +276,7 @@ libs/libc/math
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 
 drivers/video/ov2640
-^^^^^^^^^^^^^^^^^^^^
+====================
 
   WARNING:  Some of the information in the data tables in this file came
   from other projects with conflicting licenses:  Linux and ArduCAM.  Those

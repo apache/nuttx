@@ -404,6 +404,7 @@ static int gpioint_handler(int irq, FAR void *context, FAR void *arg)
  *   pin - Pin number defined in cxd56_pinconfig.h
  *   gpiocfg - GPIO Interrupt Polarity and Noise Filter Configuration Value
  *   isr - Interrupt handler. If isr is NULL, then free an allocated handler.
+ *   arg - Argument for the interrupt handler
  *
  * Returned Value:
  *   IRQ number on success; a negated errno value on failure.
@@ -413,7 +414,8 @@ static int gpioint_handler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
+int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
+                         FAR void *arg)
 {
   int slot;
   int irq;
@@ -450,9 +452,9 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
 
   /* set GPIO interrupt configuration */
 
-  if (gpiocfg & GPIOINT_TOGGLE_BOTH_MASK) {
-
-    /* set GPIO pseudo both edge interrupt */
+  if (gpiocfg & GPIOINT_TOGGLE_BOTH_MASK)
+  {
+   /* set GPIO pseudo both edge interrupt */
 
     flags = enter_critical_section();
     g_bothedge |= (1 << slot);
@@ -460,9 +462,12 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
 
     /* detect the change from the current signal */
 
-    if (true == cxd56_gpio_read(pin)) {
+    if (true == cxd56_gpio_read(pin))
+    {
       gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_LOW);
-    } else {
+    }
+    else
+    {
       gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_HIGH);
     }
   }
@@ -471,12 +476,12 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr)
 
   if ((gpiocfg & GPIOINT_TOGGLE_MODE_MASK) || GPIOINT_IS_EDGE(gpiocfg))
     {
-      irq_attach(irq, gpioint_handler, (void *)pin); /* call intermediate handler */
+      irq_attach(irq, gpioint_handler, arg); /* call intermediate handler */
       g_isr[slot] = isr;
     }
   else
     {
-      irq_attach(irq, isr, (void *)pin); /* call user handler directly */
+      irq_attach(irq, isr, arg); /* call user handler directly */
       g_isr[slot] = NULL;
     }
 

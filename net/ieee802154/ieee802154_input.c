@@ -154,8 +154,8 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
    * delete the oldest frame from the head of the RX queue.
    */
 
-   if (conn->backlog >= CONFIG_NET_IEEE802154_BACKLOG)
-     {
+  if (conn->backlog >= CONFIG_NET_IEEE802154_BACKLOG)
+    {
       DEBUGASSERT(conn->backlog == CONFIG_NET_IEEE802154_BACKLOG);
 
       /* Remove the container from the tail RX input queue. */
@@ -178,15 +178,15 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
 
       iob_free(container->ic_iob);
       ieee802154_container_free(container);
-     }
-   else
-     {
-       /* Increment the count of frames in the queue. */
+    }
+  else
+    {
+      /* Increment the count of frames in the queue. */
 
-       conn->backlog++;
-     }
+      conn->backlog++;
+    }
 
-   DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
+  DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
 #endif
 
   return OK;

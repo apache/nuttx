@@ -52,7 +52,7 @@
  * External References / External Definitions
  **************************************************************************/
 
-	xref	_up_doirq:ROM
+	xref	_z80_doirq:ROM
 
 #if defined(ENCORE_VECTORS)
 	xdef	_z8_wdt_handler
@@ -758,7 +758,7 @@ _z8_common_handler:
 	
 	/* Process the interrupt */
 
-	call	_up_doirq		/* Call the IRQ handler */
+	call	_z80_doirq		/* Call the IRQ handler */
 
 	/* Release arguments from the stack */
 

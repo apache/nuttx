@@ -218,7 +218,7 @@ void nxmq_alloc_desblock(void)
       int i;
 
       /* Add the block to the list of allocated blocks (in case
-       * we ever need to reclaim the memory.
+       * we ever need to reclaim the memory).
        */
 
       sq_addlast((FAR sq_entry_t *)&mqdesblock->queue, &g_desalloc);

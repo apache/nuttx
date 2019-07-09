@@ -1304,6 +1304,14 @@ config ARCH_BOARD_PHOTON
 		(https://www.particle.io). This board features the STM32F205RGY6
 		MCU from STMicro.
 
+config ARCH_BOARD_PNEV5180B
+	bool "NXP PNEV5180B NFC Frontend Development Kit"
+	depends on ARCH_CHIP_LPC1769
+	select ARCH_HAVE_LEDS
+	---help---
+		NXP Semiconductors' PN5180 NFC Frontend Development Kit.  This board is
+		based on the NXP LPC1769 MCU.
+
 config ARCH_BOARD_STM32_BUTTERFLY2
 	bool "Kamami STM32Butterfly2 development board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -1957,6 +1965,7 @@ config ARCH_BOARD
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "photon"                   if ARCH_BOARD_PHOTON
+	default "pnev5180b"                if ARCH_BOARD_PNEV5180B
 	default "stm32butterfly2"          if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"               if ARCH_BOARD_STM32_TINY
 	default "stm32f051-discovery"      if ARCH_BOARD_STM32F051_DISCOVERY
@@ -2411,6 +2420,9 @@ source "configs/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_PHOTON
 source "configs/photon/Kconfig"
+endif
+if ARCH_BOARD_PNEV5180B
+source "configs/pnev5180b/Kconfig"
 endif
 if ARCH_BOARD_STM32_BUTTERFLY2
 source "configs/stm32butterfly2/Kconfig"

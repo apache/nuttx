@@ -49,6 +49,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define INA3221_I2C_ADDR0   0x40
+#define INA3221_I2C_ADDR1   0x41
+#define INA3221_I2C_ADDR2   0x42
+#define INA3221_I2C_ADDR3   0x43
+
 /* INA3221 Register Definitions ***********************************************/
 /* INA3221 Config Register bits */
 

@@ -192,10 +192,10 @@
 #define TC_CTRLB_DIR                 (1 << 0)
 #define TC_CTRLB_ONESHOT             (1 << 2)
 #define TC_CTRLB_CMD_SHIFT           (6)
-#define TC_CTRLB_CMD_MASK            (3 << TC_CTRLBCLR_CMD_SHIFT)
-#  define TC_CTRLB_CMD_NONE          (0 << TC_CTRLBCLR_CMD_SHIFT)
-#  define TC_CTRLB_CMD_RETRIGGER     (1 << TC_CTRLBCLR_CMD_SHIFT)
-#  define TC_CTRLB_CMD_STOP          (2 << TC_CTRLBCLR_CMD_SHIFT)
+#define TC_CTRLB_CMD_MASK            (3 << TC_CTRLB_CMD_SHIFT)
+#  define TC_CTRLB_CMD_NONE          (0 << TC_CTRLB_CMD_SHIFT)
+#  define TC_CTRLB_CMD_RETRIGGER     (1 << TC_CTRLB_CMD_SHIFT)
+#  define TC_CTRLB_CMD_STOP          (2 << TC_CTRLB_CMD_SHIFT)
 
 /* Control C register */
 

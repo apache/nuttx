@@ -64,7 +64,7 @@ static void show_usage(char *progname, int exitcode)
 static void check_spaces_left(char *line, int lineno, int ndx)
 {
   /* Unary operator should generally be preceded by a space but make also
-   * follow a left parenthesis at the beginning of a parthentical list or
+   * follow a left parenthesis at the beginning of a parenthetical list or
    * expression or follow a right parentheses in the case of a cast.
    */
 
@@ -103,6 +103,7 @@ int main(int argc, char **argv, char **envp)
   char line[LINE_SIZE]; /* The current line being examined */
   char *filename;       /* Name of the file to open */
   char *lptr;           /* Temporary pointer into line[] */
+  char *ext;            /* Temporary file extension */
   bool btabs;           /* True: TAB characters found on the line */
   bool bfunctions;      /* True: In private or public functions */
   bool bstatm;          /* True: This line is beginning of a statement */
@@ -110,8 +111,10 @@ int main(int argc, char **argv, char **envp)
   bool bswitch;         /* True: Within a switch statement */
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
-  bool bblank;          /* Used to verify block comment termintor */
-  bool ppline;          /* True: The next line the continuation of a precessor command */
+  bool bblank;          /* Used to verify block comment terminator */
+  bool ppline;          /* True: The next line the continuation of a pre-processor command */
+  bool hdrfile;         /* True: File is a header file */
+  bool bexternc;        /* True: Within 'extern "C"' */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -125,6 +128,7 @@ int main(int argc, char **argv, char **envp)
   int blank_lineno;     /* Line number of the last blank line */
   int noblank_lineno;   /* A blank line is not needed after this line */
   int lbrace_lineno;    /* Line number of last left brace */
+  int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
   int maxline;          /* Lines longer that this generate warnings */
   int n;
@@ -174,11 +178,30 @@ int main(int argc, char **argv, char **envp)
       return 1;
     }
 
+  /* Are we parsing a header file? */
+
+  hdrfile = false;
+  ext     = strrchr(filename, '.');
+
+  if (ext == 0)
+    {
+      printf("No file extension\n");
+    }
+  else if (strcmp(ext, ".h") == 0)
+    {
+      hdrfile = true;
+    }
+  else if (strcmp(ext, ".c") != 0)
+    {
+      printf("Unrecognized file extension: \"%s\"\n", ext + 1);
+    }
+
   btabs          = false; /* True: TAB characters found on the line */
   bfunctions     = false; /* True: In private or public functions */
   bswitch        = false; /* True: Within a switch statement */
   bstring        = false; /* True: Within a string */
   ppline         = false; /* True: Continuation of a pre-processor line */
+  bexternc       = false; /* True: Within 'extern "C"' */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
   bnest          = 0;     /* Brace nesting level on this line */
@@ -188,6 +211,7 @@ int main(int argc, char **argv, char **envp)
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
   lbrace_lineno  = -1;    /* Line number of last left brace */
+  externc_lineno = -1;    /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
 
@@ -409,6 +433,20 @@ int main(int argc, char **argv, char **envp)
                strncmp(&line[indent], "void ", 5) == 0 ||
                strncmp(&line[indent], "volatile ", 9) == 0)
         {
+          /* Check if this is extern "C";  We don't typically indent following
+           * this.
+           */
+
+          if (strncmp(&line[indent], "extern \"C\"", 10) == 0)
+            {
+              externc_lineno = lineno;
+            }
+
+          /* bfunctions:  True:  Processing private or public functions.
+           * bnest:       Brace nesting level on this line
+           * dnest:       Data declaration nesting level on this line
+           */
+
           /* REVISIT: Also picks up function return types */
           /* REVISIT: Logic problem for nested data/function declarations */
 
@@ -529,11 +567,11 @@ int main(int argc, char **argv, char **envp)
       /* STEP 3: Parse each character on the line */
 
       bquote = false;   /* True: Backslash quoted character next */
-      bblank = true;    /* Used to verify block comment termintor */
+      bblank = true;    /* Used to verify block comment terminator */
 
       for (; line[n] != '\n' && line[n] != '\0'; n++)
         {
-          /* Skip over indentifiers */
+          /* Skip over identifiers */
 
           if (ncomment == 0 && !bstring && (line[n] == '_' || isalpha(line[n])))
             {
@@ -788,7 +826,7 @@ int main(int argc, char **argv, char **envp)
 
           if (ncomment == 0)
             {
-              /* Backslash quoted charater */
+              /* Backslash quoted character */
 
               if (line[n] == '\\')
                 {
@@ -796,7 +834,7 @@ int main(int argc, char **argv, char **envp)
                   n++;
                 }
 
-              /* Check for quoated characters: \" in string */
+              /* Check for quoted characters: \" in string */
 
               if (line[n] == '"' && !bquote)
                 {
@@ -823,7 +861,9 @@ int main(int argc, char **argv, char **envp)
                   {
                     if (n > indent)
                       {
-                        if (dnest == 0)
+                        /* REVISIT: dnest is always > 0 here if bfunctions == false */
+
+                        if (dnest == 0 || !bfunctions)
                           {
                             fprintf(stderr,
                                     "Left bracket not on separate line at %d:%d\n",
@@ -844,6 +884,17 @@ int main(int argc, char **argv, char **envp)
                     if (dnest > 0)
                       {
                         dnest++;
+                      }
+
+                    /* Check if we are within 'extern "C"', we don't
+                     * normally indent in that case because the 'extern "C"'
+                     * is conditioned on __cplusplus.
+                     */
+
+                    if (lineno == externc_lineno ||
+                        lineno - 1 == externc_lineno)
+                      {
+                        bexternc = true;
                       }
 
                     /* Suppress error for comment following a left brace */
@@ -876,6 +927,7 @@ int main(int argc, char **argv, char **envp)
                     if (dnest < 3)
                       {
                         dnest = 0;
+                        bexternc = false;
                       }
                     else
                       {
@@ -1415,7 +1467,7 @@ int main(int argc, char **argv, char **envp)
 
       if ((ncomment > 0 || prevncomment > 0) && !bstring)
         {
-          if (indent == 0 && line[0] != '/')
+          if (indent == 0 && line[0] != '/' && !bexternc)
             {
               fprintf(stderr, "No indentation line %d:%d\n",
                       lineno, indent);
@@ -1503,7 +1555,7 @@ int main(int argc, char **argv, char **envp)
 
       /* Check for various alignment outside of the comment block */
 
-      else if ((ncomment > 0 || prevncomment > 0) && !bstring)
+      else if ((ncomment == 0 && prevncomment == 0) && !bstring)
         {
           if (indent == 0 && strchr("\n#{}", line[0]) == NULL)
             {
@@ -1519,7 +1571,7 @@ int main(int argc, char **argv, char **envp)
                       blabel = (line[i] == ':');
                     }
 
-                  if (!blabel)
+                  if (!blabel && !bexternc)
                     {
                       fprintf(stderr, "No indentation line %d:%d\n",
                               lineno, indent);
@@ -1542,9 +1594,17 @@ int main(int argc, char **argv, char **envp)
             }
           else if (line[indent] == '{')
             {
-              /* REVISIT:  False alarms in data initializers and switch statements */
+              /* REVISIT:  Possible false alarms in compound statements
+               * without a preceding conditional.  That usage often violates
+               * the coding standard.
+               */
 
-              if ((indent & 3) != 0 && !bswitch && dnest == 0)
+              if (!bfunctions && (indent & 1) != 0)
+                {
+                  fprintf(stderr, "Bad left brace alignment at line %d:%d\n",
+                          lineno, indent);
+                }
+              else if ((indent & 3) != 0 && !bswitch && dnest == 0)
                 {
                   fprintf(stderr, "Bad left brace alignment at line %d:%d\n",
                           lineno, indent);
@@ -1552,9 +1612,17 @@ int main(int argc, char **argv, char **envp)
             }
           else if (line[indent] == '}')
             {
-              /* REVISIT:  False alarms in data initializers and switch statements */
+              /* REVISIT:  Possible false alarms in compound statements
+               * without a preceding conditional.  That usage often violates
+               * the coding standard.
+               */
 
-              if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
+              if (!bfunctions && (indent & 1) != 0)
+                {
+                  fprintf(stderr, "right left brace alignment at line %d:%d\n",
+                          lineno, indent);
+                }
+              else if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
                 {
                   fprintf(stderr, "Bad right brace alignment at line %d:%d\n",
                           lineno, indent);
@@ -1563,10 +1631,10 @@ int main(int argc, char **argv, char **envp)
           else if (indent > 0)
             {
               /* REVISIT: Generates false alarms when a statement continues on
-               * the next line.  The bstatm check limits to lines beginnnig with
+               * the next line.  The bstatm check limits to lines beginning with
                * C keywords.
                * REVISIT:  The bstatm check will not detect statements that
-               * do not begin with a C keyword (such as assignement statements).
+               * do not begin with a C keyword (such as assignment statements).
                * REVISIT: Generates false alarms on comments at the end of
                * the line if there is nothing preceding (such as the aligned
                * comments with a structure field definition).  So disabled for
@@ -1585,7 +1653,7 @@ int main(int argc, char **argv, char **envp)
                     }
                 }
 
-              /* Crazy cases.  There should be no small odd alignements
+              /* Crazy cases.  There should be no small odd alignments
                * outside of comment/string.  Odd alignments are possible
                * on continued lines, but not if they are small.
                */
@@ -1599,9 +1667,15 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+  if (!bfunctions && !hdrfile)
+    {
+      fprintf(stderr, "ERROR: \"Private/Public Functions\" not found!\n");
+      fprintf(stderr, "       File could not be checked.\n");
+    }
+
   if (ncomment > 0 || bstring)
     {
-      fprintf(stderr, "In a comment/string at end of file\n");
+      fprintf(stderr, "ERROR: In a comment/string at end of file\n");
     }
 
   fclose(instream);

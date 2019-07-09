@@ -1106,11 +1106,14 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
+    || defined(CONFIG_STM32F0L0G0_USART_SINGLEWIRE) \
     || defined(CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT)
+#if defined(CONFIG_SERIAL_TERMIOS) \
+    || defined(CONFIG_STM32F0L0G0_USART_SINGLEWIRE) \
+    || defined(CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret    = OK;
@@ -1325,21 +1328,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         flags = enter_critical_section();
         cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
-        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_SBK);
+        up_serialout(priv, STM32_USART_RQR_OFFSET, cr1 | USART_RQR_SBKRQ);
         leave_critical_section(flags);
       }
       break;
 
-    case TIOCCBRK:  /* No BSD compatibility: May turn off break too soon */
-      {
-        uint32_t cr1;
-        irqstate_t flags;
-
-        flags = enter_critical_section();
-        cr1   = up_serialin(priv, STM32_USART_CR1_OFFSET);
-        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 & ~USART_CR1_SBK);
-        leave_critical_section(flags);
-      }
+    case TIOCCBRK:  /* No BSD compatibility: HW does not support stopping a break */
       break;
 #  endif
 #endif

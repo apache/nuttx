@@ -57,8 +57,8 @@ struct irqchain_s
  * Private Data
  ****************************************************************************/
 
-/* g_irqchainpool is a list of pre-allocated irq chain. The number of irq chains
- * in the pool is a configuration item.
+/* g_irqchainpool is a list of pre-allocated irq chain. The number of irq
+ * chains in the pool is a configuration item.
  */
 
 static struct irqchain_s g_irqchainpool[CONFIG_PREALLOC_IRQCHAIN];
@@ -176,7 +176,7 @@ int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg)
 
           g_irqvector[ndx].handler = irqchain_dispatch;
           g_irqvector[ndx].arg     = node;
-       }
+        }
 
       node = (FAR struct irqchain_s *)sq_remfirst(&g_irqchainfreelist);
       if (node == NULL)
@@ -255,14 +255,16 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
                       prev->next = curr->next;
                     }
 
-                  sq_addlast((FAR struct sq_entry_s *)curr, &g_irqchainfreelist);
+                  sq_addlast((FAR struct sq_entry_s *)curr,
+                             &g_irqchainfreelist);
 
                   first = g_irqvector[ndx].arg;
                   if (first->next == NULL)
                     {
                       g_irqvector[ndx].handler = first->handler;
                       g_irqvector[ndx].arg     = first->arg;
-                      sq_addlast((FAR struct sq_entry_s *)first, &g_irqchainfreelist);
+                      sq_addlast((FAR struct sq_entry_s *)first,
+                                 &g_irqchainfreelist);
                     }
 
                   ret = OK;

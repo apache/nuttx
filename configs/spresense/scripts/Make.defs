@@ -1,5 +1,5 @@
 ############################################################################
-# configs/cxd56evb/nsh/Make.defs
+# configs/spresense/nsh/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

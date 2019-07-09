@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/up_allocateheap.c
+ * arch/arm/src/stm32f7/stm32_allocateheap.c
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -383,7 +383,7 @@ void up_addregion(void)
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
-  /* Allow user-mode access to the STM32F20xxx/STM32F40xxx SRAM2 heap */
+  /* Allow user-mode access to the SRAM2 heap */
 
   stm32_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END-SRAM2_START);
 
@@ -393,7 +393,7 @@ void up_addregion(void)
 
   up_heap_color((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
 
-  /* Add the STM32F20xxx/STM32F40xxx SRAM2 user heap region. */
+  /* Add the SRAM2 user heap region. */
 
   kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
 

@@ -159,6 +159,37 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
 }
 
 /****************************************************************************
+ * Name: psock_writebuffer_notify
+ *
+ * Description:
+ *   The TCP connection has been lost.  Free all write buffers.
+ *
+ * Input Parameters:
+ *   psock    The socket structure
+ *   conn     The connection structure associated with the socket
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TCP_NOTIFIER
+static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
+{
+  /* Check if all write buffers have been sent and ACKed */
+
+  if (sq_empty(&conn->write_q) && sq_empty(&conn->unacked_q))
+    {
+      /* Notify any waiters that the write buffers have been drained. */
+
+      tcp_writebuffer_signal(conn);
+    }
+}
+#else
+#  define psock_writebuffer_notify(conn)
+#endif
+
+/****************************************************************************
  * Name: psock_lost_connection
  *
  * Description:
@@ -207,6 +238,11 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
       sq_init(&conn->unacked_q);
       sq_init(&conn->write_q);
+
+      /* Notify any waiters if the write buffers have been drained. */
+
+      psock_writebuffer_notify(conn);
+
       conn->sent       = 0;
       conn->sndseq_max = 0;
     }
@@ -508,6 +544,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   /* And return the write buffer to the pool of free buffers */
 
                   tcp_wrbuffer_release(wrb);
+
+                  /* Notify any waiters if the write buffers have been
+                   * drained.
+                   */
+
+                  psock_writebuffer_notify(conn);
                 }
               else
                 {
@@ -599,9 +641,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-   /* Check if we are being asked to retransmit data */
+  /* Check if we are being asked to retransmit data */
 
-   else if ((flags & TCP_REXMIT) != 0)
+  else if ((flags & TCP_REXMIT) != 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
@@ -664,6 +706,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               tcp_wrbuffer_release(wrb);
 
+              /* Notify any waiters if the write buffers have been
+               * drained.
+               */
+
+              psock_writebuffer_notify(conn);
+
               /* NOTE expired is different from un-ACKed, it is designed to
                * represent the number of segments that have been sent,
                * retransmitted, and un-ACKed, if expired is not zero, the
@@ -721,6 +769,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               /* Return the write buffer to the free list */
 
               tcp_wrbuffer_release(wrb);
+
+              /* Notify any waiters if the write buffers have been
+               * drained.
+               */
+
+              psock_writebuffer_notify(conn);
 
               /* NOTE expired is different from un-ACKed, it is designed to
                * represent the number of segments that have been sent,
@@ -818,7 +872,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * be set for this write buffer.
            */
 
-           if (TCP_WBSEQNO(wrb) == (unsigned)-1)
+          if (TCP_WBSEQNO(wrb) == (unsigned)-1)
             {
               TCP_WBSEQNO(wrb) = conn->isn + conn->sent;
             }
@@ -1177,7 +1231,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          int count;
+          unsigned int count;
           int blresult;
 
           /* iob_copyin might wait for buffers to be freed, but if network is

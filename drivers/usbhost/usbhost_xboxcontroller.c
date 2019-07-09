@@ -266,7 +266,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * used to associate the USB class driver to a connected USB device.
  */
 
-static const const struct usbhost_id_s g_xboxcontroller_id[] =
+static const struct usbhost_id_s g_xboxcontroller_id[] =
 {
   /* XBox One classic controller */
   {

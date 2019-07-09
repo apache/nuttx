@@ -86,8 +86,7 @@
 
 int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
-  int ret = -ENOTTY;  /* The correct return for the case of an unrecognized
-                       * command. */
+  int ret = -ENOTTY; /* The correct return for the case of an unrecognized command */
 
   switch (cmd)
     {

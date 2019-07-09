@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_notifier.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
                                  FAR struct tcp_conn_s *conn,
                                  FAR void *arg)
 {
+#ifdef CONFIG_NET_TCP_READAHEAD
   struct work_notifier_s info;
 
   DEBUGASSERT(worker != NULL);
@@ -106,10 +107,72 @@ int tcp_readahead_notifier_setup(worker_t worker,
   info.worker    = worker;
 
   return work_notifier_setup(&info);
+#else
+  return 0;
+#endif
 }
 
 /****************************************************************************
- * Name: tcp_readahead_disconnect_setup
+ * Name: tcp_writebuffer_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function when an TCP write
+ *   buffer is emptied.  The worker function will execute on the high
+ *   priority worker thread.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the high priority work
+ *            queue when all buffer TX data has been sent.
+ *   conn   - The TCP connection where buffer write data is pending.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The signal notification is in place.  The returned value is a
+ *           key that may be used later in a call to
+ *           tcp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No signal
+ *           notification will be provided.
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+int tcp_writebuffer_notifier_setup(worker_t worker,
+                                   FAR struct tcp_conn_s *conn,
+                                   FAR void *arg)
+{
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  struct work_notifier_s info;
+
+  DEBUGASSERT(worker != NULL);
+
+  /* If the write buffers are already empty, then return zero without
+   * setting up the notification.
+   */
+
+  if (sq_empty(&conn->write_q) && sq_empty(&conn->unacked_q))
+    {
+      return 0;
+    }
+
+  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
+
+  info.evtype    = WORK_TCP_WRITEBUFFER;
+  info.qid       = LPWORK;
+  info.qualifier = conn;
+  info.arg       = arg;
+  info.worker    = worker;
+
+  return work_notifier_setup(&info);
+#else
+  return 0;
+#endif
+}
+
+/****************************************************************************
+ * Name: tcp_disconnect_notifier_setup
  *
  * Description:
  *   Set up to perform a callback to the worker function if the TCP
@@ -133,9 +196,9 @@ int tcp_readahead_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-int tcp_readahead_disconnect_setup(worker_t worker,
-                                   FAR struct tcp_conn_s *conn,
-                                   FAR void *arg)
+int tcp_disconnect_notifier_setup(worker_t worker,
+                                  FAR struct tcp_conn_s *conn,
+                                  FAR void *arg)
 {
   struct work_notifier_s info;
 
@@ -206,12 +269,44 @@ int tcp_notifier_teardown(int key)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP_READAHEAD
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
   return work_notifier_signal(WORK_TCP_READAHEAD, conn);
 }
+#endif
+
+/****************************************************************************
+ * Name: tcp_writebuffer_signal
+ *
+ * Description:
+ *   All buffer Tx data has been sent.  Signal all threads waiting for the
+ *   write buffers to become empty.
+ *
+ *   When write buffer becomes empty, *all* of the workers waiting
+ *   for that event data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call tcp_writebuffer_notifier_setup() once
+ *   again.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn)
+{
+  /* This is just a simple wrapper around work_notifier_signal(). */
+
+  return work_notifier_signal(WORK_TCP_WRITEBUFFER, conn);
+}
+#endif
 
 /****************************************************************************
  * Name: tcp_disconnect_signal

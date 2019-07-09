@@ -47,7 +47,6 @@ config CAN_NPENDINGRTR
 config CAN_TXREADY
 	bool "can_txready interface"
 	default n
-	select SCHED_WORKQUEUE
 	---help---
 		This selection enables the can_txready() interface.  This interface
 		is needed only for CAN hardware that supports queing of outgoing

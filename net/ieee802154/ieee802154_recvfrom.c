@@ -161,11 +161,11 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
         }
 
 #if CONFIG_NET_IEEE802154_BACKLOG > 0
-       /* Decrement the count of frames in the queue. */
+      /* Decrement the count of frames in the queue. */
 
-       DEBUGASSERT(conn->backlog > 0);
-       conn->backlog--;
-       DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
+      DEBUGASSERT(conn->backlog > 0);
+      conn->backlog--;
+      DEBUGASSERT((int)conn->backlog == ieee802154_count_frames(conn));
 #endif
 
       /* Extract the IOB containing the frame from the container */

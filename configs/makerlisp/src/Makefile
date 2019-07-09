@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = ez80_lowinit.c ez80_bringup.c
+CSRCS = ez80_boot.c ez80_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += ez80_appinit.c
@@ -46,10 +46,15 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += ez80_leds.c
 endif
 
-ifeq ($(CONFIG_MMCSD_SPI),y)
 ifeq ($(CONFIG_EZ80_SPI),y)
+CSRCS += ez80_spi.c
+ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += ez80_spimmcsd.c
 endif
+endif
+
+ifeq ($(CONFIG_MAKERLISP_SDBOOT),y)
+CSRCS += sd_main.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

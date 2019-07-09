@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
+ *    the documentation and/or otherr materials provided with the
  *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
@@ -60,7 +61,7 @@
 
 #include "chip/switch.h"
 #include "up_arch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -97,7 +98,13 @@ void up_initialize(void)
 
   /* Initialize the interrupt subsystem */
 
-  up_irqinitialize();
+  z80_irq_initialize();
+
+#ifdef CONFIG_RTC_ALARM
+  /* Enable RTC alarm interrupts */
+
+  z80_rtc_irqinitialize();
+#endif
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* Initialize the system timer interrupt */
@@ -120,7 +127,7 @@ void up_initialize(void)
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  (void)up_mmuinit();
+  (void)z80_mmu_initialize();
 #endif
 
 #ifdef CONFIG_MM_IOB
@@ -159,7 +166,7 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
-  up_serialinit();
+  z80_serial_initialize();
 #endif
 
   /* Initialize the console device driver (if it is other than the standard

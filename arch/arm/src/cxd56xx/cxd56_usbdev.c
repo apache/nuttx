@@ -76,6 +76,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* TOPREG VBUS regsiter */
 
 #define CLR_EDGE (1 << 9)
@@ -103,7 +104,7 @@
 #endif
 
 #ifndef CONFIG_USBDEV_SETUP_MAXDATASIZE
-#  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
+#  define CONFIG_USBDEV_SETUP_MAXDATASIZE (CONFIG_USBDEV_EP0_MAXSIZE * 4)
 #endif
 
 #define CONFIG_DEFAULT_PHY_CFG0 \
@@ -385,6 +386,7 @@ struct cxd56_usbdev_s
 
   uint8_t ep0data[CONFIG_USBDEV_SETUP_MAXDATASIZE];
   uint16_t ep0datlen;
+  uint16_t ep0reqlen;
 
   /* The endpoint list */
 
@@ -424,7 +426,8 @@ struct cxd56_usbdev_file_s
 };
 
 static struct pm_cpu_freqlock_s g_hv_lock =
-  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('U', 'S', 0), PM_CPUFREQLOCK_FLAG_HV);
+  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('U', 'S', 0),
+  PM_CPUFREQLOCK_FLAG_HV);
 static struct pm_cpu_wakelock_s g_wake_lock =
 {
   .count = 0,
@@ -500,7 +503,8 @@ static int cxd56_epstall(FAR struct usbdev_ep_s *ep, bool resume);
 static FAR struct usbdev_ep_s *cxd56_allocep(FAR struct usbdev_s *dev,
                                              uint8_t epno, bool in,
                                              uint8_t eptype);
-static void cxd56_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
+static void cxd56_freeep(FAR struct usbdev_s *dev,
+                         FAR struct usbdev_ep_s *ep);
 static int cxd56_getframe(FAR struct usbdev_s *dev);
 static int cxd56_wakeup(FAR struct usbdev_s *dev);
 static int cxd56_selfpowered(FAR struct usbdev_s *dev, bool selfpowered);
@@ -519,7 +523,8 @@ static int cxd56_usbdev_open(FAR struct file *filep, FAR const char *relpath,
 static int cxd56_usbdev_close(FAR struct file *filep);
 static ssize_t cxd56_usbdev_read(FAR struct file *filep, FAR char *buffer,
                                  size_t buflen);
-static int cxd56_usbdev_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int cxd56_usbdev_dup(FAR const struct file *oldp,
+                            FAR struct file *newp);
 static int cxd56_usbdev_stat(FAR const char *relpath, FAR struct stat *buf);
 
 #endif
@@ -612,7 +617,8 @@ static const struct cxd56_epinfo_s g_epinfo[CXD56_NENDPOINTS] =
     USB_EP_ATTR_XFER_INT,         /* Type: Interrupt */
     CXD56_INTRMAXPACKET,          /* Max packet size */
     CXD56_INTRBUFSIZE,            /* Buffer size */
-  }};
+  }
+};
 
 static uint8_t g_ep0outbuffer[CXD56_EP0MAXPACKET];
 
@@ -793,7 +799,8 @@ static inline void cxd56_abortrequest(FAR struct cxd56_ep_s *privep,
                                       FAR struct cxd56_req_s *privreq,
                                       int16_t result)
 {
-  usbtrace(TRACE_DEVERROR(CXD56_TRACEERR_REQABORTED), (uint16_t)privep->epphy);
+  usbtrace(TRACE_DEVERROR(CXD56_TRACEERR_REQABORTED),
+          (uint16_t)privep->epphy);
 
   /* Save the result in the request structure */
 
@@ -1053,7 +1060,8 @@ static int cxd56_rdrequest(FAR struct cxd56_ep_s *privep)
   /* Ready to receive next packet */
 
   ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(privep->epphy));
-  putreg32(ctrl | USB_RRDY | USB_CNAK, CXD56_USB_OUT_EP_CONTROL(privep->epphy));
+  putreg32(ctrl | USB_RRDY | USB_CNAK,
+           CXD56_USB_OUT_EP_CONTROL(privep->epphy));
 
   return OK;
 }
@@ -1127,7 +1135,8 @@ static void cxd56_cancelrequests(FAR struct cxd56_ep_s *privep)
 
   while (!cxd56_rqempty(privep))
     {
-      usbtrace(TRACE_COMPLETE(privep->epphy), (cxd56_rqpeek(privep))->req.xfrd);
+      usbtrace(TRACE_COMPLETE(privep->epphy),
+              (cxd56_rqpeek(privep))->req.xfrd);
       cxd56_reqcomplete(privep, -ESHUTDOWN);
     }
 
@@ -1202,8 +1211,8 @@ static void cxd56_dispatchrequest(FAR struct cxd56_usbdev_s *priv)
   usbtrace(TRACE_INTDECODE(CXD56_TRACEINTID_DISPATCH), 0);
   if (priv && priv->driver)
     {
-      ret = CLASS_SETUP(priv->driver, &priv->usbdev, &priv->ctrl, priv->ep0data,
-                        priv->ep0datlen);
+      ret = CLASS_SETUP(priv->driver, &priv->usbdev, &priv->ctrl,
+                        priv->ep0data, priv->ep0datlen);
       if (ret < 0)
         {
           /* Stall on failure */
@@ -1261,6 +1270,8 @@ static inline void cxd56_ep0setup(FAR struct cxd56_usbdev_s *priv)
   value = GETUINT16(priv->ctrl.value);
   len   = GETUINT16(priv->ctrl.len);
 
+  priv->ep0reqlen = len;
+
   uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
         priv->ctrl.type, priv->ctrl.req, value, index, len);
 
@@ -1299,7 +1310,8 @@ static inline void cxd56_ep0setup(FAR struct cxd56_usbdev_s *priv)
 
               usbtrace(TRACE_INTDECODE(CXD56_TRACEINTID_GETSTATUS), 0);
 
-              if (len != 2 || (priv->ctrl.type & USB_REQ_DIR_IN) == 0 || value != 0)
+              if (len != 2 || (priv->ctrl.type & USB_REQ_DIR_IN) == 0 ||
+                  value != 0)
                 {
                   usbtrace(TRACE_DEVERROR(CXD56_TRACEERR_STALLEDGETST),
                            priv->ctrl.req);
@@ -1326,7 +1338,8 @@ static inline void cxd56_ep0setup(FAR struct cxd56_usbdev_s *priv)
 
                       case USB_REQ_RECIPIENT_DEVICE:
                       case USB_REQ_RECIPIENT_INTERFACE:
-                        usbtrace(TRACE_INTDECODE(CXD56_TRACEINTID_GETIFDEV), 0);
+                        usbtrace(TRACE_INTDECODE(CXD56_TRACEINTID_GETIFDEV),
+                                 0);
                         break;
 
                       default:
@@ -1356,7 +1369,8 @@ static inline void cxd56_ep0setup(FAR struct cxd56_usbdev_s *priv)
                 {
                   cxd56_dispatchrequest(priv);
                 }
-              else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT &&
+              else if (priv->paddrset != 0 &&
+                       value == USB_FEATURE_ENDPOINTHALT &&
                        len == 0 &&
                        (privep = cxd56_epfindbyaddr(priv, index)) != NULL)
                 {
@@ -1514,6 +1528,7 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
   uint32_t eps;
   uint32_t stat;
   uint32_t ctrl;
+  uint16_t len;
   int n;
 
   eps = getreg32(CXD56_USB_DEV_EP_INTR);
@@ -1583,9 +1598,7 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
 
                 cxd56_txdmacomplete(privep);
 
-                /* Clear NAK to raise IN interrupt for send next IN
-                 * packets.
-                 */
+                /* Clear NAK to raise IN interrupt for send next IN packets */
 
                 putreg32(ctrl | USB_CNAK, CXD56_USB_IN_EP_CONTROL(n));
               }
@@ -1661,32 +1674,48 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
                 putreg32(USB_INT_OUT_DATA, CXD56_USB_OUT_EP_STATUS(n));
                 if (n == 0)
                   {
-                    priv->ep0datlen = g_ep0out.status & DESC_SIZE_MASK;
+                    len = g_ep0out.status & DESC_SIZE_MASK;
 
                     /* Reset DMA descriptor for next packet */
 
                     g_ep0out.status = privep->ep.maxpacket | DESC_LAST;
 
-                    /* Ready to receive the next SETUP packet */
-
-                    ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
-                    putreg32(ctrl | USB_SNAK | USB_RRDY,
-                             CXD56_USB_OUT_EP_CONTROL(0));
-
-                    /* Dispatch setup packet and out transaction */
-
-                    if (priv->ep0datlen > 0)
+                    if (0 < len)
                       {
-                        memcpy(priv->ep0data, (const void *)g_ep0out.buf,
-                               priv->ep0datlen);
+                        ASSERT(priv->ep0datlen + len <= sizeof(priv->ep0data));
 
+                        memcpy(priv->ep0data + priv->ep0datlen,
+                               (const void *)g_ep0out.buf,
+                               len);
+
+                        priv->ep0datlen += len;
+                      }
+
+                    /* Dispatch to cxd56_ep0setup if received all OUT data */
+
+                    if (priv->ep0datlen == priv->ep0reqlen)
+                      {
                         if (((priv->ctrl.type & USB_REQ_TYPE_MASK) !=
                              USB_REQ_TYPE_STANDARD) &&
                             USB_REQ_ISOUT(priv->ctrl.type))
                           {
+                            /* Ready to receive the next setup packet */
+
+                            ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
+                            putreg32(ctrl | USB_SNAK | USB_RRDY,
+                                     CXD56_USB_OUT_EP_CONTROL(0));
+
                             cxd56_ep0setup(priv);
                             priv->ep0datlen = 0;
                           }
+                      }
+                    else
+                      {
+                        /* Ready to receive the next OUT packet */
+
+                        ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(0));
+                        putreg32(ctrl | USB_CNAK | USB_RRDY,
+                                 CXD56_USB_OUT_EP_CONTROL(0));
                       }
                   }
                 else
@@ -1717,11 +1746,9 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
 
                 ctrl = getreg32(CXD56_USB_OUT_EP_CONTROL(n));
 
-                /* Make sure want to be DMA transfer stopped.
-                 *
-                 * XXX: S bit needs to be clear by hand, it is not found in
-                 * the specification documents.
-                 */
+                /* Make sure that want the DMA transfer stopped. */
+
+                /* The S bit needs to be clear by hand */
 
                 ctrl &= ~USB_STALL;
 

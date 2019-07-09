@@ -43,7 +43,7 @@
 #include <nuttx/irq.h>
 
 #include "chip/switch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Data
@@ -60,10 +60,10 @@ volatile chipreg_t *g_current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: z80_irq_initialize
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void z80_irq_initialize(void)
 {
   g_current_regs = NULL;
 

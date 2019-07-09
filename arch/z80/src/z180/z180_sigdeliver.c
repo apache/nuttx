@@ -48,14 +48,14 @@
 
 #include "chip/switch.h"
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: z80_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void z80_sigdeliver(void)
 {
   FAR struct tcb_s  *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];

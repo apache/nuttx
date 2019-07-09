@@ -1035,13 +1035,15 @@ static void efm32_chan_halt(FAR struct efm32_usbhost_s *priv, int chidx,
    *  set to 1, and the CHENA bit cleared to 0.
    */
 
-  if (eptype == USB_HC_CHAR_EPTYPE_CONTROL || eptype == USB_HC_CHAR_EPTYPE_BULK)
+  if (eptype == USB_HC_CHAR_EPTYPE_CONTROL ||
+      eptype == USB_HC_CHAR_EPTYPE_BULK)
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
       avail = efm32_getreg(EFM32_USB_GNPTXSTS) & _USB_GNPTXSTS_NPTXFSPCAVAIL_MASK;
     }
-  else /* if (eptype == USB_HCCHAR_EPTYP_ISOC || eptype == USB_HC_CHAR_EPTYPE_INT) */
+  else /* if (eptype == USB_HCCHAR_EPTYP_ISOC ||
+        * eptype == USB_HC_CHAR_EPTYPE_INT) */
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
@@ -2525,7 +2527,8 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
 
       /* Then handle the transfer completion event based on the endpoint type */
 
-      if (chan->eptype == EFM32_USB_EPTYPE_CTRL || chan->eptype == EFM32_USB_EPTYPE_BULK)
+      if (chan->eptype == EFM32_USB_EPTYPE_CTRL ||
+          chan->eptype == EFM32_USB_EPTYPE_BULK)
         {
           /* Halt the channel -- the CHH interrupt is expected next */
 
@@ -4509,7 +4512,8 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               /* Start DATA out transfer (only one DATA packet) */
 
               priv->chan[ep0info->outndx].outdata1 = true;
-              ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
+              ret = efm32_ctrl_senddata(priv, ep0info,
+                                        (FAR uint8_t *)buffer, buflen);
               if (ret < 0)
                 {
                   usbhost_trace1(USBHOST_TRACE1_SENDDATA, -ret);

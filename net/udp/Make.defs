@@ -54,8 +54,11 @@ endif
 
 ifeq ($(CONFIG_NET_UDP_READAHEAD),y)
 SOCK_CSRCS += udp_netpoll.c
-ifeq ($(CONFIG_UDP_READAHEAD_NOTIFIER),y)
+ifeq ($(CONFIG_UDP_NOTIFIER),y)
 SOCK_CSRCS += udp_notifier.c
+endif
+ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
+SOCK_CSRCS += udp_txdrain.c
 endif
 endif
 

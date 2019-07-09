@@ -56,7 +56,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
-#include <nuttx/lcd/edid.h>
+#include <nuttx/video/edid.h>
 #include <nuttx/lcd/tda19988.h>
 
 #include "tda19988.h"

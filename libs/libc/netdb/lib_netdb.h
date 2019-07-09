@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_NETDB_LIB_NETDB_H
-#define __LIBC_NETDB_LIB_NETDB_H
+#ifndef __LIBS_LIBC_NETDB_LIB_NETDB_H
+#define __LIBS_LIBC_NETDB_LIB_NETDB_H
 
 /****************************************************************************
  * Included Files
@@ -71,6 +71,17 @@
 #endif
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct services_db_s
+{
+  FAR const char *s_name;
+  int s_port;
+  int s_protocol;
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -84,6 +95,7 @@ extern "C"
 
 EXTERN struct hostent g_hostent;
 EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
+EXTERN const struct services_db_s g_services_db[];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -95,4 +107,4 @@ EXTERN char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
 #endif
 
 #endif /* CONFIG_LIBC_NETDB */
-#endif /* __LIBC_NETDB_LIB_NETDB_H */
+#endif /* __LIBS_LIBC_NETDB_LIB_NETDB_H */

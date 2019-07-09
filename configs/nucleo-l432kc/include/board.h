@@ -1,4 +1,4 @@
-/************************************************************************************
+/*******************************************************************************
  * configs/nucleo-l432kc/include/board.h
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
 #ifndef __CONFIGS_NUCLEO_L432KC_INCLUDE_BOARD_H
 #define __CONFIGS_NUCLEO_L432KC_INCLUDE_BOARD_H
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
+/*******************************************************************************
+ * Included File
+ ******************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -49,19 +49,20 @@
 #include <stm32l4.h>
 #endif
 
-/************************************************************************************
+/*******************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ******************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *******************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L432KC)
 #  include <arch/board/nucleo-l432kc.h>
 #endif
 
-/* DMA Channel/Stream Selections ****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections **********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future is we set aside more DMA channels/streams.
  */
 
 /* Values defined in arch/arm/src/stm32l4/hardware/stm32l4x3xx_dma.h */
@@ -77,7 +78,7 @@
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1_1
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ******************************************/
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33
@@ -117,9 +118,9 @@
  */
 
 #define GPIO_I2C1_D4 \
-   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN5)
+   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN7)
 #define GPIO_I2C1_D5 \
-   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN6)
+   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN6)
 #define GPIO_I2C1_SCL \
    (GPIO_I2C1_SCL_1 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #define GPIO_I2C1_SDA \
@@ -229,9 +230,9 @@
 #define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1
 #define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_1
 
-/************************************************************************************
+/*******************************************************************************
  * Public Data
- ************************************************************************************/
+ ******************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -244,18 +245,19 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/*******************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
+ ******************************************************************************/
+
+/*******************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory has
+ *   been configured and mapped but before any devices have been initialized.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
 void stm32l4_board_initialize(void);
 

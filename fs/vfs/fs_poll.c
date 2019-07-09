@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,14 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
 
   for (i = 0; i < nfds; i++)
     {
-      /* Setup the poll descriptor */
+      /* Setup the poll descriptor
+       *
+       * REVISIT: In a multi-threaded environment, one use case might be to
+       * share a single, array of struct pollfd in poll() calls on different
+       * threads.  That use case is not supportable here because the non-
+       * standard internal fields get reset here on each call to poll()
+       * on each thread.
+       */
 
       fds[i].sem     = sem;
       fds[i].revents = 0;

@@ -90,6 +90,7 @@
  ****************************************************************************/
 
 /* Task Lists ***************************************************************/
+
 /* The state of a task is indicated both by the task_state field of the TCB
  * and by a series of task lists.  All of these tasks lists are declared
  * below. Although it is not always necessary, most of these lists are
@@ -401,6 +402,7 @@ void nx_start(void)
   g_nx_initstate = OSINIT_BOOT;
 
   /* Initialize RTOS Data ***************************************************/
+
   /* Initialize all task lists */
 
   dq_init(&g_readytorun);
@@ -747,6 +749,7 @@ void nx_start(void)
 #endif
 
   /* IDLE Group Initialization **********************************************/
+
   /* Announce that the CPU0 IDLE task has started */
 
   sched_note_start(&g_idletcb[0].cmn);
@@ -788,6 +791,7 @@ void nx_start(void)
     }
 
   /* Start SYSLOG ***********************************************************/
+
   /* Late initialization of the system logging device.  Some SYSLOG channel
    * must be initialized late in the initialization sequence because it may
    * depend on having IDLE task file structures setup.
@@ -815,6 +819,7 @@ void nx_start(void)
 #endif /* CONFIG_SMP */
 
   /* Bring Up the System ****************************************************/
+
   /* The OS is fully initialized and we are beginning multi-tasking */
 
   g_nx_initstate = OSINIT_OSREADY;
@@ -831,6 +836,7 @@ void nx_start(void)
 #endif /* CONFIG_SMP */
 
   /* The IDLE Loop **********************************************************/
+
   /* When control is return to this point, the system is idle. */
 
   sinfo("CPU0: Beginning Idle Loop\n");

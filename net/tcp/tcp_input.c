@@ -548,13 +548,13 @@ found:
           conn->rto = (conn->sa >> 3) + conn->sv;
         }
 
-        /* Set the acknowledged flag. */
+      /* Set the acknowledged flag. */
 
-       flags |= TCP_ACKDATA;
+      flags |= TCP_ACKDATA;
 
-       /* Reset the retransmission timer. */
+      /* Reset the retransmission timer. */
 
-       conn->timer = conn->rto;
+      conn->timer = conn->rto;
     }
 
   /* Do different things depending on in what state the connection is. */

@@ -75,7 +75,7 @@
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-  /* The following is performed up_lowinit() as well */
+  /* The following is performed up_board_initialize() as well */
 
   putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
   putreg8(getreg8(Z16F_GPIOA_DD) & 0xF8, Z16F_GPIOA_DD);

@@ -56,8 +56,8 @@
 
 /* Most internal network OS interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the corresponding
- * application network interfaces must be used.  The differences between the two
- * sets of interfaces are:  The internal OS interfaces (1) do not cause
+ * application network interfaces must be used.  The differences between the
+ * two sets of interfaces are:  The internal OS interfaces (1) do not cause
  * cancellation points and (2) they do not modify the errno variable.
  *
  * This is only important when compiling libraries (libc or libnx) that are
@@ -162,8 +162,9 @@ struct sock_intf_s
   CODE int        (*si_listen)(FAR struct socket *psock, int backlog);
   CODE int        (*si_connect)(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-  CODE int        (*si_accept)(FAR struct socket *psock, FAR struct sockaddr *addr,
-                    FAR socklen_t *addrlen, FAR struct socket *newsock);
+  CODE int        (*si_accept)(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                    FAR struct socket *newsock);
   CODE int        (*si_poll)(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
   CODE ssize_t    (*si_send)(FAR struct socket *psock, FAR const void *buf,
@@ -196,7 +197,8 @@ struct socket
 {
   int16_t       s_crefs;     /* Reference count on the socket */
   uint8_t       s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
-  uint8_t       s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
+  uint8_t       s_type;      /* Protocol type: Only SOCK_STREAM or
+                              * SOCK_DGRAM */
   uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Socket options */
@@ -216,7 +218,8 @@ struct socket
 
   FAR const struct sock_intf_s *s_sockif;
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_UDP_WRITE_BUFFERS)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
+    defined(CONFIG_NET_UDP_WRITE_BUFFERS)
   /* Callback instance for TCP send() or UDP sendto() */
 
   FAR struct devif_callback_s *s_sndcb;
@@ -444,7 +447,8 @@ void net_initlist(FAR struct socketlist *list);
  *   Release resources held by the socket list
  *
  * Input Parameters:
- *   list -- A reference to the pre-allocated socket list to be un-initialized.
+ *   list -- A reference to the pre-allocated socket list to be un-
+ *           initialized.
  *
  * Returned Value:
  *   None
@@ -481,7 +485,8 @@ FAR struct socket *sockfd_socket(int sockfd);
  *   domain   (see sys/socket.h)
  *   type     (see sys/socket.h)
  *   protocol (see sys/socket.h)
- *   psock    A pointer to a user allocated socket structure to be initialized.
+ *   psock    A pointer to a user allocated socket structure to be
+ *            initialized.
  *
  * Returned Value:
  *  Returns zero (OK) on success.  On failure, it returns a negated errno
@@ -509,7 +514,8 @@ FAR struct socket *sockfd_socket(int sockfd);
  *
  ****************************************************************************/
 
-int psock_socket(int domain, int type, int protocol, FAR struct socket *psock);
+int psock_socket(int domain, int type, int protocol,
+                 FAR struct socket *psock);
 
 /****************************************************************************
  * Name: net_close
@@ -578,7 +584,7 @@ int psock_close(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-struct sockaddr; /* Forward reference. Defined in nuttx/include/sys/socket.h */
+struct sockaddr; /* Forward reference. See nuttx/include/sys/socket.h */
 
 int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
                socklen_t addrlen);
@@ -1012,7 +1018,8 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
  *   at the protocol level specified by the 'level' argument, to the value
- *   pointed to by the 'value' argument for the socket on the 'psock' argument.
+ *   pointed to by the 'value' argument for the socket on the 'psock'
+ *   argument.
  *
  *   The 'level' argument specifies the protocol level of the option. To set
  *   options at the socket level, specify the level argument as SOL_SOCKET.
@@ -1061,9 +1068,9 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *
  * Description:
  *   The psock_getsockname() function retrieves the locally-bound name of the
- *   the specified socket, stores this address in the sockaddr structure pointed
- *   to by the 'addr' argument, and stores the length of this address in the
- *   object pointed to by the 'addrlen' argument.
+ *   the specified socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this
+ *   address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -1079,8 +1086,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error.  Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -1119,8 +1126,8 @@ int psock_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error.  Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -1391,7 +1398,8 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 
 #ifdef CONFIG_NET_SENDFILE
 struct file;
-ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset, size_t count);
+ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
+                     size_t count);
 #endif
 
 /****************************************************************************
@@ -1507,3 +1515,4 @@ int netdev_unregister(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NET */
 #endif /* __INCLUDE_NUTTX_NET_NET_H */
+

@@ -43,7 +43,7 @@
 #include <nuttx/irq.h>
 
 #include "chip/switch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Data

@@ -53,7 +53,7 @@
 #  include <nuttx/mm/iob.h>
 #endif
 
-#ifdef CONFIG_UDP_READAHEAD_NOTIFIER
+#ifdef CONFIG_UDP_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -671,7 +671,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
 /****************************************************************************
- * Name: udp_notifier_setup
+ * Name: udp_readahead_notifier_setup
  *
  * Description:
  *   Set up to perform a callback to the worker function when an UDP data
@@ -696,9 +696,42 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_READAHEAD_NOTIFIER
-int udp_notifier_setup(worker_t worker, FAR struct udp_conn_s *conn,
-                       FAR void *arg);
+#ifdef CONFIG_UDP_NOTIFIER
+int udp_readahead_notifier_setup(worker_t worker,
+                                 FAR struct udp_conn_s *conn,
+                                 FAR void *arg);
+#endif
+
+/****************************************************************************
+ * Name: udp_writebuffer_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function when an UDP write
+ *   buffer is emptied.  The worker function will execute on the high
+ *   priority worker thread.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the low priority work
+ *            queue when data is available in the UDP read-ahead buffer.
+ *   conn   - The UDP connection where read-ahead data is needed.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The notification is in place.  The returned value is a key that
+ *           may be used later in a call to udp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No notification
+ *           will be provided.
+ *   < 0   - An unexpected error occurred and no notification will occur.
+ *           The returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UDP_NOTIFIER
+int udp_writebuffer_notifier_setup(worker_t worker,
+                                   FAR struct udp_conn_s *conn,
+                                   FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -706,13 +739,13 @@ int udp_notifier_setup(worker_t worker, FAR struct udp_conn_s *conn,
  *
  * Description:
  *   Eliminate a UDP read-ahead notification previously setup by
- *   udp_notifier_setup().  This function should only be called if the
+ *   udp_readahead_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
- *         udp_notifier_setup().
+ *         udp_readahead_notifier_setup().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -720,12 +753,12 @@ int udp_notifier_setup(worker_t worker, FAR struct udp_conn_s *conn,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_READAHEAD_NOTIFIER
+#ifdef CONFIG_UDP_NOTIFIER
 int udp_notifier_teardown(int key);
 #endif
 
 /****************************************************************************
- * Name: udp_notifier_signal
+ * Name: udp_readahead_signal
  *
  * Description:
  *   Read-ahead data has been buffered.  Notify all threads waiting for
@@ -734,7 +767,7 @@ int udp_notifier_teardown(int key);
  *   When read-ahead data becomes available, *all* of the workers waiting
  *   for read-ahead data will be executed.  If there are multiple workers
  *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call udp_notifier_setup() once again.
+ *   data.  Others will need to call udp_readahead_notifier_setup() once again.
  *
  * Input Parameters:
  *   conn  - The UDP connection where read-ahead data was just buffered.
@@ -744,8 +777,57 @@ int udp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_READAHEAD_NOTIFIER
-void udp_notifier_signal(FAR struct udp_conn_s *conn);
+#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_UDP_NOTIFIER)
+void udp_readahead_signal(FAR struct udp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Name: udp_writebuffer_signal
+ *
+ * Description:
+ *   All buffer Tx data has been sent.  Signal all threads waiting for the
+ *   write buffers to become empty.
+ *
+ *   When write buffer becomes empty, *all* of the workers waiting
+ *   for that event data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call tcp_writebuffer_notifier_setup() once
+ *   again.
+ *
+ * Input Parameters:
+ *   conn  - The UDP connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Name: udp_txdrain
+ *
+ * Description:
+ *   Wait for all write buffers to be sent (or for a timeout to occur).
+ *
+ * Input Parameters:
+ *   psock   - An instance of the internal socket structure.
+ *   abstime - The absolute time when the timeout will occur
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+struct timespec;
+int udp_txdrain(FAR struct socket *psock,
+                FAR const struct timespec *abstime);
+#else
+#  define udp_txdrain(conn, abstime) (0)
 #endif
 
 #undef EXTERN

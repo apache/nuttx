@@ -1307,6 +1307,54 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
+#ifdef CONFIG_IMXRT_LPUART_INVERT
+    case TIOCSINVERT:
+      {
+        uint32_t ctrl;
+        uint32_t stat;
+        uint32_t regval;
+        irqstate_t flags;
+        struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
+
+        flags  = spin_lock_irqsave();
+        ctrl   = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+        stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
+        regval = ctrl;
+
+        /* {R|T}XINV bit field can only be written when the receiver is disabled (RE=0). */
+
+        regval &= ~LPUART_CTRL_RE;
+
+        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+
+        /* Enable/disable signal inversion. */
+
+        if (arg & SER_INVERT_ENABLED_RX)
+          {
+            stat |= LPUART_STAT_RXINV;
+          }
+        else
+          {
+            stat &= ~LPUART_STAT_RXINV;
+          }
+
+        if (arg & SER_INVERT_ENABLED_TX)
+          {
+            ctrl |= LPUART_CTRL_TXINV;
+          }
+        else
+          {
+            ctrl &= ~LPUART_CTRL_TXINV;
+          }
+
+        imxrt_serialout(priv, IMXRT_LPUART_STAT_OFFSET, stat);
+        imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, ctrl);
+
+        spin_unlock_irqrestore(flags);
+      }
+      break;
+#endif
+
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
     default:

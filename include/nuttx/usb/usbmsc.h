@@ -168,9 +168,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_USBDEV_COMPOSITE) || !defined(CONFIG_USBMSC_COMPOSITE)
 int usbmsc_exportluns(FAR void *handle);
-#endif
 
 /****************************************************************************
  * Name: usbmsc_classobject

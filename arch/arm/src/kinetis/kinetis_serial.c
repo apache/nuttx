@@ -1267,30 +1267,21 @@ static int up_interrupts(int irq, void *context, FAR void *arg)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || \
-    defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
-  struct inode      *inode;
-  struct uart_dev_s *dev;
-  uint8_t regval;
-#endif
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
-  struct up_dev_s   *priv;
   bool               iflow = false;
   bool               oflow = false;
 #endif
+  struct inode      *inode;
+  struct uart_dev_s *dev;
+  uint8_t            regval;
+  struct up_dev_s   *priv;
   int                ret   = OK;
 
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || \
-    defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-#endif
-
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
   priv  = (struct up_dev_s *)dev->priv;
-#endif
 
   switch (cmd)
     {
@@ -1501,10 +1492,53 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_KINETIS_UART_BREAKS */
 
+#ifdef CONFIG_KINETIS_UART_INVERT
+    case TIOCSINVERT:
+      {
+        uint8_t s2;
+        uint8_t c3;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        s2 = up_serialin(priv, KINETIS_UART_S2_OFFSET);
+        c3 = up_serialin(priv, KINETIS_UART_C3_OFFSET);
+
+        /* {R|T}XINV bit fields can written any time */
+
+        if (arg & SER_INVERT_ENABLED_RX)
+          {
+            s2 |= UART_S2_RXINV;
+          }
+        else
+          {
+            s2 &= ~UART_S2_RXINV;
+          }
+
+        if (arg & SER_INVERT_ENABLED_TX)
+          {
+            c3 |= UART_C3_TXINV;
+          }
+        else
+          {
+            c3 &= ~UART_C3_TXINV;
+          }
+
+        up_serialout(priv, KINETIS_UART_S2_OFFSET, s2);
+        up_serialout(priv, KINETIS_UART_C3_OFFSET, c3);
+
+        leave_critical_section(flags);
+      }
+     break;
+#endif
+
     default:
       ret = -ENOTTY;
       break;
     }
+
+  UNUSED(regval);
+  UNUSED(priv);
 
   return ret;
 }

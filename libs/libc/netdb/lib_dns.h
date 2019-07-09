@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_NETDB_LIB_DNS_H
-#define __LIBC_NETDB_LIB_DNS_H
+#ifndef __LIBS_LIBC_NETDB_LIB_DNS_H
+#define __LIBS_LIBC_NETDB_LIB_DNS_H
 
 /****************************************************************************
  * Included Files
@@ -259,4 +259,4 @@ void dns_notify_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 }
 #endif
 
-#endif /* __LIBC_NETDB_LIB_DNS_H */
+#endif /* __LIBS_LIBC_NETDB_LIB_DNS_H */

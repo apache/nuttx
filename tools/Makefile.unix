@@ -442,6 +442,18 @@ ifeq ($(CONFIG_RAW_BINARY),y)
 	@echo "CP: $(NUTTXNAME).bin"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
 endif
+ifeq ($(CONFIG_CXD56_BINARY),y)
+	$(Q) if [ ! -f "tools/cxd56/mkspk" ] ; then \
+		echo ""; \
+		echo "Please run the following command to clone the needed tools"; \
+		echo "git clone https://github.com/sonydevworld/cxd56/ tools/cxd56"; \
+		echo ""; \
+		echo "run make again to create the nuttx.spk image."; \
+	else \
+		echo "Generating: $(NUTTXNAME).spk"; \
+		tools/cxd56/mkspk -c2 nuttx nuttx nuttx.spk; \
+	fi
+endif
 ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 	@echo "MKIMAGE: uImage"
 	$(Q) mkimage -A $(CONFIG_ARCH) -O linux -C none -T kernel -a $(CONFIG_UIMAGE_LOAD_ADDRESS) \

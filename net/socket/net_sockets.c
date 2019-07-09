@@ -174,10 +174,10 @@ int sockfd_allocate(int minsd)
                * as the socket descriptor.
                */
 
-               memset(&list->sl_sockets[i], 0, sizeof(struct socket));
-               list->sl_sockets[i].s_crefs = 1;
-               _net_semgive(list);
-               return i + __SOCKFD_OFFSET;
+              memset(&list->sl_sockets[i], 0, sizeof(struct socket));
+              list->sl_sockets[i].s_crefs = 1;
+              _net_semgive(list);
+              return i + __SOCKFD_OFFSET;
             }
         }
 

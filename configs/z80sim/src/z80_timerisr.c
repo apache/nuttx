@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Functions

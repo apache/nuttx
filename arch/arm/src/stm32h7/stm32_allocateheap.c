@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/up_allocateheap.c
+ * arch/arm/src/stm32h7/stm32_allocateheap.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -246,9 +246,9 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
           else
 #endif /* CONFIG_NET_SOCKOPTS */
             {
-               /* No timeout.  Just wait for the next polling cycle */
+              /* No timeout.  Just wait for the next polling cycle */
 
-               return flags;
+              return flags;
             }
         }
 
@@ -507,7 +507,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       nerr("ERROR: udp_find_raddr_device failed\n");
       ret = -ENETUNREACH;
       goto errout_with_lock;
-   }
+    }
 
   /* Make sure that the device is in the UP state */
 

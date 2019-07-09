@@ -47,7 +47,7 @@
 
 #include "chip.h"
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Private Functions

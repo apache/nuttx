@@ -1,10 +1,9 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_timerisr.c
  *
- *   Copyright 2018 Sony Semiconductor Solutions Corporation
- *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,6 +51,9 @@
 #include "clock/clock.h"
 #include "up_internal.h"
 #include "up_arch.h"
+#include "cxd56_powermgr.h"
+#include "cxd56_timerisr.h"
+#include "cxd56_clock.h"
 
 #include "chip.h"
 
@@ -79,11 +81,54 @@ static uint32_t g_systrvr;
  * Private Function Prototypes
  ****************************************************************************/
 
+static int cxd56_changeclock(uint8_t id);
 static int cxd56_timerisr(int irq, uint32_t *regs, FAR void *arg);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int cxd56_changeclock(uint8_t id)
+{
+  irqstate_t flags;
+  uint32_t systcsr;
+  uint32_t current;
+
+  if (id == CXD56_PM_CALLBACK_ID_CLK_CHG_START)
+    {
+      flags = enter_critical_section();
+      {
+        systcsr = getreg32(NVIC_SYSTICK_CTRL);
+        systcsr &= ~NVIC_SYSTICK_CTRL_ENABLE;
+        putreg32(systcsr, NVIC_SYSTICK_CTRL);
+      }
+      leave_critical_section(flags);
+    }
+  else if ((id == CXD56_PM_CALLBACK_ID_CLK_CHG_END) ||
+           (id == CXD56_PM_CALLBACK_ID_HOT_BOOT))
+    {
+      current = (cxd56_get_cpu_baseclk() / CLK_TCK) - 1;
+
+      flags = enter_critical_section();
+      {
+        if (g_systrvr != current)
+          {
+            putreg32(current, NVIC_SYSTICK_RELOAD);
+            g_systrvr = current;
+            putreg32(0, NVIC_SYSTICK_CURRENT);
+          }
+        if (id == CXD56_PM_CALLBACK_ID_CLK_CHG_END)
+          {
+            systcsr = getreg32(NVIC_SYSTICK_CTRL);
+            systcsr |= NVIC_SYSTICK_CTRL_ENABLE;
+            putreg32(systcsr, NVIC_SYSTICK_CTRL);
+          }
+      }
+      leave_critical_section(flags);
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Public Functions
@@ -107,7 +152,7 @@ static int cxd56_timerisr(int irq, uint32_t *regs, FAR void *arg)
 }
 
 /****************************************************************************
- * Function:  arm_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -134,7 +179,7 @@ void arm_timer_initialize(void)
 
   /* Configure SysTick to interrupt at the requested rate */
 
-  g_systrvr = (CXD56_CCLK / CLK_TCK) - 1;
+  g_systrvr = (cxd56_get_cpu_baseclk() / CLK_TCK) - 1;
   putreg32(g_systrvr, NVIC_SYSTICK_RELOAD);
 
   /* Attach the timer interrupt vector */
@@ -149,4 +194,11 @@ void arm_timer_initialize(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(CXD56_IRQ_SYSTICK);
+}
+
+int cxd56_timerisr_initialize(void)
+{
+  cxd56_pm_register_callback(PM_CLOCK_APP_CPU, cxd56_changeclock);
+
+  return 0;
 }

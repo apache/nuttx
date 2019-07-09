@@ -62,7 +62,7 @@
 # Downword (Host to target);
 #
 # A D U VV XXX O2 O1 O0
-# 
+#
 # A   31    1 - Service Active (Set by host)
 # D   30    1 - Downsense (Toggled when there is data)
 # U   29    1 - Upsense ack (Toggled to acknowledge receipt of uplink data)
@@ -95,13 +95,13 @@
 # $ ./ocdconsole.py
 # ==Link Activated
 #
-# nsh> 
+# nsh>
 # nsh> help
 # help usage:  help [-v] [<cmd>]
 #
-#  ?        echo     exit     hexdump  ls       mh       sleep    xd       
-#  cat      exec     help     kill     mb       mw       usleep   
-# nsh> 
+#  ?        echo     exit     hexdump  ls       mh       sleep    xd
+#  cat      exec     help     kill     mb       mw       usleep
+# nsh>
 # ------------------------------------------
 #
 # This code is designed to be 'hardy' and will survive a shutdown and
@@ -142,7 +142,6 @@ if os.name == 'nt':
 else:
     import sys, select, termios, tty
 
-
 def kbhit():
     ''' Returns True if a keypress is waiting to be read in stdin, False otherwise.
     '''
@@ -164,7 +163,7 @@ def dooutput(x):
 #
 # This code was approved for re-release under BSD (licence at the head of this
 # file) by the original author (Andreas Ortmann, ortmann@finf.uni-hannover.de)
-# via email to Dave Marples on 3rd June 2019. 
+# via email to Dave Marples on 3rd June 2019.
 # email ID: 15e1f0a0-9592-bd07-c996-697f44860877@finf.uni-hannover.de
 ###############################################################################
 
@@ -215,12 +214,22 @@ class oocd:
         return data
 
     def readVariable(self, address):
-        raw = self.send("ocd_mdw 0x%x" % address).split(": ")
+        raw = self.send("%s 0x%x" % (self.mdwText,address)).split(": ")
         return None if (len(raw) < 2) else strToHex(raw[1])
 
     def writeVariable(self, address, value):
         assert value is not None
         self.send("mww 0x%x 0x%x" % (address, value))
+
+    def testInterface(self):
+        self.mdwText="ocd_mdw"
+        if (self.readVariable(baseaddr)!=None):
+            return
+        self.mdwText="mdw"
+        if (self.readVariable(baseaddr)!=None):
+            return
+        raise ConnectionRefusedError
+
 # *** Incorporated code ends ######################################################
 
 if __name__ == "__main__":
@@ -229,7 +238,7 @@ if __name__ == "__main__":
         print(*args, end="\n\n")
 
     fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)        
+    old_settings = termios.tcgetattr(fd)
     while True:
         try:
             tty.setraw(fd)
@@ -238,6 +247,7 @@ if __name__ == "__main__":
                     # Find the location for the communication variables
                     # =================================================
                     try:
+                        ocd.testInterface()
                         downwordaddr=0
                         while (downwordaddr<length):
                             if (ocd.readVariable(baseaddr+downwordaddr)==LWL_SIG):
@@ -264,7 +274,7 @@ if __name__ == "__main__":
                                 break
                     except (BrokenPipeError, ConnectionRefusedError, ConnectionResetError) as e:
                         raise e
-                    
+
                     # Now run the comms loop until something fails
                     # ============================================
                     try:
@@ -290,7 +300,7 @@ if __name__ == "__main__":
                                     incomingBytes=(upword&LWL_OCTVALMASK)>>LWL_OCTVALSHIFT
                                     if (incomingBytes>=1): dooutput(upword&255);
                                     if (incomingBytes>=2): dooutput((upword>>8)&255);
-                                    if (incomingBytes==3): dooutput((upword>>16)&255);                                
+                                    if (incomingBytes==3): dooutput((upword>>16)&255);
 
                                 if (downword&LWL_UPSENSEBIT):
                                     downword = downword&~LWL_UPSENSEBIT
@@ -299,7 +309,7 @@ if __name__ == "__main__":
                     except (ConnectionResetError, ConnectionResetError, BrokenPipeError) as e:
                         print("\r==Link Lost\r")
                         raise e
-                    
+
         except (BrokenPipeError, ConnectionRefusedError, ConnectionResetError) as e:
             time.sleep(1)
             continue

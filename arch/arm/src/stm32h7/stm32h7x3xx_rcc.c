@@ -145,6 +145,11 @@ static inline void rcc_enableahb1(void)
    */
 
   regval = getreg32(STM32_RCC_AHB1ENR);
+#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2)
+  /* ADC1 & 2 clock enable */
+
+  regval |= RCC_AHB1ENR_ADC12EN;
+#endif
 
 #ifdef CONFIG_STM32H7_DMA1
   /* DMA 1 clock enable */
@@ -261,6 +266,12 @@ static inline void rcc_enableahb4(void)
    */
 
   regval = getreg32(STM32_RCC_AHB4ENR);
+
+#ifdef CONFIG_STM32H7_ADC3
+  /* ADC3 clock enable */
+
+  regval |= RCC_AHB4ENR_ADC3EN;
+#endif
 
   /* Enable GPIO, GPIOB, ... GPIOK */
 
@@ -673,13 +684,23 @@ static void stm32_stdclockconfig(void)
       regval |= RCC_CR_PLL1ON;
       putreg32(regval, STM32_RCC_CR);
 
-      /* TODO: Enable the PLL2 */
+      /* Enable the PLL2 */
+
+      regval = getreg32(STM32_RCC_CR);
+      regval |= RCC_CR_PLL2ON;
+      putreg32(regval, STM32_RCC_CR);
 
       /* TODO: Enable the PLL3 */
 
-      /* Wait until the PLL is ready */
+      /* Wait until the PLL1 is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
+        {
+        }
+
+      /* Wait until the PLL2 is ready */
+
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0)
         {
         }
 
@@ -759,6 +780,16 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D2CCIP2R_USBSRC;
       putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
+
+      /* Configure ADC source clock */
+
+#if defined(STM32_RCC_D3CCIPR_ADCSEL)
+      regval = getreg32(STM32_RCC_D3CCIPR);
+      regval &= ~RCC_D3CCIPR_ADCSEL_MASK;
+      regval |= STM32_RCC_D3CCIPR_ADCSEL;
+      putreg32(regval, STM32_RCC_D3CCIPR);
+#endif
+
 
 #if defined(CONFIG_STM32H7_IWDG) || defined(CONFIG_STM32H7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */

@@ -160,7 +160,15 @@ ARFLAGS = -quiet -warn
 
 # Linker definitions
 
-LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)configs$(DELIM)makerlisp$(DELIM)scripts$(DELIM)makerlisp.linkcmd
+ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+  LDSCRIPT = makerlisp_flash.linkcmd
+else ifeq ($(CONFIG_MAKERLISP_COPYTORAM),y)
+  LDSCRIPT = makerlisp_copytoram.linkcmd
+else # ifeq ($(CONFIG_BOOT_RUNFROMEXTSRAM),y)
+  LDSCRIPT = makerlisp_ram.linkcmd
+endif
+
+LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)configs$(DELIM)makerlisp$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 # Tool names/paths.
 

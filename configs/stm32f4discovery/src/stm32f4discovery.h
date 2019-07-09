@@ -423,14 +423,14 @@ int stm32_bringup(void);
 
 void weak_function stm32_spidev_initialize(void);
 
- /****************************************************************************
-  * Name: stm32_i2sdev_initialize
-  *
-  * Description:
-  *   Called to configure I2S chip select GPIO pins for the stm32f4discovery
-  *   board.
-  *
-  ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_i2sdev_initialize
+ *
+ * Description:
+ *   Called to configure I2S chip select GPIO pins for the stm32f4discovery
+ *   board.
+ *
+ ****************************************************************************/
 
 FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
 

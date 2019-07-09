@@ -102,6 +102,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif
 
+ifeq ($(CONFIG_STM32H7_ADC),y)
+CHIP_CSRCS += stm32_adc.c
+endif
+
 ifeq ($(CONFIG_STM32H7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
@@ -136,4 +140,8 @@ endif
 
 ifeq ($(CONFIG_STM32H7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CHIP_CSRCS += stm32_qencoder.c
 endif

@@ -89,6 +89,7 @@ extern "C"
 #define CXD56_SDHCI_USERDEF2CTL_OFFSET (0x0274) /* User Define2 Control Register */
 
 /* Register Addresses *******************************************************/
+
 #define CXD56_SDHCI_BASE              CXD56_SDIO_BASE
 
 #define CXD56_SDHCI_DSADDR            (CXD56_SDHCI_BASE+CXD56_SDHCI_DSADDR_OFFSET)
@@ -122,13 +123,14 @@ extern "C"
 /* DMA System Address Register */
 
 #define SDHCI_DSADDR_SHIFT               (1)       /* Bits 1-31: DMA System Address */
-#define SDHCI_DSADDR_MASK                (0xfffffffe)
-                                                  /* Bits 0-1: Reserved */
+#define SDHCI_DSADDR_MASK                (0xfffffffe) /* Bits 0-1: Reserved */
+
 /* Block Attributes Register */
 
 #define SDHCI_BLKATTR_SIZE_SHIFT         (0)       /* Bits 0-12: Transfer Block Size */
 #define SDHCI_BLKATTR_SIZE_MASK          (0x1fff << SDHCI_BLKATTR_SIZE_SHIFT)
                                                   /* Bits 13-15: Reserved */
+
 #define SDHCI_BLKATTR_CNT_SHIFT          (16)      /* Bits 16-31: Blocks Count For Current Transfer */
 #define SDHCI_BLKATTR_CNT_MASK           (0xffff << SDHCI_BLKATTR_CNT_SHIFT)
 
@@ -139,29 +141,33 @@ extern "C"
 #define SDHCI_XFERTYP_DMAEN              (1 << 0)  /* Bit 0:  DMA Enable */
 #define SDHCI_XFERTYP_BCEN               (1 << 1)  /* Bit 1:  Block Count Enable */
 #define SDHCI_XFERTYP_AC12EN             (1 << 2)  /* Bit 2:  Auto CMD12 Enable */
-                                                  /* Bit 3: Reserved */
+                                                   /* Bit 3: Reserved */
+
 #define SDHCI_XFERTYP_DTDSEL             (1 << 4)  /* Bit 4:  Data Transfer Direction Select */
 #define SDHCI_XFERTYP_MSBSEL             (1 << 5)  /* Bit 5:  Multi/Single Block Select */
-                                                  /* Bits 6-15: Reserved */
+                                                   /* Bits 6-15: Reserved */
+
 #define SDHCI_XFERTYP_RSPTYP_SHIFT       (16)      /* Bits 16-17: Response Type Select */
 #define SDHCI_XFERTYP_RSPTYP_MASK        (3 << SDHCI_XFERTYP_RSPTYP_SHIFT)
-#  define SDHCI_XFERTYP_RSPTYP_NONE      (0 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* No response */
-#  define SDHCI_XFERTYP_RSPTYP_LEN136    (1 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
-#  define SDHCI_XFERTYP_RSPTYP_LEN48     (2 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
-#  define SDHCI_XFERTYP_RSPTYP_LEN48BSY  (3 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
+#define SDHCI_XFERTYP_RSPTYP_NONE        (0 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* No response */
+#define SDHCI_XFERTYP_RSPTYP_LEN136      (1 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
+#define SDHCI_XFERTYP_RSPTYP_LEN48       (2 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
+#define SDHCI_XFERTYP_RSPTYP_LEN48BSY    (3 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
                                                   /* Bit 18: Reserved */
+
 #define SDHCI_XFERTYP_CCCEN              (1 << 19) /* Bit 19: Command CRC Check Enable */
 #define SDHCI_XFERTYP_CICEN              (1 << 20) /* Bit 20: Command Index Check Enable */
 #define SDHCI_XFERTYP_DPSEL              (1 << 21) /* Bit 21: Data Present Select */
 #define SDHCI_XFERTYP_CMDTYP_SHIFT       (22)      /* Bits 22-23: Command Type */
 #define SDHCI_XFERTYP_CMDTYP_MASK        (3 << SDHCI_XFERTYP_CMDTYP_SHIFT)
-#  define SDHCI_XFERTYP_CMDTYP_NORMAL    (0 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Normal other commands */
-#  define SDHCI_XFERTYP_CMDTYP_SUSPEND   (1 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
-#  define SDHCI_XFERTYP_CMDTYP_RESUME    (2 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
-#  define SDHCI_XFERTYP_CMDTYP_ABORT     (3 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
+#define SDHCI_XFERTYP_CMDTYP_NORMAL      (0 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Normal other commands */
+#define SDHCI_XFERTYP_CMDTYP_SUSPEND     (1 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
+#define SDHCI_XFERTYP_CMDTYP_RESUME      (2 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
+#define SDHCI_XFERTYP_CMDTYP_ABORT       (3 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
 #define SDHCI_XFERTYP_CMDINX_SHIFT       (24)      /* Bits 24-29: Command Index */
 #define SDHCI_XFERTYP_CMDINX_MASK        (63 << SDHCI_XFERTYP_CMDINX_SHIFT)
                                                   /* Bits 30-31: Reserved */
+
 /* Command Response 0-3 (32-bit response data) */
 
 /* Buffer Data Port Register (32-bit data content) */
@@ -180,17 +186,18 @@ extern "C"
 #define SDHCI_PRSSTAT_RTA                (1 << 9)  /* Bit 9:  Read Transfer Active */
 #define SDHCI_PRSSTAT_BWEN               (1 << 10) /* Bit 10: Buffer Write Enable */
 #define SDHCI_PRSSTAT_BREN               (1 << 11) /* Bit 11: Buffer Read Enable */
-                                                  /* Bits 12-15: Reserved */
+                                                   /* Bits 12-15: Reserved */
+
 #define SDHCI_PRSSTAT_CINS               (1 << 16) /* Bit 16: Card Inserted */
 #define SDHCI_PRSSTAT_CSTS               (1 << 17) /* Bit 17: Card State Stable */
 #define SDHCI_PRSSTAT_SDCD               (1 << 18) /* Bit 18: Card Detect Pin Level */
-#define SDHCI_PRSSTAT_SDWPN               (1 << 19) /* Bit 19: Write Protect Switch Pin Level*/
+#define SDHCI_PRSSTAT_SDWPN              (1 << 19) /* Bit 19: Write Protect Switch Pin Level*/
 #define SDHCI_PRSSTAT_DLSL_SHIFT         (20)      /* Bits 20-23: DAT Line Signal Level */
 #define SDHCI_PRSSTAT_DLSL_MASK          (0xf << SDHCI_PRSSTAT_DLSL_SHIFT)
-#  define SDHCI_PRSSTAT_DLSL_DAT0        (0x1 << SDHCI_PRSSTAT_DLSL_SHIFT)
-#  define SDHCI_PRSSTAT_DLSL_DAT1        (0x2 << SDHCI_PRSSTAT_DLSL_SHIFT)
-#  define SDHCI_PRSSTAT_DLSL_DAT2        (0x4 << SDHCI_PRSSTAT_DLSL_SHIFT)
-#  define SDHCI_PRSSTAT_DLSL_DAT3        (0x8 << SDHCI_PRSSTAT_DLSL_SHIFT)
+#define SDHCI_PRSSTAT_DLSL_DAT0          (0x1 << SDHCI_PRSSTAT_DLSL_SHIFT)
+#define SDHCI_PRSSTAT_DLSL_DAT1          (0x2 << SDHCI_PRSSTAT_DLSL_SHIFT)
+#define SDHCI_PRSSTAT_DLSL_DAT2          (0x4 << SDHCI_PRSSTAT_DLSL_SHIFT)
+#define SDHCI_PRSSTAT_DLSL_DAT3          (0x8 << SDHCI_PRSSTAT_DLSL_SHIFT)
 #define SDHCI_PRSSTAT_CLSL               (1 << 24) /* Bit 23: CMD Line Signal Level */
 
 /* Protocol Control Register */
@@ -198,24 +205,27 @@ extern "C"
 #define SDHCI_PROCTL_LCTL                (1 << 0)  /* Bit 0:  LED Control */
 #define SDHCI_PROCTL_DTW_SHIFT           (1)       /* Bits 1-2: Data Transfer Width */
 #define SDHCI_PROCTL_DTW_MASK            (1 << SDHCI_PROCTL_DTW_SHIFT)
-#  define SDHCI_PROCTL_DTW_1BIT          (0 << SDHCI_PROCTL_DTW_SHIFT) /* 1-bit mode */
-#  define SDHCI_PROCTL_DTW_4BIT          (1 << SDHCI_PROCTL_DTW_SHIFT) /* 4-bit mode */
+#define SDHCI_PROCTL_DTW_1BIT            (0 << SDHCI_PROCTL_DTW_SHIFT) /* 1-bit mode */
+#define SDHCI_PROCTL_DTW_4BIT            (1 << SDHCI_PROCTL_DTW_SHIFT) /* 4-bit mode */
 #define SDHCI_PROCTL_DMAS_SHIFT          (3)       /* Bits 8-9: DMA Select */
 #define SDHCI_PROCTL_DMAS_MASK           (3 << SDHCI_PROCTL_DMAS_SHIFT)
-#  define SDHCI_PROCTL_DMAS_NODMA        (0 << SDHCI_PROCTL_DMAS_SHIFT) /* No DMA or simple DMA is selected */
-#  define SDHCI_PROCTL_DMAS_ADMA2        (2 << SDHCI_PROCTL_DMAS_SHIFT) /* ADMA2 is selected */
+#define SDHCI_PROCTL_DMAS_NODMA          (0 << SDHCI_PROCTL_DMAS_SHIFT) /* No DMA or simple DMA is selected */
+#define SDHCI_PROCTL_DMAS_ADMA2          (2 << SDHCI_PROCTL_DMAS_SHIFT) /* ADMA2 is selected */
 #define SDHCI_PROCTL_CDTL                (1 << 6)  /* Bit 6:  Card Detect Test Level */
 #define SDHCI_PROCTL_CDSS                (1 << 7)  /* Bit 7:  Card Detect Signal Selection */
-                                                  /* Bits 10-15: Reserved */
+                                                   /* Bits 10-15: Reserved */
+
 #define SDHCI_PROCTL_SABGREQ             (1 << 16) /* Bit 16: Stop At Block Gap Request */
 #define SDHCI_PROCTL_CREQ                (1 << 17) /* Bit 17: Continue Request */
 #define SDHCI_PROCTL_RWCTL               (1 << 18) /* Bit 18: Read Wait Control */
 #define SDHCI_PROCTL_IABG                (1 << 19) /* Bit 19: Interrupt At Block Gap */
-                                                  /* Bits 20-23: Reserved */
+                                                   /* Bits 20-23: Reserved */
+
 #define SDHCI_PROCTL_WECINT              (1 << 24) /* Bit 24: Wakeup Event Enable On Card Interrupt */
 #define SDHCI_PROCTL_WECINS              (1 << 25) /* Bit 25: Wakeup Event Enable On SD Card Insertion */
 #define SDHCI_PROCTL_WECRM               (1 << 26) /* Bit 26: Wakeup Event Enable On SD Card Removal */
-                                                  /* Bits 27-31: Reserved */
+                                                   /* Bits 27-31: Reserved */
+
 /* System Control Register */
 
 #define SDHCI_SYSCTL_ICLKEN              (1 << 0)  /* Bit 0:  Internal Clock Enable */
@@ -228,14 +238,17 @@ extern "C"
 #define SDHCI_SYSCTL_SDCLKFS_MASK        (0xff << SDHCI_SYSCTL_SDCLKFS_SHIFT)
 #define SDHCI_SYSCTL_DTOCV_SHIFT         (16)      /* Bits 16-19: Data Timeout Counter Value */
 #define SDHCI_SYSCTL_DTOCV_MASK          (0xf << SDHCI_SYSCTL_DTOCV_SHIFT)
-#  define SDHCI_SYSCTL_DTOCV_MUL(n)      (((n)-213) << SDHCI_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
+#define SDHCI_SYSCTL_DTOCV_MUL(n)        (((n)-213) << SDHCI_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
                                                   /* Bits 20-23: Reserved */
+
 #define SDHCI_SYSCTL_RSTA                (1 << 24) /* Bit 24: Software Reset For ALL */
 #define SDHCI_SYSCTL_RSTC                (1 << 25) /* Bit 25: Software Reset For CMD Line */
 #define SDHCI_SYSCTL_RSTD                (1 << 26) /* Bit 26: Software Reset For DAT Line */
 #define SDHCI_SYSCTL_INITA               (1 << 27) /* Bit 27: Initialization Active */
                                                   /* Bits 28-31: Reserved */
-/* Interrupt Status Register, Interrupt Status Enable Register, and Interrupt Signal Enable Register
+
+/* Interrupt Status Register, Interrupt Status Enable Register,
+ * and Interrupt Signal Enable Register
  * Common interrupt bit definitions
  */
 
@@ -248,7 +261,8 @@ extern "C"
 #define SDHCI_INT_CINS                   (1 << 6)  /* Bit 6:  Card Insertion */
 #define SDHCI_INT_CRM                    (1 << 7)  /* Bit 7:  Card Removal */
 #define SDHCI_INT_CINT                   (1 << 8)  /* Bit 8:  Card Interrupt */
-                                                  /* Bits 9-15: Reserved */
+                                                   /* Bits 9-15: Reserved */
+
 #define SDHCI_INT_CTOE                   (1 << 16) /* Bit 16: Command Timeout Error */
 #define SDHCI_INT_CCE                    (1 << 17) /* Bit 17: Command CRC Error */
 #define SDHCI_INT_CEBE                   (1 << 18) /* Bit 18: Command End Bit Error */
@@ -256,11 +270,14 @@ extern "C"
 #define SDHCI_INT_DTOE                   (1 << 20) /* Bit 20: Data Timeout Error */
 #define SDHCI_INT_DCE                    (1 << 21) /* Bit 21: Data CRC Error */
 #define SDHCI_INT_DEBE                   (1 << 22) /* Bit 22: Data End Bit Error */
-                                                  /* Bit 23: Reserved */
+                                                   /* Bit 23: Reserved */
+
 #define SDHCI_INT_AC12E                  (1 << 24) /* Bit 24: Auto CMD12 Error */
-                                                  /* Bits 25-27: Reserved */
+                                                   /* Bits 25-27: Reserved */
+
 #define SDHCI_INT_DMAE                   (1 << 28) /* Bit 28: DMA Error */
-                                                  /* Bits 29-31: Reserved */
+                                                   /* Bits 29-31: Reserved */
+
 #define SDHCI_INT_ALL                    0x117f01ff
 
 /* Auto CMD12 Error Status Register */
@@ -270,18 +287,23 @@ extern "C"
 #define SDHCI_AC12ERR_EBE                (1 << 2)  /* Bit 2:  Auto CMD12 End Bit Error */
 #define SDHCI_AC12ERR_CE                 (1 << 3)  /* Bit 3:  Auto CMD12 CRC Error */
 #define SDHCI_AC12ERR_IE                 (1 << 4)  /* Bit 4:  Auto CMD12 Index Error */
-                                                  /* Bits 5-6: Reserved */
+                                                   /* Bits 5-6: Reserved */
+
 #define SDHCI_AC12ERR_CNI                (1 << 7)  /* Bit 7: Command Not Issued By Auto CMD12 Error */
-                                                  /* Bits 8-31: Reserved */
+                                                   /* Bits 8-31: Reserved */
+
 /* Host Controller Capabilities */
+
                                                   /* Bits 0-15: Reserved */
+
 #define SDHCI_HTCAPBLT_MBL_SHIFT         (16)      /* Bits 16-18: Max Block Length */
 #define SDHCI_HTCAPBLT_MBL_MASK          (7 << SDHCI_HTCAPBLT_MBL_SHIFT)
-#  define SDHCI_HTCAPBLT_MBL_512BYTES    (0 << SDHCI_HTCAPBLT_MBL_SHIFT)
-#  define SDHCI_HTCAPBLT_MBL_1KB         (1 << SDHCI_HTCAPBLT_MBL_SHIFT)
-#  define SDHCI_HTCAPBLT_MBL_2KB         (2 << SDHCI_HTCAPBLT_MBL_SHIFT)
-#  define SDHCI_HTCAPBLT_MBL_4KB         (3 << SDHCI_HTCAPBLT_MBL_SHIFT)
-                                                  /* Bit 19: Reserved */
+#define SDHCI_HTCAPBLT_MBL_512BYTES      (0 << SDHCI_HTCAPBLT_MBL_SHIFT)
+#define SDHCI_HTCAPBLT_MBL_1KB           (1 << SDHCI_HTCAPBLT_MBL_SHIFT)
+#define SDHCI_HTCAPBLT_MBL_2KB           (2 << SDHCI_HTCAPBLT_MBL_SHIFT)
+#define SDHCI_HTCAPBLT_MBL_4KB           (3 << SDHCI_HTCAPBLT_MBL_SHIFT)
+                                                   /* Bit 19: Reserved */
+
 #define SDHCI_HTCAPBLT_ADMAS             (1 << 20) /* Bit 20: ADMA Support */
 #define SDHCI_HTCAPBLT_HSS               (1 << 21) /* Bit 21: High Speed Support */
 #define SDHCI_HTCAPBLT_DMAS              (1 << 22) /* Bit 22: DMA Support */
@@ -290,6 +312,7 @@ extern "C"
 #define SDHCI_HTCAPBLT_VS30              (1 << 25) /* Bit 25: Voltage Support 3.0 V */
 #define SDHCI_HTCAPBLT_VS18              (1 << 26) /* Bit 26: Voltage Support 1.8 */
                                                   /* Bits 27-31: Reserved */
+
 /* Force Event Register */
 
 #define SDHCI_FEVT_AC12NE                (1 << 0)  /* Bit 0:  Force Event Auto Command 12 Not Executed */
@@ -297,9 +320,11 @@ extern "C"
 #define SDHCI_FEVT_AC12CE                (1 << 2)  /* Bit 2:  Force Event Auto Command 12 CRC Error */
 #define SDHCI_FEVT_AC12EBE               (1 << 3)  /* Bit 3:  Force Event Auto Command 12 End Bit Error */
 #define SDHCI_FEVT_AC12IE                (1 << 4)  /* Bit 4:  Force Event Auto Command 12 Index Error */
-                                                  /* Bits 5-6: Reserved */
+                                                   /* Bits 5-6: Reserved */
+
 #define SDHCI_FEVT_CNIBAC12E             (1 << 7)  /* Bit 7:  Force Event Command Not Executed By Auto Command 12 Error */
-                                                  /* Bits 8-15: Reserved */
+                                                   /* Bits 8-15: Reserved */
+
 #define SDHCI_FEVT_CTOE                  (1 << 16) /* Bit 16: Force Event Command Time Out Error */
 #define SDHCI_FEVT_CCE                   (1 << 17) /* Bit 17: Force Event Command CRC Error */
 #define SDHCI_FEVT_CEBE                  (1 << 18) /* Bit 18: Force Event Command End Bit Error */
@@ -307,35 +332,40 @@ extern "C"
 #define SDHCI_FEVT_DTOE                  (1 << 20) /* Bit 20: Force Event Data Time Out Error */
 #define SDHCI_FEVT_DCE                   (1 << 21) /* Bit 21: Force Event Data CRC Error */
 #define SDHCI_FEVT_DEBE                  (1 << 22) /* Bit 22: Force Event Data End Bit Error */
-                                                  /* Bit 23: Reserved */
+                                                   /* Bit 23: Reserved */
+
 #define SDHCI_FEVT_AC12E                 (1 << 24) /* Bit 24: Force Event Auto Command 12 Error */
-                                                  /* Bits 25-27: Reserved */
+                                                   /* Bits 25-27: Reserved */
+
 #define SDHCI_FEVT_DMAE                  (1 << 28) /* Bit 28: Force Event DMA Error */
-                                                  /* Bits 29-30: Reserved */
+                                                   /* Bits 29-30: Reserved */
+
 #define SDHCI_FEVT_CINT                  (1 << 31) /* Bit 31: Force Event Card Interrupt */
 
 /* ADMA Error Status Register */
 
 #define SDHCI_ADMAES_SHIFT               (0)       /* Bits 0-1: ADMA Error State (when ADMA Error is occurred) */
 #define SDHCI_ADMAES_MASK                (3 << SDHCI_ADMAES_ADMAES_SHIFT)
-#  define SDHCI_ADMAES_STOP              (0 << SDHCI_ADMAES_ADMAES_SHIFT) /* Stop DMA */
-#  define SDHCI_ADMAES_FDS               (1 << SDHCI_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
-#  define SDHCI_ADMAES_CADR              (2 << SDHCI_ADMAES_ADMAES_SHIFT) /* Change address */
-#  define SDHCI_ADMAES_TFR               (3 << SDHCI_ADMAES_ADMAES_SHIFT) /* Transfer data */
+#define SDHCI_ADMAES_STOP                (0 << SDHCI_ADMAES_ADMAES_SHIFT) /* Stop DMA */
+#define SDHCI_ADMAES_FDS                 (1 << SDHCI_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
+#define SDHCI_ADMAES_CADR                (2 << SDHCI_ADMAES_ADMAES_SHIFT) /* Change address */
+#define SDHCI_ADMAES_TFR                 (3 << SDHCI_ADMAES_ADMAES_SHIFT) /* Transfer data */
 #define SDHCI_ADMAES_LME                 (1 << 2)  /* Bit 2:  ADMA Length Mismatch Error */
 #define SDHCI_ADMAES_DCE                 (1 << 3)  /* Bit 3:  ADMA Descriptor Error */
-                                                  /* Bits 4-31: Reserved */
+                                                   /* Bits 4-31: Reserved */
+
 /* ADMA System Address Register */
 
 #define SDHCI_ADSADDR_SHIFT              (1)       /* Bits 1-31: ADMA System Address */
 #define SDHCI_ADSADDR_MASK               (0xfffffffe)
-                                                  /* Bits 0-1: Reserved */
+                                                   /* Bits 0-1: Reserved */
 
 /* Vendor Specific Register */
 
 #define SDHCI_VENDOR_EXTDMAEN            (1 << 0)  /* Bit 0:  External DMA Request Enable */
 #define SDHCI_VENDOR_EXBLKNU             (1 << 1)  /* Bit 1:  Exact block number block read enable for SDIO CMD53 */
-                                                  /* Bits 2-15: Reserved */
+                                                   /* Bits 2-15: Reserved */
+
 #define SDHCI_VENDOR_INTSTVAL_SHIFT      (16)      /* Bits 16-23: Internal State Value */
 #define SDHCI_VENDOR_INTSTVAL_MASK       (0xff << SDHCI_VENDOR_INTSTVAL_SHIFT)
                                                   /* Bits 24-31: Reserved */
@@ -387,7 +417,6 @@ struct sdio_dev_s;
  * Public Functions
  ****************************************************************************/
 
-
 /****************************************************************************
  * Name: cxd56_sdhci_initialize
  *
@@ -398,7 +427,8 @@ struct sdio_dev_s;
  *   slotno - Not used.
  *
  * Returned Values:
- *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *   A reference to an SDIO interface structure.
+ *   NULL is returned on failures.
  *
  ****************************************************************************/
 
@@ -414,7 +444,8 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno);
  *   slotno - Not used.
  *
  * Returned Values:
- *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *   A reference to an SDIO interface structure.
+ *   NULL is returned on failures.
  *
  ****************************************************************************/
 

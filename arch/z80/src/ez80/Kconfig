@@ -30,6 +30,13 @@ config EZ80_SPI
 	bool "SPI"
 	default n
 
+config EZ80_RTC
+	bool "RTC"
+	default n
+	select RTC
+	select RTC_DATETIME
+	select TIME_EXTENDED
+
 config EZ80_EMAC
 	bool "Ethernet MAC"
 	default n
@@ -38,7 +45,23 @@ config EZ80_EMAC
 	---help---
 		Enables support for ez80 EMAC driver.
 
-endmenu
+endmenu # ez80 Peripheral Support
+
+config EZ80_RTC_32KHZ
+	bool "32KHz crystal present"
+	default y
+	depends on EZ80_RTC
+	---help---
+		If there is no 32Hz crystal, the RTC will fall back to use the line
+		frequency.
+
+config EZ80_RTC_LINEFREQ50
+	bool "50Hz line frequency"
+	default n
+	depends on EZ80_RTC && !EZ80_RTC_32KHZ
+	---help---
+		If there is no 32Hz crystal, the RTC will fall back to use the line
+		frequency, either 50 or 60Hz.
 
 # The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
 # the ez80.

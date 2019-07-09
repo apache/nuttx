@@ -62,47 +62,10 @@ Version 5.2.1
 
 Version 5.3.0
 
-  I started verification using 5.30 on June 2, 2019.  To use this toolchain,
-  I had to suppress the gmtime() and gmtimer() because these were causing an
-  internal compiler error:
-
-    time\lib_gmtimer.c
-    P2: Internal Error(0xB47E59):
-            Please contact Technical Support
-
-  This is the change to suppress building these files:
-
-    diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
-    index 5c9b746778..8327e287f4 100644
-    --- a/libs/libc/time/Make.defs
-    +++ b/libs/libc/time/Make.defs
-    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
-     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
-     else
-    -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
-    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
-     ifdef CONFIG_TIME_EXTENDED
-     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
-
-  And this:
-
-     stdlib\lib_strtof.c
-     stdlib\lib_strtof.c     (76,36) :       WARNING (32) Division by zero encountered
-     stdlib\lib_strtof.c     (102,36) :      WARNING (32) Division by zero encountered
-
-   Which can be worked around by removing it from the build
-
-  The consequence is, of course, that these interfaces will not be available
-  to applications.
-
-  Alternatively, you can use 'make -i' to build the system.  The above
-  errors will occur, but will not stop the build (unless the failed build
-  objects are brought into the link).  The has the negative side effects
-  that (1) the archives will always be rebuild in the directories where
-  the error occur, and (2) you might miss other, real compilation error
-  since these will no longer stop the compilation.
+  I verifed compilation using 5.30 on June 2, 2019.  To use this version,
+  I had to make spurious modification to the implementation of gmtimer() to
+  work around an internal compiler error.  I have still not verified that
+  are no errors in the compiled code.
 
 Other Versions
   If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or

@@ -389,7 +389,7 @@ struct stm32_tim_priv_s stm32_tim12_priv =
 #endif
 
 #ifdef CONFIG_STM32H7_TIM13
-struct stm32_tim_priv_s stm32_tim12_priv =
+struct stm32_tim_priv_s stm32_tim13_priv =
 {
   .ops        = &stm32_tim_ops,
   .mode       = STM32_TIM_MODE_UNUSED,
@@ -398,7 +398,7 @@ struct stm32_tim_priv_s stm32_tim12_priv =
 #endif
 
 #ifdef CONFIG_STM32H7_TIM14
-struct stm32_tim_priv_s stm32_tim12_priv =
+struct stm32_tim_priv_s stm32_tim14_priv =
 {
   .ops        = &stm32_tim_ops,
   .mode       = STM32_TIM_MODE_UNUSED,
@@ -1430,7 +1430,7 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
 #endif
 #ifdef CONFIG_STM32H7_TIM7
       case STM32_TIM7_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1ENR_TIM7EN, 0);
+        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM7EN, 0);
         break;
 #endif
 #ifdef CONFIG_STM32H7_TIM8
@@ -1444,7 +1444,7 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
         break;
 #endif
 #ifdef CONFIG_STM32H7_TIM13
-      case STM32_TIM12_BASE:
+      case STM32_TIM13_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM13EN, 0);
         break;
 #endif

@@ -22,6 +22,12 @@ config FB_OVERLAY_BLIT
 	depends on FB_OVERLAY
 	default n
 
+config VIDEO_STREAM
+	bool "Video Stream Support"
+	default n
+	---help---
+		Enable video Stream support
+
 config VIDEO_MAX7456
         bool "Maxim 7456 Monochrome OSD"
 	default n
@@ -29,6 +35,11 @@ config VIDEO_MAX7456
 	---help---
 		Support for the Maxim 7456 monochrome on-screen display
 		multiplexer.
+
+config VIDEO_ISX012
+	bool "ISX012 Image sensor"
+	default n
+	select I2C
 
 config VIDEO_OV2640
 	bool "OV2640 camera chip"

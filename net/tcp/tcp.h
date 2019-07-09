@@ -1558,7 +1558,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  * Input Parameters:
  *   worker - The worker function to execute on the high priority work
  *            queue when data is available in the TCP read-ahead buffer.
- *   conn  - The TCP connection where read-ahead data is needed.
+ *   conn   - The TCP connection where read-ahead data is needed.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
  *
@@ -1581,7 +1581,40 @@ int tcp_readahead_notifier_setup(worker_t worker,
 #endif
 
 /****************************************************************************
- * Name: tcp_readahead_disconnect_setup
+ * Name: tcp_writebuffer_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function when an TCP write
+ *   buffer is emptied.  The worker function will execute on the high
+ *   priority worker thread.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the high priority work
+ *            queue when all buffer TX data has been sent.
+ *   conn   - The TCP connection where buffer write data is pending.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The signal notification is in place.  The returned value is a
+ *           key that may be used later in a call to
+ *           tcp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No signal
+ *           notification will be provided.
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TCP_NOTIFIER
+int tcp_writebuffer_notifier_setup(worker_t worker,
+                                   FAR struct tcp_conn_s *conn,
+                                   FAR void *arg);
+#endif
+
+/****************************************************************************
+ * Name: tcp_disconnect_notifier_setup
  *
  * Description:
  *   Set up to perform a callback to the worker function if the TCP
@@ -1607,9 +1640,9 @@ int tcp_readahead_notifier_setup(worker_t worker,
  ****************************************************************************/
 
 #ifdef CONFIG_TCP_NOTIFIER
-int tcp_readahead_disconnect_setup(worker_t worker,
-                                   FAR struct tcp_conn_s *conn,
-                                   FAR void *arg);
+int tcp_disconnect_notifier_setup(worker_t worker,
+                                  FAR struct tcp_conn_s *conn,
+                                  FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -1656,8 +1689,33 @@ int tcp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_TCP_NOTIFIER)
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Name: tcp_writebuffer_signal
+ *
+ * Description:
+ *   All buffer Tx data has been sent.  Signal all threads waiting for the
+ *   write buffers to become empty.
+ *
+ *   When write buffer becomes empty, *all* of the workers waiting
+ *   for that event data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call tcp_writebuffer_notifier_setup() once
+ *   again.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn);
 #endif
 
 /****************************************************************************
@@ -1677,6 +1735,30 @@ void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
 
 #ifdef CONFIG_TCP_NOTIFIER
 void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
+ * Name: tcp_txdrain
+ *
+ * Description:
+ *   Wait for all write buffers to be sent (or for a timeout to occur).
+ *
+ * Input Parameters:
+ *   psock   - An instance of the internal socket structure.
+ *   abstime - The absolute time when the timeout will occur
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+struct timespec;
+int tcp_txdrain(FAR struct socket *psock,
+                FAR const struct timespec *abstime);
+#else
+#  define tcp_txdrain(conn, abstime) (0)
 #endif
 
 #undef EXTERN

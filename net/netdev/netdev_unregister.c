@@ -153,9 +153,9 @@ int netdev_unregister(FAR struct net_driver_s *dev)
             }
           else
             {
-               /* The entry was at the beginning of the list */
+              /* The entry was at the beginning of the list */
 
-               g_netdevices = curr->flink;
+              g_netdevices = curr->flink;
             }
 
           curr->flink = NULL;

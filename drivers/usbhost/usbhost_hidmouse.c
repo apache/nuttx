@@ -391,7 +391,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * device.
  */
 
-static const const struct usbhost_id_s g_hidmouse_id =
+static const struct usbhost_id_s g_hidmouse_id =
 {
   USB_CLASS_HID,           /* base     */
   USBHID_SUBCLASS_BOOTIF,  /* subclass */

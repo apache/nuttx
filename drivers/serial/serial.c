@@ -1,7 +1,8 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -195,8 +196,24 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 #endif
           if (fds->revents != 0)
             {
+              irqstate_t flags;
+              int semcount;
+
               finfo("Report events: %02x\n", fds->revents);
-              nxsem_post(fds->sem);
+
+              /* Limit the number of times that the semaphore is posted.
+               * The critical section is needed to make the following
+               * operation atomic.
+               */
+
+              flags = enter_critical_section();
+              nxsem_getvalue(fds->sem, &semcount);
+              if (semcount < 1)
+                {
+                  nxsem_post(fds->sem);
+                }
+
+              leave_critical_section(flags);
             }
         }
     }

@@ -57,7 +57,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "z80_internal.h"
 #include "makerlisp.h"
 
 #ifdef CONFIG_ARCH_LEDS

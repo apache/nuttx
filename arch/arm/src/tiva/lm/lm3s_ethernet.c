@@ -1345,6 +1345,7 @@ static int tiva_ifup(struct net_driver_s *dev)
    * set
    */
 
+#ifndef CONFIG_TIVA_WITH_QEMU
   ninfo("Waiting for link\n");
   do
     {
@@ -1352,6 +1353,7 @@ static int tiva_ifup(struct net_driver_s *dev)
     }
   while ((phyreg & MII_MSR_LINKSTATUS) == 0);
   ninfo("Link established\n");
+#endif
 
   /* Reset the receive FIFO */
 

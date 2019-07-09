@@ -234,11 +234,11 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
 
       DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
-         {
-           /* Report not connected */
+        {
+          /* Report not connected */
 
-           tcp_lost_connection(psock, pstate->snd_ackcb, flags);
-         }
+          tcp_lost_connection(psock, pstate->snd_ackcb, flags);
+        }
 
       /* Report not connected */
 
@@ -377,11 +377,11 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
-         {
-           /* Report not connected */
+        {
+          /* Report not connected */
 
-           tcp_lost_connection(psock, pstate->snd_datacb, flags);
-         }
+          tcp_lost_connection(psock, pstate->snd_datacb, flags);
+        }
 
       /* Report not connected */
 

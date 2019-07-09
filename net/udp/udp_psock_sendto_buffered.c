@@ -167,6 +167,12 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
           psock->s_sndcb->priv  = NULL;
           psock->s_sndcb->event = NULL;
           wrb = NULL;
+
+#ifdef CONFIG_TCP_NOTIFIER
+          /* Notify any waiters that the write buffers have been drained. */
+
+          udp_writebuffer_signal(conn);
+#endif
         }
       else
         {
@@ -184,8 +190,8 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
            * the write buffer queue.
            */
 
-         ret = sendto_next_transfer(psock, conn);
-       }
+          ret = sendto_next_transfer(psock, conn);
+        }
     }
   while (wrb != NULL && ret < 0);
 }
@@ -858,12 +864,12 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * write buffer queue.
        */
 
-     ret = sendto_next_transfer(psock, conn);
-     if (ret < 0)
-       {
-         (void)sq_remlast(&conn->write_q);
-         goto errout_with_wrb;
-       }
+      ret = sendto_next_transfer(psock, conn);
+      if (ret < 0)
+        {
+          (void)sq_remlast(&conn->write_q);
+          goto errout_with_wrb;
+        }
 
       net_unlock();
     }

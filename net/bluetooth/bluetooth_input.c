@@ -146,28 +146,28 @@ static int bluetooth_queue_frame(FAR struct bluetooth_conn_s *conn,
 
   if (conn->bc_backlog >= CONFIG_NET_BLUETOOTH_BACKLOG)
     {
-     DEBUGASSERT(conn->bc_backlog == CONFIG_NET_BLUETOOTH_BACKLOG);
+      DEBUGASSERT(conn->bc_backlog == CONFIG_NET_BLUETOOTH_BACKLOG);
 
-     /* Remove the container from the tail RX input queue. */
+      /* Remove the container from the tail RX input queue. */
 
-     container           = conn->bc_rxhead;
-     DEBUGASSERT(container != NULL);
-     conn->bc_rxhead     = container->bn_flink;
-     container->bn_flink = NULL;
+      container           = conn->bc_rxhead;
+      DEBUGASSERT(container != NULL);
+      conn->bc_rxhead     = container->bn_flink;
+      container->bn_flink = NULL;
 
-     /* Did the RX queue become empty? */
+      /* Did the RX queue become empty? */
 
-     if (conn->bc_rxhead == NULL)
-       {
-         conn->bc_rxtail = NULL;
-       }
+      if (conn->bc_rxhead == NULL)
+        {
+          conn->bc_rxtail = NULL;
+        }
 
-     DEBUGASSERT(container != NULL && container->bn_iob != NULL);
+      DEBUGASSERT(container != NULL && container->bn_iob != NULL);
 
-     /* Free both the IOB and the container */
+      /* Free both the IOB and the container */
 
-     iob_free(container->bn_iob);
-     bluetooth_container_free(container);
+      iob_free(container->bn_iob);
+      bluetooth_container_free(container);
     }
   else
     {

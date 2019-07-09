@@ -47,7 +47,7 @@
 #include <nuttx/sched.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef USE_LOWSERIALINIT
 
@@ -176,10 +176,10 @@ static void ez80_setbaud(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowserialinit
+ * Name: z80_lowserial_initialize
  ****************************************************************************/
 
-void up_lowserialinit(void)
+void z80_lowserial_initialize(void)
 {
 #ifdef HAVE_SERIAL
   uint8_t regval;

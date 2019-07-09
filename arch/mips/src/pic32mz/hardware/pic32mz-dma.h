@@ -52,7 +52,7 @@
  ********************************************************************************************/
 /* DMA Channel Offsets **********************************************************************/
 
-#define PIC32MZ_DMACHn_OFFSET(n)      (0x0060 + 00c0 *(n))
+#define PIC32MZ_DMACHn_OFFSET(n)      (0x0060 + 0xc0 *(n))
 #  define PIC32MZ_DMACH0_OFFSET       0x0060
 #  define PIC32MZ_DMACH1_OFFSET       0x0120
 #  define PIC32MZ_DMACH2_OFFSET       0x01e0
@@ -386,6 +386,7 @@
 #  define PIC32MZ_DMACH2_DATCLR       (PIC32MZ_DMACH2_K1BASE+PIC32MZ_DMACH_DATCLR_OFFSET)
 #  define PIC32MZ_DMACH2_DATSET       (PIC32MZ_DMACH2_K1BASE+PIC32MZ_DMACH_DATSET_OFFSET)
 #  define PIC32MZ_DMACH2_DATINV       (PIC32MZ_DMACH2_K1BASE+PIC32MZ_DMACH_DATINV_OFFSET)
+#endif
 
 #if CHIP_NDMACH > 3
 #  define PIC32MZ_DMACH3_CON          (PIC32MZ_DMACH3_K1BASE+PIC32MZ_DMACH_CON_OFFSET)
@@ -658,8 +659,8 @@
 /* DMA Status Register */
 
 #define DMA_STAT_DMACH_SHIFT          (0)       /* Bits 0-1: DMA channel */
-#define DMA_STAT_DMACH_MASK           (3 << DMA_STAT_DMACH_SHIFT)
-#define DMA_STAT_RDWR                 (1 << 3)  /* Bit 3:  Read/write status */
+#define DMA_STAT_DMACH_MASK           (7 << DMA_STAT_DMACH_SHIFT)
+#define DMA_STAT_RDWR                 (1 << 31) /* Bit 31:  Read/write status */
 
 /* DMA Address Register -- This register contains a 32-bit address value */
 
@@ -737,6 +738,10 @@
 #define DMACH_INT_CHDDIE              (1 << 21) /* Bit 21: Channel destination done interrupt enable */
 #define DMACH_INT_CHSHIE              (1 << 22) /* Bit 22: Channel source half empty interrupt enable */
 #define DMACH_INT_CHSDIE              (1 << 23) /* Bit 23: Channel source done interrupt enable */
+#define DMACH_INT_FLAGS_SHIFT         (0)       /* Bits 0-7: Channel Interrupt flags */
+#define DMACH_INT_FLAGS_MASK          (0xff << DMACH_INT_FLAGS_SHIFT)
+#define DMACH_INT_EN_SHIFT            (16)      /* Bits 16-23: Channel Interrupt Enable events */
+#define DMACH_INT_EN_MASK             (0xff << DMACH_INT_EN_SHIFT)
 
 /* DMA Channel Source Start Address Register -- This register contains a 32-bit address value */
 /* DMA Channel Destination Start Address Register -- This register contains a 32-bit address value */
@@ -762,7 +767,7 @@
 
 /* DMA Channel Cell Pointer Register -- 16 bits of byte transferred data */
 
-#define DMACH_DPCR_MASK                0x0000ffff
+#define DMACH_CPTR_MASK                0x0000ffff
 
 /* DMA Channel Pattern Data Register -- 16 bits of pattern data */
 

@@ -54,7 +54,7 @@
 #include <arch/io.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #include "z180_config.h"
 #include "z180_serial.h"
@@ -565,14 +565,14 @@ static bool z180_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: z80_serial_initialize
  *
  * Description:
  *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void z80_serial_initialize(void)
 {
   /* Make sure that all UART interrupts are disabled */
 #warning "Missing logic"

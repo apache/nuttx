@@ -1922,7 +1922,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
 
                   /* Wait a bit before retrying after a NAK. */
 
-                  if (chan->eptype == OTGFS_HCCHAR_EPTYP_INTR)
+                  if (chan->eptype == OTGFS_EPTYPE_INTR)
                     {
                       /* For interrupt (and isochronous) endpoints, the
                        * polling rate is determined by the bInterval field
@@ -4540,7 +4540,8 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               /* Start DATA out transfer (only one DATA packet) */
 
               priv->chan[ep0info->outndx].outdata1 = true;
-              ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
+              ret = stm32_ctrl_senddata(priv, ep0info, (FAR uint8_t *)buffer,
+                                        buflen);
               if (ret < 0)
                 {
                   usbhost_trace1(OTGFS_TRACE1_SENDDATA, -ret);

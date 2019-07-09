@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_PNEV5180B
+
+config LPC17_ROMFS
+	bool "Automount baked-in ROMFS image"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Specify which ROMFS image to mount where via LPC17_ROMFS_IMAGEFILE,
+		LPC17_ROMFS_DEV_MINOR, and LPC17_ROMFS_MOUNTPOINT.  ROMFS images are
+		created with the genromfs Linux tool.
+
+config LPC17_ROMFS_DEV_MINOR
+	int "Minor for the block device backing the data"
+	depends on LPC17_ROMFS
+	default 64
+
+config LPC17_ROMFS_MOUNTPOINT
+	string "Mountpoint of the custom romfs image"
+	depends on LPC17_ROMFS
+	default "/mnt/romfs"
+
+config LPC17_ROMFS_IMAGEFILE
+	string "ROMFS image file to include into build"
+	depends on LPC17_ROMFS
+	default "../romfs.img"
+	---help---
+		The path to specify is relative to the 'src' directory of the
+		currently selected configuration.
+
+endif

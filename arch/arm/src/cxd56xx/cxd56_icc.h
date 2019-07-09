@@ -96,6 +96,6 @@ void cxd56_iccinitialize(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_ICC_H */

@@ -46,8 +46,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIG_CXD56_PMIC
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -165,7 +163,7 @@ struct pmic_mon_s
 
 struct pmic_mon_status_s
 {
-  int bRun;
+  int brun;
   int index;
   int latest;
   int total_watt;
@@ -174,8 +172,8 @@ struct pmic_mon_status_s
 
 struct pmic_mon_set_s
 {
-  int clearBuf;
-  int clearSum;
+  int clearbuf;
+  int clearsum;
 };
 
 struct pmic_mon_rec_s
@@ -305,7 +303,7 @@ int cxd56_pmic_set_gpo_hiz(uint8_t chset);
  *   chset : GPO Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are high. Otherwise, return false
+ *   Return true if all of the specified chset are high. Else, return false
  *
  ****************************************************************************/
 
@@ -573,7 +571,7 @@ int cxd56_pmic_getchargestate(FAR uint8_t *state);
  *
  ****************************************************************************/
 
-int cxd56_pmic_setrechargevol(int mV);
+int cxd56_pmic_setrechargevol(int mv);
 
 /****************************************************************************
  * Name: cxd56_pmic_getrechargevol
@@ -589,7 +587,7 @@ int cxd56_pmic_setrechargevol(int mV);
  *
  ****************************************************************************/
 
-int cxd56_pmic_getrechargevol(FAR int *mV);
+int cxd56_pmic_getrechargevol(FAR int *mv);
 
 /****************************************************************************
  * Name: cxd56_pmic_setchargecompcurrent
@@ -755,7 +753,6 @@ int cxd56_pmic_monitor_get(FAR struct pmic_mon_log_s *ptr);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_CXD56_PMIC */
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_PMIC_H */

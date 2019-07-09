@@ -69,7 +69,7 @@
 #include <arch/io.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

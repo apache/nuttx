@@ -1381,6 +1381,10 @@ config TIVA_DUMPPACKET
 	---help---
 		Dump each packet received/sent to the console.
 
+config TIVA_WITH_QEMU
+	bool "Workaround for tiva with qemu"
+	default n
+
 endmenu # Stellaris Ethernet Configuration
 
 menu "Ethernet Configuration"

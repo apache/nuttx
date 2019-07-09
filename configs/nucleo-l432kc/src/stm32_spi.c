@@ -33,9 +33,9 @@
  *
  ****************************************************************************/
 
-/************************************************************************************
+/*******************************************************************************
  * Included Files
- ************************************************************************************/
+ ******************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,9 +55,9 @@
 
 #if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2)
 
-/************************************************************************************
+/*******************************************************************************
  * Public Data
- ************************************************************************************/
+ ******************************************************************************/
 /* Global driver instances */
 
 #ifdef CONFIG_STM32L4_SPI1
@@ -67,17 +67,17 @@ struct spi_dev_s *g_spi1;
 struct spi_dev_s *g_spi2;
 #endif
 
-/************************************************************************************
+/*******************************************************************************
  * Public Functions
- ************************************************************************************/
+ ******************************************************************************/
 
-/************************************************************************************
+/*******************************************************************************
  * Name: stm32l4_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-L432KC board.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
 void stm32l4_spiinitialize(void)
 {
@@ -122,18 +122,18 @@ void stm32l4_spiinitialize(void)
  * Name:  stm32l4_spi1/2select and stm32l4_spi1/2status
  *
  * Description:
- *   The external functions, stm32l4_spi1/2select and stm32l4_spi1/2status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, stm32l4_spi1/2select and stm32l4_spi1/2status must
+ *   be provided by board-specific logic.  They are implementations of the
+ *   select and status methods of the SPI interface defined by struct spi_ops_s
+ *   (see include/nuttx/spi/spi.h). All other methods (including
+ *   up_spiinitialize()) are provided by common STM32 logic.  To use this common
+ *   SPI logic on your board:
  *
  *   1. Provide logic in stm32l4_board_initialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32l4_spi1/2select() and stm32l4_spi1/2status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *   2. Provide stm32l4_spi1/2select() and stm32l4_spi1/2status() functions in
+ *      your board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
@@ -144,9 +144,11 @@ void stm32l4_spiinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI1
-void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %08X CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %08X CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
 #ifdef CONFIG_MTD_AT45DB
   if (devid == SPIDEV_FLASH(0))
@@ -163,9 +165,11 @@ uint8_t stm32l4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
-void stm32l4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32l4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
 }
 

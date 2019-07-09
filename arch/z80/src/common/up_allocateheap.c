@@ -45,9 +45,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/mm.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef SDCC
 /* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file
@@ -65,18 +66,6 @@
 
 #  include "chip/up_mem.h"
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -99,7 +88,7 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  *heap_start = (FAR void*)CONFIG_HEAP1_BASE;
+  *heap_start = (FAR void *)CONFIG_HEAP1_BASE;
   *heap_size = CONFIG_HEAP1_END - CONFIG_HEAP1_BASE;
   board_autoled_on(LED_HEAPALLOCATE);
 }

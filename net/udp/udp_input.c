@@ -143,10 +143,10 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           chksum = ~udp_ipv4_chksum(dev);
         }
 #endif /* CONFIG_NET_IPv6 */
-     }
+    }
 
-   if (chksum != 0)
-     {
+  if (chksum != 0)
+    {
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.drop++;
       g_netstats.udp.chkerr++;

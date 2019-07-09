@@ -45,6 +45,18 @@
 #include <sys/boardctl.h>
 #include <stdbool.h>
 
+#include "cxd56_clock.h"
+#include "cxd56_power.h"
+#include "cxd56_flash.h"
+#include "cxd56_gauge.h"
+#include "cxd56_charger.h"
+#include "cxd56_gs2200m.h"
+#include "cxd56_i2cdev.h"
+#include "cxd56_bmi160.h"
+#include "cxd56_sdcard.h"
+#include "cxd56_wdt.h"
+#include "cxd56_gpioif.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -111,36 +123,34 @@
 
 /* LED definitions *********************************************************/
 
+#define GPIO_LED1           (PIN_I2S1_BCK)
+#define GPIO_LED2           (PIN_I2S1_LRCK)
+#define GPIO_LED3           (PIN_I2S1_DATA_IN)
+#define GPIO_LED4           (PIN_I2S1_DATA_OUT)
+
 #define BOARD_LED1          (0)
 #define BOARD_LED2          (1)
-#define BOARD_NLEDS         (2)
+#define BOARD_LED3          (2)
+#define BOARD_LED4          (3)
+#define BOARD_NLEDS         (4)
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT      (1 << BOARD_LED1)
 #define BOARD_LED2_BIT      (1 << BOARD_LED2)
+#define BOARD_LED3_BIT      (1 << BOARD_LED3)
+#define BOARD_LED4_BIT      (1 << BOARD_LED4)
 
-/* LED pattern for use with board_autoled_on() and board_autoled_off()
- *           ON            OFF
- *       LED1   LED2   LED1   LED2
- * PTN0: OFF    OFF     -      -
- * PTN1: ON     OFF     -      -
- * PTN2: -      ON      -      OFF
- *
- */
+/* LED pattern for use with board_autoled_on() and board_autoled_off() */
 
-#define LED_AUTOLED_PTN0    (0)
-#define LED_AUTOLED_PTN1    (1)
-#define LED_AUTOLED_PTN2    (2)
-
-#define LED_STARTED         (LED_AUTOLED_PTN0)
-#define LED_HEAPALLOCATE    (LED_AUTOLED_PTN1)
-#define LED_IRQSENABLED     (LED_AUTOLED_PTN1)
-#define LED_STACKCREATED    (LED_AUTOLED_PTN1)
-#define LED_INIRQ           (LED_AUTOLED_PTN2)
-#define LED_SIGNAL          (LED_AUTOLED_PTN2)
-#define LED_ASSERTION       (LED_AUTOLED_PTN2)
-#define LED_PANIC           (LED_AUTOLED_PTN2)
+#define LED_STARTED             (BOARD_LED1_BIT)
+#define LED_HEAPALLOCATE        (BOARD_LED2_BIT)
+#define LED_IRQSENABLED         (BOARD_LED1_BIT | BOARD_LED2_BIT)
+#define LED_STACKCREATED        (BOARD_LED3_BIT)
+#define LED_INIRQ               (BOARD_LED1_BIT | BOARD_LED3_BIT)
+#define LED_SIGNAL              (BOARD_LED2_BIT | BOARD_LED3_BIT)
+#define LED_ASSERTION           (BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT)
+#define LED_PANIC               (BOARD_LED4_BIT)
 
 /* Buttons definitions *****************************************************/
 
@@ -206,6 +216,37 @@ enum board_power_device
   POWER_LTE             = PMIC_NONE,
   POWER_IMAGE_SENSOR    = PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(7),
 };
+
+/* LCD Display clocking ****************************************************/
+
+#define ILI9340_SPI_MAXFREQUENCY    40000000
+
+/* Display device pin definitions ******************************************/
+
+#if defined(CONFIG_LCD_ON_MAIN_BOARD) /* Display connected to main board. */
+
+#define DISPLAY_RST     PIN_I2S0_BCK
+#define DISPLAY_DC      PIN_I2S0_LRCK
+
+#define DISPLAY_SPI     5
+
+#else /* Display is connected through extension board. */
+
+#define DISPLAY_RST     PIN_SPI2_MISO
+#define DISPLAY_DC      PIN_PWM2
+
+#define DISPLAY_SPI     4
+
+#endif
+
+/* Set signal id for notify USB device connection status and
+ * supply current value.
+ * signal returns "usbdev_notify_s" struct pointer in sival_ptr.
+ *
+ * Arg: Value of sinal number
+ */
+
+#define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)
 
 /****************************************************************************
  * Public Types

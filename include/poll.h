@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/poll.h
  *
- *   Copyright (C) 2008-2009, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,14 @@ typedef unsigned int nfds_t;
 
 typedef uint8_t pollevent_t;
 
-/* This is the Nuttx variant of the standard pollfd structure. */
+/* This is the Nuttx variant of the standard pollfd structure.  The poll()
+ * interfaces receive a variable length array of such structures.
+ *
+ * REVISIT: In a multi-threaded environment, one use case might be to share
+ * a single, array of struct pollfd in poll calls on different threads.
+ * That use case is not supportable with this variant due way in which the
+ * non-standard internal fields are used in the implementation of poll().
+ */
 
 struct pollfd
 {
@@ -120,7 +127,7 @@ struct pollfd
   pollevent_t  events;  /* The input event flags */
   pollevent_t  revents; /* The output event flags */
 
-  /* Non-standard fields used internally by NuttX */
+  /* Non-standard fields used internally by NuttX. */
 
   FAR void    *ptr;     /* The psock or file being polled */
   FAR sem_t   *sem;     /* Pointer to semaphore used to post output event */

@@ -124,6 +124,12 @@ audio$(DELIM)libaudio$(LIBEXT): context
 staging$(DELIM)libaudio$(LIBEXT): audio$(DELIM)libaudio$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+video$(DELIM)libvideo$(LIBEXT): context
+	$(Q) $(MAKE) -C video TOPDIR="$(TOPDIR)" libvideo$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+staging$(DELIM)libvideo$(LIBEXT): video$(DELIM)libvideo$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 wireless$(DELIM)libwireless$(LIBEXT): context
 	$(Q) $(MAKE) -C wireless TOPDIR="$(TOPDIR)" libwireless$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 

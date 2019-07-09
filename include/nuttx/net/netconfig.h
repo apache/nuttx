@@ -278,7 +278,7 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 #  undef  __MIN_UDP_MSS
-#  undef  __MIN_UDP_MSS
+#  undef  __MAX_UDP_MSS
 #  define __MIN_UDP_MSS(h)         MIN(IEEE802154_UDP_MSS(h),__ETH_MIN_UDP_MSS(h))
 #  define __MAX_UDP_MSS(h)         MAX(IEEE802154_UDP_MSS(h),__ETH_MAX_UDP_MSS(h))
 #  define __6LOWPAN_MIN_UDP_MSS(h) MIN(IEEE802154_UDP_MSS(h),__ETH_MIN_UDP_MSS(h))
@@ -290,7 +290,7 @@
 
 #ifdef CONFIG_NET_LOOPBACK
 #  undef  __MIN_UDP_MSS
-#  undef  __MIN_UDP_MSS
+#  undef  __MAX_UDP_MSS
 #  define __MIN_UDP_MSS(h)        MIN(LO_UDP_MSS(h),__6LOWPAN_MIN_UDP_MSS(h))
 #  define __MAX_UDP_MSS(h)        MAX(LO_UDP_MSS(h),__6LOWPAN_MAX_UDP_MSS(h))
 #  define __LOOP_MIN_UDP_MSS(h)   MIN(LO_UDP_MSS(h),__6LOWPAN_MIN_UDP_MSS(h))
@@ -302,7 +302,7 @@
 
 #ifdef CONFIG_NET_SLIP
 #  undef  __MIN_UDP_MSS
-#  undef  __MIN_UDP_MSS
+#  undef  __MAX_UDP_MSS
 #  define __MIN_UDP_MSS(h)      MIN(SLIP_UDP_MSS(h),__LOOP_MIN_UDP_MSS(h))
 #  define __MAX_UDP_MSS(h)      MAX(SLIP_UDP_MSS(h),__LOOP_MAX_UDP_MSS(h))
 #  define __SLIP_MIN_UDP_MSS(h) MIN(SLIP_UDP_MSS(h),__LOOP_MIN_UDP_MSS(h))
@@ -314,7 +314,7 @@
 
 #ifdef CONFIG_NET_TUN
 #  undef  __MIN_UDP_MSS
-#  undef  __MIN_UDP_MSS
+#  undef  __MAX_UDP_MSS
 #  define __MIN_UDP_MSS(h)      MIN(TUN_UDP_MSS(h),__SLIP_MIN_UDP_MSS(h))
 #  define __MAX_UDP_MSS(h)      MAX(TUN_UDP_MSS(h),__SLIP_MAX_UDP_MSS(h))
 #  define __TUN_MIN_UDP_MSS(h)  MIN(TUN_UDP_MSS(h),__SLIP_MIN_UDP_MSS(h))

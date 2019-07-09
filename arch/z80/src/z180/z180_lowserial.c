@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "common/up_internal.h"
+#include "common/z80_internal.h"
 
 #include "z180_config.h"
 #include "z180_serial.h"
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowserialinit
+ * Name: z80_lowserial_initialize
  *
  * Description:
  *   Called early in the boot sequence to initialize the serial ports
@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 #ifdef USE_LOWSERIALINIT
-void up_lowserialinit(void)
+void z80_lowserial_initialize(void)
 {
   /* Initialize UART and [E]SCC serial devices */
 

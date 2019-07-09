@@ -116,25 +116,15 @@ int lc823450_bringup(void)
   lc823450_wm8776initialize(0);
 #endif
 
-#if defined(CONFIG_RNDIS) && defined(CONFIG_NETINIT_MACADDR)
+#if defined(CONFIG_RNDIS)
   uint8_t mac[6];
   mac[0] = 0xa0; /* TODO */
-  mac[1] = (CONFIG_NETINIT_MACADDR >> (8 * 4)) & 0xff;
-  mac[2] = (CONFIG_NETINIT_MACADDR >> (8 * 3)) & 0xff;
-  mac[3] = (CONFIG_NETINIT_MACADDR >> (8 * 2)) & 0xff;
-  mac[4] = (CONFIG_NETINIT_MACADDR >> (8 * 1)) & 0xff;
-  mac[5] = (CONFIG_NETINIT_MACADDR >> (8 * 0)) & 0xff;
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
   usbdev_rndis_initialize(mac);
-#endif
-
-#if defined(CONFIG_SMP) && defined (CONFIG_RNDIS)
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(1, &cpuset); /* assigned to CPU1 */
-
-  /* NOTE: pid=4 is assumed to be lpwork */
-
-  (void)nxsched_setaffinity(4, sizeof(cpu_set_t), &cpuset);
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

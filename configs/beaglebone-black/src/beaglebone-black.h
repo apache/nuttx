@@ -54,9 +54,21 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Configuration ********************************************************************/
+/* LCD ******************************************************************************/
+
+#define HAVE_LCD 1
+#if !defined(CONFIG_AM335X_LCDC) || !defined(CONFIG_VIDEO_EDID) || \
+     !defined(CONFIG_LCD_TDA19988) || !defined(CONFIG_AM335X_I2C2)
+#  undef HAVE_LCD
+#endif
+
+#define TDA19988_I2CBUS        2
+#define TDA19988_HDMI_I2CADDR  0x70
+#define TDA19988_CEC_I2CADDR   0x34
+#define TDA19988_I2CFREQUENCY  400000
 
 /* LEDs *****************************************************************************/
+
 /* The beaglebone black has four user LEDs; all four can be controlled from software.
  * All are tied to ground and, hence, illuminated by driving the output pins to a
  * high value:

@@ -47,26 +47,9 @@
 
 #include <netdb.h>
 
+#include "lib_netdb.h"
+
 #ifdef CONFIG_LIBC_NETDB
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef ARRAY_SIZE
-#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
-
-/****************************************************************************
- * Private Data Types
- ****************************************************************************/
-
-struct services_db_s
-{
-  const char *s_name;
-  int s_port;
-  int s_protocol;
-};
 
 /****************************************************************************
  * Private Data
@@ -76,10 +59,11 @@ struct services_db_s
  * REVISIT: This is just an example, lets not add full list here.
  */
 
-const static struct services_db_s g_services_db[] =
+const struct services_db_s g_services_db[] =
 {
   { "ntp", 123, IP_PROTO_TCP },
   { "ntp", 123, IP_PROTO_UDP },
+  { NULL,  0,   0            }
 };
 
 /****************************************************************************
@@ -137,7 +121,7 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
       return EINVAL;
     }
 
-  for (i = 0; i < ARRAY_SIZE(g_services_db); i++)
+  for (i = 0; g_services_db[i].s_name; i++)
     {
       if (strcmp(name, g_services_db[i].s_name) == 0 &&
           (protocol == 0 || protocol == g_services_db[i].s_protocol))
@@ -166,4 +150,3 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
 }
 
 #endif /* CONFIG_LIBC_NETDB */
-

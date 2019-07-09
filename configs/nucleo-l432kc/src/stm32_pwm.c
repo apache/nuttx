@@ -1,4 +1,4 @@
-/************************************************************************************
+/*******************************************************************************
  * configs/nucleo-l432kc/src/stm32l4_pwm.c
  *
  *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
@@ -34,11 +34,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
-/************************************************************************************
+/*******************************************************************************
  * Included Files
- ************************************************************************************/
+ ******************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,30 +55,31 @@
 #include "stm32l4_pwm.h"
 #include "nucleo-l432kc.h"
 
-/************************************************************************************
+/*******************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration *******************************************************************/
+ ******************************************************************************/
+
+/* Configuration **************************************************************/
 /* PWM
  *
  * The STM3240G-Eval has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using variously unused pins on the board for
- * PWM output (see board.h for details of pins).
+ * configured to output a pulse train using variously unused pins on the board
+ * for PWM output (see board.h for details of pins).
  */
 
 #ifdef CONFIG_PWM
 
-/************************************************************************************
+/*******************************************************************************
  * Public Functions
- ************************************************************************************/
+ ******************************************************************************/
 
-/************************************************************************************
+/*******************************************************************************
  * Name: stm32l4_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ******************************************************************************/
 
 int stm32l4_pwm_setup(void)
 {
@@ -94,9 +95,9 @@ int stm32l4_pwm_setup(void)
 
       /* PWM
        *
-       * The Nucleo-l432kc has no real on-board PWM devices, but the board can be
-       * configured to output a pulse train using TIM1 or 8, or others (see board.h).
-       * Let's figure out which the user has configured.
+       * The Nucleo-l432kc has no real on-board PWM devices, but the board can
+       * be configured to output a pulse train using TIM1 or 8, or others (see
+       * board.h). Let's figure out which the user has configured.
        */
 
 #if defined(CONFIG_STM32L4_TIM1_PWM)

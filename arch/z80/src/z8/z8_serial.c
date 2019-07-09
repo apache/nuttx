@@ -54,7 +54,7 @@
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef USE_SERIALDRIVER
 
@@ -701,14 +701,14 @@ static bool z8_txempty(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: z80_serial_initialize
  *
  * Description:
  *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void z80_serial_initialize(void)
 {
    /* Disable all UART interrupts */
 

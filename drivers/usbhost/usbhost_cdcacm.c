@@ -394,7 +394,7 @@ static bool usbhost_txempty(FAR struct uart_dev_s *uartdev);
  * device.
  */
 
-static const const struct usbhost_id_s g_id[2] =
+static const struct usbhost_id_s g_id[2] =
 {
   {
     USB_CLASS_CDC,          /* base     */

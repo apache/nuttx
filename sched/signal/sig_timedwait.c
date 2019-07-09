@@ -307,7 +307,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
           leave_critical_section(flags);
           return -ECANCELED;
-       }
+        }
 #endif
       /* Save the set of pending signals to wait for */
 

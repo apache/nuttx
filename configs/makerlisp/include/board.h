@@ -46,7 +46,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking */
+/* Clocking
+ *
+ * The MakerLisp CPU board has a 5Mhz crystal. This is multiplied by 10 by
+ * the PLL to obtain a system clock frequency of 50MHz.  See the PLL setup
+ * in scripts/makerlisp.linkcmd.
+ */
 
 #define EZ80_SYS_CLK_FREQ           50000000
 
@@ -71,7 +76,7 @@
 #define LED_STACKCREATED            0
 #define LED_IDLE                    0
 #define LED_INIRQ                   0
-#define LED_ASSERTION               1
+#define LED_ASSERTION               0
 #define LED_SIGNAL                  0
 #define LED_PANIC                   1
 

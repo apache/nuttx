@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <arpa/inet.h>
+
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -338,8 +340,8 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev, FAR struct socket *psock)
   icmpv6_linkipaddr(dev, lladdr);
 
   ninfo("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        lladdr[0], lladdr[1], lladdr[2], lladdr[3],
-        lladdr[4], lladdr[6], lladdr[6], lladdr[7]);
+        ntohs(lladdr[0]), ntohs(lladdr[1]), ntohs(lladdr[2]), ntohs(lladdr[3]),
+        ntohs(lladdr[4]), ntohs(lladdr[5]), ntohs(lladdr[6]), ntohs(lladdr[7]));
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
   /* 2. Link-Local Address Uniqueness Test:  The node tests to ensure that

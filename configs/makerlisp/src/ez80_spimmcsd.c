@@ -58,28 +58,16 @@
  * Private Functions
  ****************************************************************************/
 
-/* NOTE:  We are using a SDCard adapter/module without Card Detect pin!
- * Then we don't need to Card Detect callback here.
+/* NOTES:
+ *
+ * 1. We are using a SDCard adapter/module without Card Detect pin!
+ *    Then we don't need to Card Detect callback here.
+ * 2. Media Change callbacks are not yet implemented in the SPI driver.
  */
 
 /*****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/*****************************************************************************
- * Name: ez80_spi1register
- *
- * Description:
- *   Registers media change callback
- *
- ****************************************************************************/
-
-int ez80_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
-                      void *arg)
-{
-  spiinfo("INFO: Registering spi1 device\n");
-  return OK;
-}
 
 /*****************************************************************************
  * Name: ez80_mmcsd_initialize

@@ -97,10 +97,9 @@
 
 #ifndef CONFIG_CXD56_UART2_BASE_CLOCK_DIVIDER
 #define CONFIG_CXD56_UART2_BASE_CLOCK_DIVIDER 4
-#endif /* CONFIG_CXD56_UART2_BASE_CLOCK_DIVIDER */
+#endif
 
-/*
- * Flags for IMG device active
+/* Flags for IMG device active
  *
  * This flags for fixed clock devices.
  */
@@ -139,10 +138,14 @@ struct power_domain
 
 static void cxd56_img_clock_enable(void);
 static void cxd56_img_clock_disable(void);
-static void cxd56_scu_clock_ctrl(uint32_t block, uint32_t intr, int on);
-static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p) __unused;
-static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p) __unused;
-static void cxd56_scu_peri_clock_gating(FAR const struct scu_peripheral *p, int enable) __unused;
+static void cxd56_scu_clock_ctrl(\
+   uint32_t block, uint32_t intr, int on);
+static void cxd56_scu_peri_clock_enable(\
+   FAR const struct scu_peripheral *p) __unused;
+static void cxd56_scu_peri_clock_disable(\
+   FAR const struct scu_peripheral *p) __unused;
+static void cxd56_scu_peri_clock_gating(\
+   FAR const struct scu_peripheral *p, int enable) __unused;
 
 /****************************************************************************
  * Public Data
@@ -286,7 +289,7 @@ static inline void release_pwd_reset(uint32_t domain)
     {
       /* Release power domain reset */
 
-      putreg32(domain | domain <<16, CXD56_TOPREG_PWD_RESET0);
+      putreg32(domain | domain << 16, CXD56_TOPREG_PWD_RESET0);
     }
 }
 
@@ -298,7 +301,7 @@ static void enable_pwd(int pdid)
   stat = getreg32(CXD56_TOPREG_PWD_STAT);
   if ((stat & domain) != domain)
     {
-      putreg32((domain|(domain<<16)), CXD56_TOPREG_PWD_CTL);
+      putreg32((domain | (domain << 16)), CXD56_TOPREG_PWD_CTL);
       do_power_control();
       release_pwd_reset(domain);
     }
@@ -316,7 +319,7 @@ static void disable_pwd(int pdid)
       g_digital.refs[pdid]--;
       if (g_digital.refs[pdid] == 0)
         {
-          putreg32(domain<<16, CXD56_TOPREG_PWD_CTL);
+          putreg32(domain << 16, CXD56_TOPREG_PWD_CTL);
           do_power_control();
         }
     }
@@ -330,7 +333,7 @@ static void enable_apwd(int apdid)
   stat = getreg32(CXD56_TOPREG_ANA_PW_STAT);
   if ((stat & domain) != domain)
     {
-      putreg32(domain|(domain<<16), CXD56_TOPREG_ANA_PW_CTL);
+      putreg32(domain | (domain << 16), CXD56_TOPREG_ANA_PW_CTL);
       do_power_control();
     }
   g_analog.refs[apdid]++;
@@ -347,7 +350,7 @@ static void disable_apwd(int apdid)
       g_analog.refs[apdid]--;
       if (g_analog.refs[apdid] == 0)
         {
-          putreg32(domain<<16, CXD56_TOPREG_ANA_PW_CTL);
+          putreg32(domain << 16, CXD56_TOPREG_ANA_PW_CTL);
           do_power_control();
         }
     }
@@ -419,7 +422,8 @@ void cxd56_xosc_disable(void)
 
 void cxd56_spif_clock_enable(void)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (val & CK_SFC)
@@ -446,7 +450,8 @@ void cxd56_spif_clock_enable(void)
 
 void cxd56_spif_clock_disable(void)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (!(val & CK_SFC))
@@ -470,7 +475,8 @@ void cxd56_spif_clock_disable(void)
 uint32_t cxd56_get_cpu_baseclk(void)
 {
   uint32_t val;
-  int n, m;
+  int n;
+  int m;
 
   val = getreg32(CXD56_CRG_GEAR_AHB);
   n = (val >> 16) & 0x7f;
@@ -507,7 +513,8 @@ void cxd56_cpu_clock_enable(int cpu)
 
 void cxd56_cpulist_clock_enable(uint32_t cpus)
 {
-  uint32_t c, bits = (cpus & 0x3f) << 16;
+  uint32_t c;
+  uint32_t bits = (cpus & 0x3f) << 16;
 
   c = getreg32(CXD56_CRG_CK_GATE_AHB);
   putreg32(c | bits, CXD56_CRG_CK_GATE_AHB);
@@ -534,7 +541,8 @@ void cxd56_cpu_clock_disable(int cpu)
 
 void cxd56_cpulist_clock_disable(uint32_t cpus)
 {
-  uint32_t c, bits = (cpus & 0x3f) << 16;
+  uint32_t c;
+  uint32_t bits = (cpus & 0x3f) << 16;
 
   c = getreg32(CXD56_CRG_CK_GATE_AHB);
   putreg32(c & ~bits, CXD56_CRG_CK_GATE_AHB);
@@ -561,7 +569,9 @@ void cxd56_cpu_reset(int cpu)
 
 void cxd56_cpulist_reset(uint32_t cpus)
 {
-  uint32_t c, r, bits = (cpus & 0x3f) << 16;
+  uint32_t c;
+  uint32_t r;
+  uint32_t bits = (cpus & 0x3f) << 16;
 
   /* Reset assert */
 
@@ -589,7 +599,8 @@ void cxd56_cpulist_reset(uint32_t cpus)
 
 void cxd56_usb_clock_enable(void)
 {
-  uint32_t c, r;
+  uint32_t c;
+  uint32_t r;
 
   enable_pwd(PDID_APP_SUB);
 
@@ -615,7 +626,8 @@ void cxd56_usb_clock_enable(void)
 
 void cxd56_usb_clock_disable(void)
 {
-  uint32_t c, r;
+  uint32_t c;
+  uint32_t r;
 
   c = getreg32(CXD56_CRG_CK_GATE_AHB);
   if (c & CK_GATE_USB)
@@ -639,7 +651,9 @@ void cxd56_usb_clock_disable(void)
 
 void cxd56_emmc_clock_enable(uint32_t div, uint32_t driver, uint32_t sample)
 {
-  uint32_t c, r, g;
+  uint32_t c;
+  uint32_t r;
+  uint32_t g;
 
   enable_pwd(PDID_APP_SUB);
 
@@ -686,7 +700,9 @@ void cxd56_emmc_clock_enable(uint32_t div, uint32_t driver, uint32_t sample)
 
 void cxd56_emmc_clock_disable(void)
 {
-  uint32_t c, r, g;
+  uint32_t c;
+  uint32_t r;
+  uint32_t g;
 
   c = getreg32(CXD56_CRG_CKEN_EMMC);
   if (c != 7)
@@ -699,7 +715,7 @@ void cxd56_emmc_clock_disable(void)
   putreg32(0, CXD56_CRG_CKEN_EMMC);
 
   r = getreg32(CXD56_CRG_RESET);
-  putreg32(r & ~(XRS_MMC|XRS_MMC_CRG), CXD56_CRG_RESET);
+  putreg32(r & ~(XRS_MMC | XRS_MMC_CRG), CXD56_CRG_RESET);
 
   disable_pwd(PDID_APP_SUB);
 }
@@ -713,7 +729,8 @@ void cxd56_emmc_clock_disable(void)
 
 void cxd56_sdio_clock_enable(void)
 {
-  uint32_t c, r;
+  uint32_t c;
+  uint32_t r;
 
   enable_pwd(PDID_APP_SUB);
 
@@ -738,7 +755,8 @@ void cxd56_sdio_clock_enable(void)
 
 void cxd56_sdio_clock_disable(void)
 {
-  uint32_t c, r;
+  uint32_t c;
+  uint32_t r;
 
   c = getreg32(CXD56_CRG_CK_GATE_AHB);
   if (c & CK_GATE_SDIO)
@@ -814,7 +832,8 @@ bool cxd56_audio_clock_is_enabled(void)
 
 static void cxd56_spim_clock_enable(void)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (val & CK_SPIM)
@@ -822,14 +841,16 @@ static void cxd56_spim_clock_enable(void)
       return;
     }
 
-  putreg32(val | CK_SPIM | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
+  putreg32(val | CK_SPIM | CK_COM_BRG |
+    CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
 
   busy_wait(10);
 
   putreg32(val | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
   rst = getreg32(CXD56_TOPREG_SWRESET_BUS);
   putreg32(rst | XRST_SPIM, CXD56_TOPREG_SWRESET_BUS);
-  putreg32(val | CK_SPIM | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
+  putreg32(val | CK_SPIM | CK_COM_BRG |
+    CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
 }
 
 /****************************************************************************
@@ -842,7 +863,9 @@ static void cxd56_spim_clock_enable(void)
 
 static void cxd56_spim_clock_disable(void)
 {
-  uint32_t val, rst, mask;
+  uint32_t val;
+  uint32_t rst;
+  uint32_t mask;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (!(val & CK_SPIM))
@@ -1095,7 +1118,8 @@ void cxd56_spi_clock_gear_adjust(int port, uint32_t maxfreq)
 
 static void cxd56_i2cm_clock_enable(void)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (val & CK_I2CM)
@@ -1103,14 +1127,16 @@ static void cxd56_i2cm_clock_enable(void)
       return;
     }
 
-  putreg32(val | CK_I2CM | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
+  putreg32(val | CK_I2CM | CK_COM_BRG |
+    CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
 
   busy_wait(10);
 
   putreg32(val | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
   rst = getreg32(CXD56_TOPREG_SWRESET_BUS);
   putreg32(rst | XRST_I2CM, CXD56_TOPREG_SWRESET_BUS);
-  putreg32(val | CK_I2CM | CK_COM_BRG | CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
+  putreg32(val | CK_I2CM | CK_COM_BRG |
+    CK_AHB_BRG_COMIF, CXD56_TOPREG_SYSIOP_SUB_CKEN);
 }
 
 /****************************************************************************
@@ -1122,7 +1148,9 @@ static void cxd56_i2cm_clock_enable(void)
 
 static void cxd56_i2cm_clock_disable(void)
 {
-  uint32_t val, rst, mask;
+  uint32_t val;
+  uint32_t rst;
+  uint32_t mask;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_SUB_CKEN);
   if (!(val & CK_I2CM))
@@ -1249,7 +1277,8 @@ void cxd56_i2c_clock_gate_disable(int port)
 uint32_t cxd56_get_img_uart_baseclock(void)
 {
     uint32_t val;
-    int n, m;
+    int n;
+    int m;
 
     val = getreg32(CXD56_CRG_GEAR_IMG_UART);
     n = (val >> 16) & 1;
@@ -1412,7 +1441,9 @@ static uint32_t cxd56_get_clock(enum clock_source cs)
       return CONFIG_CXD56_XOSC_CLOCK;
     case SYSPLL:
       {
-        uint32_t ctrl, rc, fb;
+        uint32_t ctrl;
+        uint32_t rc;
+        uint32_t fb;
 
         ctrl = getreg32(CXD56_TOPREG_SYS_PLL_CTRL2);
         rc = ctrl >> 30;
@@ -1466,7 +1497,7 @@ uint32_t cxd56_get_sys_baseclock(void)
       {
         uint32_t div = ((val >> 10) & 0x3) + 1;
 
-        if (div == 4 && (val & (1<<2)))
+        if (div == 4 && (val & (1 << 2)))
           {
             div = 5;
           }
@@ -1525,7 +1556,7 @@ uint32_t cxd56_get_appsmp_baseclock(void)
       {
         uint32_t div = ((val >> 10) & 0x3) + 1;
 
-        if (div == 4 && (val & (1<<7)))
+        if (div == 4 && (val & (1 << 7)))
           {
             div = 5;
           }
@@ -1554,7 +1585,8 @@ uint32_t cxd56_get_com_baseclock(void)
 uint32_t cxd56_get_sdio_baseclock(void)
 {
   uint32_t val;
-  int n, m;
+  int n;
+  int m;
 
   val = getreg32(CXD56_CRG_GEAR_PER_SDIO);
   n = (val >> 16) & 1;
@@ -1573,7 +1605,8 @@ uint32_t cxd56_get_sdio_baseclock(void)
 uint32_t cxd56_get_img_spi_baseclock(void)
 {
   uint32_t val;
-  int n, m;
+  int n;
+  int m;
 
   val = getreg32(CXD56_CRG_GEAR_IMG_SPI);
   n = (val >> 16) & 1;
@@ -1592,7 +1625,8 @@ uint32_t cxd56_get_img_spi_baseclock(void)
 uint32_t cxd56_get_img_wspi_baseclock(void)
 {
   uint32_t val;
-  int n, m;
+  int n;
+  int m;
 
   val = getreg32(CXD56_CRG_GEAR_IMG_WSPI);
   n = (val >> 16) & 1;
@@ -1704,7 +1738,8 @@ static void cxd56_img_clock_disable(void)
 
 static void cxd56_scu_clock_ctrl(uint32_t block, uint32_t intr, int on)
 {
-  uint32_t val, stat;
+  uint32_t val;
+  uint32_t stat;
   int retry = 10000;
 
   putreg32(0xffffffff, CXD56_TOPREG_CRG_INT_CLR0);
@@ -1743,7 +1778,8 @@ static void cxd56_scu_clock_ctrl(uint32_t block, uint32_t intr, int on)
 
 static void cxd56_scu_clock_enable(void)
 {
-  uint32_t val, stat;
+  uint32_t val;
+  uint32_t stat;
   int retry = 1000;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_CKEN);
@@ -1797,7 +1833,8 @@ static void cxd56_scu_clock_enable(void)
 
 void cxd56_scu_clock_disable(void)
 {
-  uint32_t val, stat;
+  uint32_t val;
+  uint32_t stat;
   int retry = 1000;
 
   val = getreg32(CXD56_TOPREG_SYSIOP_CKEN);
@@ -1823,7 +1860,8 @@ void cxd56_scu_clock_disable(void)
   /* Enable each blocks in SCU */
 
   val = getreg32(CXD56_TOPREG_SCU_CKEN);
-  putreg32(val & ~(SCU_SCU | SCU_SC | SCU_32K | SCU_SEQ), CXD56_TOPREG_SCU_CKEN);
+  putreg32(val & ~(SCU_SCU | SCU_SC | SCU_32K | SCU_SEQ),
+     CXD56_TOPREG_SCU_CKEN);
 
   do
     {
@@ -1904,7 +1942,8 @@ void cxd56_scuseq_clock_disable(void)
 
 static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
   uint32_t cken = 1u << p->cken;
   uint32_t crgintmask = 1u << p->crgintmask;
   uint32_t swreset = 1u << p->swreset;
@@ -1932,7 +1971,8 @@ static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
 
 static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
 {
-  uint32_t val, rst;
+  uint32_t val;
+  uint32_t rst;
   uint32_t cken = 1u << p->cken;
   uint32_t crgintmask = 1u << p->crgintmask;
   uint32_t swreset = 1u << p->swreset;
@@ -1953,7 +1993,8 @@ static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
   disable_pwd(PDID_SCU);
 }
 
-static void cxd56_scu_peri_clock_gating(FAR const struct scu_peripheral *p, int enable)
+static void cxd56_scu_peri_clock_gating(\
+  FAR const struct scu_peripheral *p, int enable)
 {
   uint32_t cken = 1u << p->cken;
 
@@ -2086,7 +2127,8 @@ uint32_t cxd56_get_syspll_clock(void)
 
 uint32_t cxd56_get_sys_ahb_baseclock(void)
 {
-  uint32_t bus, ahb;
+  uint32_t bus;
+  uint32_t ahb;
 
   bus = getreg32(CXD56_TOPREG_CKDIV_CPU_DSP_BUS);
   ahb = 1 << ((bus >> 16) & 0x7);
@@ -2095,7 +2137,8 @@ uint32_t cxd56_get_sys_ahb_baseclock(void)
 
 uint32_t cxd56_get_sys_apb_baseclock(void)
 {
-  uint32_t bus, apb;
+  uint32_t bus;
+  uint32_t apb;
 
   bus = getreg32(CXD56_TOPREG_CKDIV_CPU_DSP_BUS);
   apb = 1 << ((bus >> 24) & 0x3);
@@ -2104,7 +2147,8 @@ uint32_t cxd56_get_sys_apb_baseclock(void)
 
 uint32_t cxd56_get_sys_sfc_baseclock(void)
 {
-  uint32_t bus, sfchclk;
+  uint32_t bus;
+  uint32_t sfchclk;
 
   bus = getreg32(CXD56_TOPREG_CKDIV_CPU_DSP_BUS);
   sfchclk = ((bus >> 28) & 0xf);
@@ -2191,7 +2235,8 @@ uint32_t cxd56_get_gps_ahb_baseclock(void)
 uint32_t cxd56_get_usb_baseclock(void)
 {
   uint32_t val;
-  int n, m;
+  int n;
+  int m;
 
   val = getreg32(CXD56_CRG_GEAR_PER_USB);
   n = (val >> 16) & 1;
@@ -2209,7 +2254,8 @@ uint32_t cxd56_get_usb_baseclock(void)
 
 uint32_t cxd56_get_img_vsync_baseclock(void)
 {
-  int n, m;
+  int n;
+  int m;
 
   n = getreg32(CXD56_CRG_GEAR_N_IMG_VENB);
   m = getreg32(CXD56_CRG_GEAR_M_IMG_VENB);
@@ -2226,9 +2272,13 @@ uint32_t cxd56_get_img_vsync_baseclock(void)
 
 int up_pmramctrl(int cmd, uintptr_t addr, size_t size)
 {
-  int startidx, endidx;
+  int startidx;
+  int endidx;
   int i;
-  uint32_t mode, mask, ctrl, stat;
+  uint32_t mode;
+  uint32_t mask;
+  uint32_t ctrl;
+  uint32_t stat;
   uint32_t val;
   int changed = 0;
 
@@ -2317,7 +2367,8 @@ int up_pmramctrl(int cmd, uintptr_t addr, size_t size)
 
 void up_pmstatdump(void)
 {
-  uint32_t stat0, stat1;
+  uint32_t stat0;
+  uint32_t stat1;
   const char statch[] = " -?+"; /* OFF, retention, invalid, ON */
   const char gatech[] = "| ";   /* clock on, clock off */
 

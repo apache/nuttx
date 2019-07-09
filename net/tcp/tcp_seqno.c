@@ -103,11 +103,11 @@ uint32_t tcp_getsequence(FAR uint8_t *seqno)
 
   /* Combine the sequence number from network (big-endian) order */
 
-   value = (uint32_t)seqno[0] << 24 |
-           (uint32_t)seqno[1] << 16 |
-           (uint32_t)seqno[2] <<  8 |
-           (uint32_t)seqno[3];
-   return value;
+  value = (uint32_t)seqno[0] << 24 |
+          (uint32_t)seqno[1] << 16 |
+          (uint32_t)seqno[2] <<  8 |
+          (uint32_t)seqno[3];
+  return value;
 }
 
 /****************************************************************************

@@ -46,7 +46,7 @@
 #include <nuttx/arch.h>
 
 #include "chip/switch.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
@@ -102,7 +102,7 @@ void z8_registerdump(void)
 
         /* Dump the saved machine state:
          * The g_z8irqstate.regs pointer is the value of the stack pointer at
-         * the time that up_doirq() was called.  Therefore, we can calculate
+         * the time that z80_doirq() was called.  Therefore, we can calculate
          * the correct value for the stack pointer on return from interrupt:
          */
 

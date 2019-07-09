@@ -266,10 +266,10 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
  *
  * Description:
  *   Find an interface descriptor and copy it along with all of its
- *   following encpoint descriptors.
+ *   following endpoint and cs interface descriptors.
  *
  * Input Parameters:
- *   ifno        - The interface ID to find.
+ *   ifno       - The interface ID to find.
  *   configdesc - The original configuration descriptor that contains the
  *                the interface descriptor.
  *   desclen    - the length of configdesc.
@@ -282,14 +282,15 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
  *
  *   -ENOENT: Did not find interface descriptor
  *   -EINVAL: Did not find all endpoint descriptors
+ *   -ENOSPC: Provided buffer too small to hold all found descriptors
  *
  ****************************************************************************/
 
 static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
                                  int desclen, FAR uint8_t *buffer, int buflen)
 {
+  FAR struct usb_desc_s   *desc;
   FAR struct usb_ifdesc_s *ifdesc;
-  FAR struct usb_epdesc_s *epdesc;
   int retsize;
   int offset;
   int neps;
@@ -305,80 +306,109 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
   /* Search for the interface */
 
   for (offset = 0, retsize = 0;
-       offset < desclen - sizeof(struct usb_ifdesc_s);
+       offset < desclen - sizeof(struct usb_desc_s);
        offset += len)
     {
-      ifdesc = (FAR struct usb_ifdesc_s *)&configdesc[offset];
-      len    = ifdesc->len;
+      desc = (FAR struct usb_desc_s *)&configdesc[offset];
+      len  = desc->len;
 
-      /* Is this an interface descriptor?  Is it the one we are looking for? */
+      /* Is this an interface descriptor? */
 
-      if (ifdesc->type == USB_DESC_TYPE_INTERFACE && ifdesc->ifno == ifno)
+      if (desc->type == USB_DESC_TYPE_INTERFACE)
         {
-          /* Yes.. return the interface descriptor */
+          ifdesc = (FAR struct usb_ifdesc_s *)&configdesc[offset];
 
-          memcpy(buffer, ifdesc, len);
-          buffer  += len;
-          buflen  -= len;
-          retsize += len;
+          /* Is it the one we are looking for? */
 
-          /* Make sure that the buffer will hold at least the endpoint
-           * descriptors.
-           */
-
-          neps = ifdesc->neps;
-          if (buflen < neps * USB_SIZEOF_EPDESC)
+          if (ifdesc->ifno == ifno && ifdesc->neps != 0)
             {
-              return -ENOSPC;
-            }
+              /* Yes.. return the interface descriptor */
 
-          /* The endpoint descriptors should immediately follow the
-           * interface descriptor.
-           */
+              memcpy(buffer, desc, len);
+              buffer  += len;
+              buflen  -= len;
+              retsize += len;
 
-          for (offset += len;
-               offset <= desclen - sizeof(struct usb_epdesc_s);
-               offset += len)
-            {
-              epdesc = (FAR struct usb_epdesc_s *)&configdesc[offset];
-              len    = epdesc->len;
+              /* Make sure that the buffer will hold at least the endpoint
+               * descriptors.
+               */
 
-              /* Is this an endpoint descriptor?  */
-
-              if (epdesc->type == USB_DESC_TYPE_ENDPOINT)
+              neps = ifdesc->neps;
+              if (buflen < neps * USB_SIZEOF_EPDESC)
                 {
-                  /* Yes.. return the endpoint descriptor */
+                  return -ENOSPC;
+                }
 
-                  memcpy(buffer, epdesc, len);
-                  buffer  += len;
-                  buflen  -= len;
-                  retsize += len;
+              /* The CS and endpoint descriptors should immediately
+               * follow the interface descriptor.
+               */
 
-                  /* And reduce the number of endpoints we are looking for */
+              for (offset += len;
+                   offset < desclen - sizeof(struct usb_desc_s);
+                   offset += len)
+                {
+                  desc = (FAR struct usb_desc_s *)&configdesc[offset];
+                  len  = desc->len;
 
-                  if (--neps <= 0)
+                  /* Is this a class-specific interface descriptor?  */
+
+                  if (desc->type == USB_DESC_TYPE_CSINTERFACE)
                     {
-                      /* That is all of them!.  Return the total size copied */
+                      /* Yes... return the descriptor */
 
-                      return retsize;
+                      if (buflen < len)
+                        {
+                          return -ENOSPC;
+                        }
+
+                      memcpy(buffer, desc, len);
+                      buffer  += len;
+                      buflen  -= len;
+                      retsize += len;
+                    }
+
+                  /* Is this an endpoint descriptor?  */
+
+                  else if (desc->type == USB_DESC_TYPE_ENDPOINT)
+                    {
+                      /* Yes.. return the endpoint descriptor */
+
+                      if (buflen < len)
+                        {
+                          return -ENOSPC;
+                        }
+
+                      memcpy(buffer, desc, len);
+                      buffer  += len;
+                      buflen  -= len;
+                      retsize += len;
+
+                      /* And reduce the number of endpoints we are looking for */
+
+                      if (--neps <= 0)
+                        {
+                          /* That is all of them!  Return the total size copied */
+
+                          return retsize;
+                        }
+                    }
+
+                  /* The endpoint descriptors following the interface descriptor
+                   * should all be contiguous.  But we will complain only if another
+                   * interface descriptor is encountered before all of the endpoint
+                   * descriptors have been found.
+                   */
+
+                  else if (desc->type == USB_DESC_TYPE_INTERFACE)
+                    {
+                      break;
                     }
                 }
 
-              /* The endpoint descriptors following the interface descriptor
-               * should all be contiguous.  But we will complain only if another
-               * interface descriptor is encountered before all of the endpoint
-               * descriptors have been found.
-               */
+              /* Did not find all of the interface descriptors */
 
-              else if (epdesc->type == USB_DESC_TYPE_INTERFACE)
-                {
-                  break;
-                }
+              return -EINVAL;
             }
-
-          /* Did not find all of the interface descriptors */
-
-          return -EINVAL;
         }
     }
 
@@ -428,13 +458,13 @@ static int usbhost_createconfig(FAR struct usbhost_member_s *member,
     }
 
   memcpy(buffer, configdesc, USB_SIZEOF_CFGDESC);
+  cfgdesc = (FAR struct usb_cfgdesc_s *)buffer;
   cfgsize = USB_SIZEOF_CFGDESC;
   buffer += USB_SIZEOF_CFGDESC;
   buflen -= USB_SIZEOF_CFGDESC;
 
   /* Modify the copied configuration descriptor */
 
-  cfgdesc              = (FAR struct usb_cfgdesc_s *)buffer;
   cfgdesc->len         = USB_SIZEOF_CFGDESC;
   cfgdesc->ninterfaces = member->nifs;
 
@@ -446,7 +476,7 @@ static int usbhost_createconfig(FAR struct usbhost_member_s *member,
                                      buffer, buflen);
       if (ifsize < 0)
         {
-          uerr("ERROR: Failed to copy inteface: %d\n", ifsize);
+          uerr("ERROR: Failed to copy interface: %d\n", ifsize);
           return ifsize;
         }
 

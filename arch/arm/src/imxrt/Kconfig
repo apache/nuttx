@@ -141,6 +141,10 @@ config ARCH_FAMILY_IMXRT106x
 
 # Peripheral support
 
+config IMXRT_USDHC
+       bool
+       default n
+
 config IMXRT_HAVE_LPUART
 	bool
 	default n
@@ -171,6 +175,12 @@ config IMXRT_EDMA
 	bool "eDMA"
 	default n
 	select ARCH_DMA
+
+config IMXRT_USBOTG
+	bool "USB EHCI"
+	default n
+	select USBHOST_HAVE_ASYNCH
+	select USBHOST_ASYNCH
 
 config IMXRT_ENET
 	bool "Ethernet"
@@ -247,6 +257,19 @@ config IMXRT_LPUART8
 	select IMXRT_HAVE_LPUART
 
 endmenu # LPUART Peripherals
+
+menu "LPUART Configuration"
+	depends on IMXRT_HAVE_LPUART
+
+config IMXRT_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on IMXRT_HAVE_LPUART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the IMXRT serial driver.
+
+endmenu # LPUART Configuration
 
 menu "LPI2C Peripherals"
 
@@ -372,12 +395,21 @@ config IMXRT_SNVS_HPRTC
 	bool "HP RTC"
 	default n
 
-config IMXRT_USDHC
-	bool "USDHC"
+config IMXRT_USDHC1
+	bool "USDHC1"
 	default n
 	select ARCH_HAVE_SDIO
+	select IMXRT_USDHC
 	---help---
-		Support SD host controller
+		Support USDHC host controller 1
+
+config IMXRT_USDHC2
+	bool "USDHC2"
+	default n
+	select ARCH_HAVE_SDIO
+	select IMXRT_USDHC
+	---help---
+		Support USDHC host controller 2
 
 endmenu # i.MX RT Peripheral Selection
 
@@ -428,7 +460,7 @@ config IMXRT_GPIO5_16_31_IRQ
 	default n
 
 config IMXRT_GPIO6_0_15_IRQ
-	bool "GPIO6 Pins 8-15 interrupts"
+	bool "GPIO6 Pins 0-15 interrupts"
 	default n
 	depends on IMXRT_HIGHSPEED_GPIO
 
@@ -930,6 +962,43 @@ config IMXRT_DATA_RISING_EDGE
 	default y
 
 endmenu # LCD Configuration
+
+if IMXRT_USBOTG && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config IMXRT_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config IMXRT_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config IMXRT_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config IMXRT_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # IMXRT_USBOTG && USBHOST
 
 endif # ARCH_CHIP_IMXRT
 

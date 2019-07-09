@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = ez80_lowinit.c
+CSRCS = ez80_boot.c
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += ez80_leds.c
 endif

@@ -48,7 +48,7 @@
 
 #include "switch.h"
 #include "z180_iomap.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Public Data
@@ -160,14 +160,14 @@ irqstate_t up_irq_enable(void) __naked
 }
 
 /****************************************************************************
- * Name: up_irqinitialize
+ * Name: z80_irq_initialize
  *
  * Description:
  *   Initialize and enable interrupts
  *
  ****************************************************************************/
 
-void up_irqinitialize(void)
+void z80_irq_initialize(void)
 {
   uint16_t vectaddr = (uint16_t)up_vectors;
   uint8_t regval;

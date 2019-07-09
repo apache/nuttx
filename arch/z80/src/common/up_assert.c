@@ -54,7 +54,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "z80_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -190,7 +190,7 @@ void up_assert(void)
   (void)syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
+  board_crashdump(Z80_getsp(), running_task(), filename, lineno);
 #endif
 
   _up_assert(EXIT_FAILURE);

@@ -390,7 +390,8 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
       if (((PIN_I2S0_BCK == pin) || (PIN_I2S1_BCK == pin)) &&
           (PINCONF_MODE1 == mode))
         {
-          set_i2s_output_config(pin, mode, PINCONF_INPUT_ENABLED(pinconfs[i]));
+          set_i2s_output_config(pin, mode,
+              PINCONF_INPUT_ENABLED(pinconfs[i]));
         }
 
       ret = get_mode_regaddr(pin, &modereg, &shift);
@@ -408,7 +409,7 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
   return 0;
 }
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cxd56_pin_status
  *
  * Description:
@@ -417,7 +418,7 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cxd56_pin_status(uint32_t pin, cxd56_pin_status_t *stat)
 {

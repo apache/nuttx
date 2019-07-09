@@ -52,6 +52,10 @@ else ifeq ($(CONFIG_LCD_FT80X_I2C),y)
 endif
 endif
 
+ifeq ($(CONFIG_LCD_LPM013M091A),y)
+  CSRCS += lpm013m091a.c
+endif
+
 ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c
 endif
@@ -110,6 +114,10 @@ endif
 
 ifeq ($(CONFIG_LCD_SHARP_MEMLCD),y)
   CSRCS += memlcd.c
+endif
+
+ifeq ($(CONFIG_LCD_ILI9340),y)
+  CSRCS += ili9340.c
 endif
 
 ifeq ($(CONFIG_LCD_ILI9341),y)

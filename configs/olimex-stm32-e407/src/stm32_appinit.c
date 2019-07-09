@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/olimex-stm32-e407/src/stm32_appinit.c
+ * configs/olimex-stm32-e407/src/stm32_appinit.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,124 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
-
 #include <nuttx/board.h>
 
-#ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
-#endif
-
-#ifdef CONFIG_STM32_OTGFS
-#  include "stm32_usbhost.h"
-#endif
-
-#include "stm32.h"
 #include "olimex-stm32-e407.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
-/* #define HAVE_I2CTOOL    1 */
-
-/* Can't support USB host or device features if USB OTG HS is not enabled */
-
-#ifndef CONFIG_STM32_OTGHS
-#  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB device monitor if USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
-#endif
-
-/* Check if we should enable the USB monitor before starting NSH */
-
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
-#  undef HAVE_USBMONITOR
-#endif
-
-#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
-#  undef CONFIG_CAN
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_i2c_register
- *
- * Description:
- *   Register one I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#ifdef HAVE_I2CTOOL
-static void stm32_i2c_register(int bus)
-{
-  FAR struct i2c_master_s *i2c;
-  int ret;
-
-  i2c = stm32_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      _err("ERROR: Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-          stm32_i2cbus_uninitialize(i2c);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_i2ctool
- *
- * Description:
- *   Register I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#ifdef HAVE_I2CTOOL
-static void stm32_i2ctool(void)
-{
-#ifdef CONFIG_STM32_I2C1
-  stm32_i2c_register(1);
-#endif
-#ifdef CONFIG_STM32_I2C2
-  stm32_i2c_register(2);
-#endif
-#ifdef CONFIG_STM32_I2C3
-  stm32_i2c_register(3);
-#endif
-}
-#else
-#  define stm32_i2ctool()
+#ifndef OK
+#  define OK 0
 #endif
 
 /****************************************************************************
@@ -167,68 +59,36 @@ static void stm32_i2ctool(void)
  * Name: board_app_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *   CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
- *   CONFIG_LIB_BOARDCTL=n :
- *     Called from board_late_initialize().
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret;
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-  /* Register I2C drivers on behalf of the I2C tool */
-
-  stm32_i2ctool();
-
-#ifdef CONFIG_CAN
-  /* Initialize CAN and register the CAN driver. */
-
-  ret = stm32_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_ADC
-  /* Initialize ADC and register the ADC driver. */
-
-  ret = stm32_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
-   */
-
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return stm32_bringup();
+#endif
 }

@@ -652,12 +652,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* The following two routines are called from the low-level reset logic.  z16f_lowinit()
- * must be provided by the board-specific logic; z16f_lowuartinit() is called only if
- * debugging support for up_lowputc (or getc) is enabled.
+/* The following two routines are called from the low-level reset logic.
+ * z16f_board_initialize() must be provided by the board-specific logic;
+ * z16f_lowuartinit() is called only if debugging support for up_lowputc (or getc)
+ * is enabled.
  */
 
-void z16f_lowinit(void);
+void z16f_board_initialize(void);
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 void z16f_lowuartinit(void);
 #endif
