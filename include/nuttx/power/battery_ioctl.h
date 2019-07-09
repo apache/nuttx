@@ -61,6 +61,9 @@
 #define BATIOC_INPUT_CURRENT _BATIOC(0x0006)
 #define BATIOC_CAPACITY      _BATIOC(0x0007)
 #define BATIOC_OPERATE       _BATIOC(0x0008)
+#define BATIOC_CELLVOLTAGE   _BATIOC(0x0009)
+#define BATIOC_TEMPERATURE   _BATIOC(0x000A)
+#define BATIOC_BALANCE       _BATIOC(0x000B)
 
 /****************************************************************************
  * Public Types
