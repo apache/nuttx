@@ -136,11 +136,11 @@ config AM335X_I2C0
 	bool "Multi-master I2C Controller 0"
 	default n
 
-config AM335X_I2C0
+config AM335X_I2C1
 	bool "Multi-master I2C Controller 1"
 	default n
 
-config AM335X_I2C0
+config AM335X_I2C2
 	bool "Multi-master I2C Controller 2"
 	default n
 
