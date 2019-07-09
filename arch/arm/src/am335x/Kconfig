@@ -98,6 +98,7 @@ config AM335X_LCDC
 	bool "LCD controller"
 	default n
 	depends on VIDEO && EXPERIMENTAL
+	select LCD
 	select VIDEO_EDID
 
 config AM335X_TSC
