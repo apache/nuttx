@@ -379,12 +379,20 @@ Configuration Subdirectories
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
 
-    4. Optimizations:
+    4. Debugging the RAM version
+
+       You can debug the all RAM version using ZDS-II as follows:
+
+       a. Connect to the debugger,
+       b. Load the nuttx.lod file
+       c. Set the PC to 0x040000
+       d. Single step a few times to make sure things look good, then
+       e. "GO"
+
+    5. Optimizations:
 
        - The stack sizes have not been tuned and, hence, are probably too
          large.
-       - Currently the code runs out of FLASH.  Running out of the zero-
-         wait-state RAM would be much faster!
 
     STATUS:
       2019-06-16:  The basic NSH configuration appears to be fully functional
@@ -405,6 +413,15 @@ Configuration Subdirectories
 
       2019-06-26:  Renamed nsh configuration to nsh_flash.  Added nsh_ram
         configuration.  Not yet verified.
+
+      2019-07-09:  The RAM version does not run!  I can single step through
+        the initialization and all looks well, but when I "GO", the system
+        crashes.  The PC is sitting at a crazy address when I break in.  I
+        have not yet debugged this.
+
+        The identical FLASH version, differing only in the selected linker
+        script, works just fine.  This implies some issue with the
+        configuration of SRAM for execution.
 
   sdboot
 

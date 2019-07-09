@@ -217,12 +217,21 @@ Configurations
 
   lcd:
 
-    This is an NSH configuration based on the nsh configuration belong but with LCD
-    support enabled.  This configuration will be used for developing and verifying
-    basic LCD functionality.
+    This is an NSH configuration based on the nsh configuration belong but
+    with LCD support enabled.  This configuration will be used for developing
+    and verifying basic LCD functionality.
 
-    The framebuffer is assumed to reside at address 0x80000000 and has size
-    0x0a000000.
+    NOTES:
+
+    1. The framebuffer is assumed to reside at address 0x80000000 and has a
+       maximum size 0x0a000000, although probably less than 1Mb will actually
+       be used for the framebuffer.
+
+    2. The HDMI interface is assumed.  The TDA19988 HDMI interface is enabled.
+
+    STATUS:
+    2019-07-09:  This is very much a work in progress and not suitable for
+       any use other than testing.
 
   nsh:
 
