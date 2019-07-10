@@ -50,6 +50,7 @@
 #include <errno.h>
 
 #include <nuttx/video/videomode.h>
+#include <nuttx/video/vesagtf.h>
 #include <nuttx/video/edid.h>
 
 /****************************************************************************
@@ -174,7 +175,7 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
   /* First try to lookup the mode as a DMT timing */
 
   snprintf(name, sizeof(name), "%dx%dx%d", x, y, f);
-  if ((lookup = videomode_lookup(name)) != NULL)
+  if ((lookup = videomode_lookup_by_name(name)) != NULL)
     {
       *mode = *lookup;
     }
@@ -532,7 +533,7 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
     {
       if (estmodes & (1 << i))
         {
-          mode = videomode_lookup(g_edid_modes[i]);
+          mode = videomode_lookup_by_name(g_edid_modes[i]);
           if (mode != NULL)
             {
               edid->edid_modes[edid->edid_nmodes] = *mode;

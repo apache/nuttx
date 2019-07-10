@@ -133,7 +133,39 @@ void sort_videomodes(FAR struct videomode_s *modes,
  *
  ****************************************************************************/
 
-FAR const struct videomode_s *videomode_lookup(FAR const char *name);
+FAR const struct videomode_s *videomode_lookup_by_name(FAR const char *name);
+
+/****************************************************************************
+ * Name:  videomode_lookup_by_dotclock
+ *
+ * Description:
+ *   Find the video mode in a look-up table with the matching width and
+ *   height and the closest dot clock that does not exceed the requested
+ *   dot clock.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+FAR const struct videomode_s *
+  videomode_lookup_by_dotclock(uint16_t width, uint16_t height,
+                               uint32_t dotclock);
+#endif
+
+/****************************************************************************
+ * Name:  videomode_lookup_by_refresh
+ *
+ * Description:
+ *   Find the video mode in a look-up table with the matching width and
+ *   height and the closest refresh rate that does not exceed the requested
+ *   rate.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+FAR const struct videomode_s *
+  videomode_lookup_by_refresh(uint16_t width, uint16_t height,
+                              uint16_t refresh);
+#endif
 
 /****************************************************************************
  * Name:  videomode_dump

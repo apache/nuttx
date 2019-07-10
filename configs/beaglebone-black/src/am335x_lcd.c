@@ -152,7 +152,7 @@ int up_fbinitialize(int display)
 #else
   /* Lookup the video mode corresponding to the default video mode */
 
-  videomode = videomode_lookup(CONFIG_BEAGLEBONE_VIDEOMODE);
+  videomode = videomode_lookup_by_name(CONFIG_BEAGLEBONE_VIDEOMODE);
   if (videomode == NULL)
     {
       lcderr("ERROR: Videomode \"%s\" is not supported.\n",

@@ -380,7 +380,7 @@ void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
 
   if (videomode == NULL)
     {
-      videomode = videomode_lookup("640x480x60");
+      videomode = videomode_lookup_by_name("640x480x60");
       DEBUGASSERT(videomode != NULL);
     }
 
