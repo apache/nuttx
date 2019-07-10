@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/videomode_dump.c
+ * video/videomode/videomode_dump.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -7,9 +7,7 @@
  * Derives from logic in FreeBSD which has an compatible 2-clause BSD
  * license:
  *
- *   Copyright (c) 2006 Itronix Inc.
- *   All rights reserved.
- *
+ *   Copyright (c) 2006 Itronix Inc. All rights reserved.
  *   Written by Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,9 +82,10 @@ static uint32_t videomode_refresh(FAR const struct videomode_s *videomode)
  *   Dump the content of a video mode one one line to the SYSLOG.
  *
  * Input Parameters:
- *   prefix    - A string to print at the beginning of the line
+ *   prefix    - A string to print at the beginning of the line.  May be
+ *               NULL
  *   videomode - The videomode to be dumped
- *   terse     - True:  print only a minimal amount of data, sufficent to
+ *   terse     - True:  Print only a minimal amount of data, sufficient to
  *               identify the video mode.
  *
  * Returned Value:

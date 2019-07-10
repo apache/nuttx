@@ -1,6 +1,5 @@
-
 /****************************************************************************
- * video/edid/edid_dump.c
+ * video/videomode/edid_dump.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -8,9 +7,7 @@
  * Derives from logic in FreeBSD which has an compatible 2-clause BSD
  * license:
  *
- *   Copyright (c) 2006 Itronix Inc.
- *   All rights reserved.
- *
+ *   Copyright (c) 2006 Itronix Inc. All rights reserved.
  *   Written by Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +43,8 @@
 #include <sys/types.h>
 #include <syslog.h>
 
-#include <nuttx/video/edid.h>
 #include <nuttx/video/videomode.h>
+#include <nuttx/video/edid.h>
 
 /****************************************************************************
  * Public Functions

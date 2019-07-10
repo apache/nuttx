@@ -142,9 +142,10 @@ FAR const struct videomode_s *videomode_lookup(FAR const char *name);
  *   Dump the content of a video mode one one line to the SYSLOG.
  *
  * Input Parameters:
- *   prefix    - A string to print at the beginning of the line
+ *   prefix    - A string to print at the beginning of the line.  May be
+ *               NULL
  *   videomode - The videomode to be dumped
- *   terse     - True:  print only a minimal amount of data, sufficent to
+ *   terse     - True:  Print only a minimal amount of data, sufficient to
  *               identify the video mode.
  *
  * Returned Value:

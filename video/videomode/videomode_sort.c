@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/videomode_sort.c
+ * video/videomode/videomode_sort.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

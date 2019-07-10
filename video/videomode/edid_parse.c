@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/edid_parse.c
+ * video/videomode/edid_parse.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -7,9 +7,7 @@
  * Derives from logic in FreeBSD which has an equivalent 3-clause BSD
  * license:
  *
- *   Copyright (c) 2006 Itronix Inc.
- *   All rights reserved.
- *
+ *   Copyright (c) 2006 Itronix Inc. All rights reserved.
  *   Written by Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,8 +49,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/video/edid.h>
 #include <nuttx/video/videomode.h>
+#include <nuttx/video/edid.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -182,17 +180,13 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
     }
   else
     {
-#if 0 /* Not implemented.  See FreeBSD sys/dev/videomode/vesagtf.c */
       /* Failing that, calculate it using gtf
-       * 
+       *
        * Hmm. I'm not using alternate GTF timings, which
        * could, in theory, be present.
        */
 
       vesagtf_mode(x, y, f, mode);
-#endif
-#  warning REVISIT: Missing logic
-      return false;
     }
 
   return true;
@@ -256,9 +250,9 @@ static bool edid_desc_timing(FAR const uint8_t *desc,
   /* We don't support stereo modes (for now) */
 
   if (flags & (EDID_DESC_STEREO_MASK | EDID_DESC_STEREO_INTERLEAVE))
-   {
+    {
       return false;
-   }
+    }
 
   mode->dotclock    =  (uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET] |
                       ((uint16_t)desc[EDID_DESC_PIXCLOCK_OFFSET + 1] << 8);
@@ -358,7 +352,8 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
           edid->edid_modes[edid->edid_nmodes] = mode;
           if (edid->edid_preferred_mode == NULL)
             {
-            edid->edid_preferred_mode = &edid->edid_modes[edid->edid_nmodes];}
+              edid->edid_preferred_mode = &edid->edid_modes[edid->edid_nmodes];
+            }
 
           edid->edid_nmodes++;
         }
@@ -423,6 +418,7 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
           if (edid_std_timing(desc, &mode))
             {
               /* Does this mode already exist? */
+
               exist_mode = edid_search_mode(edid, &mode);
               if (exist_mode == NULL)
                 {
@@ -436,7 +432,8 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
       break;
 
     case EDID_DESCTYPE_WHITEPOINT:
-      /* XXX: not implemented yet */
+      /* Not implemented yet */
+
       break;
     }
 }
@@ -457,8 +454,8 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
  *   edid - The location to return the digested EDID data.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; otherwise a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero (OK) is returned on success; otherwise a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 

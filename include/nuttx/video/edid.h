@@ -574,7 +574,7 @@ struct edid_info_s
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
 
-/****************************************************************************
+/********************************************************************************************
  * Name:  edid_dump
  *
  * Description:
@@ -586,7 +586,7 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ ********************************************************************************************/
 
 void edid_dump(FAR const struct edid_info_s *edid);
 

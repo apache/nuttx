@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/videomode_lookup.c
+ * video/videomode/videomode_lookup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -7,9 +7,7 @@
  * Derives from logic in FreeBSD which has an equivalent 3-clause BSD
  * license:
  *
- *   Copyright (c) 2006 Itronix Inc.
- *   All rights reserved.
- *
+ *   Copyright (c) 2006 Itronix Inc. All rights reserved.
  *   Written by Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
