@@ -275,21 +275,6 @@ config AM335X_LCDC_FB_SIZE
 	---help---
 		Size of the video RAM frame buffer.  Default:  1Mb.
 
-config AM335X_LCDC_USE_CLKIN
-	bool "Use optional input clock"
-	default n
-
-config AM335X_LCDC_CLKIN_FREQUENCY
-	int "Input clock frequency"
-	default 0
-	depends on AM335X_LCDC_USE_CLKIN
-
-config AM335X_LCDC_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
-	default 50
-	---help---
-		LCD refesh rate (Hz)
-
 choice
 	prompt "Bits per pixel"
 	default AM335X_LCDC_BPP16_565
@@ -319,13 +304,6 @@ config AM335X_LCDC_BPP32
 	bool "32 BPP, 8:8:8 mode (unpacked)"
 
 endchoice
-
-config AM335X_LCDC_BGR
-	bool "Blue-Green-Red color order"
-	default n
-	depends on !AM335X_LCDC_MONOCHROME
-	---help---
-		This option selects BGR color order vs. default RGB
 
 config AM335X_LCDC_BACKCOLOR
 	hex "Initial background color"
