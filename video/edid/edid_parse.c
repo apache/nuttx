@@ -285,7 +285,9 @@ static bool edid_desc_timing(FAR const uint8_t *desc,
   mode->vsync_start = vactive + vsyncoff;
   mode->vsync_end   = mode->vsync_start + vsyncwid;
 
+  mode->hskew       = 0;
   mode->flags       = 0;
+  mode->name        = NULL;
 
   if ((flags & EDID_DESC_INTERLACED) != 0)
     {
@@ -385,7 +387,7 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
       break;
 
     case EDID_DESCTYPE_LIMITS:
-      edid->edid_have_range = 1;
+      edid->edid_have_range = true;
       edid->edid_range.er_min_vfreq = EDID_DESC_RANGE_MIN_VFREQ(desc);
       edid->edid_range.er_max_vfreq = EDID_DESC_RANGE_MAX_VFREQ(desc);
       edid->edid_range.er_min_hfreq = EDID_DESC_RANGE_MIN_HFREQ(desc);
@@ -397,7 +399,7 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
           break;
         }
 
-      edid->edid_range.er_have_gtf2 = 1;
+      edid->edid_range.er_have_gtf2 = true;
       edid->edid_range.er_gtf2_hfreq = EDID_DESC_RANGE_GTF2_HFREQ(desc);
       edid->edid_range.er_gtf2_c = EDID_DESC_RANGE_GTF2_C(desc);
       edid->edid_range.er_gtf2_m = EDID_DESC_RANGE_GTF2_M(desc);

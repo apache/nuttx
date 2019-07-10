@@ -5,10 +5,10 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference:  Wikipedia
+ * Reference:  Wikipedia (initial version)
  *
- * Some of structures in this file derive from FreeBSD which has a
- * compatible 2-clause BSD license:
+ * Updated and extended with definitions from FreeBSD which has a compatible 2-clause BSD
+ * license:
  *
  *  Copyright (c) 2006 Itronix Inc. All rights reserved.
  *  Written by Garrett D'Amore for Itronix Inc.
@@ -169,6 +169,8 @@
 
                                                     /* For digital input: */
 #define EDID_DISPLAY_INPUT_VIDIF_SHIFT    (0)       /* Bits 0-3: Video interface */
+#define EDID_DISPLAY_INPUT_VIDIF_MASK     (15 << EDID_DISPLAY_INPUT_VIDIF_SHIFT)
+#  define EDID_DISPLAY_INPUT_DFP1_COMPAT  (1 << EDID_DISPLAY_INPUT_VIDIF_SHIFT)
 #define EDID_DISPLAY_INPUT_BITDEPTH_SHIFT (4)       /* Bits 4-6: Bit depth */
 #define EDID_DISPLAY_INPUT_BITDEPTH_MASK  (7 << EDID_DISPLAY_INPUT_BITDEPTH_SHIFT)
 
@@ -181,9 +183,13 @@
                                                      *         supported */
 #define EDID_DISPLAY_INPUT_SYNC           (1 << 3)  /* Bit 3:  Separate sync supported */
 #define EDID_DISPLAY_INPUT_BLANK2BLACK    (1 << 4)  /* Bit 4:  Blank to black setup */
-#define EDID_DISPLAY_INPUT_LEVELS_SHIFT   (0)       /* Bits 5-6: Video white and sync levels,
+#define EDID_DISPLAY_INPUT_LEVELS_SHIFT   (5)       /* Bits 5-6: Video white and sync levels,
                                                      *           relative to blank */
 #define EDID_DISPLAY_INPUT_LEVELS_MASK    (3 << EDID_DISPLAY_INPUT_LEVELS_SHIFT)
+#  define EDID_DISPLAY_INPUT_LEVEL_1      (0 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.7, 0.3V */
+#  define EDID_DISPLAY_INPUT_LEVEL_2      (1 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.714, 0.286V */
+#  define EDID_DISPLAY_INPUT_LEVEL_3      (2 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -1.0, 0.4V */
+#  define EDID_DISPLAY_INPUT_LEVEL_4      (3 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.7, 0.0V */
 
 /* Display Section: Supported Features */
 
@@ -205,6 +211,10 @@
 #define EDID_DISPLAY_FEATURE_ATYPE_MASK   (3 << EDID_DISPLAY_FEATURE_ATYPE_SHIFT)
 #define EDID_DISPLAY_FEATURE_DTYPE_SHIFT  (3)       /* Bits 3-4: Display type (digital) */
 #define EDID_DISPLAY_FEATURE_DTYPE_MASK   (3 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_MONO      (0 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_RGB       (1 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_NON_RGB   (2 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_UNDEFINED (3 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
 #define EDID_DISPLAY_FEATURE_DPMSOFF      (1 << 5)  /* Bit 5: DPMS active-off supported */
 #define EDID_DISPLAY_FEATURE_DPMSSUSP     (1 << 6)  /* Bit 6: DPMS suspend supported */
 #define EDID_DISPLAY_FEATURE_DPMSSTDBY    (1 << 7)  /* Bit 7: DPMS standby supported  */
@@ -505,8 +515,9 @@ struct edid_range_s
   uint16_t er_min_hfreq;  /* kHz */
   uint16_t er_max_hfreq;  /* kHz */
   uint16_t er_max_clock;  /* MHz */
-  int      er_have_gtf2;
   uint16_t er_gtf2_hfreq;
+
+  bool     er_have_gtf2;
   uint16_t er_gtf2_c;
   uint16_t er_gtf2_m;
   uint16_t er_gtf2_k;
@@ -526,9 +537,9 @@ struct edid_info_s
   uint8_t  edid_ext_block_count;
   uint16_t edid_product;
   uint32_t edid_serial;
-  int      edid_year;
-  int      edid_week;
-  int      edid_have_range;
+  uint16_t edid_year;
+  uint8_t  edid_week;
+  bool     edid_have_range;
 
   struct edid_range_s  edid_range;
   struct edid_chroma_s edid_chroma;
@@ -562,5 +573,21 @@ struct edid_info_s
  ********************************************************************************************/
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
+
+/****************************************************************************
+ * Name:  edid_dump
+ *
+ * Description:
+ *   Dump the full content of the EDID
+ *
+ * Input Parameters:
+ *   edid - The edid to be dumped
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void edid_dump(FAR const struct edid_info_s *edid);
 
 #endif /* __INCLUDE_NUTTX_VIDEO_EDID_H */

@@ -81,7 +81,8 @@ static inline int _abs(int a)
  * Public Functions
  ****************************************************************************/
 
-/* Name:  sort_videomodes
+/****************************************************************************
+ * Name:  sort_videomodes
  *
  * Description:
  *   Sort video modes by refresh rate, aspect ratio, then resolution.
@@ -99,10 +100,11 @@ static inline int _abs(int a)
  * Returned Value:
  *   None
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 void sort_videomodes(FAR struct videomode_s *modes,
-                     FAR struct videomode_s **preferred, unsigned int nmodes)
+                     FAR struct videomode_s **preferred,
+                     unsigned int nmodes)
 {
   FAR struct videomode_s *tmpmode = NULL;
   int aspect;

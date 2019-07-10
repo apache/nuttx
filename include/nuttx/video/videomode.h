@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/video/videomode.h
  * EDID (Extended Display Identification Data) Format
  *
@@ -38,20 +38,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_VIDEO_VIDEOMODE_H
 #define __INCLUDE_NUTTX_VIDEO_VIDEOMODE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Video mode flags used in struct hdmi_videomode_s */
 
@@ -70,12 +71,13 @@
 #define VID_DBLCLK                        (1 << 13)
 #define VID_CLKDIV2                       (1 << 14)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* This structure represents one video mode extracted from the EDID.  CAREFUL:  Fields
- * may not change without also modification to initializer in videomode.c.
+/* This structure represents one video mode extracted from the EDID.
+ * CAREFUL:  Fields  may not change without also modification to initializer
+ * in videomode_lookup.c.
  */
 
 struct videomode_s
@@ -94,11 +96,11 @@ struct videomode_s
   FAR const char *name;
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name:  sort_videomodes
  *
  * Description:
@@ -117,19 +119,40 @@ struct videomode_s
  * Returned Value:
  *   None
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 void sort_videomodes(FAR struct videomode_s *modes,
-                     FAR struct videomode_s **preferred, unsigned int nmodes);
+                     FAR struct videomode_s **preferred,
+                     unsigned int nmodes);
 
-/********************************************************************************************
+/****************************************************************************
  * Name:  videomode_lookup
  *
  * Description:
  *   Find the video mode in a look-up table
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 FAR const struct videomode_s *videomode_lookup(FAR const char *name);
+
+/****************************************************************************
+ * Name:  videomode_dump
+ *
+ * Description:
+ *   Dump the content of a video mode one one line to the SYSLOG.
+ *
+ * Input Parameters:
+ *   prefix    - A string to print at the beginning of the line
+ *   videomode - The videomode to be dumped
+ *   terse     - True:  print only a minimal amount of data, sufficent to
+ *               identify the video mode.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void videomode_dump(FAR const char *prefix,
+                    FAR const struct videomode_s *videomode, bool terse);
 
 #endif /* __INCLUDE_NUTTX_VIDEO_VIDEOMODE_H */
