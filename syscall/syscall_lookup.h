@@ -96,7 +96,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 
 /* The following can be individually enabled */
 
-#ifdef CONFIG_ARCH_HAVE_VFORK
+#if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)
   SYSCALL_LOOKUP(vfork,                    0, STUB_vfork)
 #endif
 

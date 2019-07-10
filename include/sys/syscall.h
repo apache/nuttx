@@ -141,7 +141,7 @@
 
 /* The following can be individually enabled */
 
-#ifdef CONFIG_ARCH_HAVE_VFORK
+#if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)
 #  define SYS_vfork                    __SYS_vfork
 #  define __SYS_atexit                 (__SYS_vfork + 1)
 #else
