@@ -47,6 +47,7 @@
 #include <nuttx/lcd/tda19988.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/edid.h>
+#include <nuttx/video/videomode.h>
 
 #include "am335x_lcdc.h"
 #include "beaglebone-black.h"
@@ -132,11 +133,13 @@ static int am335x_enable(const struct tda19988_lower_s *lower, bool enable)
 
 int up_fbinitialize(int display)
 {
-  FAR const struct edid_videomode_s *videomode;
+  FAR const struct videomode_s *videomode;
   struct am335x_panel_info_s panel;
   int ret;
 
 #ifdef HAVE_TDA19988
+  TDA19988_HANDLE handle;
+
   /* Initialize the TDA19988 GPIO interrupt input */
   /* Initialize the TDA19988 lower half state instance */
   /* Initialize the TDA19988 HDMI controller driver */
@@ -149,7 +152,7 @@ int up_fbinitialize(int display)
 #else
   /* Lookup the video mode corresponding to the default video mode */
 
-  videomode = edid_mode_lookup(CONFIG_BEAGLEBONE_VIDEOMODE);
+  videomode = videomode_lookup(CONFIG_BEAGLEBONE_VIDEOMODE);
   if (videomode == NULL)
     {
       lcderr("ERROR: Videomode \"%s\" is not supported.\n",
@@ -158,7 +161,7 @@ int up_fbinitialize(int display)
     }
 
 #endif
-  /* Convert the video mode to a AM335X LCD panel configuration */
+  /* Convert the selected video mode to a AM335X LCD panel configuration */
 
    am335x_lcd_videomode(videomode, &panel);
 
@@ -172,10 +175,14 @@ int up_fbinitialize(int display)
     }
 
 #ifdef HAVE_TDA19988
-  /* Convert the EDID video mode to a TDA19988 video mode */
-  /* Initialize the HDMI controller using the TDA19988 video mode */
+  /* Initialize the HDMI controller using the selected video mode */
 
-#warning Missing logic
+  ret = tda19988_videomode(handle, videomode);
+  if (ret < 0)
+    {
+      lcderr("ERROR: tda19988_videomode() failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
   return OK;

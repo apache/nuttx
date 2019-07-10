@@ -52,6 +52,7 @@
 #include <errno.h>
 
 #include <nuttx/video/edid.h>
+#include <nuttx/video/videomode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,9 +135,9 @@ static bool edid_valid(FAR const uint8_t *data)
  ****************************************************************************/
 
 static bool edid_std_timing(FAR const uint8_t *stdtim,
-                            FAR struct edid_videomode_s *mode)
+                            FAR struct videomode_s *mode)
 {
-  FAR const struct edid_videomode_s *lookup;
+  FAR const struct videomode_s *lookup;
   char name[80];
   unsigned x;
   unsigned y;
@@ -175,7 +176,7 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
   /* First try to lookup the mode as a DMT timing */
 
   snprintf(name, sizeof(name), "%dx%dx%d", x, y, f);
-  if ((lookup = edid_mode_lookup(name)) != NULL)
+  if ((lookup = videomode_lookup(name)) != NULL)
     {
       *mode = *lookup;
     }
@@ -205,9 +206,9 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
  *
  ****************************************************************************/
 
-static struct edid_videomode_s *
+static struct videomode_s *
   edid_search_mode(FAR struct edid_info_s *edid,
-                   FAR const struct edid_videomode_s *mode)
+                   FAR const struct videomode_s *mode)
 {
   int refresh;
   int i;
@@ -238,7 +239,7 @@ static struct edid_videomode_s *
  ****************************************************************************/
 
 static bool edid_desc_timing(FAR const uint8_t *desc,
-                             FAR struct edid_videomode_s *mode)
+                             FAR struct videomode_s *mode)
 {
   uint16_t hactive;
   unsigned int hblank;
@@ -322,8 +323,8 @@ static bool edid_desc_timing(FAR const uint8_t *desc,
 
 static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
 {
-  struct edid_videomode_s mode;
-  FAR struct edid_videomode_s *exist_mode;
+  struct videomode_s mode;
+  FAR struct videomode_s *exist_mode;
   uint16_t pixclk;
   int i;
 
@@ -461,7 +462,7 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
 {
-  FAR const struct edid_videomode_s *mode;
+  FAR const struct videomode_s *mode;
   uint16_t manufacturer;
   uint16_t estmodes;
   uint8_t gamma;
@@ -532,7 +533,7 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
     {
       if (estmodes & (1 << i))
         {
-          mode = edid_mode_lookup(g_edid_modes[i]);
+          mode = videomode_lookup(g_edid_modes[i]);
           if (mode != NULL)
             {
               edid->edid_modes[edid->edid_nmodes] = *mode;
@@ -550,8 +551,8 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
 
   for (i = 0; i < EDID_STDTIMING_NUMBER; i++)
     {
-      struct edid_videomode_s stdmode;
-      FAR struct edid_videomode_s *exist_mode;
+      struct videomode_s stdmode;
+      FAR struct videomode_s *exist_mode;
 
       if (edid_std_timing(data + EDID_STDTIMING_OFFSET + i * 2, &stdmode))
         {

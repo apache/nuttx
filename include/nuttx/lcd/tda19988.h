@@ -46,6 +46,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/lcd/lcd_ioctl.h>
+#include <nuttx/video/videomode.h>
 
 #ifdef CONFIG_LCD_TDA19988
 
@@ -59,29 +60,12 @@
  *   Description:  Select the video mode.  This must be done as part of the
  *                 initialization of the driver.  This is equivalent to
  *                 calling tda18899_videomode() within the OS.
- *   Argument:     A reference to a tda19988_videomode_s structure instance.
- *                 See struct tda19988_videomode_s below.
+ *   Argument:     A reference to a videomode_s structure instance.
+ *                 See struct videomode_s below.
  *   Returns:      None
  */
 
 #define TDA19988_IOC_VIDEOMODE _LCDIOC(TDA19988_NIOCTL_BASE + 0)
-
-/* Values for video mode flags */
-
-#define VID_PHSYNC             0x0001
-#define VID_NHSYNC             0x0002
-#define VID_PVSYNC             0x0004
-#define VID_NVSYNC             0x0008
-#define VID_INTERLACE          0x0010
-#define VID_DBLSCAN            0x0020
-#define VID_CSYNC              0x0040
-#define VID_PCSYNC             0x0080
-#define VID_NCSYNC             0x0100
-#define VID_HSKEW              0x0200
-#define VID_BCAST              0x0400
-#define VID_PIXMUX             0x1000
-#define VID_DBLCLK             0x2000
-#define VID_CLKDIV2            0x4000
 
 /****************************************************************************
  * Public Types
@@ -90,26 +74,6 @@
 /* Opaque handle returned by tda19988_register() */
 
 typedef FAR void *TDA19988_HANDLE;
-
-/* Structure that provides the TDA19988 video mode */
-
-struct tda19988_videomode_s
-{
-  int dot_clock;          /* Dot clock frequency in kHz. */
-
-  int hdisplay;
-  int hsync_start;
-  int hsync_end;
-  int htotal;
-
-  int vdisplay;
-  int vsync_start;
-  int vsync_end;
-  int vtotal;
-
-  int flags;              /* Video mode flags; see above. */
-  int hskew;
-};
 
 /* This structure defines the I2C interface.
  * REVISIT:  This could be simplified because the CEC and HDMI reside on
@@ -210,7 +174,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
  ****************************************************************************/
 
 int tda19988_videomode(TDA19988_HANDLE handle,
-                       FAR const struct tda19988_videomode_s *mode);
+                       FAR const struct videomode_s *mode);
 
 /****************************************************************************
  * Name: tda19988_read_edid

@@ -4,7 +4,7 @@
 #
 
 config VIDEO_EDID
-	bool "EDID Support"
+	bool "EDID / Videomode Support"
 	default n
 	---help---
 		Enable support for managing EDID data EDID (Extended Display

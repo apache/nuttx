@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/edid_parse.c
+ * video/edid/videomode_lookup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-#include <nuttx/video/edid.h>
+#include <nuttx/video/videomode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,14 +65,14 @@
 
 #define M(nm,hr,vr,clk,hs,he,ht,vs,ve,vt,f) \
   { \
-    clk, hr, hs, he, ht, vr, vs, ve, vt, f, nm \
+    clk, hr, hs, he, ht, vr, vs, ve, vt, 0, f, nm \
   }
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct edid_videomode_s g_videomodes[] =
+static const struct videomode_s g_videomodes[] =
 {
   M("640x350x85",    640,  350,  31500,  672,  736,  832,  382,  385,  445, HP|VN),
   M("640x400x85",    640,  400,  31500,  672,  736,  832,  401,  404,  445, HN|VP),
@@ -185,7 +185,7 @@ static const int g_nvideomodes = 46;
  *
  ****************************************************************************/
 
-FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name)
+FAR const struct videomode_s *edid_mode_lookup(FAR const char *name)
 {
   int i;
 

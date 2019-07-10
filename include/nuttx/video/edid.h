@@ -50,6 +50,7 @@
  ********************************************************************************************/
 
 #include <stdint.h>
+#include <nuttx/video/videomode.h>
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -479,45 +480,9 @@
                                                      * from manufacturer.  However, the value is
                                                      * later used by DDDB. */
 
-/* Video mode flags used in struct hdmi_videomode_s */
-
-#define VID_PHSYNC                        (1 << 0)
-#define VID_NHSYNC                        (1 << 1)
-#define VID_PVSYNC                        (1 << 2)
-#define VID_NVSYNC                        (1 << 3)
-#define VID_INTERLACE                     (1 << 4)
-#define VID_DBLSCAN                       (1 << 5)
-#define VID_CSYNC                         (1 << 6)
-#define VID_PCSYNC                        (1 << 7)
-#define VID_NCSYNC                        (1 << 8)
-#define VID_HSKEW                         (1 << 9)
-#define VID_BCAST                         (1 << 10)
-#define VID_PIXMUX                        (1 << 11)
-#define VID_DBLCLK                        (1 << 12)
-#define VID_CLKDIV2                       (1 << 13)
-
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-
-/* This structure represents one video mode extracted from the EDID.  CAREFUL:  Fields
- * may not change without also modification to initializer in edid_videomode.c.
- */
-
-struct edid_videomode_s
-{
-  uint32_t dotclock;     /* Dot clock frequency in kHz. */
-  uint16_t hdisplay;
-  uint16_t hsync_start;
-  uint16_t hsync_end;
-  uint16_t htotal;
-  uint16_t vdisplay;
-  uint16_t vsync_start;
-  uint16_t vsync_end;
-  uint16_t vtotal;
-  uint16_t flags;        /* Video mode flags; see above. */
-  FAR const char *name;
-};
 
 /* These structures is a user-friendly digest of the EDID data. */
 
@@ -570,9 +535,9 @@ struct edid_info_s
 
   /* Parsed modes */
 
-  FAR struct edid_videomode_s  *edid_preferred_mode;
+  FAR struct videomode_s *edid_preferred_mode;
   int      edid_nmodes;
-  struct edid_videomode_s edid_modes[64];
+  struct videomode_s edid_modes[64];
 };
 
 /********************************************************************************************
@@ -597,39 +562,5 @@ struct edid_info_s
  ********************************************************************************************/
 
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
-
-/********************************************************************************************
- * Name:  edid_sort_modes
- *
- * Description:
- *   Sort video modes by refresh rate, aspect ratio, then resolution.
- *   Preferred mode or largest mode is first in the list and other modes
- *   are sorted on closest match to that mode.
- *
- *   Note that the aspect ratio calculation treats "close" aspect ratios
- *   (within 12.5%) as the same for this purpose.
- *
- * Input Parameters:
- *   modes     - A reference to the first entry in a list of video modes
- *   preferred - A pointer to the pointer to the preferred mode in the list
- *   nmodes    - The number of modes in the list
- *
- * Returned Value:
- *   None
- *
- ********************************************************************************************/
-
-void edid_sort_modes(FAR struct edid_videomode_s *modes,
-                     FAR struct edid_videomode_s **preferred, unsigned int nmodes);
-
-/********************************************************************************************
- * Name:  edid_mode_lookup
- *
- * Description:
- *   Find the video mode in a look-up table
- *
- ********************************************************************************************/
-
-FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name);
 
 #endif /* __INCLUDE_NUTTX_VIDEO_EDID_H */

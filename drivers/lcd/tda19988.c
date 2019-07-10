@@ -172,7 +172,7 @@ static int     tda19988_unlink(FAR struct inode *inode);
 
 static int     tda19988_hwinitialize(FAR struct tda1988_dev_s *priv);
 static int     tda19988_videomode_internal(FAR struct tda1988_dev_s *priv,
-                 FAR const struct tda19988_videomode_s *mode);
+                 FAR const struct videomode_s *mode);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    tda19988_shutdown(FAR struct tda1988_dev_s *priv);
 #endif
@@ -229,7 +229,8 @@ static int tda19988_getregs(FAR const struct tda19988_i2c_s *dev,
       return -1;
     }
 
-  lcdinfo("Read: %02x:%02x->%02x\n", page, regaddr, *regval);
+  lcdinfo("Write: %02x<-%02x\n", regaddr, *regval);
+  lcderrdumpbuffer("Read:", regval, nregs);
   return OK;
 }
 
@@ -263,7 +264,7 @@ static int tda19988_putreg(FAR const struct tda19988_i2c_s *dev,
       return ret;
     }
 
-  lcdinfo("Wrote: %02x:%02x<-%02x\n", page, regaddr, regval);
+  lcdinfo("Wrote: %02x<-%02x\n", regaddr, regval);
   return OK;
 }
 
@@ -298,7 +299,7 @@ static int tda19988_putreg16(FAR const struct tda19988_i2c_s *dev,
       return ret;
     }
 
-  lcdinfo("Wrote: %02x:%02x<-%02x\n", page, regaddr, regval);
+  lcdinfo("Wrote: 02x<-%04x\n", regaddr, regval);
   return OK;
 }
 
@@ -729,7 +730,7 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
       goto done;
     }
 
-  blocks = priv->edid[EDID_TRAILER_NEXTENSIONS];
+  blocks = priv->edid[EDID_TRAILER_NEXTENSIONS_OFFSET];
   if (blocks > 0)
     {
       FAR uint8_t *edid;
@@ -1125,15 +1126,15 @@ static int tda19988_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *                 of the initialization of the driver.  This is
        *                 equivalent to calling tda18899_videomode() within
        *                 the OS.
-       *   Argument:     A reference to a tda19988_videomode_s structure
+       *   Argument:     A reference to a videomode_s structure
        *                 instance.
        *   Returns:      None
        */
 
       case TDA19988_IOC_VIDEOMODE:
         {
-          FAR const struct tda19988_videomode_s *mode =
-            (FAR const struct tda19988_videomode_s *)((uintptr_t)arg);
+          FAR const struct videomode_s *mode =
+            (FAR const struct videomode_s *)((uintptr_t)arg);
 
           if (mode == NULL)
             {
@@ -1385,7 +1386,7 @@ done:
 
 static int
   tda19988_videomode_internal(FAR struct tda1988_dev_s *priv,
-                              FAR const struct tda19988_videomode_s *mode)
+                              FAR const struct videomode_s *mode)
 {
   uint16_t ref_pix;
   uint16_t ref_line;
@@ -1462,7 +1463,7 @@ static int
                          (mode->vsync_end - mode->vsync_start) / 2;
     }
 
-  div = 148500 / mode->dot_clock;
+  div = 148500 / mode->dotclock;
   if (div != 0)
     {
       if (--div > 3)
@@ -1732,7 +1733,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
  ****************************************************************************/
 
 int tda19988_videomode(TDA19988_HANDLE handle,
-                       FAR const struct tda19988_videomode_s *mode)
+                       FAR const struct videomode_s *mode)
 {
   FAR struct tda1988_dev_s *priv = (FAR struct tda1988_dev_s *)handle;
   int ret;
