@@ -210,4 +210,11 @@
 #define SNIOC_SET_CLEAN_INTERVAL   _SNIOC(0x005d) /* Arg: uint32_t value (seconds) */
 #define SNIOC_START_FAN_CLEANING   _SNIOC(0x005e) /* Arg: None */
 
+/* IOCTL commands unique to the VL53L1X */
+
+#define SNIOC_DISTANCESHORT        _SNIOC(0x0100) /* Arg: None */
+#define SNIOC_DISTANCELONG         _SNIOC(0x0101) /* Arg: None */
+#define SNIOC_CALIBRATE            _SNIOC(0x0102) /* Arg: b16_t value */
+#define SNIOC_TEMPUPDATE           _SNIOC(0x0103) /* Arg: b16_t value */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
