@@ -50,7 +50,7 @@
 
 #include <stdbool.h>
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_GPIOIRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_40_GPIOIRQ)
 #  include <nuttx/irq.h>
 #endif
 
@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_syscon.h.  It is not included here
+/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
  * because the including C file may not have that file in its include path.
  */
 
@@ -74,14 +74,14 @@
  *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
-#define LPC17_CCLK                 80000000 /* 80Mhz */
+#define LPC17_40_CCLK                 80000000 /* 80Mhz */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
  */
 
-#undef CONFIG_LPC17_MAINOSC
-#define CONFIG_LPC17_MAINOSC       1
+#undef CONFIG_LPC17_40_MAINOSC
+#define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
 /* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
@@ -100,8 +100,8 @@
  *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
  */
 
-#undef CONFIG_LPC17_PLL0
-#define CONFIG_LPC17_PLL0          1
+#undef CONFIG_LPC17_40_PLL0
+#define CONFIG_LPC17_40_PLL0          1
 #define BOARD_CLKSRCSEL_VALUE      SYSCON_CLKSRCSEL_MAIN
 
 #define BOARD_PLL0CFG_MSEL         20
@@ -112,7 +112,7 @@
 
 /* PLL1 -- Not used. */
 
-#undef CONFIG_LPC17_PLL1
+#undef CONFIG_LPC17_40_PLL1
 #define BOARD_PLL1CFG_MSEL         36
 #define BOARD_PLL1CFG_NSEL         1
 #define BOARD_PLL1CFG_VALUE \
@@ -169,7 +169,7 @@
 #define LED_STACKCREATED           3  /* OFF    OFF  */
 
 /* After the system is booted, this logic will no longer use LED 1.
- * LED 1 is available for use by application software using lpc17_led
+ * LED 1 is available for use by application software using lpc17_40_led
  * (prototyped below)
  */
                                       /* LED1   LED2 */
@@ -332,7 +332,7 @@ extern "C" {
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_led
+ * Name: lpc17_40_led
  *
  * Description:
  *   Once the system has booted, these functions can be used to control LEDs 1
@@ -340,7 +340,7 @@ extern "C" {
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void lpc17_led(int lednum, int state);
+void lpc17_40_led(int lednum, int state);
 #endif
 
 #undef EXTERN

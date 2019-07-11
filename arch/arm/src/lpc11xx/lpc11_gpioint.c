@@ -165,7 +165,7 @@ static int lpc11_irq2port(int irq)
 {
   /* Set 1:
    *   LPC176x: 12 interrupts p0.0-p0.11
-   *   LPC178x: 16 interrupts p0.0-p0.15
+   *   LPC178x_40xx: 16 interrupts p0.0-p0.15
    */
 
   if (irq >= LPC11_VALID_FIRST0L &&
@@ -176,7 +176,7 @@ static int lpc11_irq2port(int irq)
 
   /* Set 2:
    *   LPC176x: 16 interrupts p0.15-p0.30
-   *   LPC178x: 16 interrupts p0.16-p0.31
+   *   LPC178x_40xx: 16 interrupts p0.16-p0.31
    */
 
   else if (irq >= LPC11_VALID_FIRST0H &&
@@ -196,7 +196,7 @@ static int lpc11_irq2port(int irq)
       return 2;
     }
 
-#elif defined (LPC178x)
+#elif defined (LPC178x_40xx)
   /* Set 3:
    *   LPC18x: 16 interrupts p2.0-p2.15
    */
@@ -208,7 +208,7 @@ static int lpc11_irq2port(int irq)
     }
 
   /* Set 4:
-   *   LPC178x: 16 interrupts p2.16-p2.31
+   *   LPC178x_40xx: 16 interrupts p2.16-p2.31
    */
 
   else if (irq >= LPC11_VALID_FIRST2H &&
@@ -251,7 +251,7 @@ static int lpc11_irq2pin(int irq)
 
   /* Set 2:
    *   LPC176x: 16 interrupts p0.15-p0.30
-   *   LPC178x: 16 interrupts p0.16-p0.31
+   *   LPC178x_40xx: 16 interrupts p0.16-p0.31
    *
    * LPC11_VALID_SHIFT0H   15/16 - Bit number of the first bit in a group
    *                               of 16 interrupts
@@ -281,7 +281,7 @@ static int lpc11_irq2pin(int irq)
       return irq - LPC11_VALID_FIRST2 + LPC11_VALID_SHIFT2;
     }
 
-#elif defined(LPC178x)
+#elif defined(LPC178x_40xx)
 
   /* Set 3:
    *   LPC18x: 16 interrupts p2.0-p2.15
@@ -425,7 +425,7 @@ static int lpc11_gpiointerrupt(int irq, void *context, FAR void *arg)
                       LPC11_VALID_FIRST2, context);
     }
 
-#elif defined(LPC178x)
+#elif defined(LPC178x_40xx)
   /* Check for an interrupt on GPIO2 */
 
   if ((intstatus & GPIOINT_IOINTSTATUS_P2INT) != 0)
@@ -471,8 +471,8 @@ void lpc11_gpioirqinitialize(void)
   (void)irq_attach(LPC11_IRQ_EINT3, lpc11_gpiointerrupt, NULL);
   up_enable_irq(LPC11_IRQ_EINT3);
 
-#elif defined(LPC178x)
-  /* the LPC178x family has a single, dedicated interrupt for GPIO0 and
+#elif defined(LPC178x_40xx)
+  /* the LPC178x_40xx family has a single, dedicated interrupt for GPIO0 and
    * GPIO2.
    */
 

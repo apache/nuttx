@@ -48,7 +48,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_syscon.h.  It is not included here
+/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
  * because the including C file may not have that file in its include path.
  */
 
@@ -64,14 +64,14 @@
  *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
-#define LPC17_CCLK                 80000000 /* 80Mhz */
+#define LPC17_40_CCLK                 80000000 /* 80Mhz */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
  */
 
-#undef CONFIG_LPC17_MAINOSC
-#define CONFIG_LPC17_MAINOSC       1
+#undef CONFIG_LPC17_40_MAINOSC
+#define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
 /* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
@@ -90,8 +90,8 @@
  *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
  */
 
-#undef CONFIG_LPC17_PLL0
-#define CONFIG_LPC17_PLL0          1
+#undef CONFIG_LPC17_40_PLL0
+#define CONFIG_LPC17_40_PLL0          1
 #define BOARD_CLKSRCSEL_VALUE      SYSCON_CLKSRCSEL_MAIN
 
 #define BOARD_PLL0CFG_MSEL         20
@@ -102,7 +102,7 @@
 
 /* PLL1 -- Not used. */
 
-#undef CONFIG_LPC17_PLL1
+#undef CONFIG_LPC17_40_PLL1
 #define BOARD_PLL1CFG_MSEL         36
 #define BOARD_PLL1CFG_NSEL         1
 #define BOARD_PLL1CFG_VALUE \
@@ -119,8 +119,8 @@
 
 /* FLASH Configuration */
 
-#undef  CONFIG_LPC17_FLASH
-#define CONFIG_LPC17_FLASH         1
+#undef  CONFIG_LPC17_40_FLASH
+#define CONFIG_LPC17_40_FLASH         1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
 /* Ethernet configuration */

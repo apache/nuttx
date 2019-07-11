@@ -73,41 +73,41 @@ mbed Configuration Options
     CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
     Individual subsystems can be enabled:
-      CONFIG_LPC17_MAINOSC=y
-      CONFIG_LPC17_PLL0=y
-      CONFIG_LPC17_PLL1=n
-      CONFIG_LPC17_ETHERNET=n
-      CONFIG_LPC17_USBHOST=n
-      CONFIG_LPC17_USBOTG=n
-      CONFIG_LPC17_USBDEV=n
-      CONFIG_LPC17_UART0=y
-      CONFIG_LPC17_UART1=n
-      CONFIG_LPC17_UART2=n
-      CONFIG_LPC17_UART3=n
-      CONFIG_LPC17_CAN1=n
-      CONFIG_LPC17_CAN2=n
-      CONFIG_LPC17_SPI=n
-      CONFIG_LPC17_SSP0=n
-      CONFIG_LPC17_SSP1=n
-      CONFIG_LPC17_I2C0=n
-      CONFIG_LPC17_I2C1=n
-      CONFIG_LPC17_I2S=n
-      CONFIG_LPC17_TMR0=n
-      CONFIG_LPC17_TMR1=n
-      CONFIG_LPC17_TMR2=n
-      CONFIG_LPC17_TMR3=n
-      CONFIG_LPC17_RIT=n
-      CONFIG_LPC17_PWM0=n
-      CONFIG_LPC17_MCPWM=n
-      CONFIG_LPC17_QEI=n
-      CONFIG_LPC17_RTC=n
-      CONFIG_LPC17_WDT=n
-      CONFIG_LPC17_ADC=n
-      CONFIG_LPC17_DAC=n
-      CONFIG_LPC17_GPDMA=n
-      CONFIG_LPC17_FLASH=n
+      CONFIG_LPC17_40_MAINOSC=y
+      CONFIG_LPC17_40_PLL0=y
+      CONFIG_LPC17_40_PLL1=n
+      CONFIG_LPC17_40_ETHERNET=n
+      CONFIG_LPC17_40_USBHOST=n
+      CONFIG_LPC17_40_USBOTG=n
+      CONFIG_LPC17_40_USBDEV=n
+      CONFIG_LPC17_40_UART0=y
+      CONFIG_LPC17_40_UART1=n
+      CONFIG_LPC17_40_UART2=n
+      CONFIG_LPC17_40_UART3=n
+      CONFIG_LPC17_40_CAN1=n
+      CONFIG_LPC17_40_CAN2=n
+      CONFIG_LPC17_40_SPI=n
+      CONFIG_LPC17_40_SSP0=n
+      CONFIG_LPC17_40_SSP1=n
+      CONFIG_LPC17_40_I2C0=n
+      CONFIG_LPC17_40_I2C1=n
+      CONFIG_LPC17_40_I2S=n
+      CONFIG_LPC17_40_TMR0=n
+      CONFIG_LPC17_40_TMR1=n
+      CONFIG_LPC17_40_TMR2=n
+      CONFIG_LPC17_40_TMR3=n
+      CONFIG_LPC17_40_RIT=n
+      CONFIG_LPC17_40_PWM0=n
+      CONFIG_LPC17_40_MCPWM=n
+      CONFIG_LPC17_40_QEI=n
+      CONFIG_LPC17_40_RTC=n
+      CONFIG_LPC17_40_WDT=n
+      CONFIG_LPC17_40_ADC=n
+      CONFIG_LPC17_40_DAC=n
+      CONFIG_LPC17_40_GPDMA=n
+      CONFIG_LPC17_40_FLASH=n
 
-  LPC17xx specific device driver settings
+  LPC17xx/LPC40xx specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
        console and ttys0 (default is the UART0).
@@ -120,78 +120,78 @@ mbed Configuration Options
     CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_UARTn_2STOP - Two stop bits
 
-  LPC17xx specific CAN device driver settings.  These settings all
+  LPC17xx/LPC40xx specific CAN device driver settings.  These settings all
   require CONFIG_CAN:
 
     CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
       Standard 11-bit IDs.
-    CONFIG_LPC17_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN1
+    CONFIG_LPC17_40_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_40_CAN1
       is defined.
-    CONFIG_LPC17_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN2
+    CONFIG_LPC17_40_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_40_CAN2
       is defined.
-    CONFIG_LPC17_CAN1_DIVISOR - CAN1 is clocked at CCLK divided by this
+    CONFIG_LPC17_40_CAN1_DIVISOR - CAN1 is clocked at CCLK divided by this
       number. (the CCLK frequency is divided by this number to get the CAN
       clock). Options = {1,2,4,6}. Default: 4.
-    CONFIG_LPC17_CAN2_DIVISOR - CAN2 is clocked at CCLK divided by this
+    CONFIG_LPC17_40_CAN2_DIVISOR - CAN2 is clocked at CCLK divided by this
       number.  (the CCLK frequency is divided by this number to get the CAN
       clock).  Options = {1,2,4,6}. Default: 4.
-    CONFIG_LPC17_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+    CONFIG_LPC17_40_CAN_TSEG1 - The number of CAN time quanta in segment 1.
       Default: 6
-    CONFIG_LPC17_CAN_TSEG2 = the number of CAN time quanta in segment 2.
+    CONFIG_LPC17_40_CAN_TSEG2 = the number of CAN time quanta in segment 2.
       Default: 7
 
-  LPC17xx specific PHY/Ethernet device driver settings.  These setting
-  also require CONFIG_NET and CONFIG_LPC17_ETHERNET.
+  LPC17xx/LPC40xx specific PHY/Ethernet device driver settings.  These setting
+  also require CONFIG_NET and CONFIG_LPC17_40_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_LPC17_PHY_AUTONEG - Enable auto-negotion
-    CONFIG_LPC17_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
-    CONFIG_LPC17_PHY_FDUPLEX - Select full (vs. half) duplex
+    CONFIG_LPC17_40_PHY_AUTONEG - Enable auto-negotion
+    CONFIG_LPC17_40_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
+    CONFIG_LPC17_40_PHY_FDUPLEX - Select full (vs. half) duplex
 
-    CONFIG_LPC17_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
-    CONFIG_LPC17_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
-    CONFIG_LPC17_ETH_NRXDESC - Configured number of Rx descriptors. Default: 18
-    CONFIG_LPC17_ETH_WOL - Enable Wake-up on Lan (not fully implemented).
+    CONFIG_LPC17_40_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
+    CONFIG_LPC17_40_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
+    CONFIG_LPC17_40_ETH_NRXDESC - Configured number of Rx descriptors. Default: 18
+    CONFIG_LPC17_40_ETH_WOL - Enable Wake-up on Lan (not fully implemented).
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
       CONFIG_DEBUG_FEATURES.
     CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
       Also needs CONFIG_DEBUG_FEATURES.
-    CONFIG_LPC17_ETH_HASH - Enable receipt of near-perfect match frames.
-    CONFIG_LPC17_MULTICAST - Enable receipt of multicast (and unicast) frames.
+    CONFIG_LPC17_40_ETH_HASH - Enable receipt of near-perfect match frames.
+    CONFIG_LPC17_40_MULTICAST - Enable receipt of multicast (and unicast) frames.
       Automatically set if CONFIG_NET_MCASTGROUP is selected.
 
-  LPC17xx USB Device Configuration
+  LPC17xx/LPC40xx USB Device Configuration
 
-    CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
+    CONFIG_LPC17_40_USBDEV_FRAME_INTERRUPT
       Handle USB Start-Of-Frame events.
       Enable reading SOF from interrupt handler vs. simply reading on demand.
       Probably a bad idea... Unless there is some issue with sampling the SOF
       from hardware asynchronously.
-    CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
+    CONFIG_LPC17_40_USBDEV_EPFAST_INTERRUPT
       Enable high priority interrupts.  I have no idea why you might want to
       do that
-    CONFIG_LPC17_USBDEV_NDMADESCRIPTORS
+    CONFIG_LPC17_40_USBDEV_NDMADESCRIPTORS
       Number of DMA descriptors to allocate in SRAM.
-    CONFIG_LPC17_USBDEV_DMA
-      Enable lpc17xx-specific DMA support
-    CONFIG_LPC17_USBDEV_NOVBUS
+    CONFIG_LPC17_40_USBDEV_DMA
+      Enable lpc17xx/lpc40xx-specific DMA support
+    CONFIG_LPC17_40_USBDEV_NOVBUS
       Define if the hardware implementation does not support the VBUS signal
-    CONFIG_LPC17_USBDEV_NOLED
+    CONFIG_LPC17_40_USBDEV_NOLED
       Define if the hardware  implementation does not support the LED output
 
-  LPC17xx USB Host Configuration
+  LPC17xx/LPC40xx USB Host Configuration
 
-    CONFIG_LPC17_OHCIRAM_SIZE
+    CONFIG_LPC17_40_OHCIRAM_SIZE
       Total size of OHCI RAM (in AHB SRAM Bank 1)
     CONFIG_LP17_USBHOST_NEDS
       Number of endpoint descriptors
     CONFIG_LP17_USBHOST_NTDS
       Number of transfer descriptors
-    CONFIG_LPC17_USBHOST_TDBUFFERS
+    CONFIG_LPC17_40_USBHOST_TDBUFFERS
       Number of transfer descriptor buffers
-    CONFIG_LPC17_USBHOST_TDBUFSIZE
+    CONFIG_LPC17_40_USBHOST_TDBUFSIZE
       Size of one transfer descriptor buffer
-    CONFIG_LPC17_USBHOST_IOBUFSIZE
+    CONFIG_LPC17_40_USBHOST_IOBUFSIZE
       Size of one end-user I/O buffer.  This can be zero if the
       application can guarantee that all end-user I/O buffers
       reside in AHB SRAM.
@@ -213,8 +213,8 @@ USB Host Configuration
   2. Then edit the top-level .config file to enable USB host.  Make the
      following changes using 'make menuconfig':
 
-     System Type -> LPC17xx Peripheral Support
-       CONFIG_LPC17_USBHOST=y        : USB host controller driver support
+     System Type -> LPC17xx/LPC40xx Peripheral Support
+       CONFIG_LPC17_40_USBHOST=y        : USB host controller driver support
 
      Device Drivers -> USB Host Driver Support
        CONFIG_USBHOST=y              : USB host support

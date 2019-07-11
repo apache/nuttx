@@ -4,7 +4,7 @@
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derived from arch/arm/src/lpc17xx/lpc17xx_i2c.c
+ * Derived from arch/arm/src/lpc17xx_40xx/lpc17xx_40xx_i2c.c
  *
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

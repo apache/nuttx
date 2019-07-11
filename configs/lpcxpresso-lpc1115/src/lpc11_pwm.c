@@ -96,7 +96,7 @@ int pwm_devinit(void)
       pwm = lpc11_pwminitialize(0);
       if (!pwm)
         {
-          aerr("ERROR: Failed to get the LPC17XX PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX_40XX PWM lower half\n");
           return -ENODEV;
         }
 
@@ -112,7 +112,7 @@ int pwm_devinit(void)
       mcpwm = lpc11_mcpwminitialize(0);
       if (!mcpwm)
         {
-          aerr("ERROR: Failed to get the LPC17XX MOTOR PWM lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX_40XX MOTOR PWM lower half\n");
           return -ENODEV;
         }
 
@@ -128,7 +128,7 @@ int pwm_devinit(void)
       timer = lpc11_timerinitialize(0);
       if (!timer)
         {
-          aerr("ERROR: Failed to get the LPC17XX TIMER lower half\n");
+          aerr("ERROR: Failed to get the LPC17XX_40XX TIMER lower half\n");
           return -ENODEV;
         }
 

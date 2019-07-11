@@ -52,7 +52,7 @@
 #include "lpc11_ssp.h"
 #include "lpcxpresso_lpc1115.h"
 
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+#if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -88,7 +88,7 @@ void weak_function lpcxpresso_sspdev_initialize(void)
    * be set correctly for the SD slot chip select.
    */
 
-#ifdef CONFIG_LPC17_SSP1
+#ifdef CONFIG_LPC17_40_SSP1
   (void)lpc11_configgpio(LPCXPRESSO_SD_CS);
   (void)lpc11_configgpio(LPCXPRESSO_SD_CD);
 
@@ -112,7 +112,7 @@ void weak_function lpcxpresso_sspdev_initialize(void)
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including lpc11_sspbus_initialize())
- *   are provided by common LPC17xx logic.  To use this common SPI logic on your
+ *   are provided by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
  *   board:
  *
  *   1. Provide logic in lpc11_boardinitialize() to configure SPI/SSP chip select
@@ -129,7 +129,7 @@ void weak_function lpcxpresso_sspdev_initialize(void)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_SSP0
+#ifdef CONFIG_LPC17_40_SSP0
 void  lpc11_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -147,7 +147,7 @@ uint8_t lpc11_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_LPC17_SSP1
+#ifdef CONFIG_LPC17_40_SSP1
 void  lpc11_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
@@ -188,4 +188,4 @@ uint8_t lpc11_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1 */
+#endif /* CONFIG_LPC17_40_SSP0 || CONFIG_LPC17_40_SSP1 */

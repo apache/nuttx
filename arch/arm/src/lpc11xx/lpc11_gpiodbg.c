@@ -125,7 +125,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
 #if defined(LPC176x)
   uint32_t     pinsel;
   uint32_t     pinmode;
-#elif defined(LPC178x)
+#elif defined(LPC178x_40xx)
   uint32_t     iocon;
 #endif /* LPC176x */
   unsigned int port;
@@ -139,7 +139,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
 #if defined(LPC176x)
   pinsel  = lpc11_pinsel(port, pin);
   pinmode = lpc11_pinmode(port, pin);
-#elif defined(LPC178x)
+#elif defined(LPC178x_40xx)
   iocon   = LPC11_IOCON_P(port, pin);
 #endif /* LPC176x */
 
@@ -154,7 +154,7 @@ int lpc11_dumpgpio(lpc11_pinset_t pinset, const char *msg)
            pinsel,  pinsel  ? getreg32(pinsel) : 0,
            pinmode, pinmode ? getreg32(pinmode) : 0,
            g_odmode[port],    getreg32(g_odmode[port]));
-#elif defined(LPC178x)
+#elif defined(LPC178x_40xx)
   gpioinfo("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
 #endif
 

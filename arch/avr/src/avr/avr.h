@@ -161,7 +161,7 @@ FAR struct spi_dev_s *avr_spibus_initialize(int port);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including avr_spibus_initialize()) are provided by common LPC17xx logic.  To use
+ *   including avr_spibus_initialize()) are provided by common AVR logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in <arch>_boardinitialize() to configure SPI chip select

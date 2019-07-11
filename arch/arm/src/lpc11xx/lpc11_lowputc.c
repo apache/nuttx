@@ -118,7 +118,7 @@
  * This Baud Rate configuration is based on idea suggested at LPCWare:
  * www.lpcware.com/content/blog/lpc17xx-uart-simpler-way-calculate-baudrate-timming
  *
- * The original code is for LPC17xx but with few modifications it worked
+ * The original code is for LPC17xx/LPC40xx but with few modifications it worked
  * fine in the LPC11xx as well.
  *
  ****************************************************************************/

@@ -86,7 +86,7 @@
  * vector table must be zero).  In this case alignment to a 128 byte address
  * boundary is sufficient.
  *
- * Some parts, such as the LPC17xx family, require alignment to a 256 byte
+ * Some parts, such as the LPC17xx/LPC40xx family, require alignment to a 256 byte
  * address boundary.  Any other unusual alignment requirements for the vector
  * can be specified for a given architecture be redefining
  * NVIC_VECTAB_TBLOFF_MASK in the chip-specific chip.h header file for the

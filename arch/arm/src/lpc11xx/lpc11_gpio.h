@@ -52,7 +52,7 @@
 #include "hardware/lpc11_gpio.h"
 #include "hardware/lpc11_pinconfig.h"
 
-/* Include the GPIO definitions for the selected LPC17xx family. */
+/* Include the GPIO definitions for the selected LPC17xx/LPC40xx family. */
 
 #if defined(LPC111x)
 #  include "lpc111x_gpio.h"

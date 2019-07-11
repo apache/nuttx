@@ -112,7 +112,7 @@
   </li>
   <li>
     For the USB device driver, that 8-bit event data is provided within the USB device driver itself.
-    So, for example, the 8-bit event data for the LPC1768 USB device driver is found in <code>arch/arm/src/lpc17xx/lpc17_usbdev.c</code>.
+    So, for example, the 8-bit event data for the LPC1768 USB device driver is found in <code>arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c</code>.
   </li>
 </ul>
 <p><b>16-bit Trace Data</b>.
@@ -237,28 +237,28 @@
     <td align="center">3</td>
     <td align="left"><code>TRACE_INTENTRY_ID</code><sup>1</sup></td>
     <td align="right">1</td>
-    <td align="left"><code>LPC17_TRACEINTID_USB</code><sup>2</sup></td>
+    <td align="left"><code>LPC17_40_TRACEINTID_USB</code><sup>2</sup></td>
     <td align="left">0039</td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td align="left"><code>TRACE_INTDECODE_ID</code><sup>2</sup></td>
     <td align="right">7</td>
-    <td align="left"><code>LPC17_TRACEINTID_DEVSTAT</code><sup>2</sup></td>
+    <td align="left"><code>LPC17_40_TRACEINTID_DEVSTAT</code><sup>2</sup></td>
     <td align="left">0019</td>
   </tr>
   <tr>
     <td align="center">5</td>
     <td align="left"><code>TRACE_INTDECODE_ID</code><sup>2</sup></td>
     <td align="right">32</td>
-    <td align="left"><code>LPC17_TRACEINTID_SUSPENDCHG</code><sup>2</sup></td>
+    <td align="left"><code>LPC17_40_TRACEINTID_SUSPENDCHG</code><sup>2</sup></td>
     <td align="left">0019</td>
   </tr>
   <tr>
     <td align="center">6</td>
     <td align="left"><code>TRACE_INTDECODE_ID</code><sup>2</sup></td>
     <td align="right">6</td>
-    <td align="left"><code>LPC17_TRACEINTID_DEVRESET</code><sup>2</sup></td>
+    <td align="left"><code>LPC17_40_TRACEINTID_DEVRESET</code><sup>2</sup></td>
     <td align="left">0019</td>
   </tr>
   <tr>
@@ -279,13 +279,13 @@
     <td align="center">9</td>
     <td align="left"><code>TRACE_INTEXIT_ID</code><sup>1</sup></td>
     <td align="right">1</td>
-    <td align="left"><code>LPC17_TRACEINTID_USB</code><sup>2</sup></td>
+    <td align="left"><code>LPC17_40_TRACEINTID_USB</code><sup>2</sup></td>
     <td align="left">0000</td>
   </tr>
 </table>
 <p><small><b>NOTES</b>:<br>
   <sup>1</sup>See <code>include/nuttx/usb/usbdev_trace.h</code><br>
-  <sup>2</sup><code>See arch/arm/src/lpc17xx/lpc17_usbdev.c</code>
+  <sup>2</sup><code>See arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c</code>
 </small></p>
 </ul>
 <p>

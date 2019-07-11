@@ -6,7 +6,7 @@
  *
  * I used the JLX12864G-086 LCD module based on ST7567 controller.
  *
- * Based on configs/zkit-arm-1769/src/lpc17_lcd.c
+ * Based on configs/zkit-arm-1769/src/lpc17_40_lcd.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Manikandan <code@zilogic.com>

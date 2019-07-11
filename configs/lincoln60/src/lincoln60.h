@@ -74,7 +74,7 @@
 
 /* Button IRQ numbers */
 
-#define LINCOLN60_BUT1_IRQ          LPC17_IRQ_P0p23
+#define LINCOLN60_BUT1_IRQ          LPC17_40_IRQ_P0p23
 
 /****************************************************************************
  *  microSD                          PIN   SIGNAL NAME

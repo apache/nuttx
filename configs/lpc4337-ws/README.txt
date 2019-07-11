@@ -57,11 +57,11 @@ Status
     pin and GPIO configuration, and serial console support.  A SPIFI
     MTD driver is also in place but requires further verification.
 
-  - The following drivers have been copied from the LPC17xx port, but
+  - The following drivers have been copied from the LPC17xx/LPC40xx port, but
     require integration into the LPC43xx.  This integration should
     consist of:
 
-    - Remove LPC17xx power, clocking, and pin configuration logic.
+    - Remove LPC17xx/LPC40xx power, clocking, and pin configuration logic.
     - Adding of clock source and frequency to the board.h file.
     - Adding of LPC43 clock connection and pin configuration logic.
 
@@ -74,7 +74,7 @@ Status
     - lpc43_spi.c, and
     - lpc43_ssp.c
 
-    These LPC17xx drivers were not brought into the LPC43xx port because
+    These LPC17xx/LPC40xx drivers were not brought into the LPC43xx port because
     it appears that these peripherals have been completely redesigned:
 
     - CAN,
@@ -83,7 +83,7 @@ Status
     - USB host.
 
     The following LPC43xx peripherals are unsupported.  Some may be
-    compatible with the LPC17xx, but there is no LPC17xx driver to be
+    compatible with the LPC17xx/LPC40xx, but there is no LPC17xx/LPC40xx driver to be
     ported:
 
     - SD/MMC,
@@ -597,7 +597,7 @@ LPC4337-ws Configuration Options
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
     CONFIG_LPC43__AUTONEG - Enable auto-negotion
 
-    CONFIG_LPC17_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
+    CONFIG_LPC17_40_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
     CONFIG_LPC43_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
     CONFIG_LPC43_ETH_NRXDESC - Configured number of Rx descriptors. Default: 18
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
@@ -618,7 +618,7 @@ LPC4337-ws Configuration Options
     CONFIG_LPC43_USBDEV_NDMADESCRIPTORS
       Number of DMA descriptors to allocate in SRAM.
     CONFIG_LPC43_USBDEV_DMA
-      Enable lpc17xx-specific DMA support
+      Enable lpc17xx/lpc40xx-specific DMA support
     CONFIG_LPC43_USBDEV_NOVBUS
       Define if the hardware implementation does not support the VBUS signal
     CONFIG_LPC43_USBDEV_NOLED

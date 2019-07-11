@@ -55,7 +55,7 @@
 /* PORT and SLOT number probably depend on the board configuration */
 
 #define NSH_HAVEUSBDEV 1
-#ifdef CONFIG_LPC17_SSP1
+#ifdef CONFIG_LPC17_40_SSP1
 #  define NSH_HAVEMMCSD 1
 #else
 #  undef NSH_HAVEMMCSD

@@ -744,7 +744,7 @@ static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 int emac_initialize(int intf)
 {
-  struct lpc17_driver_s *priv;
+  struct lpc17_40_driver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 

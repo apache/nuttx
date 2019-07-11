@@ -65,7 +65,7 @@
  * Name: dac_devinit
  *
  * Description:
- *   All LPC17xx architectures must provide the following interface to work with
+ *   All LPC17xx/LPC40xx architectures must provide the following interface to work with
  *   examples/diag.
  *
  ************************************************************************************/

@@ -89,7 +89,7 @@ struct spi_dev_s;  /* Forward reference */
  * Name: i486_clockconfig
  *
  * Description:
- *   Called to initialize the LPC17XX.  This does whatever setup is needed to put the
+ *   Called to initialize the i486.  This does whatever setup is needed to put the
  *   MCU in a usable state.  This includes the initialization of clocking using the
  *   settings in board.h.
  *
@@ -219,7 +219,7 @@ FAR struct spi_dev_s *i486_spibus_initialize(int port);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including i486_spibus_initialize()) are provided by common LPC17xx logic.  To use
+ *   including i486_spibus_initialize()) are provided by common i486 logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in i486_boardinitialize() to configure SPI/SSP chip select
