@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc11_timer.h
+ * arch/arm/src/lpc11xx/lpc11_timer.h
  *
  *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

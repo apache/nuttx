@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc11_userspace.h
+ * arch/arm/src/lpc11xx/lpc11_userspace.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

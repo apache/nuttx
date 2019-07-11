@@ -97,7 +97,7 @@ void up_idle(void)
 
 /* If the g_dma_inprogress is zero, then there is no DMA in progress.  This
  * value is needed in the IDLE loop to determine if the IDLE loop should
- * go into lower power power consumption modes.  According to the LPC17xx
+ * go into lower power power consumption modes.  According to the LPC11xx
  * User Manual: "The DMA controller can continue to work in Sleep mode, and
  * has access to the peripheral SRAMs and all peripheral registers. The
  * flash memory and the Main SRAM are not available in Sleep mode, they are
