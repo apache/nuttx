@@ -381,22 +381,3 @@ Configuration Directories
     Configuration enables both the serial NSH interface as well as the
     telnet interface over ethernet, with an IP address assigned via DHCP.
 
-  nxlines
-  -------
-    Configures the graphics example located at examples/nsh.  This
-    configuration enables SDRAM to hold the LCD framebuffer and enables
-    the LPC178x LCD driver in order to support the external LCD panel.
-
-    NOTES:
-
-    1. Uses the older, OABI, buildroot toolchain.  But that is easily
-       reconfigured:
-
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
-
-    2. In this configuration, the SDRAM is not added to heap but is
-       dedicated to supporting an LCD frame buffer at address 0xa0010000.
-
-   STATUS:
-     2019-04-23:  Untested with LPC4088.

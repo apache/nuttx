@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/lpc4088-quickstart/src/lpc17_40_sdraminitialize.c
- * arch/arm/src/board/lpc17_40_sdraminitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +46,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/lpc17_40_syscon.h"
+#include "hardware/lpc17_40_syscon.h"
 #include "lpc17_40_emc.h"
 
 #include "lpc4088-quickstart.h"

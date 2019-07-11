@@ -2195,10 +2195,11 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
 
       default:
         nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
-        return -ENOTTY;  /* Special return value for this case */
+        ret = -ENOTTY;  /* Special return value for this case */
+        break;
     }
 
-  return OK;
+  return ret;
 }
 #endif
 

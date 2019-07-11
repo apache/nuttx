@@ -47,7 +47,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/lpc17_40_syscon.h"
+#include "hardware/lpc17_40_syscon.h"
 #include "lpc17_40_emc.h"
 
 #include "lpc4088-devkit.h"
