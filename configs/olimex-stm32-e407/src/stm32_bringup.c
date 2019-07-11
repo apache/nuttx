@@ -218,6 +218,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+  /* Initialize the BMP180 pressure sensor. */
+
+  ret = stm32_bmp180initialize("/dev/press0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
+      return ret;
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
