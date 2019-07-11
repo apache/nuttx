@@ -1,6 +1,7 @@
 README
 ======
-The Olimex STM32-E407 configuration is based on the configuration olimex-stm32-h407 and stm32f4discovery.
+The Olimex STM32-E407 configuration is based on the configuration
+olimex-stm32-h407 and stm32f4discovery.
 
 Configurations
 ==============
@@ -10,9 +11,11 @@ Configurations
   Each Olimex-STM32-E407 configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh olimex-stm32-e407/<subdir>
+    tools/configure.sh [OPTIONS] olimex-stm32-e407/<subdir>
 
-  Where <subdir> is one of the following:
+  Typical options include -l for a Linux host platform or -c for Cygwin
+  host platform. See 'tools/configure.sh -h' for other options.  And
+  <subdir> is one of the sub-directories listed below.
 
   Compile Firmware
   ----------------
@@ -26,8 +29,7 @@ Configurations
     nuttx.hex
     nuttx.bin
 
-  You can return more kind of files by setting on menuconfig.
-
+  You can return more kinds of files by setting on menuconfig.
 
   Flashing the Board
   -----------------
