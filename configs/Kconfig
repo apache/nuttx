@@ -450,7 +450,7 @@ config ARCH_BOARD_LPC4088_DEVKIT
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Embedded Artists LPC4088 Developer's Kit. See 	
+		Embedded Artists LPC4088 Developer's Kit. See
 		https://www.embeddedartists.com/products/lpc4088-developers-kit/
 		for further information. This board uses the NXP LPC4088FET208 MCU.
 
@@ -461,7 +461,7 @@ config ARCH_BOARD_LPC4088_QUICKSTART
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Embedded Artists LPC4088 QuickStart Board. See 	
+		Embedded Artists LPC4088 QuickStart Board. See
 		https://www.embeddedartists.com/products/lpc4088-quickstart-board/
 		for further information. This board uses the NXP LPC4088FET208 MCU.
 
