@@ -275,22 +275,6 @@ Information Common to All Configurations
 Configuration Directories
 -------------------------
 
-  fb
-  --
-
-    A simple configuration used for some basic (non-graphic) debug of the
-    framebuffer character drivers using apps/examples/fb.  This
-    configuration enables SDRAM to hold the LCD framebuffer and enables
-    the LPC178x LCD driver in order to support the external LCD panel.
-
-    NOTES:
-
-    1. In this configuration, the SDRAM is not added to heap but is
-       dedicated to supporting an LCD frame buffer at address 0xa0010000.
-
-    STATUS:
-      2019-04-23:  Untested with LPC4088.
-
   knsh
   ----
     This is identical to the nsh configuration below except that NuttX
@@ -391,21 +375,6 @@ Configuration Directories
        STATUS:
          2019-04-23:  Untested with LPC4088.
 
-  knxterm
-  -------
-
-    This is another protected mode build.  This configuration was used to
-    verify that NxTerms can be used in protected mode.  See the knsh
-    configuration notes for instructions on building and loading this
-    configuration.
-
-    This is a very minimal configuration intended only for low level testing.
-    To be useful, the font sizes, windows sizes, and line widths would need
-    to be optimized to make a friendlier display.
-
-    STATUS:
-      2019-04-23:  Untested with LPC4088.
-
   nsh
   ---
     Configures the NuttShell (nsh) located at examples/nsh.  The
@@ -431,46 +400,3 @@ Configuration Directories
 
    STATUS:
      2019-04-23:  Untested with LPC4088.
-
-  pdcurses
-  -------
-
-    A simple NSH configuration used for some basic (non-graphic) debug of
-    the pdcurses library on top of a framebuffer character drivers.  This
-    configuration provides the test programs from:
-
-      - apps/examples/pdcurses,
-      - apps/examples/fb, and
-      - apps/examples/djoystick
-
-    as NSH built-in applications.  A discrete joystick is provided to
-    control pdcurses examples using the joystick buttons on the LPC4088 Base
-    board.
-
-    This configuration enables SDRAM to hold the LCD framebuffer and
-    enables the LPC178x LCD driver in order to support the external LCD panel.
-    In this configuration, the SDRAM is not added to heap
-    but is dedicated to supporting an LCD frame buffer at address
-    0xa0010000.
-
-    STATUS:
-    2019-04-23:  Untested with LPC4088.
-
-  pwfb:
-  -----
-
-    This configuration uses the test at apps/examples/pwfb to verify the
-    operation of the per-window framebuffers.  That example shows three
-    windows containing text moving around, crossing each other from
-    "above" and from "below".  The example application is NOT updating the
-    windows any anyway!  The application is only changing the window
-    position.  The windows are being updated from the per-winidow
-    framebuffers automatically.
-
-    This example is reminescent of Pong:  Each window travels in straight
-    line until it hits an edge, then it bounces off.  The window is also
-    raised when it hits the edge (gets "focus").  This tests all
-    combinations of overap.
-
-    STATUS:
-      2019-04-23: Untested with LPC4088
