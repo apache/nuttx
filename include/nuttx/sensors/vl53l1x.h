@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/am335x/am335x_clockconfig.c
+ * drivers/sensors/vl53l1x.h
  *
- *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ *   Copyright (C) 2019 Acutronics Robotics. All rights reserved.
+ *   Author: Acutronics Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,77 +33,82 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __INCLUDE_NUTTX_SENSORS_VL53L1X_H
+#define __INCLUDE_NUTTX_SENSORS_VL53L1X_H
 
 #include <nuttx/config.h>
 
-#include "up_arch.h"
-#include "hardware/am335x_prcm.h"
-#include "am335x_config.h"
-#include "am335x_clockconfig.h"
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_VL53L1X)
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define VL53L1X_I2C_PORTNO 1
+
+#define SOFT_RESET                  0x0000
+#define TIMEOUT_MACROP_LOOP_BOUND   0x0008
+#define RANGE_OFFSET_MM             0x001e
+#define INNER_OFFSET_MM             0x0020
+#define OUTER_OFFSET_MM             0x0022
+#define GPIO_MUX_CTRL               0x0030
+#define GPIO_STATUS                 0x0031
+#define PHASECAL_TIMEOUT_MACRO      0x004b
+#define RANGE_CFG_TIMEOUT_MACRO_HI  0x005e
+#define RANGE_VCSEL_PERIOD_A        0x0060
+#define RANGE_VCSEL_PERIOD_B        0x0063
+#define RANGE_TIMEOUT_MACRO_HI      0x0061
+#define RANGE_CFG_VALID_PHASE       0x0069
+#define SYSTEM__THRESH_HIGH         0x0072
+#define SYSTEM__THRESH_LOW          0x0074
+#define SD_CFG_WOI_SD0              0x0078
+#define SD_CFG_INIT_PHASE           0x007a
+#define INTERRUPT_CLEAR             0x0086
+#define SYSTEM_MODE                 0x0087
+#define EFFECTIVE_SPADS             0x008c
+#define VL53L1_GET_DISTANCE         0x0096
+#define SIGNAL_COUNT_RATE           0x0098
+#define VL53L1_SYSTEM_STATUS        0x00e5
+#define VL53L1_GET_ID               0x010f
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am335x_dmtimer1ms_clockconfig
+ * Public Function Prototypes
  ****************************************************************************/
 
-static inline void am335x_dmtimer1ms_clockconfig(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  putreg32(CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC,
-           AM335X_CM_DPLL_CLKSEL_TIMER1MS_CLK);
-
-  while ((getreg32(AM335X_CM_DPLL_CLKSEL_TIMER1MS_CLK) &
-          CM_DPLL_DMTIMER1MS_CLKSEL_MASK)
-          != CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC)
-    {
-    }
-
-  modifyreg32(AM335X_CM_WKUP_TIMER1_CLKCTRL, CM_WKUP_CLKCTRL_MODULEMODE_MASK,
-              CM_WKUP_CLKCTRL_MODULEMODE_ENABLE);
-
-  while ((getreg32(AM335X_CM_WKUP_TIMER1_CLKCTRL) &
-          (CM_WKUP_CLKCTRL_MODULEMODE_MASK | CM_WKUP_CLKCTRL_IDLEST_MASK))
-         != (CM_WKUP_CLKCTRL_MODULEMODE_ENABLE | CM_WKUP_CLKCTRL_IDLEST_FUNC))
-    {
-    }
-}
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: am335x_clockconfig
+ * Name: vl53l1x_register
  *
  * Description:
- *   Called to initialize the AM335X.  This does whatever setup is needed to
- *   put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.
+ *   Register the VL53L1X character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/tof0"
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             VL53L1X
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void am335x_clockconfig(void)
-{
-  /* Don't change the current basic clock configuration if we are running
-   * from SDRAM.  In this case, some bootloader logic has already configured
-   * clocking and SDRAM.  We are pretty much committed to using things the
-   * way that the bootloader has left them.
-   *
-   * Clocking will be configured at 792 MHz initially when started via
-   * U-Boot.  The Linux kernel will uses the CPU frequency scaling code
-   * which will switch the processor frequency between 400 MHz and 1GHz based
-   * on load and temperature.  For now, NuttX simply leaves the clocking at
-   * 792MHz.
-   */
+int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 
-  am335x_dmtimer1ms_clockconfig();
-
-#ifndef CONFIG_AM335X_BOOT_SDRAM
-#  warning Missing logic
-#endif
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* CONFIG_I2C && CONFIG_SENSORS_VL53L1X */
+#endif /* __INCLUDE_NUTTX_SENSORS_VL53L1X_H */

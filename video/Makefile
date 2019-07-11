@@ -41,7 +41,7 @@ CSRCS =
 DEPPATH = --dep-path .
 VPATH = .
 
-include edid/Make.defs
+include videomode/Make.defs
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

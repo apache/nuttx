@@ -173,6 +173,7 @@ struct gs2200m_dev_s
   uint16_t             aip_cid_bits;
   uint8_t              tx_buff[MAX_PKT_LEN];
   struct net_driver_s  net_dev;
+  uint8_t              op_mode;
   FAR const struct gs2200m_lower_s *lower;
 };
 
@@ -1369,10 +1370,18 @@ errout:
 static enum pkt_type_e gs2200m_set_opmode(FAR struct gs2200m_dev_s *dev,
                                           uint8_t mode)
 {
+  enum pkt_type_e t;
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+WM=%d\r\n", mode);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  t = gs2200m_send_cmd(dev, cmd, NULL);
+
+  if (TYPE_OK == t)
+    {
+      dev->op_mode = mode;
+    }
+
+  return t;
 }
 
 /****************************************************************************
@@ -1471,7 +1480,7 @@ static enum pkt_type_e gs2200m_set_security(FAR struct gs2200m_dev_s *dev,
  ****************************************************************************/
 
 static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
-                                            FAR char *ssid)
+                                            FAR char *ssid, uint8_t ch)
 {
   struct pkt_dat_s pkt_dat;
   enum pkt_type_e   r;
@@ -1482,7 +1491,18 @@ static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
   /* Initialize pkt_dat and send command */
 
   memset(&pkt_dat, 0, sizeof(pkt_dat));
-  snprintf(cmd, sizeof(cmd), "AT+WA=%s\r\n", ssid);
+
+  if (0 == dev->op_mode)
+    {
+      snprintf(cmd, sizeof(cmd), "AT+WA=%s\r\n", ssid);
+    }
+  else
+    {
+      /* In AP mode, we can specify chennel to use */
+
+      snprintf(cmd, sizeof(cmd), "AT+WA=%s,,%d\r\n", ssid, ch);
+    }
+
   r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
 
   if (r != TYPE_OK)
@@ -2155,7 +2175,7 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
 
   /* Associate with AP */
 
-  if (TYPE_OK != gs2200m_join_network(dev, msg->ssid))
+  if (TYPE_OK != gs2200m_join_network(dev, msg->ssid, 0))
     {
       wlerr("*** error: failed to join (ssid:%s) \n", msg->ssid);
       return -1;
@@ -2222,9 +2242,10 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
 
   /* Enable the AP */
 
-  if (TYPE_OK != gs2200m_join_network(dev, msg->ssid))
+  if (TYPE_OK != gs2200m_join_network(dev, msg->ssid, msg->ch))
     {
-      wlerr("*** error: failed to join (ssid:%s) \n", msg->ssid);
+      wlerr("*** error: failed to join (ssid:%s, ch:%d) \n",
+            msg->ssid, msg->ch);
       return -1;
     }
 

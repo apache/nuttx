@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/am335x/hardware/am335x_cm.h
+ * arch/arm/src/am335x/hardware/am335x_dcan.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>

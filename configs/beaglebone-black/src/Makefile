@@ -51,7 +51,7 @@ CSRCS += am335x_buttons.c
 endif
 
 ifeq ($(CONFIG_AM335X_LCDC),y)
-CSRCS += am335x_lcdc.c
+CSRCS += am335x_lcd.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

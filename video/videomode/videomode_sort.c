@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/edid_sort.c
+ * video/videomode/videomode_sort.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-#include <nuttx/video/edid.h>
+#include <nuttx/video/videomode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,10 +55,10 @@
  * Private Functions
  ****************************************************************************/
 
-static inline void swap_modes(FAR struct edid_videomode_s *left,
-                              FAR struct edid_videomode_s *right)
+static inline void videomode_swap(FAR struct videomode_s *left,
+                                  FAR struct videomode_s *right)
 {
-  struct edid_videomode_s temp;
+  struct videomode_s temp;
 
   temp   = *left;
   *left  = *right;
@@ -82,7 +82,7 @@ static inline int _abs(int a)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  edid_sort_modes
+ * Name:  sort_videomodes
  *
  * Description:
  *   Sort video modes by refresh rate, aspect ratio, then resolution.
@@ -102,10 +102,11 @@ static inline int _abs(int a)
  *
  ****************************************************************************/
 
-void edid_sort_modes(FAR struct edid_videomode_s *modes,
-                     FAR struct edid_videomode_s **preferred, unsigned int nmodes)
+void sort_videomodes(FAR struct videomode_s *modes,
+                     FAR struct videomode_s **preferred,
+                     unsigned int nmodes)
 {
-  FAR struct edid_videomode_s *tmpmode = NULL;
+  FAR struct videomode_s *tmpmode = NULL;
   int aspect;
   int refresh;
   int hbest;
@@ -131,7 +132,7 @@ void edid_sort_modes(FAR struct edid_videomode_s *modes,
                               (*preferred)->htotal), (*preferred)->vtotal);
       if (*preferred != modes)
         {
-          swap_modes(*preferred, modes);
+          videomode_swap(*preferred, modes);
           *preferred = modes;
         }
     }
@@ -165,7 +166,7 @@ void edid_sort_modes(FAR struct edid_videomode_s *modes,
                               tmpmode->htotal), tmpmode->vtotal);
       if (tmpmode != modes)
         {
-          swap_modes(tmpmode, modes);
+          videomode_swap(tmpmode, modes);
         }
     }
 
@@ -220,7 +221,7 @@ void edid_sort_modes(FAR struct edid_videomode_s *modes,
 
       if (tmpmode != &modes[j])
         {
-          swap_modes(tmpmode, &modes[j]);
+          videomode_swap(tmpmode, &modes[j]);
         }
     }
 }

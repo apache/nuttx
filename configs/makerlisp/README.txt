@@ -384,10 +384,11 @@ Configuration Subdirectories
        You can debug the all RAM version using ZDS-II as follows:
 
        a. Connect to the debugger,
-       b. Load the nuttx.lod file
+       b. Reset, Go, and Break.  This will initialize the external RAM
+       c. Break and Load the nuttx.lod file
        c. Set the PC to 0x040000
        d. Single step a few times to make sure things look good, then
-       e. "GO"
+       e. Go
 
     5. Optimizations:
 
@@ -415,7 +416,7 @@ Configuration Subdirectories
         configuration.  Not yet verified.
 
       2019-07-09:  The RAM version does not run!  I can single step through
-        the initialization and all looks well, but when I "GO", the system
+        the initialization and all looks well, but when I "Go", the system
         crashes.  The PC is sitting at a crazy address when I break in.  I
         have not yet debugged this.
 

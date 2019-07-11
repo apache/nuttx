@@ -57,6 +57,10 @@ ifeq ($(CONFIG_SENSORS_APDS9960),y)
   CSRCS += apds9960.c
 endif
 
+ifeq ($(CONFIG_SENSORS_AK09912),y)
+  CSRCS += ak09912.c
+endif
+
 ifeq ($(CONFIG_SENSORS_AS5048B),y)
   CSRCS += as5048b.c
 endif
@@ -112,6 +116,11 @@ endif
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += bmp180.c
 endif
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += bmp280.c
+endif
+
 
 ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c
@@ -247,6 +256,12 @@ endif
 
 ifeq ($(CONFIG_SENSORS_VEML6070),y)
   CSRCS += veml6070.c
+endif
+
+# ST VL53L1X
+
+ifeq ($(CONFIG_SENSORS_VL53L1X),y)
+  CSRCS += vl53l1x.c
 endif
 
 # Sensixs XEN1210

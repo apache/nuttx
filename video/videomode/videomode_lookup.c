@@ -1,5 +1,5 @@
 /****************************************************************************
- * video/edid/edid_parse.c
+ * video/videomode/videomode_lookup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -7,9 +7,7 @@
  * Derives from logic in FreeBSD which has an equivalent 3-clause BSD
  * license:
  *
- *   Copyright (c) 2006 Itronix Inc.
- *   All rights reserved.
- *
+ *   Copyright (c) 2006 Itronix Inc. All rights reserved.
  *   Written by Garrett D'Amore for Itronix Inc.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +45,9 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <debug.h>
 
-#include <nuttx/video/edid.h>
+#include <nuttx/video/videomode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,14 +64,14 @@
 
 #define M(nm,hr,vr,clk,hs,he,ht,vs,ve,vt,f) \
   { \
-    clk, hr, hs, he, ht, vr, vs, ve, vt, f, nm \
+    clk, hr, hs, he, ht, vr, vs, ve, vt, 0, f, nm \
   }
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct edid_videomode_s g_videomodes[] =
+static const struct videomode_s g_videomodes[] =
 {
   M("640x350x85",    640,  350,  31500,  672,  736,  832,  382,  385,  445, HP|VN),
   M("640x400x85",    640,  400,  31500,  672,  736,  832,  401,  404,  445, HN|VP),
@@ -178,14 +177,15 @@ static const int g_nvideomodes = 46;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  edid_mode_lookup
+ * Name:  videomode_lookup_by_name
  *
  * Description:
- *   Find the video mode in a look-up table
+ *   Find the video mode in a look-up table by the name assigned to the
+ *   video mode.
  *
  ****************************************************************************/
 
-FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name)
+FAR const struct videomode_s *videomode_lookup_by_name(FAR const char *name)
 {
   int i;
 
@@ -199,3 +199,122 @@ FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name)
 
   return NULL;
 }
+
+/****************************************************************************
+ * Name:  videomode_lookup_by_dotclock
+ *
+ * Description:
+ *   Find the video mode in a look-up table with the matching width and
+ *   height and the closest dot clock that does not exceed the requested
+ *   dot clock.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+FAR const struct videomode_s *
+  videomode_lookup_by_dotclock(uint16_t width, uint16_t height,
+                               uint32_t dotclock)
+{
+  FAR const struct videomode_s *curr;
+  FAR const struct videomode_s *best = NULL;
+  int i;
+
+  lcdinfo("Looking for %u x %u at up to %lu kHz\n",
+          width, height, (unsigned long)dotclock);
+
+  for (i = 0; i < g_nvideomodes; i++)
+    {
+      curr = &g_videomodes[i];
+
+      if (curr->hdisplay == width && curr->vdisplay == height &&
+          curr->dotclock <= dotclock)
+        {
+          if (best != NULL)
+            {
+              if (curr->dotclock > best->dotclock)
+                {
+                  best = curr;
+                }
+            }
+        }
+      else
+        {
+          best = curr;
+        }
+    }
+
+  if (best != NULL)
+    {
+      lcdinfo("Found %s\n", best->name);
+    }
+
+  return best;
+}
+#endif
+
+/****************************************************************************
+ * Name:  videomode_lookup_by_refresh
+ *
+ * Description:
+ *   Find the video mode in a look-up table with the matching width and
+ *   height and the closest refrsh rate that does not exceed the requested
+ *   rate.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+FAR const struct videomode_s *
+  videomode_lookup_by_refresh(uint16_t width, uint16_t height,
+                              uint16_t refresh)
+{
+  FAR const struct videomode_s *curr;
+  FAR const struct videomode_s *best = NULL;
+  uint32_t mref;
+  int closest = 1000;
+  int diff;
+  int i;
+
+  lcdinfo("Looking for %u x %u at up to %u Hz\n",
+          width, height, refresh);
+
+  for (i = 0; i < g_nvideomodes; i++)
+    {
+      curr = &g_videomodes[i];
+
+      if (curr->hdisplay == width && curr->vdisplay == height)
+        {
+          mref = curr->dotclock * 1000 / (curr->htotal * curr->vtotal);
+          diff = mref - (uint32_t)refresh;
+          if (diff < 0)
+            {
+              diff = -diff;
+            }
+
+          lcdinfo("%s in %lu Hz, diff %d\n",
+                  curr->name, (unsigned long)mref, diff);
+
+          if (best != NULL)
+            {
+              if (diff < closest)
+                {
+                  best    = curr;
+                  closest = diff;
+                }
+            }
+          else
+            {
+              best    = curr;
+              closest = diff;
+            }
+        }
+    }
+
+  if (best != NULL)
+    {
+      lcdinfo("Found %s %lu\n",
+              best->name, (unsigned long)best->dotclock);
+    }
+
+  return best;
+}
+#endif

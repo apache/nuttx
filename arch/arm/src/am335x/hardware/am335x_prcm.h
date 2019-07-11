@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/am335x/hardware/am335x_cm.h
+ * arch/arm/src/am335x/hardware/am335x_prcm.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CM_H
-#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CM_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H
 
 /********************************************************************************************
  * Included Files
@@ -365,4 +365,4 @@
 #  define CM_DPLL_DMTIMER1_CLKSEL_CLK_RC32K             (3 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Select CLK_RC32K clock */
 #  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32768             (4 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Selects the CLK_32768 from 32KHz Crystal Osc */
 
-#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CM_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H */

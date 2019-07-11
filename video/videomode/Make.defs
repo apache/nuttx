@@ -1,5 +1,5 @@
 ############################################################################
-# video/edid/Make.defs
+# video/videomode/Make.defs
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,11 +38,13 @@ ifeq ($(CONFIG_VIDEO_EDID),y)
 # Files required for EDID support
 
 ASRCS +=
-CSRCS += edid_parse.c edid_videomode.c edid_sort.c
+CSRCS += edid_parse.c edid_dump.c
+CSRCS += videomode_lookup.c videomode_sort.c videomode_dump.c
+CSRCS += vesagtf.c
 
 # Include EDID build support
 
-DEPPATH += --dep-path edid
-VPATH += :edid
+DEPPATH += --dep-path videomode
+VPATH += :videomode
 
 endif

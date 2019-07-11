@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/am335x_control.h"
+#include "hardware/am335x_scm.h"
 #include "hardware/am335x_pinmux.h"
 
 /****************************************************************************

@@ -43,23 +43,12 @@
 #include <errno.h>
 
 #include "up_arch.h"
-#include "hardware/am335x_memorymap.h"
+#include "hardware/am335x_scm.h"
 #include "am335x_sysclk.h"
 
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
-
-/* REVISIT:  These belong in a control module register header file */
-
-#define AM335X_SCM_CTRL_STATUS_OFFSET       0x40
-#define AM335X_SCM_CTRL_STATUS              (AM335X_CONTROL_MODULE_VADDR + AM335X_SCM_CTRL_STATUS_OFFSET)
-#define SCM_CTRL_STATUS_SYSBOOT1_SHIFT      (22) /* Bits 22-23:  Crystal clock frequency selection */
-#define SCM_CTRL_STATUS_SYSBOOT1_MASK       (3 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
-#  define SCM_CTRL_STATUS_SYSBOOT1_19p2MHZ  (0 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
-#  define SCM_CTRL_STATUS_SYSBOOT1_24MHZ    (1 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
-#  define SCM_CTRL_STATUS_SYSBOOT1_25MHZ    (2 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
-#  define SCM_CTRL_STATUS_SYSBOOT1_26MHZ    (3 << SCM_CTRL_STATUS_SYSBOOT1_SHIFT)
 
 /****************************************************************************
  * Public Functions

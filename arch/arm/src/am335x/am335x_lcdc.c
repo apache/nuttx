@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/am225x/am335x_lcd.c
+ * arch/arm/src/am225x/am335x_lcdc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +56,7 @@
 #include <nuttx/video/fb.h>
 
 #include "up_arch.h"
-#include "hardware/am335x_cm.h"
+#include "hardware/am335x_prcm.h"
 #include "am335x_pinmux.h"
 #include "am335x_config.h"
 #include "am335x_gpio.h"

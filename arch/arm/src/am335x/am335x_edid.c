@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/am335x/am335x_wdog.c
+ * arch/arm/src/am335x/am335x_edid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -82,7 +82,7 @@
  ****************************************************************************/
 
 static uint32_t
-  am335x_videomode_vrefresh(FAR const struct edid_videomode_s *videomode)
+  am335x_videomode_vrefresh(FAR const struct videomode_s *videomode)
 {
   uint32_t refresh;
 
@@ -113,7 +113,7 @@ static uint32_t
  ****************************************************************************/
 
 static bool
-  am335x_videomode_valid(FAR const struct edid_videomode_s *videomode)
+  am335x_videomode_valid(FAR const struct videomode_s *videomode)
 {
   size_t fbstride;
   size_t fbsize;
@@ -216,10 +216,10 @@ static bool
  *
  ****************************************************************************/
 
-static const struct edid_videomode_s *
+static const struct videomode_s *
   am335x_lcd_pickmode(FAR struct edid_info_s *ei)
 {
-  FAR const struct edid_videomode_s *videomode;
+  FAR const struct videomode_s *videomode;
   int n;
 
   /* Get standard VGA as default */
@@ -242,7 +242,7 @@ static const struct edid_videomode_s *
    * are sorted on closest match to that mode.
    */
 
-  edid_sort_modes(ei->edid_modes, &ei->edid_preferred_mode, ei->edid_nmodes);
+  sort_videomodes(ei->edid_modes, &ei->edid_preferred_mode, ei->edid_nmodes);
 
   /* Pick the first valid mode in the list */
 
@@ -280,7 +280,7 @@ static const struct edid_videomode_s *
  *
  ****************************************************************************/
 
-void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
+void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
                           FAR struct am335x_panel_info_s *panel)
 {
   lcdinfo("Detected videomode: %dx%d @ %dKHz\n",
@@ -355,9 +355,9 @@ void am335x_lcd_videomode(FAR const struct edid_videomode_s *videomode,
 
 void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
                      FAR struct am335x_panel_info_s *panel,
-                     FAR struct edid_videomode_s *selected)
+                     FAR const struct videomode_s **selected)
 {
-  FAR const struct edid_videomode_s *videomode = NULL;
+  FAR const struct videomode_s *videomode = NULL;
   struct edid_info_s ei;
 
   /* Do we have EDID data? */
@@ -380,7 +380,7 @@ void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
 
   if (videomode == NULL)
     {
-      videomode = edid_mode_lookup("640x480x60");
+      videomode = videomode_lookup_by_name("640x480x60");
       DEBUGASSERT(videomode != NULL);
     }
 
@@ -392,6 +392,6 @@ void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
 
   if (selected != NULL)
     {
-      memcpy(selected, videomode, sizeof(struct edid_videomode_s));
+      *selected = videomode;
     }
 }

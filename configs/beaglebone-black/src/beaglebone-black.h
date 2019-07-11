@@ -56,16 +56,25 @@
 
 /* LCD ******************************************************************************/
 
-#define HAVE_LCD 1
-#if !defined(CONFIG_AM335X_LCDC) || !defined(CONFIG_VIDEO_EDID) || \
-     !defined(CONFIG_LCD_TDA19988) || !defined(CONFIG_AM335X_I2C2)
+#define HAVE_LCD      1
+#define HAVE_TDA19988 1
+
+#if !defined(CONFIG_AM335X_LCDC) || !defined(CONFIG_VIDEO_EDID)
 #  undef HAVE_LCD
+#  undef HAVE_TDA19988
+#elif !defined(CONFIG_LCD_TDA19988) || !defined(CONFIG_AM335X_I2C2)
+#  undef HAVE_TDA19988
+#  if !defined(CONFIG_BEAGLEBONE_VIDEOMODE)
+#    define CONFIG_BEAGLEBONE_VIDEOMODE "640x480x60"
+#  endif
 #endif
 
-#define TDA19988_I2CBUS        2
-#define TDA19988_HDMI_I2CADDR  0x70
-#define TDA19988_CEC_I2CADDR   0x34
-#define TDA19988_I2CFREQUENCY  400000
+#if defined(HAVE_LCD)
+#  define TDA19988_I2CBUS        2
+#  define TDA19988_HDMI_I2CADDR  0x70
+#  define TDA19988_CEC_I2CADDR   0x34
+#  define TDA19988_I2CFREQUENCY  400000
+#endif
 
 /* LEDs *****************************************************************************/
 

@@ -118,6 +118,7 @@ struct gs2200m_assoc_msg
   FAR char *ssid;
   FAR char *key;
   uint8_t   mode;
+  uint8_t   ch;
 };
 
 struct gs2200m_lower_s

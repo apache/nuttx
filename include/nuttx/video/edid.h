@@ -5,10 +5,10 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference:  Wikipedia
+ * Reference:  Wikipedia (initial version)
  *
- * Some of structures in this file derive from FreeBSD which has a
- * compatible 2-clause BSD license:
+ * Updated and extended with definitions from FreeBSD which has a compatible 2-clause BSD
+ * license:
  *
  *  Copyright (c) 2006 Itronix Inc. All rights reserved.
  *  Written by Garrett D'Amore for Itronix Inc.
@@ -50,6 +50,7 @@
  ********************************************************************************************/
 
 #include <stdint.h>
+#include <nuttx/video/videomode.h>
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -168,6 +169,8 @@
 
                                                     /* For digital input: */
 #define EDID_DISPLAY_INPUT_VIDIF_SHIFT    (0)       /* Bits 0-3: Video interface */
+#define EDID_DISPLAY_INPUT_VIDIF_MASK     (15 << EDID_DISPLAY_INPUT_VIDIF_SHIFT)
+#  define EDID_DISPLAY_INPUT_DFP1_COMPAT  (1 << EDID_DISPLAY_INPUT_VIDIF_SHIFT)
 #define EDID_DISPLAY_INPUT_BITDEPTH_SHIFT (4)       /* Bits 4-6: Bit depth */
 #define EDID_DISPLAY_INPUT_BITDEPTH_MASK  (7 << EDID_DISPLAY_INPUT_BITDEPTH_SHIFT)
 
@@ -180,9 +183,13 @@
                                                      *         supported */
 #define EDID_DISPLAY_INPUT_SYNC           (1 << 3)  /* Bit 3:  Separate sync supported */
 #define EDID_DISPLAY_INPUT_BLANK2BLACK    (1 << 4)  /* Bit 4:  Blank to black setup */
-#define EDID_DISPLAY_INPUT_LEVELS_SHIFT   (0)       /* Bits 5-6: Video white and sync levels,
+#define EDID_DISPLAY_INPUT_LEVELS_SHIFT   (5)       /* Bits 5-6: Video white and sync levels,
                                                      *           relative to blank */
 #define EDID_DISPLAY_INPUT_LEVELS_MASK    (3 << EDID_DISPLAY_INPUT_LEVELS_SHIFT)
+#  define EDID_DISPLAY_INPUT_LEVEL_1      (0 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.7, 0.3V */
+#  define EDID_DISPLAY_INPUT_LEVEL_2      (1 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.714, 0.286V */
+#  define EDID_DISPLAY_INPUT_LEVEL_3      (2 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -1.0, 0.4V */
+#  define EDID_DISPLAY_INPUT_LEVEL_4      (3 << EDID_DISPLAY_INPUT_LEVELS_SHIFT) /* -0.7, 0.0V */
 
 /* Display Section: Supported Features */
 
@@ -204,6 +211,10 @@
 #define EDID_DISPLAY_FEATURE_ATYPE_MASK   (3 << EDID_DISPLAY_FEATURE_ATYPE_SHIFT)
 #define EDID_DISPLAY_FEATURE_DTYPE_SHIFT  (3)       /* Bits 3-4: Display type (digital) */
 #define EDID_DISPLAY_FEATURE_DTYPE_MASK   (3 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_MONO      (0 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_RGB       (1 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_NON_RGB   (2 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
+#  define EDID_ISPLAY_FEATURES_DTYPE_UNDEFINED (3 << EDID_DISPLAY_FEATURE_DTYPE_SHIFT)
 #define EDID_DISPLAY_FEATURE_DPMSOFF      (1 << 5)  /* Bit 5: DPMS active-off supported */
 #define EDID_DISPLAY_FEATURE_DPMSSUSP     (1 << 6)  /* Bit 6: DPMS suspend supported */
 #define EDID_DISPLAY_FEATURE_DPMSSTDBY    (1 << 7)  /* Bit 7: DPMS standby supported  */
@@ -479,45 +490,9 @@
                                                      * from manufacturer.  However, the value is
                                                      * later used by DDDB. */
 
-/* Video mode flags used in struct hdmi_videomode_s */
-
-#define VID_PHSYNC                        (1 << 0)
-#define VID_NHSYNC                        (1 << 1)
-#define VID_PVSYNC                        (1 << 2)
-#define VID_NVSYNC                        (1 << 3)
-#define VID_INTERLACE                     (1 << 4)
-#define VID_DBLSCAN                       (1 << 5)
-#define VID_CSYNC                         (1 << 6)
-#define VID_PCSYNC                        (1 << 7)
-#define VID_NCSYNC                        (1 << 8)
-#define VID_HSKEW                         (1 << 9)
-#define VID_BCAST                         (1 << 10)
-#define VID_PIXMUX                        (1 << 11)
-#define VID_DBLCLK                        (1 << 12)
-#define VID_CLKDIV2                       (1 << 13)
-
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-
-/* This structure represents one video mode extracted from the EDID.  CAREFUL:  Fields
- * may not change without also modification to initializer in edid_videomode.c.
- */
-
-struct edid_videomode_s
-{
-  uint32_t dotclock;     /* Dot clock frequency in kHz. */
-  uint16_t hdisplay;
-  uint16_t hsync_start;
-  uint16_t hsync_end;
-  uint16_t htotal;
-  uint16_t vdisplay;
-  uint16_t vsync_start;
-  uint16_t vsync_end;
-  uint16_t vtotal;
-  uint16_t flags;        /* Video mode flags; see above. */
-  FAR const char *name;
-};
 
 /* These structures is a user-friendly digest of the EDID data. */
 
@@ -540,8 +515,9 @@ struct edid_range_s
   uint16_t er_min_hfreq;  /* kHz */
   uint16_t er_max_hfreq;  /* kHz */
   uint16_t er_max_clock;  /* MHz */
-  int      er_have_gtf2;
   uint16_t er_gtf2_hfreq;
+
+  bool     er_have_gtf2;
   uint16_t er_gtf2_c;
   uint16_t er_gtf2_m;
   uint16_t er_gtf2_k;
@@ -561,18 +537,18 @@ struct edid_info_s
   uint8_t  edid_ext_block_count;
   uint16_t edid_product;
   uint32_t edid_serial;
-  int      edid_year;
-  int      edid_week;
-  int      edid_have_range;
+  uint16_t edid_year;
+  uint8_t  edid_week;
+  bool     edid_have_range;
 
   struct edid_range_s  edid_range;
   struct edid_chroma_s edid_chroma;
 
   /* Parsed modes */
 
-  FAR struct edid_videomode_s  *edid_preferred_mode;
+  FAR struct videomode_s *edid_preferred_mode;
   int      edid_nmodes;
-  struct edid_videomode_s edid_modes[64];
+  struct videomode_s edid_modes[64];
 };
 
 /********************************************************************************************
@@ -599,37 +575,19 @@ struct edid_info_s
 int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid);
 
 /********************************************************************************************
- * Name:  edid_sort_modes
+ * Name:  edid_dump
  *
  * Description:
- *   Sort video modes by refresh rate, aspect ratio, then resolution.
- *   Preferred mode or largest mode is first in the list and other modes
- *   are sorted on closest match to that mode.
- *
- *   Note that the aspect ratio calculation treats "close" aspect ratios
- *   (within 12.5%) as the same for this purpose.
+ *   Dump the full content of the EDID
  *
  * Input Parameters:
- *   modes     - A reference to the first entry in a list of video modes
- *   preferred - A pointer to the pointer to the preferred mode in the list
- *   nmodes    - The number of modes in the list
+ *   edid - The edid to be dumped
  *
  * Returned Value:
  *   None
  *
  ********************************************************************************************/
 
-void edid_sort_modes(FAR struct edid_videomode_s *modes,
-                     FAR struct edid_videomode_s **preferred, unsigned int nmodes);
-
-/********************************************************************************************
- * Name:  edid_mode_lookup
- *
- * Description:
- *   Find the video mode in a look-up table
- *
- ********************************************************************************************/
-
-FAR const struct edid_videomode_s *edid_mode_lookup(FAR const char *name);
+void edid_dump(FAR const struct edid_info_s *edid);
 
 #endif /* __INCLUDE_NUTTX_VIDEO_EDID_H */

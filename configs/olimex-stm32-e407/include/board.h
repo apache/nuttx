@@ -212,24 +212,35 @@
 /* Alternate function pin selections ************************************************/
 
 /* USART1 */
+
 #define GPIO_USART1_RX    GPIO_USART1_RX_2 /* PB7 */
 #define GPIO_USART1_TX    GPIO_USART1_TX_2 /* PB6 */
 
 /* USART2 */
+
 #define GPIO_USART2_RX    GPIO_USART2_RX_2 /* PD6 */
 #define GPIO_USART2_TX    GPIO_USART2_TX_2 /* PD5 */
 
 /* USART3 */
+
 #define GPIO_USART3_RX    GPIO_USART3_RX_1 /* PB11 */
 #define GPIO_USART3_TX    GPIO_USART3_TX_1 /* PB10 */
 
 /* CAN */
-#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 /* PB8 */
-#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 /* PB9 */
+
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2   /* PB8 */
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2   /* PB9 */
 
 /* I2C */
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_1 /* PB6 */
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_1 /* PB7 */
+
+#define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1  /* PB6 */
+#define GPIO_I2C1_SDA     GPIO_I2C1_SDA_1  /* PB7 */
+
+/* SPI1 */
+
+#define GPIO_SPI1_SCK     GPIO_SPI1_SCK_1  /* PA5 */
+#define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_2 /* PB5 */
+#define GPIO_SPI1_MISO    GPIO_SPI1_MISO_1 /* PA6 */
 
 /* Ethernet *************************************************************************/
 
