@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/spresense_main.c
+ * arch/arm/src/cxd56xx/cxd56_gnss.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,24 +33,76 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include <debug.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/* GNSS specific debug */
+
+#ifdef CONFIG_CXD56_GNSS_DEBUG_ERROR
+#  define gnsserr(fmt, ...)  logerr(fmt, ## __VA_ARGS__)
+#else
+#  define gnsserr(fmt, ...)
+#endif
+
+#ifdef CONFIG_CXD56_GNSS_DEBUG_WARN
+#  define gnsswarn(fmt, ...)  logwarn(fmt, ## __VA_ARGS__)
+#else
+#  define gnsswarn(fmt, ...)
+#endif
+
+#ifdef CONFIG_CXD56_GNSS_DEBUG_INFO
+#  define gnssinfo(fmt, ...)  loginfo(fmt, ## __VA_ARGS__)
+#else
+#  define gnssinfo(fmt, ...)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* This function is provided outside exported SDK, therefore here is defined
- * as weak symbol to avoid link error.
- */
+/****************************************************************************
+ * Name: cxd56_gnssinitialize
+ *
+ * Description:
+ *   Initialize GNSS device
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gps"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-int nsh_main(int argc, char *argv[]);
+int cxd56_gnssinitialize(FAR const char *devpath);
 
-int weak_function spresense_main(int argc, char *argv[])
-{
-  return nsh_main(argc, argv);
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_H */

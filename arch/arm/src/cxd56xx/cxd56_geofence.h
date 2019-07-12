@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/spresense_main.c
+ * arch/arm/src/cxd56xx/cxd56_geofence.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,24 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GEOFENCE_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_GEOFENCE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* This function is provided outside exported SDK, therefore here is defined
- * as weak symbol to avoid link error.
- */
+/****************************************************************************
+ * Name: cxd56_geofenceinitialize
+ *
+ * Description:
+ *   Initialize GEOFENCE device
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/geofence"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-int nsh_main(int argc, char *argv[]);
+int cxd56_geofenceinitialize(FAR const char *devpath);
 
-int weak_function spresense_main(int argc, char *argv[])
-{
-  return nsh_main(argc, argv);
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GEOFENCE_H */

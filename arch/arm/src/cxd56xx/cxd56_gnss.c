@@ -1,0 +1,2937 @@
+/****************************************************************************
+ * arch/arm/src/cxd56xx/cxd56_gnss.c
+ *
+ *   Copyright 2018,2019 Sony Semiconductor Solutions Corporation
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
+ *    the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fixedmath.h>
+#include <poll.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <arch/chip/gnss.h>
+#include <arch/board/board.h>
+#include "cxd56_gnss_api.h"
+#include "cxd56_cpu1signal.h"
+#include "cxd56_gnss.h"
+
+#if defined(CONFIG_CXD56_GNSS)
+
+/****************************************************************************
+ * External Defined Functions
+ ****************************************************************************/
+
+extern int PM_LoadImage(int cpuid, const char* filename);
+extern int PM_StartCpu(int cpuid, int wait);
+extern int PM_SleepCpu(int cpuid, int mode);
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_CXD56_GNSS_NPOLLWAITERS
+#  define CONFIG_CXD56_GNSS_NPOLLWAITERS      4
+#endif
+
+#ifndef CONFIG_CXD56_GNSS_NSIGNALRECEIVERS
+#  define CONFIG_CXD56_GNSS_NSIGNALRECEIVERS  4
+#endif
+
+#ifndef CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE
+#  define CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE 1024
+#endif
+
+#ifndef CONFIG_CXD56_GNSS_BACKUP_FILENAME
+#  define CONFIG_CXD56_GNSS_BACKUP_FILENAME   "/mnt/spif/gnss_backup.bin"
+#endif
+
+#ifndef CONFIG_CXD56_GNSS_CEP_FILENAME
+#  define CONFIG_CXD56_GNSS_CEP_FILENAME      "/mnt/spif/gnss_cep.bin"
+#endif
+
+#define CXD56_GNSS_GPS_CPUID                  1
+#ifdef  CONFIG_CXD56_GNSS_FW_RTK
+#  define CXD56_GNSS_FWNAME                   "gnssfwrtk"
+#else
+#  define CXD56_GNSS_FWNAME                   "gnssfw"
+#endif
+#ifndef PM_SLEEP_MODE_COLD
+#  define PM_SLEEP_MODE_COLD                  2
+#endif
+#ifndef PM_SLEEP_MODE_HOT_ENABLE
+#  define PM_SLEEP_MODE_HOT_ENABLE            7
+#endif
+#ifndef PM_SLEEP_MODE_HOT_DISABLE
+#  define PM_SLEEP_MODE_HOT_DISABLE           8
+#endif
+
+/* Notify data of PUBLISH_TYPE_GNSS */
+
+#define CXD56_GNSS_NOTIFY_TYPE_POSITION       0
+#define CXD56_GNSS_NOTIFY_TYPE_BOOTCOMP       1
+#define CXD56_GNSS_NOTIFY_TYPE_REQBKUPDAT     2
+#define CXD56_GNSS_NOTIFY_TYPE_REQCEPOPEN     3
+#define CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE    4
+#define CXD56_GNSS_NOTIFY_TYPE_REQCEPDAT      5
+#define CXD56_GNSS_NOTIFY_TYPE_REQCEPBUFFREE  6
+
+/* GNSS core CPU FIFO interface API */
+
+#define CXD56_GNSS_GD_GNSS_START              0
+#define CXD56_GNSS_GD_GNSS_STOP               1
+#define CXD56_GNSS_GD_GNSS_CEPINITASSISTDATA  2
+
+/* CPU FIFO API bitfield converter */
+
+#define CXD56_GNSS_CPUFIFOAPI_SET_DATA(API, DATA) (((DATA) << 8) | (API))
+
+/* Common info shared with GNSS core */
+
+#define GNSS_SHARED_INFO_MAX_ARGC             6
+
+/* GDSP File read/write arguments */
+
+#define GNSS_ARGS_FILE_OFFSET                 0
+#define GNSS_ARGS_FILE_BUF                    1
+#define GNSS_ARGS_FILE_LENGTH                 2
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNAL
+struct cxd56_gnss_sig_s
+{
+  uint8_t                             enable;
+  int                                 pid;
+  FAR struct cxd56_gnss_signal_info_s info;
+};
+#endif
+
+struct cxd56_gnss_shared_info_s
+{
+  int      retval;
+  uint32_t argc;
+  uint32_t argv[GNSS_SHARED_INFO_MAX_ARGC];
+};
+
+struct cxd56_gnss_dev_s
+{
+  sem_t                           devsem;
+  sem_t                           syncsem;
+  uint8_t                         num_open;
+  uint8_t                         notify_data;
+  FAR FILE *                      cepfp;
+  FAR void *                      cepbuf;
+  FAR struct pollfd              *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
+#if !defined(CONFIG_DISABLE_SIGNAL) && \
+  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+  struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
+#endif
+  struct cxd56_gnss_shared_info_s shared_info;
+  sem_t                           ioctllock;
+  sem_t                           apiwait;
+  int                             apiret;
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* ioctl command functions */
+
+static int cxd56_gnss_start(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_stop(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_select_satellite_system(FAR struct file *filep,
+                                              unsigned long    arg);
+static int cxd56_gnss_get_satellite_system(FAR struct file *filep,
+                                           unsigned long    arg);
+static int
+cxd56_gnss_set_receiver_position_ellipsoidal(FAR struct file *filep,
+                                             unsigned long    arg);
+static int cxd56_gnss_set_receiver_position_orthogonal(FAR struct file *filep,
+                                                       unsigned long    arg);
+static int cxd56_gnss_set_ope_mode(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_get_ope_mode(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_set_tcxo_offset(FAR struct file *filep,
+                                      unsigned long    arg);
+static int cxd56_gnss_get_tcxo_offset(FAR struct file *filep,
+                                      unsigned long    arg);
+static int cxd56_gnss_set_time(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_get_almanac(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_set_almanac(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_get_ephemeris(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_set_ephemeris(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_save_backup_data(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_erase_backup_data(FAR struct file *filep,
+                                        unsigned long    arg);
+static int cxd56_gnss_open_cep_data(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_close_cep_data(FAR struct file *filep,
+                                     unsigned long    arg);
+static int cxd56_gnss_check_cep_data(FAR struct file *filep,
+                                     unsigned long    arg);
+static int cxd56_gnss_get_cep_age(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_reset_cep_flag(FAR struct file *filep,
+                                     unsigned long    arg);
+static int cxd56_gnss_set_acquist_data(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_set_frametime(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_set_tau_gps(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_set_time_gps(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_clear_receiver_info(FAR struct file *filep,
+                                          unsigned long    arg);
+static int cxd56_gnss_set_tow_assist(FAR struct file *filep,
+                                     unsigned long    arg);
+static int cxd56_gnss_set_utc_model(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_control_spectrum(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_start_test(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_stop_test(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_get_test_result(FAR struct file *filep,
+                                      unsigned long    arg);
+static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_start_pvtlog(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_stop_pvtlog(FAR struct file *filep, unsigned long arg);
+static int cxd56_gnss_delete_pvtlog(FAR struct file *filep,
+                                    unsigned long    arg);
+static int cxd56_gnss_get_pvtlog_status(FAR struct file *filep,
+                                        unsigned long    arg);
+static int cxd56_gnss_start_rtk_output(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_stop_rtk_output(FAR struct file *filep,
+                                      unsigned long    arg);
+static int cxd56_gnss_set_rtk_interval(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_get_rtk_interval(FAR struct file *filep,
+                                       unsigned long    arg);
+static int cxd56_gnss_select_rtk_satellite(FAR struct file *filep,
+                                           unsigned long    arg);
+static int cxd56_gnss_get_rtk_satellite(FAR struct file *filep,
+                                        unsigned long    arg);
+static int cxd56_gnss_set_rtk_ephemeris_enable(FAR struct file *filep,
+                                               unsigned long    arg);
+static int cxd56_gnss_get_rtk_ephemeris_enable(FAR struct file *filep,
+                                               unsigned long    arg);
+static int cxd56_gnss_start_navmsg_output(FAR struct file *filep,
+                                          unsigned long    arg);
+static int cxd56_gnss_get_var_ephemeris(FAR struct file *filep,
+                                        unsigned long arg);
+static int cxd56_gnss_set_var_ephemeris(FAR struct file *filep,
+                                        unsigned long arg);
+
+/* file operation functions */
+
+static int cxd56_gnss_open(FAR struct file *filep);
+static int cxd56_gnss_close(FAR struct file *filep);
+static ssize_t cxd56_gnss_read(FAR struct file *filep, FAR char *buffer,
+                               size_t len);
+static ssize_t cxd56_gnss_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen);
+static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
+                            unsigned long arg);
+#ifndef CONFIG_DISABLE_POLL
+static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                           bool setup);
+#endif
+static int8_t cxd56_gnss_select_notifytype(off_t fpos, uint32_t *offset);
+
+static int cxd56_gnss_cpufifo_api(FAR struct file *filep, unsigned int api,
+                                  unsigned int data);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This the vtable that supports the character driver interface */
+
+static const struct file_operations g_gnssfops =
+{
+  cxd56_gnss_open,  /* open */
+  cxd56_gnss_close, /* close */
+  cxd56_gnss_read,  /* read */
+  cxd56_gnss_write, /* write */
+  0,                /* seek */
+  cxd56_gnss_ioctl, /* ioctl */
+#ifndef CONFIG_DISABLE_POLL
+  cxd56_gnss_poll,  /* poll */
+#endif
+};
+
+/* GNSS ioctl command list */
+
+static int (*g_cmdlist[CXD56_GNSS_IOCTL_MAX])(FAR struct file *filep,
+                                              unsigned long    arg) =
+{
+  NULL,                    /* CXD56_GNSS_IOCTL_INVAL = 0 */
+  cxd56_gnss_start,
+  cxd56_gnss_stop,
+  cxd56_gnss_select_satellite_system,
+  cxd56_gnss_get_satellite_system,
+  cxd56_gnss_set_receiver_position_ellipsoidal,
+  cxd56_gnss_set_receiver_position_orthogonal,
+  cxd56_gnss_set_ope_mode,
+  cxd56_gnss_get_ope_mode,
+  cxd56_gnss_set_tcxo_offset,
+  cxd56_gnss_get_tcxo_offset,
+  cxd56_gnss_set_time,
+  cxd56_gnss_get_almanac,
+  cxd56_gnss_set_almanac,
+  cxd56_gnss_get_ephemeris,
+  cxd56_gnss_set_ephemeris,
+  cxd56_gnss_save_backup_data,
+  cxd56_gnss_erase_backup_data,
+  cxd56_gnss_open_cep_data,
+  cxd56_gnss_close_cep_data,
+  cxd56_gnss_check_cep_data,
+  cxd56_gnss_get_cep_age,
+  cxd56_gnss_reset_cep_flag,
+  cxd56_gnss_start_rtk_output,
+  cxd56_gnss_stop_rtk_output,
+  cxd56_gnss_set_rtk_interval,
+  cxd56_gnss_get_rtk_interval,
+  cxd56_gnss_select_rtk_satellite,
+  cxd56_gnss_get_rtk_satellite,
+  cxd56_gnss_set_rtk_ephemeris_enable,
+  cxd56_gnss_get_rtk_ephemeris_enable,
+  cxd56_gnss_set_acquist_data,
+  cxd56_gnss_set_frametime,
+  cxd56_gnss_set_tau_gps,
+  cxd56_gnss_set_time_gps,
+  cxd56_gnss_clear_receiver_info,
+  cxd56_gnss_set_tow_assist,
+  cxd56_gnss_set_utc_model,
+  cxd56_gnss_control_spectrum,
+  cxd56_gnss_start_test,
+  cxd56_gnss_stop_test,
+  cxd56_gnss_get_test_result,
+  cxd56_gnss_set_signal,
+  cxd56_gnss_start_pvtlog,
+  cxd56_gnss_stop_pvtlog,
+  cxd56_gnss_delete_pvtlog,
+  cxd56_gnss_get_pvtlog_status,
+  cxd56_gnss_start_navmsg_output,
+  cxd56_gnss_set_var_ephemeris,
+  cxd56_gnss_get_var_ephemeris,
+
+  /* max                       CXD56_GNSS_IOCTL_MAX */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* IOCTL private functions */
+
+/****************************************************************************
+ * Name: cxd56_gnss_start
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_START command.
+ *   Start a positioning
+ *   begining to search the satellites and measure the receiver position
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_start(FAR struct file *filep, unsigned long arg)
+{
+  int     ret;
+  int     retry = 50;
+  uint8_t start_mode = (uint8_t)arg;
+
+  ret = board_lna_power_control(true);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  while (!g_rtc_enabled && 0 < retry--)
+    {
+      /* GNSS requires stable RTC */
+
+      usleep(100 * 1000);
+    }
+
+  ret = cxd56_gnss_cpufifo_api(filep, CXD56_GNSS_GD_GNSS_START,
+                               start_mode);
+  if (ret < 0)
+    {
+      board_lna_power_control(false);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_stop
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_STOP command.
+ *   Stop a positioning.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_stop(FAR struct file *filep, unsigned long arg)
+{
+  int ret;
+
+  ret = cxd56_gnss_cpufifo_api(filep, CXD56_GNSS_GD_GNSS_STOP, 0);
+  board_lna_power_control(false);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_satellite_system
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SELECT_SATELLITE_SYSTEM command.
+ *   Select GNSSs to positioning
+ *   These are able to specified by CXD56_GNSS_B_SAT_XXX defines.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_select_satellite_system(FAR struct file *filep,
+                                              unsigned long    arg)
+{
+  uint32_t system = (uint32_t)arg;
+
+  return GD_SelectSatelliteSystem(system);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_satellite_system
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_SATELLITE_SYSTEM command.
+ *   Get current using GNSSs to positioning
+ *   A argument 'satellite' indicates current GNSSs by bit fields defined by
+ *   CXD56_GNSS_B_SAT_XXX.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_satellite_system(FAR struct file *filep,
+                                           unsigned long    arg)
+{
+  int ret;
+  uint32_t system;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ret = GD_GetSatelliteSystem(&system);
+  *(uint32_t *)arg = system;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_receiver_position_ellipsoidal
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_RECEIVER_POSITION_ELLIPSOIDAL command.
+ *   Set the rough receiver position
+ *     arg = { double lat, double lon, double height }
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int
+cxd56_gnss_set_receiver_position_ellipsoidal(FAR struct file *filep,
+                                             unsigned long    arg)
+{
+  FAR struct cxd56_gnss_ellipsoidal_position_s *pos;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  pos = (FAR struct cxd56_gnss_ellipsoidal_position_s *)arg;
+
+  return GD_SetReceiverPositionEllipsoidal(&pos->latitude, &pos->longitude,
+                                           &pos->altitude);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_receiver_position_orthogonal
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_RECEIVER_POSITION_ORTHOGONAL command.
+ *   Set the rough receiver position as orgothonal
+ *     arg = { int32_t x, int32_t y, int32_t z }
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_receiver_position_orthogonal(FAR struct file *filep,
+                                                       unsigned long    arg)
+{
+  FAR struct cxd56_gnss_orthogonal_position_s *pos;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  pos = (FAR struct cxd56_gnss_orthogonal_position_s *)arg;
+  return GD_SetReceiverPositionOrthogonal(pos->x, pos->y, pos->z);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_ope_mode
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_OPE_MODE command.
+ *   Set GNSS operation mode.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_ope_mode(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_ope_mode_param_s *ope_mode;
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ope_mode = (FAR struct cxd56_gnss_ope_mode_param_s *)arg;
+
+  return GD_SetOperationMode(ope_mode->mode, ope_mode->cycle);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_ope_mode
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_OPE_MODE command.
+ *   Set the TCXO offset
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_ope_mode(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_ope_mode_param_s *ope_mode;
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ope_mode = (FAR struct cxd56_gnss_ope_mode_param_s *)arg;
+
+  return GD_GetOperationMode(&ope_mode->mode, &ope_mode->cycle);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_tcxo_offset
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_TCXO_OFFSET command.
+ *   Set the TCXO offset
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_tcxo_offset(FAR struct file *filep,
+                                      unsigned long    arg)
+{
+  int32_t offset = (int32_t)arg;
+
+  return GD_SetTcxoOffset(offset);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_tcxo_offset
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_TCXO_OFFSET command.
+ *   Get the TCXO offset
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_tcxo_offset(FAR struct file *filep,
+                                      unsigned long    arg)
+{
+  int     ret;
+  int32_t offset;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ret              = GD_GetTcxoOffset(&offset);
+  *(uint32_t *)arg = offset;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_time
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_TIME command.
+ *   Set the estimated current time of the receiver.
+ *   1st argument date & time are in UTC.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_time(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_datetime_s *date_time;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  date_time = (FAR struct cxd56_gnss_datetime_s *)arg;
+
+  return GD_SetTime(&date_time->date, &date_time->time);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_almanac
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_ALMANAC command.
+ *   Get the almanac data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_almanac(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_orbital_param_s *param;
+  uint32_t                            almanac_size;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  param = (FAR struct cxd56_gnss_orbital_param_s *)arg;
+
+  return GD_GetAlmanac(param->type, param->data, &almanac_size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_almanac
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_ALMANAC command.
+ *   Set the almanac data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_almanac(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_orbital_param_s *param;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  param = (FAR struct cxd56_gnss_orbital_param_s *)arg;
+
+  return GD_SetAlmanac(param->type, param->data);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_ephemeris
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_EPHEMERIS command.
+ *   Get the Ephemeris data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_ephemeris(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_orbital_param_s *param;
+  uint32_t                               ephemeris_size;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  param = (FAR struct cxd56_gnss_orbital_param_s *)arg;
+
+  return GD_GetEphemeris(param->type, param->data, &ephemeris_size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_ephemeris
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_EPHEMERIS command.
+ *   Set the Ephemeris data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_ephemeris(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_orbital_param_s *param;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  param = (FAR struct cxd56_gnss_orbital_param_s *)arg;
+
+  return GD_SetEphemeris(param->type, param->data);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_save_backup_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SAVE_BACKUP_DATA command.
+ *   Save the backup data to a Flash memory.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_save_backup_data(FAR struct file *filep,
+                                       unsigned long    arg)
+{
+  FAR char *buf;
+  FAR FILE *fp;
+  int       n = 0;
+  int32_t   offset = 0;
+
+  buf = (char *)malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "wb");
+  if (fp == NULL)
+    {
+      free(buf);
+      return -ENOENT;
+    }
+
+  do
+    {
+      n = GD_ReadBuffer(CXD56_CPU1_DATA_TYPE_BACKUP, offset, buf,
+                        CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+      if (n <= 0)
+        {
+          break;
+        }
+      n = fwrite(buf, 1, n, fp);
+      offset += n;
+    }
+  while (n == CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+
+  free(buf);
+  fclose(fp);
+
+  return n < 0 ? n : 0;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_erase_backup_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_ERASE_BACKUP_DATA command.
+ *   Erase the backup data on a Flash memory.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_erase_backup_data(FAR struct file *filep,
+                                        unsigned long    arg)
+{
+  return unlink(CONFIG_CXD56_GNSS_BACKUP_FILENAME);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_open_cep_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_OPEN_CEP_DATA command.
+ *   Open CEP data file
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_open_cep_data(FAR struct file *filep, unsigned long arg)
+{
+  return cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEPFILE, TRUE);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_close_cep_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_CLOSE_CEP_DATA command.
+ *   Close CEP data file
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_close_cep_data(FAR struct file *filep,
+                                     unsigned long    arg)
+{
+  return cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEPFILE, FALSE);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_check_cep_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_CHECK_CEP_DATA command.
+ *   Check CEP data valid
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_check_cep_data(FAR struct file *filep,
+                                     unsigned long    arg)
+{
+  return GD_CepCheckAssistData();
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_cep_age
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_CEP_AGE command.
+ *   Get CEP valid term
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_cep_age(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_cep_age_s *age;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  age = (FAR struct cxd56_gnss_cep_age_s *)arg;
+
+  return GD_CepGetAgeData(&age->age, &age->cepi);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_reset_cep_flag
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RESET_CEP_FLAG command.
+ *   Reset CEP data init flag & valid flag
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_reset_cep_flag(FAR struct file *filep,
+                                     unsigned long arg)
+{
+  return cxd56_gnss_cpufifo_api(filep,
+                                CXD56_GNSS_GD_GNSS_CEPINITASSISTDATA, 0);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_acquist_data
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_ACQUIST command.
+ *   AGPS set acquist data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_acquist_data(FAR struct file *filep,
+                                       unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_acquist_s *acquist;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  acquist = (FAR struct cxd56_gnss_agps_acquist_s *)arg;
+
+  return GD_SetAcquist(acquist->data, acquist->size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_frametime
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_FRAMETIME command.
+ *   AGPS set frame time
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_frametime(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_frametime_s *frametime;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  frametime = (FAR struct cxd56_gnss_agps_frametime_s *)arg;
+
+  return GD_SetFrameTime(frametime->sec, frametime->frac);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_tau_gps
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_TAU_GPS command.
+ *   AGPS set TAU GPS
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_tau_gps(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_tau_gps_s *taugpstime;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  taugpstime = (FAR struct cxd56_gnss_agps_tau_gps_s *)arg;
+
+  return GD_SetTauGps(&taugpstime->taugps);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_time_gps
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_TIME_GPS command.
+ *   Set high precision receiver time
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_time_gps(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_time_gps_s *time_gps;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  time_gps = (FAR struct cxd56_gnss_agps_time_gps_s *)arg;
+
+  return GD_SetTimeGps(&time_gps->date, &time_gps->time);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_clear_receiver_info
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_CLEAR_RECEIVER_INFO command.
+ *   Clear info(s) for hot start such as ephemeris.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_clear_receiver_info(FAR struct file *filep,
+                                          unsigned long arg)
+{
+  uint32_t clear_type = arg;
+
+  return GD_ClearReceiverInfo(clear_type);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_tow_assist
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_TOW_ASSIST command.
+ *   AGPS set acquist data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_tow_assist(FAR struct file *filep,
+                                     unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_tow_assist_s *assist;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  assist = (FAR struct cxd56_gnss_agps_tow_assist_s *)arg;
+
+  return GD_SetTowAssist(assist->data, assist->size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_utc_model
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_AGPS_SET_UTC_MODEL command.
+ *   AGPS set UTC model
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_utc_model(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_gnss_agps_utc_model_s *model;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  model = (FAR struct cxd56_gnss_agps_utc_model_s *)arg;
+
+  return GD_SetUtcModel(model->data, model->size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_control_spectrum
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SPECTRUM_CONTROL command.
+ *   Enable or not to output spectrum data of GNSS signal
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_control_spectrum(FAR struct file *filep,
+                                       unsigned long arg)
+{
+  FAR struct cxd56_gnss_spectrum_control_s *control;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  control = (FAR struct cxd56_gnss_spectrum_control_s *)arg;
+
+  return GD_SpectrumControl(control->time, control->enable, control->point1,
+                            control->step1, control->point2, control->step2);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_start_test
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_FACTORY_START_TEST command.
+ *   Start GPS factory test
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_start_test(FAR struct file *filep, unsigned long arg)
+{
+  int ret;
+  int retry = 50;
+  FAR struct cxd56_gnss_test_info_s *info;
+
+  /* check argument */
+
+  if (!arg)
+    {
+      ret = -EINVAL;
+    }
+  else
+    {
+      /* Power on the LNA device */
+
+      ret = board_lna_power_control(true);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      while (!g_rtc_enabled && 0 < retry--)
+        {
+          /* GNSS requires stable RTC */
+
+          usleep(100 * 1000);
+        }
+
+      /* set parameter */
+
+      info = (FAR struct cxd56_gnss_test_info_s *)arg;
+      GD_StartGpsTest(info->satellite, info->reserve1,
+                      info->reserve2, info->reserve3);
+
+      /* start test */
+
+      ret = GD_Start(CXD56_GNSS_STMOD_COLD);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_stop_test
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_FACTORY_STOP_TEST command.
+ *   Stop GPS factory test
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_stop_test(FAR struct file *filep, unsigned long arg)
+{
+  int ret;
+
+  /* term test */
+
+  ret = GD_StopGpsTest();
+  if(ret == OK)
+    {
+      /* stop test */
+
+      ret = GD_Stop();
+    }
+
+  /* Power off the LNA device */
+
+  board_lna_power_control(false);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_test_result
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_FACTORY_GET_TEST_RESULT command.
+ *   Get GPS factory test result
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_test_result(FAR struct file *filep,
+                                      unsigned long arg)
+{
+  FAR struct cxd56_gnss_test_result_s *result;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  result = (FAR struct cxd56_gnss_test_result_s *)arg;
+
+  return GD_GetGpsTestResult(&result->cn, &result->doppler);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_signal
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SIGNAL_SET command.
+ *   Set signal information for synchronous reading data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
+{
+  int ret = 0;
+
+#if !defined(CONFIG_DISABLE_SIGNAL) && \
+  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+  FAR struct inode                       *inode;
+  FAR struct cxd56_gnss_dev_s            *priv;
+  FAR struct cxd56_gnss_signal_setting_s *setting;
+  FAR struct cxd56_gnss_sig_s            *sig;
+  FAR struct cxd56_gnss_sig_s            *checksig;
+  int                                     pid;
+  int                                     i;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  setting = (FAR struct cxd56_gnss_signal_setting_s *)arg;
+  if (setting->gnsssig >= CXD56_CPU1_DATA_TYPE_MAX)
+    {
+      return -EPROTOTYPE;
+    }
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  sig = NULL;
+  pid = getpid();
+  for (i = 0; i < CONFIG_CXD56_GNSS_NSIGNALRECEIVERS; i++)
+    {
+      checksig = &priv->sigs[i];
+      if (setting->enable)
+        {
+          if (sig == NULL && !checksig->enable)
+            {
+              sig = checksig;
+            }
+          else if (checksig->info.gnsssig == setting->gnsssig &&
+                   checksig->pid == pid)
+            {
+              sig = checksig;
+              break;
+            }
+        }
+      else if (checksig->info.gnsssig == setting->gnsssig &&
+               checksig->pid == pid)
+        {
+          checksig->enable = 0;
+          goto _success;
+        }
+    }
+  if (sig == NULL)
+    {
+      ret = -ENOENT;
+      goto _err;
+    }
+
+  GD_SetNotifyMask(setting->gnsssig, FALSE);
+
+  sig->enable       = 1;
+  sig->pid          = pid;
+  sig->info.fd      = setting->fd;
+  sig->info.gnsssig = setting->gnsssig;
+  sig->info.signo   = setting->signo;
+  sig->info.data    = setting->data;
+
+_success:
+_err:
+  sem_post(&priv->devsem);
+#endif /* if !defined(CONFIG_DISABLE_SIGNAL) && \
+          (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0) */
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_start_pvtlog
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_PVTLOG_START command.
+ *   Start saving PVT logs.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_start_pvtlog(FAR struct file *filep, unsigned long arg)
+{
+  FAR struct cxd56_pvtlog_setting_s *setting;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  setting = (FAR struct cxd56_pvtlog_setting_s *)arg;
+
+  return GD_RegisterPvtlog(setting->cycle, setting->threshold);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_stop_pvtlog
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_PVTLOG_STOP command.
+ *   Stop saving PVT logs.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_stop_pvtlog(FAR struct file *filep, unsigned long arg)
+{
+  return GD_ReleasePvtlog();
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_delete_pvtlog
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_PVTLOG_STOP command.
+ *   Delete stored PVT logs.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_delete_pvtlog(FAR struct file *filep, unsigned long arg)
+{
+  return GD_PvtlogDeleteLog();
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_pvtlog_status
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_PVTLOG_GET_STATUS command.
+ *   Get stored log status of PVTLOG.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_pvtlog_status(FAR struct file *filep,
+                                        unsigned long    arg)
+{
+  FAR struct cxd56_pvtlog_status_s *status;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  status = (FAR struct cxd56_pvtlog_status_s *)arg;
+
+  return GD_PvtlogGetLogStatus(&status->status);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_start_rtk_output
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_START command.
+ *   Start RTK data output
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_start_rtk_output(FAR struct file *filep,
+                                       unsigned long    arg)
+{
+  FAR struct cxd56_rtk_setting_s *setting;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  setting = (FAR struct cxd56_rtk_setting_s *)arg;
+  setting->sbasout = 0;
+
+  return GD_RtkStart(setting);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_stop_rtk_output
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_STOP command.
+ *   Stop RTK data output
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_stop_rtk_output(FAR struct file *filep,
+                                      unsigned long    arg)
+{
+  return GD_RtkStop();
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_rtk_interval
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_SET_INTERVAL command.
+ *   Set RTK data output interval
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_rtk_interval(FAR struct file *filep,
+                                       unsigned long    arg)
+{
+  int interval = (int)arg;
+
+  return GD_RtkSetOutputInterval(interval);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_rtk_interval
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_GET_INTERVAL command.
+ *   Get RTK data output interval setting
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_rtk_interval(FAR struct file *filep,
+                                       unsigned long    arg)
+{
+  int ret;
+  int interval;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ret              = GD_RtkGetOutputInterval(&interval);
+  *(uint32_t *)arg = interval;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_select_rtk_satellite
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_SELECT_SATELLITE_SYSTEM command.
+ *   Select RTK satellite type
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_select_rtk_satellite(FAR struct file *filep,
+                                           unsigned long    arg)
+{
+  uint32_t gnss  = (uint32_t)arg;
+
+  return GD_RtkSetGnss(gnss);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_rtk_ephemeris_enable
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_GET_SATELLITE_SYSTEM command.
+ *   Get RTK satellite type setting
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_rtk_satellite(FAR struct file *filep,
+                                        unsigned long    arg)
+{
+  int       ret;
+  uint32_t  gnss;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ret              = GD_RtkGetGnss(&gnss);
+  *(uint32_t *)arg = gnss;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_rtk_ephemeris_enable
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_SET_EPHEMERIS_ENABLER command.
+ *   Set RTK ephemeris notify enable setting
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_rtk_ephemeris_enable(FAR struct file *filep,
+                                               unsigned long    arg)
+{
+  int enable = (int)arg;
+
+  return GD_RtkSetEphNotify(enable);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_rtk_ephemeris_enable
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_RTK_GET_EPHEMERIS_ENABLER command.
+ *   Get RTK ephemeris notify enable setting.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_rtk_ephemeris_enable(FAR struct file *filep,
+                                               unsigned long    arg)
+{
+  int ret;
+  int enable;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  ret              = GD_RtkGetEphNotify(&enable);
+  *(uint32_t *)arg = enable;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_start_navmsg_output
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_NAVMSG_START command.
+ *   Start NAVMSG data output
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_start_navmsg_output(FAR struct file *filep,
+                                          unsigned long    arg)
+{
+  FAR struct cxd56_rtk_setting_s *setting;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  setting = (FAR struct cxd56_rtk_setting_s *)arg;
+
+  return GD_RtkStart(setting);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_set_var_ephemeris
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_SET_VAR_EPHEMERIS command.
+ *   Set the Ephemeris data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_set_var_ephemeris(FAR struct file *filep,
+                                        unsigned long arg)
+{
+  FAR struct cxd56_gnss_set_var_ephemeris_s *param;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+  param = (FAR struct cxd56_gnss_set_var_ephemeris_s *)arg;
+
+  return GD_SetVarEphemeris(param->data, param->size);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_get_var_ephemeris
+ *
+ * Description:
+ *   Process CXD56_GNSS_IOCTL_GET_VAR_EPHEMERIS command.
+ *   Get the Ephemeris data
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   arg   - Data for command
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_get_var_ephemeris(FAR struct file *filep,
+                                        unsigned long arg)
+{
+  FAR struct cxd56_gnss_get_var_ephemeris_s *param;
+
+  if (!arg)
+    {
+      return -EINVAL;
+    }
+
+  param = (FAR struct cxd56_gnss_get_var_ephemeris_s *)arg;
+
+  return GD_GetVarEphemeris(param->type, param->data, param->size);
+}
+
+/* Synchronized with processes and CPUs
+ *  CXD56_GNSS signal handler and utils
+ */
+
+/****************************************************************************
+ * Name: cxd56_gnss_wait_notify
+ *
+ * Description:
+ *   Wait notify from GNSS CPU with timeout.
+ *
+ * Input Parameters:
+ *   sem     - Semaphore for waiting
+ *   waitset - Wait time in seconds
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_wait_notify(FAR sem_t *sem, time_t waitsec)
+{
+  int             ret;
+  struct timespec timeout;
+
+  ret = clock_gettime(CLOCK_REALTIME, &timeout);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  timeout.tv_sec += waitsec; /* <waitsec> seconds timeout for wait */
+
+  return sem_timedwait(sem, &timeout);
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_read_cep_file
+ *
+ * Description:
+ *   Read a CEP data packet from file and notify to GNSS CPU.
+ *
+ * Input Parameters:
+ *   fp     - File pointer
+ *   offset - File offset of last read
+ *   len    - packet size to read
+ *   retval - Status to read file
+ *
+ * Returned Value:
+ *   Buffer address allocated in this function for reading data.
+ *
+ ****************************************************************************/
+
+static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
+                                          size_t len, FAR int *retval)
+{
+  FAR char *buf;
+  size_t    n = 0;
+  int       ret;
+
+  if (fp == NULL)
+    {
+      ret = -ENOENT;
+      goto _err0;
+    }
+
+  buf = (char *)malloc(len);
+  if (buf == NULL)
+    {
+      ret = -ENOMEM;
+      goto _err0;
+    }
+
+  ret = fseek(fp, offset, SEEK_SET);
+  if (ret < 0)
+    {
+      goto _err1;
+    }
+
+  n = fread(buf, 1, len, fp);
+  if (n <= 0)
+    {
+      ret = n < 0 ? n : ferror(fp) ? -errno : 0;
+      clearerr(fp);
+      goto _err1;
+    }
+
+  *retval = n;
+  cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEP, (uint32_t)buf);
+
+  return buf;
+
+  /* send signal to CPU1 in error for just notify completion of read sequence */
+
+_err1:
+  free(buf);
+_err0:
+  *retval = ret;
+  cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEP, 0);
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_read_backup_file
+ *
+ * Description:
+ *   Read a backup data packet from file and notify to GNSS CPU.
+ *
+ * Input Parameters:
+ *   retval - Status to read file
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void cxd56_gnss_read_backup_file(FAR int *retval)
+{
+  FAR char *  buf;
+  FAR FILE *  fp;
+  int32_t     offset = 0;
+  size_t      n;
+  int         ret = 0;
+
+  buf = (char *)malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  if (buf == NULL)
+    {
+      ret = -ENOMEM;
+      goto _err;
+    }
+
+  fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "rb");
+  if (fp == NULL)
+    {
+      free(buf);
+      ret = -ENOENT;
+      goto _err;
+    }
+
+  do
+    {
+      n = fread(buf, 1, CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE, fp);
+      if (n <= 0)
+        {
+          ret = n < 0 ? n : ferror(fp) ? -ENFILE : 0;
+          break;
+        }
+      ret = GD_WriteBuffer(CXD56_CPU1_DATA_TYPE_BACKUP, offset, buf, n);
+      if (ret < 0)
+        {
+          break;
+        }
+      offset += n;
+    }
+  while (n > 0);
+
+  fclose(fp);
+  free(buf);
+
+  /* Notify the termination of backup sequence by write zero length data */
+
+_err:
+  *retval = ret;
+  cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_BKUPFILE, 0);
+}
+
+#if !defined(CONFIG_DISABLE_SIGNAL) && \
+  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+
+/****************************************************************************
+ * Name: cxd56_gnss_common_signalhandler
+ *
+ * Description:
+ *   Common signal handler from GNSS CPU.
+ *
+ * Input Parameters:
+ *   data     - Received data from GNSS CPU
+ *   userdata - User data, this is the device information specified by the
+ *              second argument of the function cxd56_cpu1siginit.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void cxd56_gnss_common_signalhandler(uint32_t data, FAR void *userdata)
+{
+  FAR struct cxd56_gnss_dev_s *priv = (FAR struct cxd56_gnss_dev_s *)userdata;
+  uint8_t                      sigtype = CXD56_CPU1_GET_DEV(data);
+  int                          issetmask = 0;
+  int                          i;
+  int                          ret;
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  for (i = 0; i < CONFIG_CXD56_GNSS_NSIGNALRECEIVERS; i++)
+    {
+      struct cxd56_gnss_sig_s *sig = &priv->sigs[i];
+      if (sig->enable && sig->info.gnsssig == sigtype)
+        {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+          union sigval value;
+          value.sival_ptr = &sig->info;
+          (void)sigqueue(sig->pid, sig->info.signo, value);
+#else
+          (void)sigqueue(sig->pid, sig->info.signo, &sig->info);
+#endif
+          issetmask = 1;
+        }
+    }
+
+  if (issetmask)
+    {
+      GD_SetNotifyMask(sigtype, FALSE);
+    }
+
+  sem_post(&priv->devsem);
+}
+
+#endif /* if !defined(CONFIG_DISABLE_SIGNAL) && \
+          (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0) */
+
+/****************************************************************************
+ * Name: cxd56_gnss_default_sighandler
+ *
+ * Description:
+ *   Handler for GNSS type notification from GNSS CPU for signal and poll.
+ *
+ * Input Parameters:
+ *   data     - Received data from GNSS CPU
+ *   userdata - User data, this is the device information specified by the
+ *              second argument of the function cxd56_cpu1siginit.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
+{
+  FAR struct cxd56_gnss_dev_s *priv = (FAR struct cxd56_gnss_dev_s *)userdata;
+  int                          i;
+  int                          ret;
+  int                          dtype = CXD56_CPU1_GET_DATA(data);
+
+  switch (dtype)
+    {
+    case CXD56_GNSS_NOTIFY_TYPE_REQCEPDAT:
+      {
+        priv->cepbuf = cxd56_gnss_read_cep_file(
+          priv->cepfp, priv->shared_info.argv[GNSS_ARGS_FILE_OFFSET],
+          priv->shared_info.argv[GNSS_ARGS_FILE_LENGTH],
+          &priv->shared_info.retval);
+        return;
+      }
+
+    case CXD56_GNSS_NOTIFY_TYPE_REQCEPBUFFREE:
+      if (priv->cepbuf)
+        {
+          free(priv->cepbuf);
+        }
+      return;
+
+    case CXD56_GNSS_NOTIFY_TYPE_BOOTCOMP:
+      if (priv->num_open == 0)
+        {
+          /* Post to wait-semaphore in cxd56_gnss_open to notify completion
+           * of GNSS core initialization in first device open.
+           */
+
+          priv->notify_data = dtype;
+          sem_post(&priv->syncsem);
+        }
+      return;
+
+    case CXD56_GNSS_NOTIFY_TYPE_REQBKUPDAT:
+      cxd56_gnss_read_backup_file(&priv->shared_info.retval);
+      return;
+
+    case CXD56_GNSS_NOTIFY_TYPE_REQCEPOPEN:
+      if (priv->cepfp != NULL)
+        {
+          fclose(priv->cepfp);
+        }
+      priv->cepfp = fopen(CONFIG_CXD56_GNSS_CEP_FILENAME, "rb");
+      return;
+
+    case CXD56_GNSS_NOTIFY_TYPE_REQCEPCLOSE:
+      if (priv->cepfp != NULL)
+        {
+          fclose(priv->cepfp);
+          priv->cepfp = NULL;
+        }
+      return;
+
+    default:
+      break;
+    }
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  for (i = 0; i < CONFIG_CXD56_GNSS_NPOLLWAITERS; i++)
+    {
+      struct pollfd *fds = priv->fds[i];
+      if (fds)
+        {
+          fds->revents |= POLLIN;
+          gnssinfo("Report events: %02x\n", fds->revents);
+          sem_post(fds->sem);
+        }
+    }
+
+  sem_post(&priv->devsem);
+
+#if !defined(CONFIG_DISABLE_SIGNAL) && \
+  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+  cxd56_gnss_common_signalhandler(data, userdata);
+#endif
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_cpufifoapi_signalhandler
+ *
+ * Description:
+ *   Handler for API type notification from GNSS CPU.
+ *
+ * Input Parameters:
+ *   data     - Received data from GNSS CPU
+ *   userdata - User data, this is the device information specified by the
+ *              second argument of the function cxd56_cpu1siginit.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void cxd56_gnss_cpufifoapi_signalhandler(uint32_t data,
+                                                FAR void *userdata)
+{
+  FAR struct cxd56_gnss_dev_s *priv = (FAR struct cxd56_gnss_dev_s *)userdata;
+
+  priv->apiret = CXD56_CPU1_GET_DATA((int)data);
+  sem_post(&priv->apiwait);
+
+  return;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_cpufifo_api
+ *
+ * Description:
+ *   Send API type event to GNSS CPU.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   api   - Signal type
+ *   data  - Any data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_cpufifo_api(FAR struct file *filep, unsigned int api,
+                                  unsigned int data)
+{
+  FAR struct inode            *inode;
+  FAR struct cxd56_gnss_dev_s *priv;
+  unsigned int                 type;
+  int                          ret = OK;
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  type = CXD56_GNSS_CPUFIFOAPI_SET_DATA(api, data);
+  cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CPUFIFOAPI, type);
+
+  ret = sem_wait(&priv->apiwait);
+  if (ret < 0)
+    {
+      /* If sem_wait returns -EINTR, there is a possibility that the signal
+       * for GNSS set with CXD56_GNSS_IOCTL_SIGNAL_SET is unmasked
+       * by SIG_UNMASK in the signal mask.
+       */
+
+      ret = -errno;
+      _warn("Cannot wait GNSS semaphore %d\n", ret);
+      goto _err;
+    }
+
+  ret = priv->apiret;
+
+_err:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_select_notifytype
+ *
+ * Description:
+ *   Decide notify type about data from GNSS device
+ *
+ * Input Parameters:
+ *   fpos   - file offset indicated about data type
+ *   offset - Actual offset value
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int8_t cxd56_gnss_select_notifytype(off_t fpos, FAR uint32_t *offset)
+{
+  int8_t type;
+
+  if ((fpos >= CXD56_GNSS_READ_OFFSET_LAST_GNSS) &&
+      (fpos < CXD56_GNSS_READ_OFFSET_AGPS))
+    {
+      type = CXD56_CPU1_DATA_TYPE_GNSS;
+      *offset = fpos;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_AGPS)
+    {
+      type = CXD56_CPU1_DATA_TYPE_AGPS;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_RTK)
+    {
+      type = CXD56_CPU1_DATA_TYPE_RTK;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_GPSEPHEMERIS)
+    {
+      type = CXD56_CPU1_DATA_TYPE_GPSEPHEMERIS;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_GLNEPHEMERIS)
+    {
+      type = CXD56_CPU1_DATA_TYPE_GLNEPHEMERIS;
+      *offset = 0;
+    }
+  else if ((fpos == CXD56_GNSS_READ_OFFSET_SPECTRUM) ||
+           (fpos == CXD56_GNSS_READ_OFFSET_INFO))
+    {
+      type = CXD56_CPU1_DATA_TYPE_SPECTRUM;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_PVTLOG)
+    {
+      type = CXD56_CPU1_DATA_TYPE_PVTLOG;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_SBAS)
+    {
+      type = CXD56_CPU1_DATA_TYPE_SBAS;
+      *offset = 0;
+    }
+  else if (fpos == CXD56_GNSS_READ_OFFSET_DCREPORT)
+    {
+      type = CXD56_CPU1_DATA_TYPE_DCREPORT;
+      *offset = 0;
+    }
+  else
+    {
+      type = -1;
+    }
+
+  return type;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_initialize
+ *
+ * Description:
+ *   initialize gnss device
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+ static int cxd56_gnss_initialize(FAR struct cxd56_gnss_dev_s* dev)
+{
+  int32_t ret = 0;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_open
+ *
+ * Description:
+ *   Standard character driver open method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_open(FAR struct file *filep)
+{
+  FAR struct inode *           inode;
+  FAR struct cxd56_gnss_dev_s *priv;
+  int                          ret = OK;
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (priv->num_open == 0)
+    {
+      ret = sem_init(&priv->syncsem, 0, 0);
+      if (ret < 0)
+        {
+          goto _err0;
+        }
+
+      ret = PM_LoadImage(CXD56_GNSS_GPS_CPUID, CXD56_GNSS_FWNAME);
+      if (ret < 0)
+        {
+          goto _err1;
+        }
+      ret = PM_StartCpu(CXD56_GNSS_GPS_CPUID, 1);
+      if (ret < 0)
+        {
+          goto _err2;
+        }
+
+#ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
+      PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_HOT_DISABLE);
+#endif
+
+      /* Wait the request from GNSS core to restore backup data,
+      * or for completion of initialization of GNSS core here.
+      * It is post the semaphore syncsem from cxd56_gnss_default_sighandler.
+      */
+
+      ret = cxd56_gnss_wait_notify(&priv->syncsem, 5);
+      if (ret < 0)
+        {
+          goto _err2;
+        }
+
+      ret = GD_WriteBuffer(CXD56_CPU1_DATA_TYPE_INFO, 0, &priv->shared_info,
+                            sizeof(priv->shared_info));
+      if (ret < 0)
+        {
+          goto _err2;
+        }
+
+      sem_destroy(&priv->syncsem);
+    }
+
+  priv->num_open++;
+  goto _success;
+
+_err2:
+#ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
+  PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_HOT_ENABLE);
+#endif
+  PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_COLD);
+_err1:
+  sem_destroy(&priv->syncsem);
+_err0:
+_success:
+  sem_post(&priv->devsem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_close
+ *
+ * Description:
+ *   Standard character driver close method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_close(FAR struct file *filep)
+{
+  FAR struct inode *          inode;
+  FAR struct cxd56_gnss_dev_s *priv;
+  int                         ret = OK;
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  priv->num_open--;
+  if (priv->num_open == 0)
+    {
+#ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
+      PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_HOT_ENABLE);
+#endif
+
+      ret = PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_COLD);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+
+errout:
+  sem_post(&priv->devsem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_read
+ *
+ * Description:
+ *   Standard character driver read method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   buffer - Buffer to read from GNSS device
+ *   buflen - The read length of the buffer
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static ssize_t cxd56_gnss_read(FAR struct file *filep, FAR char *buffer,
+                               size_t len)
+{
+  int32_t   ret = 0;
+  uint32_t  offset = 0;
+  int8_t    type;
+
+  if (!buffer)
+    {
+      ret = -EINVAL;
+      goto _err;
+    }
+  if (len == 0)
+    {
+      goto _success;
+    }
+
+  /* setect data type */
+
+  type = cxd56_gnss_select_notifytype(filep->f_pos, &offset);
+  if (type < 0)
+    {
+      ret = -ESPIPE;
+      goto _err;
+    }
+
+  if (type == CXD56_CPU1_DATA_TYPE_GNSS)
+    {
+      /* Trim len if read would go beyond end of device */
+
+      if ((offset + len) > sizeof(struct cxd56_gnss_positiondata_s))
+        {
+          len = sizeof(struct cxd56_gnss_positiondata_s) - offset;
+        }
+    }
+  else if (type == CXD56_CPU1_DATA_TYPE_AGPS)
+    {
+      if ((offset + len) > sizeof(struct cxd56_supl_mesurementdata_s))
+        {
+          len = sizeof(struct cxd56_supl_mesurementdata_s) - offset;
+        }
+    }
+
+  /* GD_ReadBuffer returns copied data size or negative error code */
+
+  ret = GD_ReadBuffer(type, offset, buffer, len);
+
+_err:
+_success:
+  filep->f_pos = 0;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_write
+ *
+ * Description:
+ *   Standard character driver write method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   buffer - Buffer to write
+ *   buflen - The write length of the buffer
+ *
+ * Returned Value:
+ *   Always returns -ENOENT error.
+ *
+ *****************************************************************************/
+
+static ssize_t cxd56_gnss_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen)
+{
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_ioctl
+ *
+ * Description:
+ *   Standard character driver ioctl method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   fds   - Array of file descriptor
+ *   setup - 1 if start poll, 0 if stop poll
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
+                            unsigned long arg)
+{
+  FAR struct inode *          inode;
+  FAR struct cxd56_gnss_dev_s *priv;
+  int ret;
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  if (cmd <= CXD56_GNSS_IOCTL_INVAL || cmd >= CXD56_GNSS_IOCTL_MAX)
+    {
+      return -EINVAL;
+    }
+
+  ret = sem_wait(&priv->ioctllock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = g_cmdlist[cmd](filep, arg);
+
+  sem_post(&priv->ioctllock);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnss_poll
+ *
+ * Description:
+ *   Standard character driver poll method.
+ *
+ * Input Parameters:
+ *   filep - File structure pointer
+ *   fds   - array of file descriptor
+ *   setup - 1 if start poll, 0 if stop poll
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                           bool setup)
+{
+  FAR struct inode            *inode;
+  FAR struct cxd56_gnss_dev_s *priv;
+  int                          ret = OK;
+  int                          i;
+
+  inode = filep->f_inode;
+  priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
+
+  ret = sem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (setup)
+    {
+      if ((fds->events & POLLIN) == 0)
+        {
+          ret = -EDEADLK;
+          goto errout;
+        }
+
+      for (i = 0; i < CONFIG_CXD56_GNSS_NPOLLWAITERS; i++)
+        {
+          /* Find an unused slot */
+
+          if (priv->fds[i] == NULL)
+            {
+              /* Bind the poll structure and this slot */
+
+              priv->fds[i] = fds;
+              fds->priv    = &priv->fds[i];
+              GD_SetNotifyMask(CXD56_CPU1_DEV_GNSS, FALSE);
+              break;
+            }
+        }
+
+      /* No space in priv fds array for poll handling */
+
+      if (i >= CONFIG_CXD56_GNSS_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+          goto errout;
+        }
+    }
+  else if (fds->priv)
+    {
+      /* This is a request to tear down the poll. */
+
+      struct pollfd **slot = (struct pollfd **)fds->priv;
+
+      /* Remove all memory of the poll setup */
+
+      *slot                = NULL;
+      fds->priv            = NULL;
+    }
+
+errout:
+  sem_post(&priv->devsem);
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: cxd56_gnss_register
+ *
+ * Description:
+ *   Register the GNSS character device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gps"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cxd56_gnss_register(FAR const char *devpath)
+{
+  FAR struct cxd56_gnss_dev_s *priv;
+  int                          i;
+  int                          ret;
+  static struct
+  {
+    uint8_t                sigtype;
+    cxd56_cpu1sighandler_t handler;
+  } devsig_table[] =
+    {
+    {
+      CXD56_CPU1_DATA_TYPE_GNSS,
+      cxd56_gnss_default_sighandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_AGPS,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_RTK,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_GPSEPHEMERIS,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_GLNEPHEMERIS,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_SPECTRUM,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_PVTLOG,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_CPUFIFOAPI,
+      cxd56_gnss_cpufifoapi_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_SBAS,
+      cxd56_gnss_common_signalhandler
+    },
+    {
+      CXD56_CPU1_DATA_TYPE_DCREPORT,
+      cxd56_gnss_common_signalhandler
+    }
+    };
+
+  priv = (FAR struct cxd56_gnss_dev_s *)kmm_malloc(
+    sizeof(struct cxd56_gnss_dev_s));
+  if (!priv)
+    {
+      gnsserr("Failed to allocate instance\n");
+      return -ENOMEM;
+    }
+
+  memset(priv, 0, sizeof(struct cxd56_gnss_dev_s));
+
+  ret = sem_init(&priv->devsem, 0, 1);
+  if (ret < 0)
+    {
+      gnsserr("Failed to initialize gnss devsem!\n");
+      goto _err0;
+    }
+
+  ret = sem_init(&priv->apiwait, 0, 0);
+  if (ret < 0)
+    {
+      gnsserr("Failed to initialize gnss apiwait!\n");
+      goto _err0;
+    }
+
+  ret = sem_init(&priv->ioctllock, 0, 1);
+  if (ret < 0)
+    {
+      gnsserr("Failed to initialize gnss ioctllock!\n");
+      goto _err0;
+    }
+
+  ret = cxd56_gnss_initialize(priv);
+  if (ret < 0)
+    {
+      gnsserr("Failed to initialize gnss device!\n");
+      goto _err0;
+    }
+
+  ret = register_driver(devpath, &g_gnssfops, 0666, priv);
+  if (ret < 0)
+    {
+      gnsserr("Failed to register driver: %d\n", ret);
+      goto _err0;
+    }
+
+  for (i = 0; i < sizeof(devsig_table) / sizeof(devsig_table[0]); i++)
+    {
+      ret = cxd56_cpu1siginit(devsig_table[i].sigtype, priv);
+      if (ret < 0)
+        {
+          gnsserr("Failed to initialize ICC for GPS CPU: %d,%d\n", ret,
+                devsig_table[i].sigtype);
+          goto _err2;
+        }
+      cxd56_cpu1sigregisterhandler(devsig_table[i].sigtype,
+                                   devsig_table[i].handler);
+    }
+
+  gnssinfo("GNSS driver loaded successfully!\n");
+
+  return ret;
+
+_err2:
+  unregister_driver(devpath);
+
+_err0:
+  kmm_free(priv);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cxd56_gnssinitialize
+ *
+ * Description:
+ *   Initialize GNSS device
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/gps"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int cxd56_gnssinitialize(FAR const char *devpath)
+{
+  int ret;
+
+  gnssinfo("Initializing GNSS..\n");
+
+  ret = cxd56_gnss_register(devpath);
+  if (ret < 0)
+    {
+      gnsserr("Error registering GNSS\n");
+    }
+
+  return ret;
+}
+
+#endif

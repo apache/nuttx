@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/spresense/src/spresense_main.c
+ * arch/arm/include/cxd56xx/cxd56_uart0.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,24 +33,36 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
+#ifndef __ARM_ARCH_INCLUDE_CXD56XX_CXD56_UART0_H
+#define __ARM_ARCH_INCLUDE_CXD56XX_CXD56_UART0_H
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/* This function is provided outside exported SDK, therefore here is defined
- * as weak symbol to avoid link error.
- */
+#ifndef __ASSEMBLY__
 
-int nsh_main(int argc, char *argv[]);
-
-int weak_function spresense_main(int argc, char *argv[])
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  return nsh_main(argc, argv);
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int cxd56_uart0initialize(FAR const char *devname);
+void cxd56_uart0uninitialize(FAR const char *devname);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARM_ARCH_INCLUDE_CXD56XX_CXD56_UART0_H */
