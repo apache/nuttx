@@ -239,6 +239,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_INA219
+  /* Configure and initialize the INA219 sensor */
+
+  ret = stm32_ina219initialize("/dev/ina219");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ina219initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

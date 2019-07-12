@@ -89,3 +89,20 @@ Configurations
     you should see a device called "dac0". Now execute the app
     dac put a value at the output.
 
+  INA219:
+  ------
+    This is a configuration example for the INA219 DC current sensor. This
+    sensor works with I2C, you need to do the next connections:
+
+    INA219 VIN -> Board 3.3V
+    INA219 GND -> Board GND
+    INA219 SCL -> Board PB6 (Arduino header D1)
+    INA219 SDA -> Board PB7 (Arduino header D0)
+
+    This example is configured to work with the USBNSH instead of UART NSH, so
+    the console will be shown over the USB_OTG1 connector.
+
+    On the console, type "ls /dev " and if the registration process goes fine,
+    you should see a device called "ina219". Now execute the app
+    ina219 to see the ambient pressure value.
+

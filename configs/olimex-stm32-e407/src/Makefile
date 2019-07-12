@@ -88,5 +88,9 @@ ifeq ($(CONFIG_DAC),y)
 CSRCS += stm32_dac.c
 endif
 
+ifeq ($(CONFIG_SENSORS_INA219),y)
+CSRCS += stm32_ina219.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
 
