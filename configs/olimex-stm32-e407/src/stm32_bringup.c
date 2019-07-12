@@ -249,6 +249,20 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_TIMER)
+  /*Initialize the timer, at this moment it's only Timer 1,2,3*/
+
+  #if defined(CONFIG_STM32_TIM1)
+    stm32_timer_driver_setup("/dev/timer1", 1);
+  #endif
+  #if defined(CONFIG_STM32_TIM2)
+    stm32_timer_driver_setup("/dev/timer2", 2);
+  #endif
+  #if defined(CONFIG_STM32_TIM3)
+    stm32_timer_driver_setup("/dev/timer3", 3);
+  #endif
+#endif
+
   UNUSED(ret);
   return OK;
 }

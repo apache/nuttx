@@ -92,5 +92,9 @@ ifeq ($(CONFIG_SENSORS_INA219),y)
 CSRCS += stm32_ina219.c
 endif
 
+ifeq ($(CONFIG_TIMER),y)
+CSRCS += stm32_timer.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
 

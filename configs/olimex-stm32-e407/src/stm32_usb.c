@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/stm32f4discovery/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,9 +59,9 @@
 
 #ifdef CONFIG_STM32_OTGFS
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
 #  define HAVE_USB 1
@@ -78,25 +78,25 @@
 #  define CONFIG_STM32F4DISCO_USBHOST_STACKSIZE 1024
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 static struct usbhost_connection_s *g_usbconn;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbhost_waiter
  *
  * Description:
  *   Wait for USB devices to be connected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 static int usbhost_waiter(int argc, char *argv[])
@@ -127,18 +127,18 @@ static int usbhost_waiter(int argc, char *argv[])
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the STM32F4Discovery board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_usbinitialize(void)
 {
@@ -153,15 +153,15 @@ void stm32_usbinitialize(void)
 #endif
 }
 
-/***********************************************************************************
+/***************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device
- *nnnn   connection/disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.  This function will start a thread that will monitor
+ *   for device connection/disconnection events.
  *
- ***********************************************************************************/
+ ***************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
@@ -248,31 +248,34 @@ int stm32_usbhost_initialize(void)
 }
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided be each platform that implements the STM32 OTG FS host
+ *   interface
  *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump
- *    or, if 5 V are available on the application board, a basic power switch, must
- *    be added externally to drive the 5 V VBUS line. The external charge pump can
- *    be driven by any GPIO output. When the application decides to power on VBUS
- *    using the chosen GPIO, it must also set the port power bit in the host port
- *    control and status register (PPWR bit in OTG_FS_HPRT).
+ *   "On-chip 5 V VBUS generation is not supported. For this reason, a
+ *    charge pump or, if 5 V are available on the application board, a
+ *    basic power switch, must be added externally to drive the 5 V VBUS
+ *    line. The external charge pump can be driven by any GPIO output.
+ *    When the application decides to power on VBUS using the chosen GPIO,
+ *    it must also set the port power bit in the host port control and
+ *    status register (PPWR bit in OTG_FS_HPRT).
  *
- *   "The application uses this field to control power to this port, and the core
- *    clears this bit on an overcurrent condition."
+ *   "The application uses this field to control power to this port, andi
+ *    the core clears this bit on an overcurrent condition."
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface  - For future growth to handle multiple USB host interface.
+ *            Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 void stm32_usbhost_vbusdrive(int iface, bool enable)
@@ -294,22 +297,22 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument provided for the interrupt handler
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_setup_overcurrent(xcpt_t handler, void *arg)
@@ -318,16 +321,16 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
+ *   driver is used.  This function is called whenever the USB enters or
+ *   leaves suspend mode.  This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
@@ -337,3 +340,4 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 #endif
 
 #endif /* CONFIG_STM32_OTGFS */
+

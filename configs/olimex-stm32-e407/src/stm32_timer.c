@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/olimex-stm32-405/src/stm32_can.c
+ * config/olimex-stm32-e407/src/stm32_timer.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Modified by: Acutronics Robotics (Juan Flores) <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,76 +39,40 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/timers/timer.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/can/can.h>
-#include <arch/board/board.h>
-
-#include "stm32.h"
-#include "stm32_can.h"
+#include "stm32_tim.h"
 #include "olimex-stm32-e407.h"
 
-#ifdef CONFIG_CAN
-
-/*****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is used."
-#  undef CONFIG_STM32_CAN2
-#endif
-
-#ifdef CONFIG_STM32_CAN1
-#  define CAN_PORT 1
-#else
-#  define CAN_PORT 2
-#endif
+#ifdef CONFIG_TIMER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_can_setup
+ * Name: stm32_timer_driver_setup
  *
  * Description:
- *  Initialize CAN and register the CAN device
+ *   Configure the timer driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
+ *   timer   - The timer's number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int stm32_can_setup(void)
+int stm32_timer_driver_setup(FAR const char *devpath, int timer)
 {
-#if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2)
-  struct can_dev_s *can;
-  int ret;
-
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
-
-  can = stm32_caninitialize(CAN_PORT);
-  if (can == NULL)
-    {
-      candbg("ERROR:  Failed to get CAN interface\n");
-      return -ENODEV;
-    }
-
-  /* Register the CAN driver at "/dev/can0" */
-
-  ret = can_register("/dev/can0", can);
-  if (ret < 0)
-    {
-      candbg("ERROR: can_register failed: %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-#else
-  return -ENODEV;
-#endif
+  return stm32_timer_initialize(devpath, timer);
 }
 
-#endif /* CONFIG_CAN */
+#endif
+

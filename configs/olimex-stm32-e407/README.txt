@@ -60,7 +60,7 @@ Configurations
     Configures the NuttShell (nsh) located at examples/nsh.  This
     configuration is focused on network testing.
 
-  BMP180:
+  bmp180:
   ------
     This is a configuration example for the BMP180 barometer sensor. This
     sensor works with I2C, you need to do the next connections:
@@ -77,7 +77,7 @@ Configurations
     you should see a device called "press0". Now execute the app
     BMP180 to see the ambient pressure value.
 
-  DAC:
+  dac:
   ---
     This is a configuration example to use the DAC1 of the board.The DAC1 is attached
     to the PA4 pin (Arduino header D10).
@@ -89,7 +89,7 @@ Configurations
     you should see a device called "dac0". Now execute the app
     dac put a value at the output.
 
-  INA219:
+  ina219:
   ------
     This is a configuration example for the INA219 DC current sensor. This
     sensor works with I2C, you need to do the next connections:
@@ -105,4 +105,14 @@ Configurations
     On the console, type "ls /dev " and if the registration process goes fine,
     you should see a device called "ina219". Now execute the app
     ina219 to see the ambient pressure value.
+
+  timer:
+  -----
+    This configuration set the proper configuration to use the timer1 of the board.
+    This example is configured to work with the USBNSH instead of UART NSH, so
+    the console will be shown over the USB_OTG1 connector.
+
+    On the console, type "ls /dev " and if the registration process goes fine,
+    you should see a device called "timer1".
+
 
