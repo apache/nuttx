@@ -62,17 +62,30 @@ Configurations
 
   BMP180:
   ------
-   This a configuration example for the BMP180 barometer sensor. This
-   sensor works with I2C, you need to do the next connections:
+    This is a configuration example for the BMP180 barometer sensor. This
+    sensor works with I2C, you need to do the next connections:
 
-   BMP180 VIN -> Board 3.3V
-   BMP180 GND -> Board GND
-   BMP180 SCL -> Board PB6 (Arduino header D1)
-   BMP180 SDA -> Board PB7 (Arduino header D0)
+    BMP180 VIN -> Board 3.3V
+    BMP180 GND -> Board GND
+    BMP180 SCL -> Board PB6 (Arduino header D1)
+    BMP180 SDA -> Board PB7 (Arduino header D0)
 
-   This example is configured to work with the USBNSH instead of UART NSH, so
-   the console will be shown over the USB_OTG1 connector.
+    This example is configured to work with the USBNSH instead of UART NSH, so
+    the console will be shown over the USB_OTG1 connector.
 
-   On the console, type "ls /dev " and if the registration process goes fine,
-   you should see a device called "press0". Now execute the app
-   BMP180 to see the ambient pressure value.
+    On the console, type "ls /dev " and if the registration process goes fine,
+    you should see a device called "press0". Now execute the app
+    BMP180 to see the ambient pressure value.
+
+  DAC:
+  ---
+    This is a configuration example to use the DAC1 of the board.The DAC1 is attached
+    to the PA4 pin (Arduino header D10).
+
+    This example is configured to work with the USBNSH instead of UART NSH, so
+    the console will be shown over the USB_OTG1 connector.
+
+    On the console, type "ls /dev " and if the registration process goes fine,
+    you should see a device called "dac0". Now execute the app
+    dac put a value at the output.
+

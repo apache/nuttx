@@ -287,5 +287,23 @@ int stm32_can_setup(void);
 int stm32_bmp180initialize(FAR const char *devpath);
 #endif
 
+/************************************************************************************
+ * Name: stm32_dac_setup
+ *
+ * Description:
+ *   Initialize and register the DAC0 of the microcontroller.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_DAC)
+int stm32_dac_setup(void);
+#endif
+
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_STM32_E407_SRC_INTERNAL_H */
