@@ -88,6 +88,14 @@
 #define GPIO_SCHED_RUNNING (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                             GPIO_PORTJ | GPIO_PIN0)
 
+/* PWM
+ *
+ * The STM32F769 Discovery can be configured to output a pulse train using TIM1 CH4 on PA11.
+ */
+
+#define STM32F769I_DISCO_PWMTIMER   1
+#define STM32F769I_DISCO_PWMCHANNEL 4
+
 /****************************************************************************************************
  * Public data
  ****************************************************************************************************/
@@ -97,6 +105,34 @@
 /****************************************************************************************************
  * Public Functions
  ****************************************************************************************************/
+
+/****************************************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
 
 /****************************************************************************************************
  * Name: stm32_spidev_initialize

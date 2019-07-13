@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/stm32f769i-disco/src/stm32_boot.c
+ * configs/stm32f769i-disco/src/stm32_pwm.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,84 +39,76 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/board.h>
+#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
+#include "stm32_pwm.h"
 #include "stm32f769i-disco.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#define HAVE_PWM 1
+
+#ifndef CONFIG_PWM
+#  undef HAVE_PWM
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+int stm32_pwm_setup(void)
 {
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
-   */
+#ifdef HAVE_PWM
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  if (stm32_spidev_initialize)
+  /* Have we already initialized? */
+
+  if (!initialized)
     {
-      stm32_spidev_initialize();
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = stm32_pwminitialize(STM32F769I_DISCO_PWMTIMER);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
-#endif
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
-  /* This configuration has been used for evaluating the NuttX sporadic scheduler.
-   * The following caqll initializes the sporadic scheduler monitor.
-   */
-
-  arch_sporadic_initialize();
-#endif
-
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
+  return OK;
+#else
+  return -ENODEV;
 #endif
 }
-
-/************************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional initialization call
- *   will be performed in the boot-up sequence to a function called
- *   board_late_initialize().  board_late_initialize() will be called immediately after
- *   up_initialize() is called and just before the initial application is started.
- *   This additional initialization phase may be used, for example, to initialize
- *   board-specific device drivers.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  (void)stm32_bringup();
-}
-#endif

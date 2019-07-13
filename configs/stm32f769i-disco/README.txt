@@ -36,6 +36,8 @@ Contents
 STATUS
 ======
 
+  2019-06: PWM support has been tested as working.
+
   2017-07:  The basic NSH configuration is functional using a serial
     console on USART1, which is connected to the "virtual com port"
     of the ST/LINK USB adapter.
@@ -119,7 +121,21 @@ Configuration Directories
     Support for builtin applications is enabled, but in the base
     configuration no builtin applications are selected.
 
+    1. This config supports the PWM test (apps/examples/pwm) but this must
+       be manually enabled by selecting:
+
+       CONFIG_PWM=y              : Enable the generic PWM infrastructure
+       CONFIG_EXAMPLES_PWM=y     : Enable the PWM example app
+
+       And these for enabling the STM32 timer PWM channel:
+
+       CONFIG_STM32F7_TIM1=y
+       CONFIG_STM32F7_TIM1_PWM=y
+       CONFIG_STM32F7_TIM1_CHANNEL=4
+
   nsh-ehternet:
   ---
     Same as above but a lot more hardware peripherals enabled,
     in particular ethernet, as well as networking stuff.
+
+
