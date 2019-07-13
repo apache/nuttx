@@ -384,16 +384,19 @@
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT)
 #if defined(CONFIG_FS_READABLE)
-#  define SYS_mount                    (__SYS_mountpoint + 0)
+#    define SYS_mount                  (__SYS_mountpoint + 0)
+#    define __SYS_fs                   (__SYS_mountpoint + 1)
+#else
+#    define __SYS_fs                   (__SYS_mountpoint + 0)
 #endif
-#  define SYS_fsync                    (__SYS_mountpoint + 1)
-#  define SYS_ftruncate                (__SYS_mountpoint + 2)
-#  define SYS_mkdir                    (__SYS_mountpoint + 3)
-#  define SYS_rename                   (__SYS_mountpoint + 4)
-#  define SYS_rmdir                    (__SYS_mountpoint + 5)
-#  define SYS_umount2                  (__SYS_mountpoint + 6)
-#  define SYS_unlink                   (__SYS_mountpoint + 7)
-#  define __SYS_shm                    (__SYS_mountpoint + 8)
+#  define SYS_fsync                    (__SYS_fs + 0)
+#  define SYS_ftruncate                (__SYS_fs + 1)
+#  define SYS_mkdir                    (__SYS_fs + 2)
+#  define SYS_rename                   (__SYS_fs + 3)
+#  define SYS_rmdir                    (__SYS_fs + 4)
+#  define SYS_umount2                  (__SYS_fs + 5)
+#  define SYS_unlink                   (__SYS_fs + 6)
+#  define __SYS_shm                    (__SYS_fs + 7)
 #else
 #  define __SYS_shm                    __SYS_mountpoint
 #endif
@@ -401,11 +404,11 @@
 /* Shared memory interfaces */
 
 #ifdef CONFIG_MM_SHM
-#    define SYS_shmget                 (__SYS_shm + 0)
-#    define SYS_shmat                  (__SYS_shm + 1)
-#    define SYS_shmctl                 (__SYS_shm + 2)
-#    define SYS_shmdt                  (__SYS_shm + 3)
-#    define __SYS_pthread              (__SYS_shm + 4)
+#  define SYS_shmget                   (__SYS_shm + 0)
+#  define SYS_shmat                    (__SYS_shm + 1)
+#  define SYS_shmctl                   (__SYS_shm + 2)
+#  define SYS_shmdt                    (__SYS_shm + 3)
+#  define __SYS_pthread                (__SYS_shm + 4)
 #else
 #  define __SYS_pthread                __SYS_shm
 #endif
