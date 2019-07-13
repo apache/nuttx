@@ -3017,7 +3017,7 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
 
       imxrt_clockall_usdhc1();
       break;
-
+#if defined(CONFIG_IMXRT_USDHC2)
     case IMXRT_USDHC2_BASE:
       (void)imxrt_config_gpio(PIN_USDHC2_D0);
       (void)imxrt_config_gpio(PIN_USDHC2_D1);
@@ -3027,7 +3027,7 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
       (void)imxrt_config_gpio(PIN_USDHC2_CMD);
       imxrt_clockall_usdhc2();
       break;
-
+#endif
     default:
       return NULL;
     }
