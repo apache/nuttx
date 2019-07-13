@@ -2766,7 +2766,6 @@ if STM32_LCD
 choice
 	prompt "Segment LCD Clock Source"
 	default LCD_LSECLOCK
-	depends on STM32_LCD
 
 config LCD_LSICLOCK
 	bool "Internal Low Speed Clock"
@@ -2778,7 +2777,7 @@ config LCD_HSECLOCK
 	bool "External High Speed Clock"
 
 endchoice
-endif
+endif # STM32_LCD
 
 config STM32_IWDG
 	bool "IWDG"
