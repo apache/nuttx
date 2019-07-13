@@ -2764,8 +2764,9 @@ config STM32_LCD
 if STM32_LCD
 
 choice
-	prompt "LCD Clock Source"
+	prompt "Segment LCD Clock Source"
 	default LCD_LSECLOCK
+	depends on STM32_LCD
 
 config LCD_LSICLOCK
 	bool "Internal Low Speed Clock"
