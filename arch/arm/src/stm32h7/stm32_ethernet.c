@@ -565,9 +565,8 @@
   (ETH_DMACIER_TIE | ETH_DMACIER_TBUE | ETH_DMACIER_RIE | ETH_DMACIER_ERIE)
 
 #define ETH_DMAINT_ABNORMAL                                             \
-  (ETH_DMACIER_TXSE                                                     \
-   ETH_DMACIER_RBUE | ETH_DMACIER_RSE | ETH_DMACIER_RWTE | /* ETH_DMACIER_ETIE | */ \
-   ETH_DMACIER_FBEE)
+  (ETH_DMACIER_TXSE | ETH_DMACIER_RBUE | ETH_DMACIER_RSE |              \
+   ETH_DMACIER_RWTE | /* ETH_DMACIER_ETIE | */ ETH_DMACIER_FBEE)
 
 /* Normal receive, transmit, error interrupt enable bit sets */
 
@@ -576,7 +575,7 @@
 #define ETH_DMAINT_XMIT_DISABLE   (ETH_DMACIER_TIE)
 
 #ifdef CONFIG_DEBUG_NET
-#  define ETH_DMAINT_ERROR_ENABLE (ETH_DMACIER_AIE | ETH_DMACIER_ABNORMAL)
+#  define ETH_DMAINT_ERROR_ENABLE (ETH_DMACIER_AIE | ETH_DMAINT_ABNORMAL)
 #else
 #  define ETH_DMAINT_ERROR_ENABLE (0)
 #endif
