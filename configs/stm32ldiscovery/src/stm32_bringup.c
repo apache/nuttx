@@ -42,6 +42,8 @@
 #include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
+
 #include <arch/board/board.h>
 
 #include "stm32ldiscovery.h"
@@ -67,6 +69,16 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_STM32_LCD
   /* Initialize the SLCD and register the SLCD device as /dev/slcd0 */
