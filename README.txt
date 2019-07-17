@@ -1848,8 +1848,6 @@ nuttx/
  |   |   `- README.txt
  |   |- lpc4370-link2/
  |   |   `- README.txt
- |   |- lpcxpresso-lpc1115/
- |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
  |   |- lpcxpresso-lpc54628/

@@ -166,9 +166,8 @@ arch/arm - ARM-based micro-controllers
       arch/arm/include/imx6 and arch/arm/src/imrt
       arch/arm/include/kinetis and arch/arm/src/kinetis
       arch/arm/include/kl and arch/arm/src/kl
-      arch/arm/include/lpc11xx and arch/arm/src/lc823450
-      arch/arm/include/lpc11xx and arch/arm/src/lpc11xx
-      arch/arm/include/lpc17xx and arch/arm/src/lpc17xx
+      arch/arm/include/lc823450 and arch/arm/src/lc823450
+      arch/arm/include/lpc17xx_40xx and arch/arm/src/lpc17xx_40xx
       arch/arm/include/lpc214x and arch/arm/src/lpc214x
       arch/arm/include/lpc2378 and arch/arm/src/lpc2378.
       arch/arm/include/lpc31xx and arch/arm/src/lpc31xx

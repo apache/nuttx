@@ -75,8 +75,8 @@ Serial Console
   serial console by changing the configuration as follows:
 
     System Type:
-      CONFIG_LPC17_UART0=n          : Disable UART0 if it is no longer used
-      CONFIG_LPC17_UART1=y          : Enable UART1
+      CONFIG_LPC17_40_UART0=n          : Disable UART0 if it is no longer used
+      CONFIG_LPC17_40_UART1=y          : Enable UART1
 
     Drivers:
       CONFIG_UART1_SERIAL_CONSOLE=y : Setup up the UART1 configuration
@@ -141,7 +141,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
         It just sets up a few parameters then sources lpc17xx.cfg
 
       /usr/local/share/openocd/scripts/target/lpc17xx.cfg
-        This is the generic LPC configuration for the LPC17xx
+        This is the generic LPC configuration for the LPC17xx/LPC40xx
         family.  It is included by lpc1788.cfg.
 
     NOTE:  These files could also be located under /usr/share in some
@@ -321,9 +321,9 @@ Configuration Directories
     2. This configuration has DMA-based SD card support enabled by
        default.  That support can be disabled as follow:
 
-       CONFIG_LPC17_GPDMA=n                : No DMA
+       CONFIG_LPC17_40_GPDMA=n                : No DMA
        CONFIG_ARCH_DMA=n
-       CONFIG_LPC17_SDCARD=n               : No SD card driver
+       CONFIG_LPC17_40_SDCARD=n               : No SD card driver
        CONFIG_SDIO_DMA=n                   : No SD card DMA
        CONFIG_MMCSD=n                      : No MMC/SD driver support
        CONFIG_FS_FAT=n                     : No FAT file system support
@@ -425,9 +425,9 @@ Configuration Directories
     3. This configuration has DMA-based SD card support enabled by
        default.  That support can be disabled as follow:
 
-       CONFIG_LPC17_GPDMA=n                : No DMA
+       CONFIG_LPC17_40_GPDMA=n                : No DMA
        CONFIG_ARCH_DMA=n
-       CONFIG_LPC17_SDCARD=n               : No SD card driver
+       CONFIG_LPC17_40_SDCARD=n               : No SD card driver
        CONFIG_SDIO_DMA=n                   : No SD card DMA
        CONFIG_MMCSD=n                      : No MMC/SD driver support
        CONFIG_FS_FAT=n                     : No FAT file system support
@@ -435,9 +435,9 @@ Configuration Directories
     4. This configuration has been used for verifying SDRAM by modifying
        the configuration in the following ways:
 
-       CONFIG_LPC17_EMC=y                  : Enable the EMC
-       CONFIG_LPC17_EXTDRAM=y              : Configure external DRAM
-       CONFIG_LPC17_EXTDRAMSIZE=67108864   : DRAM size 2x256/8 = 64MB
+       CONFIG_LPC17_40_EMC=y                  : Enable the EMC
+       CONFIG_LPC17_40_EXTDRAM=y              : Configure external DRAM
+       CONFIG_LPC17_40_EXTDRAMSIZE=67108864   : DRAM size 2x256/8 = 64MB
        CONFIG_SYSTEM_RAMTEST=y             : Enable the RAM test built-in
 
        In this configuration, the SDRAM is not added to heap and so is
@@ -465,8 +465,8 @@ Configuration Directories
             CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
 
           System Type:
-            CONFIG_LPC17_GPIOIRQ=y            : GPIO interrupt support
-            CONFIG_LPC17_SSP1=y               : Enable support for SSP1
+            CONFIG_LPC17_40_GPIOIRQ=y            : GPIO interrupt support
+            CONFIG_LPC17_40_SSP1=y               : Enable support for SSP1
 
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
@@ -492,8 +492,8 @@ Configuration Directories
             CONFIG_MMCSD=n                    : No MMC/SD driver support
 
           System Type:
-            CONFIG_LPC17_GPDMA=n              : No DMA
-            CONFIG_LPC17_SDCARD=n             : No SD card driver
+            CONFIG_LPC17_40_GPDMA=n              : No DMA
+            CONFIG_LPC17_40_SDCARD=n             : No SD card driver
             CONFIG_SDIO_DMA=n                 : No SD card DMA
             CONFIG_ARCH_DMA=n
 

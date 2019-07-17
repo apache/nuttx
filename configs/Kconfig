@@ -409,14 +409,6 @@ config ARCH_BOARD_LM4F120_LAUNCHPAD
 	---help---
 		Stellaris LM4F120 LaunchPad.
 
-config ARCH_BOARD_LPCXPRESSO_LPC1115
-	bool "NXP LPCXpresso LPC1115"
-	depends on ARCH_CHIP_LPC1115
-	select ARCH_HAVE_LEDS
-	---help---
-		The Embedded Artists LPCXpresso LPC1115 board featuring the NXP
-		LPC1115 MCU.
-
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
 	depends on ARCH_CHIP_LPC1768
@@ -442,6 +434,28 @@ config ARCH_BOARD_BAMBINO_200E
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		Micromint Bambino board. This board is based on the LPC4330FBD144.
+
+config ARCH_BOARD_LPC4088_DEVKIT
+	bool "LPC4088 Developer's Kit"
+	depends on ARCH_CHIP_LPC4088
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Embedded Artists LPC4088 Developer's Kit. See
+		https://www.embeddedartists.com/products/lpc4088-developers-kit/
+		for further information. This board uses the NXP LPC4088FET208 MCU.
+
+config ARCH_BOARD_LPC4088_QUICKSTART
+	bool "LPC4088 QuickStart Board"
+	depends on ARCH_CHIP_LPC4088
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Embedded Artists LPC4088 QuickStart Board. See
+		https://www.embeddedartists.com/products/lpc4088-quickstart-board/
+		for further information. This board uses the NXP LPC4088FET208 MCU.
 
 config ARCH_BOARD_LPC4330_XPLORER
 	bool "NXG LPC4330-Xplorer"
@@ -1881,11 +1895,12 @@ config ARCH_BOARD
 	default "lm3s6965-ek"              if ARCH_BOARD_LM3S6965EK
 	default "lm3s8962-ek"              if ARCH_BOARD_LM3S8962EK
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
+	default "lpc4088-devkit"           if ARCH_BOARD_LPC4088_DEVKIT
+	default "lpc4088-quickstart"       if ARCH_BOARD_LPC4088_QUICKSTART
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
 	default "lpc4337-ws"               if ARCH_BOARD_LPC4337_WS
 	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
-	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "maple"                    if ARCH_BOARD_MAPLE
@@ -2171,6 +2186,12 @@ source "configs/lm3s8962-ek/Kconfig"
 endif
 if ARCH_BOARD_LM3S8962EK
 source "configs/lm4f120-launchpad/Kconfig"
+endif
+if ARCH_BOARD_LPC4088_DEVKIT
+source "configs/lpc4088-devkit/Kconfig"
+endif
+if ARCH_BOARD_LPC4088_QUICKSTART
+source "configs/lpc4088-quickstart/Kconfig"
 endif
 if ARCH_BOARD_LPC4330_XPLORER
 source "configs/lpc4330-xplorer/Kconfig"

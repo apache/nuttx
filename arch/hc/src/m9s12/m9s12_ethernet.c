@@ -744,12 +744,12 @@ static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 int emac_initialize(int intf)
 {
-  struct lpc17_driver_s *priv;
+  struct emac_driver_s *priv;
 
   /* Get the interface structure associated with this interface number. */
 
   DEBUGASSERT(inf <  CONFIG_HCS12_NINTERFACES);
-  priv = &g_ethdrvr[intf];
+  priv = &g_emac[intf];
 
    /* Check if a Ethernet chip is recognized at its I/O base */
 
@@ -773,7 +773,7 @@ int emac_initialize(int intf)
   priv->d_dev.d_addmac  = emac_addmac;   /* Add multicast MAC address */
   priv->d_dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->d_dev.d_private = (void*)g_emac; /* Used to recover private state from dev */
+  priv->d_dev.d_private = priv;          /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

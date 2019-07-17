@@ -224,7 +224,7 @@ that makes then less re-usable:
 
   LCD controllers built-into the MCU:
 
-    arch/arm/src/lpc17xx/lpc17_lcd.c and configs/open1788/src/lpc17_lcd.c.
+    arch/arm/src/lpc17xx_40xx/lpc17_40_lcd.c and configs/open1788/src/lpc17_40_lcd.c.
       RGB LCD display panel.
     configs/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with bars
       using the segment LCD controller built-into the STM32L15X.
@@ -247,7 +247,7 @@ that makes then less re-usable:
 
   TFT Panel Drivers:
 
-    configs/open1788/src/lpc17_lcd.c and arch/arm/src/lpc17xx/lpc17_lcd.c
+    configs/open1788/src/lpc17_40_lcd.c and arch/arm/src/lpc17xx_40xx/lpc17_40_lcd.c
     configs/sama5d3x-ek/src and configs/sama5d4-ek/src: Use
       arch/arm/src/sama5/sam_lcd.c
 

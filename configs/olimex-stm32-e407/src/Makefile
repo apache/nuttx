@@ -84,5 +84,17 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif
 
+ifeq ($(CONFIG_DAC),y)
+CSRCS += stm32_dac.c
+endif
+
+ifeq ($(CONFIG_SENSORS_INA219),y)
+CSRCS += stm32_ina219.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+CSRCS += stm32_timer.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
 

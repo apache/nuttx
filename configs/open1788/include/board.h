@@ -45,7 +45,7 @@
 
 #include <stdbool.h>
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_GPIOIRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_LPC17_40_GPIOIRQ)
 #  include <nuttx/irq.h>
 #endif
 
@@ -53,7 +53,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_syscon.h.  It is not included here
+/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
  * because the including C file may not have that file in its include path.
  */
 
@@ -70,9 +70,9 @@
  *   CCLCK = 120MHz  -> CCLK divider = 1
  */
 
-#define LPC17_CCLK                 120000000 /* 120Mhz */
-#define BOARD_PCLKDIV              2         /* Peripheral clock = LPC17_CCLK/2 */
-#define BOARD_PCLK_FREQUENCY       (LPC17_CCLK / BOARD_PCLKDIV)
+#define LPC17_40_CCLK                 120000000 /* 120Mhz */
+#define BOARD_PCLKDIV              2         /* Peripheral clock = LPC17_40_CCLK/2 */
+#define BOARD_PCLK_FREQUENCY       (LPC17_40_CCLK / BOARD_PCLKDIV)
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
@@ -81,8 +81,8 @@
  * be set in the BOARD_SCS_VALUE.
  */
 
-#undef CONFIG_LPC17_MAINOSC
-#define CONFIG_LPC17_MAINOSC       1
+#undef CONFIG_LPC17_40_MAINOSC
+#define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
 /* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
@@ -101,8 +101,8 @@
  *  PLL0CLK = (M * SYSCLK) = 120MHz
  */
 
-#undef CONFIG_LPC17_PLL0
-#define CONFIG_LPC17_PLL0          1
+#undef CONFIG_LPC17_40_PLL0
+#define CONFIG_LPC17_40_PLL0          1
 #define BOARD_CLKSRCSEL_VALUE      SYSCON_CLKSRCSEL_MAIN
 
 #define BOARD_PLL0CFG_MSEL         10
@@ -113,14 +113,14 @@
 
 /* PLL1 : PLL1 is used to generate clock for the USB */
 
-#undef  CONFIG_LPC17_PLL1
+#undef  CONFIG_LPC17_40_PLL1
 #define BOARD_PLL1CFG_MSEL        4
 #define BOARD_PLL1CFG_PSEL        2
 #define BOARD_PLL1CFG_VALUE \
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
-#ifdef CONFIG_LPC17_EMC
+#ifdef CONFIG_LPC17_40_EMC
 /* EMC clock selection.
  *
  * The EMC clock should not be driven above 80MHz.  As a result the EMC
@@ -129,10 +129,10 @@
 
 #  define BOARD_EMCCLKSEL_DIVIDER  2
 #  define BOARD_EMCCLKSEL_VALUE    SYSCON_EMCCLKSEL_CCLK_DIV2
-#  define LPC17_EMCCLK             (LPC17_CCLK / BOARD_EMCCLKSEL_DIVIDER)
+#  define LPC17_40_EMCCLK             (LPC17_40_CCLK / BOARD_EMCCLKSEL_DIVIDER)
 #endif
 
-#if defined(CONFIG_LPC17_USBHOST) || (CONFIG_LPC17_USBDEV)
+#if defined(CONFIG_LPC17_40_USBHOST) || (CONFIG_LPC17_40_USBDEV)
 /* USB divider.  The output of the PLL is used as the USB clock
  *
  *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
@@ -145,8 +145,8 @@
 
 /* FLASH Configuration */
 
-#undef  CONFIG_LPC17_FLASH
-#define CONFIG_LPC17_FLASH         1
+#undef  CONFIG_LPC17_40_FLASH
+#define CONFIG_LPC17_40_FLASH         1
 
 /* Flash access use 6 CPU clocks - Safe for any allowed conditions */
 
@@ -156,7 +156,7 @@
 
 #define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV20
 
-#ifdef CONFIG_LPC17_SDCARD
+#ifdef CONFIG_LPC17_40_SDCARD
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
  * to service FIFOs in interrupt driven mode.
@@ -200,8 +200,8 @@
  * Needed for NAND and SDRAM: {17,1,2,1}
  */
 
-#ifdef CONFIG_LPC17_EMC
-#if defined(CONFIG_LPC17_EXTNAND) || defined(CONFIG_LPC17_EXTDRAM)
+#ifdef CONFIG_LPC17_40_EMC
+#if defined(CONFIG_LPC17_40_EXTNAND) || defined(CONFIG_LPC17_40_EXTDRAM)
 #  define BOARD_CMDDLY             17
 #  define BOARD_FBCLKDLY           17
 #  define BOARD_CLKOUT0DLY         1

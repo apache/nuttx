@@ -57,26 +57,6 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const unsigned int g_ledbits[8] =
-{
-  LED_STARTED,
-  LED_HEAPALLOCATE,
-  LED_IRQSENABLED,
-  LED_STACKCREATED,
-  LED_INIRQ,
-  LED_SIGNAL,
-  LED_ASSERTION,
-  LED_PANIC
-};
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -149,7 +129,7 @@ void board_autoled_initialize(void)
 void board_autoled_on(int led)
 {
   led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT | BOARD_LED4_BIT);
-  led_setbits(g_ledbits[led]);
+  led_setbits(led);
 }
 
 /****************************************************************************
@@ -158,7 +138,7 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  led_clrbits(g_ledbits[led]);
+  led_clrbits(led);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

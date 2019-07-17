@@ -101,6 +101,10 @@ CHIP_CSRCS += cxd56_powermgr.c
 CHIP_CSRCS += cxd56_farapi.c
 CHIP_CSRCS += cxd56_sysctl.c
 
+ifeq ($(CONFIG_CXD56_UART0),y)
+CHIP_CSRCS += cxd56_uart0.c
+endif
+
 ifeq ($(CONFIG_CXD56_PM_PROCFS),y)
 CHIP_CSRCS += cxd56_powermgr_procfs.c
 endif
@@ -180,4 +184,13 @@ endif
 
 ifeq ($(CONFIG_CXD56_WDT),y)
 CHIP_CSRCS += cxd56_wdt.c
+endif
+
+ifeq ($(CONFIG_CXD56_GNSS),y)
+CHIP_CSRCS += cxd56_gnss.c
+CHIP_CSRCS += cxd56_cpu1signal.c
+endif
+
+ifeq ($(CONFIG_CXD56_GEOFENCE),y)
+CHIP_CSRCS += cxd56_geofence.c
 endif

@@ -4,7 +4,7 @@
  *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *
- * Derived arch/arm/src/lpc17xx/lpc17_spi.h
+ * Derived arch/arm/src/lpc17xx_40xx/lpc17_40_spi.h
  *
  *   Copyright (C) 2010, 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

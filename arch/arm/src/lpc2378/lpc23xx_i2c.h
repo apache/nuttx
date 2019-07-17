@@ -4,7 +4,7 @@
  *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *
- * Derived arch/arm/src/lpc17xx/lpc17_i2c.h
+ * Derived arch/arm/src/lpc17xx_40xx/lpc17_40_i2c.h
  *
  *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

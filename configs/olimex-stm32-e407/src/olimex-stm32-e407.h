@@ -233,13 +233,13 @@ int stm32_bringup(void);
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -269,7 +269,7 @@ int stm32_sdio_initialize(void);
 int stm32_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bmp180initialize
  *
  * Description:
@@ -281,10 +281,67 @@ int stm32_can_setup(void);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
 int stm32_bmp180initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_dac_setup
+ *
+ * Description:
+ *   Initialize and register the DAC0 of the microcontroller.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DAC)
+int stm32_dac_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_ina219initialize
+ *
+ * Description:
+ *   Initialize and register the INA219 voltage/current sensor.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/ina219"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_INA219)
+int stm32_ina219initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_timer_driver_setup
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
+ *   timer   - The timer's number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif  /* __ASSEMBLY__ */

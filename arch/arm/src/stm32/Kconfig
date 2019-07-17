@@ -2757,6 +2757,28 @@ config STM32_LCD
 	default n
 	depends on STM32_STM32L15XX
 
+#
+# STM32 LCD Clock Selection
+#
+
+if STM32_LCD
+
+choice
+	prompt "Segment LCD Clock Source"
+	default LCD_LSECLOCK
+
+config LCD_LSICLOCK
+	bool "Internal Low Speed Clock"
+
+config LCD_LSECLOCK
+	bool "External Low Speed Clock"
+
+config LCD_HSECLOCK
+	bool "External High Speed Clock"
+
+endchoice
+endif # STM32_LCD
+
 config STM32_IWDG
 	bool "IWDG"
 	default n

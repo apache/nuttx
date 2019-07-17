@@ -50,7 +50,7 @@
 #define C027_LED (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT3 | GPIO_PIN25)
 
 #define C027_SD_CS (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN2)
-#ifdef CONFIG_LPC17_GPIOIRQ
+#ifdef CONFIG_LPC17_40_GPIOIRQ
 #  define C027_SD_CD (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN11)
 #else
 #  define C027_SD_CD (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN11)
@@ -91,7 +91,7 @@
 void weak_function c027_sspdev_initialize(void);
 
 /************************************************************************************
- * Name: lpc17_ubxmdm_init
+ * Name: lpc17_40_ubxmdm_init
  *
  * Description:
  *   Initialisation function for the u-blox modem.
@@ -99,11 +99,11 @@ void weak_function c027_sspdev_initialize(void);
  ************************************************************************************/
 
 #if defined(CONFIG_MODEM_U_BLOX)
-void lpc17_ubxmdm_init(bool usb_used);
+void lpc17_40_ubxmdm_init(bool usb_used);
 #endif /* CONFIG_MODEM_U_BLOX */
 
 /************************************************************************************
- * Name: lpc17_pwm_setup
+ * Name: lpc17_40_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
@@ -111,11 +111,11 @@ void lpc17_ubxmdm_init(bool usb_used);
  ************************************************************************************/
 
 #ifdef CONFIG_PWM
-int lpc17_pwm_setup(void);
+int lpc17_40_pwm_setup(void);
 #endif
 
 /************************************************************************************
- * Name: lpc17_adc_setup
+ * Name: lpc17_40_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
@@ -123,7 +123,7 @@ int lpc17_pwm_setup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ADC
-int lpc17_adc_setup(void);
+int lpc17_40_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

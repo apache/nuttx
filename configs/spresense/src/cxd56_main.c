@@ -1,5 +1,5 @@
 /****************************************************************************
- * bsp/board/spresense/src/spresense_main.c
+ * configs/spresense/src/spresense_main.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

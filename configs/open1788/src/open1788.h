@@ -105,13 +105,13 @@
 
 /* IRQ numbers for the buttons that do support interrupts */
 
-#define GPIO_USER2_IRQ   LPC17_IRQ_P2p22
-#define GPIO_USER3_IRQ   LPC17_IRQ_P0p10
-#define GPIO_JOY_A_IRQ   LPC17_IRQ_P2p25
-#define GPIO_JOY_B_IRQ   LPC17_IRQ_P2p26
-#define GPIO_JOY_C_IRQ   LPC17_IRQ_P2p23
-#define GPIO_JOY_D_IRQ   LPC17_IRQ_P2p19
-#define GPIO_JOY_CTR_IRQ LPC17_IRQ_P0p14
+#define GPIO_USER2_IRQ   LPC17_40_IRQ_P2p22
+#define GPIO_USER3_IRQ   LPC17_40_IRQ_P0p10
+#define GPIO_JOY_A_IRQ   LPC17_40_IRQ_P2p25
+#define GPIO_JOY_B_IRQ   LPC17_40_IRQ_P2p26
+#define GPIO_JOY_C_IRQ   LPC17_40_IRQ_P2p23
+#define GPIO_JOY_D_IRQ   LPC17_40_IRQ_P2p19
+#define GPIO_JOY_CTR_IRQ LPC17_40_IRQ_P0p14
 
 /* SD Card **************************************************************************/
 /* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
@@ -149,7 +149,7 @@
 #define GPIO_TC_BUSY     (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN14)
 #define GPIO_TC_CS       (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN8)
 
-#define LPC17_IRQ_PENIRQ LPC17_IRQ_P2p15
+#define LPC17_40_IRQ_PENIRQ LPC17_40_IRQ_P2p15
 
 /************************************************************************************
  * Public data
@@ -195,8 +195,8 @@ void weak_function open1788_sspdev_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_EMC
-#ifdef CONFIG_LPC17_EXTDRAM
+#ifdef CONFIG_LPC17_40_EMC
+#ifdef CONFIG_LPC17_40_EXTDRAM
 void open1788_sdram_initialize(void);
 #endif
 
@@ -208,7 +208,7 @@ void open1788_sdram_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_EXTNOR
+#ifdef CONFIG_LPC17_40_EXTNOR
 void open1788_nor_initialize(void);
 #endif
 
@@ -220,10 +220,10 @@ void open1788_nor_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_EXTNAND
+#ifdef CONFIG_LPC17_40_EXTNAND
 void open1788_nand_initialize(void);
 #endif
-#endif /* CONFIG_LPC17_EMC */
+#endif /* CONFIG_LPC17_40_EMC */
 
 /************************************************************************************
  * Name: open1788_lcd_initialize
@@ -233,7 +233,7 @@ void open1788_nand_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_LCD
+#ifdef CONFIG_LPC17_40_LCD
 void open1788_lcd_initialize(void);
 #endif
 
@@ -259,7 +259,7 @@ int open1788_tsc_setup(int minor);
 #endif
 
 /************************************************************************************
- * Name: lpc17_djoy_initialization
+ * Name: lpc17_40_djoy_initialization
  *
  * Description:
  *   Initialize and register the discrete joystick driver
@@ -267,7 +267,7 @@ int open1788_tsc_setup(int minor);
  ************************************************************************************/
 
 #ifdef CONFIG_OPEN1788_DJOYSTICK
-int lpc17_djoy_initialization(void);
+int lpc17_40_djoy_initialization(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -36,44 +36,44 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc17_boardinitialize.c lpc17_bringup.c lpc17_ssp.c
+CSRCS = lpc17_40_boardinitialize.c lpc17_40_bringup.c lpc17_40_ssp.c
 
-ifeq ($(CONFIG_LPC17_EMC),y)
-ifeq ($(CONFIG_LPC17_EXTNOR),y)
-  CSRCS += lpc17_norinitialize.c
+ifeq ($(CONFIG_LPC17_40_EMC),y)
+ifeq ($(CONFIG_LPC17_40_EXTNOR),y)
+  CSRCS += lpc17_40_norinitialize.c
 endif
 
-ifeq ($(CONFIG_LPC17_EXTNAND),y)
-  CSRCS += lpc17_nandinitialize.c
+ifeq ($(CONFIG_LPC17_40_EXTNAND),y)
+  CSRCS += lpc17_40_nandinitialize.c
 endif
 
-ifeq ($(CONFIG_LPC17_EXTDRAM),y)
-  CSRCS += lpc17_sdraminitialize.c
+ifeq ($(CONFIG_LPC17_40_EXTDRAM),y)
+  CSRCS += lpc17_40_sdraminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_LPC17_LCD),y)
-  CSRCS += lpc17_lcd.c
+ifeq ($(CONFIG_LPC17_40_LCD),y)
+  CSRCS += lpc17_40_lcd.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-  CSRCS += lpc17_appinit.c
+  CSRCS += lpc17_40_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-  CSRCS += lpc17_autoleds.c
+  CSRCS += lpc17_40_autoleds.c
 else
-  CSRCS += lpc17_userleds.c
+  CSRCS += lpc17_40_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-  CSRCS += lpc17_buttons.c
+  CSRCS += lpc17_40_buttons.c
 else ifeq ($(CONFIG_OPEN1788_DJOYSTICK),y)
-  CSRCS += lpc17_djoystick.c
+  CSRCS += lpc17_40_djoystick.c
 endif
 
 ifeq ($(CONFIG_INPUT_ADS7843E),y)
-  CSRCS += lpc17_touchscreen.c
+  CSRCS += lpc17_40_touchscreen.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

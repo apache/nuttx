@@ -229,6 +229,40 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start ADC1: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_INA219
+  /* Configure and initialize the INA219 sensor */
+
+  ret = stm32_ina219initialize("/dev/ina219");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ina219initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_TIMER)
+  /*Initialize the timer, at this moment it's only Timer 1,2,3*/
+
+  #if defined(CONFIG_STM32_TIM1)
+    stm32_timer_driver_setup("/dev/timer1", 1);
+  #endif
+  #if defined(CONFIG_STM32_TIM2)
+    stm32_timer_driver_setup("/dev/timer2", 2);
+  #endif
+  #if defined(CONFIG_STM32_TIM3)
+    stm32_timer_driver_setup("/dev/timer3", 3);
+  #endif
+#endif
+
   UNUSED(ret);
   return OK;
 }

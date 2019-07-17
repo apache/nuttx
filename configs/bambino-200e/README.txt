@@ -306,7 +306,7 @@ Bambino-200e Configuration Options
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
     CONFIG_LPC43_AUTONEG - Enable auto-negotion
 
-    CONFIG_LPC17_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
+    CONFIG_LPC17_40_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
     CONFIG_LPC43_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
     CONFIG_LPC43_ETH_NRXDESC - Configured number of Rx descriptors. Default: 18
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
@@ -327,7 +327,7 @@ Bambino-200e Configuration Options
     CONFIG_LPC43_USBDEV_NDMADESCRIPTORS
       Number of DMA descriptors to allocate in SRAM.
     CONFIG_LPC43_USBDEV_DMA
-      Enable lpc17xx-specific DMA support
+      Enable lpc17xx/lpc40xx-specific DMA support
     CONFIG_LPC43_USBDEV_NOVBUS
       Define if the hardware implementation does not support the VBUS signal
     CONFIG_LPC43_USBDEV_NOLED

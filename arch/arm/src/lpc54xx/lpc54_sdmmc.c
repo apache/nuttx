@@ -10,7 +10,7 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
- * which was itself based on arch/arm/src/lpc17xx/lpc17_sdcard.c:
+ * which was itself based on arch/arm/src/lpc17xx_40xx/lpc17_40_sdcard.c:
  *
  *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

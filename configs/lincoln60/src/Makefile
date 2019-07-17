@@ -36,18 +36,18 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc17_boot.c lpc17_leds.c
+CSRCS = lpc17_40_boot.c lpc17_40_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += lpc17_appinit.c
+CSRCS += lpc17_40_appinit.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS += lpc17_usbmsc.c
+CSRCS += lpc17_40_usbmsc.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += lpc17_buttons.c
+CSRCS += lpc17_40_buttons.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

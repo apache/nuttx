@@ -154,9 +154,9 @@
 
 /* Button IRQ numbers */
 
-#define LPC1766STK_BUT1_IRQ   LPC17_IRQ_P0p23
-#define LPC1766STK_BUT2_IRQ   LPC17_IRQ_P2p13
-#define LPC1766STK_WAKEUP_IRQ LPC17_IRQ_P2p12
+#define LPC1766STK_BUT1_IRQ   LPC17_40_IRQ_P0p23
+#define LPC1766STK_BUT2_IRQ   LPC17_40_IRQ_P2p13
+#define LPC1766STK_WAKEUP_IRQ LPC17_40_IRQ_P2p12
 
 /* Joystick GPIO                    PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
@@ -182,11 +182,11 @@
 
 /* Joystick IRQ numbers */
 
-#define LPC1766STK_CENTER_IRQ LPC17_IRQ_P0p5
-#define LPC1766STK_UP_IRQ     LPC17_IRQ_P2p0
-#define LPC1766STK_DOWN_IRQ   LPC17_IRQ_P2p1
-#define LPC1766STK_LEFT_IRQ   LPC17_IRQ_P2p7
-#define LPC1766STK_RIGHT_IRQ  LPC17_IRQ_P2p8
+#define LPC1766STK_CENTER_IRQ LPC17_40_IRQ_P0p5
+#define LPC1766STK_UP_IRQ     LPC17_40_IRQ_P2p0
+#define LPC1766STK_DOWN_IRQ   LPC17_40_IRQ_P2p1
+#define LPC1766STK_LEFT_IRQ   LPC17_40_IRQ_P2p7
+#define LPC1766STK_RIGHT_IRQ  LPC17_40_IRQ_P2p8
 
 /* Nokia LCD GPIO                   PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
@@ -251,7 +251,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_bringup
+ * Name: lpc17_40_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -264,7 +264,7 @@
  *
  ************************************************************************************/
 
-int lpc17_bringup(void);
+int lpc17_40_bringup(void);
 
 /************************************************************************************
  * Name: lpc1766stk_sspdev_initialize

@@ -46,8 +46,7 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32.h"
+#include <sys/types.h>
 
 /************************************************************************************
  * Pre-processor Definitions

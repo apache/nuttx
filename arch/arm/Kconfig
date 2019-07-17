@@ -133,21 +133,14 @@ config ARCH_CHIP_LM
 	---help---
 		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
-config ARCH_CHIP_LPC11XX
-	bool "NXP LPC11xx"
-	select ARCH_CORTEXM0
-	---help---
-		NXP LPC11xx architectures (ARM Cortex-M0)
-
-config ARCH_CHIP_LPC17XX
-	bool "NXP LPC17xx"
-	select ARCH_CORTEXM3
+config ARCH_CHIP_LPC17XX_40XX
+	bool "NXP LPC17xx/LPC40xx"
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
-		NXP LPC17xx architectures (ARM Cortex-M3)
+		NXP LPC17xx & LPC40xx architectures (ARM Cortex-M3/4)
 
 config ARCH_CHIP_LPC214X
 	bool "NXP LPC214x"
@@ -665,9 +658,8 @@ config ARCH_CHIP
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
 	default "lc823450"	if ARCH_CHIP_LC823450
-	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA ||ARCH_CHIP_SIMPLELINK
-	default "lpc11xx"	if ARCH_CHIP_LPC11XX
-	default "lpc17xx"	if ARCH_CHIP_LPC17XX
+	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA || ARCH_CHIP_SIMPLELINK
+	default "lpc17xx_40xx"	if ARCH_CHIP_LPC17XX_40XX
 	default "lpc214x"	if ARCH_CHIP_LPC214X
 	default "lpc2378"	if ARCH_CHIP_LPC2378
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
@@ -877,11 +869,8 @@ endif
 if ARCH_CHIP_LM || ARCH_CHIP_TIVA || ARCH_CHIP_SIMPLELINK
 source arch/arm/src/tiva/Kconfig
 endif
-if ARCH_CHIP_LPC11XX
-source arch/arm/src/lpc11xx/Kconfig
-endif
-if ARCH_CHIP_LPC17XX
-source arch/arm/src/lpc17xx/Kconfig
+if ARCH_CHIP_LPC17XX_40XX
+source arch/arm/src/lpc17xx_40xx/Kconfig
 endif
 if ARCH_CHIP_LPC214X
 source arch/arm/src/lpc214x/Kconfig

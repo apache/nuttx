@@ -360,6 +360,14 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_1
 #define GPIO_USART1_TX GPIO_USART1_TX_1
 
+/* PWM
+ *
+ * The STM32F7 Discovery has no real on-board PWM devices, but the board can be
+ * configured to output a pulse train using TIM1 CH4 on PA11.
+ */
+
+#define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_1
+
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
  *   STM32 F7 BOARD        LAN8742A

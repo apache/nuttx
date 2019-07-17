@@ -38,9 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
-#include "stm32_ccm.h"
 #include "stm32f769i-disco.h"
 
 /****************************************************************************
@@ -59,7 +57,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -74,26 +72,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_FS_PROCFS
-  int ret;
-
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
-
-  (void)ccm_procfs_register();
-#endif
-
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
-             SAMV71_PROCFS_MOUNTPOINT, ret);
-    }
-#endif
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return stm32_bringup();
+#endif
 }
