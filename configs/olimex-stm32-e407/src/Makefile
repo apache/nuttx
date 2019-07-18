@@ -96,5 +96,9 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
+ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
+CSRCS += stm32_mrf24j40.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
 

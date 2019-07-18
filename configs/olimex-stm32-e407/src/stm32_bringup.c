@@ -263,6 +263,16 @@ int stm32_bringup(void)
   #endif
 #endif
 
+#ifdef CONFIG_IEEE802154_MRF24J40
+  /* Configure MRF24J40 wireless */
+
+  ret = stm32_mrf24j40_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

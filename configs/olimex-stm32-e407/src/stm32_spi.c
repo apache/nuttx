@@ -113,7 +113,7 @@ void stm32_spidev_initialize(void)
 #endif
 
 #ifdef CONFIG_IEEE802154_MRF24J40
-  stm32_configgpio(GPIO_MRF24J40_CS);
+  stm32_configgpio(GPIO_MRF24J40_CS);        /* MRF24J40 chip select */
 #endif
 }
 

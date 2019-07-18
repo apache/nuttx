@@ -115,16 +115,28 @@
 /* Olimex-STM32-E407 GPIOs ****************************************************/
 /* LEDs */
 
-#define GPIO_LED_STATUS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_LED_STATUS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+
+/* Pin for MRF24J40 radio */
+
+#define GPIO_MRF24J40_INT (GPIO_INPUT|GPIO_FLOAT|\
+                           GPIO_EXTI|GPIO_PORTG|GPIO_PIN12) /* PG12 */
+#define GPIO_MRF24J40_RST (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN15) /* PG15 */
+
+/* SPI chip selects */
+
+#define GPIO_MRF24J40_CS  (GPIO_OUTPUT|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4) /* PA4 */
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON   BUTTON_BUT
-#define MAX_IRQBUTTON   BUTTON_BUT
-#define NUM_IRQBUTTONS  1
+#define MIN_IRQBUTTON     BUTTON_BUT
+#define MAX_IRQBUTTON     BUTTON_BUT
+#define NUM_IRQBUTTONS    1
 
-#define GPIO_BTN_BUT   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_BUT      (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
 /* USB OTG FS - USB-A connector
  *
@@ -155,14 +167,22 @@
  * PF11  OTG_HS_Overcurrent
  */
 
-#define GPIO_OTGHS_VBUS (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN13)
-#define GPIO_OTGHS_PWRON (GPIO_OUTPUT|GPIO_OUTPUT_SET|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN8)
+#define GPIO_OTGHS_VBUS \
+  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTB| \
+   GPIO_PIN13)
+#define GPIO_OTGHS_PWRON \
+  (GPIO_OUTPUT|GPIO_OUTPUT_SET|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL| \
+   GPIO_PORTA|GPIO_PIN8)
 
 #ifdef CONFIG_USBHOST
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN11)
+#  define GPIO_OTGHS_OVER \
+  (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL| \
+   GPIO_PORTF|GPIO_PIN11)
 
 #else
-#  define GPIO_OTGHS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN11)
+#  define GPIO_OTGHS_OVER \
+  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTF| \
+  GPIO_PIN11)
 #endif
 
 /* LAN8710 works with LAN8720 driver
@@ -184,10 +204,10 @@
  */
 
 #if defined(CONFIG_STM32_ETHMAC)
-#  define GPIO_EMAC_NINT  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|    \
-                         GPIO_PORTA|GPIO_PIN3)
-#  define GPIO_EMAC_NRST  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|    \
-                         GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN6)
+#  define GPIO_EMAC_NINT  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI| \
+                           GPIO_PORTA|GPIO_PIN3)
+#  define GPIO_EMAC_NRST  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN6)
 #endif
 
 /****************************************************************************
@@ -342,6 +362,22 @@ int stm32_ina219initialize(FAR const char *devpath);
 
 #ifdef CONFIG_TIMER
 int stm32_timer_driver_setup(FAR const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name: stm32_mrf24j40_initialize
+ *
+ * Description:
+ *   Initialize the MRF24J40 device.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IEEE802154_MRF24J40
+int stm32_mrf24j40_initialize(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
