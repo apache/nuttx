@@ -542,6 +542,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 #ifdef CONFIG_SCHED_CHILD_STATUS
           if (retains)
             {
+              child = group_exitchild(rtcb->group);
               DEBUGASSERT(child != NULL);
 
               /* Discard the child entry */
