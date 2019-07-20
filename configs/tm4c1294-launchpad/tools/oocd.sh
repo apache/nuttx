@@ -36,7 +36,7 @@ if [ "X$2" = "X-d" ]; then
 	set -x
 fi
 
-if [ ! -d ${OPENOCD_PATH} ]; thenf
+if [ ! -d ${OPENOCD_PATH} ]; then
 	echo "OpenOCD path does not exist: ${OPENOCD_PATH}"
 	exit 1
 fi
