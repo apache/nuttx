@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_waitpid.c
  *
- *   Copyright (C) 2011-2013, 2015, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2011-2013, 2015, 2017-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -429,7 +429,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       if (pid == (pid_t)-1)
         {
           /* We are waiting for any child, check if there are still
-           * chilren.
+           * children.
            */
 
           DEBUGASSERT(!retains || rtcb->group->tg_children);
@@ -542,6 +542,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 #ifdef CONFIG_SCHED_CHILD_STATUS
           if (retains)
             {
+              /* Recover the exiting child */
+
               child = group_exitchild(rtcb->group);
               DEBUGASSERT(child != NULL);
 
