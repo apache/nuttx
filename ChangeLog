@@ -24301,9 +24301,9 @@
 	* Rename all arch/<famil>/src/<chip>/chip to
 	  arch/<family>/src/<chip>/hardware.  This eliminates a name collision that
 	  is usually harmless but does cause problems at the time.  The problem is
-	  becauase the include path includes '.' and 'chip/.', therefore and
-	  inclusion like '#include <chip/mcu_header.h' can be ambiguous of a filel
-	  named mcu_header.h exists in bothe at both arch/<famil>/src/<chip>/chip
+	  because the include path includes '.' and 'chip/.', therefore an
+	  inclusion like '#include <chip/mcu_header.h' can be ambiguous of a file
+	  named mcu_header.h exists in both at both arch/<famil>/src/<chip>/chip
 	  and at arch/<famil>/src/chip/chip  From Gregory Nutt (2019-05-24).
 	* arch/mips/src:  Previous commit used CP0 register definitions that were
 	  not defined in the cp0.h header file.  Probably these were from the
@@ -24387,7 +24387,7 @@
 	* include/nuttx/net/bluetooth.h:  Ignore content if CONFIG_NET_BLUETOOTH is
 	  not set.  This is necessary because bt_hci.h content was previously
 	  commented out because it uses several compiler specific things include
-	  zero-dimensione arrays and uint64_t.  Neither are supported by the C89
+	  zero-dimensioned arrays and uint64_t.  Neither are supported by the C89
 	  ZiLOG ZDS-II compiler.  From Gregory Nutt (2019-06-02).
 	* configs/axoloti:  Adds initial support for the Axoloti sound/music
 	  synthesizer board.  Board is based on STM32F427 SoC.  See
@@ -24400,7 +24400,7 @@
 	* arch/z16/src:  Replicate build changes make for ez80 and z8 for zneo.
 	  From Gregory Nutt (2019-06-02).
 	* arch/z16/src/z16f/Kconfig and configs/z16f2800100zcog/scripts/Make.defs:
-	  Add support for the lastest 5.2.1 version of the ZDS-II toolchain.  From
+	  Add support for the latest 5.2.1 version of the ZDS-II toolchain.  From
 	  Gregory Nutt (2019-06-02).
 	* net/usrsock: Fix debug logs and remove DEBUGASSERT from
 	  usrsockdev_do_request().  In a client mode, socket() will be the first
