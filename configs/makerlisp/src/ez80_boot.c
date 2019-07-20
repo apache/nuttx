@@ -103,15 +103,22 @@ static void ez80_vga_initialize(void)
         {
           /* Yes.. set newline mode, graphic attributes:
            *
-           * \033 = ESCAPE character
+           * \e = ESCAPE character
            * Assumption:  VGA is on the console UART.
            */
 
-          up_puts("\033[20h\033[0m");
+          up_puts("\e[20h\e[0m");
 
           /* Clear, home cursor, beep */
 
-          up_puts("\033[2J\033[H\a");
+          up_puts("\e[2J\e[H\a");
+
+          /* The VGA display controller and keyboard controller come up by
+           * default emulating a terminal with "newline mode" on.  The
+           * following turns off that mode.
+           */
+
+          up_puts("\e[20l");
         }
     }
 }
