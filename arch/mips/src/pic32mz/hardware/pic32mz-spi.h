@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz-spi.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015,m 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* SPI Peripheral Offsets ***************************************************/
 
 #define PIC32MZ_SPIn_OFFSET(n)    ((n) << 9)
