@@ -23495,7 +23495,7 @@ detailed bugfix information):
 NuttX-7.31 Release Notes
 ------------------------
 
-The 131st release of NuttX, Version 7.31, was made on July 22, 2019,
+The 131st release of NuttX, Version 7.31, was made on July 21, 2019,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-7.31.tar.gz and
 apps-7.31.tar.gz.  These are available from:

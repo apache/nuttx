@@ -24261,7 +24261,7 @@
 	  Move HSI48 enable from stm32_usbdev.c to stm32xx_rcc.c  From Mateusz
 	  Szafoni (2019-05-17).
 
-7.31 2019-07-22 Gregory Nutt <gnutt@nuttx.org>
+7.31 2019-07-21 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/net/telnet.c:  Handle ctrl events (SIGINT, SIGSTP).  From
 	  Valmantas Paliksa (2019-05-21).
