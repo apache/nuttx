@@ -77,10 +77,10 @@
 #define PIC32MZ_SPI_BRGSET_OFFSET  0x0038 /* SPI baud rate set register */
 #define PIC32MZ_SPI_BRGINV_OFFSET  0x003c /* SPI baud rate invert register */
 
-#define PIC32MZ_SPI_CON2_OFFSET    0x0040 /* SPI control register 2*/
-#define PIC32MZ_SPI_CON2CLR_OFFSET 0x0040 /* SPI control register 2*/
-#define PIC32MZ_SPI_CON2SET_OFFSET 0x0040 /* SPI control register 2*/
-#define PIC32MZ_SPI_CON2INV_OFFSET 0x0040 /* SPI control register 2*/
+#define PIC32MZ_SPI_CON2_OFFSET    0x0040 /* SPI control register 2 */
+#define PIC32MZ_SPI_CON2CLR_OFFSET 0x0044 /* SPI control clear register 2 */
+#define PIC32MZ_SPI_CON2SET_OFFSET 0x0048 /* SPI control set register 2 */
+#define PIC32MZ_SPI_CON2INV_OFFSET 0x004c /* SPI control invert register 2 */
 
 /* SPI Peripheral Addresses *************************************************/
 
