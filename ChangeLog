@@ -1832,7 +1832,7 @@
 6.6 2011-07-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
-	  Several structural changes made to get a clean compile under the ez80 ZDS-II
+	  Several structural changes made to get a clean compile under the eZ80 ZDS-II
 	  toolchain (no design changes).
 	* drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
 	  Younan:  (1) Read capacity logic read largest block, not the number of blocks
@@ -1953,7 +1953,7 @@
 	  storage driver; it is possible that a similar but could exist for other
 	  architectures.
 	* graphics/nxfonts/nxfonts_*.h:  Add serveral more new fonts
-	* arch/z80/src/ez80/ez80_serial.c: Fix some errors in serial driver
+	* arch/z80/src/eZ80/ez80_serial.c: Fix some errors in serial driver
 	  setup for UART1 (submitted by Paul Osmialowski).
 	* drivers/input/tsc2007.c and include/nuttx/input/*:  Add a generic NuttX
 	  touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
@@ -3648,11 +3648,11 @@
 	* graphics/nxmw:  Extended the blocked messages to cover mouse movement
 	  and redraw events.  These will also cause problems if sent to a window
 	  while it is closing.
-	* arch/several:  Change UARTs are enabled for i.MX, LM3S, ez80, and M16C to
+	* arch/several:  Change UARTs are enabled for i.MX, LM3S, eZ80, and M16C to
 	  match how they are enabled for other architectures.
 	* configs/ez80f910200kitg:  Convert to use mconf configuration.
 	* sched/pause.c:  Implements the POSIX pause() function.
-	* ez80: Lots of changes to ez80 configurations and build logic as I
+	* eZ80: Lots of changes to eZ80 configurations and build logic as I
 	  struggle to get a clean Windows build (still not working).
 	* configs/cloudctrl:   Darcy Gong's CloudController board.  This is a
 	  small network relay development board. Based on the Shenzhou IV development
@@ -3690,7 +3690,7 @@
 	* configs/ez80f910200zco/ostest:  Now uses Kconfig/mconf configuration
 	  tool. Updated to build in native Windows environment.  Other ez80f910200zco
 	  build scripts also updated.
-	* configs/z8f64200100kit/ostest: Update to same level as ez80 configurations.
+	* configs/z8f64200100kit/ostest: Update to same level as eZ80 configurations.
 	* nuttx/configs/z8f64200100kit/scripts/setenv.bat: Add support for native
 	  Windows build.
 	* nuttx/arch/arm/src/lpc17xx/lpc17_i2c.c: Resources not being released when
@@ -11393,7 +11393,7 @@
 	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_intialize(),
 	  Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_intialize(),
 	  Rename the Calypso up_spiinitialize() to calypso_spibus_intialize(),
-	  Rename the ez80 up_spiinitialize() to ez80_spibus_intialize(),
+	  Rename the eZ80 up_spiinitialize() to ez80_spibus_intialize(),
 	  Rename the STR71xx up_spiinitialize() to str71_spibus_intialize(),
 	  Rename the i.MX1 up_spiinitialize() to imx_spibus_intialize(),
 	  Rename the LPC2378 up_spiinitialize() to lpc23_spibus_intialize(),
@@ -17886,9 +17886,9 @@
 	  priv->epbulkout->maxpacket is used instead.  From Masayuki Ishikawa
 	  (2017-11-13).
 	* configs/stm32f4discovery: RNDIS support on STM32F4Discovery
-	    - Add rndis configuration.  NOTE: STM32F4Discovery + DM-STF4BB
+	    - Add RNDIS configuration.  NOTE: STM32F4Discovery + DM-STF4BB
 	    - Add stm32_netinit.c to avoid a compilation error
-	    - Add rndis initialization in stm32_bringup.c
+	    - Add RNDIS initialization in stm32_bringup.c
 	  NOTE: MAC address for the host side starts 0xaa.  This assignment
 	  scheme should be fixed later.  From Masayuki Ishikawa (2017-11-13).
 	* configs/:  apps/system/free has been deleted because it violates the
@@ -18132,7 +18132,7 @@
 	      corruption.  From Masayuki Ishikawa (2017-11-27).
 	* arch/arm/src/lpc43xx:  lpc43_adc.c was being selected by the build
 	  system wehn DAC was selected (2017-11-27).
-	* configs/lc823450-xgevk: Add rndis configuration.  From Masayuki
+	* configs/lc823450-xgevk: Add RNDIS configuration.  From Masayuki
 	  Ishikawa (2017-11-28).
 	* drivers/input/nunchuck.c: Add Nintendo Wii Nunchuck driver.  From
 	  Alan Carvalho de Assis (2017-11-28).
@@ -18187,7 +18187,7 @@
 	* drivers/audio/wm8776.c: Improve stability in SMP mode.  Apply irq_spin
 	  APIs to improve performance.  Repeat to process a message to avoid
 	  deadlock.  From Masayuki Ishikawa (2017-12-08).
-	* configs/lc823450-xgevk: Enable SPINLOCK_IRQ and NXPLAYER in rndis.  From
+	* configs/lc823450-xgevk: Enable SPINLOCK_IRQ and NXPLAYER in RNDIS.  From
 	  Masayuki Ishikawa (2017-12-08).
 	* arch/arm/src/xmc4:  Only setup USB clock when USB PLL is enabled  From
 	  Alan Carvalho de Assis (2017-12-08).
@@ -18281,7 +18281,7 @@
 	  assign CPU0 for IRQ handling.  (7) Use spinlock APIs instead of critical
 	  section APIs. (8) Fix race conditions in dma/usbdev. (9) Enable HRT_TIMER,
 	  LC823450_MTM0_TICK, SPINLOCK_IRQ, (10) Enable NET_TCP_RWND_CONTROL,
-	  NXPLAYER_HTTP_STREAMING_SUPPORT (rndis only)  From Masayuki Ishikawa
+	  NXPLAYER_HTTP_STREAMING_SUPPORT (RNDIS only)  From Masayuki Ishikawa
 	  (2017-12-20).
 	* syslog: Fixes LOG_UPTO macro to include specified log level  From Anthony
 	  Merlino (2017-12-20).
@@ -18420,7 +18420,7 @@
 	* arch/arm/src/lc823450: Introduce DVFS.   This version only supports
 	  manual mode and Vdd1 is fixed to 1.2V.  From Masayuki Ishikawa (2018-01-10).
 	* configs/lc823450-xgevk: Enable DVFS in lc823450_bringup.c.  Enable DVFS
-	  in audio and rndis. Add telnet character mode to rndis.  From Masayuki
+	  in audio and RNDIS. Add telnet character mode to RNDIS.  From Masayuki
 	  Ishikawa (2018-01-10).
 	* arch/arm/src/samdl: In sam_spibus_initialize(), the pinmux configuration
 	  was smashing the previous CTRLA register configuration. There are also some
@@ -18843,7 +18843,7 @@
 	  From Masayuki Ishikawa (2018-02-23).
 	* configs/lc823450-xgevk: Update defconfigs.   Enable RTC_HIRES instead of
 	  RTC_DATETIME (audio/rndis).  Disable TCP_WRITE_BUFFERS and change
-	  SCHED_LPWORKPRIORITY (rndis). Update SMP and DVFS related part.  From
+	  SCHED_LPWORKPRIORITY (RNDIS). Update SMP and DVFS related part.  From
 	  Masayuki Ishikawa (2018-02-23).
 	* net/icmpv6/icmpv6:  Eliminate warnings by correct the type uses to link
 	  structure into lists.  From SP (2018-02-23).
@@ -19531,7 +19531,7 @@
 	  400Khz to 4MHz.  From Alan Carvalho de Assis (2018-06-16).
 	* This commit brings in a partial STMicro STM32H7.  From Simon Laube
 	  (2018-06-16).
-	* configs/stm32f4discovery: Remove STM32F4BB dependence from rndis; add
+	* configs/stm32f4discovery: Remove STM32F4BB dependence from RNDIS; add
 	  RAMDISK support.  From Alan Carvalho de Assis (2018-06-18).
 	* arch/arm/src/stm32l4:  STM32L4 has fetchadd and testset  From Juha
 	  Niskanen (2018-06-18).
@@ -19988,7 +19988,7 @@
 	  implementation, the setting can ben changed by the tx threshold but
 	  it is fixed at startup. Also, check write size and adjust alignment
 	  if needed.
-	  configs/lc823450-xgevk: Change IOB related params for rndis.  Since
+	  configs/lc823450-xgevk: Change IOB related params for RNDIS.  Since
 	  TCP flow control scheme was changed, HTTP audio streaming has not
 	  been working. These IOB params are not optimized but HTTP audio
 	  streaming now works.  From Masayuki Ishikawa (2018-08-06).
@@ -20810,7 +20810,7 @@
 	* libs/libc/string/lib_stpncpy.c:  Correct the return pointer value for the
 	  case where the NUL terminator is transferred.  From Gregory Nutt
 	  (2018-09-18).
-	* drivers/usbdev: Fix buffer overrun check in rndis.c.  The rndis driver has
+	* drivers/usbdev: Fix buffer overrun check in rndis.c.  The RNDIS driver has
 	  been working since 13 Nov 2017.  However, I finally found that it depends
 	  on network and buffer configurations.  If a receiving TCP packet is
 	  divided into smaller ones based on USB max packet size, this condition
@@ -22237,7 +22237,7 @@
 	  fixed in somes places still lacks sufficient intelligence to find the
 	  right stack for the CPU IDLE thread and could still show the wrong
 	  stack.  From Gregory Nutt (2018-12-18).
-	* Change rndis mac:
+	* Change RNDIS mac:
 	  - configs/lc823450-xgevk:  Change RNDIS MAC address assignment.  In
 	    previous implementation, mac[0] was assigned to 0xaa for RNDIS host
 	    to avoid MAC address conflicts with RNDIS device..  However, I
@@ -22458,7 +22458,7 @@
 	  enable/disable.  From Petro Karashchenko (2019-01-06).
 	* drivers/timers/mcp7941x.c:  Add support for the MCP741x external RTC.
 	  From Ouss4 (2019-01-06).
-	* configs/lc823450-xgevk: Enable NFS client for rndis.  Also, some stack
+	* configs/lc823450-xgevk: Enable NFS client for RNDIS.  Also, some stack
 	  size were adjusted to work with NFS  From Masayuki Ishikawa (2019-01-07).
 	* include/dsp.h:  Fix missing semicolon error in dsp.h  From MYAPICI
 	  (2019-01-07).
@@ -22546,7 +22546,7 @@
 	* configs/stm32f4discovery: Update nsh configuration: (1) Add
 	  CONFIG_BOARD_INITIALIZE=y, (2) Add CONFIG_EXAMPLES_HELLO=y  From
 	  Masayuki Ishikawa (2019-01-14).
-	* configs/stm32f4discovery: Update rndis configuration:
+	* configs/stm32f4discovery: Update RNDIS configuration:
 	  - Add NFS and adjusted stack size for usermain and telnetd client.
 	  - Add support for loadable application and ping.
 	  From Masayuki Ishikawa (2019-01-14).
@@ -23875,7 +23875,7 @@
 	  definitions.  From oao Matos (2019-04-04).
 	* Added support for KSZ8081RNA PHY to LPC17xx Ethernet driver.  From
 	  jjlange (2019-04-04).
-	* Refresh configurations.  Remove CONFIG_NXWM_UNITTEST=y, not longer in
+	* Refresh configurations.  Remove CONFIG_NXWM_UNITTEST=y, no longer in
 	  Kconfigs.  From Gregory Nutt (2019-04-04).
 	* syscall/syscall.csv: Fix a warning due to inconsistencies in return
 	  type.  From Gregory Nutt (2019-04-04).
@@ -24261,7 +24261,7 @@
 	  Move HSI48 enable from stm32_usbdev.c to stm32xx_rcc.c  From Mateusz
 	  Szafoni (2019-05-17).
 
-7.31 2019-07-21 Gregory Nutt <gnutt@nuttx.org>
+7.31 2019-07-22 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/net/telnet.c:  Handle ctrl events (SIGINT, SIGSTP).  From
 	  Valmantas Paliksa (2019-05-21).
@@ -24279,7 +24279,7 @@
 	* configs/lpcxpresso-lpc54628:  Add another Twm4Nx configuration for
 	  working out the new CONTEMPORARY theme.  From Gregory Nutt (2019-05-21).
 	* Removed all references to CONFIG_DISABLE_POLL.  The standard POSIX poll()
-	  can not longer be disabled.  From Gregory Nutt (2019-05-21).
+	  can no longer be disabled.  From Gregory Nutt (2019-05-21).
 	* Documentation/: Applies a stylesheet to static HTML files. I've also
 	  tried to put the TOC of each document to the side, where it made sense
 	  (in some documents the TOC was actually inside a section so it wasn't
@@ -24298,13 +24298,13 @@
 	  graphics system.  When a lower-level window was raised while a model
 	  window was in place, then list corruption could occur.  From Gregory Nutt
 	  (2019-05-23).
-	* Rename all arch/<famil>/src/<chip>/chip to
+	* Rename all arch/<family>/src/<chip>/chip to
 	  arch/<family>/src/<chip>/hardware.  This eliminates a name collision that
 	  is usually harmless but does cause problems at the time.  The problem is
 	  because the include path includes '.' and 'chip/.', therefore an
-	  inclusion like '#include <chip/mcu_header.h' can be ambiguous of a file
-	  named mcu_header.h exists in both at both arch/<famil>/src/<chip>/chip
-	  and at arch/<famil>/src/chip/chip  From Gregory Nutt (2019-05-24).
+	  inclusion like '#include <chip/mcu_header.h' can be ambiguous if a file
+	  named mcu_header.h exists in both at both arch/<family>/src/<chip>/chip
+	  and at arch/<family>/src/chip/chip  From Gregory Nutt (2019-05-24).
 	* arch/mips/src:  Previous commit used CP0 register definitions that were
 	  not defined in the cp0.h header file.  Probably these were from the
 	  Microchip hacked up GCC toolchain but are not generally available.  Fix:
@@ -24318,7 +24318,7 @@
 	  Gregory Nutt (2019-05-25).
 	* configs/lpcxpresso-lpc54628:  Modify the TWM configurations to properly
 	  inject keyboard data.  This way, in the case of multiple NxTERMs, only
-	  the NxTerm at the top of the heiararchy gets the keyboard input.
+	  the NxTerm at the top of the hierarchy gets the keyboard input.
 	  Otherwise, it is not possible to use multiple NxTerms with each the
 	  keyboard input going to a different NxTerm window.  From Gregory Nutt
 	  (2019-05-26).
@@ -24382,7 +24382,7 @@
 	  stm32s have an SQR4 register.  From rajan gill (2019-05-31).
 	* configs/lpcxpresso-lpc54628:  Enable DATE command in twm4nx1 and twm4nx2
 	  configurations.  From Gregory Nutt (2019-06-01).
-	* Integrate support for the newest ez80 ZDSII 5.3.0 toolchain.  From
+	* Integrate support for the newest eZ80 ZDSII 5.3.0 toolchain.  From
 	  Gregory Nutt (2019-06-02).
 	* include/nuttx/net/bluetooth.h:  Ignore content if CONFIG_NET_BLUETOOTH is
 	  not set.  This is necessary because bt_hci.h content was previously
@@ -24392,12 +24392,12 @@
 	* configs/axoloti:  Adds initial support for the Axoloti sound/music
 	  synthesizer board.  Board is based on STM32F427 SoC.  See
 	  http://www.axoloti.com/.  From Jason Harris (2019-06-02).
-	* arch/z80/src:  Fix ez80 compile problems due to New ZDS-II toolchain and
+	* arch/z80/src:  Fix eZ80 compile problems due to New ZDS-II toolchain and
 	  ongoing bit rot due to non-C89 code creeping into the core OS.  From
 	  Gregory Nutt (2019-06-02).
-	* configs:  Fix included path used in all arch/z80 XDS-II builds (ez80 and
+	* configs:  Fix included path used in all arch/z80 XDS-II builds (eZ80 and
 	  z8).  From Gregory Nutt (2019-06-02).
-	* arch/z16/src:  Replicate build changes make for ez80 and z8 for zneo.
+	* arch/z16/src:  Replicate build changes make for eZ80 and z8 for zneo.
 	  From Gregory Nutt (2019-06-02).
 	* arch/z16/src/z16f/Kconfig and configs/z16f2800100zcog/scripts/Make.defs:
 	  Add support for the latest 5.2.1 version of the ZDS-II toolchain.  From
@@ -24413,11 +24413,11 @@
 	  Link' protocol between a target and debugger for use when you need a
 	  console but the target doesn't have a spare serial port or other
 	  available resource.  From Dave Marples (2019-06-03).
-	* include/nuttx/signal.h:  Fix a C89 compliance problem that cause the ez80
+	* include/nuttx/signal.h:  Fix a C89 compliance problem that cause the eZ80
 	  build to fail.  Empty structure and unions are not accepted by the
 	  compiler.  From Gregory Nutt (2019-06-03).
 	* drivers/net/telnet.c:  Fix a C89 non-compliance that was breaking the
-	  ez80 build.  From Gregory Nutt (2019-06-03).
+	  eZ80 build.  From Gregory Nutt (2019-06-03).
 	* libs/libc/stdio:  Fix long long usage in all of the newer printf-related
 	  logic:  The selection CONFIG_LIBC_LONG_LONG must be ignored if the
 	  architecture does not support long long types.  From Gregory Nutt
@@ -24427,11 +24427,11 @@
 	  be evaluated even though they are not used any variables that are
 	  references must at least be defined.  From Gregory Nutt (2019-06-03).
 	* udp\udp_callback.c:  Fix another C89 compatibility problem.  Empty
-	  initializers are not permitted.  Caused ez80 build failure.  From Gregory
+	  initializers are not permitted.  Caused eZ80 build failure.  From Gregory
 	  Nutt (2019-06-03).
 	* configs/:  Update configurations for changes to apps/netutils/netinit
 	  configuration.  MAC address configuration was represented by type long
-	  long.  That is a problem for architectures that do not support typle long
+	  long.  That is a problem for architectures that do not support type long
 	  long.  Replaces by two long configuration items.  From Gregory Nutt
 	  (2019-06-03).
 	* Fix several ZNeo compile issues.  There are more.  Pthreads:  Fix a could
@@ -24444,15 +24444,15 @@
 	* More ZNeo compile fixes:  include/stdio.h:  Another place where misuse of
 	  FAR makes a difference.  include/nuttx/sched.h:  Be consistent in use of
 	  WDOG_ID type.  ZDS-II doesn't like auto-conversions of struct wdog_s * to
-	  WDOG_I (which is type struct wdog_s *).  From Gregory Nutt (2019-06-03).
+	  WDOG_ID (which is type struct wdog_s *).  From Gregory Nutt (2019-06-03).
 	* Various fixes to get a clean compile with the SDCC compiler.  Compile is
 	  'almost' clean.  From Gregory Nutt (2019-06-03).
 	* Add initial support for the MakerLisp eZ80 board.  Ref:
 	  https://makerlisp.com/  From Gregory Nutt (2019-06-04).
 	* arch/arm/src/cxd54xx:  Adds (1) the HW pin configuration, (2) GPIO
 	  support for cxd56xx, (3) GPIO interrupts, (4) clock support, (5) PMIC
-	  (Power management integrated circuit) supportm (6) add a simple FIFO
-	  schedulier that minimizes overhead, (6) Inter Core Communication.  From
+	  (Power management integrated circuit) support (6) add a simple FIFO
+	  scheduler that minimizes overhead, (6) Inter Core Communication.  From
 	  Alin Jerpelea (2019-06-05).
 	* arch/arm/src/cxd54xx:  Add Package Configuration. The CXD56xx can come in
 	  FCBGA 185 pin or WLCSP 100 pin package.  For each package we have to pick
@@ -24480,9 +24480,9 @@
 	  Gregory Nutt (2019-06-05).
 	* drivers/sensors/as726x.c Fix little change from tools/indent.sh  From
 	  Fabian Justi (2019-06-06).
-	* arch/z80/src/ez80/Make.defs:  Fix some backward conditional loic  From
+	* arch/z80/src/eZ80/Make.defs:  Fix some backward conditional logic  From
 	  Gregory Nutt (2019-06-07).
-	* arch/z80/src/ez80:  Integrate and verify the RTC driver  From Gregory
+	* arch/z80/src/eZ80:  Integrate and verify the RTC driver  From Gregory
 	  Nutt (2019-06-08).
 	* nuttx/arch/z80/src:  To properly follow the coding standard, the z80
 	  architecture common should up_mmuinit should be called
@@ -24506,7 +24506,7 @@
 	  (2019-06-10).
 	* arch/arm/src/cxd56xx: add Power Management support  From Alin Jerpelea
 	  (2019-06-10).
-	* configs: Fix mac address settings for rndis.  Recently
+	* configs: Fix mac address settings for RNDIS.  Recently
 	  CONFIG_NETINIT_MACADDR_2 and CONFIG_NETINIT_MACADDR_1 were newly
 	  introduced instead of CONFIG_NETINIT_MACADDR.  This PR conforms to this
 	  change.  From Masayuki Ishikawa (2019-06-11).
@@ -24534,14 +24534,14 @@
 	  Anthony Merlino (2019-06-13).
 	* arch/arm/src/cxd56xx: Fix ep0 out packet handling in cxd56_usbdev.c. This
 	  change fixes to handle ep0 out packet which exceeds EP0_MAXSIZE.  For
-	  example, 76 bytes of out packet is sent from rndis host during rndis
+	  example, 76 bytes of out packet is sent from RNDIS host during RNDIS
 	  negotiation and finally the packet is split into two out packets (64
 	  bytes out packet + 12 bytes out packet). To handle these packets, actual
 	  ep0reqlen is stored during ep0 out setup stage, and if all out packets
 	  are received, it dispatches to cxd56_ep0setup(), otherwise, it sets up
 	  the internal USB DMA to receive remaining out packets.  From Masayuki
 	  Ishikawa (2019-06-13).
-	  configs/spresense: Add support for rndis configuration.  From Masayuki
+	  configs/spresense: Add support for RNDIS configuration.  From Masayuki
 	  Ishikawa (2019-06-13).
 	* arch/arm/src/cxd56xx: Add SPI, DMA, and RTC support
 	  configs/spresense:  Enable RTC functionality on spresense board  From
@@ -24598,24 +24598,24 @@
 	* arch/arm/src/stm32f0l0g0: Fix STM32G0 error when SINGLEWIRE or
 	  SERIALBRK_BSDCOMPAT defined (it reflects previous changes in STM32H7)
 	  From raiden00pl (2019-06-16).
-	* arch/z80/src/ez80/ez80_vectors.asm:  Fix a logic error in vector
+	* arch/z80/src/eZ80/ez80_vectors.asm:  Fix a logic error in vector
 	  initialization  From Gregory Nutt (2019-06-16).
 	* configs/makerlisp/nsh/defconfig:  Enable Procfs, RTC, SPI-based SD
 	  support, task name, NSH data command.  Various fixes under
-	  arch/z80/src/ez80 for a clean compile.  From Gregory Nutt (2019-06-16).
+	  arch/z80/src/eZ80 for a clean compile.  From Gregory Nutt (2019-06-16).
 	* arch/arm/src/cxd56xx: Fix cxd56_wdt.c in debug build  From Masayuki
 	  Ishikawa (2019-06-17).
 	* include/nuttx/wireless: Fix NRF24L01_NCMDS in ioctl.h.  The last one in
 	  nrf24l01.h is _WLCIOC(NRF24L01_FIRST + 15)  From Masayuki Ishikawa
 	  (2019-06-17).
-	* arch/z80/src/ez80/ez80_spi.c:   Fix to SPI baud rate calculation.  Driver
+	* arch/z80/src/eZ80/ez80_spi.c:   Fix to SPI baud rate calculation.  Driver
 	  now has timeouts so that at least it does not hang the system on
 	  startup.  From Gregory Nutt (2019-06-17).
 	* configs/makerlisp/nsh/defconfig:  Enable STACKDUMP on assertion.  From
 	  Gregory Nutt (2019-06-17).
 	* configs/makerlisp/src/ez80_bringup.c:  Fix an error that was causing
 	  MMC/SD to fail to initialize.  From Gregory Nutt (2019-06-17).
-	* arch/z80/src/ez80:  Add an RTC lower half driver.  From Gregory Nutt
+	* arch/z80/src/eZ80:  Add an RTC lower half driver.  From Gregory Nutt
 	  (2019-06-17).
 	* configs/pnev5180b: Minimal support for NXP Semiconductors' PN5180 NFC
 	  Frontend Development Kit.  This board is based on the NXP LPC1769 MCU.
@@ -24635,9 +24635,9 @@
 	* tools/ocdconsole.py:  OCD TCL interface changed after version 0.10 of
 	  OpenOCD.  This change allows the script to work with both the older and
 	  newer TCL interface.  From Dave Marples (2019-06-18).
-	* arch/z80/src/ez80:  Correct setting of RTC time.  From Gregory Nutt
+	* arch/z80/src/eZ80:  Correct setting of RTC time.  From Gregory Nutt
 	  (2019-06-18).
-	* arch/z80/src/ez80/ez80_spi.c:  Fix a poorly constructed loop that would
+	* arch/z80/src/eZ80/ez80_spi.c:  Fix a poorly constructed loop that would
 	  lead to hangs.  From Gregory Nutt (2019-06-18).
 	* configs/spresense: Add support for Tilt GS2200M Wi-Fi module  From
 	  Masayuki Ishikawa (2019-06-18).
@@ -24683,7 +24683,7 @@
 	* configs/makerlisp/src/sd_main.c:  Add a tiny FLASH-resident loader that
 	  will load and start applications in Intel HEX format from an SD card.
 	  From Gregory Nutt (2019-06-23).
-	* configs/spresense:  Sdd I2CTOOL support and extend GPIO for future use;
+	* configs/spresense:  Add I2CTOOL support and extend GPIO for future use;
 	  add delay support for cxd56xx chip;  for development is useful to
 	  register I2C busses when the I2CTOOL is built;  Enable GPIO interface on
 	  spresense board.  From Alin Jerpelea (2019-06-24).
@@ -24821,7 +24821,7 @@
 	  tiva_ifup() hangs because ethernet link status can not be set correctly.
 	  This PR is a workaround to avoid this issue.  From Masayuki Ishikawa
 	  (2019-07-03).
-	* arch/arm/sr/cxd56xx:  Add driver for hardware image processor device to
+	* arch/arm/src/cxd56xx:  Add driver for hardware image processor device to
 	  enable the hardware image processor set CXD56_GE2D=true.  From Alin
 	  Jerpelea (2019-07-03).
 	* drivers/lcd:  Add ILI9340 LCD Single Chip Driver.  Required LCD driver
@@ -24830,7 +24830,7 @@
 	  (2019-07-03).
 	* drivers/lcd:  Add JDI LPM013M091A LCD Driver.  From Alin Jerpelea
 	  (2019-07-03).
-	* configs/spresense:  Add suport for lpm013m091a LCD, add support for
+	* configs/spresense:  Add support for lpm013m091a LCD, add support for
 	  ili9340 LCD, add a new configuration to support an LCD.  From Alin
 	  Jerpelea (2019-07-03).
 	* arch/arm/src/stm32f7/stm32_serial.c:  This adds the ability to invert and
@@ -24880,7 +24880,7 @@
 	* net/icmpv6/icmpv6_autoconfig.c:  Use ntohs() to convert IPv6 address from
 	  network to host order int network debug output.  From Bernd Walter
 	  (2019-07-06).
-	* configs/spresense: Update defconfigs rndis and wifi.  Enable RTC and
+	* configs/spresense: Update defconfigs RNDIS and wifi.  Enable RTC and
 	  webserver with directory listing support.  Also, changed start
 	  year/month/day for NuttX 2019.  From Masayuki Ishikawa (2019-07-06).
 	* arch/arm/src/am335x/hardware: Add register description files for I2C
@@ -25054,7 +25054,7 @@
 	  Pierre-Olivier Vauboin (2019-07-16).
 	* tools/flash_writer: license change.  license update for project
 	  compliance  From Alin Jerpelea (2019-07-17).
-	* configs/stm32ldiscovery/:  Add button suppot o stm32Ldiscovery.  Add
+	* configs/stm32ldiscovery/:  Add button support for stm32Ldiscovery.  Add
 	  chronometer board config.  From Alan Carvalho de Assis (2019-07-17).
 	* configs/olimex-stm32-e407:  Add support for MRF24J40 radio.  From Gregory
 	  Nutt (2019-07-18).
@@ -25064,7 +25064,7 @@
 	  patch turns that mode off.  From Gregory Nutt (2019-07-20).
 	* configs/tm4c1294-launchpad/tools/oocd.sh:  Fix syntax error.  From Nathan
 	  Hartman (2019-07-20).
-	* ched/sched/sched_waitpid.c:  In waitpid, remember to grab the exited
+	* sched/sched/sched_waitpid.c:  In waitpid, remember to grab the exited
 	  child ptr.  After being unblocked in waitpid, the child pointer might be
 	  NULL.  Modify to use group_exitchild to get the pointer of recent exited
 	  child.  From Yang ChungFan (2019-07-20).
