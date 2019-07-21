@@ -24139,8 +24139,6 @@ detailed bugfix information):
         causes the lsb of pipe number to interfere with the received packet
         size stored in the FIFO.  This fix RX corruption when using pipe
         number > 0.  From Federico Braghiroli.
-      - GS2200M: Fix a passive close when sending a packet in gs2200m.c.
-        From Masayuki Ishikawa.
 
     * Graphics/Display Drivers:
 
@@ -24259,7 +24257,6 @@ detailed bugfix information):
         Otherwise, it is not possible to use multiple NxTerms with each the
         keyboard input going to a different NxTerm window.  From Gregory
         Nutt.
-      - PNEV5180B: CDC/ECM requires SCHED_LPWORK. From Gregory Nutt.
 
     * NXP i.MXRT Drivers:
 
@@ -24279,21 +24276,6 @@ detailed bugfix information):
 
       - EFM32 USB Host:  Apply Adam Porter's STM32 fix to EFM32 which has
         the same IP.  From Gregory Nutt.
-
-    * Sony CXD56xx Drivers:
-
-      - CXD56xx USB: Fix ep0 out packet handling in CXD56_usbdev.c.  This
-        change fixes to handle ep0 out packet which exceeds EP0_MAXSIZE.
-        For example, 76 bytes of out packet is sent from RNDIS host during
-        RNDIS negotiation and finally the packet is split into two out
-        packets (64 bytes out packet + 12 bytes out packet). To handle
-        these packets, actual ep0reqlen is stored during ep0 out setup
-        stage, and if all out packets are received, it dispatches to
-        cxd56_ep0setup(), otherwise, it sets up the internal USB DMA to
-        receive remaining out packets.  From Masayuki Ishikawa.
-      - CXD56xx:  Fix cxd56_wdt.c in debug build.  From Masayuki Ishikawa.
-      - CXD56xx:  Fix DMA initialization in cxd56_dmac.c. up_dma_initialize()
-        must be used instead of up_dmainitialize().  From Masayuki Ishikawa.
 
     * STMicro STM32:
 
@@ -24415,20 +24397,6 @@ detailed bugfix information):
         Gregory Nutt.
       - eZ80:  Fix a logic error in vector initialization.  From Gregory Nutt.
 
-    * ZiLOG eZ80Acclaim! Drivers:
-
-      - eZ80 SPI:  Fix to SPI baud rate calculation.  Driver now has
-        timeouts so that at least it can not hang the system on startup.
-        From Gregory Nutt.
-      - eZ80 SPI:  Fix a poorly constructed loop in the SPI driver that
-        would lead to hangs.  From Gregory Nutt.
-      - eZ80 RTC:  Correct setting of RTC time.  From Gregory Nutt.
-
-    * ZiLOG eZ80Acclaim! Boards
-
-      - MakerLisp:  Fix an error that was causing MMC/SD to fail to
-        initialize.  From Gregory Nutt.
-
     * C Library/Header Files:
 
       - signal.h:  Fix a C89 compliance problem that cause the eZ80 build to
@@ -24459,8 +24427,6 @@ detailed bugfix information):
 
     * Tools:
 
-      - tools/ocdconsole.py:  Fix small typo on ocdconsole.py script  From
-        Alan Carvalho de Assis.
       - tools/nxstyle.c:  Fix error in conditional logic that was preventing
         detection bad brace alignment.  Add logic to handle alignment of
         braces in data initializers which following slightly different
@@ -24493,10 +24459,6 @@ detailed bugfix information):
         caused the eZ80 build to fail.  From Gregory Nutt.
       - apps/netutils/json:  Removed.  Replaced with apps/netutils/cjson.
         From Gregory Nutt.
-      - apps/netutils/cjson/Kconfig:  stdio floating point support required.
-        cJSON requires floating point support in printf (specifically the
-        'g' conversion specifier).  Thus, select LIBC_FLOATINGPOINT when
-        NETUTILS_CJSON is selected.  From Michael Jung.
 
     * Graphics Utilities: apps/graphics:
 
