@@ -274,6 +274,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_ZEROCROSS
+  /* Configure the zero-crossing driver */
+
+  ret = stm32_zerocross_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize Zero-Cross, error %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_TIMER
   /* Initialize and register the timer driver */
 

@@ -110,6 +110,10 @@
 
 #define GPIO_INT1         (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN3)
 
+/* ZERO CROSS pin definition */
+
+#define GPIO_ZEROCROSS    (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN0)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -229,6 +233,18 @@ int stm32_ina226initialize(FAR const char *devpath);
 
 #ifdef CONFIG_SENSORS_INA219
 int stm32_ina219initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_zerocross_initialize
+ *
+ * Description:
+ *   Initialize and register the zero cross driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_ZEROCROSS
+int stm32_zerocross_initialize(void);
 #endif
 
 /****************************************************************************
