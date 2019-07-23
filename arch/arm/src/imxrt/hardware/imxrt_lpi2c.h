@@ -281,7 +281,7 @@
 #define LPI2C_MSR_BBF                       (1 << 25) /* Bus Busy Flag Bit */
                                                       /* Bits 31-26 Reserved */
 #define LPI2C_MSR_ERROR_MASK                (LPI2C_MSR_NDF | LPI2C_MSR_ALF | \
-                                             LPI2C_MSR_BBF | LPI2C_MSR_FEF)
+                                             LPI2C_MSR_FEF)
 
 /* LPI2C Master Interrupt Enable Register  */
 
@@ -426,7 +426,6 @@
 #define LPI2C_MCCR1_DATAVD_MASK             (0x3f << LPI2C_MCCR1_DATAVD_SHIFT)  /* Setup Hold Delay */
 #define LPI2C_MCCR1_DATAVD(n)               ((n << LPI2C_MCCR1_DATAVD_SHIFT) & LPI2C_MCCR1_DATAVD_MASK)
                                                      /* Bits 31-30 Reserved */
-
 
 /* LPI2C Master FIFO Control Register */
 
