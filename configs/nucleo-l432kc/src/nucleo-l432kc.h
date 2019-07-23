@@ -98,6 +98,18 @@
       GPIO_SPEED_50MHz)
 #endif
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_IN1          (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_OUT1         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN1)
+
+#define GPIO_INT1         (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN3)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -114,6 +126,18 @@ extern struct spi_dev_s *g_spi2;
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: stm32l4_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32l4_gpio_initialize(void);
+#endif
 
 /************************************************************************************
  * Name: stm32l4_spiinitialize
