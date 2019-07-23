@@ -1940,8 +1940,8 @@ static int usbclass_copy_epdesc(int epid, FAR struct usb_epdesc_s *epdesc,
           {
             /* Maximum packet size (full speed) */
 
-            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKIN_HSSIZE);
-            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKIN_HSSIZE);
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKIN_FSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKIN_FSSIZE);
           }
 
         epdesc->interval = 0;                       /* Interval */
