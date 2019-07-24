@@ -376,6 +376,35 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 }
             }
 
+          if (c == 'z')
+            {
+              switch (sizeof(size_t))
+                {
+                  /* The only known case that the default will be hit is the eZ80
+                   * which has sizeof(size_t) = 3 which is the same as the sizeof(int)
+                   */
+
+                  default:
+                    continue;  /* Treat as integer with no size qualifier. */
+
+                  case sizeof(unsigned short):
+                    c = 'h';
+                    break;
+
+                  case sizeof(unsigned long):
+                    c = 'l';
+                    break;
+
+#ifdef CONFIG_HAVE_LONG_LONG
+                  case sizeof(unsigned long long):
+                    c = 'l';
+                    flags |= FL_LONG;
+                    flags &= ~FL_SHORT;
+                    break;
+#endif
+                }
+            }
+
           if (c == 'l')
             {
               if ((flags & FL_LONG) != 0)
