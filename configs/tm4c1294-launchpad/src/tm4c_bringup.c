@@ -58,6 +58,10 @@
 #include "tiva_qencoder.h"
 #include "tm4c1294-launchpad.h"
 
+#ifdef HAVE_USERLED_DRIVER
+#  include <nuttx/leds/userled.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -355,6 +359,18 @@ int tm4c_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_USERLED_DRIVER
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n",
+             ret);
+      return ret;
     }
 #endif
 

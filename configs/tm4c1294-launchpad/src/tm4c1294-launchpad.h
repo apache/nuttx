@@ -111,6 +111,13 @@
 #define GPIO_LED_D3   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTF | GPIO_PIN_4)
 #define GPIO_LED_D4   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTF | GPIO_PIN_0)
 
+/* Check if we have the LED driver */
+
+#define HAVE_USERLED_DRIVER   1
+#if !defined(CONFIG_USERLED) || !defined(CONFIG_USERLED_LOWER)
+#  undef HAVE_USERLED_DRIVER
+#endif
+
 /* Button definitions ***************************************************************/
 /* There are four push buttons on the board. Two of them are user controllable.
  * The others are RESET and WAKE
