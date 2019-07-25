@@ -1,8 +1,8 @@
 README.txt
 ==========
 
-  This README file discuss discusses the port of NuttX to the Texas
-  Instruments DK-TM4C129X Connected Development Kit.
+  This README file discusses the port of NuttX to the Texas Instruments
+  DK-TM4C129X Connected Development Kit.
 
   Description
   -----------
@@ -78,7 +78,7 @@ Using OpenOCD and GDB with ICDI
 
   Starting OpenOCD
 
-    If you are in the top-level NuttX build directlory then you should
+    If you are in the top-level NuttX build directory then you should
     be able to start the OpenOCD daemon like:
 
       oocd.sh $PWD
@@ -242,8 +242,8 @@ Networking Support
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
     CONFIG_NET_ICMP_SOCKET=y            : Needed for NSH ping command
                                         : Defaults should be okay for other options
-f Application Configuration -> Network Utilities
-    CONFIG_NETDB_DNSCLIENT=y               : Enable host address resolution
+  Application Configuration -> Network Utilities
+    CONFIG_NETDB_DNSCLIENT=y            : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
     CONFIG_NETUTILS_NETLIB=y            : Network library support is needed
@@ -257,8 +257,8 @@ f Application Configuration -> Network Utilities
     CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
                                         : Defaults should be okay for other options
 
-  You can also enable enable the DHCPC client for networks that use
-  dynamically assigned address:
+  You can also enable the DHCPC client for networks that use dynamically
+  assigned address:
 
   Application Configuration -> Network Utilities
     CONFIG_NETUTILS_DHCPC=y             : Enables the DHCP client
@@ -314,7 +314,7 @@ f Application Configuration -> Network Utilities
     56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
     10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
 
-  NOTE: In this configuration is is normal to have packet loss > 0%
+  NOTE: In this configuration it is normal to have packet loss > 0%
   the first time you ping due to the default handling of the ARP
   table.
 
@@ -358,7 +358,7 @@ f Application Configuration -> Network Utilities
   numerous timeouts and retries, the network will not be available --
   even if the network cable is plugged in later.
 
-  The long delays can be eliminated by using a separate the network
+  The long delays can be eliminated by using a separate network
   initialization thread discussed below.  Recovering after the network
   becomes available requires the network monitor feature, also discussed
   below.
@@ -409,7 +409,7 @@ f Application Configuration -> Network Utilities
         CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
         device driver. Special IOCTL commands must be provided by the Ethernet
         driver to support certain PHY operations that will be needed for link
-        management. There operations are not complex and are implemented for
+        management. These operations are not complex and are implemented for
         the Atmel SAMA5 family.
 
         CONFIG_ARCH_PHY_INTERRUPT. This is not a user selectable option.
@@ -590,8 +590,8 @@ DK-TM4129X Configuration Options
 
     CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
        stack. If defined, this symbol is the size of the interrupt
-        stack in bytes.  If not defined, the user task stacks will be
-      used during interrupt handling.
+       stack in bytes.  If not defined, the user task stacks will be
+       used during interrupt handling.
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 

@@ -32,7 +32,7 @@ Where <subdir> is one of the following:
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    configuration enables the serial ICDI vitual UART on UART0.  Support for
+    configuration enables the serial ICDI virtual UART on UART0.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected.
 
@@ -95,7 +95,7 @@ Where <subdir> is one of the following:
        lost (for example, if the cable is disconnected) and bring the
        network back up when the link becomes available again (for example,
        if the cable is reconnected).  See the paragraph "Network Monitor"
-        in the DK-TM4C129X README for additional information.
+       in the DK-TM4C129X README for additional information.
 
   ipv6:
   ----
@@ -113,9 +113,9 @@ Where <subdir> is one of the following:
        Telnet does work with IPv6 but is not enabled in this
        configuration (but could be).
 
-    2. This configuration can be modified to that both IPv4 and IPv6
-       are support.  Here is a summary of the additional configuration
-       settings requird to support both IPv4 and IPv6:
+    2. This configuration can be modified so that both IPv4 and IPv6
+       are supported.  Here is a summary of the additional configuration
+       settings required to support both IPv4 and IPv6:
 
          CONFIG_NET_IPv4=y
          CONFIG_NET_ARP=y

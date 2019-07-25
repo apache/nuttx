@@ -6,9 +6,9 @@ by NuttX.  This directory is retained in a separate repository and is a Sub-
 Module of NuttX and will appear as nuttx/configs when the NuttX repository
 is cloned.
 
-The nuttx/configs directory is a part of the internal OS.  It there should
-contain only OS bring-up logic and driver initialization logic.  THERE SHOULD
-BE NO APPLICATION CALLABLE LOGIC IN THIS DIRECTORY.
+The nuttx/configs directory is a part of the internal OS.  It should contain
+only OS bring-up logic and driver initialization logic.  THERE SHOULD BE NO
+APPLICATION CALLABLE LOGIC IN THIS DIRECTORY.
 
 If you have board-specific, application callable logic, that logic should not
 go here.  Please consider using a sub-directory under apps/platform instead.
@@ -31,11 +31,11 @@ The NuttX configuration consists of:
 o Processor architecture specific files.  These are the files contained
   in the arch/<arch-name>/ directory.
 
-o Chip/SoC specific files.  Each processor processor architecture
-  is embedded in chip or System-on-a-Chip (SoC) architecture.  The
-  full chip architecture includes the processor architecture plus
-  chip-specific interrupt logic, general purpose I/O (GIO) logic, and
-  specialized, internal peripherals (such as UARTs, USB, etc.).
+o Chip/SoC specific files.  Each processor architecture is embedded
+  in a chip or System-on-a-Chip (SoC) architecture.  The full chip
+  architecture includes the processor architecture plus chip-specific
+  interrupt logic, general purpose I/O (GIO) logic, and specialized,
+  internal peripherals (such as UARTs, USB, etc.).
 
   These chip-specific files are contained within chip-specific
   sub-directories in the arch/<arch-name>/ directory and are selected
@@ -48,7 +48,7 @@ o Board specific files.  In order to be usable, the chip must be
 
   These board-specific configuration files can be found in the
   configs/<board-name>/ sub-directories and are discussed in this
-  README.  Additional configuration information maybe available in
+  README.  Additional configuration information may be available in
   board-specific configs/<board-name>/README.txt files.
 
 The configs/ subdirectory contains configuration data for each board.  These
@@ -58,7 +58,7 @@ the arch/ subdirectory completely define a customized port of NuttX.
 Directory Structure
 ^^^^^^^^^^^^^^^^^^^
 
-The configs directory contains board specific configurationlogic.  Each
+The configs directory contains board specific configuration logic.  Each
 board must provide a subdirectory <board-name> under configs/ with the
 following characteristics:
 
@@ -124,7 +124,7 @@ Make.defs -- This makefile fragment provides architecture and
   different if CONFIG_DEBUG_FEATURES=y.
 
   The included tools/Config.mk file contains additional definitions that may
-  be overriden in the architecture-specific Make.defs file as necessary:
+  be overridden in the architecture-specific Make.defs file as necessary:
 
     COMPILE, ASSEMBLE, ARCHIVE, CLEAN, and MKDEP macros
 
