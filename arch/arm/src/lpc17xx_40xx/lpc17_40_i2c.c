@@ -215,6 +215,10 @@ static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
            priv->base + LPC17_40_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC17_40_I2C_CONSET_OFFSET);
 
+  /* Initializes the I2C state machine to a known value */
+
+  priv->state = 0x00;
+
   (void)wd_start(priv->timeout, I2C_TIMEOUT, lpc17_40_i2c_timeout, 1,
                  (uint32_t)priv);
   nxsem_wait(&priv->wait);
@@ -275,7 +279,7 @@ static int lpc17_40_i2c_transfer(FAR struct i2c_master_s *dev,
   struct lpc17_40_i2cdev_s *priv = (struct lpc17_40_i2cdev_s *)dev;
   int ret;
 
-   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
+  DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
 
   /* Get exclusive access to the I2C bus */
 
@@ -348,11 +352,20 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
   state = getreg32(priv->base + LPC17_40_I2C_STAT_OFFSET);
   msg  = priv->msgs;
 
-  priv->state = state;
-  state &= 0xf8;  /* state mask, only 0xX8 is possible */
+  /* Checks if a timeout occurred */
+
+  if (priv->state == 0xff)
+    {
+      state = 0xff;
+    }
+  else
+    {
+      priv->state = state;
+      state &= 0xf8;  /* state mask, only 0xX8 is possible */
+    }
+
   switch (state)
     {
-
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
       /* Set address */
@@ -402,7 +415,8 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
-      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt - 1] =
+        getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
 
       if (priv->rdcnt >= (msg->length - 1))
         {
@@ -411,7 +425,8 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
       break;
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
-      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt] =
+        getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
       lpc17_40_stopnext(priv);
       break;
 
@@ -425,7 +440,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_i2c_reset
  *
  * Description:
@@ -437,7 +452,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int lpc17_40_i2c_reset(FAR struct i2c_master_s * dev)

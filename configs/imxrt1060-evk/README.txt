@@ -43,6 +43,7 @@ Contents
 
   o Serial Console
   o LEDs and buttons
+  o J-Link External Debug Probe
   o Configurations
     - Configuration sub-directories
 
@@ -114,6 +115,16 @@ LEDs and buttons
 
   Only the user button is available to the software.  It is sensed on the
   WAKEUP pin which will be pulled low when the button is pressed.
+
+
+J-Link External Debug Probe
+===========================
+
+  Install the J-Link Debug Host Tools and make sure they are in your search path.
+
+  Attach a J-Link 20-pin connector to J21. Check that jumpers J47 and J48 are
+  off (they are on by default when boards ship from the factory) to ensure SWD
+  signals are disconnected from the OpenSDA microcontroller.
 
 Configurations
 ==============
