@@ -40,6 +40,13 @@
 #define DMA_DEV_TO_MEM          3
 #define DMA_DEV_TO_DEV          4
 
+#ifdef CONFIG_DMA_LINK
+#  define DMA_BLOCK_MODE        0
+#  define DMA_SRC_LINK_MODE     1
+#  define DMA_DST_LINK_MODE     2
+#  define DMA_DUAL_LINK_MODE    3
+#endif
+
 /****************************************************************************
  * Name: DMA_GET_CHAN
  *
@@ -128,6 +135,21 @@
 
 #define DMA_START_CYCLIC(chan, callback, arg, dst, src, len, period_len) \
     (chan)->ops->start_cyclic(chan, callback, arg, dst, src, len, period_len)
+
+/****************************************************************************
+ * Name: DMA_START_CYCLIC
+ *
+ * Description:
+ *   Start the cyclic DMA transfer.
+ *
+ * Note: callback get called for each period length data DMA transfer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DMA_LINK
+#  define DMA_START_LINK(chan, callback, arg, mode, link_cfg) \
+    (chan)->ops->start_link(chan, callback, arg, mode, link_cfg)
+#endif
 
 /****************************************************************************
  * Name: DMA_PAUSE
@@ -226,6 +248,26 @@ struct dma_config_s
   unsigned int src_width;
 };
 
+#ifdef CONFIG_DMA_LINK
+struct dma_link_s
+{
+  uintptr_t addr;
+  union
+  {
+    unsigned int link_num;
+    unsigned int link_size;
+  };
+};
+
+struct dma_link_config_s
+{
+  unsigned int dst_link_num;
+  unsigned int src_link_num;
+  FAR struct dma_link_s *dst_link;
+  FAR struct dma_link_s *src_link;
+};
+#endif
+
 /* The DMA vtable */
 
 struct dma_ops_s
@@ -239,6 +281,12 @@ struct dma_ops_s
                            dma_callback_t callback, FAR void *arg,
                            uintptr_t dst, uintptr_t src,
                            size_t len, size_t period_len);
+#ifdef CONFIG_DMA_LINK
+  CODE int (*start_link)(FAR struct dma_chan_s *chan,
+                         dma_callback_t callback, FAR void *arg,
+                         unsigned int work_mode,
+                         FAR struct dma_link_config_s *cfg);
+#endif
   CODE int (*stop)(FAR struct dma_chan_s *chan);
   CODE int (*pause)(FAR struct dma_chan_s *chan);
   CODE int (*resume)(FAR struct dma_chan_s *chan);
