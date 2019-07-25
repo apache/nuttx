@@ -42,6 +42,7 @@
 
 #include <stdint.h>
 #include <sys/ioctl.h>
+#include <netinet/in.h>
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -81,6 +82,7 @@ struct gs2200m_bind_msg
 {
   char     cid;
   uint8_t  type;
+  bool     is_tcp;
   char     port[6];
 };
 
@@ -92,19 +94,23 @@ struct gs2200m_accept_msg
 
 struct gs2200m_send_msg
 {
-  char     cid;
-  uint8_t  type;
-  FAR uint8_t  *buf;
+  struct sockaddr_in addr; /* used for udp */
+  bool        is_tcp;
+  char        cid;
+  uint8_t     type;
+  FAR uint8_t *buf;
   uint16_t len;
 };
 
 struct gs2200m_recv_msg
 {
-  char     cid;
-  uint8_t  type;
-  FAR uint8_t  *buf;
-  uint16_t len;    /* actual buffer length */
-  uint16_t reqlen; /* requested size */
+  struct sockaddr_in addr; /* used for udp */
+  bool        is_tcp;
+  char        cid;
+  uint8_t     type;
+  FAR uint8_t *buf;
+  uint16_t    len;    /* actual buffer length */
+  uint16_t    reqlen; /* requested size */
 };
 
 struct gs2200m_close_msg
