@@ -1182,7 +1182,7 @@ if STM32L4_QSPI
 config STM32L4_QSPI_FLASH_SIZE
 	int "Size of attached serial flash, bytes"
 	default 16777216
-	range 1 2147483648
+	range 1 2147483647
 	---help---
 		The STM32L4 QSPI peripheral requires the size of the Flash be specified
 

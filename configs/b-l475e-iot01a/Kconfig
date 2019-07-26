@@ -6,7 +6,7 @@
 if ARCH_BOARD_B_L475E_IOT01A
 
 config B_L475E_IOT01A_MTD_FLASH
-	bool "MTD driver for external 64Mbytes flash memory"
+	bool "MTD driver for external 64Mbits flash memory"
 	default n
 	select STM32L4_DMA1
 	select STM32L4_QSPI

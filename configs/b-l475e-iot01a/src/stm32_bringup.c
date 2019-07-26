@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/b-l475e-iot01a/src/stm32_bringup.c
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,8 +182,15 @@ int stm32l4_bringup(void)
               }
 
             mtd_part = mtd_partition(g_mtd_fs, partoffset,
-                                     partszbytes / erasesize);
-            partoffset += partszbytes / erasesize;
+                                     partszbytes / geo.blocksize);
+            partoffset += partszbytes / geo.blocksize;
+
+            if (!mtd_part)
+              {
+                syslog(LOG_ERR, "Failed to create part %d, size=%d\n",
+                       partno, partsize);
+                goto process_next_part;
+              }
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
             /* Now initialize a SMART Flash block device and bind it to the MTD

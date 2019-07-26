@@ -1879,7 +1879,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
         {
           /* Read the next sector from the device */
 
-          ret = MTD_READ(dev->mtd, 0, sizeof(struct smart_sect_header_s),
+          ret = MTD_READ(dev->mtd, readaddress, sizeof(struct smart_sect_header_s),
                          (FAR uint8_t *) &header);
           if (ret != sizeof(struct smart_sect_header_s))
             {
