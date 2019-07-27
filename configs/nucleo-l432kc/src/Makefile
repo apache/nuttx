@@ -52,7 +52,7 @@ ifeq ($(CONFIG_DEV_GPIO),y)
   CSRCS += stm32_gpio.c
 endif
 
-ifeq ($(CONFIG_ADC),y)
+ifeq ($(CONFIG_STM32L4_ADC),y)
 CSRCS += stm32_adc.c
 endif
 

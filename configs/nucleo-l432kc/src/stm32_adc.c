@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32l4_pwm.h"
+#include "stm32l4_adc.h"
 #include "nucleo-l432kc.h"
 
 #ifdef CONFIG_STM32L4_ADC1
@@ -60,7 +60,7 @@
 
 /* The number of ADC channels in the conversion list */
 
-#ifdef CONFIG_ADC_DMA
+#ifdef CONFIG_STM32L4_ADC1_DMA
 #  define ADC1_NCHANNELS 2
 #else
 #  define ADC1_NCHANNELS 1
@@ -71,27 +71,27 @@
  ******************************************************************************/
 /* Identifying number of each ADC channel. */
 
-#ifdef CONFIG_ADC_DMA
+#ifdef CONFIG_STM32L4_ADC1_DMA
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1, 2};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {11, 12};
 
 /* Configurations of pins used byte each ADC channels */
 
 static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
 {
-  GPIO_ADC1_IN1, GPIO_ADC1_IN2
+  GPIO_ADC1_IN11, GPIO_ADC1_IN12
 };
 
 #else
 /* Without DMA, only a single channel can be supported */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {1};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {11};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN1};
+static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN11};
 
-#endif /* CONFIG_ADC_DMA */
+#endif /* CONFIG_STM32L4_ADC1_DMA */
 
 /*******************************************************************************
  * Private Functions

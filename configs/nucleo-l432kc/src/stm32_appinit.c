@@ -234,7 +234,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_STM32L4_ADC
   /* Initialize ADC and register the ADC driver. */
 
   ret = stm32l4_adc_setup();
