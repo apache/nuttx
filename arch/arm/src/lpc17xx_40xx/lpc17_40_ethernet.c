@@ -2794,6 +2794,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
       case 0x0002:
         priv->lp_mode = LPC17_40_10BASET_HD;
+        lpc17_40_putreg(0, LPC17_40_ETH_SUPP);
         break;
 
       case 0x0004:
@@ -2802,6 +2803,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
       case 0x0006:
         priv->lp_mode = LPC17_40_10BASET_FD;
+        lpc17_40_putreg(0, LPC17_40_ETH_SUPP);
         break;
 
       default:
