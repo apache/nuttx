@@ -1631,8 +1631,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
  *   > 0   - The signal notification is in place.  The returned value is a
  *           key that may be used later in a call to
  *           tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
+ *   == 0  - No connection has been established.
  *   < 0   - An unexpected error occurred and no signal will be sent.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
