@@ -2967,6 +2967,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
+#ifdef CONFIG_STM32F7_DMACAPABLE
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2978,6 +2979,7 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
     {
       return -EFAULT;
     }
+#endif
 
   return 0;
 }
