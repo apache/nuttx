@@ -94,7 +94,7 @@ int stm32_ina219initialize(FAR const char *devpath)
 
   /* Then register the sensor */
 
-  ret = ina219_register(devpath, i2c,0x40,100000,0x00);
+  ret = ina219_register(devpath, i2c, 0x40, 100000, 0x00);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Error registering hih6130\n");

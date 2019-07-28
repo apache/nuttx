@@ -46,7 +46,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "stm32_ccm.h"
 #include "stm32f769i-disco.h"
 
 /****************************************************************************
