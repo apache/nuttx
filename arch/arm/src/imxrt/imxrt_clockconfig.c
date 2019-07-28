@@ -506,6 +506,20 @@ void imxrt_clockconfig(void)
   putreg32(reg, IMXRT_CCM_CBCMR);
 #endif
 
+#ifdef IMXRT_TRACE_PODF_DIVIDER
+  /* Set TRACE clock source to PLL2 PFD0 */
+
+  reg  = getreg32(IMXRT_CCM_CBCMR);
+  reg &= ~CCM_CBCMR_TRACE_CLK_SEL_MASK;
+  reg |= CCM_CBCMR_TRACE_CLK_SEL_PLL2_PFD0;
+  putreg32(reg, IMXRT_CCM_CBCMR);
+
+  reg  = getreg32(IMXRT_CCM_CSCDR1);
+  reg &= ~CCM_CSCDR1_TRACE_PODF_MASK;
+  reg |= CCM_CSCDR1_TRACE_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_TRACE_PODF_DIVIDER));
+  putreg32(reg, IMXRT_CCM_CSCDR1);
+#endif
+
 #ifdef CONFIG_IMXRT_USDHC
   /* Optionally set USDHC1 & 2 to generate clocks from IMXRT_USDHC1_CLK_SELECT */
 
