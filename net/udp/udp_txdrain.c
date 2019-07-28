@@ -144,7 +144,7 @@ int udp_txdrain(FAR struct socket *psock,
         {
           ret = net_timedwait(&waitsem, abstime);
         }
-      while (ret == EINTR);
+      while (ret == -EINTR);
 
       /* Tear down the notifier (in case we timed out or were canceled) */
 

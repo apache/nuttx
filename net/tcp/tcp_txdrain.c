@@ -65,7 +65,7 @@
  *   Called with the write buffers have all been sent.
  *
  * Input Parameters:
- *   arg     - The semaphore that will wake up tcp_txdrain
+ *   arg     - The notifier entry.
  *
  * Returned Value:
  *   None.
@@ -178,7 +178,7 @@ int tcp_txdrain(FAR struct socket *psock,
             {
               ret = net_timedwait(&waitsem, abstime);
             }
-          while (ret == EINTR);
+          while (ret == -EINTR);
 
           /* Tear down the disconnect notifier */
 

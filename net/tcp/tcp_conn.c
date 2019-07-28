@@ -747,7 +747,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #endif
 
   /* Because g_free_tcp_connections is accessed from user level and event
-   * processing logic, it is necessary to keep the newtork locked during this
+   * processing logic, it is necessary to keep the network locked during this
    * operation.
    */
 
