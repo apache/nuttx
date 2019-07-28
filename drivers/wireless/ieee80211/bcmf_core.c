@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -86,9 +87,17 @@
 
 #define BCMF_UPLOAD_TRANSFER_SIZE  (64 * 256)
 
+/* Define this to validate uploaded materials */
+
+/*  #define DBG_VALIDATE_UPLOAD */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifdef DBG_VALIDATE_UPLOAD
+static uint8_t compare_buffer[BCMF_UPLOAD_TRANSFER_SIZE];
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -122,7 +131,7 @@ int bcmf_core_set_backplane_window(FAR struct bcmf_sdio_dev_s *sbus,
         {
           /* Update current backplane base address */
 
-          ret = bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_SBADDRLOW+i-1,
+          ret = bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_SBADDRLOW + i - 1,
                   addr_part);
 
           if (ret != OK)
@@ -143,6 +152,12 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 {
   unsigned int size;
 
+#ifdef DBG_VALIDATE_UPLOAD
+  uint32_t      validate_address = address;
+  uint8_t       *validate_buffer = buf;
+  unsigned int  validate_len     = len;
+#endif
+
   while (len > 0)
     {
       /* Set the backplane window to include the start address */
@@ -150,6 +165,7 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       int ret = bcmf_core_set_backplane_window(sbus, address);
       if (ret != OK)
         {
+          wlerr("Backplane setting failed at %08x\n", address);
           return ret;
         }
 
@@ -168,14 +184,62 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                                 address & SBSDIO_SB_OFT_ADDR_MASK, buf, size);
       if (ret != OK)
         {
-            wlerr("transfer failed %d %x %d\n", ret, address, size);
-            return ret;
+          wlerr("transfer failed %d %x %d\n", ret, address, size);
+          return ret;
         }
 
-      len -= size;
-      address += size;
-      buf += size;
+      len       -= size;
+      address   += size;
+      buf       += size;
     }
+
+#ifdef DBG_VALIDATE_UPLOAD
+  wlwarn("Validating....\n");
+  while (validate_len > 0)
+    {
+      /* Set the backplane window to include the start address */
+
+      int ret = bcmf_core_set_backplane_window(sbus, validate_address);
+      if (ret != OK)
+        {
+          wlerr("Backplane setting failed at %08x\n", validate_address);
+          return ret;
+        }
+
+      if (validate_len > BCMF_UPLOAD_TRANSFER_SIZE)
+        {
+          size = BCMF_UPLOAD_TRANSFER_SIZE;
+        }
+      else
+        {
+          size = validate_len;
+        }
+
+      /* Transfer firmware data */
+
+      ret = bcmf_transfer_bytes(sbus, false, 1,
+                                validate_address & SBSDIO_SB_OFT_ADDR_MASK,
+                                compare_buffer, size);
+      if (ret != OK)
+        {
+          wlerr("validate transfer failed %d %x %d\n", ret, validate_address,
+                size);
+          return ret;
+        }
+
+      if (memcmp(validate_buffer, compare_buffer, size))
+        {
+          wlerr("Match failed at address base %08x\n", validate_address);
+          return -EILSEQ;
+        }
+
+      validate_len     -= size;
+      validate_address += size;
+      validate_buffer  += size;
+    }
+
+  wlwarn("Validation passed\n");
+  #endif
 
   return OK;
 }
@@ -193,10 +257,10 @@ int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
   /* Open the file in the detached state */
 
   ret = file_open(&finfo, path, O_RDONLY | O_BINARY);
-  if (ret <0)
+  if (ret < 0)
     {
-       wlerr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);
-       return ret;
+      wlerr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);
+      return ret;
     }
 
   /* Allocate an I/O buffer */
@@ -204,9 +268,9 @@ int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
   buf = (FAR uint8_t *)kmm_malloc(BCMF_UPLOAD_TRANSFER_SIZE);
   if (buf == NULL)
     {
-       wlerr("ERROR: Failed allocate an I/O buffer\n");
-       ret = -ENOMEM;
-       goto errout_with_file;
+      wlerr("ERROR: Failed allocate an I/O buffer\n");
+      ret = -ENOMEM;
+      goto errout_with_file;
     }
 
   /* Loop until the firmware has been loaded */
@@ -296,7 +360,7 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
   /* Generate length token */
 
   token = nvram_sz / 4;
-  token = (~token << 16) | (token & 0x0000FFFF);
+  token = (~token << 16) | (token & 0x0000ffff);
 
   /* Write the length token to the last word */
 
@@ -346,7 +410,6 @@ int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                      FAR uint8_t *reg, unsigned int len)
 {
-
   int ret = bcmf_core_set_backplane_window(sbus, address);
   if (ret != OK)
     {

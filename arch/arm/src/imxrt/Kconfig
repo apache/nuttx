@@ -700,11 +700,33 @@ config IMXRT_USDHC_DMA
 		For most usages, SD accesses will cause data overruns if used without
 		DMA.
 
-config IMXRT_USDHC_WIDTH_D1_ONLY
-	bool "Use D1 only"
-	default n
-	---help---
-		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+choice
+	prompt "Bus width for USDHC1"
+	default IMXRT_USDHC1_WIDTH_D1_ONLY
+	depends on IMXRT_USDHC1
+
+config IMXRT_USDHC1_WIDTH_D1_ONLY
+	bool "One bit"
+
+config IMXRT_USDHC1_WIDTH_D1_D4
+	bool "Four bit"
+endchoice
+
+choice
+	depends on IMXRT_USDHC2
+	prompt "Bus width for USDHC2"
+	default IMXRT_USDHC2_WIDTH_D1_D4
+
+config IMXRT_USDHC2_WIDTH_D1_ONLY
+	bool "One bit"
+
+config IMXRT_USDHC2_WIDTH_D1_D4
+	bool "Four bit"
+
+config IMXRT_USDHC2_WIDTH_D1_D8
+	bool "Eight bit"
+endchoice
+
 endmenu # USDHC Configuration
 
 menu "eDMA Configuration"
