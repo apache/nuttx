@@ -4,7 +4,6 @@
  *   Copyright (C) 2018 Erle Robotics (Juan Flores Muñoz). All rights reserved.
  *   Author: Erle Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
  *
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -42,6 +41,7 @@
 
 #include <errno.h>
 #include <syslog.h>
+#include <debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/ina219.h>
@@ -104,4 +104,3 @@ int stm32_ina219initialize(FAR const char *devpath)
 }
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_INA219 */
-
