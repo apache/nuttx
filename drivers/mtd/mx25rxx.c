@@ -233,7 +233,9 @@ static void mx25rxx_write_enable(FAR struct mx25rxx_dev_s *dev, bool enable);
 static int mx25rxx_write_page(struct mx25rxx_dev_s *priv,
                        FAR const uint8_t *buffer, off_t address, size_t buflen);
 static int mx25rxx_erase_sector(struct mx25rxx_dev_s *priv, off_t sector);
+#if 0 /* FIXME:  Not used */
 static int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block);
+#endif
 static int mx25rxx_erase_chip(struct mx25rxx_dev_s *priv);
 
 #ifdef CONFIG_MX25RXX_SECTOR512
@@ -460,6 +462,7 @@ int mx25rxx_erase_sector(struct mx25rxx_dev_s *priv, off_t sector)
   return OK;
 }
 
+#if 0 /* FIXME:  Not used */
 int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block)
 {
   uint8_t status;
@@ -483,6 +486,7 @@ int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block)
 
   return OK;
 }
+#endif
 
 int mx25rxx_erase_chip(struct mx25rxx_dev_s *priv)
 {
