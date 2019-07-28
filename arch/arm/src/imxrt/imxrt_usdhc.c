@@ -2311,7 +2311,7 @@ static int imxrt_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
                 getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET));
           ret = -ETIMEDOUT;
           break;
-      }
+        }
     }
 
   /* Check for hardware detected errors */
