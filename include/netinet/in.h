@@ -222,7 +222,7 @@ struct sockaddr_in
   sa_family_t     sin_family;       /* Address family: AF_INET */
   in_port_t       sin_port;         /* Port in network byte order */
   struct in_addr  sin_addr;         /* Internet address */
-  uint8_t         __pad[8];
+  uint8_t         sin_zero[8];
 };
 
 /* Used with certain IPv4 socket options */
