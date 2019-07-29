@@ -380,8 +380,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
             {
               switch (sizeof(size_t))
                 {
-                  /* The only known case that the default will be hit is the eZ80
-                   * which has sizeof(size_t) = 3 which is the same as the sizeof(int)
+                  /* The only known cases that the default will be hit are
+                   * (1) the eZ80 which has sizeof(size_t) = 3 which is the
+                   * same as the sizeof(int).  And (2) if CONFIG_LIBC_LONG_LONG
+                   * is not enabled and sizeof(size_t) is equal to
+                   * sizeof(unsigned long long).  This latter case is an error.
                    */
 
                   default:

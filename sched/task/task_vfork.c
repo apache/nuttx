@@ -282,8 +282,8 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
 
 FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
 {
-  struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  FAR struct tcb_s *parent = this_task();
+  FAR struct task_tcb_s *child;
   uint8_t ttype;
   int priority;
   int ret;
@@ -407,7 +407,7 @@ errout_with_tcb:
 
 pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 {
-  struct tcb_s *parent = this_task();
+  FAR struct tcb_s *parent = this_task();
   pid_t pid;
   int rc;
   int ret;
