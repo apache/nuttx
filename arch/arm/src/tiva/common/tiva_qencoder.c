@@ -239,7 +239,7 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
   ctlreg |= VELDIV_1 << TIVA_QEI_CTL_VELDIV;
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
-  /* Set period load (10ms for TM4C1294NC) */
+  /* Set period load (10ms for TM4C1294NCPDT) */
 
   tiva_qe_putreg(qe, TIVA_QEI_LOAD_OFFSET, 1200000);
 

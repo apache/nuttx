@@ -296,7 +296,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
   nbytes   &= ~3;
   remaining = nbytes;
 
-#if defined(CONFIG_ARCH_CHIP_TM4C1294NC)
+#if defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
   while (remaining > 0)
     {
       /* Set the address of this block of words. */

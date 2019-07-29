@@ -1091,7 +1091,7 @@
 #  define GPIO_RTC_CLK_2       (GPIO_FUNC_PFIO     | GPIO_ALT_7  | GPIO_PORTC | GPIO_PIN_5)
 #  define GPIO_RTC_CLK_3       (GPIO_FUNC_PFIO     | GPIO_ALT_7  | GPIO_PORTP | GPIO_PIN_3)
 
-#elif defined(CONFIG_ARCH_CHIP_TM4C1294NC)
+#elif defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
 #  define GPIO_ADC_AIN0        (GPIO_FUNC_ANINPUT                | GPIO_PORTE | GPIO_PIN_3)
 #  define GPIO_ADC_AIN1        (GPIO_FUNC_ANINPUT                | GPIO_PORTE | GPIO_PIN_2)
 #  define GPIO_ADC_AIN2        (GPIO_FUNC_ANINPUT                | GPIO_PORTE | GPIO_PIN_1)

@@ -91,7 +91,7 @@
 #  define TIVA_TPIU_BASE      0xe0040000 /* -0xe0040fff: Trace Port Interface Unit */
 #  define TIVA_ETM_BASE       0xe0041000 /* -0xe0041fff: Embedded Trace Macrocell */
                                          /* -0xffffffff: Reserved */
-#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC) || defined(CONFIG_ARCH_CHIP_TM4C1294NC)
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC) || defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
 #  define TIVA_FLASH_BASE     0x00000000 /* -0x000fffff: On-chip FLASH */
                                          /* -0x01ffffff: Reserved */
 #  define TIVA_ROM_BASE       0x02000000 /* -0x02ffffff: On-chip ROM (16 MB) */
@@ -389,7 +389,7 @@
                                                             /* -0x53fff: Reserved */
 #  define TIVA_EPHY_BASE      (TIVA_PERIPH2_BASE + 0x54000) /* -0x54fff: EPHY */
                                                             /* -0xfffff: Reserved */
-#elif defined(CONFIG_ARCH_CHIP_TM4C1294NC)
+#elif defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
 /* Peripheral region 1 */
 #  define TIVA_WDOG0_BASE     (TIVA_PERIPH1_BASE + 0x00000) /* -0x00fff: Watchdog Timer 0 */
 #  define TIVA_WDOG1_BASE     (TIVA_PERIPH1_BASE + 0x01000) /* -0x00fff: Watchdog Timer 1 */
