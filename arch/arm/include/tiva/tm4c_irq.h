@@ -210,7 +210,7 @@
 
 #  define NR_IRQS             (155) /* (Really fewer because of reserved vectors) */
 
-#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI)
+#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PM)
 #  define TIVA_IRQ_GPIOA      (16)  /* Vector 16: GPIO Port A */
 #  define TIVA_IRQ_GPIOB      (17)  /* Vector 17: GPIO Port B */
 #  define TIVA_IRQ_GPIOC      (18)  /* Vector 18: GPIO Port C */
