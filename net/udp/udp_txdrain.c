@@ -47,6 +47,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "udp/udp.h"
