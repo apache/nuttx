@@ -395,7 +395,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     c = 'l';
                     break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#if defined(CONFIG_LIBC_LONG_LONG) && ULLONG_MAX != ULONG_MAX
                   case sizeof(unsigned long long):
                     c = 'l';
                     flags |= FL_LONG;
