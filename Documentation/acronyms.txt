@@ -91,7 +91,7 @@ RTC    Real Time Clock
 RTCC   Real Time Clock/Calendar
 RTOS   Real Time Operating System
 SAIC   Secure Advanced Interrupt Controller (Atmel SAM)
-SCI    Serial Communications Inteface
+SCI    Serial Communications Interface
 SD     Secure Digital (flash memory)
 SDHC   Secure Digital High Capacity (flash memory),
        Secure Digital Host Controller (hardware)
@@ -99,7 +99,7 @@ SDIO   Secure Digital I/O
 SDRAM  Synchronous Dynamic Random Access Memory
 SLCD   Segment Liquid Crystal Display
 SMC    Static Memory Controller (hardware)
-SPI    Serial Periperhal Interface
+SPI    Serial Peripheral Interface
 SPRNG  Scalable Parallel Random Number Generator
 SRAM   Static RAM
 SYSLOG System Log
@@ -117,5 +117,5 @@ WAN    Wide Area Network (networking)
 WLAN   Wireless Local Area Network (networking)
 WPAN   Wireless Personal Area Network (networking)
 WDT    Watchdog Timer (hardware)
-XIP    eExecute In Place
+XIP    eXecute In Place
 XDMAC  Extended DMA Controller (Atmel)

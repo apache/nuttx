@@ -235,7 +235,7 @@ void up_initialize(void)
 #endif
 
 #if defined(USE_DEVCONSOLE)
-  /* Start the sumulated UART device */
+  /* Start the simulated UART device */
 
   simuart_start();
 

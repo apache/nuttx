@@ -118,7 +118,7 @@ int mount(const char *source, const char *target, const char *filesystemtype, un
    <code>mount()</code> attaches the filesystem specified by the <code>source</code> block device name into the root file system at the path specified by <code>target</code>.
 </p>
 <p>
-  <b>Input Paramters</b>:
+  <b>Input Parameters</b>:
   <ul>
     <li><code>source</code>.  A null-terminated string providing the fill path to a block driver in the NuttX pseudo-file system.
     <li><code>target</code>.  The location in the NuttX pseudo-file system where the volume will be mounted.
@@ -132,7 +132,7 @@ int mount(const char *source, const char *target, const char *filesystemtype, un
   Zero is returned on success; -1 is returned on an error and <code>errno</code> is set appropriately:
   <ul>
     <li><code>EACCES</code>.
-      A component of a path was not searchable or mounting a read-onlyfilesystem was attempted without giving the <code>MS_RDONLY</code> flag.
+      A component of a path was not searchable or mounting a read-only filesystem was attempted without giving the <code>MS_RDONLY</code> flag.
     </li>
     <li><code>EBUSY</code>.
       <code>source</code> is already  mounted.
@@ -315,7 +315,7 @@ This is a test
 directory machine1(option11,option12)
 </pre></ul>
 <p>
-  So for our example we export <coce>/export</code> to the client 10.0.0.2 add the entry:
+  So for our example we export <code>/export</code> to the client 10.0.0.2 add the entry:
 </p>
 <ul><pre>
 /export 10.0.0.2(rw)
