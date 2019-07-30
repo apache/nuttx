@@ -41,6 +41,7 @@
  * Public Functions
  ****************************************************************************/
 
+#ifndef CONFIG_LIBM_ARCH_SQRTF
 float sqrtf(float x)
 {
   float y;
@@ -82,3 +83,4 @@ float sqrtf(float x)
 
   return y;
 }
+#endif

@@ -1,15 +1,10 @@
 /****************************************************************************
- * libs/libc/math/lib_fabsf.c
+ * libs/libc/machine/arm/armv7-m/math/arch_fabsf.c
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
- *
- * It derives from the Rhombus OS math library by Nick Johnson which has
- * a compatibile, MIT-style license:
- *
- * Copyright (C) 2009, 2010 Nick Johnson <nickbjohnson4224 at gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: David S. Alessio <david.s.alessio@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,9 +31,15 @@
  * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBM_ARCH_FABSF
+#if (__ARM_ARCH >= 7) && (__ARM_FP >= 4)
+
 float fabsf(float x)
 {
-  return ((x < 0) ? -x : x);
+  float result;
+  asm volatile ( "vabs.f32\t%0, %1" : "=t" (result) : "t" (x) );
+  return result;
 }
+
+#else
+#  warning fabsf() not built
 #endif

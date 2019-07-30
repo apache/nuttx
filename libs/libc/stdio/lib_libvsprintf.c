@@ -384,7 +384,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                    * (1) the eZ80 which has sizeof(size_t) = 3 which is the
                    * same as the sizeof(int).  And (2) if CONFIG_LIBC_LONG_LONG
                    * is not enabled and sizeof(size_t) is equal to
-                   * sizeof(unsigned long long).  This latter case is an error.
+                   * sizeof(unsigned long long).  This latter case is an
+                   * error.
                    */
 
                   default:
