@@ -1538,10 +1538,6 @@ static enum pkt_type_e gs2200m_enable_dhcpc(FAR struct gs2200m_dev_s *dev,
 {
   char cmd[16];
 
-#ifdef CONFIG_WL_GS2200M_DISABLE_DHCPC
-  on = 0;
-#endif
-
   snprintf(cmd, sizeof(cmd), "AT+NDHCP=%d\r\n", on);
   return gs2200m_send_cmd(dev, cmd, NULL);
 }
@@ -2308,10 +2304,26 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
   t = gs2200m_set_opmode(dev, 0);
   ASSERT(TYPE_OK == t);
 
+#ifdef CONFIG_WL_GS2200M_DISABLE_DHCPC
+  /* Disable DHCP Client */
+
+  t = gs2200m_enable_dhcpc(dev, 0);
+  ASSERT(TYPE_OK == t);
+
+
+  /* Set static address */
+  t = gs2200m_set_addresses(dev,
+                            "10.0.0.2",
+                            "255.255.255.0",
+                            "10.0.0.1"
+                            );
+  ASSERT(TYPE_OK == t);
+#else
   /* Enable DHCP Client */
 
   t = gs2200m_enable_dhcpc(dev, 1);
   ASSERT(TYPE_OK == t);
+#endif
 
   /* Get mac address info */
 
@@ -2403,6 +2415,67 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: gs2200m_ifreq_ifreq
+ ****************************************************************************/
+
+static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
+                               FAR struct gs2200m_ifreq_msg *msg)
+{
+  FAR struct sockaddr_in *inaddr;
+  struct in_addr in[3];
+  char addr[3][17];
+  int ret = OK;
+
+  wlinfo("+++ start: cmd=%x \n", msg->cmd);
+
+  inaddr = (FAR struct sockaddr_in *)&msg->ifr.ifr_addr;
+
+  switch (msg->cmd)
+    {
+      case SIOCSIFADDR:
+        memcpy(&dev->net_dev.d_ipaddr,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      case SIOCSIFDSTADDR:
+        memcpy(&dev->net_dev.d_draddr,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      case SIOCSIFNETMASK:
+        memcpy(&dev->net_dev.d_netmask,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      default:
+        ret = -EINVAL;
+        break;
+    }
+
+  if (OK == ret)
+    {
+      memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
+      memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
+      memcpy(&in[2], &dev->net_dev.d_draddr, sizeof(in[2]));
+      strncpy(addr[0], inet_ntoa(in[0]), sizeof(addr[0]));
+      strncpy(addr[1], inet_ntoa(in[1]), sizeof(addr[1]));
+      strncpy(addr[2], inet_ntoa(in[2]), sizeof(addr[2]));
+
+      (void)gs2200m_set_addresses(dev,
+                                  addr[0],
+                                  addr[1],
+                                  addr[2]
+                                  );
+    }
+
+  wlinfo("+++ end: \n");
+  return ret;
 }
 
 /****************************************************************************
@@ -2499,6 +2572,15 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = gs2200m_ioctl_assoc_ap(dev, msg);
             }
+          break;
+        }
+
+      case GS2200M_IOC_IFREQ:
+        {
+          struct gs2200m_ifreq_msg *msg =
+            (struct gs2200m_ifreq_msg *)arg;
+
+          ret = gs2200m_ioctl_ifreq(dev, msg);
           break;
         }
 

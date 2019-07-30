@@ -43,6 +43,7 @@
 #include <stdint.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <net/if.h>
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -69,6 +70,9 @@ extern "C"
 #define GS2200M_IOC_BIND     _WLCIOC(GS2200M_FIRST + 4)
 #define GS2200M_IOC_ACCEPT   _WLCIOC(GS2200M_FIRST + 5)
 #define GS2200M_IOC_ASSOC    _WLCIOC(GS2200M_FIRST + 6)
+#define GS2200M_IOC_IFREQ    _WLCIOC(GS2200M_FIRST + 7)
+
+/* NOTE: do not forget to update include/nuttx/wireless/ioctl.h */
 
 struct gs2200m_connect_msg
 {
@@ -125,6 +129,12 @@ struct gs2200m_assoc_msg
   FAR char *key;
   uint8_t   mode;
   uint8_t   ch;
+};
+
+struct gs2200m_ifreq_msg
+{
+  uint32_t cmd;
+  struct ifreq ifr;
 };
 
 struct gs2200m_lower_s
