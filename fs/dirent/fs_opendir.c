@@ -88,7 +88,7 @@ static inline int open_mountpoint(FAR struct inode *inode,
 
   if (!inode->u.i_mops || !inode->u.i_mops->opendir)
     {
-       return ENOSYS;
+      return ENOSYS;
     }
 
   /* Take reference to the mountpoint inode.  Note that we do not use
@@ -138,7 +138,8 @@ static inline int open_mountpoint(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-static void open_pseudodir(FAR struct inode *inode, FAR struct fs_dirent_s *dir)
+static void open_pseudodir(FAR struct inode *inode,
+                           FAR struct fs_dirent_s *dir)
 {
   /* We have a valid pseudo-filesystem node.  Take two references on the
    * inode -- one for the parent (fd_root) and one for the child (fd_next).
@@ -297,7 +298,7 @@ FAR DIR *opendir(FAR const char *path)
 
       if (*path != '/')
         {
-          ret = -ENOTDIR;
+          ret = ENOTDIR;
           goto errout_with_semaphore;
         }
 
@@ -373,7 +374,7 @@ FAR DIR *opendir(FAR const char *path)
       ret = open_mountpoint(inode, relpath, dir);
       if (ret != OK)
         {
-           goto errout_with_direntry;
+          goto errout_with_direntry;
         }
     }
 #endif
