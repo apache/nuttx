@@ -180,4 +180,4 @@ void lib_stream_release(FAR struct task_group_s *group)
 }
 
 #endif /* CONFIG_NFILE_STREAMS > 0 */
-#endif /* (!CONFIG_BUILD_PROTECTED &&7 !CONFIG_BUILD_KERNEL) || __KERNEL__ */
+#endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

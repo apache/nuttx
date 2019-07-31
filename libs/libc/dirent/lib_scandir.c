@@ -44,6 +44,13 @@
 #include <errno.h>
 #include <stdlib.h>
 
+/* The scandir() function is not appropriate for use within the kernel in its
+ * current form because it uses user space memory allocators and modifies
+ * the errno value.
+ */
+
+#ifndef __KERNEL__
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -61,10 +68,12 @@
  * Input Parameters:
  *   path     - Pathname of the directory to scan
  *   namelist - An array of pointers to directory entries, which is allocated
- *     by scandir via malloc.  Each directory entry is allocated via malloc as
- *     well.  The caller is responsible to free said objects.
+ *              by scandir via malloc.  Each directory entry is allocated via
+ *              malloc as well.  The caller is responsible to free said
+               objects.
  *   filter   - Directory entries for which filter returns zero are not
- *     included in the namelist.  If filter is NULL, all entries are included.
+ *              included in the namelist.  If filter is NULL, all entries are
+ *              included.
  *   compar   - Comparison function used with qsort() to sort the namelist.
  *
  * Returned Value:
@@ -79,14 +88,14 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
             CODE int (*compar)(FAR const struct dirent **,
                                FAR const struct dirent **))
 {
-  struct dirent *d;
-  struct dirent *dnew;
-  struct dirent **list = NULL;
+  FAR struct dirent *d;
+  FAR struct dirent *dnew;
+  FAR struct dirent **list = NULL;
   size_t listsize = 0;
   size_t cnt = 0;
   int errsv;
   int result;
-  DIR *dirp;
+  FAR DIR *dirp;
 
   /* This scandir implementation relies on errno being set by other service
    * functions that it is calling to figure if it was successful.  We save
@@ -230,3 +239,5 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
 
   return result;
 }
+
+#endif /* __KERNEL__ */
