@@ -476,10 +476,6 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
   /* Send SIGCHLD to all members of the parent's task group */
 
   nxtask_sigchild(ptcb, ctcb, status);
-
-  /* Forget who our parent was */
-
-  ctcb->group->tg_ppid = INVALID_PROCESS_ID;
   sched_unlock();
 #endif
 }

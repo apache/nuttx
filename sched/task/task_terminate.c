@@ -60,7 +60,7 @@
  * Name: nxtask_terminate
  *
  * Description:
- *   This function causes a specified task to cease to exist. Its  stack and
+ *   This function causes a specified task to cease to exist.  Its stack and
  *   TCB will be deallocated.  This function is the internal implementation
  *   of the task_delete() function.  It includes and additional parameter
  *   to determine if blocking is permitted or not.
