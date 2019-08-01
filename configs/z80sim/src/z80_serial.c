@@ -129,7 +129,7 @@ static uart_dev_t g_uartport =
   },
   &g_uart_ops,              /* ops */
   NULL,                     /* priv */
-  NULL                      /* pollfds */
+  { NULL }                  /* pollfds */
 };
 
 /****************************************************************************
