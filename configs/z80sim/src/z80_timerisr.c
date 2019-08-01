@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  z80sim_timerisr
+ * Function: z80sim_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions of
