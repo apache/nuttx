@@ -504,20 +504,20 @@
 #  define RCC_D1CCIPR_FMCSEL_PLL2       (2 << RCC_D1CCIPR_FMCSEL_SHIFT) /* 10: */
 #  define RCC_D1CCIPR_FMCSEL_PER        (3 << RCC_D1CCIPR_FMCSEL_SHIFT) /* 11: */
                                             /* Bits 2-3: Reserved */
-#define RCC_D1CCIPR_QSPISEL_SHIFT       (0) /* Bits 4-5: */
+#define RCC_D1CCIPR_QSPISEL_SHIFT       (4) /* Bits 4-5: */
 #define RCC_D1CCIPR_QSPISEL_MASK        (3 << RCC_D1CCIPR_QSPISEL_SHIFT)
 #  define RCC_D1CCIPR_QSPISEL_HCLK      (0 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 00: */
 #  define RCC_D1CCIPR_QSPISEL_PLL1      (1 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 01: */
 #  define RCC_D1CCIPR_QSPISEL_PLL2      (2 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 10: */
 #  define RCC_D1CCIPR_QSPISEL_PER       (3 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 11: */
                                             /* Bits 6-15: Reserved */
-#define RCC_D1CCIPR_SDMMC_SHIFT         (16) /* Bit 15: */
+#define RCC_D1CCIPR_SDMMC_SHIFT         (16) /* Bit 16: */
 #define RCC_D1CCIPR_SDMMC_MASK          (1 << RCC_D1CCIPR_SDMMC_SHIFT)
 #  define RCC_D1CCIPR_SDMMC_PLL1        (0 << RCC_D1CCIPR_SDMMC_SHIFT) /* 0: */
 #  define RCC_D1CCIPR_SDMMC_PLL2        (1 << RCC_D1CCIPR_SDMMC_SHIFT) /* 1: */
                                             /* Bits 17-27: Reserved */
                                             /* Bits 17-27: Reserved */
-#define RCC_D1CCIPR_CKPERSEL_SHIFT      (0) /* Bits 28-29: */
+#define RCC_D1CCIPR_CKPERSEL_SHIFT      (28) /* Bits 28-29: */
 #define RCC_D1CCIPR_CKPERSEL_MASK       (3 << RCC_D1CCIPR_CKPERSEL_SHIFT)
 #  define RCC_D1CCIPR_CKPERSEL_HSI      (0 << RCC_D1CCIPR_CKPERSEL_SHIFT) /* 00: */
 #  define RCC_D1CCIPR_CKPERSEL_CSI      (1 << RCC_D1CCIPR_CKPERSEL_SHIFT) /* 01: */
@@ -583,28 +583,23 @@
 #  define RCC_D2CCIP1R_SWPSEL_PCLK      (0 << RCC_D2CCIP1R_SWPSEL_SHIFT) /* 0 */
 #  define RCC_D2CCIP1R_SWPSEL_HSI       (1 << RCC_D2CCIP1R_SWPSEL_SHIFT) /* 1 */
 
-/* Bit definitions for RCC_D2CCIP2R reigster */
+/* Bit definitions for RCC_D2CCIP2R register */
 
 #define RCC_D2CCIP2R_USART234578SEL_SHIFT  (0) /* Bits 0-2 */
 #  define RCC_D2CCIP2R_USART234578SEL_MASK (7 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
 #define RCC_D2CCIP2R_USART16SEL_SHIFT      (3) /* Bits 3-5 */
 #  define RCC_D2CCIP2R_USART16SEL_MASK     (7 << RCC_D2CCIP2R_USART16SEL_SHIFT)
-#define RCC_D2CCIP2R_RNGSEL_SHIFT          (3) /* Bits 8-9 */
+                                               /* Bits 6-7: Reserved */
+#define RCC_D2CCIP2R_RNGSEL_SHIFT          (8) /* Bits 8-9 */
 #  define RCC_D2CCIP2R_RNGSEL_MASK         (3 << RCC_D2CCIP2R_RNGSEL_SHIFT)
+                                               /* Bits 10-11: Reserved */
 #define RCC_D2CCIP2R_I2C123SEL_SHIFT       (12) /* Bits 12-13 */
 #define RCC_D2CCIP2R_I2C123SEL_MASK        (3 << RCC_D2CCIP2R_I2C123SEL_SHIFT)
 #   define RCC_D2CCIP2R_I2C123SEL_PCLK1    (0 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 00 */
 #   define RCC_D2CCIP2R_I2C123SEL_PLL3     (1 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 01 */
 #   define RCC_D2CCIP2R_I2C123SEL_HSI      (2 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 10 */
 #   define RCC_D2CCIP2R_I2C123SEL_CSI      (3 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 11 */
-
-#define RCC_D2CCIP2R_I2C4SEL_SHIFT         (8) /* Bits 8-9 */
-#define RCC_D2CCIP2R_I2C4SEL_MASK          (3 << RCC_D2CCIP2R_I2C4SEL_SHIFT)
-#   define RCC_D2CCIP2R_I2C4SEL_PCLK1      (0 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 00 */
-#   define RCC_D2CCIP2R_I2C4SEL_PLL3       (1 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 01 */
-#   define RCC_D2CCIP2R_I2C4SEL_HSI        (2 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 10 */
-#   define RCC_D2CCIP2R_I2C4SEL_CSI        (3 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 11 */
-
+                                               /* Bits 14-19: Reserved */
 #define RCC_D2CCIP2R_USBSEL_SHIFT          (20) /* Bits 20-21 */
 #  define RCC_D2CCIP2R_USBSEL_MASK         (3 << RCC_D2CCIP2R_USBSEL_SHIFT)
 #  define RCC_D2CCIP2R_USBSEL_DISABLE      (0 << RCC_D2CCIP2R_USBSEL_SHIFT)
@@ -613,10 +608,12 @@
 #  define RCC_D2CCIP2R_USBSEL_HSI48        (3 << RCC_D2CCIP2R_USBSEL_SHIFT)
 #define RCC_D2CCIP2R_CECSEL_SHIFT          (22) /* Bits 22-23 */
 #  define RCC_D2CCIP2R_CECSEL_MASK         (3 << RCC_D2CCIP2R_CECSEL_SHIFT)
+                                               /* Bits 24-27: Reserved */
 #define RCC_D2CCIP2R_LPTIM1SEL_SHIFT       (28) /* Bits 28-30 */
 #  define RCC_D2CCIP2R_LPTIM1SEL_MASK      (3 << RCC_D2CCIP2R_LPTIM1SEL_SHIFT)
+                                               /* Bit 31: Reserved */
 
-/* TODO: Bit definitions for RCC_D3CCIPR reigster */
+/* Bit definitions for RCC_D3CCIPR register */
 
 #define RCC_D3CCIPR_LPUART1SEL_SHIFT     (0)  /* Bits 0-2: LPUART1 kernel clock source selection */
 #define RCC_D3CCIPR_LPUART1SEL_MASK      (7 << RCC_D3CCIPR_LPUART1SEL_SHIFT)

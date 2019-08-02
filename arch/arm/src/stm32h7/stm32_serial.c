@@ -672,7 +672,7 @@ static struct up_dev_s g_uart8priv =
     },
 
   .irq           = STM32_IRQ_UART8,
-  .rxftcfg       = CONFIG_USRT8_RXFIFO_THRES,
+  .rxftcfg       = CONFIG_UART8_RXFIFO_THRES,
   .parity        = CONFIG_UART8_PARITY,
   .bits          = CONFIG_UART8_BITS,
   .stopbits2     = CONFIG_UART8_2STOP,
