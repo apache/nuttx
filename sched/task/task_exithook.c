@@ -459,9 +459,7 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
   sched_lock();
 
   /* Get the TCB of the receiving, parent task.  We do this early to
-   * handle multiple calls to nxtask_signalparent.  ctcb->group->tg_ppid is
-   * set to an invalid value below and the following call will fail if we
-   * are called again.
+   * handle multiple calls to nxtask_signalparent.
    */
 
   ptcb = sched_gettcb(ctcb->group->tg_ppid);
@@ -473,7 +471,11 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
       return;
     }
 
-  /* Send SIGCHLD to all members of the parent's task group */
+  /* Send SIGCHLD to all members of the parent's task group.  NOTE that the
+   * SIGCHLD signal is only sent once either (1) if this is the final thread
+   * of the task group that is exiting (HAVE_GROUP_MEMBERS) or (2) if the
+   * main thread of the group is exiting (!HAVE_GROUP_MEMBERS).
+   */
 
   nxtask_sigchild(ptcb, ctcb, status);
   sched_unlock();
