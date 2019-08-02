@@ -48,11 +48,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
  * CONFIG_SENSORS_QENCODER - Enables support for the quadrature encoder upper half
  */
 
 /* IOCTL Commands ***********************************************************/
+
 /* The Quadrature Encode module uses a standard character driver framework.
  * However, since the driver is a device control interface rather than a
  * data transfer interface, the majority of the functionality is implemented
@@ -80,7 +82,7 @@
 /* See arch/arm/src/tiva/tiva_qencoder.h (Not usable at that location) */
 
 #define QE_TIVA_FIRST      (QE_FIRST + QE_NCMDS)
-#define QE_TIVA_NCMDS      3
+#define QE_TIVA_NCMDS      5
 
 /* See include/nuttx/sensors/as5048b.h */
 
@@ -90,6 +92,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the vtable that is used to by the upper half quadrature encoder
  * to call back into the lower half quadrature encoder.
  */

@@ -91,6 +91,8 @@ config ARCH_CHIP_TM4C123GH6ZRB
 	select TIVA_HAVE_GPIOQ_IRQS
 	select TIVA_HAVE_I2C4
 	select TIVA_HAVE_I2C5
+	select TIVA_HAVE_QEI0
+	select TIVA_HAVE_QEI1
 
 config ARCH_CHIP_TM4C123GH6PM
 	bool "TM4C123GH6PM"
@@ -105,6 +107,8 @@ config ARCH_CHIP_TM4C123GH6PM
 	select TIVA_HAVE_GPIOF_IRQS
 	select TIVA_HAVE_ADC0
 	select TIVA_HAVE_ADC1
+	select TIVA_HAVE_QEI0
+	select TIVA_HAVE_QEI1
 
 config ARCH_CHIP_TM4C1294NCPDT
 	bool "TM4C1294NCPDT"
@@ -122,6 +126,7 @@ config ARCH_CHIP_TM4C1294NCPDT
 	select TIVA_HAVE_GPION_IRQS
 	select TIVA_HAVE_GPIOP_IRQS
 	select TIVA_HAVE_GPIOQ_IRQS
+	select TIVA_HAVE_QEI0
 
 config ARCH_CHIP_TM4C129XNC
 	bool "TM4C129XNC"
@@ -141,6 +146,7 @@ config ARCH_CHIP_TM4C129XNC
 	select TIVA_HAVE_GPIOR_IRQS
 	select TIVA_HAVE_GPIOS_IRQS
 	select TIVA_HAVE_GPIOT_IRQS
+	select TIVA_HAVE_QEI0
 
 config ARCH_CHIP_CC1310
 	bool "CC1310 SimpleLink"
@@ -315,6 +321,18 @@ config TIVA_HAVE_ADC1
 	bool
 	default n
 
+config TIVA_QEI
+	bool
+	default n
+
+config TIVA_HAVE_QEI0
+	bool
+	default n
+
+config TIVA_HAVE_QEI1
+	bool
+	default n
+
 config TIVA_I2C
 	bool
 	default n
@@ -461,6 +479,18 @@ config TIVA_ADC1
 	default n
 	depends on TIVA_HAVE_ADC0
 	select TIVA_ADC
+
+config TIVA_QEI0
+	bool "QEI0"
+	default n
+	depends on TIVA_HAVE_QEI0
+	select TIVA_QEI
+
+config TIVA_QEI1
+	bool "QEI1"
+	default n
+	depends on TIVA_HAVE_QEI1
+	select TIVA_QEI
 
 config TIVA_I2C0
 	bool "I2C0"

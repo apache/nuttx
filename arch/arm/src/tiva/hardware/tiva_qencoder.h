@@ -56,14 +56,14 @@
 #define TIVA_QEI_RIS_OFFSET             (0x24)  /* QEI Raw Interrupt Status */
 #define TIVA_QEI_ISC_OFFSET             (0x28)  /* QEI Interrupt Status and Clear */
 
+/* QEI_CTL register */
+
 #define TIVA_QEI_CTL_FILTCNT            (16)    /* (Bit) Input Filter Prescale Count */
 #define TIVA_QEI_CTL_FILTEN             (13)    /* (Bit) Enable Input Filter */
 #define TIVA_QEI_CTL_STALLEN            (12)    /* (Bit) Stall QEI */
 #define TIVA_QEI_CTL_INVI               (11)    /* (Bit) Invert Index Pulse */
 #define TIVA_QEI_CTL_INVB               (10)    /* (Bit) Invert PhB */
 #define TIVA_QEI_CTL_INVA               (9)     /* (Bit) Invert PhA */
-#define TIVA_QEI_CTL_SIGMODE            (2)     /* (Bit) Signal Mode */
-#define TIVA_QEI_CTL_SWAP               (1)     /* (Bit) Swap Signals */
 
 #define TIVA_QEI_CTL_VELDIV             (6)     /* (Bit) Predivide Velocity */
 #define VELDIV_1                        (0x0)   /* (Value) Divided by 1 */
@@ -87,12 +87,23 @@
 #define CAPMODE_ONLY_PHA                (0)     /* (Value) Count PhA both edges */
 #define CAPMODE_PHA_AND_PHB             (1)     /* (Value) Count PhA and PhB both edges */
 
+#define TIVA_QEI_CTL_SIGMODE            (2)     /* (Bit) Signal Mode */
+#define SIGMODE_QUADRATURE              (0)     /* (Value) PhA and PhB are Quadrature signals */
+#define SIGMODE_CLK_AND_DIR             (1)     /* (Value) PhA is CLK, PhB is DIR */
+
+#define TIVA_QEI_CTL_SWAP               (1)     /* (Bit) Swap PhA/PhB Signals */
+#define SWAP_NO_SWAP                    (0)     /* (Value) No swapping */
+#define SWAP_PHA_PHB                    (1)     /* (Value) Swap PhA and PhB */
+
 #define TIVA_QEI_CTL_ENABLE             (0)     /* (Bit) Enable QEI */
 #define QEI_DISABLE                     (0)     /* (Value) Disable QEI */
 #define QEI_ENABLE                      (1)     /* (Value) Enable QEI */
+
+/* QEI_STAT register */
 
 #define TIVA_QEI_STAT_DIRECTION         (1)     /* (Bit) Direction of Rotation */
 #define DIRECTION_FORWARD               (0)     /* (Value) Forward */
 #define DIRECTION_BACKWARD              (1)     /* (Value) Backward */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_QENCODER_H */
+
