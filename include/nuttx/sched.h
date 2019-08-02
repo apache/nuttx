@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/nuttx/sched.h
  *
- *   Copyright (C) 2007-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -361,6 +361,12 @@ struct pthread_cleanup_s
 #  endif
 #endif
 
+/* type grpid_t ******************************************************************/
+
+/* The task group ID */
+
+typedef int16_t grpid_t;
+
 /* struct dspace_s ***************************************************************/
 
 /* This structure describes a reference counted D-Space region.  This must be a
@@ -425,10 +431,10 @@ struct task_group_s
 {
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   struct task_group_s *flink;       /* Supports a singly linked list            */
-  gid_t tg_gid;                     /* The ID of this task group                */
+  grpid_t tg_grpid;                 /* The ID of this task group                */
 #endif
 #ifdef HAVE_GROUP_MEMBERS
-  gid_t tg_pgid;                    /* The ID of the parent task group          */
+  grpid_t tg_pgrpid;                /* The ID of the parent task group          */
 #endif
 #if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
   pid_t tg_task;                    /* The ID of the task within the group      */
@@ -479,7 +485,7 @@ struct task_group_s
 #endif
 
 #ifndef HAVE_GROUP_MEMBERS
-  /* REVISIT: What if parent thread exits?  Should use tg_pgid. */
+  /* REVISIT: What if parent thread exits?  Should use tg_pgrpid. */
 
   pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
 #ifndef CONFIG_SCHED_CHILD_STATUS

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -203,7 +203,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Mark no address environment */
 
-  g_gid_current = 0;
+  g_grpid_current = 0;
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)

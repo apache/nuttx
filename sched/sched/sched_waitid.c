@@ -231,7 +231,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       ctcb = sched_gettcb((pid_t)id);
 
 #ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
 #else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif
@@ -274,7 +274,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       ctcb = sched_gettcb((pid_t)id);
 
 #ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
 #else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif

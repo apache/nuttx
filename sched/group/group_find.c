@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_find.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
 #include "group/group.h"
 #include "environ/environ.h"
@@ -55,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_findbygid
+ * Name: group_findby_grpid
  *
  * Description:
  *   Given a group ID, find the group task structure with that ID.  IDs are
@@ -64,7 +65,7 @@
  *   because if the group disappears, this function will fail gracefully.
  *
  * Input Parameters:
- *   gid - The group ID to find.
+ *   grpid - The group ID to find.
  *
  * Returned Value:
  *   On success, a pointer to the group task structure is returned.  This
@@ -79,7 +80,7 @@
  ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-FAR struct task_group_s *group_findbygid(gid_t gid)
+FAR struct task_group_s *group_findby_grpid(grpid_t grpid)
 {
   FAR struct task_group_s *group;
   irqstate_t flags;
@@ -89,7 +90,7 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
   flags = enter_critical_section();
   for (group = g_grouphead; group; group = group->flink)
     {
-      if (group->tg_gid == gid)
+      if (group->tg_grpid == grpid)
         {
           leave_critical_section(flags);
           return group;

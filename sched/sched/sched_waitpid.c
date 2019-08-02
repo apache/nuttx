@@ -7,7 +7,7 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
- * are met:
+ * are met:make
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -359,7 +359,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
           /* Make sure that the thread it is our child. */
 
 #ifdef HAVE_GROUP_MEMBERS
-          if (ctcb->group->tg_pgid != rtcb->group->tg_gid)
+          if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
 #else
           if (ctcb->group->tg_ppid != rtcb->pid)
 #endif
@@ -403,7 +403,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       ctcb = sched_gettcb(pid);
 
 #ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgid != rtcb->group->tg_gid)
+      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
 #else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
 #endif

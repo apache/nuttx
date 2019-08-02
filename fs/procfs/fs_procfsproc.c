@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -513,7 +513,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
 #ifdef HAVE_GROUPID
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Group:",
-                        group->tg_pgid);
+                        group->tg_pgrpid);
 #else
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
                         group->tg_ppid);
@@ -930,7 +930,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 
 #ifdef HAVE_GROUP_MEMBERS
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                        "Group ID:", group->tg_gid);
+                        "Group ID:", group->tg_grpid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
@@ -943,7 +943,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
     }
 
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                        "Parent ID:", group->tg_pgid);
+                        "Parent ID:", group->tg_pgrpid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;

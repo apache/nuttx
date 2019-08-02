@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/group/group.h
  *
- *   Copyright (C) 2007-2013, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013, 2015, 2018-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +49,16 @@
 #include <sched.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Any negative GID is invalid. */
 
-#define INVALID_GROUP_ID    (pid_t)-1
-#define IS_INVALID_GID(gid) ((int)(gid) < 0)
+/* Any negative GRPID is invalid. */
+
+#define INVALID_GROUP_ID        (pid_t)-1
+#define IS_INVALID_GRPID(grpid) ((int)(grpid) < 0)
 
 /****************************************************************************
  * Public Type Definitions
@@ -81,7 +84,7 @@ extern FAR struct task_group_s *g_grouphead;
  * This must only be accessed with interrupts disabled.
  */
 
-extern gid_t g_gid_current;
+extern grpid_t g_grpid_current;
 #endif
 
 /****************************************************************************
@@ -107,7 +110,7 @@ void group_delwaiter(FAR struct task_group_s *group);
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-FAR struct task_group_s *group_findbygid(gid_t gid);
+FAR struct task_group_s *group_findby_grpid(grpid_t grpid);
 #endif
 
 #ifdef HAVE_GROUP_MEMBERS
