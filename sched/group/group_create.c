@@ -106,7 +106,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
   irqstate_t flags;
   grpid_t grpid;
 
-  /* Pre-emption should already be enabled, but lets be paranoid careful */
+  /* Pre-emption should already be disabled, but let's be paranoid careful */
 
   sched_lock();
 
@@ -123,7 +123,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
 
       if (grpid <= 0)
         {
-          g_grpid_counter = 1;
+          g_grpid_counter = 1;            /* One is the IDLE group */
           leave_critical_section(flags);
         }
       else
@@ -133,7 +133,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
           leave_critical_section(flags);
           if (group_findby_grpid(grpid) == NULL)
             {
-              /* Now assign this ID to the group and return */
+              /* No.. Assign this ID to the new group and return */
 
               group->tg_grpid = grpid;
               sched_unlock();
