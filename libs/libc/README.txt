@@ -36,6 +36,7 @@ we have:
   locale    - locale.h
   lzf       - lzf.h
   fixedmath - fixedmath.h
+  grp       - grp.h
   inttypes  - inttypes.h
   machine   - Various architecture-specific implementations.
   math      - math.h
