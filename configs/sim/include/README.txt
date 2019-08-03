@@ -8,16 +8,17 @@ README
   CONFIG_NSH_ARCHROMFS=y.  The script provides a ROMFS volue that will be
   mounted at /etc and will look like this at run-time:
 
-    NuttShell (NSH) NuttX-7.13
-    This is the message of the day
+    NuttShell (NSH) NuttX-7.31
+    MOTD: username=admin password=Administrator
     nsh> ls -Rl /etc
     /etc:
      dr-xr-xr-x       0 .
+     -r-xr-xr-x      20 group
      dr-xr-xr-x       0 init.d/
-     -r--r--r--      39 passwd
+     -r-xr-xr-x      35 passwd
     /etc/init.d:
      dr-xr-xr-x       0 ..
-     -r--r--r--     110 rcS
+     -r-xr-xr-x     110 rcS
     nsh>
 
   /etc/init.d/rcS is the start-up script; /etc/passwd is a the password
@@ -26,10 +27,39 @@ README
     USERNAME:  admin
     PASSWORD:  Adminstrator
 
-  The encrypted passwords in the provided passwd file are only value if the
+    nsh> cat /etc/passwd
+    admin:8Tv+Hbmr3pLddSjtzL0kwC:0:0:/
+
+  The encrypted passwords in the provided passwd file are only valid if the
   TEA key is set to:  012345678 9abcdef0 012345678 9abcdef0.  Changes to either
   the key or the password word will require regeneration of the nsh_romfimg.h
   header file.
+
+  The format of the password file is:
+
+     user:x:uid:gid:home
+
+  Where:
+     user:  User name
+     x:     Encrypted password
+     uid:   User ID (0 for now)
+     gid:   Group ID (0 for now)
+     home:  Login directory (/ for now)
+
+  /etc/group is a group file.  It is not currently used.
+
+    nsh> cat /etc/group
+    root:*:0:root,admin
+
+  The format of the group file is:
+
+     group:x:gid:users
+
+  Where:
+     group:  The group name
+     x:      Group password
+     gid:    Group ID
+     users:  A comma separated list of members of the group
 
   Updating the ROMFS File System
   ------------------------------
