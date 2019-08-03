@@ -161,7 +161,7 @@ int getgrbuf_r(gid_t gid, FAR const char *name, FAR const char *passwd,
    * sufficient buffer space was supplied by the caller.
    */
 
-  padlen  = sizeof(FAR void *) - ((unsigned)buf % sizeof(FAR char *));
+  padlen  = sizeof(FAR void *) - ((uintptr_t)buf % sizeof(FAR char *));
   reqdlen = sizeof(FAR void *) + strlen(name) + 1 + strlen(passwd) + 1;
 
   if (buflen < padlen + reqdlen)
