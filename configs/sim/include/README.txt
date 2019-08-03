@@ -13,12 +13,12 @@ README
     nsh> ls -Rl /etc
     /etc:
      dr-xr-xr-x       0 .
-     -r-xr-xr-x      20 group
+     -r--r--r--      20 group
      dr-xr-xr-x       0 init.d/
-     -r-xr-xr-x      35 passwd
+     -r--r--r--      35 passwd
     /etc/init.d:
      dr-xr-xr-x       0 ..
-     -r-xr-xr-x     110 rcS
+     -r--r--r--     110 rcS
     nsh>
 
   /etc/init.d/rcS is the start-up script; /etc/passwd is a the password
@@ -37,14 +37,14 @@ README
 
   The format of the password file is:
 
-     user:x:uid:gid:home
+    user:x:uid:gid:home
 
   Where:
-     user:  User name
-     x:     Encrypted password
-     uid:   User ID (0 for now)
-     gid:   Group ID (0 for now)
-     home:  Login directory (/ for now)
+    user:  User name
+    x:     Encrypted password
+    uid:   User ID (0 for now)
+    gid:   Group ID (0 for now)
+    home:  Login directory (/ for now)
 
   /etc/group is a group file.  It is not currently used.
 
@@ -53,13 +53,13 @@ README
 
   The format of the group file is:
 
-     group:x:gid:users
+    group:x:gid:users
 
   Where:
-     group:  The group name
-     x:      Group password
-     gid:    Group ID
-     users:  A comma separated list of members of the group
+    group:  The group name
+    x:      Group password
+    gid:    Group ID
+    users:  A comma separated list of members of the group
 
   Updating the ROMFS File System
   ------------------------------
