@@ -67,6 +67,10 @@ README
   directory structure.  That directory structure is contained in the binary
   file etc.tar.gz and can be modified per the following steps:
 
+  NOTE:  It is not advised to do this under Windows.  Windows will end up
+  changing the file permissions so the files under /etc will have executable
+  permissions.
+
     1. Unpack the directory structure:
 
        tar zxf etc.tar.gz
