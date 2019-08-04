@@ -36,7 +36,13 @@
 # Add the grp C files to the build
 
 CSRCS += lib_getgrgid.c lib_getgrgidr.c lib_getgrnam.c lib_getgrnamr.c
-CSRCS += lib_grp.c lib_initgroups.c
+CSRCS += lib_initgroups.c
+
+ifeq ($(CONFIG_LIBC_GROUP_FILE),y)
+CSRCS += lib_find_grpfile.c lib_grp_globals.c
+else
+CSRCS += lib_getgrbuf.c lib_getgrbufr.c
+endif
 
 # Add the grp directory to the build
 

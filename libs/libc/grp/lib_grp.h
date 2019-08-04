@@ -52,6 +52,16 @@
 #define ROOT_NAME "root"
 #define ROOT_PASSWD "x"
 
+/* Reserver space for a NULL terminated list for group member names */
+
+#define MEMBER_SIZE ((CONFIG_LIBC_GROUP_NUSERS + 1) * sizeof(FAR char *))
+
+/* Reserve space for the maximum line in the group file PLUS space for an
+ * array of Member names.
+ */
+
+#define GRPBUF_RESERVE_SIZE (CONFIG_LIBC_GROUP_LINESIZE + MEMBER_SIZE)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -64,6 +74,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_LIBC_GROUP_FILE
+/* Data for non-reentrant group functions */
+
+EXTERN struct group g_group;
+EXTERN char g_group_buffer[GRPBUF_RESERVE_SIZE];
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -73,6 +90,13 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
 int getgrbuf_r(gid_t gid, FAR const char *name, FAR const char *passwd,
                FAR struct group *grp, FAR char *buf, size_t buflen,
                FAR struct group **result);
+
+#ifdef CONFIG_LIBC_GROUP_FILE
+int grp_findby_name(FAR const char *gname, FAR struct group *entry,
+                    FAR char *buffer, size_t buflen);
+int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
+                   size_t buflen);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -69,10 +69,22 @@
 
 FAR struct group *getgrnam(FAR const char *name)
 {
+#ifdef CONFIG_LIBC_GROUP_FILE
+  int ret;
+
+  ret = grp_findby_name(name, &g_group, g_group_buffer, GRPBUF_RESERVE_SIZE);
+  if (ret != 1)
+    {
+      return NULL;
+    }
+
+  return &g_group;
+#else
   if (strcmp(name, "root"))
     {
       return NULL;
     }
 
   return getgrbuf(ROOT_GID, ROOT_NAME, ROOT_PASSWD);
+#endif
 }

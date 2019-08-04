@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_pwd.c
+ * libs/libc/grp/lib_getgrbuf.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -42,50 +42,48 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <pwd.h>
+#include <grp.h>
 
-#include "pwd/lib_pwd.h"
+#include "grp/lib_grp.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static FAR char *g_buf;
-static FAR struct passwd *g_pwd;
+static FAR struct group *g_grp;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpwbuf
+ * Name: getgrbuf
  *
  * Description:
- *   libc/grp internal helper function for getpwgid and getpwnam to allocate
- *   and setup a passwd structure once a matching entry has been found.
+ *   libc/grp internal helper function for getgrgid and getgrnam to allocate
+ *   and setup a group structure once a matching entry has been found.
  *
  * Input Parameters:
- *   uid   - Value to set the passwd structure's pw_uid field to.
- *   gid   - Value to set the passwd structure's pw_gid field to.
- *   name  - Value to set the passwd structure's pw_name field to.
- *   dir   - Value to set the passwd structure's pw_dir field to.
- *   shell - Value to set the passwd structure's pw_shell field to.
+ *   gid    - Value to set the group structure's gr_gid field to.
+ *   name   - Value to set the group structure's gr_name field to.
+ *   passwd - Value to set the group structure's passwd field to.
  *
  * Returned Value:
- *   A pointer to a statically allocated passwd structure, or NULL if an
+ *   A pointer to a statically allocated group structure, or NULL if an
  *   error occurs, in which case errno is set appropriately.
  *
  ****************************************************************************/
 
-FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
-                            FAR const char *dir, FAR const char *shell)
+FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
+                           FAR const char *passwd)
 {
-  FAR struct passwd *result;
+  FAR struct group *result;
   FAR char *newbuf;
   size_t buflen;
   int err;
 
-  buflen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
+  buflen = sizeof(FAR char **) + strlen(name) + 1 + strlen(passwd) + 1;
 
   newbuf = (FAR char *)realloc(g_buf, buflen);
 
@@ -97,18 +95,18 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
 
   g_buf = newbuf;
 
-  if (!g_pwd)
+  if (!g_grp)
     {
-      g_pwd = (FAR struct passwd *)malloc(sizeof(struct passwd));
+      g_grp = (FAR struct group *)malloc(sizeof(struct group));
     }
 
-  if (!g_pwd)
+  if (!g_grp)
     {
       err = ENOMEM;
       goto error;
     }
 
-  err = getpwbuf_r(uid, gid, name, dir, shell, g_pwd, g_buf, buflen, &result);
+  err = getgrbuf_r(gid, name, passwd, g_grp, g_buf, buflen, &result);
 
   if (err)
     {
@@ -118,67 +116,11 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
   return result;
 
 error:
-  free(g_pwd);
+  free(g_grp);
   free(g_buf);
-  g_pwd = NULL;
+  g_grp = NULL;
   g_buf = NULL;
   set_errno(err);
 
   return NULL;
-}
-
-/****************************************************************************
- * Name: getpwbuf_r
- *
- * Description:
- *   libc/grp internal helper function for getpwuid_r and getpwnam_r to setup
- *   the caller supplied 'pwd' and 'buf' buffers once a matching entry has
- *   been found.
- *
- * Input Parameters:
- *   uid    - Value to set the passwd structure's pw_uid field to.
- *   gid    - Value to set the passwd structure's pw_gid field to.
- *   name   - Value to set the passwd structure's pw_name field to.
- *   dir    - Value to set the passwd structure's pw_dir field to.
- *   shell  - Value to set the passwd structure's pw_shell field to.
- *   pwd    - Pointer to the space to store the retrieved passwd structure in.
- *   buf    - String fields pointed to by the passwd struct are stored here.
- *   buflen - The length of buf in bytes.
- *   result - Pointer to the resulting passwd struct, or NULL in case of fail.
- *
- * Returned Value:
- *   On success getpwgid_r returns 0 and sets *result to pwd.  In case of
- *   failure an error number is returned.
- *
- ****************************************************************************/
-
-int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
-               FAR const char *dir, FAR const char *shell,
-               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
-               FAR struct passwd **result)
-{
-  size_t reqdlen;
-
-  reqdlen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
-
-  if (buflen < reqdlen)
-    {
-      /* Insufficient buffer space supplied. */
-
-      *result = NULL;
-      return ERANGE;
-    }
-
-  pwd->pw_name  = buf;
-  pwd->pw_dir   = &buf[strlen(name) + 1];
-  pwd->pw_shell = &buf[strlen(name) + 1 + strlen(dir) + 1];
-
-  pwd->pw_uid = uid;
-  pwd->pw_gid = gid;
-  strcpy(pwd->pw_name, name);
-  strcpy(pwd->pw_dir, dir);
-  strcpy(pwd->pw_shell, shell);
-
-  *result = pwd;
-  return 0;
 }

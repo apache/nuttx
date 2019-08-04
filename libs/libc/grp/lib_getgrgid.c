@@ -68,10 +68,22 @@
 
 FAR struct group *getgrgid(gid_t gid)
 {
+#ifdef CONFIG_LIBC_GROUP_FILE
+  int ret;
+
+  ret = grp_findby_gid(gid, &g_group, g_group_buffer, GRPBUF_RESERVE_SIZE);
+  if (ret != 1)
+    {
+      return NULL;
+    }
+
+  return &g_group;
+#else
   if (gid != ROOT_GID)
     {
       return NULL;
     }
 
   return getgrbuf(ROOT_GID, ROOT_NAME, ROOT_PASSWD);
+#endif
 }

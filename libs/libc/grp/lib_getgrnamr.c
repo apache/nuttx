@@ -73,6 +73,19 @@
 int getgrnam_r(FAR const char *name, FAR struct group *grp, FAR char *buf,
                size_t buflen, FAR struct group **result)
 {
+#ifdef CONFIG_LIBC_GROUP_FILE
+  int ret;
+
+  ret = grp_findby_name(name, grp, buf, buflen);
+  if (ret != 1)
+    {
+      *result = NULL;
+      return ret < 0 ? -ret : 0;
+    }
+
+  *result = grp;
+  return 0;
+#else
   if (strcmp(name, ROOT_NAME))
     {
       /* The only known group is 'root', which has a gid of 0.  Thus, report
@@ -85,4 +98,5 @@ int getgrnam_r(FAR const char *name, FAR struct group *grp, FAR char *buf,
 
   return getgrbuf_r(ROOT_GID, ROOT_NAME, ROOT_PASSWD, grp, buf, buflen,
                     result);
+#endif
 }

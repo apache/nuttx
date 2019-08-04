@@ -68,10 +68,23 @@
 
 FAR struct passwd *getpwuid(uid_t uid)
 {
+#ifdef CONFIG_LIBC_PASSWD_FILE
+  int ret;
+
+  ret = pwd_findby_uid(uid, &g_passwd, g_passwd_buffer,
+                       CONFIG_LIBC_PASSWD_LINESIZE);
+  if (ret != 1)
+    {
+      return NULL;
+    }
+
+  return &g_passwd;
+#else
   if (uid != ROOT_UID)
     {
       return NULL;
     }
 
   return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL);
+#endif
 }

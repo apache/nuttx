@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnamr.c
+ * libs/libc/grp/lib_getgrbufr.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -39,64 +39,73 @@
 
 #include <nuttx/config.h>
 
-#include <pwd.h>
+#include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <grp.h>
 
-#include "pwd/lib_pwd.h"
+#include "grp/lib_grp.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpwnam_r
+ * Name: getgrbuf_r
  *
  * Description:
- *   The getpwnam_r() function searches the user database for an entry with a
- *   matching name and stores the retrieved passwd structure in the space
- *   pointed to by pwd.
+ *   libc/grp internal helper function for getgrgid_r and getgrnam_r to setup
+ *   the caller supplied 'grp' and 'buf' buffers once a matching entry has
+ *   been found.
  *
  * Input Parameters:
- *   name - The name to return a passwd structure for.
- *   pwd - Pointer to the space to store the retrieved passwd structure in.
- *   buf - The string fields pointed to by the passwd struct are stored here.
+ *   gid    - Value to set grp->gr_gid to.
+ *   name   - Value to set grp->gr_name to.
+ *   passwd - Value to set grp->passwd to.
+ *   grp    - Pointer to the space to store the retrieved group structure in.
+ *   buf    - String fields pointed to by the group struct are stored here.
  *   buflen - The length of buf in bytes.
- *   result - Pointer to the resulting passwd struct, or NULL in case of fail.
+ *   result - Pointer to the resulting group struct, or NULL in case of fail.
  *
  * Returned Value:
- *   On success getpwnam_r returns 0 and sets *result to pwd.  If no match
- *   is found, 0 is returned and *result is set to NULL.  In case of failure
- *   an error number is returned.
+ *   On success getgrgid_r returns 0 and sets *result to grp.  In case of
+ *   failure an error number is returned.
  *
  ****************************************************************************/
 
-int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
-               size_t buflen, FAR struct passwd **result)
+int getgrbuf_r(gid_t gid, FAR const char *name, FAR const char *passwd,
+               FAR struct group *grp, FAR char *buf, size_t buflen,
+               FAR struct group **result)
 {
-#ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
+  size_t reqdlen;
+  size_t padlen;
 
-  ret = pwd_findby_name(name, pwd, buf, buflen);
-  if (ret != 1)
+  /* In 'buf' a NULL pointer value will be stored, which must be naturally
+   * aligned, followed by the null terminated group name string and the null
+   * terminated passwd string 'x' (indicating 'no password').  Make sure
+   * sufficient buffer space was supplied by the caller.
+   */
+
+  padlen  = sizeof(FAR void *) - ((uintptr_t)buf % sizeof(FAR char *));
+  reqdlen = sizeof(FAR void *) + strlen(name) + 1 + strlen(passwd) + 1;
+
+  if (buflen < padlen + reqdlen)
     {
+      /* Insufficient buffer space supplied. */
+
       *result = NULL;
-      return ret < 0 ? -ret : 0;
+      return ERANGE;
     }
 
-  *result = pwd;
+  grp->gr_mem    = (FAR char **)&buf[padlen];
+  grp->gr_name   = &buf[padlen + sizeof(FAR char *)];
+  grp->gr_passwd = &buf[padlen + sizeof(FAR char *) + strlen(name) + 1];
+
+  strcpy(grp->gr_name, name);
+  strcpy(grp->gr_passwd, passwd);
+  grp->gr_gid  = gid;
+  *grp->gr_mem = NULL;
+
+  *result = grp;
   return 0;
-#else
-  if (strcmp(name, ROOT_NAME))
-    {
-      /* The only known user is 'root', which has a uid of 0.  Thus, report
-       * back that no match was found.
-       */
-
-      *result = NULL;
-      return 0;
-    }
-
-  return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL, pwd,
-                    buf, buflen, result);
-#endif
 }

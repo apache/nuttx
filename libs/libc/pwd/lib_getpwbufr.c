@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnamr.c
+ * libs/libc/pwd/lib_getpwbufr.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <pwd.h>
+#include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <pwd.h>
 
 #include "pwd/lib_pwd.h"
 
@@ -49,54 +51,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpwnam_r
+ * Name: getpwbuf_r
  *
  * Description:
- *   The getpwnam_r() function searches the user database for an entry with a
- *   matching name and stores the retrieved passwd structure in the space
- *   pointed to by pwd.
+ *   libc/grp internal helper function for getpwuid_r and getpwnam_r to setup
+ *   the caller supplied 'pwd' and 'buf' buffers once a matching entry has
+ *   been found.
  *
  * Input Parameters:
- *   name - The name to return a passwd structure for.
- *   pwd - Pointer to the space to store the retrieved passwd structure in.
- *   buf - The string fields pointed to by the passwd struct are stored here.
+ *   uid    - Value to set the passwd structure's pw_uid field to.
+ *   gid    - Value to set the passwd structure's pw_gid field to.
+ *   name   - Value to set the passwd structure's pw_name field to.
+ *   dir    - Value to set the passwd structure's pw_dir field to.
+ *   shell  - Value to set the passwd structure's pw_shell field to.
+ *   pwd    - Pointer to the space to store the retrieved passwd structure in.
+ *   buf    - String fields pointed to by the passwd struct are stored here.
  *   buflen - The length of buf in bytes.
  *   result - Pointer to the resulting passwd struct, or NULL in case of fail.
  *
  * Returned Value:
- *   On success getpwnam_r returns 0 and sets *result to pwd.  If no match
- *   is found, 0 is returned and *result is set to NULL.  In case of failure
- *   an error number is returned.
+ *   On success getpwgid_r returns 0 and sets *result to pwd.  In case of
+ *   failure an error number is returned.
  *
  ****************************************************************************/
 
-int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
-               size_t buflen, FAR struct passwd **result)
+int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
+               FAR const char *dir, FAR const char *shell,
+               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
+               FAR struct passwd **result)
 {
-#ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
+  size_t reqdlen;
 
-  ret = pwd_findby_name(name, pwd, buf, buflen);
-  if (ret != 1)
+  reqdlen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
+
+  if (buflen < reqdlen)
     {
+      /* Insufficient buffer space supplied. */
+
       *result = NULL;
-      return ret < 0 ? -ret : 0;
+      return ERANGE;
     }
+
+  pwd->pw_name  = buf;
+  pwd->pw_dir   = &buf[strlen(name) + 1];
+  pwd->pw_shell = &buf[strlen(name) + 1 + strlen(dir) + 1];
+
+  pwd->pw_uid = uid;
+  pwd->pw_gid = gid;
+  strcpy(pwd->pw_name, name);
+  strcpy(pwd->pw_dir, dir);
+  strcpy(pwd->pw_shell, shell);
 
   *result = pwd;
   return 0;
-#else
-  if (strcmp(name, ROOT_NAME))
-    {
-      /* The only known user is 'root', which has a uid of 0.  Thus, report
-       * back that no match was found.
-       */
-
-      *result = NULL;
-      return 0;
-    }
-
-  return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL, pwd,
-                    buf, buflen, result);
-#endif
 }

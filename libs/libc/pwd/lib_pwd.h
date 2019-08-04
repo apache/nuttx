@@ -66,6 +66,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_LIBC_PASSWD_FILE
+/* Data for non-reentrant group functions */
+
+EXTERN struct passwd g_passwd;
+EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -76,6 +83,13 @@ int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
                FAR const char *dir, FAR const char *shell,
                FAR struct passwd *pwd, FAR char *buf, size_t buflen,
                FAR struct passwd **result);
+
+#ifdef CONFIG_LIBC_PASSWD_FILE
+int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
+                    FAR char *buffer, size_t buflen);
+int pwd_findby_uid(uid_t uid, FAR struct passwd *entry, FAR char *buffer,
+                   size_t buflen);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

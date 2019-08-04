@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnamr.c
+ * libs/libc/grp/lib_grp_globals.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Michael Jung <mijung@gmx.net>
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,64 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <pwd.h>
-#include <string.h>
+#include "grp/lib_grp.h"
 
-#include "pwd/lib_pwd.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#ifdef CONFIG_LIBC_GROUP_FILE
 
 /****************************************************************************
- * Name: getpwnam_r
- *
- * Description:
- *   The getpwnam_r() function searches the user database for an entry with a
- *   matching name and stores the retrieved passwd structure in the space
- *   pointed to by pwd.
- *
- * Input Parameters:
- *   name - The name to return a passwd structure for.
- *   pwd - Pointer to the space to store the retrieved passwd structure in.
- *   buf - The string fields pointed to by the passwd struct are stored here.
- *   buflen - The length of buf in bytes.
- *   result - Pointer to the resulting passwd struct, or NULL in case of fail.
- *
- * Returned Value:
- *   On success getpwnam_r returns 0 and sets *result to pwd.  If no match
- *   is found, 0 is returned and *result is set to NULL.  In case of failure
- *   an error number is returned.
- *
+ * Public Data
  ****************************************************************************/
 
-int getpwnam_r(FAR const char *name, FAR struct passwd *pwd, FAR char *buf,
-               size_t buflen, FAR struct passwd **result)
-{
-#ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
+/* Data for non-reentrant group functions */
 
-  ret = pwd_findby_name(name, pwd, buf, buflen);
-  if (ret != 1)
-    {
-      *result = NULL;
-      return ret < 0 ? -ret : 0;
-    }
+struct group g_group;
+char g_group_buffer[GRPBUF_RESERVE_SIZE];
 
-  *result = pwd;
-  return 0;
-#else
-  if (strcmp(name, ROOT_NAME))
-    {
-      /* The only known user is 'root', which has a uid of 0.  Thus, report
-       * back that no match was found.
-       */
-
-      *result = NULL;
-      return 0;
-    }
-
-  return getpwbuf_r(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL, pwd,
-                    buf, buflen, result);
-#endif
-}
+#endif /* CONFIG_LIBC_GROUP_FILE */

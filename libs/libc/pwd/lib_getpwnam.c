@@ -69,10 +69,23 @@
 
 FAR struct passwd *getpwnam(FAR const char *name)
 {
+#ifdef CONFIG_LIBC_PASSWD_FILE
+  int ret;
+
+  ret = pwd_findby_name(name, &g_passwd, g_passwd_buffer,
+                        CONFIG_LIBC_PASSWD_LINESIZE);
+  if (ret != 1)
+    {
+      return NULL;
+    }
+
+  return &g_passwd;
+#else
   if (strcmp(name, ROOT_NAME))
     {
       return NULL;
     }
 
   return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_DIR, ROOT_SHELL);
+#endif
 }

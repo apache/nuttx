@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/grp/lib_grp.c
+ * libs/libc/pwd/lib_getpwbuf.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -42,48 +42,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <grp.h>
+#include <pwd.h>
 
-#include "grp/lib_grp.h"
+#include "pwd/lib_pwd.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static FAR char *g_buf;
-static FAR struct group *g_grp;
+static FAR struct passwd *g_pwd;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getgrbuf
+ * Name: getpwbuf
  *
  * Description:
- *   libc/grp internal helper function for getgrgid and getgrnam to allocate
- *   and setup a group structure once a matching entry has been found.
+ *   libc/grp internal helper function for getpwgid and getpwnam to allocate
+ *   and setup a passwd structure once a matching entry has been found.
  *
  * Input Parameters:
- *   gid    - Value to set the group structure's gr_gid field to.
- *   name   - Value to set the group structure's gr_name field to.
- *   passwd - Value to set the group structure's passwd field to.
+ *   uid   - Value to set the passwd structure's pw_uid field to.
+ *   gid   - Value to set the passwd structure's pw_gid field to.
+ *   name  - Value to set the passwd structure's pw_name field to.
+ *   dir   - Value to set the passwd structure's pw_dir field to.
+ *   shell - Value to set the passwd structure's pw_shell field to.
  *
  * Returned Value:
- *   A pointer to a statically allocated group structure, or NULL if an
+ *   A pointer to a statically allocated passwd structure, or NULL if an
  *   error occurs, in which case errno is set appropriately.
  *
  ****************************************************************************/
 
-FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
-                           FAR const char *passwd)
+FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
+                            FAR const char *dir, FAR const char *shell)
 {
-  FAR struct group *result;
+  FAR struct passwd *result;
   FAR char *newbuf;
   size_t buflen;
   int err;
 
-  buflen = sizeof(FAR char **) + strlen(name) + 1 + strlen(passwd) + 1;
+  buflen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
 
   newbuf = (FAR char *)realloc(g_buf, buflen);
 
@@ -95,18 +97,18 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
 
   g_buf = newbuf;
 
-  if (!g_grp)
+  if (!g_pwd)
     {
-      g_grp = (FAR struct group *)malloc(sizeof(struct group));
+      g_pwd = (FAR struct passwd *)malloc(sizeof(struct passwd));
     }
 
-  if (!g_grp)
+  if (!g_pwd)
     {
       err = ENOMEM;
       goto error;
     }
 
-  err = getgrbuf_r(gid, name, passwd, g_grp, g_buf, buflen, &result);
+  err = getpwbuf_r(uid, gid, name, dir, shell, g_pwd, g_buf, buflen, &result);
 
   if (err)
     {
@@ -116,71 +118,11 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
   return result;
 
 error:
-  free(g_grp);
+  free(g_pwd);
   free(g_buf);
-  g_grp = NULL;
+  g_pwd = NULL;
   g_buf = NULL;
   set_errno(err);
 
   return NULL;
-}
-
-/****************************************************************************
- * Name: getgrbuf_r
- *
- * Description:
- *   libc/grp internal helper function for getgrgid_r and getgrnam_r to setup
- *   the caller supplied 'grp' and 'buf' buffers once a matching entry has
- *   been found.
- *
- * Input Parameters:
- *   gid    - Value to set grp->gr_gid to.
- *   name   - Value to set grp->gr_name to.
- *   passwd - Value to set grp->passwd to.
- *   grp    - Pointer to the space to store the retrieved group structure in.
- *   buf    - String fields pointed to by the group struct are stored here.
- *   buflen - The length of buf in bytes.
- *   result - Pointer to the resulting group struct, or NULL in case of fail.
- *
- * Returned Value:
- *   On success getgrgid_r returns 0 and sets *result to grp.  In case of
- *   failure an error number is returned.
- *
- ****************************************************************************/
-
-int getgrbuf_r(gid_t gid, FAR const char *name, FAR const char *passwd,
-               FAR struct group *grp, FAR char *buf, size_t buflen,
-               FAR struct group **result)
-{
-  size_t reqdlen;
-  size_t padlen;
-
-  /* In 'buf' a NULL pointer value will be stored, which must be naturally
-   * aligned, followed by the null terminated group name string and the null
-   * terminated passwd string 'x' (indicating 'no password').  Make sure
-   * sufficient buffer space was supplied by the caller.
-   */
-
-  padlen  = sizeof(FAR void *) - ((uintptr_t)buf % sizeof(FAR char *));
-  reqdlen = sizeof(FAR void *) + strlen(name) + 1 + strlen(passwd) + 1;
-
-  if (buflen < padlen + reqdlen)
-    {
-      /* Insufficient buffer space supplied. */
-
-      *result = NULL;
-      return ERANGE;
-    }
-
-  grp->gr_mem    = (FAR char **)&buf[padlen];
-  grp->gr_name   = &buf[padlen + sizeof(FAR char *)];
-  grp->gr_passwd = &buf[padlen + sizeof(FAR char *) + strlen(name) + 1];
-
-  strcpy(grp->gr_name, name);
-  strcpy(grp->gr_passwd, passwd);
-  grp->gr_gid  = gid;
-  *grp->gr_mem = NULL;
-
-  *result = grp;
-  return 0;
 }
