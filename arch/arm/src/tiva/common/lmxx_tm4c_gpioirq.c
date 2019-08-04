@@ -237,6 +237,14 @@ static int gpioport2irq(uint8_t port)
         }
         break;
 #endif
+
+#ifdef CONFIG_TIVA_GPIOT_IRQS
+      case (GPIO_PORTT >> GPIO_PORT_SHIFT):
+        {
+          irq = TIVA_IRQ_GPIOT;
+        }
+        break;
+#endif
     }
 
   return irq;
