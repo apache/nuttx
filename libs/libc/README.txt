@@ -43,6 +43,7 @@ we have:
   modlib    - Part of module and shared library logic: nuttx/lib/modlib.h
   net       - Various network-related header files: netinet/ether.h, arpa/inet.h
   pthread   - pthread.h
+  pwd       - pwd.h
   queue     - queue.h
   sched     - sched.h
   semaphore - semaphore.h

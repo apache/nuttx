@@ -72,6 +72,7 @@ include modlib/Make.defs
 include net/Make.defs
 include netdb/Make.defs
 include pthread/Make.defs
+include pwd/Make.defs
 include queue/Make.defs
 include sched/Make.defs
 include semaphore/Make.defs
