@@ -193,9 +193,9 @@ static void up_notify(FAR struct up_dev_s *priv)
       nxsem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for touchscreen data to become availabe,
+  /* If there are threads waiting on poll() for touchscreen data to become available,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
+   * do not know what they are going to do.  If they all try to read the data,
    * then some make end up blocking after all.
    */
 

@@ -93,7 +93,7 @@
 
 /* Beginning (BOTTOM/BASE) and End+1 (TOP) of the IDLE stack.
  *
- * The IDLE stack is the stack that is used during intialization and,
+ * The IDLE stack is the stack that is used during initialization and,
  * eventually, becomes the stack of the IDLE task when initialization
  * is complete.
  *

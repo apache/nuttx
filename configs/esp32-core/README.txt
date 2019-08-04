@@ -703,7 +703,7 @@ Things to Do
 
   1. There is no support for an interrupt stack yet.
 
-  2. There is no clock intialization logic in place.  This depends on logic in
+  2. There is no clock initialization logic in place.  This depends on logic in
      Expressif libriaries.  The board comes up using that basic 40 Mhz crystal
      for clocking.  Getting to 80 MHz will require clocking initialization in
      esp32_clockconfig.c.

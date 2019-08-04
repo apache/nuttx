@@ -182,7 +182,7 @@ void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler);
  *
  *   NOTE: In most architectures, LED initialization() is called from
  *   board-specific initialization and should, therefore, have the name
- *   <arch>_led_intialize().  But there are a few architectures where the
+ *   <arch>_led_initialize().  But there are a few architectures where the
  *   LED initialization function is still called from common chip
  *   architecture logic.  This interface is not, however, a common board
  *   interface in any event and the name board_led_initialization is

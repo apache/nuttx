@@ -1952,7 +1952,7 @@ FAR struct can_dev_s *sam_caninitialize(int port)
       dev->cd_ops       = &g_canops;
       dev->cd_priv      = (FAR void *)priv;
 
-      /* And put the hardware in the intial state */
+      /* And put the hardware in the initial state */
 
       can_reset(dev);
     }

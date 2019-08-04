@@ -358,7 +358,7 @@ LEDs
 
     Stuck in the OFF state suggests that that the system never completed
     initialization;  Stuck in the ON state would indicated that the system
-    intialialized, but is not takint interrupts.
+    initialized, but is not taking interrupts.
 
   - If a fatal assertion or a fatal unhandled exception occurs, the LED will flash
     strongly as a slow, 2Hz rate.

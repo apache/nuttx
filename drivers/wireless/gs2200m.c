@@ -2905,7 +2905,7 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
       dq_init(&dev->pkt_q[i]);
     }
 
-  /* Intialize SPI driver. */
+  /* Initialize SPI driver. */
 
   ret = gs2200m_spi_init(dev);
 

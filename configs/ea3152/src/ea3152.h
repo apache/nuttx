@@ -90,14 +90,14 @@ void lpc31_meminitialize(void);
 #endif
 
 /************************************************************************************
- * Name: lpc31_spidev_intialize
+ * Name: lpc31_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EA3152 board.
  *
  ************************************************************************************/
 
-void weak_function lpc31_spidev_intialize(void);
+void weak_function lpc31_spidev_initialize(void);
 
 /************************************************************************************
  * Name: lpc31_usbinitialize

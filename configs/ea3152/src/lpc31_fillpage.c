@@ -507,7 +507,7 @@ void weak_function lpc31_pginitialize(void)
    *
    * - Initialize and configure a mass storage device to support on-demand paging.
    *   This might be, perhaps an SD card or NAND memory.  An SPI FLASH would probably
-   *   already have been configured by lpc31_spidev_intialize(void);
+   *   already have been configured by lpc31_spidev_initialize(void);
    * - Set up resources to support up_fillpage() operation.  For example, perhaps the
    *   the text image is stored in a named binary file.  In this case, the virtual
    *   text addresses might map to offsets into that file.

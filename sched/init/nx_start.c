@@ -543,7 +543,7 @@ void nx_start(void)
       g_idleargv[cpu][1]  = NULL;
       g_idletcb[cpu].argv = &g_idleargv[cpu][0];
 
-      /* Then add the idle task's TCB to the head of the corrent ready to
+      /* Then add the idle task's TCB to the head of the current ready to
        * run list.
        */
 
@@ -855,7 +855,7 @@ void nx_start(void)
        * possible because if the IDLE thread is running, no other task is!
        *
        * WARNING: This logic could have undesirable side-effects if priority
-       * inheritance is enabled.  Imaginee the possible issues if the
+       * inheritance is enabled.  Imagine the possible issues if the
        * priority of the IDLE thread were to get boosted!  Moral: If you
        * use priority inheritance, then you should also enable the work
        * queue so that is done in a safer context.
