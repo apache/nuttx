@@ -486,7 +486,7 @@ static void config_search(const char *boarddir)
 
   parent = strdup(g_buffer);
 
-  /* Vist each entry in the directory */
+  /* Visit each entry in the directory */
 
   while ((dp = readdir (dir)) != NULL)
     {
@@ -498,7 +498,8 @@ static void config_search(const char *boarddir)
         }
 
       /* Get a properly terminated copy of d_name (if d_name is long it may
-       * not include a NUL terminator.\ */
+       * not include a NUL terminator.
+       */
 
       child = strndup(dp->d_name, NAME_MAX);
 
@@ -513,7 +514,7 @@ static void config_search(const char *boarddir)
           continue;
         }
 
-      /* If it is a directory, the recurse */
+      /* If it is a directory, then recurse */
 
       if (S_ISDIR(buf.st_mode))
         {
@@ -532,7 +533,32 @@ static void config_search(const char *boarddir)
 
       else if (S_ISREG(buf.st_mode) && strcmp("defconfig", child) == 0)
         {
-          fprintf(stderr, "  %s\n", boarddir);
+          char *boardname;
+          char *configname;
+          char *delim;
+
+          /* Get the board directory at the beginning of the 'boarddir' path. */
+
+          strncpy(g_buffer, boarddir, BUFFER_SIZE);
+          boardname = g_buffer;
+          delim   = strchr(g_buffer, '/');
+          if (delim == NULL)
+            {
+              configname = "";
+            }
+          else
+            {
+              *delim     = '\0';
+              configname = delim + 1;
+
+              delim = strrchr(configname, '/');
+              if (delim != NULL)
+                {
+                  configname = delim + 1;
+                }
+            }
+
+          fprintf(stderr, "  %s/%s\n", boardname, configname);
         }
 
       free(child);
@@ -575,7 +601,7 @@ static void check_configdir(void)
 
   g_configpath = strdup(g_buffer);
 
-  /* Get and verfy the path to the scripts directory:
+  /* Get and verify the path to the scripts directory:
    * boards/<boarddir>/scripts
    */
 

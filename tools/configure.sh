@@ -141,7 +141,7 @@ if [ ! -d "${configpath}" ]; then
     echo "Select one of the following options for <board-name>:"
     configlist=`find ${TOPDIR}/boards -name defconfig`
     for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
+      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g" | sed -e "s,configs/,,g"`
       echo "  ${config}"
     done
     echo ""
