@@ -99,7 +99,7 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm7tdmi-defconfig-4.3.3 .config
+  5. cp boards/arm7tdmi-defconfig-4.3.3 .config
 
   6. make oldconfig
 
@@ -108,7 +108,7 @@ NuttX buildroot Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
@@ -225,7 +225,7 @@ ARM/LPC214X-specific Configuration Options
 
 	   CONFIG_ARCH_CHIP_LPC214X
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+	CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
 	   CONFIG_ARCH_BOARD=mcu123-lpc214x

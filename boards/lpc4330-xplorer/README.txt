@@ -269,7 +269,7 @@ Code Red IDE/Tools
 
   The LPC18xx/LPC43xx debug driver can also be used to program the LPC43xx
   flash directly from the command line.  The script flash.sh that may be
-  found in the configs/lpc4330-xplorer/scripts directory can do that with
+  found in the boards/lpc4330-xplorer/scripts directory can do that with
   a single command line command.
 
   Executing from SPIFI
@@ -378,7 +378,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
+Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support
@@ -425,7 +425,7 @@ LPC4330-Xplorer Configuration Options
 
        CONFIG_ARCH_CHIP_LPC4330=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=lpc4330-xplorer (for the LPC4330-Xplorer board)

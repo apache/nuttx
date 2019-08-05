@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/launchxl-tms5700/scripts/flash-sram.ld
+ * boards/launchxl-tms5700/scripts/flash-sram.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -274,7 +274,7 @@ NuttX EABI "buildroot" Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
+  5. cp boards/cortexm3-eabi-defconfig-4.6.3 .config
 
   6. make oldconfig
 
@@ -283,7 +283,7 @@ NuttX EABI "buildroot" Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
@@ -315,7 +315,7 @@ NXFLAT Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm3-defconfig-nxflat .config
+  5. cp boards/cortexm3-defconfig-nxflat .config
 
   6. make oldconfig
 

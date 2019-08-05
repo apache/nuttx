@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p407/scripts/memory.ld
+ * boards/olimex-stm32-p407/scripts/memory.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
  * the 0x0800:0000 address range.
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
- * FLASH and 8Kb of SRAM.  (See configs/stm32f4discovery/scripts/kernel-space.ld).
+ * FLASH and 8Kb of SRAM.  (See boards/stm32f4discovery/scripts/kernel-space.ld).
  * Allowing additional memory permitis configuring debug instrumentation to
  * be added to the kernel space without overflowing the partition.  This could
  * just as easily be set to 256Kb or even 512Kb.

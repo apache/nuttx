@@ -181,9 +181,9 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm-defconfig .config
+  5. cp boards/arm-defconfig .config
      or
-     cp configs/arm7tdmi-defconfig-4.3.3 .config  (Last tested with this toolchain)
+     cp boards/arm7tdmi-defconfig-4.3.3 .config  (Last tested with this toolchain)
 
   6. make oldconfig
 

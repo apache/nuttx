@@ -561,7 +561,7 @@ Arduino DUE-specific Configuration Options
     CONFIG_ARCH_CHIP_SAM3X
     CONFIG_ARCH_CHIP_ATSAM3X8E
 
-  CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and
+  CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
   hence, the board that supports the particular chip or SoC.
 
     CONFIG_ARCH_BOARD=arduino-due (for the Arduino Due development board)

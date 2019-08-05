@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l452re/scripts/l452re-flash.ld
+ * boards/nucleo-l452re/scripts/l452re-flash.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

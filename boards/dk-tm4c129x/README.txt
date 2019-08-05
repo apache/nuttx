@@ -40,7 +40,7 @@ Using OpenOCD and GDB with ICDI
 
   Building OpenOCD under Cygwin:
 
-    Refer to configs/olimex-lpc1766stk/README.txt
+    Refer to boards/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 
@@ -56,7 +56,7 @@ Using OpenOCD and GDB with ICDI
     I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      configs/dk-tm4c129x/tools/dk-tm4c129x.cfg
+      boards/dk-tm4c129x/tools/dk-tm4c129x.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -74,7 +74,7 @@ Using OpenOCD and GDB with ICDI
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      configs/dk-tm4c129x/tools/dk-tm4c129x.cfg
+      boards/dk-tm4c129x/tools/dk-tm4c129x.cfg
 
   Starting OpenOCD
 
@@ -84,7 +84,7 @@ Using OpenOCD and GDB with ICDI
       oocd.sh $PWD
 
     Assuming that you have included the path to the oocd.sh script,
-    configs/dk-tm4c129x/tools, in PATH variable.
+    boards/dk-tm4c129x/tools, in PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
     some environments (sudo).
@@ -513,7 +513,7 @@ Temperature Sensor
   More complex temperature sensor operations are also available.  See the IOCTL
   commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
   of the tiva_tmp100_initialize() and tiva_tmp100_attach() interfaces in the
-  arch/board/board.h file (sames as configs/dk-tm4c129x/include/board.h).
+  arch/board/board.h file (sames as boards/dk-tm4c129x/include/board.h).
 
   NSH Command Line Application
   ----------------------------
@@ -562,7 +562,7 @@ DK-TM4129X Configuration Options
 
        CONFIG_ARCH_CHIP_TM4C129XNC
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=dk-tm4c129x (for the DK-TM4129X)

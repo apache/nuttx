@@ -9,7 +9,7 @@ DK-TM4C129X
 ===========
 
   This board configuration derives from the DK-T4C129X.  Refer to the README
-  file at nuttx/configs/dk-tm4c129x for additional information that may be
+  file at nuttx/boards/dk-tm4c129x for additional information that may be
   relevant to this board as well.
 
 Serial Console

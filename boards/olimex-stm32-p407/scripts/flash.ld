@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p407/scripts/flash.ld
+ * boards/olimex-stm32-p407/scripts/flash.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

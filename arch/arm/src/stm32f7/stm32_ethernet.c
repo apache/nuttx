@@ -90,7 +90,7 @@
 #define MEMORY_SYNC() do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* Configuration ************************************************************/
-/* See configs/stm3240g-eval/README.txt for an explanation of the configuration
+/* See boards/stm3240g-eval/README.txt for an explanation of the configuration
  * settings.
  */
 

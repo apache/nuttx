@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ntosd-dm320/scripts/sdram.ld
+ * boards/ntosd-dm320/scripts/sdram.ld
  *
  *   Copyright (C) 2007, 2008, 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

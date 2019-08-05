@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4088-quickstart/scripts/memory.ld
+ * boards/lpc4088-quickstart/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 256KB of
  * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
- * also configs/lpc4088-quickstart/scripts/kernel-space.ld); 256KB is probably much
+ * also boards/lpc4088-quickstart/scripts/kernel-space.ld); 256KB is probably much
  * more than is needed by the RTOS!  That size is selected only because it
  * is available due to alignment issues for the user space FLASH memory.
  *

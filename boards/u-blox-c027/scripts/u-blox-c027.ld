@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/u-blox-c027/scripts/u-blox-c027.ld
+ * boards/u-blox-c027/scripts/u-blox-c027.ld
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

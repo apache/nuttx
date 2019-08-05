@@ -230,7 +230,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Building OpenOCD under Cygwin:
 
-    Refer to configs/olimex-lpc1766stk/README.txt
+    Refer to boards/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 
@@ -258,7 +258,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      configs/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
+      boards/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -276,7 +276,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      configs/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
+      boards/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
 
   Starting OpenOCD
 
@@ -285,7 +285,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       oocd.sh $PWD
 
-    The relative path to the oocd.sh script is configs/tm4c123g-launchpad/tools.
+    The relative path to the oocd.sh script is boards/tm4c123g-launchpad/tools.
     You may want to add that path to you PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
@@ -333,12 +333,12 @@ LEDs
   The TM4C123G has a single RGB LED.  If CONFIG_ARCH_LEDS is defined, then
   support for the LaunchPad LEDs will be included in the build.  See:
 
-  - configs/tm4c123g-launchpad/include/board.h - Defines LED constants, types and
+  - boards/tm4c123g-launchpad/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/tm4c123g-launchpad/src/tm4c123g-launchpad.h - GPIO settings for the LEDs.
+  - boards/tm4c123g-launchpad/src/tm4c123g-launchpad.h - GPIO settings for the LEDs.
 
-  - configs/tm4c123g-launchpad/src/up_leds.c - LED control logic.
+  - boards/tm4c123g-launchpad/src/up_leds.c - LED control logic.
 
   OFF:
   - OFF means that the OS is still initializing. Initialization is very fast so
@@ -469,7 +469,7 @@ TM4C123G LaunchPad Configuration Options
 
        CONFIG_ARCH_CHIP_TM4C123GH6PM
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=tm4c123g-launchpad (for the TM4C123G LaunchPad)

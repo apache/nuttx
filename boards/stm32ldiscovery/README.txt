@@ -321,7 +321,7 @@ STM32L-Discovery-specific Configuration Options
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=stm32fldiscovery (for the STM32L-Discovery development board)

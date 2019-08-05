@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32vldiscovery/scripts/stm32vldiscovery.ld
+ * boards/stm32vldiscovery/scripts/stm32vldiscovery.ld
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

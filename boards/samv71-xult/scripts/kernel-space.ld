@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samv71-xult/scripts/kernel-space.ld
+ * boards/samv71-xult/scripts/kernel-space.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -128,7 +128,7 @@ Buildroot Instructions
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/i486-defconfig-4.3.3 .config
+  5. cp boards/i486-defconfig-4.3.3 .config
 
   6. make oldconfig
 
@@ -137,7 +137,7 @@ Buildroot Instructions
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you
   run into problems building the toolchain for Cygwin under Windows.
 

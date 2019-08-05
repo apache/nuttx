@@ -94,7 +94,7 @@ Stellaris MDL-S2E Reference Design Configuration Options
 
        CONFIG_ARCH_CHIP_LM3S6432
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=lm3s6432-s2e (for the Stellaris MDL-S2E Reference Design)

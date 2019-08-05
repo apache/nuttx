@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f072-discovery/scripts/flash.ld
+ * boards/stm32f072-discovery/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

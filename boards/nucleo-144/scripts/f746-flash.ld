@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-144/scripts/f746-flash.ld
+ * boards/nucleo-144/scripts/f746-flash.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

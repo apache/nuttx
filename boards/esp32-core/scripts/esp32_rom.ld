@@ -1163,7 +1163,7 @@ PROVIDE ( r_lld_pdu_tx_prog = 0x4004b120 );
 PROVIDE ( r_lld_pdu_tx_push = 0x4004b080 );
 PROVIDE ( r_lld_ral_renew_req = 0x4004a73c );
 /****************************************************************************
- * configs/elf32-core/scripts/esp32_rom.ld
+ * boards/elf32-core/scripts/esp32_rom.ld
  ****************************************************************************/
 
 PROVIDE ( r_lld_scan_start = 0x40048ee0 );

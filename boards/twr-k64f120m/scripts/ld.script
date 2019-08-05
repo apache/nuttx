@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/twr-k64f120m/scripts/ld.script
+ * boards/twr-k64f120m/scripts/ld.script
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

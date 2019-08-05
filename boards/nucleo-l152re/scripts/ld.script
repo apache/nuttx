@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l152re/scripts/ld.script
+ * boards/nucleo-l152re/scripts/ld.script
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

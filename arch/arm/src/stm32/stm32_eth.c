@@ -84,7 +84,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* See configs/stm3240g-eval/README.txt for an explanation of the configuration
+/* See boards/stm3240g-eval/README.txt for an explanation of the configuration
  * settings.
  */
 

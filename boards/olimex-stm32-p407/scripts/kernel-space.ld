@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-stm32-p407/scripts/kernel-space.ld
+ * boards/olimex-stm32-p407/scripts/kernel-space.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

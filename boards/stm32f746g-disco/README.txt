@@ -200,7 +200,7 @@ STM32F746G-DISCO-specific Configuration Options
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs/ subdirectory and,
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and,
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=stm32f746g-disco (for the STM32F746G-DISCO development board)

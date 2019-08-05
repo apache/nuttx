@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/photon/scripts/photon_dfu.ld
+ * boards/photon/scripts/photon_dfu.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *

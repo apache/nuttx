@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f072rb/scripts/flash.ld
+ * boards/nucleo-f072rb/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/simxrt1060-evk/scripts/user-space.ld
+ * boards/simxrt1060-evk/scripts/user-space.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

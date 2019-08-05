@@ -1,5 +1,5 @@
 /****************************************************************************/
-/* configs/z8encore000zco/ostest/ostest.linkcmd                             */
+/* boards/z8encore000zco/ostest/ostest.linkcmd                             */
 /*                                                                          */
 /*   Copyright (C) 2008 Gregory Nutt. All rights reserved.                  */
 /*   Author: Gregory Nutt <gnutt@nuttx.org>                          */

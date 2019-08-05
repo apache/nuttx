@@ -1,5 +1,5 @@
 /**************************************************************************************
- * configs/amber/scripts/amber.ld
+ * boards/amber/scripts/amber.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

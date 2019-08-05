@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/tms570ls31x-usb-kit/scripts/flash-sram.ld
+ * boards/tms570ls31x-usb-kit/scripts/flash-sram.ld
  *
  *   Copyright (C) 2017 Ivan Ucherdzhiev. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4370-link2/scripts/spificonfig.ld
+ * boards/lpc4370-link2/scripts/spificonfig.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

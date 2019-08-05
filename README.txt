@@ -679,7 +679,7 @@ Instantiating "Canned" Configurations
 
     "Canned" NuttX configuration files are retained in:
 
-      configs/<board-name>/<config-dir>
+      boards/<board-name>/<config-dir>
 
     Where <board-name> is the name of your development board and <config-dir>
     is the name of the sub-directory containing a specific configuration for
@@ -706,8 +706,8 @@ Instantiating "Canned" Configurations
 
     General information about configuring NuttX can be found in:
 
-     {TOPDIR}/configs/README.txt
-     {TOPDIR}/configs/<board-name>/README.txt
+     {TOPDIR}/boards/README.txt
+     {TOPDIR}/boards/<board-name>/README.txt
 
   The Hidden Configuration Scripts:
 
@@ -720,9 +720,9 @@ Instantiating "Canned" Configurations
       Configuring NuttX requires only copying two files from the
       <config-dir> to the directory where you installed NuttX (TOPDIR):
 
-        Copy configs/<board-name>/<config-dir>/Make.def to{TOPDIR}/Make.defs
+        Copy boards/<board-name>/<config-dir>/Make.def to{TOPDIR}/Make.defs
         OR
-        Copy configs/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
+        Copy boards/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
 
       Make.defs describes the rules needed by your tool chain to compile
       and link code.  You may need to modify this file to match the
@@ -731,7 +731,7 @@ Instantiating "Canned" Configurations
       it may use a common Make.defs file for the board in the scripts/
       directory.  The first takes precedence.
 
-        Copy configs/<board-name>/<config-dir>/defconfig to{TOPDIR}/.config
+        Copy boards/<board-name>/<config-dir>/defconfig to{TOPDIR}/.config
 
       The defconfig file holds the actual build configuration.  This
       file is included by all other make files to determine what is
@@ -1221,7 +1221,7 @@ Cross-Development Toolchains
 
   In order to build NuttX for your board, you will have to obtain a cross-
   compiler to generate code for your target CPU.  For each board,
-  configuration, there is a README.txt file (at configs/<board-name>/README.txt).
+  configuration, there is a README.txt file (at boards/<board-name>/README.txt).
   That README file contains suggestions and information about appropriate
   tools and development environments for use with your board.
 
@@ -1234,11 +1234,11 @@ NuttX Buildroot Toolchain
   For many configurations, a DIY set of tools is available for NuttX.  These
   tools can be downloaded from the NuttX Bitbucket.org file repository.  After
   unpacking the buildroot tarball, you can find instructions for building
-  the tools in the buildroot/configs/README.txt file.
+  the tools in the buildroot/boards/README.txt file.
 
   Check the README.txt file in the configuration directory for your board
   to see if you can use the buildroot toolchain with your board (this
-  README.txt file is located in configs/<board-name>/README.txt).
+  README.txt file is located in boards/<board-name>/README.txt).
 
   This toolchain is available for both the Linux and Cygwin development
   environments.
@@ -1312,7 +1312,7 @@ Building
     make
 
   At least one configuration (eagle100) requires additional command line
-  arguments on the make command.  Read{TOPDIR}/configs/<board-name>/README.txt
+  arguments on the make command.  Read{TOPDIR}/boards/<board-name>/README.txt
   to see if that applies to your target.
 
 Re-building
@@ -1754,7 +1754,7 @@ nuttx/
  |- binfmt/
  |   `-libpcode/
  |       `-README.txt
- |- configs/
+ |- boards/
  |   |- amber/
  |   |   `- README.txt
  |   |- arduino-mega2560/

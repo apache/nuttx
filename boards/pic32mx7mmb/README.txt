@@ -1,4 +1,4 @@
-configs/pic32mx7mmb README
+boards/pic32mx7mmb README
 ===============================
 
 This README file discusses the port of NuttX to the  Mikroelektronika PIC32MX7
@@ -375,7 +375,7 @@ PIC32MX Configuration Options
 
        CONFIG_ARCH_CHIP_PIC32MX795F512L=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=pic32mx7mmb

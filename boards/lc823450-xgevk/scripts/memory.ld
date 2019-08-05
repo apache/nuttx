@@ -1,10 +1,10 @@
 /****************************************************************************
- * configs/lc823450-xgevk/scripts/memory.ld
+ * boards/lc823450-xgevk/scripts/memory.ld
  *
  *   Copyright 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
- * Based on configs/stm32f4discovery/scripts/memory.ld
+ * Based on boards/stm32f4discovery/scripts/memory.ld
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/or1k/scripts/ram.ld
+ * boards/or1k/scripts/ram.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

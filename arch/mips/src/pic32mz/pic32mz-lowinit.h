@@ -87,7 +87,7 @@ void pic32mz_lowinit(void);
  *
  * Description:
  *   This function must be provided by the board-specific logic in the  directory
- *   <nuttx>/configs/<board-name>/pic32mz_boot.c.
+ *   <nuttx>/boards/<board-name>/pic32mz_boot.c.
  *
  ************************************************************************************/
 

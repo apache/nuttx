@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f3discovery/scripts/gnu-elf.ld
+ * boards/stm32f3discovery/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

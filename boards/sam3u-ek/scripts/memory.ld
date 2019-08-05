@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/scripts/user-space.ld
+ * boards/sam3u-ek/scripts/user-space.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 64KB of
  * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).
+ * also boards/open1788/scripts/kernel-space.ld).
  *
  * Alignment of the user space FLASH partition is a critical factor: The
  * user space FLASH partition will be spanned with a single region of size

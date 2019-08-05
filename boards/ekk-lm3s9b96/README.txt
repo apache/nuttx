@@ -98,7 +98,7 @@ Stellaris EKK-LM3S9B96 Evaluation Kit Configuration Options
 
        CONFIG_ARCH_CHIP_LM3S9B96
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=ekk-lm3s9b96 (for the Stellaris EKK-LM3S9b96 Evaluation Kit)

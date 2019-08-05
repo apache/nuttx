@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sabre-6quad/scripts/dramboot.ld
+ * boards/sabre-6quad/scripts/dramboot.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

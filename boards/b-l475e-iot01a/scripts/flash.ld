@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/b-l475e-iot01a/scripts/flash.ld
+ * boards/b-l475e-iot01a/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *

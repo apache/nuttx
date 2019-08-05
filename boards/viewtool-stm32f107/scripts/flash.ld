@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/viewtool-stm32f107/scripts/flash.ld
+ * boards/viewtool-stm32f107/scripts/flash.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

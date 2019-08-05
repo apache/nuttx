@@ -27,7 +27,7 @@ Contents
 STATUS/ISSUES
 =============
 
-    1. See configs/samd20-xplained/README.txt.  This port derives from the
+    1. See boards/samd20-xplained/README.txt.  This port derives from the
        SAMD20 Xplained board board and all issues there should apply.
 
     2. 2015-07-06:  The basic NSH configuration is working properly, but
@@ -365,7 +365,7 @@ SAMD21 Xplained Pro-specific Configuration Options
        CONFIG_ARCH_CHIP_SAMD21
        CONFIG_ARCH_CHIP_ATSAMD21J18
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=samd21-xplained (for the SAMD21 Xplained Pro development board)

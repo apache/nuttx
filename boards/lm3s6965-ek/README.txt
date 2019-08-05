@@ -103,7 +103,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Building OpenOCD under Cygwin:
 
-    Refer to configs/olimex-lpc1766stk/README.txt
+    Refer to boards/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 
@@ -114,7 +114,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the on-board FT2232 JTAG/SWD/SWO interface.  OpenOCD
     requires a configuration file.  I keep the one I used last here:
 
-      configs/lm3s6965-ek/tools/lm3s6965-ek.cfg
+      boards/lm3s6965-ek/tools/lm3s6965-ek.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -132,13 +132,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      configs/lm3s6965-ek/tools/lm3s6965-ek.cfg
+      boards/lm3s6965-ek/tools/lm3s6965-ek.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      configs/lm3s6965-ek/tools/oocd.sh $PWD
+      boards/lm3s6965-ek/tools/oocd.sh $PWD
 
   Connecting GDB
 
@@ -241,7 +241,7 @@ Stellaris LM3S6965 Evaluation Kit Configuration Options
 
        CONFIG_ARCH_CHIP_LM3S6965
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=lm3s6965-ek (for the Stellaris LM3S6965 Evaluation Kit)

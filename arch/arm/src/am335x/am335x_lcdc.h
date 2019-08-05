@@ -196,7 +196,7 @@ struct am335x_panel_info_s
  *   1b. The framebuffer character driver is initialized and calls
  *       up_fbinitialize().
  *   2.  The function up_fbinitialize() must reside in board specific logic
- *       under configs/.  It must create the instance of struct
+ *       under boards/.  It must create the instance of struct
  *       am335x_panel_info_s and call this function with that instance.
  *
  *   For a directly connected LCD, either (1) the struct am335x_panel_info_s

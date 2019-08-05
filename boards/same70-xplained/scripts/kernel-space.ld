@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/same70-xplained/scripts/kernel-space.ld
+ * boards/same70-xplained/scripts/kernel-space.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -91,7 +91,7 @@ Eagle100-specific Configuration Options
 
        CONFIG_ARCH_CHIP_LM3S6918
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=eagle100 (for the MicroMint Eagle-100 development board)

@@ -193,7 +193,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
+Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support
@@ -343,7 +343,7 @@ STM3240G-EVAL-specific Configuration Options
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=stm3240g_eval (for the STM3240G-EVAL development board)

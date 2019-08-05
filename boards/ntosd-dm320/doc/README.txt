@@ -43,7 +43,7 @@ General instructions.
 5. Build the toolchain:
 
   cd <directory>/buildroot
-  cp configs/c5471-defconfig .config
+  cp boards/c5471-defconfig .config
   make oldconfig
   make
 

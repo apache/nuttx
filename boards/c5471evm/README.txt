@@ -21,7 +21,7 @@ Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm-defconfig .config
+  5. cp boards/arm-defconfig .config
 
   6. make oldconfig
 
@@ -63,7 +63,7 @@ ARM/C5471-specific Configuration Options
 
 	   CONFIG_ARCH_CHIP_C5471
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+	CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
 	   CONFIG_ARCH_BOARD=c5471evm (for the Spectrum Digital C5471 EVM)

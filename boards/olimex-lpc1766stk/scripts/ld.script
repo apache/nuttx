@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-lpc1766stk/scripts/ld.script
+ * boards/olimex-lpc1766stk/scripts/ld.script
  *
  *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

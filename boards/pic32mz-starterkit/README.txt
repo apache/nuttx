@@ -1,4 +1,4 @@
-configs/pic32mz-starterkit README
+boards/pic32mz-starterkit README
 ===============================
 
 This README file discusses the port of NuttX to the Microchip PIC32MZ
@@ -138,7 +138,7 @@ Tool Issues
   C:\pinguino-11\compilers\p32\bin\p32-ld.exe: target elf32-tradlittlemips not found
 
   This is due to linker differences in the toolchains.  The linker script
-  at configs/pic32mz-starterkit has:
+  at boards/pic32mz-starterkit has:
 
     OUTPUT_FORMAT("elf32-tradlittlemips")
 
@@ -246,7 +246,7 @@ Serial Console
   The default serial configuration here in these configurations is UART1
   using RPC14 and RPB3.  That UART selection can be change by running 'make
   menuconfig'.  The UART pin selections would need to be changed by editing
-  configs/pc32mz-starterkit/include/board.h.
+  boards/pc32mz-starterkit/include/board.h.
 
   If using a AC320006 by itself, JP7 pin 2 and JP8 pin 2 is where you would
   connect a 3.3 Volt TTL serial interface.

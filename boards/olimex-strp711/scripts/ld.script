@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-strp711/scripts/ld.script
+ * boards/olimex-strp711/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

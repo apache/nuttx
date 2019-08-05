@@ -41,7 +41,7 @@ Version 5.0.0
 Other Versions
   If you use any version of ZDS-II other than 5.0.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
-  the configs/z8f64200100kit/*/Make.defs file and also your PATH environment
+  the boards/z8f64200100kit/*/Make.defs file and also your PATH environment
   variable.
 
   It has been a long time since the z8 port has been used.  A lot has

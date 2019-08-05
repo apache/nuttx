@@ -142,12 +142,12 @@ LEDs
   If CONFIG_ARCH_LEDS is defined, then support for the ZKit-ARM LEDs will be
   included in the build.  See:
 
-  - configs/zkit-arm-1769/include/board.h - Defines LED constants, types and
+  - boards/zkit-arm-1769/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/zkit-arm-1769/src/zkit-arm-1769.h - GPIO settings for the LEDs.
+  - boards/zkit-arm-1769/src/zkit-arm-1769.h - GPIO settings for the LEDs.
 
-  - configs/zkit-arm-1769/src/up_leds.c - LED control logic.
+  - boards/zkit-arm-1769/src/up_leds.c - LED control logic.
 
   The ZKit-ARM LPC1768 has a single LEDs (there are more on the Embedded Artists
   base board, but those are not controlled by NuttX).  Usage this single LED by NuttX
@@ -203,7 +203,7 @@ ZKit-ARM Configuration Options
 
        CONFIG_ARCH_CHIP_LPC1768=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=zkit-arm-1769

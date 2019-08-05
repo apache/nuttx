@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-144/scripts/user-space.ld
+ * boards/nucleo-144/scripts/user-space.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

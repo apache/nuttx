@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mcu123-lpc214x/scripts/ld.script
+ * boards/mcu123-lpc214x/scripts/ld.script
  *
  *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

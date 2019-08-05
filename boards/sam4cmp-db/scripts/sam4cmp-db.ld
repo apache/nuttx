@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam4cmp-db/scripts/sam4cmp-db.ld
+ * boards/sam4cmp-db/scripts/sam4cmp-db.ld
  *
  *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

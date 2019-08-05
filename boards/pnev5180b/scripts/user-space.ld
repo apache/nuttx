@@ -1,10 +1,10 @@
 /****************************************************************************
- * configs/pnev5180b/scripts/user-space.ld
+ * boards/pnev5180b/scripts/user-space.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
  *
- * Based on configs/open1788/scripts/user-space.ld
+ * Based on boards/open1788/scripts/user-space.ld
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

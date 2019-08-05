@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/freedom-kl26z/scripts/freedom-kl26z.ld
+ * boards/freedom-kl26z/scripts/freedom-kl26z.ld
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

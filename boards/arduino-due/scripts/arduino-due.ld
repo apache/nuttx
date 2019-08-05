@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/arduino-due/scripts/arduino-due.ld
+ * boards/arduino-due/scripts/arduino-due.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

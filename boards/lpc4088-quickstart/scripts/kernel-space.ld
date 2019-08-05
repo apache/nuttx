@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4088-quickstart/scripts/kernel-space.ld
+ * boards/lpc4088-quickstart/scripts/kernel-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

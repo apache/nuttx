@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ne64badge/ostest/ne64badge-banked.ld
+ * boards/ne64badge/ostest/ne64badge-banked.ld
  *
  *   Copyright (C) 2011m, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

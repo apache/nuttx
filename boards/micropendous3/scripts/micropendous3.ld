@@ -1,5 +1,5 @@
 /**************************************************************************************
- * configs/micropendous3/scripts/micropendous3.ld
+ * boards/micropendous3/scripts/micropendous3.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

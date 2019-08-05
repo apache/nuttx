@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mz-starterkit/nsh/c32-debug.ld
+ * boards/pic32mz-starterkit/nsh/c32-debug.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

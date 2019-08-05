@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mikroe-stm32f4/scripts/gnu-elf.ld
+ * boards/mikroe-stm32f4/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/scripts/ld-spif-boot.script
+ * boards/lc823450-xgevk/scripts/ld-spif-boot.script
  *
  *   Copyright 2019 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

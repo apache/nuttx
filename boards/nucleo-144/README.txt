@@ -55,7 +55,7 @@ allow us to quickly change configurations by just cloning a configuration
 and changing the CPU choice and board initialization.  Unfortunately for
 the developer, the CPU specific information must be extracted from the
 common information in the documentation. The exception are the STM32L496ZG
-boards, which are supported by configs/nucleo-l496zg
+boards, which are supported by boards/nucleo-l496zg
 
 Please read the User Manual UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the

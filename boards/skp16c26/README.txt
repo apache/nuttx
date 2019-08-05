@@ -1,4 +1,4 @@
-configs/skp16c26/README.txt
+boards/skp16c26/README.txt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. The buildroot package can be used to build an M16C toolchain.  The toolchain
@@ -71,7 +71,7 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 4. Configure and Make the buildroot
 
      cd <buildroot-dir>
-     cp configs/m32c-defconfig-4.2.4 .config
+     cp boards/m32c-defconfig-4.2.4 .config
      make oldconfig
      make
 

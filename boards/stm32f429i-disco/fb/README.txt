@@ -15,7 +15,7 @@ make
 Frambuffer calculation
 ----------------------
 
-Use the helper script configs/stm32f429i-disco/tools/fbcalc.sh for calculating
+Use the helper script boards/stm32f429i-disco/tools/fbcalc.sh for calculating
 the heap2 and framebuffer memory region. The script assumes that all overlay
 buffers (LTDC and DMA2D) located in heap2 memory region starting at address
 0xD0000000. When changing the display size (when using a custom display), DMA2D

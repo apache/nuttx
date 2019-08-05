@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam4e-ek/scripts/flash.ld
+ * boards/sam4e-ek/scripts/flash.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

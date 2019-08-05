@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-efm32g880f128-stk/scripts/ld.script
+ * boards/olimex-efm32g880f128-stk/scripts/ld.script
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-lpc2378/scripts/ld.script
+ * boards/olimex-lpc2378/scripts/ld.script
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

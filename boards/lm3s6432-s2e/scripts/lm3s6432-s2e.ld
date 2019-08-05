@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lm3s6432-s2e/scripts/lm3s6432-s2e.ld
+ * boards/lm3s6432-s2e/scripts/lm3s6432-s2e.ld
  *
  *   Copyright (C) 2010, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

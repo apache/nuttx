@@ -1,5 +1,5 @@
 /************************************************************
- * configs/c5471evm/scripts/ld.script
+ * boards/c5471evm/scripts/ld.script
  *
  *   Copyright (C) 2007, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

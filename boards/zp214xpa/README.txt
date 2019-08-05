@@ -215,7 +215,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     ZP213X/4XPA.  OpenOCD requires a configuration file.  I keep the
     one I used last here:
 
-      configs/zpa214xpa/tools/olimex.cfg
+      boards/zpa214xpa/tools/olimex.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -228,13 +228,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      configs/zp214xpa/tools/olimex.cfg
+      boards/zp214xpa/tools/olimex.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      configs/zp214xpa/tools/oocd.sh $PWD
+      boards/zp214xpa/tools/oocd.sh $PWD
 
     If you add that path to your PATH environment variable, the command
     simplifies to just:

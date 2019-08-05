@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/freedom-k66f/scripts/flash.ld
+ * boards/freedom-k66f/scripts/flash.ld
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

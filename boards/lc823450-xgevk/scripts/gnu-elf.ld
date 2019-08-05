@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lc823450-xgevk/scripts/gnu-elf.ld
+ * boards/lc823450-xgevk/scripts/gnu-elf.ld
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

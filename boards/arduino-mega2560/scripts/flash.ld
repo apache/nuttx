@@ -1,5 +1,5 @@
 /*******************************************************************************
- * configs/arduino-mega2560/scripts/flash.ld
+ * boards/arduino-mega2560/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

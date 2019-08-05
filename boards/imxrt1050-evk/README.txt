@@ -203,7 +203,7 @@ Configuration sub-directories
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
-       a. The 'configs/samv71-xult/knsh/defconfigtail' of the nuttx.hex file should look something like this
+       a. The 'boards/samv71-xult/knsh/defconfigtail' of the nuttx.hex file should look something like this
           (with my comments added beginning with #):
 
             $ tail nuttx.hex

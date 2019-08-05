@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/metro-m4/scripts/sram.ld
+ * boards/metro-m4/scripts/sram.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

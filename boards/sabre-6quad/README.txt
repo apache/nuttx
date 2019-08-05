@@ -136,7 +136,7 @@ Status
     commit 50ab5d638a37b539775d1e60085f182bf26be57f
       sched/task:  It is not appropriate for logic in nxtask_exit() to call
       the new version of this_task().  sched/irq:  Remove redundant fetch
-      of CPU index; configs/sabre-6quad: update README.
+      of CPU index; boards/sabre-6quad: update README.
 
     commit 0ba78530164814360eb09ed9805137b934c6f03b
       sched/irq: Fix a infinite recursion problem that a recent change

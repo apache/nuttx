@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mirtoo/scripts/xc32-debug.ld
+ * boards/mirtoo/scripts/xc32-debug.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

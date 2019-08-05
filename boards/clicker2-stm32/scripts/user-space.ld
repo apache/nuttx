@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/clicker2-stm32/scripts/user-space.ld
+ * boards/clicker2-stm32/scripts/user-space.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

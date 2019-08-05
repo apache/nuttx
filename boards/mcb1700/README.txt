@@ -36,7 +36,7 @@ mcb1700 Configuration Options
 
        CONFIG_ARCH_CHIP_LPC1768=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=mcb1700 (for the mcb1700.org board)

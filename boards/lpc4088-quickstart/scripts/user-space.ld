@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4088-quickstart/scripts/user-space.ld
+ * boards/lpc4088-quickstart/scripts/user-space.ld
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

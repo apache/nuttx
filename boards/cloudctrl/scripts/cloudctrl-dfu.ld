@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/cloudctrl/scripts/cloudctrl-dfu.ld
+ * boards/cloudctrl/scripts/cloudctrl-dfu.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

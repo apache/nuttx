@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/axoloti/scripts/kernel-space.ld
+ * boards/axoloti/scripts/kernel-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

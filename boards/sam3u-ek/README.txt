@@ -105,7 +105,7 @@ SAM3U-EK-specific Configuration Options
        CONFIG_ARCH_CHIP_SAM3U
        CONFIG_ARCH_CHIP_ATSAM3U4
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=sam3u-ek (for the SAM3U-EK development board)
@@ -191,7 +191,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
   LCD Options.  Other than the standard LCD configuration options
-  (see configs/README.txt), the SAM3U-EK driver also supports:
+  (see boards/README.txt), the SAM3U-EK driver also supports:
 
     CONFIG_LCD_PORTRAIT - Present the display in the standard 240x320
        "Portrait" orientation.  Default:  The display is rotated to

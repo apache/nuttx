@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ubw32/scripts/mips-release.ld
+ * boards/ubw32/scripts/mips-release.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

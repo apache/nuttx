@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f429i-disco/scripts/user-space.ld
+ * boards/stm32f429i-disco/scripts/user-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

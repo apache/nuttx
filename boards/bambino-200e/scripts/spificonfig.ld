@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/bambino-200e/scripts/spificonfig.ld
+ * boards/bambino-200e/scripts/spificonfig.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

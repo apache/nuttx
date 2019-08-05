@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/efm32-g8xx-stk/scripts/efm32-g8xx-stk.ld
+ * boards/efm32-g8xx-stk/scripts/efm32-g8xx-stk.ld
  *
  *   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
  *

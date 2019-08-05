@@ -1,4 +1,4 @@
-configs/flipnclick-pic32mz README
+boards/flipnclick-pic32mz README
 ===============================
 
   This README file discusses the port of NuttX to the Mikroe Flip&Click

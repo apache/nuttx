@@ -221,10 +221,10 @@ NuttX EABI "buildroot" Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5.  Copy the configuration file from the configs/ sub-directory to the
+  5.  Copy the configuration file from the boards/ sub-directory to the
       top-level build directory:
 
-      cp configs/cortexa8-eabi-defconfig-4.8.2 .config
+      cp boards/cortexa8-eabi-defconfig-4.8.2 .config
 
   6a. You may wish to modify the configuration before you build it.  For
       example, it is recommended that you build the kconfig-frontends tools,
@@ -244,7 +244,7 @@ NuttX EABI "buildroot" Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
@@ -271,7 +271,7 @@ NXFLAT Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm3-defconfig-nxflat .config
+  5. cp boards/cortexm3-defconfig-nxflat .config
 
   6. make oldconfig
 
@@ -535,13 +535,13 @@ Boot sequence
 DRAMBOOT
 --------
 
-  See also configs/sama5d4-ek/README.txt for a description of the DRAMBOOT
+  See also boards/sama5d4-ek/README.txt for a description of the DRAMBOOT
   program.  This is a tiny version of NuttX that can run out of internal
   SRAM.  If you put this program on the HSMCI1 microSD card as boot.bin, then
   it will boot on power up and you can download NuttX directly into DRAM by
   sending the nuttx.hex file over the serial connection.
 
-  The configs/sama5d4-ek/README.txt also describes variants AT25BOOT and
+  The boards/sama5d4-ek/README.txt also describes variants AT25BOOT and
   SRAMBOOT.  This have not been ported to the SAMA5D3x-EK, but are available
   if they are usefult too you.
 
@@ -1145,7 +1145,7 @@ Networking
       prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
       CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
       that it supports arch_phy_irq().  This logic can be found at
-      nuttx/configs/sama5d3x-ek/src/sam_ethernet.c.
+      nuttx/boards/sama5d3x-ek/src/sam_ethernet.c.
 
     - One other thing: UDP support is required (CONFIG_NET_UDP).
 
@@ -1373,7 +1373,7 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
   However, to use the automounter you will to provide some additional
-  board-level support.  See configs/sama5d4-ek for and example of how
+  board-level support.  See boards/sama5d4-ek for and example of how
   you might do this.
 
   WARNING:  SD cards should never be removed without first unmounting
@@ -2589,7 +2589,7 @@ SAMA5 PWM Support
                  B  PB13  ---  GMAC
       -----+---+---+----+--------------------
 
-    See configs/sama5d3x-ek/include/board.h for all of the default PWM
+    See boards/sama5d3x-ek/include/board.h for all of the default PWM
     pin selections.  I used PWM channel 0, pins PA20 and PA21 for testing.
 
     Clocking is addressed in the next paragraph.
@@ -3134,7 +3134,7 @@ SAMA5D3x-EK Configuration Options
    CONFIG_ARCH_CHIP_ATSAMA5D34=y
    CONFIG_ARCH_CHIP_ATSAMA5D35=y
 
-  CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+  CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
   hence, the board that supports the particular chip or SoC.
 
     CONFIG_ARCH_BOARD="sama5d3x-ek" (for the SAMA5D3x-EK development board)

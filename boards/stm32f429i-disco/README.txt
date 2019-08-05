@@ -295,7 +295,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to configs/stm32f429i-disco/nsh2
+Below are all of the configuration changes that I had to make to boards/stm32f429i-disco/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support
@@ -402,7 +402,7 @@ STM32F429I-DISCO-specific Configuration Options
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=STM32F429I-DISCO (for the STM32F429I-DISCO development board)

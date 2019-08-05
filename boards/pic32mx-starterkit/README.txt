@@ -1,4 +1,4 @@
-configs/pic32mx-starterkit README
+boards/pic32mx-starterkit README
 ===============================
 
 
@@ -440,7 +440,7 @@ Toolchains
   well. This toolchain can be downloded from the Pinguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
-  See also configs/mirtoo/README.txt.  There is an experimental (untested)
+  See also boards/mirtoo/README.txt.  There is an experimental (untested)
   configuration for the Mirtoo platform in that directory.
 
   MPLAB/C32 vs MPLABX/X32
@@ -793,7 +793,7 @@ PIC32MX Configuration Options
 
        CONFIG_ARCH_CHIP_PIC32MX795F512L=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=pic32mx-starterkit

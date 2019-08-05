@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samv71-xult/scripts/memory.ld
+ * boards/samv71-xult/scripts/memory.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

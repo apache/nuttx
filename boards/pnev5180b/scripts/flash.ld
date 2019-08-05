@@ -1,10 +1,10 @@
 /*****************************************************************************
- * configs/pnev5180b/scripts/flash.ld
+ * boards/pnev5180b/scripts/flash.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
  *
- * Based on configs/zkit-arm-1769/scripts/flash.ld
+ * Based on boards/zkit-arm-1769/scripts/flash.ld
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>

@@ -17,7 +17,7 @@ LEDs
 
 It is asumed that STMicro STM32F100RB generic board board has one LED on PA0.
 You should configure the port and pin number in
-configs/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
+boards/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
 the board port is defined in include/board.h and src/up_leds.c. The LED is used
 to encode OS-related events as follows:
@@ -77,7 +77,7 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=stm32vldiscovery

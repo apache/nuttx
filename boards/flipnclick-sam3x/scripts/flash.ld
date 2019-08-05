@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/flipnclick-sam3x/scripts/flash.ld
+ * boards/flipnclick-sam3x/scripts/flash.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

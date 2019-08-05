@@ -9,7 +9,7 @@ depending on board revision).
 
 This board features the LPC1768 MCU and is related to the Embedded Artists' base
 board with the NXP the LPCXpresso daughter board, see
-configs/lpcxpresso-lpc1768/README.txt.
+boards/lpcxpresso-lpc1768/README.txt.
 
 The board also features an embedded USB debugger.
 
@@ -114,7 +114,7 @@ pppd app is located in apps/examples/pppd and requires setting correct login
 details in the source code.
 
 To connect using the internal u-blox TCP/IP stack, use the chat app. Its
-configuration is done in configs/u-blox-c027/nsh/defconfig and can be adjusted
+configuration is done in boards/u-blox-c027/nsh/defconfig and can be adjusted
 using 'make menuconfig'.
 
 The NuttX u-blox modem driver is included like this:

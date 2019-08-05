@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/beaglebone-black/scripts/sdram.ld
+ * boards/beaglebone-black/scripts/sdram.ld
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>

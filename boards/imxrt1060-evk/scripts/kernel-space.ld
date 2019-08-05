@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/imxrt1060-evk/scripts/kernel-space.ld
+ * boards/imxrt1060-evk/scripts/kernel-space.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

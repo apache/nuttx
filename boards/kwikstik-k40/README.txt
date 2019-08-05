@@ -169,7 +169,7 @@ KwikStik-K40-specific Configuration Options
 
        CONFIG_ARCH_CHIP_MK40X256VLQ100
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=kwikstik-k40 (for the KwikStik-K40 development board)

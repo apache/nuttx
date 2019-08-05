@@ -1,5 +1,5 @@
 /****************************************************************************/
-/* configs/makerlisp/scripts/makerlisp_flash.linkcmd                        */
+/* boards/makerlisp/scripts/makerlisp_flash.linkcmd                        */
 /* For configurations running entirely out of FLASH                         */
 /*                                                                          */
 /*   Copyright (C) 2019 Gregory Nutt. All rights reserved.                  */

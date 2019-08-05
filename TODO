@@ -4,7 +4,7 @@ NuttX TODO List (Last updated July 1, 2019)
 This file summarizes known NuttX bugs, limitations, inconsistencies with
 standards, things that could be improved, and ideas for enhancements.  This
 TODO list does not include issues associated with individual board ports. See
-also the individual README.txt files in the configs/ sub-directories for
+also the individual README.txt files in the boards/ sub-directories for
 issues related to each board port.
 
 nuttx/:
@@ -81,7 +81,7 @@ o Task/Scheduler (sched/)
                As of this writing, the basic feature implementation is
                complete and much of the logic has been verified.  The test
                harness for the feature exists only for the NXP LPC3131 (see
-               configs/ea3131/pgnsh and locked directories).  There are
+               boards/ea3131/pgnsh and locked directories).  There are
                some limitations of this testing so I still cannot say that
                the feature is fully functional.
   Status:      Open.  This has been put on the shelf for some time.
@@ -283,7 +283,7 @@ o Task/Scheduler (sched/)
                  and sched_setaffinity(),
                2018-09-15:  This change has been completed for the case of
                  open() used within the OS.  There are places under libs/ and
-                 configs/ that have not been converted.  I also note cases
+                 boards/ that have not been converted.  I also note cases
                  where fopen() is called under libs/libc/netdb/.
 
   Status:      Open
@@ -987,7 +987,7 @@ o Kernel/Protected Build
                 by simply reading this variable.
 
                "This one would be easy: Just a change to include/nuttx/userspace.h,
-                configs/*/kernel/up_userspace.c, libs/libc/,
+                boards/*/kernel/up_userspace.c, libs/libc/,
                 sched/sched_addreadytorun.c, and sched/sched_removereadytorun.c.
                 That would eliminate 59% of the syscalls."
 
@@ -1788,7 +1788,7 @@ o USB (drivers/usbdev, drivers/usbhost)
   Title:       USB CDC/ACM HOST CLASS DRIVER
   Description: A CDC/ACM host class driver has been added.  This has been
                testing by running the USB CDC/ACM host on an Olimex
-               LPC1766STK and using the configs/stm3210e-eval/usbserial
+               LPC1766STK and using the boards/stm3210e-eval/usbserial
                configuration (using the CDC/ACM device side driver).  There
                are several unresolved issues that prevent the host driver
                from being usable:
@@ -2230,7 +2230,7 @@ o File system / Generic drivers (fs/, drivers/)
                file being read is smaller than number bytes written to the
                file.  That test does write small files continuously until
                file system is full and even the the error is rare.  The
-               configs/sim/spiffs test can used to demonstrate the error.
+               boards/sim/spiffs test can used to demonstrate the error.
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.

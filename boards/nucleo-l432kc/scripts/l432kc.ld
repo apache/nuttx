@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l432kc/scripts/l432kc.ld
+ * boards/nucleo-l432kc/scripts/l432kc.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

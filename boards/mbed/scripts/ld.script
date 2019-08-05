@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mbed/scripts/ld.script
+ * boards/mbed/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

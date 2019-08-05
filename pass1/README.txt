@@ -18,6 +18,6 @@ README
   feature, look at apps/examples/module/drivers/Makefile.  Kernel symbol
   tables are needed to support kernel modules.
 
-  Of course, addition board-specific logic in, say, configs/<board>/src
+  Of course, addition board-specific logic in, say, boards/<board>/src
   would have to be included to make use of the application-installed symbol
   tables.

@@ -54,7 +54,7 @@ NuttX Buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm0-eabi-defconfig-4.6.3 .config
+  5. cp boards/cortexm0-eabi-defconfig-4.6.3 .config
 
   6. make oldconfig
 
@@ -63,7 +63,7 @@ NuttX Buildroot Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M0 toolchain for Cygwin under Windows.
 
@@ -150,7 +150,7 @@ Freedom KL26Z-specific Configuration Options
 
        CONFIG_ARCH_CHIP_MKL26Z128=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=freedom-kl26z (for the Freescale FRDM-KL26Z development board)

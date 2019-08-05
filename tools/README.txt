@@ -33,7 +33,7 @@ configure.c, cfgparser.c, and cfgparser.h
 
   configure.sh is a bash script that is used to configure NuttX for a given
   target board in a environment that supports POSIX paths (Linux, Cygwin,
-  macOS, or similar).  See configs/README.txt or Documentation/NuttxPortingGuide.html
+  macOS, or similar).  See boards/README.txt or Documentation/NuttxPortingGuide.html
   for a description of how to configure NuttX with this script.
 
   configure.c, cfgparser.c, and cfgparser.h can be used to build a work-alike
@@ -167,7 +167,7 @@ mkconfig.c, cfgdefine.c, and cfgdefine.h
   program is used during the initial NuttX build.
 
   When you configure NuttX, you will copy a configuration file called .config
-  in the top level NuttX directory (See configs/README.txt or
+  in the top level NuttX directory (See boards/README.txt or
   Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
   the top-level makefile will build the mkconfig executable from mkconfig.c
   (using Makefile.host).  The top-level Makefile will then execute the
@@ -481,7 +481,7 @@ mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
   NuttX uses the GCC compilers capabilities to create Makefile dependencies.
   The program  mkdeps is used to run GCC in order to create the dependencies.
   If a NuttX configuration uses the GCC toolchain, its Make.defs file (see
-  configs/README.txt) will include a line like:
+  boards/README.txt) will include a line like:
 
     MKDEP = $(TOPDIR)/tools/mkdeps[.exe] (See NOTE below)
 
@@ -556,11 +556,11 @@ ide_exporter.py
         cd nuttx
         make V=1 |& tee build_log
 
-        ./tools/ide_exporter.py makelog_f2nsh_c  iar ./configs/<board>/ide/template/iar -o ./configs/<board>/ide/nsh/iar
+        ./tools/ide_exporter.py makelog_f2nsh_c  iar ./boards/<board>/ide/template/iar -o ./boards/<board>/ide/nsh/iar
 
         or
 
-        ./tools/ide_exporter.py makelog_f2nsh_c uvision_gcc ./configs/<board>/ide/template/uvision_gcc/ -o ./configs/<board>/ide/nsh/uvision
+        ./tools/ide_exporter.py makelog_f2nsh_c uvision_gcc ./boards/<board>/ide/template/uvision_gcc/ -o ./boards/<board>/ide/nsh/uvision
 
   3) Limitations:
      - IAR supports C only. Iar C++ does not compatible with g++ so disable
@@ -807,7 +807,7 @@ refresh.sh
       <board>
          The board directory under nuttx/configs
       <config>
-         The board configuration directory under nuttx/configs/<board>
+         The board configuration directory under nuttx/boards/<board>
 
   The steps to refresh the file taken by refresh.sh are:
 

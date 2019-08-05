@@ -31,7 +31,7 @@ Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/sh-defconfig .config
+  5. cp boards/sh-defconfig .config
 
   6. make oldconfig
 
@@ -100,7 +100,7 @@ Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^
 
 In additional to the common configuration options listed in the
-file configs/README.txt, there are other configuration options
+file boards/README.txt, there are other configuration options
 specific to the SH-1
 
 Architecture selection
@@ -112,9 +112,9 @@ Architecture selection
   CONFIG_ARCH_SH1 and CONFIG_ARCH_CHIP_SH7032 - for use in C code.  These
     identify the particular chip or SoC that the architecture is
     implemented in.
-  CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
+  CONFIG_ARCH_BOARD - identifies the boards/ subdirectory and, hence,
     the board that supports the particular chip or SoC.  This
-    should be us7032evb1 for (configs/us7032evb1).
+    should be us7032evb1 for (boards/us7032evb1).
   CONFIG_ARCH_BOARD_US7032EVB1 - for use in C code
   CONFIG_ENDIAN_BIG - the SH-1 usually runs big-endian
   CONFIG_ARCH_NOINTC - define if the architecture does not

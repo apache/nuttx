@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/xmc4500-relax/scripts/flash.ld
+ * boards/xmc4500-relax/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

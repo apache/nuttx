@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/teensy-3.x/scripts/mk20dx128vlh5.ld
+ * boards/teensy-3.x/scripts/mk20dx128vlh5.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

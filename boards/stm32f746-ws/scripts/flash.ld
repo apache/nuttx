@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746-ws/scripts/flash.ld
+ * boards/stm32f746-ws/scripts/flash.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

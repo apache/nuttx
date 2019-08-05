@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-g071rb/scripts/ld.script
+ * boards/nucleo-g071rb/scripts/ld.script
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

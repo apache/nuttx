@@ -131,7 +131,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Building OpenOCD under Cygwin:
 
-    Refer to configs/olimex-lpc1766stk/README.txt
+    Refer to boards/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 
@@ -159,7 +159,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      configs/lm4f120-launchpad/tools/lm4f120-launchpad.cfg
+      boards/lm4f120-launchpad/tools/lm4f120-launchpad.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -177,7 +177,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      configs/lm4f120-launchpad/tools/lm4f120-launchpad.cfg
+      boards/lm4f120-launchpad/tools/lm4f120-launchpad.cfg
 
   Starting OpenOCD
 
@@ -186,7 +186,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
       oocd.sh $PWD
 
-    provided that you have the path to the oocd.sh script, configs/lm4f120-launchpad/tools,
+    provided that you have the path to the oocd.sh script, boards/lm4f120-launchpad/tools,
     added to your PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
@@ -234,12 +234,12 @@ LEDs
   The LM4F120 has a single RGB LED.  If CONFIG_ARCH_LEDS is defined, then
   support for the LaunchPad LEDs will be included in the build.  See:
 
-  - configs/lm4f120-launchpad/include/board.h - Defines LED constants, types and
+  - boards/lm4f120-launchpad/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/lm4f120-launchpad/src/lm4f120-launchpad.h - GPIO settings for the LEDs.
+  - boards/lm4f120-launchpad/src/lm4f120-launchpad.h - GPIO settings for the LEDs.
 
-  - configs/lm4f120-launchpad/src/up_leds.c - LED control logic.
+  - boards/lm4f120-launchpad/src/up_leds.c - LED control logic.
 
   OFF:
   - OFF means that the OS is still initializing. Initialization is very fast so
@@ -370,7 +370,7 @@ LM4F120 LaunchPad Configuration Options
 
        CONFIG_ARCH_CHIP_LM4F120
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=lm4f120-launchpad (for the LM4F120 LaunchPad)

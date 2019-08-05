@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l496zg/scripts/l496zg-flash.ld
+ * boards/nucleo-l496zg/scripts/l496zg-flash.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

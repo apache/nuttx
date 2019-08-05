@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/us7032evb1/nsh/ld.script
+ * boards/us7032evb1/nsh/ld.script
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sure-pic32mx/nsh/mips-release.ld
+ * boards/sure-pic32mx/nsh/mips-release.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

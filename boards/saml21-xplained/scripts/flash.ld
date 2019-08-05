@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/saml21-xplained/scripts/flash.ld
+ * boards/saml21-xplained/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

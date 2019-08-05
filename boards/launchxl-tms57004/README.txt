@@ -64,7 +64,7 @@ Toolchain
   this:
 
     cd buildroot/
-    cp configs/cortexr4-armeb-eabi-4.8.3-defconfig .config
+    cp boards/cortexr4-armeb-eabi-4.8.3-defconfig .config
     make oldconfig
     make
 

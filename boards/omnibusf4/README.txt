@@ -76,7 +76,7 @@ PB12    SPI2      SPI2_NSS
 Build Instructions
 ==================
 
-The configs/omnibusf4/nsh/defconfig file creates a basic setup, and
+The boards/omnibusf4/nsh/defconfig file creates a basic setup, and
 includes drivers for all supported onboard chips. The console and
 command prompt are sent to USART3.
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f746-ws/scripts/memory.ld
+ * boards/stm32f746-ws/scripts/memory.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,7 +67,7 @@
  * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
  * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
  * should fit into 64KB and, of course, can be optimized as needed (See
- * also configs/stm32f746g-disco/scripts/kernel-space.ld).  Allowing the
+ * also boards/stm32f746g-disco/scripts/kernel-space.ld).  Allowing the
  * additional does permit addition debug instrumentation to be added to the
  * kernel space without overflowing the partition.
  *

@@ -174,8 +174,8 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm-defconfig .config OR
-     cp configs/arm926t_defconfig-4.2.4 .config
+  5. cp boards/arm-defconfig .config OR
+     cp boards/arm926t_defconfig-4.2.4 .config
 
   6. make oldconfig
 
@@ -208,7 +208,7 @@ ARM/DM320-specific Configuration Options
 
        CONFIG_ARCH_CHIP_DM320
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=ntosd-dm320
@@ -324,7 +324,7 @@ Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^
 
 In additional to the common configuration options listed in the
-file configs/README.txt, there are other configuration options
+file boards/README.txt, there are other configuration options
 specific to the DM320:
 
  CONFIG_ARCH - identifies the arch subdirectory and, hence, the
@@ -334,7 +334,7 @@ specific to the DM320:
    in.
  CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
  CONFIG_ARCH_CHIP_name - For use in C code
- CONFIG_ARCH_BOARD - identifies the configs subdirectory and, hence,
+ CONFIG_ARCH_BOARD - identifies the boards/ subdirectory and, hence,
    the board that supports the particular chip or SoC.
  CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
  CONFIG_ARCH_BOARD_name - for use in C code

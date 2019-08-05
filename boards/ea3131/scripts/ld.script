@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ea3131/scripts/ld.script
+ * boards/ea3131/scripts/ld.script
  *
  *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

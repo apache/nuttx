@@ -306,7 +306,7 @@ TWR-K60N512-specific Configuration Options
 
        CONFIG_ARCH_CHIP_MK60N512VMD100
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=twr-k60n512 (for the TWR-K60N512 development board)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4088-quickstart/scripts/ld.script
+ * boards/lpc4088-quickstart/scripts/ld.script
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Rommel Marcelo

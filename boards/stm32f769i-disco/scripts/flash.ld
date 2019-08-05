@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f769i-disco/scripts/flash.ld
+ * boards/stm32f769i-disco/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

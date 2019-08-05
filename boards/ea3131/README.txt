@@ -160,7 +160,7 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm926t-defconfig-4.2.4 .config
+  5. cp boards/arm926t-defconfig-4.2.4 .config
 
   6. make oldconfig
 
@@ -169,7 +169,7 @@ NuttX buildroot Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
@@ -195,11 +195,11 @@ Image Format
   it!
 
   To work around both of these issues, I have created a small program under
-  configs/ea3131/tools to add the header.  This program can be built under
+  boards/ea3131/tools to add the header.  This program can be built under
   either Linux or Cygwin (and probably other tool environments as well).  That
   tool can be built as follows:
 
-  - cd configs/ea3131/tools
+  - cd boards/ea3131/tools
   - make
 
   Then, to build the NuttX binary ready to load with the bootloader, just
@@ -216,10 +216,10 @@ Image Format
        to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
-    3. The CRC32 logic in configs/ea3131/tools doesn't seem to work.  As a result,
+    3. The CRC32 logic in boards/ea3131/tools doesn't seem to work.  As a result,
        the CRC is currently disabled in the header:
 
-       RCS file: /cvsroot/nuttx/nuttx/configs/ea3131/tools/lpchdr.c,v
+       RCS file: /cvsroot/nuttx/nuttx/boards/ea3131/tools/lpchdr.c,v
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
@@ -262,7 +262,7 @@ Using OpenOCD and GDB
 
   Then you should be able to start the OpenOCD daemon like:
 
-    configs/ea3131/tools/oocd.sh $PWD
+    boards/ea3131/tools/oocd.sh $PWD
 
   Where it is assumed that you are executing oocd.sh from the top level
   directory where NuttX is installed.
@@ -383,16 +383,16 @@ On-Demand Paging
 
   This example uses a two-pass build.  The top-level Makefile recognizes the
   configuration option CONFIG_BUILD_2PASS and will execute the Makefile in
-  configs/ea3131/locked/Makefile to build the first pass object, locked.r.
+  boards/ea3131/locked/Makefile to build the first pass object, locked.r.
   This first pass object contains all of the code that must be in the locked
   text region. The Makefile in arch/arm/src/Makefile then includes this 1st
-  pass in build, positioning it as controlled by configs/ea3131/scripts/pg-ld.script.
+  pass in build, positioning it as controlled by boards/ea3131/scripts/pg-ld.script.
 
   Finishing the Example:
   ----------------------
 
   This example is incomplete in that it does not have any media to reload the
-  page text region from:  The file configs/ea3131/src/up_fillpage.c is only
+  page text region from:  The file boards/ea3131/src/up_fillpage.c is only
   a stub.  That logic to actually reload the page from some storage medium
   (among other things) would have to be implemented in order to complete this
   example.  At present, the example works correctly up to the point where
@@ -438,7 +438,7 @@ On-Demand Paging
   Alternative:
   ------------
 
-  I have implemented an alternative within configs/ea3131/src/up_fillpage.c
+  I have implemented an alternative within boards/ea3131/src/up_fillpage.c
   which is probably only useful for testing.  Here is the usage module
   for this alternative
 
@@ -495,7 +495,7 @@ ARM/EA3131-specific Configuration Options
 
        CONFIG_ARCH_CHIP_LPC3131
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=ea3131

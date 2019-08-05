@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/metro-m4/scripts/flash.ld
+ * boards/metro-m4/scripts/flash.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

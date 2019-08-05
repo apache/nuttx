@@ -1,4 +1,4 @@
-configs/mirtoo README
+boards/mirtoo README
 =====================
 
 This README file discusses the port of NuttX to the DTX1-4000L "Mirtoo" module.
@@ -574,7 +574,7 @@ Analog Input
     CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
 
   When CONFIG_PIC32MX_ADC=y is defined, the Mirtoo boot up logic will
-  automatically configure pin 18 (AN0) as an analog input (see configs/mirtoo/src/up_adc.c).
+  automatically configure pin 18 (AN0) as an analog input (see boards/mirtoo/src/up_adc.c).
   To initializee and use the PGA117, you to add logic something like the
   following in your application code:
 
@@ -618,7 +618,7 @@ Analog Input
       return -EIO;
     }
 
-  The above logic may belong in configs/mirtoo/src/up_adc.c?
+  The above logic may belong in boards/mirtoo/src/up_adc.c?
 
   There is still one missing piece to complete the analog support on the
   Mirtoo.  This is the ADC driver that collects analog data and provides
@@ -629,14 +629,14 @@ Analog Input
       the ADC interfaces defined in include/nuttx/analog/adc.h and must
       be built when CONFIG_PIC32MX_ADC is defined.
 
-  (2) configs/mirtoo/up_adc.c.  Add Mirtoo logic that initializes and
+  (2) boards/mirtoo/up_adc.c.  Add Mirtoo logic that initializes and
       registers the ADC driver.
 
   A complete ADC driver will be a considerable amount of work to support
   all of the ADC features (such as timer driven sampling).  If all you want
   to do is a simple analog conversion, then in lieu of a real ADC driver,
   you can use simple in-line logic such as you can see in the PIC32MX7 MMB
-  touchscreen driver at configs/pic32mx7mmb/src/up_touchscreen.c
+  touchscreen driver at boards/pic32mx7mmb/src/up_touchscreen.c
 
 PIC32MX Configuration Options
 =============================
@@ -665,7 +665,7 @@ PIC32MX Configuration Options
 
        CONFIG_ARCH_CHIP_PIC32MX250F128D=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=mirtoo

@@ -60,7 +60,7 @@
  * NOTE:
  * 1. Most DM320 memory sections can be programmed to lie at different locations in
  *    the memory map. Therefore, much of the DM320 physical memory map is really
- *    board-specific and, as such, really belongs in the configs/<board>/include/board.h
+ *    board-specific and, as such, really belongs in the boards/<board>/include/board.h
  *    file rather than here.
  *
  *    To handle all cases, this file defines a "default" physical memory map, but

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/misoc/scripts/ld.script
+ * boards/misoc/scripts/ld.script
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

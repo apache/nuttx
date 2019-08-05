@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-h743zi/scripts/kernel-space.ld
+ * boards/nucleo-h743zi/scripts/kernel-space.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

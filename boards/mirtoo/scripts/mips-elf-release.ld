@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mirtoo/scripts/mips-elf-release.ld
+ * boards/mirtoo/scripts/mips-elf-release.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

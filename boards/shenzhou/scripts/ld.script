@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/shenzhou/scripts/ld.script
+ * boards/shenzhou/scripts/ld.script
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

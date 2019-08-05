@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mirtoo/scripts/xc32-release.ld
+ * boards/mirtoo/scripts/xc32-release.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

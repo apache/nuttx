@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/dk-tm4c129x/scripts/ld.script
+ * boards/dk-tm4c129x/scripts/ld.script
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

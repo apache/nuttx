@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/mikroe-stm32f4/scripts/user-space.ld
+ * boards/mikroe-stm32f4/scripts/user-space.ld
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -159,7 +159,7 @@ NuttX buildroot Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/arm926t-defconfig-4.2.4 .config
+  5. cp boards/arm926t-defconfig-4.2.4 .config
 
   6. make oldconfig
 
@@ -168,7 +168,7 @@ NuttX buildroot Toolchain
   8. Make sure that the PATH variable includes the path to the newly built
      binaries.
 
-  See the file configs/README.txt in the buildroot source tree.  That has more
+  See the file boards/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
@@ -194,11 +194,11 @@ Image Format
   it!
 
   To work around both of these issues, I have created a small program under
-  configs/ea3152/tools to add the header.  This program can be built under
+  boards/ea3152/tools to add the header.  This program can be built under
   either Linux or Cygwin (and probably other tool environments as well).  That
   tool can be built as follows:
 
-  - cd configs/ea3152/tools
+  - cd boards/ea3152/tools
   - make
 
   Then, to build the NuttX binary ready to load with the bootloader, just
@@ -215,10 +215,10 @@ Image Format
        to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
-    3. The CRC32 logic in configs/ea3152/tools doesn't seem to work.  As a result,
+    3. The CRC32 logic in boards/ea3152/tools doesn't seem to work.  As a result,
        the CRC is currently disabled in the header:
 
-       RCS file: /cvsroot/nuttx/nuttx/configs/ea3152/tools/lpchdr.c,v
+       RCS file: /cvsroot/nuttx/nuttx/boards/ea3152/tools/lpchdr.c,v
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
@@ -261,7 +261,7 @@ Using OpenOCD and GDB
 
   Then you should be able to start the OpenOCD daemon like:
 
-    configs/ea3152/tools/oocd.sh $PWD
+    boards/ea3152/tools/oocd.sh $PWD
 
   Where it is assumed that you are executing oocd.sh from the top level
   directory where NuttX is installed.
@@ -301,7 +301,7 @@ ARM/EA3152-specific Configuration Options
 
        CONFIG_ARCH_CHIP_LPC3152
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=ea3152

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpcxpresso-lpc54628/scripts/flash.ld
+ * boards/lpcxpresso-lpc54628/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

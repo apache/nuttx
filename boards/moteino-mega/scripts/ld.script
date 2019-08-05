@@ -1,5 +1,5 @@
 /**************************************************************************************
- * configs/moteino-mega/scripts/ld.script
+ * boards/moteino-mega/scripts/ld.script
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

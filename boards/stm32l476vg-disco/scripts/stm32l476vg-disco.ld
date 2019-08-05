@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32l476vg-disco/scripts/stm32l476vg-disco.ld
+ * boards/stm32l476vg-disco/scripts/stm32l476vg-disco.ld
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

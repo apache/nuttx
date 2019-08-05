@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lm3s8962-ek/scripts/ld.script
+ * boards/lm3s8962-ek/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

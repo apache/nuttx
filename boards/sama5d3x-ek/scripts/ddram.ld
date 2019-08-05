@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3x-ek/scripts/ddram.ld
+ * boards/sama5d3x-ek/scripts/ddram.ld
  *
  *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -90,7 +90,7 @@ Loading Code with J-Link
 Loading Code OpenOCD
 ====================
 
-  OpenOCD scripts are available in the configs/sam4e-ek/tools directory.
+  OpenOCD scripts are available in the boards/sam4e-ek/tools directory.
   These scripts were used with OpenOCD 0.8.0.  If you use a version after
   OpenOCD 0.8.0, then you should comment out the following lines in the
   openocd.cfg file:
@@ -889,7 +889,7 @@ SAM4E-EK-specific Configuration Options
        CONFIG_ARCH_CHIP_SAM3U
        CONFIG_ARCH_CHIP_ATSAM3U4
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD=sam4e-ek (for the SAM4E-EK development board)
@@ -1006,7 +1006,7 @@ SAM4E-EK-specific Configuration Options
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
   LCD Options.  Other than the standard LCD configuration options
-  (see configs/README.txt), the SAM4E-EK driver also supports:
+  (see boards/README.txt), the SAM4E-EK driver also supports:
 
     CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
       support. Default is this 320x240 "landscape" orientation

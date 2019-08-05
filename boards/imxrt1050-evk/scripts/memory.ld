@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/imxrt1050-evk/scripts/memory.ld
+ * boards/imxrt1050-evk/scripts/memory.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

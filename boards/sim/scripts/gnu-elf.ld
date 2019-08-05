@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sim/scripts/gnu-elf.ld
+ * boards/sim/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

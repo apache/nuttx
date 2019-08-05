@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f103-minimum/scripts/ld.script
+ * boards/stm32f103-minimum/scripts/ld.script
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -34,7 +34,7 @@ Toolchain
   this:
 
     cd buildroot/
-    cp configs/cortexr4f-eabi-defconfig-4.8.5 .config
+    cp boards/cortexr4f-eabi-defconfig-4.8.5 .config
     make oldconfig
     make
 

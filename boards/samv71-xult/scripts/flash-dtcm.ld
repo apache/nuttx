@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/samv71-xult/scripts/flash-dtcm.ld
+ * boards/samv71-xult/scripts/flash-dtcm.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

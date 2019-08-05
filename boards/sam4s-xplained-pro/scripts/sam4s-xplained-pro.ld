@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam4s-xplained-pro/scripts/sam4s-xplained-pro.ld
+ * boards/sam4s-xplained-pro/scripts/sam4s-xplained-pro.ld
  *
  *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pic32mx-starterkit/nsh/c32-release.script
+ * boards/pic32mx-starterkit/nsh/c32-release.script
  *
  *   Copyright (C) 2012i, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

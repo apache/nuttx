@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/scripts/user-space.ld
+ * boards/sam3u-ek/scripts/user-space.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

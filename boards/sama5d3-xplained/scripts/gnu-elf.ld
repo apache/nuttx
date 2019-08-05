@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3-xplained/scripts/gnu-elf.ld
+ * boards/sama5d3-xplained/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

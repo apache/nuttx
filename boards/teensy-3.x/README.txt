@@ -30,9 +30,9 @@ README
     --------------- -------------- -------------- ---------------------------
 
   NOTES:
-  1. Settings in configs/teensy-3.x/include/board.h will automatically
+  1. Settings in boards/teensy-3.x/include/board.h will automatically
      select the correct clocking based on CONFIG_ARCH_CHIP_MK20DX128VLH5=y.
-  2. The linker script at configs/teensy-3.x/scripts/mk30dx128vlh5.ld will
+  2. The linker script at boards/teensy-3.x/scripts/mk30dx128vlh5.ld will
      automatically be selected when CONFIG_ARCH_CHIP_MK20DX128VLH5=y.  It
      will use the correct FLASH and SRAM sizes.
 
@@ -172,7 +172,7 @@ Teensy-3.1 Configuration settings
 
        CONFIG_ARCH_CHIP_MK20DX256VLH7=y
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+    CONFIG_ARCH_BOARD - Identifies the boards/ subdirectory and
        hence, the board that supports the particular chip or SoC.
 
        CONFIG_ARCH_BOARD="teensy-3.x"

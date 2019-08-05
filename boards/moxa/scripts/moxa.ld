@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/moxa/scripts/moxa.ld
+ * boards/moxa/scripts/moxa.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

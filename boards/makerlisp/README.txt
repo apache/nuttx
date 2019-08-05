@@ -46,7 +46,7 @@ Other Versions
   If you use any version of ZDS-II other than 5.3.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
   three files:  (1) arch/arm/z80/src/ez80/Kconfig, (2)
-  configs/makerlisp/scripts/Make.defs and, perhaps, (3)
+  boards/makerlisp/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
 
 Serial Console
@@ -434,7 +434,7 @@ Configuration Subdirectories
     the application's reset vector resides at address 0x040000 in external
     SRAM.
 
-    The boot loader source is located at configs/makerlisp/src/sd_main.c.
+    The boot loader source is located at boards/makerlisp/src/sd_main.c.
 
     STATUS:
       2019-06-26:  Configuration added.  Not yet verified.

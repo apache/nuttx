@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4337-ws/scripts/flashconfig.ld
+ * boards/lpc4337-ws/scripts/flashconfig.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
