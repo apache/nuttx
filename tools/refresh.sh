@@ -77,7 +77,7 @@ while [ ! -z "$1" ]; do
         echo "  <board>"
         echo "     The board directory under nuttx/boards"
         echo "  <config>"
-        echo "     The board configuration directory under nuttx/boards/<board>"
+        echo "     The board configuration directory under nuttx/boards/<board>/configs"
         exit 0
         ;;
     * )
@@ -121,7 +121,7 @@ BOARDDIR=boards/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts
 MAKEDEFS1=$SCRIPTSDIR/Make.defs
 
-CONFIGDIR=$BOARDDIR/$CONFIGSUBDIR
+CONFIGDIR=$BOARDDIR/configs/$CONFIGSUBDIR
 DEFCONFIG=$CONFIGDIR/defconfig
 MAKEDEFS2=$CONFIGDIR/Make.defs
 
