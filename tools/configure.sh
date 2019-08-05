@@ -37,7 +37,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/configs/<config-name>
 
 Where:
   -l selects the Linux (l) host environment.
@@ -49,7 +49,7 @@ Where:
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
   <board-name> is the name of the board in the boards directory
-  <config-name> is the name of the board configuration sub-directory
+  configs/<config-name> is the name of the board configuration sub-directory
   <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
 
@@ -108,7 +108,7 @@ while [ ! -z "$1" ]; do
     *)
       if [ ! -z "${boardconfig}" ]; then
         echo ""
-        echo "<board/config> defined twice"
+        echo "<board/configs/config> defined twice"
         echo "$USAGE"
         exit 1
       fi
@@ -122,7 +122,7 @@ done
 
 if [ -z "${boardconfig}" ]; then
   echo ""
-  echo "Missing <board/config> argument"
+  echo "Missing <board/configs/config> argument"
   echo "$USAGE"
   exit 2
 fi
@@ -152,7 +152,7 @@ dest_makedefs="${TOPDIR}/Make.defs"
 
 if [ ! -r "${src_makedefs}" ]; then
   boardpath=`dirname $configpath`
-  src_makedefs="${boardpath}/scripts/Make.defs"
+  src_makedefs="${boardpath}/../scripts/Make.defs"
 
   if [ ! -r "${src_makedefs}" ]; then
     echo "File Make.defs could not be found"
