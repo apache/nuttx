@@ -123,7 +123,7 @@ config SIM_NET_HOST_ROUTE
 	---help---
 		Add a host route for the simulation that points to the created tap device.  The
 		simulation will not be able to access the public network unless iptables is
-		configured to masquerade for it.  See configs/sim/NETWORK-LINUX.txt for more
+		configured to masquerade for it.  See boards/sim/NETWORK-LINUX.txt for more
 		information.
 
 config SIM_NET_BRIDGE
@@ -131,7 +131,7 @@ config SIM_NET_BRIDGE
 	 ---help---
 		Add the created tap device to the specified bridge.  You will need to manually
 		configure the bridge IP address (if any) and routes that point to the bridge.
-		See configs/sim/NETWORK-LINUX.txt for more information.
+		See boards/sim/NETWORK-LINUX.txt for more information.
 
 endchoice
 endif

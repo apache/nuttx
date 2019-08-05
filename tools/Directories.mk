@@ -79,9 +79,9 @@ else
 LIBXX=libxx
 endif
 
-NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
+NONFSDIRS = sched drivers boards $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
-CONTEXTDIRS = configs $(APPDIR)
+CONTEXTDIRS = boards $(APPDIR)
 USERDIRS =
 OTHERDIRS = pass1
 

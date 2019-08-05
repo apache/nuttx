@@ -1654,7 +1654,7 @@ source "arch/Kconfig"
 endmenu
 
 menu "Board Selection"
-source "configs/Kconfig"
+source "boards/Kconfig"
 endmenu
 
 menu "RTOS Features"

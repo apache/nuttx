@@ -82,10 +82,10 @@ net$(DELIM)libnet$(LIBEXT): context
 staging$(DELIM)libnet$(LIBEXT): net$(DELIM)libnet$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-configs$(DELIM)libconfigs$(LIBEXT): context
-	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" libconfigs$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+boards$(DELIM)libboards$(LIBEXT): context
+	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" libboards$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 
-staging$(DELIM)libconfigs$(LIBEXT): configs$(DELIM)libconfigs$(LIBEXT)
+staging$(DELIM)libboards$(LIBEXT): boards$(DELIM)libboards$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 crypto$(DELIM)libcrypto$(LIBEXT): context

@@ -1,0 +1,389 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAMA5D4_EK
+
+choice
+	prompt "SAMA5D4-EK Board Version"
+	default SAMA5D4_MB_REVC
+
+config SAMA5D4_MB_REVC
+	bool "SAMA5D44-MB Rev. C"
+
+config SAMA5D4_MB_REVE
+	bool "SAMA5D44-MB Rev. E"
+
+endchoice # SAMA5D4-EK Board Version
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D4EK_396MHZ
+
+config SAMA5D4EK_384MHZ
+	bool "384 MHz"
+
+config SAMA5D4EK_396MHZ
+	bool "396 MHz"
+
+config SAMA5D4EK_528MHZ
+	bool "528 MHz"
+
+endchoice # CPU Frequency
+
+choice
+	prompt "SAMA4D4-EK DRAM Type"
+	default SAMA5D4EK_MT47H128M16RT
+	depends on SAMA5_DDRCS
+
+config SAMA5D4EK_MT47H128M16RT
+	bool "MT47H128M16RT"
+	---help---
+		Micron 2Gbit x16 DDR2-1066 128Mb
+
+config SAMA5D4EK_MT47H64M16HR
+	bool "MT47H64M16HR"
+	---help---
+		Micron 1Gbit x16 DDR2-800 64Mb
+
+endchoice # SAMA4D4-EK DRAM Type
+
+config SAMA5D4EK_DRAM_MAIN
+	bool "Build dram_main"
+	default n
+	depends on SAMA5_BOOT_ISRAM && BUILD_FLAT
+	---help---
+		dram_main is a tiny program that runs in ISRAM.  dram_main will
+		enable SDRAM and load an Intel HEX program into SDRAM over the
+		serial console. Then it will either (1) jump to the program in
+		DRAM at address 0x2000:0000 (2) wait for you to break in with GDB to
+		debug the SDRAM program.  These different behaviors are controlled
+		by SAMA5D4EK_DRAM_START.
+
+		NOTE: If you use this boot loader, then your program must be built at
+		origin 0x2000:0000, not at 0x2000:8000 as is customary with U-Boot.
+
+config SAMA5D4EK_DRAM_START
+	bool "Start DRAM program"
+	default n
+	depends on SAMA5D4EK_DRAM_MAIN
+	---help---
+		The default behavior of the DRAM boot program is to initialize the
+		DRAM, then patiently wait for you to break into the program with GDB.
+		An alternative behavior is enabled with this option:  If
+		SAMA5D4EK_DRAM_START is defined, then it will not wait but will,
+		instead, immediately start the program in DRAM.
+
+config SAMA5D4EK_AT25_MAIN
+	bool "Build at25_main"
+	default n
+	depends on SAMA5_BOOT_ISRAM && BUILD_FLAT
+	---help---
+		at25_main is a tiny program that runs in ISRAM.  at25_main will
+		enable SDRAM and configure the AT25 Serial FLASH.  It will prompt
+		and then load an Intel HEX program into SDRAM over the serial
+		console. If the program is successfully loaded in SDRAM, at25_main
+		will copy the program at the beginning of the AT26 Serial FLASH.
+		If the jumpering is set correctly, the SAMA5D4 RomBOOT loader will
+		then boot the program from the serial FLASH the next time that it
+		reset.
+
+config SAMA5D4EK_AT25_PROGSIZE
+	int "AT25 partition size"
+	default 131072
+	depends on SAMA5D4EK_AT25_MAIN
+	---help---
+		This is the size of the partition at the beginning to the AT25
+		serial FLASH that will be used to hold the boot program.  Since
+		this program must run from SRAM, there would be no purpose int
+		making this size any larger than the size of the internal SRAM.
+
+config SAMA5D4EK_DRAM_BOOT
+	bool "Using DRAM boot loader"
+	default y
+	depends on SAMA5_BOOT_SDRAM && !SAMA5D4EK_DRAM_MAIN && !SAMA5D4EK_AT25_MAIN
+	---help---
+		Select this option if you are going to boot using the sdram_main
+		bootloader (created with SAMA5D4EK_DRAM_MAIN=y).  This selection
+		will simply origin your program at 0x2000:0000 as required by the
+		sdram_main bootloader (vs. 0x2000:8000 as required by U-Boot).
+
+config SAMA5D4EK_NAND_BLOCKMOUNT
+	bool "NAND FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
+	---help---
+		Automatically initialize the NAND FLASH driver when NSH starts.
+
+choice
+	prompt "NAND FLASH configuration"
+	default SAMA5D4EK_NAND_NXFFS
+	depends on SAMA5D4EK_NAND_BLOCKMOUNT
+
+config SAMA5D4EK_NAND_FTL
+	bool "Create NAND FLASH block driver"
+	depends on MTD && MTD_NAND
+	---help---
+		Create the MTD driver for the NAND and "wrap" the NAND as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+		NOTE: This options is not currently recommended.  There is not now
+		NuttX file system that can handle the NAND back blocks or performs
+		wear-leveling other than NXFFS and NXFFS does not use a block driver
+		but, rather, operates directly upon the NAND MTD device.
+
+config SAMA5D4EK_NAND_NXFFS
+	bool "Create NAND FLASH NXFFS file system"
+	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
+	---help---
+		Create the MTD driver for the NAND and mount the NAND device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+		NOTE: NXFFS is recommended because (1) it can handle the NAND back
+		blocks and (1) performs wear-leveling.
+
+endchoice # NAND FLASH configuration
+
+config SAMA5D4EK_AT25_BLOCKMOUNT
+	bool "AT25 serial FLASH auto-mount"
+	default n
+	depends on (NSH_ARCHINIT || SAMA5D4EK_AT25_MAIN) && SAMA5_SPI0 && MTD_AT25
+	---help---
+		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
+
+choice
+	prompt "AT25 serial FLASH configuration"
+	default SAMA5D4EK_AT25_FTL
+	depends on SAMA5D4EK_AT25_BLOCKMOUNT
+
+config SAMA5D4EK_AT25_FTL
+	bool "Create AT25 Serial FLASH block driver"
+	---help---
+		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5D4EK_AT25_CHARDEV
+	bool "Create AT25 Serial FLASH character driver"
+	---help---
+		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
+		character driver that could then, for example, via simple open, close,
+		read, write file system operations.  There will be no wear-leveling
+		in this configuration.
+
+config SAMA5D4EK_AT25_NXFFS
+	bool "Create AT25 serial FLASH NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT25 and mount the AT25 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # AT25 serial FLASH configuration
+
+if FS_AUTOMOUNTER
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT
+	bool "HSMCI0 automounter"
+	default n
+	depends on SAMA5_HSMCI0
+
+if SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/mnt/sdcard0"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY
+	int "HSMCI0 debounce delay (milliseconds)"
+	default 1000
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY
+	int "HSMCI0 unmount retry delay (milliseconds)"
+	default 2000
+
+endif # SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT
+	bool "HSMCI1 automounter"
+	default n
+	depends on SAMA5_HSMCI1
+
+if SAMA5D4EK_HSMCI1_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_FSTYPE
+	string "HSMCI1 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_BLKDEV
+	string "HSMCI1 block device"
+	default "/dev/mmcsd1"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_MOUNTPOINT
+	string "HSMCI1 mount point"
+	default "/mnt/sdcard1"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_DDELAY
+	int "HSMCI1 debounce delay (milliseconds)"
+	default 1000
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_UDELAY
+	int "HSMCI1 unmount retry delay (milliseconds)"
+	default 2000
+
+endif # SAMA5D4EK_HSMCI1_AUTOMOUNT
+endif # FS_AUTOMOUNTER
+
+config SAMA5D4EK_HSMCI0_MOUNT
+	bool "HSMCI0 boot mount"
+	default n
+	depends on SAMA5_HSMCI0 && !SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+if SAMA5D4EK_HSMCI0_MOUNT
+
+config SAMA5D4EK_HSMCI0_MOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI0_MOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
+
+config SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/bin"
+
+endif # SAMA5D4EK_HSMCI0_MOUNT
+
+config SAMA5D4EK_HSMCI1_MOUNT
+	bool "HSMCI1 boot mount"
+	default n
+	depends on SAMA5_HSMCI1 && !SAMA5D4EK_HSMCI1_AUTOMOUNT
+
+if SAMA5D4EK_HSMCI1_MOUNT
+
+config SAMA5D4EK_HSMCI1_MOUNT_FSTYPE
+	string "HSMCI1 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI1_MOUNT_BLKDEV
+	string "HSMCI1 block device"
+	default "/dev/mmcsd1"
+
+config SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT
+	string "HSMCI1 mount point"
+	default "/bin"
+
+endif # SAMA5D4EK_HSMCI1_MOUNT
+
+config SAMA5D4EK_ROMFS_MOUNT
+	bool "ROMFS boot mount"
+	default n
+	depends on FS_ROMFS
+	---help---
+		By selecting this option, you an build mount a ROMFS file system as
+		part of the system boot operation.  NOTE that the board logic
+		contains no a priori ROMFS file system.  In order to use this option,
+		you must provide the file nuttx/boards/sama5d4-ek/include/boot_romfsimg.h.
+		You might use logic in the tool at apps/tools/mkromfsimg.sh to create
+		this header file.
+
+if SAMA5D4EK_ROMFS_MOUNT
+
+config SAMA5D4EK_ROMFS_ROMDISK_MINOR
+	int "ROM disk minor device number"
+	default 0
+
+config SAMA5D4EK_ROMFS_ROMDISK_DEVNAME
+	string "ROM disk block device"
+	default "/dev/ram0"
+
+config SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE
+	int "ROM disk sector size"
+	default 512
+
+config SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT
+	string "ROMFS mount point"
+	default "/bin"
+
+endif # SAMA5D4EK_ROMFS_MOUNT
+
+config SAMA5D4EK_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D4EK_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+if INPUT_MXT
+
+config SAMA5D4EK_MXT_I2CFREQUENCY
+	int "maXTouch I2C frequency"
+	default 400000
+
+config SAMA5D4EK_MXT_DEVMINOR
+	int "/dev/input minor number"
+	default 0
+
+endif # INPUT_MXT
+
+config SAMA5D4EK_CHANNEL
+	int "PWM channel number"
+	default 0 if SAMA5_PWM_CHAN0
+	default 1 if SAMA5_PWM_CHAN1
+	default 2 if SAMA5_PWM_CHAN2
+	default 3 if SAMA5_PWM_CHAN3
+	range 0 3
+	depends on PWM && SAMA5_PWM
+	---help---
+		Selects the PWM channel number that will be used to perform the PWM
+		test.  See apps/examples/pwm.
+
+config SAMA5D4EK_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
+if AUDIO_WM8904
+
+config SAMA5D4EK_WM8904_I2CFREQUENCY
+	int "WM8904 I2C Frequency"
+	default 400000
+	range 1 400000
+	---help---
+		This option selects the I2C frequency to use when communicating with
+		the WM8904 device.  The default, 400KHz, is the maximum supported by
+		the WM8904.  If you have problems communicating with the WM8904,
+		then you might want to try lowering this rate.
+
+choice
+	prompt "WM8904 MCLK source"
+	default SAMA5D4EK_WM8904_SRCMAIN
+
+config SAMA5D4EK_WM8904_SRCMAIN
+	bool "Main Clock (12MHz)"
+
+config SAMA5D4EK_WM8904_SRCSCK
+	bool "Slow XTAL (32.768KHz)"
+	select SAMA5D4EK_SLOWCLOCK
+
+endchoice # WM8904 MCLK source
+endif # AUDIO_WM8904
+endif # ARCH_BOARD_SAMA5D4_EK

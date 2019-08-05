@@ -73,7 +73,7 @@ else
 BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 endif
 else
-BOARD_DIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)
+BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)
 endif
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
@@ -304,7 +304,7 @@ else
 	$(Q) echo FAKELNK > include\arch\.fakelnk
 endif
 
-# Link the configs\<board-name>\include directory to include\arch\board
+# Link the boards\<board-name>\include directory to include\arch\board
 
 include\arch\board: include\arch
 	@echo LN: include\arch\board to $(BOARD_DIR)\include
@@ -315,7 +315,7 @@ else
 	$(Q) echo FAKELNK > include\arch\board\.fakelnk
 endif
 
-# Link the configs\<board-name>\src dir to arch\<arch-name>\src\board
+# Link the boards\<board-name>\src dir to arch\<arch-name>\src\board
 
 $(ARCH_SRC)\board: .config
 	@echo LN: $(ARCH_SRC)\board to $(BOARD_DIR)\src
@@ -353,7 +353,7 @@ endif
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip
-	$(Q) $(MAKE) -C configs dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
 
 # context
@@ -372,7 +372,7 @@ context: check_context staging include\nuttx\config.h include\nuttx\version.h in
 # and symbolic links created by the context target.
 
 clean_context:
-	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" clean_context
+	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" clean_context
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" clean_context
 	$(call DELFILE, include\nuttx\config.h)
 	$(call DELFILE, include\nuttx\version.h)

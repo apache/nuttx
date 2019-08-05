@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_MAKERLISP
+
+config MAKERLISP_VGA
+	bool "VGA Controller attached?"
+	default n
+	---help---
+		Select this option if you have an I/O Controller and a VGA vide card
+		connected.
+
+config MAKERLISP_COPYTORAM
+	bool "Copy to RAM"
+	default n
+	depends on BOOT_RUNFROMEXTSRAM
+	---help---
+		This option is available only when running from external SRAM
+		(CONFIG_BOOT_RUNFROMEXTSRAM).  In that case there are two possible
+		options:  (1) The configuration runs entirely out of SRAM and must
+		be copied into SRAM by a boot loader.  Or (2) The configuration
+		boots out of FLASH, copies itself to SRAM, and runs from SRAM.  This
+		configuration setting selects that latter option.
+
+config MAKERLISP_SDBOOT
+	bool "Build SD boot loader"
+	default n
+	---help---
+		Select this option only with the boards/makerlisp/sdboot
+		configuration.  This will enable the components needed only by the
+		boot loader.
+
+endif # ARCH_BOARD_MAKERLISP

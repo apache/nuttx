@@ -48,7 +48,7 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
-  <board-name> is the name of the board in the configs directory
+  <board-name> is the name of the board in the boards directory
   <config-name> is the name of the board configuration sub-directory
   <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
@@ -127,7 +127,7 @@ if [ -z "${boardconfig}" ]; then
   exit 2
 fi
 
-configpath=${TOPDIR}/configs/${boardconfig}
+configpath=${TOPDIR}/boards/${boardconfig}
 if [ ! -d "${configpath}" ]; then
   # Try direct path for convenience.
 
@@ -136,9 +136,9 @@ if [ ! -d "${configpath}" ]; then
     echo "Directory ${configpath} does not exist.  Options are:"
     echo ""
     echo "Select one of the following options for <board-name>:"
-    configlist=`find ${TOPDIR}/configs -name defconfig`
+    configlist=`find ${TOPDIR}/boards -name defconfig`
     for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/configs/,,g"`
+      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
       echo "  ${config}"
     done
     echo ""

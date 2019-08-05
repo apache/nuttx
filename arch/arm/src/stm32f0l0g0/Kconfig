@@ -1779,7 +1779,7 @@ config STM32F0L0G0_SERIAL_DISABLE_REORDERING
 		can, however, have the side-effect that all port mappings
 		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
 		UART. This is in particular relevant if a project uses the USB console
-		in some configs and a serial console in other configs, but does not
+		in some boards and a serial console in other boards, but does not
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 

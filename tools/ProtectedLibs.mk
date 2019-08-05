@@ -54,7 +54,7 @@ NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
 # Add libraries for board support
 
-NUTTXLIBS += staging$(DELIM)libconfigs$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)
 
 # Add libraries for syscall support.  The C library will be needed by
 # both the kernel- and user-space builds.  For now, the memory manager (mm)

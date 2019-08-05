@@ -75,9 +75,9 @@ while [ ! -z "$1" ]; do
         echo "  --help"
         echo "     Show this help message and exit"
         echo "  <board>"
-        echo "     The board directory under nuttx/configs"
+        echo "     The board directory under nuttx/boards"
         echo "  <config>"
-        echo "     The board configuration directory under nuttx/configs/<board>"
+        echo "     The board configuration directory under nuttx/boards/<board>"
         exit 0
         ;;
     * )
@@ -117,7 +117,7 @@ fi
 
 WD=${PWD}
 
-BOARDDIR=configs/$BOARDSUBDIR
+BOARDDIR=boards/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts
 MAKEDEFS1=$SCRIPTSDIR/Make.defs
 

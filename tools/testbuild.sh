@@ -278,7 +278,7 @@ for line in $testlist; do
 
       config=`echo $line | cut -d',' -f1`
 
-      path=$nuttx/configs/$config
+      path=$nuttx/boards/$config
       if [ ! -r "$path/defconfig" ]; then
         echo "ERROR: no configuration found at $path"
         showusage
