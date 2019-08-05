@@ -591,7 +591,7 @@ Configurations
 Each LPC4330-Xplorer configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    tools/configure.sh lpc4330-xplorer/<subdir>
+    tools/configure.sh lpc4330-xplorer:<subdir>
 
 Where <subdir> is one of the following:
 

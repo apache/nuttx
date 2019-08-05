@@ -48,7 +48,7 @@ Configurations
   1. Each Arduino MEGA2560 configuration is maintained in a sub-directory
      and can be selected as follow:
 
-       tools/configure.sh arduino-mega2560/<subdir>
+       tools/configure.sh arduino-mega2560:<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

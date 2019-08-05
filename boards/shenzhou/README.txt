@@ -482,7 +482,7 @@ Configurations
 Each Shenzhou configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh shenzhou/<subdir>
+    tools/configure.sh shenzhou:<subdir>
 
 Where <subdir> is one of the following:
 

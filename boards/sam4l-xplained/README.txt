@@ -382,7 +382,7 @@ Configurations
   Each SAM4L Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sam4l-xplained/<subdir>
+    tools/configure.sh sam4l-xplained:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

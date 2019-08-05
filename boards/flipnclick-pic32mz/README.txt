@@ -356,7 +356,7 @@ Information Common to All Configurations
   1. Each PIC32MZ configuration is maintained in a sub-directory and can be
      selected as follow:
 
-       tools/configure.sh flipnclick-pic32mz/<subdir>
+       tools/configure.sh flipnclick-pic32mz:<subdir>
 
      Where typical options are -l to configure to build on Linux or -c to
      configure for Cygwin under Linux.  'tools/configure.sh -h' will show

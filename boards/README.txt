@@ -881,14 +881,12 @@ tools/configure.sh
   There is a script that automates these steps.  The following steps will
   accomplish the same configuration:
 
-    cd tools
-   ./configure.sh <board-name>/<config-dir>
+   tools/configure.sh <board-name>:<config-dir>
 
   There is an alternative Windows batch file that can be used in the
   windows native enironment like:
 
-    cd ${TOPDIR}\tools
-    configure.bat <board-name>\<config-dir>
+    tools\configure.bat <board-name>:<config-dir>
 
   See tools/README.txt for more information about these scripts.
 
@@ -897,7 +895,7 @@ tools/configure.sh
   application directory on the command line like:
 
     cd tools
-    ./configure.sh -a <app-dir> <board-name>/<config-dir>
+    ./configure.sh -a <app-dir> <board-name>:<config-dir>
 
 Building Symbol Tables
 ^^^^^^^^^^^^^^^^^^^^^^

@@ -105,7 +105,7 @@ Configurations
   Each Nucleo-H743ZI configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [options] viewtool-stm32f107/<subdir>
+    tools/configure.sh [options] viewtool-stm32f107:<subdir>
 
   Where options should specify the host build platform (-l for Linux, -c for
   Cygwin under Windows, etc.).  Try 'tools/configure.sh -h' for the complete

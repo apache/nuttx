@@ -160,7 +160,7 @@ Configurations
   Each Clicker2 configuration is maintained in a sub-directory and can be
   selected as follow:
 
-    tools/configure.sh clicker2-stm32/<subdir>
+    tools/configure.sh clicker2-stm32:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

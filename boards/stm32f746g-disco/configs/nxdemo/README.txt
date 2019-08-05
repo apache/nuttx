@@ -6,7 +6,7 @@ STM32F746G-DISCO NX demo example
 Configure and build
 -------------------
 
-tools/configure.sh stm32f746g-disco/nxdemo
+tools/configure.sh stm32f746g-disco:nxdemo
 make
 
 

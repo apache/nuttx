@@ -135,7 +135,7 @@ that directory is also a bash script that will apply that patch for you.
 
 The patch would be applied when NuttX is configured as follows:
 
-  tools/configure.sh z16f2800100zcog/nsh
+  tools/configure.sh z16f2800100zcog:nsh
   dopatch.sh
   make
 
@@ -166,7 +166,7 @@ Variations on the basic z8f162800100zcog configuration are maintained
 in subdirectories.  To configure any specific configuration, do the
 following steps:
 
-   tools/configure.sh z16f2800100zcog/<sub-directory>
+   tools/configure.sh z16f2800100zcog:<sub-directory>
    make
 
 Where <sub-directory> is the specific board configuration that you

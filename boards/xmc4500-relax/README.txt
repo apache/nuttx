@@ -81,7 +81,7 @@ Configurations
   Each XMC4500 Relax configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    .tools/configure.sh xmc5400-relax/<subdir>
+    .tools/configure.sh xmc5400-relax:<subdir>
 
   See '.tools/configure.sh -h' for a list of all options.  The most typical
   are -l to select the Linux host or -c to select the Windows Cygwin host.

@@ -647,7 +647,7 @@ Configurations
 Each DK-TM4C129X configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    tools/configure.sh dk-tm4c129x/<subdir>
+    tools/configure.sh dk-tm4c129x:<subdir>
 
 Where <subdir> is one of the following:
 

@@ -272,7 +272,7 @@ Configurations
 Each Lincoln 60 configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    tools/configure.sh lincoln60/<subdir>
+    tools/configure.sh lincoln60:<subdir>
 
 Where <subdir> is one of the following:
 

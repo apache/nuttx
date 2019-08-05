@@ -817,7 +817,7 @@ Configurations
   Each SAM3U-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh viewtool-stm32f107/<subdir>
+    tools/configure.sh viewtool-stm32f107:<subdir>
 
   Before starting the build, make sure that your PATH environment variable
   includes the correct path to your toolchain.

@@ -211,7 +211,7 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh sama5d3x-ek/<sub-dir>
+     tools/configure.sh sama5d3x-ek:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -261,7 +261,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh sama5d3x-ek/<sub-dir>
+     tools/configure.sh sama5d3x-ek:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -367,7 +367,7 @@ Creating and Using NORBOOT
      the norboot configuration and setup the PATH variable in order to do
      the build:
 
-       tools/configure.sh sama5d3x-ek/<subdir>
+       tools/configure.sh sama5d3x-ek:<subdir>
 
      Before building, make sure the PATH environment variable includes the
      correct path to the directory than holds your toolchain binaries.
@@ -3290,7 +3290,7 @@ Configurations
   Each SAMA5D3x-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sama5d3x-ek/<subdir>
+    tools/configure.sh sama5d3x-ek:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

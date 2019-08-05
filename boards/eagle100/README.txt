@@ -186,7 +186,7 @@ Common Configuration Notes
   1. Each Eagle-100 configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       tools/configure.sh eagle100/<subdir>
+       tools/configure.sh eagle100:<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

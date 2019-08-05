@@ -195,7 +195,7 @@ Configurations
 Each Stellaris MDL-S2E Reference Design configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    tools/configure.sh lm3s6432-s2e/<subdir>
+    tools/configure.sh lm3s6432-s2e:<subdir>
 
 Where <subdir> is one of the following:
 

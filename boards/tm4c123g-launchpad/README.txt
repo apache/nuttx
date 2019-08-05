@@ -554,7 +554,7 @@ Configurations
 Each TM4C123G LaunchPad configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    tools/configure.sh tm4c123g-launchpad/<subdir>
+    tools/configure.sh tm4c123g-launchpad:<subdir>
 
 Where <subdir> is one of the following:
 

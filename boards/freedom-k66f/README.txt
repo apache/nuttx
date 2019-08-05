@@ -816,7 +816,7 @@ Configurations
 Each Freedom K66F configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh freedom-K66F/<subdir>
+    tools/configure.sh freedom-K66F:<subdir>
 
 Where <subdir> is one of the following:
 

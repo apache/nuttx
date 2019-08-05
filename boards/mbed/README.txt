@@ -245,7 +245,7 @@ Configurations
   Each mbed configuration is maintained in a sub-directory and can be selected
   as follow:
 
-    tools/configure.sh mbed/<subdir>
+    tools/configure.sh mbed:<subdir>
 
   Where <subdir> is one of the mbed subdirectories described in the
   following paragraph.

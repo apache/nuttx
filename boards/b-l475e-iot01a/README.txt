@@ -190,7 +190,7 @@ Configurations
   Each  B-L475E-IOT01A configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [-l|c|u|n] /b-l475e-iot01a/<subdir>
+    tools/configure.sh [-l|c|u|n] /b-l475e-iot01a:<subdir>
 
   Where:
    -l selects the Linux (l) host environment.  The [-c|u|n] options

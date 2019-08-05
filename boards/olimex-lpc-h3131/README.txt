@@ -152,7 +152,7 @@ NuttX buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh olimex-lpc-h3131/<sub-dir>
+     tools/configure.sh olimex-lpc-h3131:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -253,7 +253,7 @@ Image Format
   Then, to build the NuttX binary ready to load with the bootloader, just
   following these steps:
 
-  - tools/configure.sh olimex-lpc-h3131/ostest  # (using the ostest configuration for this example)
+  - tools/configure.sh olimex-lpc-h3131:ostest  # (using the ostest configuration for this example)
   - cd ..                         # Set up environment
   - make                          # Make NuttX.  This will produce nuttx.bin
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
@@ -488,7 +488,7 @@ Configurations
   Each LPC-H3131 configuration is maintained in a sub-directory and can be
   selected as follow:
 
-    tools/configure.sh olimex-lpc-h3131/<subdir>
+    tools/configure.sh olimex-lpc-h3131:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

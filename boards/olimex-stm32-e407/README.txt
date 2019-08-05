@@ -11,7 +11,7 @@ Configurations
   Each Olimex-STM32-E407 configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [OPTIONS] olimex-stm32-e407/<subdir>
+    tools/configure.sh [OPTIONS] olimex-stm32-e407:<subdir>
 
   Typical options include -l for a Linux host platform or -c for Cygwin
   host platform. See 'tools/configure.sh -h' for other options.  And

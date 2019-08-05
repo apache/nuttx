@@ -89,7 +89,7 @@ Common Configuration Notes
      in subdirectories.  To configure any specific configuration, do the
      following steps:
 
-       tools/configure.sh ez80f910200zco/<sub-directory>
+       tools/configure.sh ez80f910200zco:<sub-directory>
        make
 
      Where <sub-directory> is the specific board configuration that you

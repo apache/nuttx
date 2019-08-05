@@ -246,7 +246,7 @@ Configurations
   Each mcb1700 configuration is maintained in a sub-directory and can be selected
   as follow:
 
-    tools/configure.sh mcb1700/<subdir>
+    tools/configure.sh mcb1700:<subdir>
 
   Where <subdir> is one of the mcb1700 subdirectories described in the
   following paragraph.

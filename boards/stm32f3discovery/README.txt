@@ -407,7 +407,7 @@ Configurations
 Each STM32F3Discovery configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh STM32F3Discovery/<subdir>
+    tools/configure.sh STM32F3Discovery:<subdir>
 
 Where <subdir> is one of the following:
 

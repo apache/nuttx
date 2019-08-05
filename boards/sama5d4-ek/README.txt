@@ -205,7 +205,7 @@ NuttX EABI "buildroot" Toolchain
 
   1.  You must have already configured Nuttx in <some-dir>/nuttx.
 
-      tools/configure.sh sama5d4-ek/<sub-dir>
+      tools/configure.sh sama5d4-ek:<sub-dir>
 
   2.  Download the latest buildroot package into <some-dir>
 
@@ -255,7 +255,7 @@ NXFLAT Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh sama5d4-ek/<sub-dir>
+     tools/configure.sh sama5d4-ek:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -354,7 +354,7 @@ Creating and Using DRAMBOOT
      the dramboot configuration and setup the PATH variable in order to do
      the build:
 
-       tools/configure.sh sama5d4-ek/dramboot
+       tools/configure.sh sama5d4-ek:dramboot
 
      Before building, make sure that the PATH environment variable includes
      the correct path  to the directory than holds your toolchain binaries.
@@ -457,7 +457,7 @@ Creating and Using AT25BOOT
      the AT25BOOT configuration and setup the PATH variable in order to do
      the build:
 
-       tools/configure.sh sama5d4-ek/at25boot
+       tools/configure.sh sama5d4-ek:at25boot
 
      Before building, make sure that the PATH environment variable includes
      the correct path  to the directory than holds your toolchain binaries.
@@ -3569,7 +3569,7 @@ Configurations
   Each SAMA4D4-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sama5d4-ek/<subdir>
+    tools/configure.sh sama5d4-ek:<subdir>
 
   Before building, make sure that the PATH environment variable includes
   the correct path  to the directory than holds your toolchain binaries.
@@ -4158,7 +4158,7 @@ Configurations
           the board
 
         $ cd nuttx                          : Go to the NuttX build directory
-        $ tools/configure.sh sama5d4-ek/knsh  : Establish this configuration
+        $ tools/configure.sh sama5d4-ek:knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ make                              : Build the kerne with a dummy ROMFS image
                                             : This should create the nuttx ELF
@@ -4192,7 +4192,7 @@ Configurations
           Enable the ROMFS file system and board-specific "ROMFS boot mount"
           support to auto-mount the ROMFS file system on bootup.
 
-        $ tools/configure.sh sama5d4-ek/knsh  : Establish this configuration
+        $ tools/configure.sh sama5d4-ek:knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch boards/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image

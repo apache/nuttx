@@ -466,7 +466,7 @@ Configurations
 Each Mikroe-STM32F4 configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh mikroe-stm32f4/<subdir>
+    tools/configure.sh mikroe-stm32f4:<subdir>
 
 If this is a Windows native build, then configure.bat should be used
 instead of configure.sh:

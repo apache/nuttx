@@ -32,7 +32,7 @@ Selecting the Photon board on NuttX
   2) Enter inside nuttx/tools and configure to use the Photon board:
 
      $ cd nuttx
-     $ tools/configure.sh photon/wlan
+     $ tools/configure.sh photon:wlan
 
 Configuring NuttX to use your Wireless Router (aka Access Point)
 ================================================================

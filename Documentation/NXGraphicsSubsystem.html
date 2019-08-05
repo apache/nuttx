@@ -4215,9 +4215,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
     based upon a simple region of memory posing as video memory.
     That default configuration can be built as follows:
 <ul><pre>
-cd &lt;NuttX-Directory&gt;/tools
-./configure sim/nx
-cd  &lt;NuttX-Directory&gt;
+tools/configure.sh sim:nx
 make
 ./nuttx
 </pre></ul>
@@ -4232,9 +4230,7 @@ make
       This preferred configuration can be built as follows:
     </p>
 <ul><pre>
-cd &lt;NuttX-Directory&gt;/tools
-./configure sim/nx11
-cd  &lt;NuttX-Directory&gt;
+tools/configure sim:nx11
 make
 ./nuttx
 </pre></ul>

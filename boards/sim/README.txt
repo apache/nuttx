@@ -422,7 +422,7 @@ Common Configuration Information
   1. Each configuration is maintained in a sub-directory and can be selected
      as follow:
 
-       tools/configure.sh sim/<subdir>
+       tools/configure.sh sim:<subdir>
 
      Where <subdir> is one of the following sub-directories.
 

@@ -1488,7 +1488,7 @@ tools/
 |-- cfgparser.h
 |-- cmpconfig.c
 |-- cnvwindeps.c
-|-- configure.sh / configure.bat
+|-- configure.sh / configure.bat / configure.c
 |-- copydir.sh / copydir.bat
 |-- define.sh / define.bat
 |-- discovery.py
@@ -1578,14 +1578,14 @@ tools/
   accomplish the same configuration:
 </p>
 <ul><pre>
-  tools/configure.sh [OPTIONS] <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh [OPTIONS] <i>&lt;board-name&gt;</i>:<i>&lt;config-dir&gt;</i>
 </pre></ul>
 
 <p>
   There is an alternative Windows batch file, <code>configure.bat</code>,  that can be used instead of <code>configure.sh</code> in the windows native environment like:
 </p>
 <ul><pre>
-  tools\configure.bat <i>&lt;board-name&gt;</i>[\<i>&lt;config-dir&gt;</i>]
+  tools\configure.bat <i>&lt;board-name&gt;</i>:<i>&lt;config-dir&gt;</i>
 </pre></ul>
 <p>
   See <code>tools/README.txt</code> for more information about these scripts.
@@ -1594,7 +1594,7 @@ tools/
 <ul><pre>
 $ tools/configure.sh -h
 
-USAGE: tools/configure.sh [-d] [-l|m|c|u|g|n] [-a &lt;app-dir&gt;] &lt;board-name&gt;/&lt;config-name&gt;
+USAGE: tools/configure.sh [-d] [-l|m|c|u|g|n] [-a &lt;app-dir&gt;] &lt;board-name&gt;:&lt;config-name&gt;
 
 Where:
   -l selects the Linux (l) host environment.
@@ -1616,7 +1616,7 @@ Where:
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
-  tools/configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>:<i>&lt;config-dir&gt;</i>
 </pre></ul>
 
 <p>

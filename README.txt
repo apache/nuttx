@@ -691,12 +691,12 @@ Instantiating "Canned" Configurations
     There is one tool for use with any Bash-like shell that does configuration
     steps.  It is used as follows:
 
-      tools/configure.sh <board-name>/<config-dir>
+      tools/configure.sh <board-name>:<config-dir>
 
     There is an alternative Windows batch file that can be used in the windows
     native environment like:
 
-      tools\configure.bat <board-name>\<config-dir>
+      tools\configure.bat <board-name>:<config-dir>
 
     And, to make sure that other platforms are supported, there is also a
     C program at tools/configure.c that can be compiled to establish the
@@ -939,7 +939,7 @@ Make Sure that You are on the Right Platform
   configurations.  For example, if you are running on Linux and you
   configure like this:
 
-    tools/configure.sh board/configuration
+    tools/configure.sh board:configuration
 
   The you can use the following command to both (1) make sure that the
   configuration is up to date, AND (2) the configuration is set up
@@ -965,11 +965,11 @@ Make Sure that You are on the Right Platform
   platform that you use, and uncompress and refresh the defconfig file all in
   one command like:
 
-    tools/configure.sh -l board/configuration
+    tools/configure.sh -l board:configuration
 
   For a Linux host or for a Windows/Cygwin host:
 
-    tools/configure.sh -h board/configuration
+    tools/configure.sh -h board:configuration
 
   Other options are available from the help option built into the
   script.  You can see all options with:

@@ -1025,7 +1025,7 @@ Configurations
   Each SAM4E-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sam4e-ek/<subdir>
+    tools/configure.sh sam4e-ek:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

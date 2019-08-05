@@ -61,9 +61,7 @@ NOTE:  The full TZ database is quite large.  To create a reasonable sized
 ROMFS image, I had to trim some of the files like this:
 
   cd nuttx
-  cd tools
-  ./configure.sh sim/nsh
-  cd ..
+  tools/configure.sh sim:nsh
   make menuconfig
 
 Select the above localtime() and nuttx/zoneinfo configuration settings.

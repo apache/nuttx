@@ -129,8 +129,8 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
-  fprintf(stderr, "\nUSAGE: %s  [-h]\n\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
@@ -175,7 +175,8 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "  <config-name>:\n");
   fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
   fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
-  fprintf(stderr, "    under nuttx%cboards%c<board-name>%c.\n", g_delim, g_delim, g_delim);
+  fprintf(stderr, "    under nuttx%cboards%c<board-name>%cconfigs%c.\n",
+          g_delim, g_delim, g_delim, g_delim);
   fprintf(stderr, "  -h:\n");
   fprintf(stderr, "    Prints this message and exits.\n");
   exit(exitcode);
@@ -278,22 +279,26 @@ static void parse_args(int argc, char **argv)
     }
 
   /* The required option should be the board directory name and the
-   * configuration directory name separated by '/' or '\'.  Either is
+   * configuration directory name separated by ':', '/' or '\'.  Any are
    * acceptable in this context.
    */
 
   g_boarddir = argv[optind];
   optind++;
 
-  ptr = strchr(g_boarddir, '/');
-  if (!ptr)
+  ptr = strchr(g_boarddir, ':');
+  if (ptr == NULL)
     {
-      ptr = strchr(g_boarddir, '\\');
+      ptr = strchr(g_boarddir, '/');
+      if (!ptr)
+        {
+          ptr = strchr(g_boarddir, '\\');
+        }
     }
 
-  if (!ptr)
+  if (ptr == NULL)
     {
-      fprintf(stderr, "ERROR: Invalid <board-name>%c<config-name>\n", g_delim);
+      fprintf(stderr, "ERROR: Invalid <board-name>:<config-name>\n");
       show_usage(argv[0], EXIT_FAILURE);
     }
 
@@ -558,7 +563,7 @@ static void config_search(const char *boarddir)
                 }
             }
 
-          fprintf(stderr, "  %s/%s\n", boardname, configname);
+          fprintf(stderr, "  %s:%s\n", boardname, configname);
         }
 
       free(child);
@@ -570,7 +575,7 @@ static void config_search(const char *boarddir)
 
 static void enumerate_configs(void)
 {
-  fprintf(stderr, "Options for <board-name>[%c<config-name>] include:\n\n", g_delim);
+  fprintf(stderr, "Options for <board-name>:<config-name> include:\n\n");
   config_search("");
 }
 

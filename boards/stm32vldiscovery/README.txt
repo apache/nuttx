@@ -204,7 +204,7 @@ Configurations
 Each STMicro STM32F100RB generic configuration is maintained in a sub-directory
 and can be selected as follow:
 
-    tools/configure.sh stm32vldiscovery/<subdir>
+    tools/configure.sh stm32vldiscovery:<subdir>
 
 Where <subdir> is one of the following:
 

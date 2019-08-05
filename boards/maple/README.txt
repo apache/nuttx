@@ -108,7 +108,7 @@ Configurations
   Each Maple configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh maple/<subdir>
+    tools/configure.sh maple:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

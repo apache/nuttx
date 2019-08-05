@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-USAGE="USAGE: $0 [options] <board>/<config>"
+USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
@@ -97,8 +97,21 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-BOARDSUBDIR=`echo $1 | cut -d'/' -f1`
-CONFIGSUBDIR=`echo $1 | cut -d'/' -f2`
+CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d':' -f2`
+if [ -z "${CONFIGSUBDIR}" ]; then
+  CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d'/' -f2`
+  if [ -z "${CONFIGSUBDIR}" ]; then
+    echo "ERROR: Malformed configuration: ${CONFIG}"
+    echo $USAGE
+    echo $ADVICE
+    exit 1
+  else
+    BOARDSUBDIR=`echo ${CONFIG} | cut -d'/' -f1`
+  fi
+else
+  BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
+fi
+
 
 # Where are we
 

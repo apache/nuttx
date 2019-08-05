@@ -163,7 +163,7 @@ nsh> wdog
 IPL2 is the 2nd boot loader based on NuttX and can be built as follows.
 
   $ make distclean
-  $ ./tools/configure.sh lc823450-xgevk/ipl2
+  $ ./tools/configure.sh lc823450-xgevk:ipl2
   $ make V=1
   $ MakeIPL2 ./nuttx.bin 0 2 0 0 0
   $ cp LC8234xx_17S_start_data.boot_bin /tmp/
@@ -172,7 +172,7 @@ To write the IPL2 (LC8234xx_17S_start_data.boot_bin),
 firstly build USB configuration image.
 
   $ make distclean
-  $ ./tools/configure.sh lc823450-xgevk/usb
+  $ ./tools/configure.sh lc823450-xgevk:usb
   $ make V=1
 
 Load the nuttx.bin with openocd + gdb

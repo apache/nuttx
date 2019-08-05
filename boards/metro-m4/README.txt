@@ -277,7 +277,7 @@ Configurations
   Each Adafruit Metro M4 configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [OPTIONS] metro-m4/<subdir>
+    tools/configure.sh [OPTIONS] metro-m4:<subdir>
 
   Do 'tools/configure.sh -h' for the list of options.  If you are building
   under Windows with Cygwin, you would need the -c option, for example.

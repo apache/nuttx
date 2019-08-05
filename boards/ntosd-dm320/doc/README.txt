@@ -38,7 +38,7 @@ General instructions.
 4. Configure NuttX:
 
    cd <directory>/nuttx/tools
-  ./configure.sh ntosd-dm320
+  ./configure.sh ntosd-dm320:nsh
 
 5. Build the toolchain:
 

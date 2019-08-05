@@ -483,7 +483,7 @@ Configurations
   Each STM32L-Discovery configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh STM32L-Discovery/<subdir>
+    tools/configure.sh STM32L-Discovery:<subdir>
 
   Where <subdir> is one of the following sub-directories.
 

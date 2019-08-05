@@ -1231,7 +1231,7 @@ Information Common to All Configurations
 Each SAME70-XPLD configuration is maintained in a sub-directory and
 can be selected as follow:
 
-  tools/configure.sh same70-xplained/<subdir>
+  tools/configure.sh same70-xplained:<subdir>
 
 Before building, make sure that the PATH environment variable include the
 correct path to the directory than holds your toolchain binaries.

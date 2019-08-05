@@ -456,7 +456,7 @@ Configurations
   Each SAMD21 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh samd21-xplained/<subdir>
+    tools/configure.sh samd21-xplained:<subdir>
 
   Before building, make sure the PATH environment varaible include the
   correct path to the directory than holds your toolchain binaries.

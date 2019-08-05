@@ -134,7 +134,7 @@ Configurations
   Each EFM32G880F128-STK configuration is maintained in a sub-director
   and can be selected as follow:
 
-    tools/configure.sh olimex-efm32g880f128-stk/<subdir>
+    tools/configure.sh olimex-efm32g880f128-stk:<subdir>
 
   Where <subdir> is one of the following:
 

@@ -451,7 +451,7 @@ Configurations
   Each STM32F746G-DISCO configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh stm32f746g-disco/<subdir>
+    tools/configure.sh stm32f746g-disco:<subdir>
 
   Where <subdir> is one of the sub-directories listed below.
 

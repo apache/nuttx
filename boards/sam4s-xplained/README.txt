@@ -268,7 +268,7 @@ Configurations
   Each SAM4S Xplained configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.shsam4s-xplained/<subdir>
+    tools/configure.shsam4s-xplained:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

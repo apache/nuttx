@@ -565,7 +565,7 @@ Configurations
 Each TWR-K64F120M configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh twr-k64f120m/<subdir>
+    tools/configure.sh twr-k64f120m:<subdir>
 
 Where <subdir> is one of the following:
 

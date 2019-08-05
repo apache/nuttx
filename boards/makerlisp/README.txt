@@ -218,7 +218,7 @@ Common Configuration Notes
      in subdirectories.  To configure any specific configuration, do the
      following steps:
 
-       tools/configure.sh [OPTIONS] makerlisp/<sub-directory>
+       tools/configure.sh [OPTIONS] makerlisp:<sub-directory>
        make
 
      Where <sub-directory> is the specific board configuration that you

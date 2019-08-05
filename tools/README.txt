@@ -861,9 +861,7 @@ sethost.sh
   configurations.  For example, if you are running on Linux and you
   configure like this:
 
-    $ cd tools
-    $ ./configure.sh board/configuration
-    $ cd ..
+    $ tools/configure.sh board:configuration
 
   The you can use the following command to both (1) make sure that the
   configuration is up to date, AND (2) the configuration is set up

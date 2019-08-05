@@ -6,7 +6,7 @@ STM32F746G-DISCO NX Terminal example
 Configure and build
 -------------------
 
-tools/configure.sh stm32f746g-disco/nxterm
+tools/configure.sh stm32f746g-disco:nxterm
 make
 
 

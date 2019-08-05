@@ -46,7 +46,7 @@ Configurations
   Each gapuino configuration is maintained in a sub-directory and can
   be selected as follow:
 
-    tools/configure.sh gapuino/<subdir>
+    tools/configure.sh gapuino:<subdir>
 
   Where <subdir> is one of the following:
 

@@ -190,7 +190,7 @@ Configurations
 Each Stellaris EKK-LM3S9b96 Evaluation Kit configuration is maintained in a
 sub-directory and can be selected as follow:
 
-    tools/configure.sh ekk-lm3s9b96/<subdir>
+    tools/configure.sh ekk-lm3s9b96:<subdir>
 
 Where <subdir> is one of the following:
 

@@ -241,7 +241,7 @@ Common Configuration Notes
   1. Each MoteinoMEGA configuration is maintained in a sub-directory and
      can be selected as follow:
 
-       tools/configure.sh moteino-mega/<subdir>
+       tools/configure.sh moteino-mega:<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

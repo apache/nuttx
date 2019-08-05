@@ -231,7 +231,7 @@ CONFIGURATIONS
   Each EFM32 Gecko Starter Kit configuration is maintained in a sub-directory
   and can be selected as follow:
 
-    tools/configure.sh efm32-g8xx-stk/<subdir>
+    tools/configure.sh efm32-g8xx-stk:<subdir>
 
   If this is a Windows native build, then configure.bat should be used
   instead of configure.sh:

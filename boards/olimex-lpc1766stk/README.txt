@@ -682,7 +682,7 @@ Common Configuration Notes
   1. Each Olimex LPC1766-STK configuration is maintained in a
      sub-directory and can be selected as follow:
 
-       tools/configure.sh olimex-lpc1766stk/<subdir>
+       tools/configure.sh olimex-lpc1766stk:<subdir>
 
      Where <subdir> is one of the sub-directories identified in the following
      paragraphs.

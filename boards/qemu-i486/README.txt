@@ -118,7 +118,7 @@ Buildroot Instructions
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh qemu-i486/<sub-dir>
+     tools/configure.sh qemu-i486:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -160,7 +160,7 @@ Common Configuration Notes
   1. Each Qemu-i486 Web Server configuration is maintained in a sub-directory
      and can be selected as follow:
 
-       tools/configure.sh qemu-i486/<subdir>
+       tools/configure.sh qemu-i486:<subdir>
 
      Where <subdir> is one of the configuration sub-directories described in
      the following paragraph.

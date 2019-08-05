@@ -207,7 +207,7 @@ Basic configuration & build steps
   different from the default in your PATH variable).
 
    - Configures nuttx creating .config file in the nuttx directory.
-     $ tools/configure.sh nucleo-f746zg/nsh
+     $ tools/configure.sh nucleo-f746zg:nsh
    - Refreshes the .config file with the latest available configurations.
      $ make oldconfig
    - Select the features you want in the build.
@@ -514,7 +514,7 @@ f7xx-nsh:
 
      b. If this is the initial configuration then execute
 
-           ./tools/configure.sh nucleo-144/nsh
+           ./tools/configure.sh nucleo-144:nsh
 
         in nuttx/ in order to start configuration process.
         Caution: Doing this step more than once will overwrite .config with
@@ -579,7 +579,7 @@ f7xx-evalos:
 
     b. If this is the initial configuration then execute
 
-          ./tools/configure.sh nucleo-144/evalos
+          ./tools/configure.sh nucleo-144:evalos
 
        in nuttx/ in order to start configuration process.
        Caution: Doing this step more than once will overwrite .config with

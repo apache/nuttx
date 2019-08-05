@@ -809,7 +809,7 @@ Configurations
 Each Freedom K64F configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh freedom-k64f/<subdir>
+    tools/configure.sh freedom-k64f:<subdir>
 
 Where <subdir> is one of the following:
 

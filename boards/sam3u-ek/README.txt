@@ -205,7 +205,7 @@ Configurations
   Each SAM3U-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sam3u-ek/<subdir>
+    tools/configure.sh sam3u-ek:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

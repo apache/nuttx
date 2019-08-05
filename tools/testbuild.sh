@@ -1,7 +1,7 @@
 #!/bin/bash
 # testbuild.sh
 #
-#   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -277,8 +277,18 @@ for line in $testlist; do
       # Parse the next line
 
       config=`echo $line | cut -d',' -f1`
-      boarddir=`echo $config | cut -d'/' -f1`
-      configdir=`echo $config | cut -d'/' -f2`
+      configdir=`echo $config | cut -s -d':' -f2`
+      if [ -z "${configdir}" ]; then
+        configdir=`echo $config | cut -s -d'/' -f2`
+        if [ -z "${configdir}" ]; then
+          echo "ERROR: Malformed configuration: ${config}"
+          showusage
+        else
+          boarddir=`echo $config | cut -d'/' -f1`
+        fi
+      else
+        boarddir=`echo $config | cut -d':' -f1`
+      fi
 
       path=$nuttx/boards/$boarddir/configs/$configdir
       if [ ! -r "$path/defconfig" ]; then

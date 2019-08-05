@@ -366,7 +366,7 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh samd20-xplained/<sub-dir>
+     tools/configure.sh samd20-xplained:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -590,7 +590,7 @@ Configurations
   Each SAMD20 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh samd20-xplained/<subdir>
+    tools/configure.sh samd20-xplained:<subdir>
 
   Before building, make sure that the PATH environment variable include the
   correct path to the directory than holds your toolchain binaries.

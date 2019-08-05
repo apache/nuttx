@@ -621,7 +621,7 @@ Configurations
   Each PIC32MX configuration is maintained in a sub-directory and can be
   selected as follow:
 
-    tools/configure.sh sure-pic32mx/<subdir>
+    tools/configure.sh sure-pic32mx:<subdir>
 
   Where <subdir> is one of the following sub-directories.
 

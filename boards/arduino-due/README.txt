@@ -637,7 +637,7 @@ Configurations
   Each Arduino Due configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [OPTIONS] arduino-due/<subdir>
+    tools/configure.sh [OPTIONS] arduino-due:<subdir>
 
   Where typical options are -l to configure to build on Linux or -c to
   configure for Cygwin under Linux.  'tools/configure.sh -h' will show

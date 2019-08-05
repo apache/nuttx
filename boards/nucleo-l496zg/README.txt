@@ -318,7 +318,7 @@ nsh:
 
      b. If this is the initial configuration then execute
 
-           ./tools/configure.sh nucleo-l496zg/nsh
+           ./tools/configure.sh nucleo-l496zg:nsh
 
         in nuttx/ in order to start configuration process.
         Caution: Doing this step more than once will overwrite .config with

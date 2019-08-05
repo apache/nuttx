@@ -720,7 +720,7 @@ Configurations
   Each SAMA5D2-XULT configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh sama5d2-xult/<subdir>
+    tools/configure.sh sama5d2-xult:<subdir>
 
   Before building, make sure the PATH environment variable includes the
   correct path to the directory than holds your toolchain binaries.

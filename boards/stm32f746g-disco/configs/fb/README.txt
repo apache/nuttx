@@ -6,7 +6,7 @@ STM32F746G-DISCO LTDC Framebuffer demo example
 Configure and build
 -------------------
 
-tools/configure.sh stm32f746g-disco/fb
+tools/configure.sh stm32f746g-disco:fb
 make
 
 

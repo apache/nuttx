@@ -638,7 +638,7 @@ Configurations
 Each STM32F429I-DISCO configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh stm32f429i-disco/<subdir>
+    tools/configure.sh stm32f429i-disco:<subdir>
 
 Where <subdir> is one of the following:
 

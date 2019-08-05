@@ -630,7 +630,7 @@ Configurations
 Each LPC4337-ws configuration is maintained in a sub-directory and can be selected
 as follow:
 
-    tools/configure.sh LPC4337-ws/<subdir>
+    tools/configure.sh LPC4337-ws:<subdir>
 
 Where <subdir> is one of the following:
 

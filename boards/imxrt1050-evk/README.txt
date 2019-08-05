@@ -116,7 +116,7 @@ Configurations
   Each i.MX RT 10050 configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh [OPTIONS] imxrt1050-evk/<subdir>
+    tools/configure.sh [OPTIONS] imxrt1050-evk:<subdir>
 
   Where typical options are -l to configure to build on Linux or -c to
   configure for Cygwin under Linux.  'tools/configure.sh -h' will show

@@ -26,7 +26,7 @@ Configuring NuttX
 
     1) From a POSIX window:
 
-         tools/configure.sh [OPTIONS] z80sim/ostest
+         tools/configure.sh [OPTIONS] z80sim:ostest
 
        where you need to select the right [OPTIONS] for your build
        environment.  Do:
@@ -68,7 +68,7 @@ Configuring NuttX
 
     1) From a POSIX window:
 
-         tools/configure.sh [OPTIONS] z80sim/nsh
+         tools/configure.sh [OPTIONS] z80sim:nsh
 
        where you need to select the right [OPTIONS] for your build
        environment.  Do:
@@ -112,7 +112,7 @@ Configuring NuttX
 
     1) From a POSIX window:
 
-         tools/configure.sh [OPTIONS] z80sim/pashello
+         tools/configure.sh [OPTIONS] z80sim:pashello
 
        where you need to select the right [OPTIONS] for your build
        environment.  Do:

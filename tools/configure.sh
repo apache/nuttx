@@ -37,7 +37,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
   -l selects the Linux (l) host environment.
@@ -127,8 +127,20 @@ if [ -z "${boardconfig}" ]; then
   exit 2
 fi
 
-boarddir=`echo ${boardconfig} | cut -d'/' -f1`
-configdir=`echo ${boardconfig} | cut -d'/' -f2`
+configdir=`echo ${boardconfig} | cut -s -d':' -f2`
+if [ -z "${configdir}" ]; then
+  configdir=`echo ${boardconfig} | cut -s -d'/' -f2`
+  if [ -z "${configdir}" ]; then
+    echo ""
+    echo "Unrecognizable <board/config> argument: ${boardconfig}"
+    echo "$USAGE"
+    exit 3
+  else
+    boarddir=`echo ${boardconfig} | cut -d'/' -f1`
+  fi
+else
+  boarddir=`echo ${boardconfig} | cut -d':' -f1`
+fi
 
 configpath=${TOPDIR}/boards/${boarddir}/configs/${configdir}
 if [ ! -d "${configpath}" ]; then
@@ -141,12 +153,12 @@ if [ ! -d "${configpath}" ]; then
     echo "Select one of the following options for <board-name>:"
     configlist=`find ${TOPDIR}/boards -name defconfig`
     for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g" | sed -e "s,configs/,,g"`
+      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g" | sed -e "s,configs/,,g" | sed -e "s,/,:,g"`
       echo "  ${config}"
     done
     echo ""
     echo "$USAGE"
-    exit 3
+    exit 4
   fi
 fi
 
@@ -158,7 +170,7 @@ if [ ! -r "${src_makedefs}" ]; then
 
   if [ ! -r "${src_makedefs}" ]; then
     echo "File Make.defs could not be found"
-    exit 4
+    exit 5
   fi
 fi
 
@@ -244,16 +256,16 @@ winappdir=`echo "${appdir}" | sed -e 's/\\//\\\\\\\/g'`
 
 if [ ! -z "${appdir}" -a ! -d "${TOPDIR}/${posappdir}" ]; then
   echo "Directory \"${TOPDIR}/${posappdir}\" does not exist"
-  exit 7
+  exit 8
 fi
 
 # Okay... Everything looks good.  Setup the configuration
 
 echo "  Copy files"
 install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
-  { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
+  { echo "Failed to copy \"${src_makedefs}\"" ; exit 9 ; }
 install -m 644 "${src_config}" "${dest_config}" || \
-  { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
+  { echo "Failed to copy \"${src_config}\"" ; exit 10 ; }
 
 # Install any optional files
 
@@ -337,7 +349,7 @@ fi
 # reconstitued before they can be used.
 
 echo "  Refreshing..."
-cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 1; }
+cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 11; }
 
 MAKE_BIN=make
 if [ ! -z `which gmake 2>/dev/null` ]; then

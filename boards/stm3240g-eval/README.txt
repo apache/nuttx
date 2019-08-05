@@ -639,7 +639,7 @@ Configurations
 Each STM3240G-EVAL configuration is maintained in a sub-directory and
 can be selected as follow:
 
-    tools/configure.sh stm3240g-eval/<subdir>
+    tools/configure.sh stm3240g-eval:<subdir>
 
 Where <subdir> is one of the following:
 

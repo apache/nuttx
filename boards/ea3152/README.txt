@@ -149,7 +149,7 @@ NuttX buildroot Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     tools/configure.sh ea3152/<sub-dir>
+     tools/configure.sh ea3152:<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -204,7 +204,7 @@ Image Format
   Then, to build the NuttX binary ready to load with the bootloader, just
   following these steps:
 
-  - tools/configure.sh ea3152/ostest # (using the ostest configuration for this example)
+  - tools/configure.sh ea3152:ostest # (using the ostest configuration for this example)
   - cd ..                            # Set up environment
   - make                             # Make NuttX.  This will produce nuttx.bin
   - mklpc.sh                         # Make the bootloader binary (nuttx.lpc)
@@ -394,7 +394,7 @@ Configurations
 Each EA3152 configuration is maintained in a sub-directory and can be
 selected as follow:
 
-    tools/configure.sh ea3152/<subdir>
+    tools/configure.sh ea3152:<subdir>
 
 Where <subdir> is one of the following:
 

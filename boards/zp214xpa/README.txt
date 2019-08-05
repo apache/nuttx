@@ -284,7 +284,7 @@ Configurations:
   Each NXP LPC214x configuration is maintained in a sub-directory and
   can be selected as follow:
 
-    tools/configure.sh zp214xpa/<subdir>
+    tools/configure.sh zp214xpa:<subdir>
 
   Where <subdir> is one of the following:
 

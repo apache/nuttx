@@ -59,7 +59,7 @@ Here is a simple test configuration using the NuttX simulator:
 1. Install the sim/nsh configuration:
 
    cd tools
-   ./configure.sh sim/nsh
+   ./configure.sh sim:nsh
    cd ..
 
 2. Install p-code virtual machine as described above.

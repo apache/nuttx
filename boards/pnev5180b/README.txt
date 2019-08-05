@@ -79,7 +79,7 @@ Each PNEV5180B configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools
-    ./configure.sh pnev5180b/<subdir>
+    ./configure.sh pnev5180b:<subdir>
     cd -
 
 Where <subdir> is one of the following:
