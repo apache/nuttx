@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/configure.sh
 #
-#   Copyright (C) 2007, 2008, 2011, 2015, 2017-2018 Gregory Nutt. All rights
+#   Copyright (C) 2007, 2008, 2011, 2015, 2017-2019 Gregory Nutt. All rights
 #     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
@@ -37,7 +37,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/configs/<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>/<config-name>
 
 Where:
   -l selects the Linux (l) host environment.
@@ -108,7 +108,7 @@ while [ ! -z "$1" ]; do
     *)
       if [ ! -z "${boardconfig}" ]; then
         echo ""
-        echo "<board/configs/config> defined twice"
+        echo "<board/config> defined twice"
         echo "$USAGE"
         exit 1
       fi
@@ -122,12 +122,15 @@ done
 
 if [ -z "${boardconfig}" ]; then
   echo ""
-  echo "Missing <board/configs/config> argument"
+  echo "Missing <board/config> argument"
   echo "$USAGE"
   exit 2
 fi
 
-configpath=${TOPDIR}/boards/${boardconfig}
+boarddir=`echo ${boardconfig} | cut -d'/' -f1`
+configdir=`echo ${boardconfig} | cut -d'/' -f2`
+
+configpath=${TOPDIR}/boards/${boarddir}/configs/${configdir}
 if [ ! -d "${configpath}" ]; then
   # Try direct path for convenience.
 
@@ -147,12 +150,11 @@ if [ ! -d "${configpath}" ]; then
   fi
 fi
 
-src_makedefs="${configpath}/Make.defs"
+src_makedefs="${TOPDIR}/boards/${boarddir}/configs/${configdir}/Make.defs"
 dest_makedefs="${TOPDIR}/Make.defs"
 
 if [ ! -r "${src_makedefs}" ]; then
-  boardpath=`dirname $configpath`
-  src_makedefs="${boardpath}/../scripts/Make.defs"
+  src_makedefs="${TOPDIR}/boards/${boarddir}/scripts/Make.defs"
 
   if [ ! -r "${src_makedefs}" ]; then
     echo "File Make.defs could not be found"

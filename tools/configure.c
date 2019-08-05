@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/configure.c
  *
- *   Copyright (C) 2012, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -550,7 +550,7 @@ static void enumerate_configs(void)
 
 static void check_configdir(void)
 {
-  /* Get the path to the top level configuration directory */
+  /* Get the path to the top level configuration directory: boards/ */
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%cboards", g_topdir, g_delim);
   debug("check_configdir: Checking configtop=%s\n", g_buffer);
@@ -558,10 +558,12 @@ static void check_configdir(void)
   verify_directory(g_buffer);
   g_configtop = strdup(g_buffer);
 
-  /* Get and verify the path to the selected configuration */
+  /* Get and verify the path to the selected configuration:
+   * boards/<boarddir>/configs/<configdir>
+   */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s",
-           g_topdir, g_delim, g_delim, g_boarddir, g_delim, g_configdir);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%cconfigs%c%s",
+           g_topdir, g_delim, g_delim, g_boarddir, g_delim, g_delim, g_configdir);
   debug("check_configdir: Checking configpath=%s\n", g_buffer);
 
   if (!verify_optiondir(g_buffer))
@@ -572,6 +574,10 @@ static void check_configdir(void)
     }
 
   g_configpath = strdup(g_buffer);
+
+  /* Get and verfy the path to the scripts directory:
+   * boards/<boarddir>/scripts
+   */
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%cscripts",
            g_topdir, g_delim, g_delim, g_boarddir, g_delim);
