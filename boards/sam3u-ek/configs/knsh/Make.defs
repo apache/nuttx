@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam3u-ek/knsh/Make.defs
+# boards/sam3u-ek/configs/knsh/Make.defs
 #
 #   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
