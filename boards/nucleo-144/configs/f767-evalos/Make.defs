@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-144/f767-evalos/Make.defs
+# boards/nucleo-144/configs/f767-evalos/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Authors: Gregory Nutt <gnutt@nuttx.org>

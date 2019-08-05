@@ -679,7 +679,7 @@ Instantiating "Canned" Configurations
 
     "Canned" NuttX configuration files are retained in:
 
-      boards/<board-name>/<config-dir>
+      boards/<board-name>/configs/<config-dir>
 
     Where <board-name> is the name of your development board and <config-dir>
     is the name of the sub-directory containing a specific configuration for
@@ -720,7 +720,7 @@ Instantiating "Canned" Configurations
       Configuring NuttX requires only copying two files from the
       <config-dir> to the directory where you installed NuttX (TOPDIR):
 
-        Copy boards/<board-name>/<config-dir>/Make.def to{TOPDIR}/Make.defs
+        Copy boards/<board-name>/configs/<config-dir>/Make.def to{TOPDIR}/Make.defs
         OR
         Copy boards/<board-name>/scripts/Make.def to{TOPDIR}/Make.defs
 
@@ -731,7 +731,7 @@ Instantiating "Canned" Configurations
       it may use a common Make.defs file for the board in the scripts/
       directory.  The first takes precedence.
 
-        Copy boards/<board-name>/<config-dir>/defconfig to{TOPDIR}/.config
+        Copy boards/<board-name>/configs/<config-dir>/defconfig to{TOPDIR}/.config
 
       The defconfig file holds the actual build configuration.  This
       file is included by all other make files to determine what is
@@ -1792,15 +1792,17 @@ nuttx/
  |   |- ekk-lm3s9b96/
  |   |   `- README.txt
  |   |- ez80f910200kitg/
- |   |   |- ostest/README.txt
- |   |   `- README.txt
+ |   |   `- configs/
+ |   |       |- ostest/README.txt
+ |   |       `- README.txt
  |   |- ez80f910200zco/
- |   |   |- dhcpd/README.txt
- |   |   |- httpd/README.txt
- |   |   |- nettest/README.txt
- |   |   |- nsh/README.txt
- |   |   |- ostest/README.txt
- |   |   |- poll/README.txt
+ |   |   |- configs/
+ |   |   |   |- dhcpd/README.txt
+ |   |   |   |- httpd/README.txt
+ |   |   |   |- nettest/README.txt
+ |   |   |   |- nsh/README.txt
+ |   |   |   |- ostest/README.txt
+ |   |   |   |- poll/README.txt
  |   |   `- README.txt
  |   |- fire-stm32v2/
  |   |   `- README.txt
@@ -1853,7 +1855,8 @@ nuttx/
  |   |- lpcxpresso-lpc54628/
  |   |   `- README.txt
  |   |- makerlisp/
- |   |   |- nsh/README.txt
+ |   |   |-configs/
+ |   |   |  `- nsh/README.txt
  |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
@@ -1992,7 +1995,6 @@ nuttx/
  |   |- spresense/
  |   |   `- README.txt
  |   |- stm3210e-eval/
- |   |   |- RIDE/README.txt
  |   |   `- README.txt
  |   |- stm3220g-eval/
  |   |   `- README.txt
@@ -2012,9 +2014,10 @@ nuttx/
  |   |   |- fb/README.txt
  |   |   `- README.txt
  |   |- stm32f746g-disco/
- |   |   _- fb/README.txt
- |   |   _- nxdemo/README.txt
- |   |   _- nxterm/README.txt
+ |   |   |- configs/
+ |   |   |  |- fb/README.txt
+ |   |   |  |- nxdemo/README.txt
+ |   |   |  `- nxterm/README.txt
  |   |   `- README.txt
  |   |- stm32f769i-disco/
  |   |   `- README.txt
@@ -2057,16 +2060,19 @@ nuttx/
  |   |- xmc5400-relax/
  |   |   `- README.txt
  |   |- z16f2800100zcog/
- |   |   |- ostest/README.txt
- |   |   |- pashello/README.txt
+ |   |   |- configs/
+ |   |   |   |- ostest/README.txt
+ |   |   |   `- pashello/README.txt
  |   |   `- README.txt
  |   |- z80sim/
  |   |   `- README.txt
  |   |- z8encore000zco/
- |   |   |- ostest/README.txt
+ |   |   |- configs/
+ |   |   |  `- ostest/README.txt
  |   |   `- README.txt
  |   |- z8f64200100kit/
- |   |   |- ostest/README.txt
+ |   |   |- configs/
+ |   |   |  `- ostest/README.txt
  |   |   `- README.txt
  |   |- zkit-arm-1769/
  |   |   `- README.txt

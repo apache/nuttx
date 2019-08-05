@@ -1,5 +1,5 @@
 ############################################################################
-# boards/open1788/knsh/Make.defs
+# boards/open1788/configs/knsh/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

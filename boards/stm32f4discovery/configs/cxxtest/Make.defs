@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f4discovery/cxxtest/Make.defs
+# boards/stm32f4discovery/configs/cxxtest/Make.defs
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

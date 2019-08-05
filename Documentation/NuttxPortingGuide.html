@@ -315,9 +315,10 @@
 |   |   |   |   `-- <i>(other board-specific header files)</i>
 |   |   |   |-- src/
 |   |   |   |   `-- <i>(board-specific source files)</i>
-|   |   |   |---<i>&lt;config-name&gt;</i>/
-|   |   |   |   `-- <i>(board configuration-specific source files)</i>
-|   |   |   `---<i>(other configuration sub-directories for this board)</i>/
+|   |   |   `- configs/
+|   |   |       |---<i>&lt;config-name&gt;</i>/
+|   |   |       |   `-- <i>(board configuration-specific source files)</i>
+|   |   |       `---<i>(other configuration sub-directories for this board)</i>/
 |   |   `-- <i>&lt;(other board directories)&gt;</i>/
 |   |-- crypto
 |   |   |-- Makefile
@@ -812,12 +813,13 @@
 |-- src/
 |   |-- Makefile
 |   `-- <i>(board-specific source files)</i>
-|-- <i>&lt;config1-dir&gt;</i>
-|   |-- Make.defs
-|   `-- defconfig
-|-- <i>&lt;config2-dir&gt;</i>
-|   |-- Make.defs
-|   `-- defconfig
+|-- configs/
+|   |-- <i>&lt;config1-dir&gt;</i>
+|   |   |-- Make.defs (optional)
+|   |   `-- defconfig
+|   |-- <i>&lt;config2-dir&gt;</i>
+|   |   |-- Make.defs
+|   |   `-- defconfig
 |   ...
 |-- scripts/
 |   |-- <i>(linker script files)</i>
@@ -850,7 +852,7 @@
 </ul>
 <h4><a name="boardconfigsubdirs">2.5.2.2 Board Specific Configuration Sub-Directories</a></h4>
 <p>
-  The <code>boards/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
+  The <code>boards/</code><i>&lt;board-name&gt;</i><code>/configs</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
   Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
@@ -1555,8 +1557,8 @@ tools/
   This could be done manually as follows:
 </p>
 <ul>
-  <li>Copy <code>boards/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code>,<li>
-  <li>Copy <code>boards/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
+  <li>Copy <code>boards/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code> (see NOTE below),</li>
+  <li>Copy <code>boards/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 
 <p>
@@ -1566,6 +1568,9 @@ tools/
   identified <a href="#supportedboards">above</a>.
   &lt;config-dir&gt; is the optional, specific configuration directory for the board.
   And &lt;app-dir&gt; is the location of the optional application directory.
+</p>
+<p>
+  NOTE:  Recall that the <code>Make.defs</code> file may reside in either the <code>boards/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i></code> directory or in the <code>boards/</code><i>&lt;board-name&gt;</i>/<code>scripts</code>.
 </p>
 <p>
   <b>Automated Configuration</b>.
