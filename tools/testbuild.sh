@@ -277,8 +277,10 @@ for line in $testlist; do
       # Parse the next line
 
       config=`echo $line | cut -d',' -f1`
+      boarddir=`echo $config | cut -d'/' -f1`
+      configdir=`echo $config | cut -d'/' -f2`
 
-      path=$nuttx/boards/$config
+      path=$nuttx/boards/$boarddir/configs/$configdir
       if [ ! -r "$path/defconfig" ]; then
         echo "ERROR: no configuration found at $path"
         showusage
