@@ -805,7 +805,7 @@ refresh.sh
       --help
          Show this help message and exit
       <board>
-         The board directory under nuttx/configs
+         The board directory under nuttx/boards
       <config>
          The board configuration directory under nuttx/boards/<board>
 
@@ -944,7 +944,7 @@ testbuild.sh
 
   The first value is the usual configuration description of the form
   form <board-name>/<configuration-name> and must correspond to a
-  configuration in the nuttx/configs directory.
+  configuration in the nuttx/boards directory.
 
   The second value is valid name for a toolchain configuration to use
   when building the configuration.  The set of valid toolchain

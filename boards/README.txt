@@ -3,10 +3,10 @@ Board-Specific Configurations
 
 This directory contains the board support for logic for all boards supported
 by NuttX.  This directory is retained in a separate repository and is a Sub-
-Module of NuttX and will appear as nuttx/configs when the NuttX repository
+Module of NuttX and will appear as nuttx/boards when the NuttX repository
 is cloned.
 
-The nuttx/configs directory is a part of the internal OS.  It should contain
+The nuttx/boards directory is a part of the internal OS.  It should contain
 only OS bring-up logic and driver initialization logic.  THERE SHOULD BE NO
 APPLICATION CALLABLE LOGIC IN THIS DIRECTORY.
 
@@ -58,7 +58,7 @@ the arch/ subdirectory completely define a customized port of NuttX.
 Directory Structure
 ^^^^^^^^^^^^^^^^^^^
 
-The configs directory contains board specific configuration logic.  Each
+The boards/ directory contains board specific configuration logic.  Each
 board must provide a subdirectory <board-name> under boards/ with the
 following characteristics:
 
@@ -200,12 +200,12 @@ boards/c5471evm
   NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
   This port is complete and verified.
 
-configs launchxl_cc1310
+boards/launchxl_cc1310
   Port to the TI SimpleLink CC1310 LaunchPad Evaluation Kit (LAUNCHXL-CC1310)
   featuring the SimpleLinkCC1310 chip.  This board features the CC1310F128
   part with 128Kb of FLASH and 20Kb of SRAM.
 
-configs launchxl_cc1312r1
+boards/launchxl_cc1312r1
   Port to the TI SimpleLink CC1312R1 LaunchPad Evaluation Kit (LAUNCHXL-CC1312R1)
   featuring the SimpleLinkCC1312R1 chip.
 

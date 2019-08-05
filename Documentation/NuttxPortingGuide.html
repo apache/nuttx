@@ -32,7 +32,7 @@
     <a href="#DirStructAudio">2.4 nuttx/audio/</a><br>
     <a href="#DirStructConfigs">2.5 nuttx/boards/</a>
     <ul>
-      <a href="#configsdirectorystructure">2.5.1 Subdirectory Structure</a><br>
+      <a href="#boardsdirectorystructure">2.5.1 Subdirectory Structure</a><br>
       <a href="#summaryofconfigfiles">2.5.2 Summary of Files</a>
       <ul>
         <a href="#boardlogic">2.5.2.1 Board Specific Logic</a><br>
@@ -240,7 +240,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 25, 2019</p>
+      <p>Last Updated: August 5, 2019</p>
     </td>
   </tr>
 </table>
@@ -309,7 +309,7 @@
 |   |   |-- <i>(binfmt-specific sub-directories)</i>/
 |   |   |   `-- <i>(binfmt-specific source files)</i>
 |   |   `-- <i>(common binfmt source files)</i>
-|   |-- <a href="#DirStructConfigs">configs</a>/
+|   |-- <a href="#DirStructConfigs">boards</a>/
 |   |   |-- <i>&lt;board-name&gt;</i>/
 |   |   |   |-- include/
 |   |   |   |   `-- <i>(other board-specific header files)</i>
@@ -527,7 +527,7 @@
     <p>
       These board-specific configuration files can be found in the
       <code>boards/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
-      in a paragraph <a href="#configsdirectorystructure">below</a>.
+      in a paragraph <a href="#boardsdirectorystructure">below</a>.
     </p>
     <p>
       The directory <code>boards/stm32f4disovery/</code>, as an example, holds board-specific logic for the STM32F4 Discovery board and is selected via the <code>CONFIG_ARCH_BOARD=&quot;stm32f4discovery&quot;</code> configuration setting.
@@ -791,16 +791,16 @@
   The <code>audio/</code> subdirectory contains the NuttX audio sub-system.
 </p>
 
-<h2>2.5 <a name="DirStructConfigs">nuttx/configs</a></h2>
+<h2>2.5 <a name="DirStructConfigs">nuttx/boards</a></h2>
 <p>
   The <code>boards/</code> subdirectory contains configuration data for each board.
   These board-specific configurations plus the architecture-specific configurations in
   the <code>arch/</code> subdirectory complete define a customized port of NuttX.
 </p>
 
-<h3><a name="configsdirectorystructure">2.5.1 Subdirectory Structure</a></h3>
+<h3><a name="boardsdirectorystructure">2.5.1 Subdirectory Structure</a></h3>
 <p>
-  The configs directory contains board specific configuration files.  Each board must
+  The <code>boards/</code> directory contains board specific configuration files.  Each board must
   provide a subdirectory &lt;board-name&gt; under <code>boards/</code> with the following characteristics:
 </p>
 <ul><pre>
@@ -1600,7 +1600,7 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
-  &lt;board-name&gt; is the name of the board in the configs directory
+  &lt;board-name&gt; is the name of the board in the <code>boards/</code> directory
   &lt;config-name&gt; is the name of the board configuration sub-directory
   &lt;app-dir&gt; is the path to the apps/ directory, relative to the nuttx
      directory

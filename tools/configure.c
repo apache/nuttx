@@ -171,11 +171,11 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    ..%capps-xx.yy where xx.yy is the NuttX version number.\n", g_delim);
   fprintf(stderr, "  <board-name>:\n");
   fprintf(stderr, "    Identifies the board.  This must correspond to a board directory\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c.\n", g_delim, g_delim);
+  fprintf(stderr, "    under nuttx%cboards%c.\n", g_delim, g_delim);
   fprintf(stderr, "  <config-name>:\n");
   fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
   fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c<board-name>%c.\n", g_delim, g_delim, g_delim);
+  fprintf(stderr, "    under nuttx%cboards%c<board-name>%c.\n", g_delim, g_delim, g_delim);
   fprintf(stderr, "  -h:\n");
   fprintf(stderr, "    Prints this message and exits.\n");
   exit(exitcode);
@@ -552,7 +552,7 @@ static void check_configdir(void)
 {
   /* Get the path to the top level configuration directory */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs", g_topdir, g_delim);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards", g_topdir, g_delim);
   debug("check_configdir: Checking configtop=%s\n", g_buffer);
 
   verify_directory(g_buffer);
@@ -560,7 +560,7 @@ static void check_configdir(void)
 
   /* Get and verify the path to the selected configuration */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs%c%s%c%s",
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s",
            g_topdir, g_delim, g_delim, g_boarddir, g_delim, g_configdir);
   debug("check_configdir: Checking configpath=%s\n", g_buffer);
 
@@ -573,7 +573,7 @@ static void check_configdir(void)
 
   g_configpath = strdup(g_buffer);
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs%c%s%cscripts",
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%cscripts",
            g_topdir, g_delim, g_delim, g_boarddir, g_delim);
   debug("check_configdir: Checking scriptspath=%s\n", g_buffer);
 

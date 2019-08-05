@@ -192,8 +192,8 @@ Unlocking FLASH
 
       J-Link>mem8 804000,10
       00804000 = 39 92 9A F6 80 FF EC AE FF FF FF FF FF FF FF FF
-      J-Link>loadfile D:\Spuda\Documents\projects\nuttx\master\nuttx\configs\metro-m4\scripts\nvm.srec
-      Downloading file [D:\Spuda\Documents\projects\nuttx\master\nuttx\configs\metro-m4\scripts\nvm.srec]...
+      J-Link>loadfile D:\Spuda\Documents\projects\nuttx\master\nuttx\boards\metro-m4\scripts\nvm.srec
+      Downloading file [D:\Spuda\Documents\projects\nuttx\master\nuttx\boards\metro-m4\scripts\nvm.srec]...
       J-Link: Flash download: Bank 1 @ 0x00804000: 1 range affected (16 bytes)
       J-Link: Flash download: Total time needed: 0.089s (Prepare: 0.035s, Compare: 0.011s, Erase: 0.000s, Program: 0.019s, Verify: 0.011s, Restore: 0.011s)
       O.K.
