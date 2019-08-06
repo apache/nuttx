@@ -140,7 +140,7 @@ fi
 archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
 
 for arc in ${archs}; do
-  if [ -f boards/${arc}/${boarddir}/Kconfig ]; then
+  if [ -f ${TOPDIR}/boards/${arc}/${boarddir}/Kconfig ]; then
     archdir=${arc}
     echo "  Detected ${archdir} Architecture"
   fi
