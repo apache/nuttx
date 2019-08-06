@@ -73,7 +73,7 @@ else
 BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 endif
 else
-BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)
+BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_BOARD)
 endif
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.

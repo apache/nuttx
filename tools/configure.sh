@@ -135,7 +135,17 @@ else
   boarddir=`echo ${boardconfig} | cut -d':' -f1`
 fi
 
-configpath=${TOPDIR}/boards/${boarddir}/configs/${configdir}
+# Try to detect architecure for convenience.
+archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+
+for arc in ${archs}; do
+  if [ -f boards/${arc}/${boarddir}/Kconfig ]; then
+  archdir=${arc}
+  echo "Detected ${archdir} Architecture"
+  fi
+done
+
+configpath=${TOPDIR}/boards/${archdir}/${boarddir}/configs/${configdir}
 if [ ! -d "${configpath}" ]; then
   # Try direct path for convenience.
 
@@ -155,11 +165,11 @@ if [ ! -d "${configpath}" ]; then
   fi
 fi
 
-src_makedefs="${TOPDIR}/boards/${boarddir}/configs/${configdir}/Make.defs"
+src_makedefs="${TOPDIR}/boards/${archdir}/${boarddir}/configs/${configdir}/Make.defs"
 dest_makedefs="${TOPDIR}/Make.defs"
 
 if [ ! -r "${src_makedefs}" ]; then
-  src_makedefs="${TOPDIR}/boards/${boarddir}/scripts/Make.defs"
+  src_makedefs="${TOPDIR}/boards/${archdir}/${boarddir}/scripts/Make.defs"
 
   if [ ! -r "${src_makedefs}" ]; then
     src_makedefs="${TOPDIR}/${boardconfig}/Make.defs"
