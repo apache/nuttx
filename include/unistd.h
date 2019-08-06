@@ -371,7 +371,9 @@ long    sysconf(int name);
 /* User and group identity management */
 
 int     setuid(uid_t uid);
+uid_t   getuid(void);
 int     setgid(gid_t gid);
+gid_t   getgid(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getuid.c
+ * sched/group/group_setuid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.net>
@@ -42,27 +42,37 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <sched/sched.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getuid
+ * Name: setuid
  *
  * Description:
- *   The getuid() function will return the real user ID of the calling process.
+ *   The setuid() function sets the real user ID, effective user ID, and the
+ *   saved set-user-ID of the calling process to uid, given appropriate
+ *   privileges.
  *
  * Input Parameters:
- *   None
+ *   uid - User identity to set the various process' user ID attributes to.
  *
  * Returned Value:
- *   The real user ID of the calling task group.
+ *   Zero if successful and -1 in case of failure, in which case errno is set
+ *   appropriately.
  *
  ****************************************************************************/
 
-uid_t getuid(void)
+int setuid(uid_t uid)
 {
-  /* Return the user identity 'root' with a uid value of 0. */
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
 
-  return 0;
+  /* Set the task group's group identity. */
+
+  DEBUGASSERT(group != NULL);
+  rgroup->tg_uid = uid;
+  return OK;
 }

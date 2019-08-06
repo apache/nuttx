@@ -50,11 +50,13 @@
 #include <nuttx/sched.h>
 
 #include "environ/environ.h"
+#include "sched/sched.h"
 #include "group/group.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Is this worth making a configuration option? */
 
 #define GROUP_INITIAL_MEMBERS 4
@@ -62,6 +64,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is counter that is used to generate unique task group IDs */
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
@@ -143,6 +146,40 @@ static void group_assign_grpid(FAR struct task_group_s *group)
     }
 }
 #endif /* HAVE_GROUP_MEMBERS */
+
+/****************************************************************************
+ * Name: group_inherit_identity
+ *
+ * Description:
+ *   All inherit the user identity from the parent task group.
+ *
+ * Input Parameters:
+ *   group - The new task group.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The parent of the new task is the task at the head of the assigned task
+ *   list for the current CPU.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+static inline void group_inherit_identity(FAR struct task_group_s *group)
+{
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
+
+  /* Inherit the user identity from the parent task group. */
+
+  DEBUGASSERT(group != NULL);
+  group->tg_uid = rgroup->tg_uid;
+  group->tg_gid = rgroup->tg_gid;
+}
+#else
+#  define group_inherit_identity(group)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -229,6 +266,10 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   group_assign_grpid(group);
 #endif
+
+  /* Inherit the user identity from the parent task group */
+
+  group_inherit_identity(group);
 
   /* Duplicate the parent tasks environment */
 

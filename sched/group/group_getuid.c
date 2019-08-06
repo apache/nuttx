@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getuid.c
+ * sched/group/group_getuid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.net>
@@ -42,6 +42,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <sched/sched.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -62,7 +64,11 @@
 
 uid_t getuid(void)
 {
-  /* Return the user identity 'root' with a uid value of 0. */
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
 
-  return 0;
+  /* Set the task group's group identity. */
+
+  DEBUGASSERT(group != NULL);
+  return rgroup->tg_uid;
 }

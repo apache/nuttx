@@ -59,6 +59,15 @@ SYSCALL_LOOKUP(sched_yield,                0, STUB_sched_yield)
 SYSCALL_LOOKUP(set_errno,                  1, STUB_set_errno)
 SYSCALL_LOOKUP(uname,                      1, STUB_uname)
 
+/* User identity */
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+SYSCALL_LOOKUP(setuid,                     1, STUB_setuid)
+SYSCALL_LOOKUP(getuid,                     0, STUB_getuid)
+SYSCALL_LOOKUP(setgid,                     1, STUB_setgid)
+SYSCALL_LOOKUP(getgid,                     0, STUB_getgid)
+#endif
+
 /* Semaphores */
 
 SYSCALL_LOOKUP(sem_destroy,                1, STUB_sem_destroy)

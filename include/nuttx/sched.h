@@ -441,6 +441,13 @@ struct task_group_s
 #endif
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
+  /* User identity **************************************************************/
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t   tg_uid;                   /* User identity                            */
+  gid_t   tg_gid;                   /* User group identity                      */
+#endif
+
   /* Group membership ***********************************************************/
 
   uint8_t    tg_nmembers;           /* Number of members in the group           */

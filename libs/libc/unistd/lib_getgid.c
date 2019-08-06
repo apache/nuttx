@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_aetgid.c
+ * libs/libc/unistd/lib_getgid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.net>
@@ -56,12 +56,11 @@
  *   None.
  *
  * Returned Value:
- *   The getgid() function is always be successful and no return value is
- *   reserved to indicate an error..
+ *   The real group ID of the calling task group.
  *
  ****************************************************************************/
 
-int setgid(gid_t gid)
+gid_t getgid(void)
 {
   /* Return group identity 'root' with a gid value of 0. */
 

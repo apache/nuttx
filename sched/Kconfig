@@ -621,6 +621,17 @@ config SCHED_EXIT_KILL_CHILDREN
 		memory leaks since, for example, memory allocations held by threads
 		are not automatically freed!
 
+config SCHED_USER_IDENTITY
+	bool "Support per-task User Identity"
+	default n
+	---help---
+		This selection enables functionality of getuid(), setuid(), getgid(),
+		setgid().  If this option is not selected, then stub, root-only
+		versions of these interfaces are avaialbe.  When selected, these
+		interfaces will associate a UID and/or GID with each task group.
+		Those can then be managed using the interfaces.  Child tasks will
+		inherit the UID and GID of its parent.
+
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
