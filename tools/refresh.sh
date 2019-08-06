@@ -90,11 +90,11 @@ done
 
 # Get the board configuration
 
-if [ -z "$1" ]; then
-    echo "ERROR: No configuration provided"
-    echo $USAGE
-    echo $ADVICE
-    exit 1
+if [ -z "${CONFIG}" ]; then
+  echo "ERROR: No configuration provided"
+  echo $USAGE
+  echo $ADVICE
+  exit 1
 fi
 
 CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d':' -f2`
@@ -110,6 +110,21 @@ if [ -z "${CONFIGSUBDIR}" ]; then
   fi
 else
   BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
+fi
+
+# Detect the architecture of this board.
+
+ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+
+for arch in ${ARCHLIST}; do
+  if [ -f boards/${arch}/${BOARDSUBDIR}/Kconfig ]; then
+    ARCHSUBDIR=${arch}
+  fi
+done
+
+if [ -z "${ARCHSUBDIR}" ]; then
+  echo "ERROR:  Architecture of ${BOARDSUBDIR} not found"
+  exit 1
 fi
 
 # Where are we
@@ -129,7 +144,7 @@ fi
 
 WD=${PWD}
 
-BOARDDIR=boards/$BOARDSUBDIR
+BOARDDIR=boards/$ARCHSUBDIR/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts
 MAKEDEFS1=$SCRIPTSDIR/Make.defs
 

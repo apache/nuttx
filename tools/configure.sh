@@ -135,19 +135,20 @@ else
   boarddir=`echo ${boardconfig} | cut -d':' -f1`
 fi
 
-# Try to detect architecure for convenience.
+# Try to detect architecture for convenience.
+
 archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
 
 for arc in ${archs}; do
   if [ -f boards/${arc}/${boarddir}/Kconfig ]; then
-  archdir=${arc}
-  echo "Detected ${archdir} Architecture"
+    archdir=${arc}
+    echo "  Detected ${archdir} Architecture"
   fi
 done
 
 configpath=${TOPDIR}/boards/${archdir}/${boarddir}/configs/${configdir}
 if [ ! -d "${configpath}" ]; then
-  # Try direct path for convenience.
+  # Try direct path used with custom configurations.
 
   configpath=${TOPDIR}/${boardconfig}
   if [ ! -d "${configpath}" ]; then
@@ -156,8 +157,10 @@ if [ ! -d "${configpath}" ]; then
     echo "Select one of the following options for <board-name>:"
     configlist=`find ${TOPDIR}/boards -name defconfig`
     for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g" | sed -e "s,/configs/,:,g"`
-      echo "  ${config}"
+      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
+      boardname=`echo ${config} | cut -d'/' -f2`
+      configname=`echo ${config} | cut -d'/' -f4`
+      echo "  ${boardname}:${configname}"
     done
     echo ""
     echo "$USAGE"

@@ -290,7 +290,22 @@ for line in $testlist; do
         boarddir=`echo $config | cut -d':' -f1`
       fi
 
-      path=$nuttx/boards/$boarddir/configs/$configdir
+      # Detect the architecture of this board.
+
+      ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+
+      for arch in ${ARCHLIST}; do
+        if [ -f $nuttx/boards/${arch}/${boarddir}/Kconfig ]; then
+          archdir=${arch}
+        fi
+      done
+
+      if [ -z "${archdir}" ]; then
+        echo "ERROR:  Architecture of ${boarddir} not found"
+        exit 1
+      fi
+
+      path=$nuttx/boards/$archdir/$boarddir/configs/$configdir
       if [ ! -r "$path/defconfig" ]; then
         echo "ERROR: no configuration found at $path"
         showusage
