@@ -1,7 +1,7 @@
 #!/bin/bash
 # refresh.sh
 #
-#   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016-2017, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,6 @@ if [ -z "${CONFIGSUBDIR}" ]; then
 else
   BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
 fi
-
 
 # Where are we
 
