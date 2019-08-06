@@ -368,6 +368,11 @@ int     sethostname(FAR const char *name, size_t size);
 
 long    sysconf(int name);
 
+/* User and group identity management */
+
+int     setuid(uid_t uid);
+int     setgid(gid_t gid);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

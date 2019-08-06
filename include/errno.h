@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* How can we access the errno variable? */
 
 #if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
@@ -87,7 +88,8 @@
 
 #  else
    /* User libraries for the kernel.  Only indirect access from user
-    * libraries */
+    * libraries
+   */
 
 #    undef __DIRECT_ERRNO_ACCESS
 #  endif
