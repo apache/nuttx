@@ -247,7 +247,7 @@
 #  define ETH_MACQTXFCR_PLT_M256        (4 << ETH_MACQTXFCR_PLT_SHIFT) /* 100 PT - 256 slot times */
 #  define ETH_MACQTXFCR_PLT_M512        (5 << ETH_MACQTXFCR_PLT_SHIFT) /* 101 PT - 512 slot times */
 #define ETH_MACQTXFCR_DZPQ              (1 << 7)  /* Bit 7: Zero-quanta pause disable */
-#define ETH_MACQTXFCR_PT_SHIFT          (4)       /* Bits 16-31: Pause Time */
+#define ETH_MACQTXFCR_PT_SHIFT          (16)      /* Bits 16-31: Pause Time */
 #define ETH_MACQTXFCR_PT_MASK           (0xFFFF << ETH_MACQTXFCR_PT_SHIFT)
 #define ETH_MACQTXFCR_PT(n)             ((uint32_t)(n) << ETH_MACQTXFCR_PT_SHIFT)
 

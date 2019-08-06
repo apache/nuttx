@@ -776,8 +776,8 @@
 #define RCC_APB1LRSTR_HDMICECRST        (1 << 27)   /* RCC APB1LRSTR: HDMICECRST */
                                                     /* Bit 28: Reserved */
 #define RCC_APB1LRSTR_DAC1RST           (1 << 29)   /* RCC APB1LRSTR: DAC1RST */
-#define RCC_APB1LRSTR_USART7RST         (1 << 30)   /* RCC APB1LRSTR: USART7RST */
-#define RCC_APB1LRSTR_USART8RST         (1 << 31)   /* RCC APB1LRSTR: USART8RST */
+#define RCC_APB1LRSTR_UART7RST          (1 << 30)   /* RCC APB1LRSTR: UART7RST */
+#define RCC_APB1LRSTR_UART8RST          (1 << 31)   /* RCC APB1LRSTR: UART8RST */
 
 /* APB1 H peripheral reset register */
 
@@ -913,8 +913,8 @@
 #define RCC_APB1LENR_HDMICECEN          (1 << 27) /* RCC APB1LENR: HDMICECEN */
                                                   /* Bit 28: Reserved */
 #define RCC_APB1LENR_DAC1EN             (1 << 29) /* RCC APB1LENR: DAC1EN */
-#define RCC_APB1LENR_UART7EN            (1 << 30) /* RCC APB1LENR: USART7EN */
-#define RCC_APB1LENR_UART8EN            (1 << 31) /* RCC APB1LENR: USART8EN */
+#define RCC_APB1LENR_UART7EN            (1 << 30) /* RCC APB1LENR: UART7EN */
+#define RCC_APB1LENR_UART8EN            (1 << 31) /* RCC APB1LENR: UART8EN */
 
 /* APB1 H Peripheral Clock enable register */
 
@@ -1061,8 +1061,8 @@
 #define RCC_APB1LLPENR_I2C3LPEN         (1 << 23)      /* RCC APB1LLPENR: I2C3LPEN */
 #define RCC_APB1LLPENR_HDMICECLPEN      (1 << 27)      /* RCC APB1LLPENR: HDMICECLPEN */
 #define RCC_APB1LLPENR_DAC1LPEN         (1 << 29)      /* RCC APB1LLPENR: DAC1LPEN */
-#define RCC_APB1LLPENR_USART7LPEN       (1 << 30)      /* RCC APB1LLPENR: USART7LPEN */
-#define RCC_APB1LLPENR_USART8LPEN       (1 << 31)      /* RCC APB1LLPENR: USART8LPEN */
+#define RCC_APB1LLPENR_UART7LPEN        (1 << 30)      /* RCC APB1LLPENR: UART7LPEN */
+#define RCC_APB1LLPENR_UART8LPEN        (1 << 31)      /* RCC APB1LLPENR: UART8LPEN */
 
 
 /* APB1 H low power mode peripheral clock enable register */
