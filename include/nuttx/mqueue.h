@@ -390,14 +390,15 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group);
  *   group - Group that has the open descriptor.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   and failure.
  *
  * Assumptions:
  * - Called only from mq_close() with the scheduler locked.
  *
  ****************************************************************************/
 
-void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
+int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
 
 #undef EXTERN
 #ifdef __cplusplus

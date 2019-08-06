@@ -77,6 +77,7 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
 {
   FAR struct mqueue_inode_s *msgq;
   FAR struct inode *inode;
+  int ret = OK;
 
   DEBUGASSERT(mqdes != NULL && group != NULL);
 
@@ -93,20 +94,23 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
 
        /* Close/free the message descriptor */
 
-       nxmq_desclose_group(mqdes, group);
+       ret = nxmq_desclose_group(mqdes, group);
+       if (ret >= 0)
+         {
+           /* Get the inode from the message queue structure */
 
-       /* Get the inode from the message queue structure */
+           inode = msgq->inode;
+           DEBUGASSERT(inode->u.i_mqueue == msgq);
 
-       inode = msgq->inode;
-       DEBUGASSERT(inode->u.i_mqueue == msgq);
+           /* Decrement the reference count on the inode, possibly freeing it */
 
-       /* Decrement the reference count on the inode, possibly freeing it */
+           mq_inode_release(inode);
+         }
 
-       mq_inode_release(inode);
        sched_unlock();
      }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
