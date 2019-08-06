@@ -412,6 +412,7 @@ static void parse_args(int argc, char **argv)
     {
       fprintf(stderr, "ERROR: Architecture for board %s not found\n",
               g_boarddir);
+      g_archdir = "unknown";
     }
 }
 
