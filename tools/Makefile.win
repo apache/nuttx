@@ -235,6 +235,18 @@ else
 include\stdarg.h:
 endif
 
+# Target used to copy include\nuttx\setjmp.h.  If CONFIG_ARCH_SETJMP_H is
+# defined, then there is an architecture specific setjmp.h header file
+# that will be included indirectly from include\setjmp.h.  But first, we
+# have to copy setjmp.h from include\nuttx\. to include\.
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+include\setjmp.h: include\nuttx\setjmp.h
+	$(Q) cp -f include\nuttx\setjmp.h include\setjmp.h
+else
+include\setjmp.h:
+endif
+
 # Targets used to build include\nuttx\version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
 # tools\mkversion tool is built and used to create include\nuttx\version.h
@@ -363,7 +375,7 @@ dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(
 # the config.h and version.h header files in the include\nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context staging include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h dirlinks
+context: check_context staging include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
 	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" context )
 
 # clean_context
@@ -378,6 +390,7 @@ clean_context:
 	$(call DELFILE, include\nuttx\version.h)
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
+	$(call DELFILE, include\setjmp.h)
 	$(call DELDIR, include\arch\board)
 	$(call DELDIR, include\arch\chip)
 	$(call DELDIR, include\arch)

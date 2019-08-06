@@ -514,6 +514,7 @@ config ARCH_CORTEXM23
 config ARCH_ARMV7M
 	bool
 	default n
+	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
 
 config ARCH_CORTEXM3
 	bool
