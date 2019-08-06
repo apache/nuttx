@@ -202,15 +202,15 @@ static int  tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
 static int  tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
               const struct tiva_timer32config_s *timer);
 #endif
-#ifdef CONFIG_TIVA_TIMER32_EDGECOUNT
+#ifdef CONFIG_TIVA_TIMER16_EDGECOUNT
 static int  tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
               const struct tiva_timer16config_s *timer, int tmndx);
 #endif
-#ifdef CONFIG_TIVA_TIMER32_TIMECAP
+#ifdef CONFIG_TIVA_TIMER16_TIMECAP
 static int  tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
               const struct tiva_timer16config_s *timer, int tmndx);
 #endif
-#ifdef CONFIG_TIVA_TIMER32_PWM
+#ifdef CONFIG_TIVA_TIMER16_PWM
 static int  tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
               const struct tiva_timer16config_s *timer, int tmndx);
 
@@ -980,7 +980,7 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is not started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
    */
 
   return OK;
@@ -1190,7 +1190,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is not started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
    */
 
   return OK;
@@ -1277,7 +1277,7 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
    * begins counting at this new value and continues until it reaches
    * 0xFFFF.FFFF, at which point it rolls over.
    *
-   * NOTE: The RTC timer will not be enabled until tiva_gptm_enable() is
+   * NOTE: The RTC timer will not be enabled until tiva_gptm_enableclk() is
    * called.
    */
 
@@ -1293,7 +1293,7 @@ static int tiva_rtc_mode32(struct tiva_gptmstate_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_TIMER32_EDGECOUNT
+#ifdef CONFIG_TIVA_TIMER16_EDGECOUNT
 static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
                                        const struct tiva_timer16config_s *timer,
                                        int tmndx)
@@ -1349,7 +1349,7 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    * programmed number of edge events has been detected. To re-enable the
    * timer, ensure that the TnEN bit is cleared and repeat steps 4 through 8.
    *
-   * NOTE: This timer is not started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
    */
 
   return -ENOSYS;
@@ -1364,7 +1364,7 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_TIMER32_TIMECAP
+#ifdef CONFIG_TIVA_TIMER16_TIMECAP
 static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
                                   const struct tiva_timer16config_s *timer,
                                   int tmndx)
@@ -1435,7 +1435,7 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    * the GPTMTnMR register. The change takes effect at the next cycle after
    * the write.
    *
-   * NOTE: This timer is not started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
    */
 
   return -ENOSYS;
@@ -1450,7 +1450,7 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_TIMER32_PWM
+#ifdef CONFIG_TIVA_TIMER16_PWM
 static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
                            const struct tiva_timer16config_s *timer,
                            int tmndx)
@@ -1521,7 +1521,7 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
    * the GPTMTnILR register, and the change takes effect at the next cycle
    * after the write.
    *
-   * NOTE: This timer is not started until tiva_gptm_enable() is called.
+   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
    */
 
   return -ENOSYS;
@@ -1585,19 +1585,19 @@ static int tiva_timer16_configure(struct tiva_gptmstate_s *priv,
       return tiva_oneshot_periodic_mode16(priv, timer, tmndx);
 #endif
 
-#ifdef CONFIG_TIVA_TIMER32_EDGECOUNT
+#ifdef CONFIG_TIVA_TIMER16_EDGECOUNT
     case TIMER16_MODE_COUNT_CAPTURE: /* 16-bit input-edge count-capture
                                       * mode w/8-bit prescaler */
       return tiva_input_edgecount_mode16(priv, timer, tmndx);
 #endif
 
-#ifdef CONFIG_TIVA_TIMER32_TIMECAP
+#ifdef CONFIG_TIVA_TIMER16_TIMECAP
     case TIMER16_MODE_TIME_CAPTURE:  /* 16-bit input-edge time-capture
                                       * mode w/8-bit prescaler */
       return tiva_input_time_mode16(priv, timer, tmndx);
 #endif
 
-#ifdef CONFIG_TIVA_TIMER32_PWM
+#ifdef CONFIG_TIVA_TIMER16_PWM
     case TIMER16_MODE_PWM:           /* 16-bit PWM output mode w/8-bit
                                       * prescaler */
       return tiva_pwm_mode16(priv, timer, tmndx);
