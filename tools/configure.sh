@@ -135,7 +135,7 @@ else
   boarddir=`echo ${boardconfig} | cut -d':' -f1`
 fi
 
-# Try to detect architecture for convenience.
+# Detect the architecture of this board.
 
 archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
 chips="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
@@ -168,8 +168,8 @@ if [ ! -d "${configpath}" ]; then
     configlist=`find ${TOPDIR}/boards -name defconfig`
     for defconfig in ${configlist}; do
       config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
-      boardname=`echo ${config} | cut -d'/' -f2`
-      configname=`echo ${config} | cut -d'/' -f4`
+      boardname=`echo ${config} | cut -d'/' -f3`
+      configname=`echo ${config} | cut -d'/' -f5`
       echo "  ${boardname}:${configname}"
     done
     echo ""

@@ -293,11 +293,22 @@ for line in $testlist; do
       # Detect the architecture of this board.
 
       ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+      CHIPLIST="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
+        lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
+        nuc1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
+        stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
+        pic32mz lm32 mor1kx m32262f8 sh7032 gap8 nr5m100 sim qemu esp32 z16f2811
+        ez80 z180 z8 z80"
 
       for arch in ${ARCHLIST}; do
-        if [ -f $nuttx/boards/${arch}/${boarddir}/Kconfig ]; then
-          archdir=${arch}
-        fi
+        for chip in ${CHIPLIST}; do
+          if [ -f ${TOPDIR}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
+            archdir=${arch}
+            chipdir=${chip}
+            echo "  Detected ${archdir} Architecture"
+            echo "  Detected ${chipdir} Chip"
+          fi
+        done
       done
 
       if [ -z "${archdir}" ]; then
@@ -305,7 +316,7 @@ for line in $testlist; do
         exit 1
       fi
 
-      path=$nuttx/boards/$archdir/$boarddir/configs/$configdir
+      path=$nuttx/boards/$archdir/$chipdir/$boarddir/configs/$configdir
       if [ ! -r "$path/defconfig" ]; then
         echo "ERROR: no configuration found at $path"
         showusage
