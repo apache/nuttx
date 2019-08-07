@@ -734,6 +734,11 @@ config LPC17_40_PHY_AUTONEG
 	---help---
 		Enable auto-negotiation
 
+config LPC17_40_PHY_CEMENT_DISABLE
+	bool "Don't re-write the PHY mode"
+	---help---
+		Re-writing the PHY mode might cause problems with some PHYs.
+
 config LPC17_40_PHY_SPEED100
 	bool "100Mbit/Sec"
 	depends on !LPC17_40_PHY_AUTONEG

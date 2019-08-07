@@ -2869,13 +2869,13 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).
    *
-   * REVISIT: Revisit the following CONFIG_PHY_CEMENT_DISABLE work-around.
+   * REVISIT: Revisit the following CONFIG_LPC17_40_PHY_CEMENT_DISABLE work-around.
    * It is should not needed if CONFIG_LPC17_40_PHY_AUTONEG is defined and is known
    * cause a problem for at least one PHY (DP83848I PHY).  It might be
    * safe just to remove this elided coded for all PHYs.
    */
 
-#ifndef CONFIG_PHY_CEMENT_DISABLE
+#ifndef CONFIG_LPC17_40_PHY_CEMENT_DISABLE
   ret = lpc17_40_phymode(phyaddr, priv->lp_mode);
 #endif
   lpc17_40_showmii(phyaddr, "After final configuration");
