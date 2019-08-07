@@ -302,7 +302,7 @@ for line in $testlist; do
 
       for arch in ${ARCHLIST}; do
         for chip in ${CHIPLIST}; do
-          if [ -f ${TOPDIR}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
+          if [ -f ${nuttx}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
             archdir=${arch}
             chipdir=${chip}
             echo "  Detected ${archdir} Architecture"
