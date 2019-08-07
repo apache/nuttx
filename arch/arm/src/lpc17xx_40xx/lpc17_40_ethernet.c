@@ -2317,6 +2317,8 @@ static void lpc17_40_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata
 {
   uint32_t regval;
 
+  lpc17_40_putreg(0, LPC17_40_ETH_MCMD);
+
   /* Set PHY address and PHY register address */
 
   regval = ((uint32_t)phyaddr << ETH_MADR_PHYADDR_SHIFT) |
@@ -2359,7 +2361,7 @@ static uint16_t lpc17_40_phyread(uint8_t phyaddr, uint8_t regaddr)
 {
   uint32_t regval;
 
-  lpc17_40_putreg(0, LPC17_40_ETH_MCMD);
+  lpc17_40_putreg(1, LPC17_40_ETH_MCMD);
 
   /* Set PHY address and PHY register address */
 
