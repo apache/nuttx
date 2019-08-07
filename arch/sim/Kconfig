@@ -21,6 +21,10 @@ config HOST_ARM
 
 endchoice # Host CPU Type
 
+config ARCH_CHIP
+	string
+	default "sim" if ARCH_SIM
+
 config SIM_M32
 	bool "Build 32-bit simulation on 64-bit machine"
 	default n

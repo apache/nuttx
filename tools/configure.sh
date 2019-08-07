@@ -152,7 +152,6 @@ for chip in ${chips}; do
     chipdir=${chip}
     echo "  Detected ${archdir} Architecture"
     echo "  Detected ${chipdir} Chip"
-    echo ""
   fi
 done
 done
