@@ -2064,524 +2064,533 @@ config ARCH_IRQBUTTONS
 comment "Board-Specific Options"
 
 
-if ARCH_BOARD_ARDUINO_DUE
-source "boards/arm/arduino-due/Kconfig"
-endif
-if ARCH_BOARD_AXOLOTI
-source "boards/arm/axoloti/Kconfig"
-endif
-if ARCH_BOARD_B_L072Z_LRWAN1
-source "boards/arm/b-l072z-lrwan1/Kconfig"
-endif
-if ARCH_BOARD_B_L475E_IOT01A
-source "boards/arm/b-l475e-iot01a/Kconfig"
-endif
-if ARCH_BOARD_BAMBINO_200E
-source "boards/arm/bambino-200e/Kconfig"
+if ARCH_BOARD_PCDUINO_A10
+source "boards/arm/a1x/pcduino-a10/Kconfig"
 endif
 if ARCH_BOARD_BEAGLEBONE_BLACK
-source "boards/arm/beaglebone-black/Kconfig"
+source "boards/arm/am335x/beaglebone-black/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
-source "boards/arm/c5471evm/Kconfig"
-endif
-if ARCH_BOARD_CLICKER2_STM32
-source "boards/arm/clicker2-stm32/Kconfig"
-endif
-if ARCH_BOARD_CLOUDCTRL
-source "boards/arm/cloudctrl/Kconfig"
-endif
-if ARCH_BOARD_DK_TM4C129X
-source "boards/arm/dk-tm4c129x/Kconfig"
-endif
-if ARCH_BOARD_EA3131
-source "boards/arm/ea3131/Kconfig"
-endif
-if ARCH_BOARD_EA3152
-source "boards/arm/ea3152/Kconfig"
-endif
-if ARCH_BOARD_EAGLE100
-source "boards/arm/eagle100/Kconfig"
-endif
-if ARCH_BOARD_EFM32G8XXSTK
-source "boards/arm/efm32-g8xx-stk/Kconfig"
-endif
-if ARCH_BOARD_EFM32GG_STK3700
-source "boards/arm/efm32gg-stk3700/Kconfig"
-endif
-if ARCH_BOARD_EKKLM3S9B96
-source "boards/arm/ekk-lm3s9b96/Kconfig"
-endif
-if ARCH_BOARD_FIRE_STM32
-source "boards/arm/fire-stm32v2/Kconfig"
-endif
-if ARCH_BOARD_FLIPNCLICK_SAM3X
-source "boards/arm/flipnclick-sam3x/Kconfig"
-endif
-if ARCH_BOARD_FREEDOM_K28F
-source "boards/arm/freedom-k28f/Kconfig"
-endif
-if ARCH_BOARD_FREEDOM_K64F
-source "boards/arm/freedom-k64f/Kconfig"
-endif
-if ARCH_BOARD_FREEDOM_K66F
-source "boards/arm/freedom-k66f/Kconfig"
-endif
-if ARCH_BOARD_FREEDOM_KL25Z
-source "boards/arm/freedom-kl25z/Kconfig"
-endif
-if ARCH_BOARD_FREEDOM_KL26Z
-source "boards/arm/freedom-kl26z/Kconfig"
-endif
-if ARCH_BOARD_HYMINI_STM32V
-source "boards/arm/hymini-stm32v/Kconfig"
-endif
-if ARCH_BOARD_IMXRT1050_EVK
-source "boards/arm/imxrt1050-evk/Kconfig"
-endif
-if ARCH_BOARD_IMXRT1060_EVK
-source "boards/arm/imxrt1060-evk/Kconfig"
-endif
-if ARCH_BOARD_KWIKSTIK_K40
-source "boards/arm/kwikstik-k40/Kconfig"
-endif
-if ARCH_BOARD_LAUNCHXL_CC1310
-source "boards/arm/launchxl-cc1310/Kconfig"
-endif
-if ARCH_BOARD_LAUNCHXL_CC1312R1
-source "boards/arm/launchxl-cc1312r1/Kconfig"
-endif
-if ARCH_BOARD_LAUNCHXL_TMS57004
-source "boards/arm/launchxl-tms57004/Kconfig"
-endif
-if ARCH_BOARD_LC823450_XGEVK
-source "boards/arm/lc823450-xgevk/Kconfig"
-endif
-if ARCH_BOARD_LINCOLN60
-source "boards/arm/lincoln60/Kconfig"
-endif
-if ARCH_BOARD_LM3S6432S2E
-source "boards/arm/lm3s6432-s2e/Kconfig"
-endif
-if ARCH_BOARD_LM3S6965EK
-source "boards/arm/lm3s6965-ek/Kconfig"
-endif
-if ARCH_BOARD_LM3S8962EK
-source "boards/arm/lm3s8962-ek/Kconfig"
-endif
-if ARCH_BOARD_LM3S8962EK
-source "boards/arm/lm4f120-launchpad/Kconfig"
-endif
-if ARCH_BOARD_LPC4088_DEVKIT
-source "boards/arm/lpc4088-devkit/Kconfig"
-endif
-if ARCH_BOARD_LPC4088_QUICKSTART
-source "boards/arm/lpc4088-quickstart/Kconfig"
-endif
-if ARCH_BOARD_LPC4330_XPLORER
-source "boards/arm/lpc4330-xplorer/Kconfig"
-endif
-if ARCH_BOARD_LPC4337_WS
-source "boards/arm/lpc4337-ws/Kconfig"
-endif
-if ARCH_BOARD_LPC4357_EVB
-source "boards/arm/lpc4357-evb/Kconfig"
-endif
-if ARCH_BOARD_LPC4370_LINK2
-source "boards/arm/lpc4370-link2/Kconfig"
-endif
-if ARCH_BOARD_LPCXPRESSO
-source "boards/arm/lpcxpresso-lpc1768/Kconfig"
-endif
-if ARCH_BOARD_LPCXPRESSO_LPC54628
-source "boards/arm/lpcxpresso-lpc54628/Kconfig"
-endif
-if ARCH_BOARD_MAPLE
-source "boards/arm/maple/Kconfig"
-endif
-if ARCH_BOARD_MAX32660_EVSYS
-source "boards/arm/max32660-evsys/Kconfig"
-endif
-if ARCH_BOARD_MBED
-source "boards/arm/mbed/Kconfig"
-endif
-if ARCH_BOARD_MCB1700
-source "boards/arm/mcb1700/Kconfig"
-endif
-if ARCH_BOARD_MCU123_LPC214X
-source "boards/arm/mcu123-lpc214x/Kconfig"
-endif
-if ARCH_BOARD_METRO_M4
-source "boards/arm/metro-m4/Kconfig"
-endif
-if ARCH_BOARD_MIKROE_STM32F4
-source "boards/arm/mikroe-stm32f4/Kconfig"
-endif
-if ARCH_BOARD_MOXA
-source "boards/arm/moxa/Kconfig"
-endif
-if ARCH_BOARD_NRF52_GENERIC
-source "boards/arm/nrf52-generic/Kconfig"
-endif
-if ARCH_BOARD_NTOSD_DM320
-source "boards/arm/ntosd-dm320/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_144
-source "boards/arm/nucleo-144/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F072RB
-source "boards/arm/nucleo-f072rb/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F091RC
-source "boards/arm/nucleo-f091rc/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F103RB
-source "boards/arm/nucleo-f103rb/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F207ZG
-source "boards/arm/nucleo-f207zg/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F302R8
-source "boards/arm/nucleo-f302r8/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F303RE
-source "boards/arm/nucleo-f303re/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F303ZE
-source "boards/arm/nucleo-f303ze/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F334R8
-source "boards/arm/nucleo-f334r8/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
-source "boards/arm/nucleo-f4x1re/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F44RE
-source "boards/arm/nucleo-f446re/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_F410RB
-source "boards/arm/nucleo-f410rb/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_G071RB
-source "boards/arm/nucleo-g071rb/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_H743ZI
-source "boards/arm/nucleo-h743zi/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L073RZ
-source "boards/arm/nucleo-l073rz/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L152RE
-source "boards/arm/nucleo-l152re/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L432KC
-source "boards/arm/nucleo-l432kc/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L452RE
-source "boards/arm/nucleo-l452re/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L476RG
-source "boards/arm/nucleo-l476rg/Kconfig"
-endif
-if ARCH_BOARD_NUCLEO_L496ZG
-source "boards/arm/nucleo-l496zg/Kconfig"
-endif
-if ARCH_BOARD_NUTINY_NUC120
-source "boards/arm/nutiny-nuc120/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
-source "boards/arm/olimex-efm32g880f128-stk/Kconfig"
-endif
-if ARCH_BOARD_LPC1766STK
-source "boards/arm/olimex-lpc1766stk/Kconfig"
-endif
-if ARCH_BOARD_OLIMEXLPC2378
-source "boards/arm/olimex-lpc2378/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_LPC_H3131
-source "boards/arm/olimex-lpc-h3131/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32H405
-source "boards/arm/olimex-stm32-h405/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32H407
-source "boards/arm/olimex-stm32-h407/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32E407
-source "boards/arm/olimex-stm32-e407/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32P107
-source "boards/arm/olimex-stm32-p107/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32P207
-source "boards/arm/olimex-stm32-p207/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STM32P407
-source "boards/arm/olimex-stm32-p407/Kconfig"
-endif
-if ARCH_BOARD_OLIMEX_STRP711
-source "boards/arm/olimex-strp711/Kconfig"
-endif
-if ARCH_BOARD_OLIMEXINO_STM32
-source "boards/arm/olimexino-stm32/Kconfig"
-endif
-if ARCH_BOARD_OMNIBUSF4
-source "boards/arm/omnibusf4/Kconfig"
-endif
-if ARCH_BOARD_OPEN1788
-source "boards/arm/open1788/Kconfig"
-endif
-if ARCH_BOARD_PCDUINO_A10
-source "boards/arm/pcduino-a10/Kconfig"
-endif
-if ARCH_BOARD_SABRE_6QUAD
-source "boards/arm/sabre-6quad/Kconfig"
-endif
-if ARCH_BOARD_SAMA5D2_XULT
-source "boards/arm/sama5d2-xult/Kconfig"
-endif
-if ARCH_BOARD_SAMA5D3X_EK
-source "boards/arm/sama5d3x-ek/Kconfig"
-endif
-if ARCH_BOARD_SAMA5D3_XPLAINED
-source "boards/arm/sama5d3-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAMA5D4_EK
-source "boards/arm/sama5d4-ek/Kconfig"
-endif
-if ARCH_BOARD_SAMD20_XPLAINED
-source "boards/arm/samd20-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAMD21_XPLAINED
-source "boards/arm/samd21-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAML21_XPLAINED
-source "boards/arm/saml21-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAM3UEK
-source "boards/arm/sam3u-ek/Kconfig"
-endif
-if ARCH_BOARD_SAM4CMP_DB
-source "boards/arm/sam4cmp-db/Kconfig"
-endif
-if ARCH_BOARD_SAM4EEK
-source "boards/arm/sam4e-ek/Kconfig"
-endif
-if ARCH_BOARD_SAM4L_XPLAINED
-source "boards/arm/sam4l-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAM4S_XPLAINED
-source "boards/arm/sam4s-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAM4S_XPLAINED_PRO
-source "boards/arm/sam4s-xplained-pro/Kconfig"
-endif
-if ARCH_BOARD_SAME70_XPLAINED
-source "boards/arm/same70-xplained/Kconfig"
-endif
-if ARCH_BOARD_SAMV71_XULT
-source "boards/arm/samv71-xult/Kconfig"
-endif
-if ARCH_BOARD_SHENZHOU
-source "boards/arm/shenzhou/Kconfig"
-endif
-if ARCH_BOARD_PHOTON
-source "boards/arm/photon/Kconfig"
-endif
-if ARCH_BOARD_PNEV5180B
-source "boards/arm/pnev5180b/Kconfig"
-endif
-if ARCH_BOARD_STM32_BUTTERFLY2
-source "boards/arm/stm32butterfly2/Kconfig"
-endif
-if ARCH_BOARD_STM32_TINY
-source "boards/arm/stm32_tiny/Kconfig"
-endif
-if ARCH_BOARD_STM32F051_DISCOVERY
-source "boards/arm/stm32f051-discovery/Kconfig"
-endif
-if ARCH_BOARD_STM32F072_DISCOVERY
-source "boards/arm/stm32f072-discovery/Kconfig"
-endif
-if ARCH_BOARD_STM32F103_MINIMUM
-source "boards/arm/stm32f103-minimum/Kconfig"
-endif
-if ARCH_BOARD_STM3210E_EVAL
-source "boards/arm/stm3210e-eval/Kconfig"
-endif
-if ARCH_BOARD_STM3220G_EVAL
-source "boards/arm/stm3220g-eval/Kconfig"
-endif
-if ARCH_BOARD_STM3240G_EVAL
-source "boards/arm/stm3240g-eval/Kconfig"
-endif
-if ARCH_BOARD_STM32F334_DISCO
-source "boards/arm/stm32f334-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32F4_DISCOVERY
-source "boards/arm/stm32f4discovery/Kconfig"
-endif
-if ARCH_BOARD_STM32F411E_DISCO
-source "boards/arm/stm32f411e-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32F429I_DISCO
-source "boards/arm/stm32f429i-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32F746G_DISCO
-source "boards/arm/stm32f746g-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32F769I_DISCO
-source "boards/arm/stm32f769i-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32F746_WS
-source "boards/arm/stm32f746-ws/Kconfig"
-endif
-if ARCH_BOARD_STM32L476VG_DISCO
-source "boards/arm/stm32l476vg-disco/Kconfig"
-endif
-if ARCH_BOARD_STM32L476_MDK
-source "boards/arm/stm32l476-mdk/Kconfig"
-endif
-if ARCH_BOARD_STM32L_DISCOVERY
-source "boards/arm/stm32ldiscovery/Kconfig"
-endif
-if ARCH_BOARD_STM32VL_DISCOVERY
-source "boards/arm/stm32vldiscovery/Kconfig"
-endif
-if ARCH_BOARD_TEENSY_3X
-source "boards/arm/teensy-3.x/Kconfig"
-endif
-if ARCH_BOARD_TEENSY_LC
-source "boards/arm/teensy-lc/Kconfig"
-endif
-if ARCH_BOARD_TM4C123G_LAUNCHPAD
-source "boards/arm/tm4c123g-launchpad/Kconfig"
-endif
-if ARCH_BOARD_TM4C1294_LAUNCHPAD
-source "boards/arm/tm4c1294-launchpad/Kconfig"
-endif
-if ARCH_BOARD_TMS570LS31X_USB_KIT
-source "boards/arm/tms570ls31x-usb-kit/Kconfig"
-endif
-if ARCH_BOARD_TWR_K60N512
-source "boards/arm/twr-k60n512/Kconfig"
-endif
-if ARCH_BOARD_TWR_K64F120M
-source "boards/arm/twr-k64f120m/Kconfig"
-endif
-if ARCH_BOARD_U_BLOX_C027
-source "boards/arm/u-blox-c027/Kconfig"
-endif
-if ARCH_BOARD_VIEWTOOL_STM32F107
-source "boards/arm/viewtool-stm32f107/Kconfig"
-endif
-if ARCH_BOARD_XMC4500RELAX
-source "boards/arm/xmc4500-relax/Kconfig"
-endif
-if ARCH_BOARD_ZP214XPA
-source "boards/arm/zp214xpa/Kconfig"
-endif
-if ARCH_BOARD_ZKITARM
-source "boards/arm/zkit-arm-1769/Kconfig"
+source "boards/arm/c5471/c5471evm/Kconfig"
 endif
 if ARCH_BOARD_SPRESENSE
-source "boards/arm/spresense/Kconfig"
+source "boards/arm/cxd56xx/spresense/Kconfig"
 endif
-if ARCH_BOARD_AMBER
-source "boards/avr/amber/Kconfig"
+if ARCH_BOARD_NTOSD_DM320
+source "boards/arm/dm320/ntosd-dm320/Kconfig"
 endif
-if ARCH_BOARD_ARDUINO_MEGA2560
-source "boards/avr/arduino-mega2560/Kconfig"
+if ARCH_BOARD_EFM32G8XXSTK
+source "boards/arm/efm32/efm32-g8xx-stk/Kconfig"
+endif
+if ARCH_BOARD_EFM32GG_STK3700
+source "boards/arm/efm32/efm32gg-stk3700/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
+source "boards/arm/efm32/olimex-efm32g880f128-stk/Kconfig"
+endif
+if ARCH_BOARD_SABRE_6QUAD
+source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_IMXRT1050_EVK
+source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
+endif
+if ARCH_BOARD_IMXRT1060_EVK
+source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K28F
+source "boards/arm/kinetis/freedom-k28f/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K64F
+source "boards/arm/kinetis/freedom-k64f/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_K66F
+source "boards/arm/kinetis/freedom-k66f/Kconfig"
+endif
+if ARCH_BOARD_KWIKSTIK_K40
+source "boards/arm/kinetis/kwikstik-k40/Kconfig"
+endif
+if ARCH_BOARD_TEENSY_3X
+source "boards/arm/kinetis/teensy-3.x/Kconfig"
+endif
+if ARCH_BOARD_TWR_K60N512
+source "boards/arm/kinetis/twr-k60n512/Kconfig"
+endif
+if ARCH_BOARD_TWR_K64F120M
+source "boards/arm/kinetis/twr-k64f120m/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_KL25Z
+source "boards/arm/kl/freedom-kl25z/Kconfig"
+endif
+if ARCH_BOARD_FREEDOM_KL26Z
+source "boards/arm/kl/freedom-kl26z/Kconfig"
+endif
+if ARCH_BOARD_TEENSY_LC
+source "boards/arm/kl/teensy-lc/Kconfig"
+endif
+if ARCH_BOARD_LC823450_XGEVK
+source "boards/arm/lc823450/lc823450-xgevk/Kconfig"
+endif
+if ARCH_BOARD_LINCOLN60
+source "boards/arm/lpc17xx_40xx/lincoln60/Kconfig"
+endif
+if ARCH_BOARD_LPC4088_DEVKIT
+source "boards/arm/lpc17xx_40xx/lpc4088-devkit/Kconfig"
+endif
+if ARCH_BOARD_LPC4088_QUICKSTART
+source "boards/arm/lpc17xx_40xx/lpc4088-quickstart/Kconfig"
+endif
+if ARCH_BOARD_LPCXPRESSO
+source "boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/Kconfig"
+endif
+if ARCH_BOARD_MBED
+source "boards/arm/lpc17xx_40xx/mbed/Kconfig"
+endif
+if ARCH_BOARD_MCB1700
+source "boards/arm/lpc17xx_40xx/mcb1700/Kconfig"
+endif
+if ARCH_BOARD_LPC1766STK
+source "boards/arm/lpc17xx_40xx/olimex-lpc1766stk/Kconfig"
+endif
+if ARCH_BOARD_OPEN1788
+source "boards/arm/lpc17xx_40xx/open1788/Kconfig"
+endif
+if ARCH_BOARD_PNEV5180B
+source "boards/arm/lpc17xx_40xx/pnev5180b/Kconfig"
+endif
+if ARCH_BOARD_U_BLOX_C027
+source "boards/arm/lpc17xx_40xx/u-blox-c027/Kconfig"
+endif
+if ARCH_BOARD_ZKITARM
+source "boards/arm/lpc17xx_40xx/zkit-arm-1769/Kconfig"
+endif
+if ARCH_BOARD_MCU123_LPC214X
+source "boards/arm/lpc214x/mcu123-lpc214x/Kconfig"
+endif
+if ARCH_BOARD_ZP214XPA
+source "boards/arm/lpc214x/zp214xpa/Kconfig"
+endif
+if ARCH_BOARD_OLIMEXLPC2378
+source "boards/arm/lpc2378/olimex-lpc2378/Kconfig"
+endif
+if ARCH_BOARD_EA3131
+source "boards/arm/lpc31xx/ea3131/Kconfig"
+endif
+if ARCH_BOARD_EA3152
+source "boards/arm/lpc31xx/ea3152/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_LPC_H3131
+source "boards/arm/lpc31xx/olimex-lpc-h3131/Kconfig"
+endif
+if ARCH_BOARD_BAMBINO_200E
+source "boards/arm/lpc43xx/bambino-200e/Kconfig"
+endif
+if ARCH_BOARD_LPC4330_XPLORER
+source "boards/arm/lpc43xx/lpc4330-xplorer/Kconfig"
+endif
+if ARCH_BOARD_LPC4337_WS
+source "boards/arm/lpc43xx/lpc4337-ws/Kconfig"
+endif
+if ARCH_BOARD_LPC4357_EVB
+source "boards/arm/lpc43xx/lpc4357-evb/Kconfig"
+endif
+if ARCH_BOARD_LPC4370_LINK2
+source "boards/arm/lpc43xx/lpc4370-link2/Kconfig"
+endif
+if ARCH_BOARD_LPCXPRESSO_LPC54628
+source "boards/arm/lpc54xx/lpcxpresso-lpc54628/Kconfig"
+endif
+if ARCH_BOARD_MAX32660_EVSYS
+source "boards/arm/max326xx/max32660-evsys/Kconfig"
+endif
+if ARCH_BOARD_MOXA
+source "boards/arm/moxart/moxa/Kconfig"
+endif
+if ARCH_BOARD_NRF52_GENERIC
+source "boards/arm/nrf52/nrf52-generic/Kconfig"
+endif
+if ARCH_BOARD_NUTINY_NUC120
+source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_DUE
+source "boards/arm/sam34/arduino-due/Kconfig"
+endif
+if ARCH_BOARD_FLIPNCLICK_SAM3X
+source "boards/arm/sam34/flipnclick-sam3x/Kconfig"
+endif
+if ARCH_BOARD_SAM3UEK
+source "boards/arm/sam34/sam3u-ek/Kconfig"
+endif
+if ARCH_BOARD_SAM4CMP_DB
+source "boards/arm/sam34/sam4cmp-db/Kconfig"
+endif
+if ARCH_BOARD_SAM4EEK
+source "boards/arm/sam34/sam4e-ek/Kconfig"
+endif
+if ARCH_BOARD_SAM4L_XPLAINED
+source "boards/arm/sam34/sam4l-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAM4S_XPLAINED
+source "boards/arm/sam34/sam4s-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAM4S_XPLAINED_PRO
+source "boards/arm/sam34/sam4s-xplained-pro/Kconfig"
+endif
+if ARCH_BOARD_SAMA5D2_XULT
+source "boards/arm/sama5/sama5d2-xult/Kconfig"
+endif
+if ARCH_BOARD_SAMA5D3X_EK
+source "boards/arm/sama5/sama5d3x-ek/Kconfig"
+endif
+if ARCH_BOARD_SAMA5D3_XPLAINED
+source "boards/arm/sama5/sama5d3-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAMA5D4_EK
+source "boards/arm/sama5/sama5d4-ek/Kconfig"
+endif
+if ARCH_BOARD_SAMD20_XPLAINED
+source "boards/arm/samd2l2/samd20-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAMD21_XPLAINED
+source "boards/arm/samd2l2/samd21-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAML21_XPLAINED
+source "boards/arm/samd2l2/saml21-xplained/Kconfig"
+endif
+if ARCH_BOARD_METRO_M4
+source "boards/arm/samd5e5/metro-m4/Kconfig"
+endif
+if ARCH_BOARD_SAME70_XPLAINED
+source "boards/arm/samv7/same70-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAMV71_XULT
+source "boards/arm/samv7/samv71-xult/Kconfig"
+endif
+if ARCH_BOARD_B_L072Z_LRWAN1
+source "boards/arm/stm32f0l0g0/b-l072z-lrwan1/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F072RB
+source "boards/arm/stm32f0l0g0/nucleo-f072rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F091RC
+source "boards/arm/stm32f0l0g0/nucleo-f091rc/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_G071RB
+source "boards/arm/stm32f0l0g0/nucleo-g071rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L073RZ
+source "boards/arm/stm32f0l0g0/nucleo-l073rz/Kconfig"
+endif
+if ARCH_BOARD_STM32F051_DISCOVERY
+source "boards/arm/stm32f0l0g0/stm32f051-discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F072_DISCOVERY
+source "boards/arm/stm32f0l0g0/stm32f072-discovery/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_144
+source "boards/arm/stm32f7/nucleo-144/Kconfig"
+endif
+if ARCH_BOARD_STM32F746_WS
+source "boards/arm/stm32f7/stm32f746-ws/Kconfig"
+endif
+if ARCH_BOARD_STM32F746G_DISCO
+source "boards/arm/stm32f7/stm32f746g-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F769I_DISCO
+source "boards/arm/stm32f7/stm32f769i-disco/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_H743ZI
+source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
+endif
+if ARCH_BOARD_B_L475E_IOT01A
+source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L432KC
+source "boards/arm/stm32l4/nucleo-l432kc/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L452RE
+source "boards/arm/stm32l4/nucleo-l452re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L476RG
+source "boards/arm/stm32l4/nucleo-l476rg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L496ZG
+source "boards/arm/stm32l4/nucleo-l496zg/Kconfig"
+endif
+if ARCH_BOARD_STM32L476_MDK
+source "boards/arm/stm32l4/stm32l476-mdk/Kconfig"
+endif
+if ARCH_BOARD_STM32L476VG_DISCO
+source "boards/arm/stm32l4/stm32l476vg-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32L4R9AI_DISCO
+source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
+endif
+if ARCH_BOARD_AXOLOTI
+source "boards/arm/stm32/axoloti/Kconfig"
+endif
+if ARCH_BOARD_CLICKER2_STM32
+source "boards/arm/stm32/clicker2-stm32/Kconfig"
+endif
+if ARCH_BOARD_CLOUDCTRL
+source "boards/arm/stm32/cloudctrl/Kconfig"
+endif
+if ARCH_BOARD_FIRE_STM32
+source "boards/arm/stm32/fire-stm32v2/Kconfig"
+endif
+if ARCH_BOARD_HYMINI_STM32V
+source "boards/arm/stm32/hymini-stm32v/Kconfig"
+endif
+if ARCH_BOARD_MAPLE
+source "boards/arm/stm32/maple/Kconfig"
+endif
+if ARCH_BOARD_MIKROE_STM32F4
+source "boards/arm/stm32/mikroe-stm32f4/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F103RB
+source "boards/arm/stm32/nucleo-f103rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F207ZG
+source "boards/arm/stm32/nucleo-f207zg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F302R8
+source "boards/arm/stm32/nucleo-f302r8/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F303RE
+source "boards/arm/stm32/nucleo-f303re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F303ZE
+source "boards/arm/stm32/nucleo-f303ze/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F334R8
+source "boards/arm/stm32/nucleo-f334r8/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F410RB
+source "boards/arm/stm32/nucleo-f410rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F44RE
+source "boards/arm/stm32/nucleo-f446re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L152RE
+source "boards/arm/stm32/nucleo-l152re/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32E407
+source "boards/arm/stm32/olimex-stm32-e407/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32H405
+source "boards/arm/stm32/olimex-stm32-h405/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32H407
+source "boards/arm/stm32/olimex-stm32-h407/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32P107
+source "boards/arm/stm32/olimex-stm32-p107/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32P207
+source "boards/arm/stm32/olimex-stm32-p207/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32P407
+source "boards/arm/stm32/olimex-stm32-p407/Kconfig"
+endif
+if ARCH_BOARD_OLIMEXINO_STM32
+source "boards/arm/stm32/olimexino-stm32/Kconfig"
+endif
+if ARCH_BOARD_OMNIBUSF4
+source "boards/arm/stm32/omnibusf4/Kconfig"
+endif
+if ARCH_BOARD_PHOTON
+source "boards/arm/stm32/photon/Kconfig"
+endif
+if ARCH_BOARD_SHENZHOU
+source "boards/arm/stm32/shenzhou/Kconfig"
+endif
+if ARCH_BOARD_STM3210E_EVAL
+source "boards/arm/stm32/stm3210e-eval/Kconfig"
+endif
+if ARCH_BOARD_STM3220G_EVAL
+source "boards/arm/stm32/stm3220g-eval/Kconfig"
+endif
+if ARCH_BOARD_STM3240G_EVAL
+source "boards/arm/stm32/stm3240g-eval/Kconfig"
+endif
+if ARCH_BOARD_STM32_TINY
+source "boards/arm/stm32/stm32_tiny/Kconfig"
+endif
+if ARCH_BOARD_STM32_BUTTERFLY2
+source "boards/arm/stm32/stm32butterfly2/Kconfig"
+endif
+if ARCH_BOARD_STM32F103_MINIMUM
+source "boards/arm/stm32/stm32f103-minimum/Kconfig"
+endif
+if ARCH_BOARD_STM32F334_DISCO
+source "boards/arm/stm32/stm32f334-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F3_DISCOVERY
+source "boards/arm/stm32/stm32f3discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F411E_DISCO
+source "boards/arm/stm32/stm32f411e-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F429I_DISCO
+source "boards/arm/stm32/stm32f429i-disco/Kconfig"
+endif
+if ARCH_BOARD_STM32F4_DISCOVERY
+source "boards/arm/stm32/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32L_DISCOVERY
+source "boards/arm/stm32/stm32ldiscovery/Kconfig"
+endif
+if ARCH_BOARD_STM32VL_DISCOVERY
+source "boards/arm/stm32/stm32vldiscovery/Kconfig"
+endif
+if ARCH_BOARD_VIEWTOOL_STM32F107
+source "boards/arm/stm32/viewtool-stm32f107/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STRP711
+source "boards/arm/str71x/olimex-strp711/Kconfig"
+endif
+if ARCH_BOARD_DK_TM4C129X
+source "boards/arm/tiva/dk-tm4c129x/Kconfig"
+endif
+if ARCH_BOARD_EAGLE100
+source "boards/arm/tiva/eagle100/Kconfig"
+endif
+if ARCH_BOARD_EKKLM3S9B96
+source "boards/arm/tiva/ekk-lm3s9b96/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_CC1310
+source "boards/arm/tiva/launchxl-cc1310/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_CC1312R1
+source "boards/arm/tiva/launchxl-cc1312r1/Kconfig"
+endif
+if ARCH_BOARD_LM3S6432S2E
+source "boards/arm/tiva/lm3s6432-s2e/Kconfig"
+endif
+if ARCH_BOARD_LM3S6965EK
+source "boards/arm/tiva/lm3s6965-ek/Kconfig"
+endif
+if ARCH_BOARD_LM3S8962EK
+source "boards/arm/tiva/lm3s8962-ek/Kconfig"
+endif
+if ARCH_BOARD_LM3S8962EK
+source "boards/arm/tiva/lm4f120-launchpad/Kconfig"
+endif
+if ARCH_BOARD_TM4C123G_LAUNCHPAD
+source "boards/arm/tiva/tm4c123g-launchpad/Kconfig"
+endif
+if ARCH_BOARD_TM4C1294_LAUNCHPAD
+source "boards/arm/tiva/tm4c1294-launchpad/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_TMS57004
+source "boards/arm/tms570/launchxl-tms57004/Kconfig"
+endif
+if ARCH_BOARD_TMS570LS31X_USB_KIT
+source "boards/arm/tms570/tms570ls31x-usb-kit/Kconfig"
+endif
+if ARCH_BOARD_XMC4500RELAX
+source "boards/arm/xmc4/xmc4500-relax/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
-source "boards/avr/avr32dev1/Kconfig"
+source "boards/avr/at32uc3/avr32dev1/Kconfig"
 endif
 if ARCH_BOARD_MICROPENDOUS3
-source "boards/avr/micropendous3/Kconfig"
-endif
-if ARCH_BOARD_MOTEINO_MEGA
-source "boards/avr/moteino-mega/Kconfig"
+source "boards/avr/at90usb/micropendous3/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_20
-source "boards/avr/teensy-2.0/Kconfig"
+source "boards/avr/at90usb/teensy-2.0/Kconfig"
+endif
+if ARCH_BOARD_AMBER
+source "boards/avr/atmega/amber/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_MEGA2560
+source "boards/avr/atmega/arduino-mega2560/Kconfig"
+endif
+if ARCH_BOARD_MOTEINO_MEGA
+source "boards/avr/atmega/moteino-mega/Kconfig"
 endif
 if ARCH_BOARD_CUSTOM
 source "boards/dummy/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
-source "boards/hc/demo9s12ne64/Kconfig"
+source "boards/hc/mcs92s12ne64/demo9s12ne64/Kconfig"
 endif
 if ARCH_BOARD_NE64BADGE
-source "boards/hc/ne64badge/Kconfig"
-endif
-if ARCH_BOARD_FLIPNCLICK_PIC32MZ
-source "boards/mips/flipnclick-pic32mz/Kconfig"
+source "boards/hc/mcs92s12ne64/ne64badge/Kconfig"
 endif
 if ARCH_BOARD_MIRTOO
-source "boards/mips/mirtoo/Kconfig"
+source "boards/mips/pic32mx/mirtoo/Kconfig"
 endif
 if ARCH_BOARD_PIC32MX_STARTERKIT
-source "boards/mips/pic32mx-starterkit/Kconfig"
+source "boards/mips/pic32mx/pic32mx-starterkit/Kconfig"
 endif
 if ARCH_BOARD_PIC32MX7MMB
-source "boards/mips/pic32mx7mmb/Kconfig"
-endif
-if ARCH_BOARD_PIC32MZ_STARTERKIT
-source "boards/mips/pic32mz-starterkit/Kconfig"
+source "boards/mips/pic32mx/pic32mx7mmb/Kconfig"
 endif
 if ARCH_BOARD_SUREPIC32MX
-source "boards/mips/sure-pic32mx/Kconfig"
+source "boards/mips/pic32mx/sure-pic32mx/Kconfig"
 endif
 if ARCH_BOARD_UBW32
-source "boards/mips/ubw32/Kconfig"
+source "boards/mips/pic32mx/ubw32/Kconfig"
+endif
+if ARCH_BOARD_FLIPNCLICK_PIC32MZ
+source "boards/mips/pic32mz/flipnclick-pic32mz/Kconfig"
+endif
+if ARCH_BOARD_PIC32MZ_STARTERKIT
+source "boards/mips/pic32mz/pic32mz-starterkit/Kconfig"
 endif
 if ARCH_BOARD_MISOC_QEMU || ARCH_BOARD_MISOC_VERILATOR
-source "boards/misoc/misoc/Kconfig"
+source "boards/misoc/lm32/misoc/Kconfig"
 endif
 if ARCH_BOARD_OR1K
-source "boards/or1k/or1k/Kconfig"
+source "boards/or1k/mor1kx/or1k/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
-source "boards/renesas/skp16c26/Kconfig"
+source "boards/renesas/m32262f8/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
-source "boards/renesas/us7032evb1/Kconfig"
+source "boards/renesas/sh7032/us7032evb1/Kconfig"
 endif
 if ARCH_BOARD_GAPUINO
-source "boards/risc-v/gapuino/Kconfig"
+source "boards/risc-v/gap8/gapuino/Kconfig"
 endif
 if ARCH_BOARD_NR5M100_NEXYS4
-source "boards/risc-v/nr5m100-nexys4/Kconfig"
+source "boards/risc-v/nr5m100/nr5m100-nexys4/Kconfig"
 endif
 if ARCH_BOARD_SIM
-source "boards/sim/sim/Kconfig"
+source "boards/sim/sim/sim/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
-source "boards/x86/qemu-i486/Kconfig"
+source "boards/x86/qemu/qemu-i486/Kconfig"
 endif
 if ARCH_BOARD_ESP32CORE
-source "boards/xtensa/esp32-core/Kconfig"
+source "boards/xtensa/esp32/esp32-core/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
-source "boards/z16/z16f2800100zcog/Kconfig"
+source "boards/z16/z16f2811/z16f2800100zcog/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200KITG
-source "boards/z80/ez80f910200kitg/Kconfig"
+source "boards/z80/ez80/ez80f910200kitg/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200ZCO
-source "boards/z80/ez80f910200zco/Kconfig"
+source "boards/z80/ez80/ez80f910200zco/Kconfig"
 endif
 if ARCH_BOARD_MAKERLISP
-source "boards/z80/makerlisp/Kconfig"
+source "boards/z80/ez80/makerlisp/Kconfig"
 endif
-if ARCH_BOARD_Z80SIM
-source "boards/z80/z80sim/Kconfig"
+if ARCH_BOARD_P112
+source "boards/z80/z180/p112/Kconfig"
 endif
 if ARCH_BOARD_Z8ENCORE000ZCO
-source "boards/z80/z8encore000zco/Kconfig"
+source "boards/z80/z8/z8encore000zco/Kconfig"
 endif
 if ARCH_BOARD_Z8F64200100KIT
-source "boards/z80/z8f64200100kit/Kconfig"
+source "boards/z80/z8/z8f64200100kit/Kconfig"
+endif
+if ARCH_BOARD_Z80SIM
+source "boards/z80/z80/z80sim/Kconfig"
 endif
 
 config BOARD_CRASHDUMP

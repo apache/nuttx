@@ -138,15 +138,26 @@ fi
 # Try to detect architecture for convenience.
 
 archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+chips="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
+ lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
+ nuc1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
+ stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
+ pic32mz lm32 mor1kx m32262f8 sh7032 gap8 nr5m100 sim qemu esp32 z16f2811
+ ez80 z180 z8 z80"
 
 for arc in ${archs}; do
-  if [ -f ${TOPDIR}/boards/${arc}/${boarddir}/Kconfig ]; then
+for chip in ${chips}; do
+  if [ -f ${TOPDIR}/boards/${arc}/${chip}/${boarddir}/Kconfig ]; then
     archdir=${arc}
+    chipdir=${chip}
     echo "  Detected ${archdir} Architecture"
+    echo "  Detected ${chipdir} Chip"
+    echo ""
   fi
 done
+done
 
-configpath=${TOPDIR}/boards/${archdir}/${boarddir}/configs/${configdir}
+configpath=${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}
 if [ ! -d "${configpath}" ]; then
   # Try direct path used with custom configurations.
 
@@ -168,11 +179,11 @@ if [ ! -d "${configpath}" ]; then
   fi
 fi
 
-src_makedefs="${TOPDIR}/boards/${archdir}/${boarddir}/configs/${configdir}/Make.defs"
+src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}/Make.defs"
 dest_makedefs="${TOPDIR}/Make.defs"
 
 if [ ! -r "${src_makedefs}" ]; then
-  src_makedefs="${TOPDIR}/boards/${archdir}/${boarddir}/scripts/Make.defs"
+  src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/scripts/Make.defs"
 
   if [ ! -r "${src_makedefs}" ]; then
     src_makedefs="${TOPDIR}/${boardconfig}/Make.defs"
