@@ -1747,7 +1747,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 
   /* Wait for the reset to complete */
 
-  while (!tiva_emac_periphrdy());
+  while (!tiva_gptm_periphrdy());
   up_udelay(250);
 
   /* Select the alternate timer clock source is so requested.  The general
@@ -1906,7 +1906,7 @@ void tiva_gptm_release(TIMER_HANDLE handle)
 
   /* Wait for the reset to complete */
 
-  while (!tiva_emac_periphrdy());
+  while (!tiva_gptm_periphrdy());
   up_udelay(250);
 
   /* Disable power and clocking to the GPTM module */

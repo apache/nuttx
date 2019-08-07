@@ -98,8 +98,8 @@
 /* Flags bit definitions in configuration structures.  NOTE: not all flags
  * apply in all timer modes.  Applicable modes noted with:
  *
- *   a. 32-bit one shot timer
- *   b. 32-bit periodic timer
+ *   a. 16-bit one shot timer
+ *   b. 16-bit periodic timer
  *   c. 32-bit one shot timer
  *   d. 32-bit periodic timer
  *   e. 32-bit RTC timer
