@@ -1,4 +1,4 @@
-boards/pic32mx README
+boards/mips/pic32mx/sure-pic32mx README
 =====================
 
 This README file discusses the port of NuttX to the "Advanced USB Storage

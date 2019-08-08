@@ -1,4 +1,4 @@
-boards/mirtoo README
+boards/mips/pic32mx/mirtoo README
 =====================
 
 This README file discusses the port of NuttX to the DTX1-4000L "Mirtoo" module.

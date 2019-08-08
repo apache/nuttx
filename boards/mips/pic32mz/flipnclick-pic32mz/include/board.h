@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/flipnclick-pic32mz/include/board.h
+ * boards/mips/pic32mz/flipnclick-pic32mz/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -49,7 +49,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
+
 /* REVISIT:  The PIC32MZ2048EFH100 is capable of operating at 252MHz */
 
 /* Crystal frequencies
@@ -89,6 +91,7 @@
 #define BOARD_CPU_CLOCK        200000000 /* CPU clock: 200MHz = (24MHz / 3) * 50 / 2) */
 
 /* Peripheral clocks */
+
 /* PBCLK1
  *   Peripherals: OSC2 pin
  *
@@ -173,6 +176,7 @@
 #define BOARD_EMAC_MIIM_DIV    40        /* Ideal: 100MHz/40 = 2.5MHz */
 
 /* LED definitions **********************************************************/
+
 /* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
  *
@@ -189,6 +193,7 @@
  */
 
 #ifdef CONFIG_ARCH_LEDS
+
 /* LED index values for use with board_userled(): */
 
 #  define BOARD_LED_A     0
@@ -204,6 +209,7 @@
 #  define BOARD_LED_C_BIT (1 << BOARD_LED_C)
 #  define BOARD_LED_D_BIT (1 << BOARD_LED_D)
 #else
+
 /* LED index values for use with board_userled(): */
 
 #  define BOARD_LED_L     0
@@ -223,13 +229,15 @@
 #endif
 
 /* These LEDs are available to the application and are all available to the
- * application unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by the
- * board port is defined in include/board.h and src/sam_autoleds.c.  The LEDs are
- * used to encode OS-related events as follows:
+ * application unless CONFIG_ARCH_LEDS is defined.  In that case, the usage
+ * by the board port is defined in include/board.h and src/sam_autoleds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *      SYMBOL                MEANING                        LED STATE
  *                                                     L   A   B   C   D
- *      ----------------      ----------------------- --- --- --- --- ---*/
+ *      ----------------      ----------------------- --- --- --- --- ---
+ */
+
 #define LED_STARTED      0 /* NuttX has been started  OFF ON  OFF OFF OFF */
 #define LED_HEAPALLOCATE 1 /* Heap has been allocated OFF OFF ON  OFF OFF */
 #define LED_IRQSENABLED  2 /* Interrupts enabled      OFF OFF OFF ON  OFF */
@@ -240,19 +248,22 @@
 #define LED_PANIC        4 /* The system has crashed  2Hz N/C N/C N/C N/C */
 #undef  LED_IDLE           /* MCU is is sleep mode    ---- Not used ----- */
 
-/* Thus if LED L is faintly glowing and all other LEDs are off (except LED D which
- * was left on but is no longer controlled by NuttX and so may be in any state),
- * NuttX has successfully booted and is, apparently, running normally and taking
- * interrupts.  If any of LEDs A-D are statically set, then NuttX failed to boot
- * and the LED indicates the initialization phase where the failure occurred.  If
- * LED L is flashing at approximately 2Hz, then a fatal error has been detected and
- * the system has halted.
+/* Thus if LED L is faintly glowing and all other LEDs are off (except LED D
+ * which was left on but is no longer controlled by NuttX and so may be
+ * in any state),
+ * NuttX has successfully booted and is, apparently, running normally and
+ * taking interrupts.
+ * If any of LEDs A-D are statically set, then NuttX failed to boot
+ * and the LED indicates the initialization phase where the failure occurred.
+ * If LED L is flashing at approximately 2Hz, then a fatal error has been
+ * detected and the system has halted.
  *
  * NOTE: After booting, LEDs A-D are no longer used by the system and may be
  * controlled the application.
  */
 
 /* Switch definitions *******************************************************/
+
 /* The Flip&Click PIC32MZ has 2 user push buttons labeled T1 and T2 on the
  * white side of the board:
  *
@@ -273,6 +284,7 @@
 #define BUTTON_T2_BIT          (1 << BUTTON_T2)
 
 /* UARTS ********************************************************************/
+
 /* Convenient U[S]ARTs that may be used as the Serial console include:
  *
  * 1) An Arduino Serial Shield.  The RX and TX pins are available on the
@@ -304,6 +316,7 @@
 #define BOARD_U5TX_PPS  U5TX_RPD15R
 
 /* SPI **********************************************************************/
+
 /* SPI3 is available on pins D10-D13 of the Arduino Shield connectors where
  * you would expect then.  The SPI connector is configured as follows:
  *
@@ -377,4 +390,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_INCLUDE_BOARD_H */

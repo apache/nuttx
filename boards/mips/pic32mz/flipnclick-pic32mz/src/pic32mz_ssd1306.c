@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-pic32mz/src/pic32mz_ssd1306.c
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_ssd1306.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -77,6 +77,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SPI_CMDDATA

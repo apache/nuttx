@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/flipnclick-pic32mz/src/pic32mz_buttons.c
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_buttons.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -106,16 +106,16 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed. */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = pic32mz_gpioread(g_buttons[i]);
+      bool released = pic32mz_gpioread(g_buttons[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
+      if (!released)
+        {
             ret |= (1 << i);
-         }
+        }
     }
 
   return ret;

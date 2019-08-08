@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/mirtoo/scripts/xc32-release.ld
+ * boards/mips/pic32mx/mirtoo/scripts/xc32-release.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* Memory Regions ***********************************************************/
 
 MEMORY

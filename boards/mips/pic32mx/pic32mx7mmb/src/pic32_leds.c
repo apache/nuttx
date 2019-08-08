@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx7mmb/src/pic32_leds.c
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32_leds.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labelled LED0-2 in the
  * schematics:
  *
@@ -115,6 +117,7 @@ struct led_setting_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is defined then NuttX will control the LEDs.  The
  * following structures identified the LED settings for each NuttX LED state.
  */
@@ -226,9 +229,12 @@ void board_userled_all(uint8_t ledset)
 {
   /* Call board_userled() with ledon == true to illuminated the LED */
 
-  board_userled(PIC32MX_PIC32MX7MMB_LED0, (ledset & PIC32MX_PIC32MX7MMB_LED0_BIT) != 0);
-  board_userled(PIC32MX_PIC32MX7MMB_LED1, (ledset & PIC32MX_PIC32MX7MMB_LED1_BIT) != 0);
-  board_userled(PIC32MX_PIC32MX7MMB_LED2, (ledset & PIC32MX_PIC32MX7MMB_LED2_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED0,
+               (ledset & PIC32MX_PIC32MX7MMB_LED0_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED1,
+               (ledset & PIC32MX_PIC32MX7MMB_LED1_BIT) != 0);
+  board_userled(PIC32MX_PIC32MX7MMB_LED2,
+               (ledset & PIC32MX_PIC32MX7MMB_LED2_BIT) != 0);
 }
 #endif
 

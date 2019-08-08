@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/avr/teensy-2.0/scripts/flash.ld
+ * boards/avr/at90usb/teensy-2.0/scripts/flash.ld
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

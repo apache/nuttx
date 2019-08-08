@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/moteino-mega/src/moteino-mega.h
+ * boards/avr/atmega/moteino-mega/src/moteino-mega.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
-#define __BOARDS_AVR_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
+#ifndef __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
+#define __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /****************************************************************************
@@ -69,25 +70,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: atmega_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
 void weak_function atmega_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: atmega_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void atmega_led_initialize(void);
@@ -99,4 +100,4 @@ void atmega_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H */
+#endif /* __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_SRC_MOTEINO_MEGA_H */

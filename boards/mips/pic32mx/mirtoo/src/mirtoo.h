@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/mirtoo/src/mirtoo.h
+ * boards/mips/pic32mx/mirtoo/src/mirtoo.h
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_MIRTOO_SRC_MIRTOO_H
-#define __BOARDS_MIPS_MIRTOO_SRC_MIRTOO_H
+#ifndef __BOARDS_MIPS_PIC32MX_MIRTOO_SRC_MIRTOO_H
+#define __BOARDS_MIPS_PIC32MX_MIRTOO_SRC_MIRTOO_H
 
 /****************************************************************************
  * Included Files
@@ -69,25 +69,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spi2initialize
  *
  * Description:
  *   Called to configure SPI2 chip select GPIO pins for the Mirtoo module.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI2
 void weak_function pic32mx_spi2initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
@@ -102,7 +102,9 @@ void pic32mx_led_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_ADC
+
 /* int pic32mx_adcinitialize(void); not used */
+
 #endif
 
 #undef EXTERN
@@ -111,4 +113,4 @@ void pic32mx_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_MIRTOO_SRC_MIRTOO_H */
+#endif /* __BOARDS_MIPS_PIC32MX_MIRTOO_SRC_MIRTOO_H */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/ubw32/src/pic32_boot.c
+/****************************************************************************
+ * boards/mips/pic32mx/ubw32/src/pic32_boot.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,32 +49,32 @@
 #include "pic32mx.h"
 #include "ubw32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_boardinitialize
  *
  * Description:
- *   All PIC32MX architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All PIC32MX architectures must provide the following entry point.  This
+ *   entry point is called early in the intitialization - after all memory has
+ *   been configured and mapped but before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void pic32mx_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mx_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the
+   * weak function pic32mx_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)

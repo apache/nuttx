@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/moteino-mega/src/Makefile
+# boards/avr/atmega/moteino-mega/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

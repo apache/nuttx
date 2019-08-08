@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/arduino-mega2560/src/Makefile
+# boards/avr/atmega/arduino-mega2560/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

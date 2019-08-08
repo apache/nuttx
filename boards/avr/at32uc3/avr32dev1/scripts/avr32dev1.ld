@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/avr32dev1/scripts/avr32dev1.ld
+ * boards/avr/at32uc3/avr32dev1/scripts/avr32dev1.ld
  *
  *   Copyright (C) 2010, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

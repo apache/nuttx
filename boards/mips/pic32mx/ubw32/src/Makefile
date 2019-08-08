@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ubw32/src/Makefile
+# boards/mips/pic32mx/ubw32/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -34,7 +34,7 @@ The only GPIO pin usage is for LEDs (2) and Buttons (2):
   PIN 24  PB2  KEY1
   PIN 25  PB3  KEY2
 
-(See boards/avr32dev1/src/avr32dev1.h).  And also for
+(See boards/avr/at32uc3/avr32dev1/src/avr32dev1.h).  And also for
 crystals (4), JTAG (1), and USB (1):
 
   PIN 30  PA11 XIN32
@@ -83,7 +83,7 @@ RS-232 drivers or connectors on board.  I use an off-board MAX232
 module that I got on eBay (search for MAX232 if you want to find
 one).  I connect the MAX232 board as follows:
 
-In boards/avr32dev/include/board.h:
+In boards/avr/at32uc3/avr32dev/include/board.h:
 
   #define PINMUX_USART1_RXD   PINMUX_USART1_RXD_1
   #define PINMUX_USART1_TXD   PINMUX_USART1_TXD_1

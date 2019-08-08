@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/teensy-2.0/src/Makefile
+# boards/avr/at90usb/teensy-2.0/src/Makefile
 #
 #   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

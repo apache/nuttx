@@ -1,5 +1,5 @@
 ############################################################################
-# boards/pic32mx-starterkit/src/Makefile
+# boards/mips/pic32mx/pic32mx-starterkit/src/Makefile
 #
 #   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

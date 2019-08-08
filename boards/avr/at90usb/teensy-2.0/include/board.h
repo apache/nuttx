@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/teensy-2.0/include/board.h
+ * boards/avr/at90usb/teensy-2.0/include/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_TEENSY_20_INCLUDE_BOARD_H
-#define __BOARDS_AVR_TEENSY_20_INCLUDE_BOARD_H
+#ifndef __BOARDS_AVR_AT90USB_TEENSY_20_INCLUDE_BOARD_H
+#define __BOARDS_AVR_AT90USB_TEENSY_20_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -45,16 +45,20 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
 #define BOARD_XTAL_FREQ        16000000         /* 16MHz crystal */
 #define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ  /* F_CPU = 16MHz */
 
 /* LED definitions **********************************************************/
+
 /* The Teensy++ 2.0 has a single on-board LEDs connected to PortD, Pin 6 */
+
                                  /* ON      OFF                 */
 #define LED_STARTED            0 /* OFF     ON  (never happens) */
 #define LED_HEAPALLOCATE       0 /* OFF     ON  (never happens) */
@@ -66,6 +70,7 @@
 #define LED_PANIC              0 /* OFF     ON  (1Hz flashing) */
 
 /* Button definitions *******************************************************/
+
 /* SW1 = Connects to AT90USBxx RESET pin and is not available to software */
 
 /****************************************************************************
@@ -96,4 +101,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_TEENSY_20_INCLUDE_BOARD_H */
+#endif /* __BOARDS_AVR_AT90USB_TEENSY_20_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/arduino-mega2560/scripts/Make.defs
+# boards/avr/atmega/arduino-mega2560/scripts/Make.defs
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx-starterkit/include/board.h
+ * boards/mips/pic32mx/pic32mx-starterkit/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MX_PIC32MX_STARTERKIT_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MX_PIC32MX_STARTERKIT_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -50,9 +50,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Crystal frequencies */
 
 #define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
@@ -104,7 +106,9 @@
 #define BOARD_EMAC_MIIM_DIV    32        /* Ideal: 80MHz/32 = 2.5MHz */
 
 /* LED definitions **********************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The PIC32MX Ethernet Starter kit has 3 user LEDs labeled LED1-3 on the
  * board graphics (but referred to as LED4-6 in the schematic):
  *
@@ -168,6 +172,7 @@
 #define LED_NVALUES            6
 
 /* Switch definitions *******************************************************/
+
 /* The PIC32 starter kit has 3 switches:
  *
  *   RD7            Switch SW2 (low when closed)
@@ -203,4 +208,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MX_PIC32MX-STARTERKIT_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/avr/teensy-2.0/src/at90usb_spi.c
+/****************************************************************************
+ * boards/avr/at90usb/teensy-2.0/src/at90usb_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,10 @@
 
 #ifdef CONFIG_AVR_SPI
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Teensy SPI Connection
  *
  * -- ---- -- ------------------------- -------
@@ -80,65 +81,71 @@
 #define TEENSY_CD (1 << 4)
 #define TEENSY_WP (1 << 5)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: at90usb_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function at90usb_spidev_initialize(void)
 {
-  /* The Teensy board has no dedicated SPI devices so we assume that SS is used
-   * for chip select:
+  /* The Teensy board has no dedicated SPI devices so we assume that SS is
+   * used for chip select:
    *
-   *   "When the SPI is configured as a Master (MSTR in SPCR is set), the user
-   *    can determine the direction of the SS pin.  If SS is configured as an
-   *    output, the pin is a general output pin which does not affect the SPI
-   *    system. ...
+   *   "When the SPI is configured as a Master (MSTR in SPCR is set), the
+   *    user can determine the direction of the SS pin.
+   *    If SS is configured as an output, the pin is a general output pin
+   *    which does not affect the SPI system. ...
    *
-   *   "If SS is configured as an input, it must be held high to ensure Master
-   *    SPI operation. If the SS pin is driven low by peripheral circuitry when
-   *    the SPI is configured as a Master with the SS pin defined as an input,
-   *    the SPI system interprets this as another master selecting the SPI ...
+   *   "If SS is configured as an input, it must be held high to ensure
+   *    Master SPI operation. If the SS pin is driven low by peripheral
+   *    circuitry when the SPI is configured as a Master with the SS pin
+   *    defined as an input, the SPI system interprets this as another
+   *    master selecting the SPI ...
    */
 
-   DDRB  |= TEENSY_CS;                 /* B0 is an output */
-   PORTB |= TEENSY_CS;                 /* Low de-selects */
-   DDRB  &= ~(TEENSY_CD | TEENSY_WP);  /* B4 and B5 are inputs */
-   PORTB |= (TEENSY_CD | TEENSY_WP);   /* Pull high */
+  DDRB  |= TEENSY_CS;                 /* B0 is an output */
+  PORTB |= TEENSY_CS;                 /* Low de-selects */
+  DDRB  &= ~(TEENSY_CD | TEENSY_WP);  /* B4 and B5 are inputs */
+  PORTB |= (TEENSY_CD | TEENSY_WP);   /* Pull high */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  avr_spiselect and avr_spistatus
  *
  * Description:
- *   The external functions, avr_spiselect and avr_spistatus  must be provided by
- *   board-specific logic.  They are implementations of the select and status methods
- *   of the SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
- *   other methods (including avr_spibus_initialize()) are provided by common AVR logic.
+ *   The external functions, avr_spiselect and avr_spistatus  must be provided
+ *   by board-specific logic.  They are implementations of the select and
+ *   status methods of the SPI interface defined by struct spi_ops_s
+ *   (see include/nuttx/spi/spi.h).
+ *   All other methods (including avr_spibus_initialize()) are provided by
+ *   common AVR logic.
  *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in avr_spidev_initialize() to configure SPI chip select pins.
- *   2. Provide avr_spiselect() and avr_spistatus() functions in your board-specific
- *      logic.  These functions will perform chip selection and status operations
- *      in the way your board is configured.
- *   3. Add a calls to at90usb_spidev_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by avr_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
+ *   1. Provide logic in avr_spidev_initialize() to configure SPI
+ *      chip select pins.
+ *   2. Provide avr_spiselect() and avr_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations in the way your board is configured.
+ *   3. Add a calls to at90usb_spidev_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by avr_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic
+ *      (e.g., calling  mmcsd_spislotinitialize(),
  *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void  avr_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+           selected ? "assert" : "de-assert");
 
   /* Assert/de-assert the CS pin to the card */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/flipnclick-pic32mz/src/pic32mz_userleds.c
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
  *

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/mirtoo/src/pic32_boot.c
+/****************************************************************************
+ * boards/mips/pic32mx/mirtoo/src/pic32_boot.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,9 +50,9 @@
 #include "pic32mx-pps.h"
 #include "mirtoo.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define GPIO_U1TX  (GPIO_OUTPUT|GPIO_PORTC|GPIO_PIN5)
 #define GPIO_U1RX  (GPIO_INPUT|GPIO_PORTC|GPIO_PIN6)
@@ -60,17 +60,18 @@
 #define GPIO_U2TX  (GPIO_OUTPUT|GPIO_PORTB|GPIO_PIN10)
 #define GPIO_U2RX  (GPIO_INPUT|GPIO_PORTB|GPIO_PIN11)
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_uartinitialize
  *
  * Description:
- *   When mounted on the DTX1-4000L EV-kit1 board, serial output is avaiable through
- *   an FT230X device via the FUNC0 and FUNC1 module outputs.  If CONFIG_PIC32MX_UART2
- *   is enabled, the src/pic32_boot will configure the UART2 pins as follows.
+ *   When mounted on the DTX1-4000L EV-kit1 board, serial output is avaiable
+ *   through an FT230X device via the FUNC0 and FUNC1 module outputs.
+ *   If CONFIG_PIC32MX_UART2 is enabled, the src/pic32_boot will configure
+ *   the UART2 pins as follows.
  *
  *   ---------- ------ ----- ------ -------------------------
  *      BOARD   OUTPUT  PIN  SIGNAL NOTES
@@ -78,8 +79,9 @@
  *   FT230X RXD  FUNC0 RPB11  U2RX  UART2 RX (Also PGEC2)
  *   FT230X TXD  FUNC1 RPB10  U2TX  UART2 TX (Also PGED2)
  *
- *   If CONFIG_PIC32MX_UART1 is enabled, the src/pic32_boot will configure the UART
- *   pins as follows.  This will support communictions (via an external RS-232
+ *   If CONFIG_PIC32MX_UART1 is enabled,
+ *   the src/pic32_boot will configure the UART pins as follows.
+ *   This will support communictions (via an external RS-232
  *   driver) through X3 pins 4 and 5:
  *
  *   ---------- ------ ----- ------ -------------------------
@@ -88,13 +90,14 @@
  *   X3, pin 4   FUNC4 RPBC5  U1TX  UART1 TX
  *   X3, pin 5   FUNC5 RPBC6  U1RX  UART1 RX
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void pic32mx_uartinitialize(void)
 {
 #ifdef CONFIG_PIC32MX_UART2
-  /* Make sure that TRIS pins are set correctly.  Configure the UART pins as digital
-   * inputs and outputs first.
+
+  /* Make sure that TRIS pins are set correctly.
+   * Configure the UART pins as digital inputs and outputs first.
    */
 
   pic32mx_configgpio(GPIO_U2TX);
@@ -107,8 +110,9 @@ static inline void pic32mx_uartinitialize(void)
 #endif
 
 #ifdef CONFIG_PIC32MX_UART1
-  /* Make sure that TRIS pins are set correctly.  Configure the UART pins as digital
-   * inputs and outputs first.
+
+  /* Make sure that TRIS pins are set correctly.
+   * Configure the UART pins as digital inputs and outputs first.
    */
 
   pic32mx_configgpio(GPIO_U1TX);
@@ -121,19 +125,20 @@ static inline void pic32mx_uartinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_boardinitialize
  *
  * Description:
- *   All PIC32MX architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All PIC32MX architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void pic32mx_boardinitialize(void)
 {
@@ -141,8 +146,9 @@ void pic32mx_boardinitialize(void)
 
   pic32mx_uartinitialize();
 
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mx_spi2initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2)
+   * the weak function pic32mx_spi2initialize() has been brought into the
+   * link.
    */
 
 #ifdef CONFIG_PIC32MX_SPI2

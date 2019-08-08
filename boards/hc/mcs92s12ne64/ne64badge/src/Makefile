@@ -1,5 +1,5 @@
 ############################################################################
-# boards/hc/ne64badge/src/Makefile
+# boards/hc/mcs92s12ne64/ne64badge/src/Makefile
 #
 #   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

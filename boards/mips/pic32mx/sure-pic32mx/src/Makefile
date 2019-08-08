@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sure-pic32mx/src/Makefile
+# boards/mips/pic32mx/sure-pic32mx/src/Makefile
 #
 #   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

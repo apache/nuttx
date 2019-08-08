@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/avr32dev1/scripts/Make.defs
+# boards/avr/at32uc3/avr32dev1/scripts/Make.defs
 #
 #   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

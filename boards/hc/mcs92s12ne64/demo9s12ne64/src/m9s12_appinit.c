@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/demo9s12ne64/src/m9s12_appinit.c
+ * boards/hc/mcs92s12ne64/demo9s12ne64/src/m9s12_appinit.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

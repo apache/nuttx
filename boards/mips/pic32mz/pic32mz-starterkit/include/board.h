@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz-starterkit/include/board.h
+ * boards/mips/pic32mz/pic32mz-starterkit/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -49,9 +49,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Crystal frequencies
  *
  * - A 24 MHz oscillator circuit (Y4) is connected to the on-board
@@ -89,6 +91,7 @@
 #define BOARD_CPU_CLOCK        200000000 /* CPU clock: 200MHz = (24MHz / 3) * 50 / 2) */
 
 /* Peripheral clocks */
+
 /* PBCLK1
  *   Peripherals: OSC2 pin
  *
@@ -173,7 +176,9 @@
 #define BOARD_EMAC_MIIM_DIV    40        /* Ideal: 100MHz/40 = 2.5MHz */
 
 /* LED definitions **********************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board:
  *
@@ -227,6 +232,7 @@
 #define LED_NVALUES            6
 
 /* Switch definitions *******************************************************/
+
 /* The PIC32MZ Ethernet Starter kit has 3 user push buttons labelled SW1-3
  * on the board:
  *
@@ -251,6 +257,7 @@
 #define BUTTON_SW3_BIT         (1 << BUTTON_SW3)
 
 /* UARTS ********************************************************************/
+
 /*  MEB-II
  *
  * By default, the UART1 is configured for the pins used by the MEB-II
@@ -312,4 +319,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_INCLUDE_BOARD_H */

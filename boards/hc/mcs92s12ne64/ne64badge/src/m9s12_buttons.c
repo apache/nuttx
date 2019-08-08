@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hc/ne64badge/src/m9s12_buttons.c
+ * boards/hc/mcs92s12ne64/ne64badge/src/m9s12_buttons.c
  *
  *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

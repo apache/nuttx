@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hc/demo9s12ne64/src/m9s12_buttons.c
+ * boards/hc/mcs92s12ne64/demo9s12ne64/src/m9s12_buttons.c
  *
  *   Copyright (C) 2009, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

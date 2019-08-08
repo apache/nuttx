@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx-starterkit/src/up_usbmsc.c
+ * boards/mips/pic32mx/pic32mx-starterkit/src/up_usbmsc.c
  *
  *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,12 +59,13 @@ int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initialized in board_app_initialize() (see
-   * pic32mx_appinit.c).  In this case, there is nothing further to be done here.
+   * pic32mx_appinit.c).  In this case, there is nothing further to be
+   * done here.
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS
 #  warning "Missing Logic"
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
-   return 0;
+  return 0;
 }

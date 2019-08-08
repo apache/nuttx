@@ -1,4 +1,4 @@
-boards/pic32mx-starterkit README
+boards/mips/pic32mx/pic32mx-starterkit README
 ===============================
 
 

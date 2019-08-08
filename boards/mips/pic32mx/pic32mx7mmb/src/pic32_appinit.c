@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/pic32mx7mmb/src/pic32_appinit.c
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32_appinit.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

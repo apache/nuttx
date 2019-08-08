@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/sure-pic32mx/src/pic32mx_leds.c
+ * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
  * controllable by software.  Four are controllable by software:
  *

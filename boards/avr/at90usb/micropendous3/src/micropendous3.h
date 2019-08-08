@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/micropendous3/src/micropendous3.h
+ * boards/avr/at90usb/micropendous3/src/micropendous3.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_MICROPENDOUS3_SRC_MICROPENDOUS3_H
-#define __BOARDS_AVR_MICROPENDOUS3_SRC_MICROPENDOUS3_H
+#ifndef __BOARDS_AVR_AT90USB_MICROPENDOUS3_SRC_MICROPENDOUS3_H
+#define __BOARDS_AVR_AT90USB_MICROPENDOUS3_SRC_MICROPENDOUS3_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /****************************************************************************
@@ -63,30 +64,32 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: at90usb_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Micropendous3 board.
+ *   Called to configure SPI chip select GPIO pins for the Micropendous3
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
 EXTERN void weak_function at90usb_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: at90usb_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 EXTERN void at90usb_led_initialize(void);
@@ -98,4 +101,4 @@ EXTERN void at90usb_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_MICROPENDOUS3_SRC_MICROPENDOUS3_H */
+#endif /* __BOARDS_AVR_AT90USB_MICROPENDOUS3_SRC_MICROPENDOUS3_H */

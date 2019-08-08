@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/flipnclick-pic32mz/src/flipnclick-pic32mz.h
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/flipnclick-pic32mz.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H
-#define __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H
+#ifndef __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H
+#define __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H
 
 /****************************************************************************
  * Included Files
@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_SSD1306 1
@@ -65,6 +66,7 @@
 #endif
 
 /* LEDs *********************************************************************/
+
 /* There are four LEDs on the top, red side of the board.  Only one can be
  * controlled by software:
  *
@@ -236,25 +238,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI
 void weak_function pic32mz_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mz_led_initialize(void);
@@ -291,4 +293,4 @@ FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H */
+#endif /* __BOARDS_MIPS_PIC32MZ_FLIPNCLICK_PIC32MZ_SRC_FLIPNCLICK_PIC32MZ_H */

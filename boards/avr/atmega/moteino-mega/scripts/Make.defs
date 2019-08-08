@@ -1,5 +1,5 @@
 ############################################################################
-# boards/avr/moteino-mega/scripts/Make.defs
+# boards/avr/atmega/moteino-mega/scripts/Make.defs
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

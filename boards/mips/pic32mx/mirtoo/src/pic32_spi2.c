@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/mirtoo/src/pic32_spi2.c
+/****************************************************************************
+ * boards/mips/pic32mx/mirtoo/src/pic32_spi2.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,18 +54,19 @@
 
 #ifdef CONFIG_PIC32MX_SPI2
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The Mirtoo module as two on-board SPI devices:
  *
  * SST25VF032B - 32-Mbit SPI Serial FLASH
  *
- * PGA117 - Zero drift programmable gain amplifier with MUX. The PGA117 offers 10
- * analog inputs, a four-pin SPI interface with daisy-chain capability, and hardware
- * and software shutdown in a TSSOP-20 package. Only 8 of the analog inputs (PORT0-7)
- * are used on the Mirtoo module.
+ * PGA117 - Zero drift programmable gain amplifier with MUX.
+ * The PGA117 offers 10 analog inputs, a four-pin SPI interface with
+ * daisy-chain capability, and hardware and software shutdown in a TSSOP-20
+ * package.
+ * Only 8 of the analog inputs (PORT0-7) are used on the Mirtoo module.
  *
  * Chip selects:
  *
@@ -92,21 +93,22 @@
 #define GPIO_PGA117_CS      (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN7)
 #define GPIO_SST25VF032B_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN13)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spi2initialize
  *
  * Description:
  *   Called to configure SPI2 chip select GPIO pins for the Mirtoo module.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function pic32mx_spi2initialize(void)
 {
-  /* Make sure that TRIS pins are set correctly.  Configure the SPI pins as digital
+  /* Make sure that TRIS pins are set correctly.
+   * Configure the SPI pins as digital
    * inputs and outputs first.
    */
 
@@ -125,39 +127,44 @@ void weak_function pic32mx_spi2initialize(void)
   pic32mx_configgpio(GPIO_SST25VF032B_CS);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  pic32mx_spi2select, pic32mx_spi2status, and pic32mx_spi2cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.
+ *   They are implementations of the select, status, and cmddata methods of
+ *   the SPI interface defined by struct spi_ops_s
+ *   (see include/nuttx/spi/spi.h).
+ *   All other methods including pic32mx_spibus_initialize()) are provided by
+ *   common PIC32MX logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mx_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in pic32mx_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide pic32mx_spiNselect() and pic32mx_spiNstatus() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to pic32mx_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to pic32mx_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
-void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   if (devid == SPIDEV_FLASH(0))
     {

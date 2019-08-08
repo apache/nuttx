@@ -1,5 +1,5 @@
-/*******************************************************************************
- * boards/avr/arduino-mega2560/scripts/flash.ld
+/****************************************************************************
+ * boards/avr/atmega/arduino-mega2560/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,9 +31,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/* Memory Regions *************************************************************/
+/* Memory Regions ***********************************************************/
+
 /* ------ ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
  *         FLASH       | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
  *                     |           REGISTERS REGISTERS             |

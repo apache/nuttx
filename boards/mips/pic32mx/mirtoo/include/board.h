@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/mirtoo/include/board.h
+ * boards/mips/pic32mx/mirtoo/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_MIRTOO_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_MIRTOO_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MX_MIRTOO_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MX_MIRTOO_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -49,9 +49,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* The Mirtoo does not use an external crystal but relies instead on the
  * internal +/- 0.9% FRC clock.  That clock has a nomninal frequency of 8MHz.
  */
@@ -94,6 +96,7 @@
 #define BOARD_WD_PRESCALER     8        /* Watchdog pre-scaler */
 
 /* LED definitions **********************************************************/
+
 /* The Mirtoo module has 2 user LEDs labeled LED0 and LED1 in the schematics:
  *
  * ---  ----- --------------------------------------------------------------
@@ -172,4 +175,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_MIRTOO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MX_MIRTOO_INCLUDE_BOARD_H */

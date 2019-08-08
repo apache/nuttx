@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/pic32mx-starterkit/src/pic32mx_appinit.c
+ * boards/mips/pic32mx/pic32mx-starterkit/src/pic32mx_appinit.c
  *
  *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Assume that we have MMC/SD, USB host (and USB device) */
 
 #define NSH_HAVEMMCSD   1
@@ -76,7 +78,7 @@
 
 #ifdef NSH_HAVEMMCSD
 
-   /* Make sure that the NSH configuration uses the correct SPI */
+/* Make sure that the NSH configuration uses the correct SPI */
 
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
 #    define CONFIG_NSH_MMCSDSPIPORTNO CONFIG_PIC32MX_MMCSDSPIPORTNO
@@ -86,7 +88,7 @@
 #    define CONFIG_NSH_MMCSDSPIPORTNO CONFIG_PIC32MX_MMCSDSPIPORTNO
 #  endif
 
-   /* Make sure that the NSH configuration uses the slot */
+/* Make sure that the NSH configuration uses the slot */
 
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO 0
@@ -96,7 +98,7 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 
-   /* Make sure that the correct SPI is enabled in the configuration */
+/* Make sure that the correct SPI is enabled in the configuration */
 
 #  if CONFIG_PIC32MX_MMCSDSPIPORTNO == 1 && !defined(CONFIG_PIC32MX_SPI1)
 #    warning "CONFIG_PIC32MX_SPI1 is not enabled"
@@ -184,12 +186,13 @@ static int nsh_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      syslog(LOG_INFO, "nsh_waiter: %s\n", hport->connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -286,7 +289,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -296,7 +300,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 

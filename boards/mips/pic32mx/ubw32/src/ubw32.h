@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/ubw32/src/ubw32.h
+ * boards/mips/pic32mx/ubw32/src/ubw32.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_UBW32_SRC_UBW32_H
-#define __BOARDS_MIPS_UBW32_SRC_UBW32_H
+#ifndef __BOARDS_MIPS_PIC32MX_UBW32_SRC_UBW32_H
+#define __BOARDS_MIPS_PIC32MX_UBW32_SRC_UBW32_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /****************************************************************************
@@ -69,25 +70,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the UBW32 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
 void weak_function pic32mx_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
@@ -99,4 +100,4 @@ void pic32mx_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_UBW32_SRC_UBW32_H */
+#endif /* __BOARDS_MIPS_PIC32MX_UBW32_SRC_UBW32_H */

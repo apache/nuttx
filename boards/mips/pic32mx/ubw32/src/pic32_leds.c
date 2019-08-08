@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/ubw32/src/pic32_leds.c
+ * boards/mips/pic32mx/ubw32/src/pic32_leds.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +56,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* ----- ----- -------------------------------------------------------------
  * LABEL COLOR CONTROL
  * ----- ----- -------------------------------------------------------------
@@ -67,7 +69,8 @@
  * LED3  Yellow  RE0, Pulled up.  Low value illuminates
  * PWR   Blue    Illuminated when 5V is present, not controlled by software
  *
- * If CONFIG_ARCH_LEDS is defined, then NuttX will control these LEDs as follows:
+ * If CONFIG_ARCH_LEDS is defined,
+ * then NuttX will control these LEDs as follows:
  *
  *                           ON                  OFF
  * ------------------------- ---- ---- ---- ---- ---- ----
@@ -112,6 +115,7 @@ struct led_setting_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is defined then NuttX will control the LEDs.  The
  * following structures identified the LED settings for each NuttX LED state.
  */

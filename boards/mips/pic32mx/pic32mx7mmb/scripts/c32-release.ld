@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx7mmb/scripts/c32-release.ld
+ * boards/mips/pic32mx/pic32mx7mmb/scripts/c32-release.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* Memory Regions ***********************************************************/
 
 MEMORY

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/sure-pic32mx/include/board.h
+ * boards/mips/pic32mx/sure-pic32mx/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -46,9 +46,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Crystal frequencies */
 
 #define BOARD_POSC_FREQ        20000000  /* Primary OSC XTAL frequency (20MHz) */
@@ -97,6 +99,7 @@
 #undef BOARD_TIMER1_SOSC
 
 /* LED definitions **********************************************************/
+
 /* The Sure DB_DP11215 PIC32 Storage Demo Board board has five LEDs.  One
  * (D4, lablel "Power") is not controllable by software.  Four are
  * controllable by software:
@@ -118,10 +121,10 @@
 #define LED_PANIC              5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
 #define LED_NVALUES            6
 
-/* The Sure DB-DP11212 PIC32 General Purpose Demo Board does not have any user
- * controllable LEDs, but does does have a segment LED display.  That display is
- * however, obscured by the larger segment display attached to the board and, so,
- * is not supported.
+/* The Sure DB-DP11212 PIC32 General Purpose Demo Board does not have any
+ * user controllable LEDs, but does does have a segment LED display.
+ * That display is however, obscured by the larger segment display attached to
+ * the board and, so, is not supported.
  */
 
 /* For distinguishing individual LEDs */
@@ -132,6 +135,7 @@
 #define LED_ERROR              3
 
 /* Button Definitions *******************************************************/
+
 /* The Sure PIC32MX board has three buttons.
  *
  * SW1  (SW_UP, left arrow)          RB3 Pulled high, Grounded/low when depressed
@@ -175,4 +179,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_SURE_PIC32MX_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_INCLUDE_BOARD_H */

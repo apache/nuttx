@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz-starterkit/nsh/mips-debug.ld
+ * boards/mips/pic32mz/pic32mz-starterkit/nsh/mips-debug.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* Memory Regions ***********************************************************/
 
 MEMORY

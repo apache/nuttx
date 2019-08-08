@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx-starterkit/src/pic32mx_leds.c
+ * boards/mips/pic32mx/pic32mx-starterkit/src/pic32mx_leds.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The PIC32MX Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board graphics (but referred to as LED4-6 in the schematic):
  *
@@ -112,6 +114,7 @@ struct led_setting_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is defined then NuttX will control the LEDs.  The
  * following structures identified the LED settings for each NuttX LED state.
  */
@@ -217,9 +220,12 @@ void board_userled(int led, bool ledon)
 #ifndef CONFIG_ARCH_LEDS
 void board_userled_all(uint8_t ledset)
 {
-  board_userled(PIC32MX_STARTERKIT_LED1, (ledset & PIC32MX_STARTERKIT_LED1_BIT) != 0);
-  board_userled(PIC32MX_STARTERKIT_LED2, (ledset & PIC32MX_STARTERKIT_LED2_BIT) != 0);
-  board_userled(PIC32MX_STARTERKIT_LED3, (ledset & PIC32MX_STARTERKIT_LED3_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED1,
+               (ledset & PIC32MX_STARTERKIT_LED1_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED2,
+               (ledset & PIC32MX_STARTERKIT_LED2_BIT) != 0);
+  board_userled(PIC32MX_STARTERKIT_LED3,
+               (ledset & PIC32MX_STARTERKIT_LED3_BIT) != 0);
 }
 #endif
 

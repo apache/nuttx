@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/avr/moteino-mega/src/avr_boot.c
+/****************************************************************************
+ * boards/avr/atmega/moteino-mega/src/avr_boot.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,32 +49,34 @@
 #include "atmega.h"
 #include "moteino_mega.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: atmega_boardinitialize
  *
  * Description:
- *   All ATMega architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *  All ATMega architectures must provide the following entry point.
+ *  This entry point is called early in the initialization -- after all
+ *  memory has been configured and mapped but before any devices have been
+ *  initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void atmega_boardinitialize(void)
 {
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function atmega_spidev_initialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2)
+   * the weak function atmega_spidev_initialize() has been brought into the
+   * link.
    */
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)

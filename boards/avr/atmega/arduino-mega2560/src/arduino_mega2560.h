@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/arduino-mega2560/src/arduino-mega2560.h
+ * boards/avr/atmega/arduino-mega2560/src/arduino-mega2560.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H
-#define __BOARDS_AVR_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H
+#ifndef __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H
+#define __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /****************************************************************************
@@ -61,17 +62,17 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: atmega_ledinit
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void atmega_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H */
+#endif /* __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_SRC_ARDUINO_MEGA2560_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/teensy-2.0/src/teensy-20.h
+ * boards/avr/at90usb/teensy-2.0/src/teensy-20.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_TEENSY_20_SRC_TEENSY_H
-#define __BOARDS_AVR_TEENSY_20_SRC_TEENSY_H
+#ifndef __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H
+#define __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H
 
 /****************************************************************************
  * Included Files
@@ -56,25 +56,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: at90usb_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Teensy++ 2.0 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_AVR_SPI
 void weak_function at90usb_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: at90usb_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void at90usb_led_initialize(void);
@@ -86,4 +86,4 @@ void at90usb_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_TEENSY_20_SRC_TEENSY_H */
+#endif /* __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H */

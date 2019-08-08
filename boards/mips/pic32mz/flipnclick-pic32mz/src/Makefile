@@ -1,5 +1,5 @@
 ############################################################################
-# boards/flipnclick-pic32mz/src/Makefile
+# boards/mips/pic32mz/flipnclick-pic32mz/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

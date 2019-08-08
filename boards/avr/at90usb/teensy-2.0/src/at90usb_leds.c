@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/teensy-2.0/src/at90usb_leds.c
+ * boards/avr/at90usb/teensy-2.0/src/at90usb_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -100,17 +100,20 @@ void board_autoled_on(int led)
   switch (led)
     {
     case 0:
+
       /* The steady state is OFF */
 
       g_ncoff = true;
 
     case 2:
+
       /* Turn the LED off */
 
       PORTD &= ~(1 << 6);
       break;
 
     case 1:
+
       /* The steady state is ON */
 
       PORTD |= (1 << 6);
@@ -142,6 +145,7 @@ void board_autoled_off(int led)
   switch (led)
     {
     case 2:
+
       /* If the "no-change" state is OFF, then turn the LED off */
 
       if (g_ncoff)
@@ -154,6 +158,7 @@ void board_autoled_off(int led)
 
     case 0:
     case 1:
+
       /* Turn the LED on */
 
       PORTD |= (1 << 6);

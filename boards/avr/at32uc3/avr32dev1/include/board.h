@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/avr/avr32dev1/include/board.h
+/****************************************************************************
+ * boards/avr/at32uc3/avr32dev1/include/board.h
  *
  *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,27 +31,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_AVR_AVR32DEV1_INCLUDE_BOARD_H
-#define __BOARDS_AVR_AVR32DEV1_INCLUDE_BOARD_H
+#ifndef __BOARDS_AVR_AT32UC3_AVR32DEV1_INCLUDE_BOARD_H
+#define __BOARDS_AVR_AT32UC3_AVR32DEV1_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdint.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0 can drive
- * the main clock.
+/* Clocking *****************************************************************/
+
+/* Oscillator setup:  RCOSC, OSC32, OSC0, OSC1.  Only RCOSC, OSC0, or PLL0 can
+ * drive the main clock.
  */
 
 /* The RCOSC frequency needs to be calibrated! */
@@ -62,7 +63,7 @@
 #define AVR32_OSC32STARTUP   3          /* OSC32 startup time in RCOSC periods */
 
 #define AVR32_FOSC0          12000000   /* OSC0 frequency in Hz */
-#define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOSC periods.
+#define AVR32_OSC0STARTUP    3          /* OSC0 startup time in RCOSC periods. */
 
 /* #define AVR32_FOSC1       12000000      OSC1 frequency: Hz.
  * #define AVR32_OSC1STARTUP 3             OSC1 startup time in RCOSC periods.
@@ -135,12 +136,13 @@
 #define AVR32_CPU_CLOCK       AVR32_FOSC0
 #define AVR32_PBA_CLOCK       AVR32_FOSC0
 
-/* Pin muliplexing selecion *********************************************************/
+/* Pin muliplexing selecion *************************************************/
 
 #define PINMUX_USART1_RXD     PINMUX_USART1_RXD_1
 #define PINMUX_USART1_TXD     PINMUX_USART1_TXD_1
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The AVR32DEV1 board has 3 LEDs, two of which can be controlled through GPIO pins */
 
                                  /*    ON        OFF    */
@@ -154,11 +156,11 @@
 #define LED_ASSERTION         2  /* ON   ON   ON   OFF  */
 #define LED_PANIC             2  /* ON   ON   ON   OFF  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The AVR32DEV1 board has 3 BUTTONs, two of which can be sensed through GPIO pins. */
 
 #define BUTTON1               1 /* Bit 0: Button 1 */
 #define BUTTON2               2 /* Bit 1: Button 2 */
 
-#endif  /* __BOARDS_AVR_AVR32DEV1_INCLUDE_BOARD_H */
-
+#endif  /* __BOARDS_AVR_AT32UC3_AVR32DEV1_INCLUDE_BOARD_H */

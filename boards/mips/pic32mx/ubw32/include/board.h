@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/ubw32/include/board.h
+ * boards/mips/pic32mx/ubw32/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_UBW32_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_UBW32_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MX_UBW32_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MX_UBW32_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -46,9 +46,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Crystal frequencies */
 
 #define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
@@ -91,6 +93,7 @@
 #define BOARD_WD_PRESCALER     8        /* Watchdog pre-scaler */
 
 /* LED definitions **********************************************************/
+
 /* ----- ----- -------------------------------------------------------------
  * LABEL COLOR CONTROL
  * ----- ----- -------------------------------------------------------------
@@ -115,7 +118,8 @@
 #define PIC32MX_UBW32_LED2_BIT (1 << PIC32MX_UBW32_LED2)
 #define PIC32MX_UBW32_LED3_BIT (1 << PIC32MX_UBW32_LED3)
 
-/* If CONFIG_ARCH_LEDS is defined, then NuttX will control these LEDs as follows:
+/* If CONFIG_ARCH_LEDS is defined,
+ * then NuttX will control these LEDs as follows:
  *
  *                           ON                  OFF
  * ------------------------- ---- ---- ---- ---- ---- ----
@@ -184,4 +188,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_UBW32_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MX_UBW32_INCLUDE_BOARD_H */

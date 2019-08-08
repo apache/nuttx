@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hc/ne64badge/ostest/ne64badge-nonbanked.ld
+ * boards/hc/mcs92s12ne64/ne64badge/ostest/ne64badge-nonbanked.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

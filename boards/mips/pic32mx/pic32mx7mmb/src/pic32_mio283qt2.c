@@ -1,7 +1,8 @@
-/**************************************************************************************
- * boards/mips/pic32mx7mmb/src/pic32_mio283qt2.c
+/****************************************************************************
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32_mio283qt2.c
  *
- * Interface definition for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.
+ * Interface definition for the MI0283QT-2 LCD
+ * from Multi-Inno Technology Co., Ltd.
  * This LCD is based on the Himax HX8347-D LCD controller.
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
@@ -34,11 +35,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,16 +61,18 @@
 #include "pic32mx-pmp.h"
 #include "pic32mx7mmb.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #if defined(CONFIG_LCD_MIO283QT2) && !defined(CONFIG_PIC32MX_PMP)
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
-/* PIC32MX7MMB LCD Hardware Definitions ***********************************************/
+/* PIC32MX7MMB LCD Hardware Definitions *************************************/
+
 /* --- ---------------------------------- -------------------- ------------------------
  * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
  *     (Family Data Sheet Table 1-1)     (PIC32MX7 Schematic)
@@ -124,9 +127,9 @@
 
 #ifdef CONFIG_LCD_MIO283QT2
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 struct pic32mx7mmb_dev_s
 {
@@ -137,9 +140,10 @@ struct pic32mx7mmb_dev_s
   FAR struct lcd_dev_s  *drvr;     /* The saved instance of the LCD driver */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
+
 /* Low Level LCD access */
 
 static void pic32mx_select(FAR struct mio283qt2_lcd_s *dev);
@@ -151,9 +155,9 @@ static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev);
 static void pic32mx_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data);
 static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is the driver state structure (there is no retained state information) */
 
@@ -171,17 +175,17 @@ static struct pic32mx7mmb_dev_s g_pic32mx7mmb_lcd =
   }
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_command
  *
  * Description:
  *   Configure to write an LCD command
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_command(FAR struct pic32mx7mmb_dev_s *priv)
 {
@@ -196,13 +200,13 @@ static void pic32mx_command(FAR struct pic32mx7mmb_dev_s *priv)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_data
  *
  * Description:
  *   Configure to read or write LCD data
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_data(FAR struct pic32mx7mmb_dev_s *priv)
 {
@@ -217,26 +221,26 @@ static void pic32mx_data(FAR struct pic32mx7mmb_dev_s *priv)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_data
  *
  * Description:
  *   Wait until the PMP is no longer busy
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_busywait(void)
 {
   while ((getreg32(PIC32MX_PMP_MODE) & PMP_MODE_BUSY) != 0);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_select
  *
  * Description:
  *   Select the LCD device
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_select(FAR struct mio283qt2_lcd_s *dev)
 {
@@ -253,13 +257,13 @@ static void pic32mx_select(FAR struct mio283qt2_lcd_s *dev)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_deselect
  *
  * Description:
  *   De-select the LCD device
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_deselect(FAR struct mio283qt2_lcd_s *dev)
 {
@@ -276,20 +280,20 @@ static void pic32mx_deselect(FAR struct mio283qt2_lcd_s *dev)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_index
  *
  * Description:
  *   Set the index register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index)
 {
   FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
 
-  /* Make sure that the PMP is not busy from the last transaction.  Read data is not
-   * available until the busy bit becomes zero.
+  /* Make sure that the PMP is not busy from the last transaction.
+   * Read data is not available until the busy bit becomes zero.
    */
 
   pic32mx_busywait();
@@ -300,13 +304,13 @@ static void pic32mx_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index)
   putreg16((uint16_t)index, PIC32MX_PMP_DIN);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_read
  *
  * Description:
  *   Read LCD data (GRAM data or register contents)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_MIO283QT2_WRONLY
 static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev)
@@ -314,8 +318,8 @@ static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev)
   FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
   uint16_t data;
 
-  /* Make sure that the PMP is not busy from the last transaction.  Read data is not
-   * available until the busy bit becomes zero.
+  /* Make sure that the PMP is not busy from the last transaction.
+   * Read data is not available until the busy bit becomes zero.
    */
 
   pic32mx_busywait();
@@ -325,8 +329,8 @@ static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev)
   pic32mx_data(priv);
   data = getreg16(PIC32MX_PMP_DIN);
 
-  /* We need to discard the first 16-bits of data that we read and re-read inorder
-   * to get valid data (that is just the way that the PMP works).
+  /* We need to discard the first 16-bits of data that we read and re-read
+   * inorder to get valid data (that is just the way that the PMP works).
    */
 
   if (!priv->reading)
@@ -338,13 +342,13 @@ static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_write
  *
  * Description:
  *   Write LCD data (GRAM data or register contents)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data)
 {
@@ -364,44 +368,44 @@ static void pic32mx_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data)
   priv->reading = false;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pic32mx_write
  *
  * Description:
  *   Write LCD data (GRAM data or register contents)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power)
 {
-  /* For now, we just control the backlight as a discrete.  Pulse width modulation
-   * would be required to vary the backlight level.  A low value turns the backlight
-   * off.
+  /* For now, we just control the backlight as a discrete.
+   * Pulse width modulation would be required to vary the backlight level.
+   * A low value turns the backlight off.
    */
 
   pic32mx_gpiowrite(GPIO_LCD_BLED, power > 0);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
  *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   initialized, display memory cleared, and the LCD ready to use, but with
+ *   the power setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
   uint32_t regval;
 
-  /* Only initialize the driver once.  NOTE: The LCD GPIOs were already configured
-   * by pic32mx_lcdinitialize.
+  /* Only initialize the driver once.
+   * NOTE: The LCD GPIOs were already configured by pic32mx_lcdinitialize.
    */
 
   if (!g_pic32mx7mmb_lcd.drvr)
@@ -422,8 +426,12 @@ int board_lcd_initialize(void)
        * increment, and no interrupts.
        */
 
-      regval = (PMP_MODE_WAITE_RD(0) | PMP_MODE_WAITM(3) | PMP_MODE_WAITB_1TPB |
-                PMP_MODE_MODE_MODE2 | PMP_MODE_MODE16 | PMP_MODE_INCM_NONE |
+      regval = (PMP_MODE_WAITE_RD(0) |
+                PMP_MODE_WAITM(3) |
+                PMP_MODE_WAITB_1TPB |
+                PMP_MODE_MODE_MODE2 |
+                PMP_MODE_MODE16 |
+                PMP_MODE_INCM_NONE |
                 PMP_MODE_IRQM_NONE);
       putreg32(regval, PIC32MX_PMP_MODE);
 
@@ -461,14 +469,14 @@ int board_lcd_initialize(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -476,13 +484,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return g_pic32mx7mmb_lcd.drvr;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Uninitialize the LCD support
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -513,16 +521,16 @@ void pic32mx_lcdinitialize(void)
    */
 
 #ifdef CONFIG_LCD_MIO283QT2
-   pic32mx_configgpio(GPIO_LCD_RST);
-   pic32mx_configgpio(GPIO_LCD_CS);
-   pic32mx_configgpio(GPIO_LCD_BLED);
-   pic32mx_configgpio(GPIO_LCD_RS);
+  pic32mx_configgpio(GPIO_LCD_RST);
+  pic32mx_configgpio(GPIO_LCD_CS);
+  pic32mx_configgpio(GPIO_LCD_BLED);
+  pic32mx_configgpio(GPIO_LCD_RS);
 
 #else
   /* Just configure the backlight control as an output and turn off the
    * backlight for now.
    */
 
-   pic32mx_configgpio(GPIO_LCD_BLED);
+  pic32mx_configgpio(GPIO_LCD_BLED);
 #endif
 }

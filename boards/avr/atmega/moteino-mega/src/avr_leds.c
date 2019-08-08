@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/moteino-mega/src/avr_leds.c
+ * boards/avr/atmega/moteino-mega/src/avr_leds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,10 +69,10 @@ static bool g_ncoff;
 
 void atmega_led_initialize(void)
 {
-  /* The MoteinoMEGA's single LED is on Port D, Pin 7.  Configure this pin as an
-   * output and turn it OFF.  The "other" side of the LED is onnected to
-   * ground through a resistor.  Therefore, a logic value of 0 should turn
-   * the LED off.
+  /* The MoteinoMEGA's single LED is on Port D, Pin 7.
+   * Configure this pin as an output and turn it OFF.
+   * The "other" side of the LED is onnected to ground through a resistor.
+   * Therefore, a logic value of 0 should turn the LED off.
    */
 
   DDRD   |= (1 << 7);
@@ -100,17 +100,20 @@ void board_autoled_on(int led)
   switch (led)
     {
     case 0:
+
       /* The steady state is OFF */
 
       g_ncoff = true;
 
     case 2:
+
       /* Turn the LED off */
 
       PORTD &= ~(1 << 7);
       break;
 
     case 1:
+
       /* The steady state is ON */
 
       PORTD |= (1 << 7);
@@ -142,6 +145,7 @@ void board_autoled_off(int led)
   switch (led)
     {
     case 2:
+
       /* If the "no-change" state is OFF, then turn the LED off */
 
       if (g_ncoff)
@@ -154,6 +158,7 @@ void board_autoled_off(int led)
 
     case 0:
     case 1:
+
       /* Turn the LED on */
 
       PORTD |= (1 << 7);

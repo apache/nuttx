@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/micropendous3/include/board.h
+ * boards/avr/at90usb/micropendous3/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_MICROPENDOUS3_INCLUDE_BOARD_H
-#define __BOARDS_AVR_MICROPENDOUS3_INCLUDE_BOARD_H
+#ifndef __BOARDS_AVR_AT90USB_MICROPENDOUS3_INCLUDE_BOARD_H
+#define __BOARDS_AVR_AT90USB_MICROPENDOUS3_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -46,15 +46,18 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
 #define BOARD_XTAL_FREQ        16000000         /* 16MHz crystal */
 #define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ  /* F_CPU = 16MHz */
 
 /* LED definitions **********************************************************/
+
 /* The Micropendous 3 has no on-board LEDs */
 
 #define LED_STARTED            0
@@ -67,6 +70,7 @@
 #define LED_PANIC              7
 
 /* Button definitions *******************************************************/
+
 /* SW1 = Connects to AT90USBxx RESET pin and is not available to software.
  * SW2 = Connects (via a pull-up) to PE-2
  */
@@ -87,7 +91,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -98,4 +103,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_MICROPENDOUS3_INCLUDE_BOARD_H */
+#endif /* __BOARDS_AVR_AT90USB_MICROPENDOUS3_INCLUDE_BOARD_H */

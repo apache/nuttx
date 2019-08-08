@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/arduino-mega2560/include/board.h
+ * boards/avr/atmega/arduino-mega2560/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_ARDUINO_MEGA2560_INCLUDE_BOARD_H
-#define __BOARDS_AVR_ARDUINO_MEGA2560_INCLUDE_BOARD_H
+#ifndef __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_INCLUDE_BOARD_H
+#define __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -45,13 +45,15 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
-//#define BOARD_XTAL_FREQ        20000000         /* 20MHz crystal */
-//#define BOARD_XTAL_FREQ        16700000         /* 16.7MHz crystal */
+//#define BOARD_XTAL_FREQ        20000000        /* 20MHz crystal */
+//#define BOARD_XTAL_FREQ        16700000        /* 16.7MHz crystal */
 #define BOARD_XTAL_FREQ        16000000         /* 16MHz crystal */
 #define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ  /* F_CPU = 16MHz */
 
@@ -71,7 +73,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -82,4 +85,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_ARDUINO_MEGA2560_INCLUDE_BOARD_H */
+#endif /* __BOARDS_AVR_ATMEGA_ARDUINO_MEGA2560_INCLUDE_BOARD_H */

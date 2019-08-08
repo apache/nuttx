@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/sure-pic32mx/src/pic32mx_spi.c
+/****************************************************************************
+ * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_spi.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,13 +53,14 @@
 
 #if defined(CONFIG_PIC32MX_SPI2)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_DBDP11215
 
-/* The Sure DB_DP11215 PIC32 Storage Demo Board has an SD slot connected on SPI2:
+/* The Sure DB_DP11215 PIC32 Storage Demo Board has an SD slot
+ * connected on SPI2:
  *
  *  SCK2/PMA5/CN8/RG6    SCK    SD connector SCK, FLASH (U1) SCK*
  *  SDI2/PMA4/CN9/RG7    SDI    SD connector DO, FLASH (U1) SO*
@@ -118,22 +119,22 @@
 #  define GPIO_SOIC_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN11)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function pic32mx_spidev_initialize(void)
 {
-  /* Configure the SPI2 chip select (CS) GPIO output, and the card detect (CD) and
-   * write protect (WP) inputs.
+  /* Configure the SPI2 chip select (CS) GPIO output, and the card detect (CD)
+   * and write protect (WP) inputs.
    */
 
 #ifdef PIC32_HAVE_SD
@@ -148,35 +149,39 @@ void weak_function pic32mx_spidev_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  pic32mx_spi2select and pic32mx_spi2status
  *
  * Description:
  *   The external functions, pic32mx_spi2select and pic32mx_spi2status
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including pic32mx_spibus_initialize())
- *   are provided by common PIC32MX logic.  To use this common SPI logic on your
- *   board:
+ *   must be provided by board-specific logic.  They are implementations of
+ *   the select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including pic32mx_spibus_initialize())
+ *   are provided by common PIC32MX logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SPI chip select
- *      pins.
+ *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SPI chip
+ *      select pins.
  *   2. Provide pic32mx_spi2select() and pic32mx_spi2status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to pic32mx_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to pic32mx_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI2
-void pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n",
+         (int)devid, selected ? "assert" : "de-assert");
 
   /* The SD card chip select is pulled high and active low */
 

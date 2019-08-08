@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz-starterkit/src/pic32mz-starterkit.h
+ * boards/mips/pic32mz/pic32mz-starterkit/src/pic32mz-starterkit.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H
-#define __BOARDS_MIPS_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H
+#ifndef __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H
+#define __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Assume that we have MMC/SD */
 
 #define PIC32MZ_HAVE_MMCSD   1
@@ -78,7 +80,7 @@
 
 #if defined(PIC32MZ_HAVE_MMCSD) && defined(CONFIG_LIB_BOARDCTL)
 
-   /* Make sure that the NSH configuration uses the correct SPI */
+/* Make sure that the NSH configuration uses the correct SPI */
 
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
 #    define CONFIG_NSH_MMCSDSPIPORTNO PIC32MZ_MMCSDSPIPORTNO
@@ -88,7 +90,7 @@
 #    define CONFIG_NSH_MMCSDSPIPORTNO PIC32MZ_MMCSDSPIPORTNO
 #  endif
 
-   /* Make sure that the NSH configuration uses the slot */
+/* Make sure that the NSH configuration uses the slot */
 
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO 0
@@ -98,7 +100,7 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 
-   /* Make sure that the correct SPI is enabled in the configuration */
+/* Make sure that the correct SPI is enabled in the configuration */
 
 #  if PIC32MZ_MMCSDSPIPORTNO == 1 && !defined(CONFIG_PIC32MZ_SPI1)
 #    warning "CONFIG_PIC32MZ_SPI1 is not enabled"
@@ -114,7 +116,7 @@
 #    undef PIC32MZ_HAVE_MMCSD
 #  endif
 
- /* Use the minor number selected in the NSH configuration */
+/* Use the minor number selected in the NSH configuration */
 
 #  ifdef CONFIG_NSH_MMCSDMINOR
 #    define PIC32MZ_MMCSDMINOR CONFIG_NSH_MMCSDMINOR
@@ -122,6 +124,7 @@
 #endif
 
 /* LEDs *********************************************************************/
+
 /* The PIC32 starter kit has 3 user LEDs
  *
  *   PIN  LED   Notes
@@ -178,25 +181,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI
 void weak_function pic32mz_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mz_led_initialize(void);
@@ -218,4 +221,4 @@ int pic32mz_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H */
+#endif /* __BOARDS_MIPS_PIC32MZ_PIC32MZ_STARTERKIT_SRC_PIC32MZ_STARTERKIT_H */

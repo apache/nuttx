@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mips/sure-pic32mx/scripts/Make.defs
+# boards/mips/pic32mx/sure-pic32mx/scripts/Make.defs
 #
 #   Copyright (C) 2011, 2013, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

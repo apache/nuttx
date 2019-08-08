@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/flipnclick-pic32mz/src/pic32mz_boot.c
+/****************************************************************************
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,24 +46,26 @@
 
 #include "flipnclick-pic32mz.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_boardinitialize
  *
  * Description:
- *   All PIC32MZ architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *  All PIC32MZ architectures must provide the following entry point.
+ *  This entry point is called early in the initialization -- after all memory
+ *  has been configured and mapped but before any devices have been
+ * initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void pic32mz_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mz_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2)
+   * the weak function pic32mz_spidev_initialize() has been brought into the
+   * link.
    */
 
 #ifdef CONFIG_PIC32MZ_SPI

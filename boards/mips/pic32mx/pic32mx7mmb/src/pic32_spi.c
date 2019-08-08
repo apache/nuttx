@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/pic32mx7mmb/src/pic32_spi.c
+/****************************************************************************
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32_spi.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,10 @@
 #if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
     defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* SPI1 and SD Card
  *
  * ------ -------- ------------------------- --------------------------------
@@ -75,18 +76,18 @@
 #define GPIO_SD_WP (GPIO_INPUT|GPIO_PORTG|GPIO_PIN6)
 #define GPIO_SD_CD (GPIO_INPUT|GPIO_INT|GPIO_PORTG|GPIO_PIN7)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Mikroelektronka PIC32MX7
- *   MMB board.
+ *   Called to configure SPI chip select GPIO pins for the
+ *   Mikroelektronka PIC32MX7 MMB board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function pic32mx_spidev_initialize(void)
 {
@@ -99,40 +100,45 @@ void weak_function pic32mx_spidev_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.
+ *   They are implementations of the select, status, and cmddata methods of
+ *   the SPI interface defined by struct spi_ops_s
+ *   (see include/nuttx/spi/spi.h).
+ *   All other methods including pic32mx_spibus_initialize()) are provided
+ *   by common PIC32MX logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mx_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in pic32mx_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide pic32mx_spiNselect() and pic32mx_spiNstatus() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to pic32mx_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to pic32mx_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
 #ifdef CONFIG_PIC32MX_SPI1
-void  pic32mx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  pic32mx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -174,9 +180,11 @@ int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI2
-void  pic31mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  pic31mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
@@ -197,9 +205,11 @@ int pic31mx_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
@@ -220,9 +230,11 @@ int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI4
-void  pic32mx_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  pic32mx_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 

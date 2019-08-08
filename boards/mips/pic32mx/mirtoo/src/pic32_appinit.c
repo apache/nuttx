@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/mirtoo/src/pic32_appinit.c
+ * boards/mips/pic32mx/mirtoo/src/pic32_appinit.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,6 +61,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Can't support the SST25 device if it SPI2 or SST25 support is not enabled */
 
 #define HAVE_SST25  1

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/hc/demo9s12ne64/src/m9s12_boot.c
+/****************************************************************************
+ * boards/hc/mcs92s12ne64/demo9s12ne64/src/m9s12_boot.c
  *
  *   Copyright (C) 2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,32 +46,33 @@
 
 #include "demo9s12ne64.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_boardinitialize
  *
  * Description:
- *   All HCS12 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All HCS12 architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after
+ *   all memory has been configured and mapped but before any
+ *   devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void hcs12_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * hcs12_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function hcs12_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_INCLUDE_HCS12_ARCH_SPI)

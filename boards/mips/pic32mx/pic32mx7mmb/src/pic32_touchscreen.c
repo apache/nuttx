@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/pic32mx7mmb/src/pic32_touchscreen.c
+/****************************************************************************
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32_touchscreen.c
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -65,11 +65,14 @@
 
 #ifdef CONFIG_INPUT
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Reference counting is partially implemented, but not needed in the current design.
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Reference counting is partially implemented, but not needed in the current
+ * design.
  */
 
 #undef CONFIG_TOUCHSCREEN_REFCNT
@@ -88,8 +91,8 @@
  *   Touchscreen data comes in a a very high rate.  New touch positions
  *   will only be reported when the X or Y data changes by these thresholds.
  *   This trades reduces data rate for some loss in dragging accuracy.  The
- *   touchscreen is configure for 10-bit values so the raw ranges are 0-1023. So
- *   for example, if your display is 320x240, then THRESHX=3 and THRESHY=4
+ *   touchscreen is configure for 10-bit values so the raw ranges are 0-1023.
+ *   So for example, if your display is 320x240, then THRESHX=3 and THRESHY=4
  *   would correspond to one pixel.  Default: 4
  */
 
@@ -101,15 +104,17 @@
 #  define CONFIG_TOUCHSCREEN_THRESHY 4
 #endif
 
-/* Driver support *******************************************************************/
-/* This format is used to construct the /dev/input[n] device driver path.  It is
- * defined here so that it will be used consistently in all places.
+/* Driver support ***********************************************************/
+
+/* This format is used to construct the /dev/input[n] device driver path.
+ * It is defined here so that it will be used consistently in all places.
  */
 
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
 
-/* PIC32MX7MMB Touchscreen Hardware Definitions *************************************/
+/* PIC32MX7MMB Touchscreen Hardware Definitions *****************************/
+
 /*   ----- ------ --------------------
  *   GPIO  ADC IN TFT Signal Name
  *   ----- ------ --------------------
@@ -139,7 +144,8 @@
 #define UPPER_THRESHOLD        (MAX_ADC-1)
 #define LOWER_THRESHOLD        (1)
 
-/* Delays ***************************************************************************/
+/* Delays *******************************************************************/
+
 /* All values will be increased by one system timer tick (probably 10MS). */
 
 #define TC_PENUP_POLL_TICKS   MSEC2TICK(100) /* IDLE polling rate: 100 MSec */
@@ -148,9 +154,10 @@
 #define TC_SAMPLE_TICKS       MSEC2TICK(4)   /* Delay for A/D sampling: 4 MSec */
 #define TC_RESAMPLE_TICKS     TC_SAMPLE_TICKS
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* This enumeration describes the state of touchscreen state machine */
 
 enum tc_state_e
@@ -214,9 +221,9 @@ struct tc_dev_s
   struct pollfd *fds[CONFIG_TOUCHSCREEN_NPOLLWAITERS];
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_adc_sample(int pin);
 static uint16_t tc_adc_convert(void);
@@ -266,17 +273,19 @@ static const struct file_operations tc_fops =
 static struct tc_dev_s g_touchscreen;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
-/************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: tc_adc_sample
  *
  * Description:
- *   Perform A/D sampling.    Time must be allowed betwen the start of sampling
+ *   Perform A/D sampling.
+ *   Time must be allowed betwen the start of sampling
  *   and conversion (approx. 100Ms).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_adc_sample(int pin)
 {
@@ -319,18 +328,19 @@ static void tc_adc_sample(int pin)
   putreg32(ADC_CON1_SAMP, PIC32MX_ADC_CON1SET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tc_adc_convert
  *
  * Description:
- *   Begin A/D conversion.  Time must be allowed betwen the start of sampling
+ *   Begin A/D conversion.
+ *   Time must be allowed betwen the start of sampling
  *   and conversion (approx. 100Ms).
  *
  * Assumptions:
  * 1) All output pins configured as outputs:
  * 2) Approprite pins are driven high and low
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t tc_adc_convert(void)
 {
@@ -358,19 +368,20 @@ static uint16_t tc_adc_convert(void)
   return (uint16_t)retval;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tc_yminus_sample
  *
  * Description:
  *   Initiate sampling on Y-
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_yminus_sample(void)
 {
   /* Configure X- as an input and X+, Y+, and Y- as outputs */
 
-  putreg32(LCD_XPLUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
+  putreg32(LCD_XPLUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT,
+           PIC32MX_IOPORTB_TRISCLR);
   putreg32(LCD_XMINUS_BIT, PIC32MX_IOPORTB_TRISSET);
 
   /* Energize the X plate: Y+ and Y- high, X+ low */
@@ -383,19 +394,20 @@ static void tc_yminus_sample(void)
   tc_adc_sample(LCD_XMINUS_PIN);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tc_yplus_sample
  *
  * Description:
  *   Initiate sampling on Y+
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_yplus_sample(void)
 {
   /* Configure X+ as an input and X-, Y+, and Y- as outputs */
 
-  putreg32(LCD_XMINUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
+  putreg32(LCD_XMINUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT,
+           PIC32MX_IOPORTB_TRISCLR);
   putreg32(LCD_XPLUS_BIT, PIC32MX_IOPORTB_TRISSET);
 
   /* Energize the X plate: Y+ and Y- High, X- low (X+ is an input) */
@@ -408,19 +420,20 @@ static void tc_yplus_sample(void)
   tc_adc_sample(LCD_XPLUS_PIN);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tc_xplus_sample
  *
  * Description:
  *   Initiate sampling on X+
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_xplus_sample(void)
 {
   /* Configure Y+ as an input and X+, X-, and Y- as outputs */
 
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
+  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YMINUS_BIT,
+           PIC32MX_IOPORTB_TRISCLR);
   putreg32(LCD_YPLUS_BIT, PIC32MX_IOPORTB_TRISSET);
 
   /* Energize the Y plate: X+ and X- high, Y- low (Y+ is an input) */
@@ -433,19 +446,20 @@ static void tc_xplus_sample(void)
   tc_adc_sample(LCD_YPLUS_PIN);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tc_xminus_sample
  *
  * Description:
  *   Initiate sampling on X-
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void tc_xminus_sample(void)
 {
   /* Configure Y- as an input and X+, Y+, and X- as outputs */
 
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YPLUS_BIT, PIC32MX_IOPORTB_TRISCLR);
+  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YPLUS_BIT,
+           PIC32MX_IOPORTB_TRISCLR);
   putreg32(LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISSET);
 
   /* Energize the Y plate: X+ and X- high, Y+ low (Y- is an input) */
@@ -488,10 +502,11 @@ static void tc_notify(FAR struct tc_dev_s *priv)
       nxsem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for touchscreen data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for touchscreen data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.
+   * If they all try to read the data, then some make end up blocking after
+   * all.
    */
 
   for (i = 0; i < CONFIG_TOUCHSCREEN_NPOLLWAITERS; i++)
@@ -526,7 +541,7 @@ static int tc_sample(FAR struct tc_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct tc_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct tc_sample_s));
 
       /* Now manage state transitions */
 
@@ -541,11 +556,11 @@ static int tc_sample(FAR struct tc_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -742,9 +757,9 @@ static void tc_worker(FAR void *arg)
 
         value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the contact
-         * before all of the conversions were completed.  At converted value at
-         * the maximum value is probably bad too.
+        /* A converted value at the minimum would mean that we lost the
+         * contact before all of the conversions were completed.
+         *  At converted value at the maximum value is probably bad too.
          */
 
         if (!tc_valid_sample(value))
@@ -760,7 +775,8 @@ static void tc_worker(FAR void *arg)
           {
             value      = MAX_ADC - value;
             priv->newy = (value + priv->value) >> 1;
-            iinfo("Y-=%d Y+=%d[%d] Y=%d\n", priv->value, value, MAX_ADC - value, priv->newy);
+            iinfo("Y-=%d Y+=%d[%d] Y=%d\n", priv->value,
+                   value, MAX_ADC - value, priv->newy);
 
             /* Start X+ sampling */
 
@@ -784,9 +800,9 @@ static void tc_worker(FAR void *arg)
 
         value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the contact
-         * before all of the conversions were completed.  At converted value at
-         * the maximum value is probably bad too.
+        /* A converted value at the minimum would mean that we lost the
+         * contact before all of the conversions were completed.
+         * At converted value at the maximum value is probably bad too.
          */
 
         if (!tc_valid_sample(value))
@@ -826,9 +842,9 @@ static void tc_worker(FAR void *arg)
 
         value = tc_adc_convert();
 
-        /* A converted value at the minimum would mean that we lost the contact
-         * before all of the conversions were completed.  At converted value at
-         * the maximum value is probably bad too.
+        /* A converted value at the minimum would mean that we lost the
+         * contact before all of the conversions were completed.
+         * At converted value at the maximum value is probably bad too.
          */
 
         if (!tc_valid_sample(value))
@@ -846,7 +862,8 @@ static void tc_worker(FAR void *arg)
 
             value = MAX_ADC - value;
             newx  = (value + priv->value) >> 1;
-            iinfo("X+=%d X-=%d[%d] X=%d\n", priv->value, value, MAX_ADC - value, newx);
+            iinfo("X+=%d X-=%d[%d] X=%d\n", priv->value,
+                   value, MAX_ADC - value, newx);
 
             /* Samples are available */
 
@@ -864,8 +881,8 @@ static void tc_worker(FAR void *arg)
 
   if (priv->state == TC_PENUP)
     {
-      /* Ignore if the pen was already down (CONTACT_NONE == pen up and already
-       * reported.  CONTACT_UP == pen up, but not reported)
+      /* Ignore if the pen was already down (CONTACT_NONE == pen up and
+       *  already reported.  CONTACT_UP == pen up, but not reported)
        */
 
       if (priv->sample.contact != CONTACT_NONE)
@@ -898,15 +915,17 @@ static void tc_worker(FAR void *arg)
 
   else if (priv->state == TC_PENDOWN)
     {
-      /* It is a pen down event.  If the last loss-of-contact event has not been
-       * processed yet, then we have to ignore the pen down event (or else it will
-       * look like a drag event)
+      /* It is a pen down event.  If the last loss-of-contact event has not
+       * been processed yet, then we have to ignore the pen down event
+       * (or else it will look like a drag event)
        */
 
       if (priv->sample.contact != CONTACT_UP)
         {
-          /* Perform a thresholding operation so that the results will be more stable.
-           * If the difference from the last sample is small, then ignore the event.
+          /* Perform a thresholding operation so that the results will be
+           * more stable.
+           * If the difference from the last sample is small, then ignore
+           * the event.
            */
 
           xdiff = (int16_t)priv->sample.x - (int16_t)newx;
@@ -924,15 +943,18 @@ static void tc_worker(FAR void *arg)
           if (xdiff >= CONFIG_TOUCHSCREEN_THRESHX ||
               ydiff >= CONFIG_TOUCHSCREEN_THRESHY)
             {
-              /* There is some change above the threshold... Report the change. */
+              /* There is some change above the threshold...
+               * Report the change.
+               */
 
               priv->sample.x     = newx;
               priv->sample.y     = priv->newy;
               priv->sample.valid = true;
 
-              /* If this is the first (acknowledged) penddown report, then report
-               * this as the first contact.  If contact == CONTACT_DOWN, it will be
-               * set to set to CONTACT_MOVE after the contact is first sampled.
+              /* If this is the first (acknowledged) penddown report, then
+               * report this as the first contact.
+               * If contact == CONTACT_DOWN, it will be set to set to
+               * CONTACT_MOVE after the contact is first sampled.
                */
 
               if (priv->sample.contact != CONTACT_MOVE)
@@ -1120,7 +1142,7 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -1148,8 +1170,8 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (sample.contact == CONTACT_UP)
     {
-       /* Pen is now up.  Is the positional data valid?  This is important to
-        * know because the release will be sent to the window based on its
+      /* Pen is now up.  Is the positional data valid?  This is important to
+       * know because the release will be sent to the window based on its
        * last positional data.
        */
 
@@ -1169,13 +1191,15 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           /* First contact */
 
-          report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
         }
       else /* if (sample->contact == CONTACT_MOVE) */
         {
           /* Movement of the same contact */
 
-          report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
         }
     }
 
@@ -1326,9 +1350,9 @@ errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: pic32mx_tsc_setup

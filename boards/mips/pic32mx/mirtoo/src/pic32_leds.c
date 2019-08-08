@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/mirtoo/src/pic32_leds.c
+ * boards/mips/pic32mx/mirtoo/src/pic32_leds.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The Mirtoo module has 2 user LEDs labelled LED0 and LED1 in the schematics:
  *
  * ---  ----- --------------------------------------------------------------
@@ -107,6 +109,7 @@ struct led_setting_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is defined then NuttX will control the LEDs.  The
  * following structures identified the LED settings for each NuttX LED state.
  */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/teens-2.0/src/at90usb_usbmsc.c
+ * boards/avr/at90usb/teens-2.0/src/at90usb_usbmsc.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -101,7 +101,8 @@ int board_usbmsc_initialize(int port)
 
   syslog(LOG_INFO, "Binding SPI port to MMC/SD slot\n");
 
-  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, AVR_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+                                AVR_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: mmcsd_spislotinitialize failed: %d\n", ret);

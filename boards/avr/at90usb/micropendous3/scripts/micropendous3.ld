@@ -1,5 +1,5 @@
-/**************************************************************************************
- * boards/avr/micropendous3/scripts/micropendous3.ld
+/****************************************************************************
+ * boards/avr/at90usb/micropendous3/scripts/micropendous3.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,9 +31,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Memory Regions *********************************************************************/
+/* Memory Regions ***********************************************************/
 /* -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
  *                FLASH        | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
  *                             |           REGISTERS REGISTERS             |

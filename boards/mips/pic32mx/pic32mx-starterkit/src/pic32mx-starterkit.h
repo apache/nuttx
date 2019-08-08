@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx-starterkit/src/pic32mx-starterkit.h
+ * boards/mips/pic32mx/pic32mx-starterkit/src/pic32mx-starterkit.h
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H
-#define __BOARDS_MIPS_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H
+#ifndef __BOARDS_MIPS_PIC32MX_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H
+#define __BOARDS_MIPS_PIC32MX_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H
 
 /****************************************************************************
  * Included Files
@@ -45,7 +45,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The PIC32 starter kit has 3 user LEDs
  *
  *   RD0          User LED D4 (high illuminates)
@@ -90,25 +92,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI2)
 void weak_function pic32mx_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
@@ -120,4 +122,4 @@ void pic32mx_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H */
+#endif /* __BOARDS_MIPS_PIC32MX_PIC32MX_STARTERKIT_SRC_PIC32MX_STARTERKIT_H */

@@ -1,4 +1,4 @@
-boards/ubw32 README
+boards/mips/pic32mx/ubw32 README
 ====================
 
 This README file discusses the port of NuttX to the Sparkfun UBW32 board.

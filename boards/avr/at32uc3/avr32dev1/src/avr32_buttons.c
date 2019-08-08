@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/avr32dev1/src/avr32_buttons.c
+ * boards/avr/at32uc3/avr32dev1/src/avr32_buttons.c
  *
  *   Copyright (C) 2010-2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -86,7 +86,7 @@ static int board_button_irqx(int irq, xcpt_t irqhandler, void *arg)
       else
         {
          gpio_irqdisable(irq);
-       }
+        }
     }
 
   return OK;
@@ -102,9 +102,9 @@ static int board_button_irqx(int irq, xcpt_t irqhandler, void *arg)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After  that, board_buttons() may be called to collect the current state of
- *   all  buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/moteino-mega/include/board.h
+ * boards/avr/atmega/moteino-mega/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_MOTEINO_MEGA_INCLUDE_BOARD_H
-#define __BOARDS_AVR_MOTEINO_MEGA_INCLUDE_BOARD_H
+#ifndef __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_INCLUDE_BOARD_H
+#define __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -45,9 +45,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
 #define BOARD_XTAL_FREQ        16000000         /* 16MHz crystal */
@@ -94,4 +96,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_MOTEINO_MEGA_INCLUDE_BOARD_H */
+#endif /* __BOARDS_AVR_ATMEGA_MOTEINO_MEGA_INCLUDE_BOARD_H */

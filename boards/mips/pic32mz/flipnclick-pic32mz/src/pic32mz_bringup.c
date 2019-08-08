@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-pic32mz/src/pic32mz_bringup.c
+ * boards/mips/pic32mz/flipnclick-pic32mz/src/pic32mz_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,7 +67,7 @@ int pic32mz_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR,"ERROR: Failed to mount procfs at /proc: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n",
             ret);
     }
 #endif
@@ -77,7 +77,7 @@ int pic32mz_bringup(void)
 
   if (pic32mz_graphics_setup(0) == NULL)
     {
-      syslog(LOG_ERR,"ERROR: Failed to configure the SSD1306 OLED\n");
+      syslog(LOG_ERR, "ERROR: Failed to configure the SSD1306 OLED\n");
     }
 #endif
 

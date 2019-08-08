@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx7mmb/include/board.h
+ * boards/mips/pic32mx/pic32mx7mmb/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_INCLUDE_BOARD_H
+#ifndef __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_INCLUDE_BOARD_H
+#define __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -50,9 +50,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Crystal frequencies */
 
 #define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
@@ -108,7 +110,9 @@
 #define BOARD_EMAC_MIIM_DIV    32        /* Ideal: 80MHz/32 = 2.5MHz */
 
 /* LED definitions **********************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labeled LED0-2 in the
  * schematics:
  *
@@ -209,4 +213,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_INCLUDE_BOARD_H */

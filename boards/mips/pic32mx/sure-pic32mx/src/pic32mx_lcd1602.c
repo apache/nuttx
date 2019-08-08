@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/sure-pic32mx/src/pic32mx_lcd1602.c
+ * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_lcd1602.c
  *
  * This logic supports the connection of an LCD1602 LCD to the PCB Logic
  * PIC32MX board.  The LCD1602 is based on the Hitachi HD44780U LCD
@@ -99,6 +99,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_LCD_MAXCONTRAST
@@ -153,6 +154,7 @@ struct lcd1602_2
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Debug */
 
 #ifdef CONFIG_DEBUG_LCD_INFO
@@ -184,7 +186,8 @@ static void lcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t lcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t lcd_write(FAR struct file *, FAR const char *, size_t);
 static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                    bool setup);
 
 /****************************************************************************
  * Private Data
@@ -304,9 +307,9 @@ static void lcd_brightness(uint8_t brightness)
       /* Turn the LCD light on */
 
       pic32mx_gpiowrite(GPIO_LCD_LIGHT, true);
-      NOP;NOP;NOP;
+      NOP; NOP; NOP;
       pic32mx_gpiowrite(GPIO_LCD_COMP, true);
-      NOP;NOP;
+      NOP; NOP;
       pic32mx_gpiowrite(GPIO_LCD_PWR, true);
     }
   else
@@ -501,7 +504,7 @@ static uint8_t lcd_readch(uint8_t row, uint8_t column)
    * Column  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ... 39
    * Row 0  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f ... 27
    * Ro1 1  40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f ... 67
-  */
+   */
 
   addr = column;
   if (row > 0)
@@ -530,7 +533,7 @@ static void lcd_writech(uint8_t ch, uint8_t row, uint8_t column)
    * Column  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ... 39
    * Row 0  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f ... 27
    * Ro1 1  40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f ... 67
-  */
+   */
 
   addr = column;
   if (row > 0)
@@ -582,9 +585,10 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
               break;
             }
 
-          /* Otherwise, BACKDEL is like moving the cursor back N characters then doing a
-           * forward deletion.  Decrement the cursor position and fall through.
-           */
+           /* Otherwise, BACKDEL is like moving the cursor back N characters
+            * then doing a forward deletion.
+            * Decrement the cursor position and fall through.
+            */
 
            tmp = (int)g_lcd1602.curcol - count;
            if (tmp < 0)
@@ -912,11 +916,10 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-
       /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
        *
-       * argument:  Pointer to struct slcd_attributes_s in which values will be
-       *            returned
+       * argument:  Pointer to struct slcd_attributes_s in which values will
+       *            be returned
        */
 
       case SLCDIOC_GETATTRIBUTES:
@@ -943,7 +946,6 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * argument:  Pointer to struct slcd_curpos_s in which values will be
        *            returned
        */
-
 
       case SLCDIOC_CURPOS:
         {
@@ -1073,6 +1075,7 @@ int up_lcd1602_initialize(void)
       pic32mx_gpiowrite(GPIO_LCD_E, true);     /* Enable transfer */
 
       /* Configure and enable the LCD */
+
       /* Delay for 4.1MS or more */
 
       up_mdelay(5);
@@ -1083,15 +1086,17 @@ int up_lcd1602_initialize(void)
        * Function set: 5x7 Style | N=2R | DL=8D
        */
 
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+                    HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       up_udelay(100);            /* Delay more than 100uS */
-
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+                    HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       up_udelay(40);             /* Delay more than 40uS */
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+                    HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       lcd_waitbusy();
-
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 |
+                    HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
       lcd_waitbusy();
 
       /* Display ON, cursor OFF, blink OFF */
@@ -1103,7 +1108,6 @@ int up_lcd1602_initialize(void)
 
       lcd_wrcommand(HD4478OU_CLEAR); /* Clear display */
       lcd_waitbusy();
-
       lcd_wrcommand(HD4478OU_RETURN); /* Return home: AC=0 */
       lcd_waitbusy();
 

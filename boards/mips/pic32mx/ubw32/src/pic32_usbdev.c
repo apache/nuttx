@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mips/ubw32/src/pic32_usbdev.c
+/****************************************************************************
+ * boards/mips/pic32mx/ubw32/src/pic32_usbdev.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,59 +49,64 @@
 
 #if defined(CONFIG_PIC32MX_USBDEV)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_usbdevinitialize
  *
  * Description:
  *   Called to configure the mini-A/B J5 on the UBW32 for the
  *   USB device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function pic32mx_usbdevinitialize(void)
 {
   /* Notes from the Sure Electronics sample code:
    *
-   * "The USB specifications require that USB peripheral devices must never source
-   *  current onto the Vbus pin.  Additionally, USB peripherals should not source
-   *  current on D+ or D- when the host/hub is not actively powering the Vbus line.
+   * "The USB specifications require that USB peripheral devices must never
+   *  source current onto the Vbus pin.  Additionally, USB peripherals should
+   *  not source current on D+ or D- when the host/hub is not actively
+   *  powering the Vbus line.
    *  When designing a self powered (as opposed to bus powered) USB peripheral
-   *  device, the firmware should make sure not to turn on the USB module and D+
-   *  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
-   *  firmware needs some means to detect when Vbus is being powered by the host.
+   *  device, the firmware should make sure not to turn on the USB module and
+   *  D+ or D- pull up resistor unless Vbus is actively powered.  Therefore,
+   *  the firmware needs some means to detect when Vbus is being powered by
+   *  the host.
    *  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
    *  can be used to detect when Vbus is high (host actively powering), or low
    *  (host is shut down or otherwise not supplying power).  The USB firmware
-   *  can then periodically poll this I/O pin to know when it is okay to turn on
-   *  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
-   *  peripheral device, it is not possible to source current on D+ or D- when the
-   *  host is not actively providing power on Vbus. Therefore, implementing this
-   *  bus sense feature is optional. ..."
+   *  can then periodically poll this I/O pin to know when it is okay to turn
+   *  on the USB module/D+/D- pull up resistor.  When designing a purely bus
+   *  powered peripheral device, it is not possible to source current on D+ or
+   *  D- when the host is not actively providing power on Vbus.
+   *  Therefore, implementing this bus sense feature is optional. ..."
    */
 
 #ifdef CONFIG_USBHOST
 #endif
 
-  /* "If the host PC sends a GetStatus (device) request, the firmware must respond
-   *  and let the host know if the USB peripheral device is currently bus powered
-   *  or self powered.  See chapter 9 in the official USB specifications for details
-   *  regarding this request.  If the peripheral device is capable of being both
-   *  self and bus powered, it should not return a hard coded value for this request.
-   *  Instead, firmware should check if it is currently self or bus powered, and
-   *  respond accordingly.  If the hardware has been configured like demonstrated
-   *  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
+  /* "If the host PC sends a GetStatus (device) request, the firmware must
+   *  respond and let the host know if the USB peripheral device is currently
+   *  bus powered or self powered.
+   *  See chapter 9 in the official USB specifications for details
+   *  regarding this request.
+   *  If the peripheral device is capable of being both self and bus powered,
+   *  it should not return a hard coded value for this request.
+   *  Instead, firmware should check if it is currently self or bus powered,
+   *  and respond accordingly.
+   *  If the hardware has been configured like demonstrated on the PICDEM FS
+   *  USB Demo Board, an I/O pin can be polled to determine the
    *  currently selected power source. ..."
    */
 
@@ -109,7 +114,7 @@ void weak_function pic32mx_usbdevinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_usbpullup
  *
  * Description:
@@ -119,7 +124,7 @@ void weak_function pic32mx_usbdevinitialize(void)
  *   of this method.  Alternatively, if no pull-up GPIO the following EXTERN
  *   can be redefined to be NULL.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable)
 {
@@ -128,7 +133,7 @@ int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_usbsuspend
  *
  * Description:
@@ -137,7 +142,7 @@ int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable)
  *   suspend mode. This is an opportunity for the board logic to shutdown
  *   clocks, power, etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void pic32mx_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {

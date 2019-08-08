@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/sure-pic32mx/src/sure-pic32mx.h
+ * boards/mips/pic32mx/sure-pic32mx/src/sure-pic32mx.h
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
-#define __BOARDS_MIPS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
+#ifndef __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
+#define __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
 
 /****************************************************************************
  * Included Files
@@ -45,9 +45,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* GPIO Pin Configurations **************************************************/
+
 /* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
  * controllable by software.  Four are controllable by software:
  *
@@ -63,7 +65,7 @@
 #define GPIO_FLASH_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN0)
 #define GPIO_ERROR_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN1)
 
- /* LCD pin mapping (see boards/sure-pic32mx/README.txt)
+/* LCD pin mapping (see boards/sure-pic32mx/README.txt)
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description
@@ -123,42 +125,45 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX Logic board.
+ *   Called to configure SPI chip select GPIO pins for the
+ *   Sure PIC32MX Logic board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI2)
 void weak_function pic32mx_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_usbdevinitialize
  *
  * Description:
- *   Called to configure the mini-B PHY on the Sure PIC32MX board for the USB device
+ *   Called to configure the mini-B PHY on the Sure PIC32MX board for the USB
+ *   device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PIC32MX_USBDEV)
 void weak_function pic32mx_usbdevinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mx_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void pic32mx_led_initialize(void);
@@ -170,4 +175,4 @@ void pic32mx_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H */
+#endif /* __BOARDS_MIPS_PIC32MX_SURE_PIC32MX_SRC_SURE_PIC32MXL_H */

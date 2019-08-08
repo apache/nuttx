@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/avr32dev1/src/avr32_leds.c
+ * boards/avr/at32uc3/avr32dev1/src/avr32_leds.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

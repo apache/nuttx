@@ -1,4 +1,4 @@
-boards/pic32mx7mmb README
+boards/mips/pic32mx/pic32mx7mmb README
 ===============================
 
 This README file discusses the port of NuttX to the  Mikroelektronika PIC32MX7

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mz-starterkit/src/pic32mz_leds.c
+ * boards/mips/pic32mz/pic32mz-starterkit/src/pic32mz_leds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED Configuration ********************************************************/
+
 /* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board:
  *
@@ -106,6 +108,7 @@ struct led_setting_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDS is defined then NuttX will control the LEDs.  The
  * following structures identified the LED settings for each NuttX LED state.
  */

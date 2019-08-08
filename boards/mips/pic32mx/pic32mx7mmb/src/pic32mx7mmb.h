@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/pic32mx7mmb/src/pic32mx7mmb.h
+ * boards/mips/pic32mx/pic32mx7mmb/src/pic32mx7mmb.h
  *
  *   Copyright (C) 2012, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_SRC_PIC32MX7MMB_H
-#define __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_SRC_PIC32MX7MMB_H
+#ifndef __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_SRC_PIC32MX7MMB_H
+#define __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_SRC_PIC32MX7MMB_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The Mikroelektronika PIC32MX7 MMB has 3 user LEDs labeled LED0-2 in the
  * schematics:
  *
@@ -114,7 +116,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -200,4 +203,4 @@ int pic32mx_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_MIKROELEKTRONIKA_PIC32MX7MMB_SRC_PIC32MX7MMB_H */
+#endif /* __BOARDS_MIPS_PIC32MX_PIC32MX7MMB_SRC_PIC32MX7MMB_H */
