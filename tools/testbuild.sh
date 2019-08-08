@@ -305,8 +305,6 @@ for line in $testlist; do
           if [ -f ${nuttx}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
             archdir=${arch}
             chipdir=${chip}
-            echo "  Detected ${archdir} Architecture"
-            echo "  Detected ${chipdir} Chip"
           fi
         done
       done
