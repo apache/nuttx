@@ -556,11 +556,11 @@ ide_exporter.py
         cd nuttx
         make V=1 |& tee build_log
 
-        ./tools/ide_exporter.py makelog_f2nsh_c  iar ./boards/<board>/ide/template/iar -o ./boards/<board>/ide/nsh/iar
+        ./tools/ide_exporter.py makelog_f2nsh_c  iar ./boards/<arch>/<chip>/<board>/ide/template/iar -o ./boards/<arch>/<chip>/<board>/ide/nsh/iar
 
         or
 
-        ./tools/ide_exporter.py makelog_f2nsh_c uvision_gcc ./boards/<board>/ide/template/uvision_gcc/ -o ./boards/<board>/ide/nsh/uvision
+        ./tools/ide_exporter.py makelog_f2nsh_c uvision_gcc ./boards/<arch>/<chip>/<board>/ide/template/uvision_gcc/ -o ./boards/<arch>/<chip>/<board>/ide/nsh/uvision
 
   3) Limitations:
      - IAR supports C only. Iar C++ does not compatible with g++ so disable
@@ -807,7 +807,7 @@ refresh.sh
       <board>
          The board directory under nuttx/boards
       <config>
-         The board configuration directory under nuttx/boards/<board>
+         The board configuration directory under nuttx/boards/<arch>/<chip>/<board>
 
   The steps to refresh the file taken by refresh.sh are:
 
