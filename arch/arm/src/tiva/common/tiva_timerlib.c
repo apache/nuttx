@@ -515,6 +515,8 @@ static int tiva_timer32_interrupt(struct tiva_gptmstate_s *priv)
 
   if (status != 0)
     {
+      /* Acknowledge (clear) the interrupt */
+
       tiva_putreg(priv, TIVA_TIMER_ICR_OFFSET, status);
 
       /* If this was a match (or RTC match) interrupt, then disable further
@@ -980,7 +982,7 @@ static int tiva_oneshot_periodic_mode32(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
+   * NOTE: This timer is not started until tiva_timer32_start() is called.
    */
 
   return OK;
@@ -1190,7 +1192,7 @@ static int tiva_oneshot_periodic_mode16(struct tiva_gptmstate_s *priv,
    *    a 1 to the appropriate bit of the GPTM Interrupt Clear Register
    *   (GPTMICR).
    *
-   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
+   * NOTE: This timer is not started until tiva_timer16_start() is called.
    */
 
   return OK;
@@ -1349,7 +1351,7 @@ static int tiva_input_edgecount_mode16(struct tiva_gptmstate_s *priv,
    * programmed number of edge events has been detected. To re-enable the
    * timer, ensure that the TnEN bit is cleared and repeat steps 4 through 8.
    *
-   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
+   * NOTE: This timer is not started until tiva_timer16_start() is called.
    */
 
   return -ENOSYS;
@@ -1435,7 +1437,7 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
    * the GPTMTnMR register. The change takes effect at the next cycle after
    * the write.
    *
-   * NOTE: This timer is not started until tiva_gptm_enableclk() is called.
+   * NOTE: This timer is not started until tiva_timer16_start() is called.
    */
 
   return -ENOSYS;
@@ -1446,7 +1448,18 @@ static int tiva_input_time_mode16(struct tiva_gptmstate_s *priv,
  * Name: tiva_pwm_mode16
  *
  * Description:
- *   Configure 16-bit timer A/B to operate in PWM mode
+ *   Configure 16-bit timer A/B to operate in PWM mode. The timer is not
+ *   started until tiva_timer16_start() is called.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned by tiva_gptm_configure()
+ *   timer  - The timer A or B configuration structure. This is located
+ *            within the configuration passed to tiva_gptm_configure().
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -1533,6 +1546,7 @@ static int tiva_pwm_mode16(struct tiva_gptmstate_s *priv,
  *
  * Description:
  *   Configure the 32-bit timer to operate in the provided mode.
+ *   The timer is not started until tiva_timer32_start() is called.
  *
  ****************************************************************************/
 #ifdef CONFIG_TIVA_TIMER_32BIT
@@ -1564,6 +1578,7 @@ static int tiva_timer32_configure(struct tiva_gptmstate_s *priv,
  *
  * Description:
  *   Configure 16-bit timer A or B to operate in the provided mode.
+ *   The timer is not started until tiva_timer16_start() is called.
  *
  ****************************************************************************/
 
@@ -2298,7 +2313,7 @@ uint32_t tiva_timer16_counter(TIMER_HANDLE handle, int tmndx)
  *   interrupt enabled are: GPTMTAMATCHR = 0x23 GPTMTAILR = 0x46"
  *
  * Input Parameters:
- *   handle   - The handle value returned  by tiva_gptm_configure()
+ *   handle   - The handle value returned by tiva_gptm_configure()
  *   interval - The value to write to the timer interval load register
  *
  * Returned Value:
@@ -2452,8 +2467,9 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
   uint32_t intbit;
   bool toints;
 
-  DEBUGASSERT(priv && priv->attr && priv->config &&
-              priv->config->mode != TIMER16_MODE);
+  DEBUGASSERT(priv && priv->attr &&  priv->config &&
+              priv->config->mode == TIMER16_MODE && (unsigned)tmndx < 2);
+
   config = (const struct tiva_gptm16config_s *)priv->config;
   timer  = &config->config[tmndx];
 
@@ -2474,8 +2490,8 @@ void tiva_timer16_setinterval(TIMER_HANDLE handle, uint16_t interval, int tmndx)
   imrr = base + TIVA_TIMER_IMR_OFFSET;
 
   /* Do we need to enable timeout interrupts?  Interrupts are only enabled
-   * if (1) the user has provided a handler, and (2) the timer timer is
-   * configure as a one-short or periodic timer.
+   * if (1) the user has provided a handler, and (2) the timer is
+   * configured as a one-shot or periodic timer.
    */
 
   toints = false;
