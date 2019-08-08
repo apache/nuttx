@@ -65,10 +65,8 @@ endif
 else
 ifeq ($(WINTOOL),y)
   CFLAGS += -I "${shell cygpath -w $(SCHEDSRCDIR)}"
-ifeq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)}"
-else
   CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)chip}"
+ifneq ($(CONFIG_ARCH_SIM),y)
   CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)common}"
 ifneq ($(ARCH_FAMILY),)
   CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)}"
@@ -76,10 +74,8 @@ endif
 endif
 else
   CFLAGS += -I$(SCHEDSRCDIR)
-ifeq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += -I$(ARCHSRCDIR)
-else
   CFLAGS += -I$(ARCHSRCDIR)$(DELIM)chip
+ifneq ($(CONFIG_ARCH_SIM),y)
   CFLAGS += -I$(ARCHSRCDIR)$(DELIM)common
 ifneq ($(ARCH_FAMILY),)
   CFLAGS += -I$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)
