@@ -1312,8 +1312,7 @@ config LCD_LCD1602
 		HD44780U LCD controller.  See also include/nuttx/lcd/hd4478ou.h.
 
 		NOTE:  There is no common implementation of the LCD1602 driver.
-		Rather, there are board-by-board implementations.  See, for example,
-		boards/pcblogic-pic32mx/src/up_lcd1602.c.
+		Rather, there are board-by-board implementations.
 
 config LCD_BACKPACK
 	bool "PCF8574 LCD Backpack"

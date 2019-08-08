@@ -345,8 +345,8 @@ config ARCH_CHIP_STM32H7
 		STMicro STM32H7 architectures (ARM Cortex-M7).
 
 		BEWARE: This is a work-in-progress and not yet ready for general
-		usage.  See boards/nucleo-h743zi/README.txt for the current state
-		of the port.
+		usage.  See boards/arm/stm32/nucleo-h743zi/README.txt for the
+		current state of the port.
 
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"

@@ -81,7 +81,7 @@ force rebuilding of the ROMFS filesystem be removing some files:
   make
 
 If you have problems building the simulator on your platform, check out
-nuttx/boards/sim/README.txt.  You might find some help there.
+nuttx/boards/sim/sim/sim/README.txt.  You might find some help there.
 
 Here is a sample run.  I have not seen any errors in single stepping through
 the logic but neither am I certain that everything is working properly:

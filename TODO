@@ -81,9 +81,9 @@ o Task/Scheduler (sched/)
                As of this writing, the basic feature implementation is
                complete and much of the logic has been verified.  The test
                harness for the feature exists only for the NXP LPC3131 (see
-               boards/ea3131/configs/pgnsh and locked directories).  There are
-               some limitations of this testing so I still cannot say that
-               the feature is fully functional.
+               boards/arm/lpc31xx/ea3131/configs/pgnsh and locked
+               directories).  There are some limitations of this testing so
+               I still cannot say that the feature is fully functional.
   Status:      Open.  This has been put on the shelf for some time.
   Priority:    Medium-Low
 
@@ -987,7 +987,7 @@ o Kernel/Protected Build
                 by simply reading this variable.
 
                "This one would be easy: Just a change to include/nuttx/userspace.h,
-                boards/*/kernel/up_userspace.c, libs/libc/,
+                boards/<arch>/<chip>/<board>/kernel/up_userspace.c, libs/libc/,
                 sched/sched_addreadytorun.c, and sched/sched_removereadytorun.c.
                 That would eliminate 59% of the syscalls."
 
@@ -1788,7 +1788,8 @@ o USB (drivers/usbdev, drivers/usbhost)
   Title:       USB CDC/ACM HOST CLASS DRIVER
   Description: A CDC/ACM host class driver has been added.  This has been
                testing by running the USB CDC/ACM host on an Olimex
-               LPC1766STK and using the boards/stm3210e-eval/configs/usbserial
+               LPC1766STK and using the
+               boards/arm/stm32/stm3210e-eval/configs/usbserial
                configuration (using the CDC/ACM device side driver).  There
                are several unresolved issues that prevent the host driver
                from being usable:
@@ -2230,7 +2231,8 @@ o File system / Generic drivers (fs/, drivers/)
                file being read is smaller than number bytes written to the
                file.  That test does write small files continuously until
                file system is full and even the the error is rare.  The
-               boards/sim/configs/spiffs test can used to demonstrate the error.
+               boards/sim/sim/sim/configs/spiffs test can used to
+               demonstrate the error.
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.

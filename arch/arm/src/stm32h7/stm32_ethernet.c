@@ -92,7 +92,7 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/stm3240g-eval/README.txt for an explanation of the
+/* See boards/arm/stm32/stm3240g-eval/README.txt for an explanation of the
  * configuration settings.
  */
 

@@ -90,8 +90,9 @@
 #define MEMORY_SYNC() do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* Configuration ************************************************************/
-/* See boards/stm3240g-eval/README.txt for an explanation of the configuration
- * settings.
+
+/* See boards/arm/stm32/stm3240g-eval/README.txt for an explanation of the
+ * configuration settings.
  */
 
 #if STM32F7_NETHERNET > 1
