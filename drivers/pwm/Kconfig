@@ -23,6 +23,15 @@ config PWM_MULTICHAN
 	---help---
 		Enables support for multiple output channels per timer.
 
+config PWM_MULTICHAN_SELECT
+	bool "PWM Multiple Output Channel Support"
+	default n
+	depends on ARCH_HAVE_PWM_MULTICHAN
+	depends on !PWM_PULSECOUNT
+	---help---
+		Enables support for multiple output channels per timer with
+		ability to set timers individually.
+
 if PWM_MULTICHAN
 
 config PWM_NCHANNELS

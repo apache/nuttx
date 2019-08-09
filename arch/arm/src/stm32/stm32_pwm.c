@@ -2293,10 +2293,10 @@ static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
   pwminfo("TIM%u channel: %u duty: %08x\n",
           priv->timid, channel, duty);
 
-#ifndef CONFIG_PWM_MULTICHAN
+#if (!defined(CONFIG_PWM_MULTICHAN) && !defined(CONFIG_PWM_MULTICHAN_SELECT))
   DEBUGASSERT(channel == priv->channels[0].channel);
   DEBUGASSERT(duty >= 0 && duty < uitoub16(100));
-#endif
+#endif  
 
   /* Get the reload values */
 
@@ -3583,7 +3583,9 @@ errout:
 static int pwm_duty_channels_update(FAR struct pwm_lowerhalf_s *dev,
                                     FAR const struct pwm_info_s *info)
 {
+#ifndef CONFIG_PWM_MULTICHAN_SELECT    
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+#endif  
   uint8_t   channel = 0;
   ub16_t    duty    = 0;
   int       ret     = OK;
@@ -3624,8 +3626,12 @@ static int pwm_duty_channels_update(FAR struct pwm_lowerhalf_s *dev,
             }
 #else
           duty = info->duty;
+#ifdef CONFIG_PWM_MULTICHAN_SELECT          
+          channel = info->chan_num;   /* only update specified PWM channel */
+#else
           channel = priv->channels[0].channel;
-#endif
+#endif  /* CONFIG_PWM_MULTICHAN_SELECT */
+#endif  /* CONFIG_PWM_MULTICHAN */
 
           /* Update duty cycle */
 
@@ -3670,11 +3676,15 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 #if defined(CONFIG_PWM_MULTICHAN)
   pwminfo("TIM%u frequency: %u\n",
           priv->timid, info->frequency);
-#else
+#elif defined(CONFIG_PWM_MULTICHAN_SELECT)
+  pwminfo("TIM%u channel: %u frequency: %u duty: %08x\n",
+          priv->timid, info->channel,
+          info->frequency, info->duty);
+#else /* !CONFIG_PWM_MULTICHAN && !CONFIG_PWM_MULTICHAN_SELECT */
   pwminfo("TIM%u channel: %u frequency: %u duty: %08x\n",
           priv->timid, priv->channels[0].channel,
           info->frequency, info->duty);
-#endif
+#endif /* CONFIG_PWM_MULTICHAN */      
 
   DEBUGASSERT(info->frequency > 0);
 #ifndef CONFIG_PWM_MULTICHAN
@@ -4295,7 +4305,32 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   return pwm_pulsecount_timer(dev, info);
 }
-#else  /* !CONFIG_PWM_PULSECOUNT */
+#elif  defined(CONFIG_PWM_MULTICHAN_SELECT)
+static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
+                     FAR const struct pwm_info_s *info)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  int ret = OK;
+
+   /* if frequency has not changed we just update duty for specified channel */
+  if (info->frequency == priv->frequency)
+    {
+      ret = pwm_duty_update(dev, info->chan_num, info->duty);
+    }
+  else
+    {
+      ret = pwm_timer(dev, info);
+
+       /* Save current frequency */
+      if (ret == OK)
+        {
+          priv->frequency = info->frequency;
+        }
+    }
+
+   return ret;
+}
+#else  /* !CONFIG_PWM_PULSECOUNT && !CONFIG_PWM_MULTICHAN_SELECT */
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
