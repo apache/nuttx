@@ -1327,7 +1327,11 @@ config TIVA_TIMER16_TIMECAP
 config TIVA_TIMER16_PWM
 	bool "16-bit PWM output support"
 	default n
-	depends on EXPERIMENTAL
+	---help---
+		Enables 24-bit PWM mode using a 16-bit half-timer of a
+		Tiva 16/32-bit General Purpose Timer Module (GPTM) block.
+		The 24-bit resolution is achieved by using the prescaler
+		as the high 8 bits.
 
 endif # TIVA_TIMER_16BIT
 
