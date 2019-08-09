@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/renesas/scp16c26/src/m16c_leds.c
+/****************************************************************************
+ * boards/renesas/m32262f8/scp16c26/src/m16c_leds.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,11 +50,13 @@
 
 #ifdef CONFIG_ARCH_LEDS
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* The SKP62C26 has 3 LEDs control by bits 0 and 2 in port 7 and bit 0 in port 8. */
+/* The SKP62C26 has 3 LEDs control by bits
+ * 0 and 2 in port 7 and bit 0 in port 8.
+ */
 
 #define GREEN_LED            (1 << 2)   /* Bit 2, port 7 */
 #define YELLOW_LED           (1 << 4)   /* Bit 4, port 7 */
@@ -80,13 +82,13 @@
 #define RED_LED_PORT         M16C_P8
 #define RED_DIR_PORT         M16C_PD8
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const uint8_t g_ledstate[7] =
 {
@@ -103,13 +105,13 @@ static const uint8_t g_ledstate[7] =
 static uint8_t g_prevled[3];
 static uint8_t g_nestlevel;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: m16c_setleds
- ************************************************************************************/
+ ****************************************************************************/
 
 static void m16c_setleds(uint8_t gybits, uint8_t rbit)
 {
@@ -126,13 +128,13 @@ static void m16c_setleds(uint8_t gybits, uint8_t rbit)
   putreg8(regval, RED_LED_PORT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_autoled_initialize
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_autoled_initialize(void)
 {
@@ -141,7 +143,7 @@ void board_autoled_initialize(void)
   /* Make sure that the LEDs are in the OFF state */
 
   regval  = getreg8(GREENYELLOW_LED_PORT);
-  regval |= (GREEN_LED_OFF |YELLOW_LED_OFF);
+  regval |= (GREEN_LED_OFF | YELLOW_LED_OFF);
   putreg8(regval, GREENYELLOW_LED_PORT);
 
   regval  = getreg8(RED_LED_PORT);
@@ -151,7 +153,7 @@ void board_autoled_initialize(void)
   /* Set the direction to output */
 
   regval  = getreg8(GREENYELLOW_DIR_PORT);
-  regval |= (GREEN_LED |YELLOW_LED);
+  regval |= (GREEN_LED | YELLOW_LED);
   putreg8(regval, GREENYELLOW_DIR_PORT);
 
   regval  = getreg8(RED_DIR_PORT);
@@ -159,16 +161,16 @@ void board_autoled_initialize(void)
   putreg8(regval, RED_DIR_PORT);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_autoled_on
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_autoled_on(int led)
 {
   uint8_t ledset;
 
-  /* If this is the ASSERTION led, preserve the Y&G bits from the last setting and
-   * set the RED LED on.
+  /* If this is the ASSERTION led, preserve the Y&G bits from the last setting
+   * and set the RED LED on.
    */
 
   if (led == LED_ASSERTION)
@@ -195,21 +197,24 @@ void board_autoled_on(int led)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_autoled_off
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_autoled_off(int led)
 {
   uint8_t ledset;
 
-  /* If this is the ASSERTION led then what we do depends on the previous state */
+  /* If this is the ASSERTION led then what we do depends on
+   * the previous state
+   */
 
   if (led == LED_ASSERTION)
     {
-      /* If the previous state was one of the nested states (INIRQ, SIGNAL, or ASSERTION),
-       * then turn the green and yellow LEDs all off.  That way we can distinguish
-       * that case from the simple cases.
+      /* If the previous state was one of the nested states
+       * (INIRQ, SIGNAL, or ASSERTION),
+       * then turn the green and yellow LEDs all off.
+       * That way we can distinguish that case from the simple cases.
        */
 
       if (g_nestlevel > 0)
@@ -225,7 +230,8 @@ void board_autoled_off(int led)
     }
   else if (led > 0 && led < LED_ASSERTION)
     {
-      /* If this was one of the nested states, then we want to back to the LED setting
+      /* If this was one of the nested states,
+       * then we want to back to the LED setting
        * before entering that nested statel.
        */
 
@@ -243,7 +249,7 @@ void board_autoled_off(int led)
 
       ledset = g_ledstate[led];
       m16c_setleds(ledset & GREENYELLOW_LED_MASK, ledset & RED_LED_MASK);
-      g_prevled[g_nestlevel]= led;
+      g_prevled[g_nestlevel] = led;
     }
 }
 

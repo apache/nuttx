@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/elf32-core/scripts/esp32_flash.ld
+ * boards/xtensa/esp32/esp32-core/scripts/esp32_flash.ld
  ****************************************************************************/
 
 /* Default entry point: */

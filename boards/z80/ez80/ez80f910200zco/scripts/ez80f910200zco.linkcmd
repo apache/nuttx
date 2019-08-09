@@ -1,5 +1,5 @@
 /****************************************************************************/
-/* boards/z80/ez80f910200zco/scripts/ez80f910200zco.linkcmd                 */
+/* boards/z80/ez80/ez80f910200zco/scripts/ez80f910200zco.linkcmd            */
 /*                                                                          */
 /*   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.            */
 /*   Author: Gregory Nutt <gnutt@nuttx.org>                                 */

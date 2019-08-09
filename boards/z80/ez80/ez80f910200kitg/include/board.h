@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/ez80f910200kitg/include/board.h
+ * arch/z80/ez80/ez80f910200kitg/include/board.h
  *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_Z80_EZ80_EZ80f910200KITG_INCLUDE_BOARD_H
+#define __BOARDS_Z80_EZ80_EZ80f910200KITG_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -67,7 +67,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -77,4 +78,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_Z80_EZ80_EZ80f910200KITG_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/src/sim_gpio.c
+ * boards/sim/sim/sim/src/sim_gpio.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -160,7 +160,8 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   FAR struct simgpio_dev_s *simgpio = (FAR struct simgpio_dev_s *)dev;
 
   DEBUGASSERT(simgpio != NULL && value != NULL);
-  gpioinfo("Reading %d (next=%d)\n", (int)simgpio->value, (int)!simgpio->value);
+  gpioinfo("Reading %d (next=%d)\n",
+          (int)simgpio->value, (int)!simgpio->value);
 
   *value = simgpio->value;
   simgpio->value = !simgpio->value;

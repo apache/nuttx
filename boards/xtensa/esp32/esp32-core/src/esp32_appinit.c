@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/esp32-core/src/esp32_appinit.c
+ * boards/xtensa/esp32/esp32-core/src/esp32_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

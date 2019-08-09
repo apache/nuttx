@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/ez80f910200kitg/src/ez80_leds.c
+ * boards/z80/ez80/ez80f910200kitg/src/ez80_leds.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

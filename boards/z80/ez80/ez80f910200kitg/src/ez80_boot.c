@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/ez80f910200kitg/src/ez80_boot.c
+ * boards/z80/ez80/ez80f910200kitg/src/ez80_boot.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

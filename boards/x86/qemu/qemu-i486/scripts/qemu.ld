@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/†/qemu-i486/scripts/qemu.ld
+ * boards/x86/qemu/qemu-i486/scripts/qemu.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

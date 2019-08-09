@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/makerlisp/src/makerlisp.h
+ * boards/z80/ez80/makerlisp/src/makerlisp.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_MAKERLISP_SRC_MAKERLISP_H
-#define _CONFIGS_MAKERLISP_SRC_MAKERLISP_H
+#ifndef __BOARDS_Z80_EZ80_MAKERLISP_SRC_MAKERLISP_H
+#define __BOARDS_Z80_EZ80_MAKERLISP_SRC_MAKERLISP_H
 
 /****************************************************************************
  * Included Files
@@ -147,4 +147,4 @@ void ez80_spidev_initialize(void);
 }
 #endif
 
-#endif  /* _CONFIGS_MAKERLISP_SRC_MAKERLISP_H */
+#endif  /* __BOARDS_Z80_EZ80_MAKERLISP_SRC_MAKERLISP_H */

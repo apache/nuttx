@@ -1,5 +1,5 @@
 ############################################################################
-# boards//srp32-core/Makefile
+# boards/xtensa/esp32/esp32-core/src/Makefile
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

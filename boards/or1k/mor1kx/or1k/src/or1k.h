@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/or1k/or1k/src/or1k.h
+/****************************************************************************
+ * boards/or1k/mor1kx/or1k/src/or1k.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_OR1K_OR1K_SRC_OR1K_H
-#define __BOARDS_OR1K_OR1K_SRC_OR1K_H
+#ifndef __BOARDS_OR1K_MOR1KX_OR1K_SRC_OR1K_H
+#define __BOARDS_OR1K_MOR1KX_OR1K_SRC_OR1K_H
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: or1k_bringup
@@ -56,4 +56,4 @@
 
 int or1k_bringup(void);
 
-#endif  /* __BOARDS_OR1K_OR1K_SRC_OR1K_H */
+#endif  /* __BOARDS_OR1K_MOR1KX_OR1K_SRC_OR1K_H */

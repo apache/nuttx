@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/misoc/include/board.h
+ * boards/misoc/m32/misoc/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,6 +48,7 @@
  ****************************************************************************/
 
 /* Clocking *****************************************************************/
+
 /* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
 #define BOARD_XTAL_FREQ        14745600         /* 14.7456MHz crystal */
@@ -55,6 +56,7 @@
 #define BOARD_TOSCK_CLOCK      32768            /* TOSC  = 32.768KHz */
 
 /* LED definitions **********************************************************/
+
 /* The Amber Web Server has a reset switch and four LEDs. The LEDs indicate
  * the status of power, programming state, Ethernet link status and reset
  * status (Active).  None are available for software use.

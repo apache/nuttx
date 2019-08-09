@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/us7032evb1/nsh/ld.script
+ * boards/renesas/sh7032/us7032evb1/nsh/ld.script
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

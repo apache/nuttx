@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/misoc/misoc/src/lm32_boot.c
+/****************************************************************************
+ * boards/misoc/m32/misoc/src/lm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,24 +44,25 @@
 
 #include <arch/board/board.h>
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm32_board_initialize
  *
  * Description:
- *   All LM32 architectures must provide the following entry point.  This entry
+ *   All LM32 architectures must provide the following entry point. This entry
  *   point is called early in the initialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lm32_board_initialize(void)
 {
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function atmega_spidev_initialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2)
+   * the weak function atmega_spidev_initialize() has been brought into
+   * the link.
    */
 
   /* Configure on-board LEDs if LED support has been selected. */

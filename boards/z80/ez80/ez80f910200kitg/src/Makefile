@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ez80f910200kitg/Makefile
+# boards/z80/ez80/ez80f910200kitg/src/Makefile
 #
 #   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

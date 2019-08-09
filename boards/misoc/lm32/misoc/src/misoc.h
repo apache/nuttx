@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/misoc/src/misoc.h
+ * boards/misoc/m32/misoc/src/misoc.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MISOC_MISOC_SRC_MISOC_H
-#define __BOARDS_MISOC_MISOC_SRC_MISOC_H
+#ifndef __BOARDS_MISOC_LM32_MISOC_SRC_MISOC_H
+#define __BOARDS_MISOC_LM32_MISOC_SRC_MISOC_H
 
 /****************************************************************************
  * Included Files
@@ -69,25 +69,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
 void weak_function lm32_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm32_led_initialize
  *
  * Description:
  *   Configure on-board LEDs if LED support has been selected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void lm32_led_initialize(void);
@@ -99,4 +99,4 @@ void lm32_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MISOC_MISOC_SRC_MISOC_H */
+#endif /* __BOARDS_MISOC_LM32_MISOC_SRC_MISOC_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sim/src/sim_touchscreen.c
+ * boards/sim/sim/sim/src/sim_touchscreen.c
  *
  *   Copyright (C) 2011, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,7 +64,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Pick a background color */
 
 #ifndef CONFIG_EXAMPLES_TOUCHSCREEN_BGCOLOR
@@ -107,7 +109,7 @@ static FAR void *sim_listener(FAR void *arg)
 
   /* Process events forever */
 
-  for (;;)
+  for (; ; )
     {
       /* Handle the next event.  If we were configured blocking, then
        * we will stay right here until the next event is received.  Since
@@ -206,33 +208,33 @@ int sim_tsc_setup(int minor)
           return ret;
         }
 #endif
-       /* Start a separate thread to listen for server events.  This is probably
-        * the least efficient way to do this, but it makes this example flow more
-        * smoothly.
-        */
+      /* Start a separate thread to listen for server events.
+       * This is probably the least efficient way to do this,
+       * but it makes this example flow more smoothly.
+       */
 
-       (void)pthread_attr_init(&attr);
-       param.sched_priority = CONFIG_SIM_LISTENERPRIO;
-       (void)pthread_attr_setschedparam(&attr, &param);
-       (void)pthread_attr_setstacksize(&attr, CONFIG_SIM_LISTENER_STACKSIZE);
+      (void)pthread_attr_init(&attr);
+      param.sched_priority = CONFIG_SIM_LISTENERPRIO;
+      (void)pthread_attr_setschedparam(&attr, &param);
+      (void)pthread_attr_setstacksize(&attr, CONFIG_SIM_LISTENER_STACKSIZE);
 
-       ret = pthread_create(&thread, &attr, sim_listener, NULL);
-       if (ret != 0)
-         {
-            gerr("ERROR: pthread_create failed: %d\n", ret);
-            return -ret;
-         }
+      ret = pthread_create(&thread, &attr, sim_listener, NULL);
+      if (ret != 0)
+        {
+          gerr("ERROR: pthread_create failed: %d\n", ret);
+          return -ret;
+        }
 
-       /* Don't return until we are connected to the server */
+      /* Don't return until we are connected to the server */
 
-       while (!g_simtc.connected)
-         {
-           /* Wait for the listener thread to wake us up when we really
-            * are connected.
-            */
+      while (!g_simtc.connected)
+        {
+          /* Wait for the listener thread to wake us up when we really
+           * are connected.
+           */
 
            (void)sem_wait(&g_simtc.eventsem);
-         }
+        }
     }
   else
     {

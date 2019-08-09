@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/z80/makerlisp/src/ez80_spimmcsd.c
+ * boards/z80/ez80/makerlisp/src/ez80_spimmcsd.c
  *
  *   Copyright (C) 2019 Greg Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

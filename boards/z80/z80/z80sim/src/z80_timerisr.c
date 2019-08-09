@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/z80sim/src/z80_timerisr.c
+ * boards/z80/z80/z80sim/src/z80_timerisr.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,10 +61,10 @@
 
 int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
-   nxsched_process_timer();
-   return 0;
+  nxsched_process_timer();
+  return 0;
 }
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/z16f2800100zcog/Makefile
+# boards/z16/z16f2811/z16f2800100zcog/Makefile
 #
 #   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

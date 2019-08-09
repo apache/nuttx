@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sim/src/Makefile
+# boards/sim/sim/sim/src/Makefile
 #
 #   Copyright (C) 2007, 2008, 2011-2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

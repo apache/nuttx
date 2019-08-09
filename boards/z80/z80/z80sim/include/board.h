@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/z80sim/include/board.h
+ * boards/z80/z80/z80sim/include/board.h
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_Z80_Z80_Z80SIM_INCLUDE_BOARD_H
+#define __BOARDS_Z80_Z80_Z80SIM_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -50,7 +50,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -63,4 +64,4 @@ EXTERN char z80_lowgetc(void) __naked;
 }
 #endif
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_Z80_Z80_Z80SIM_INCLUDE_BOARD_H */

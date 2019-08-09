@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z8encore000zco/include/board.h
+ * boards/z80/z8/z8encore000zco/include/board.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_Z80_Z8_Z8ENCORE000ZCO_INCLUDE_BOARD_H
+#define __BOARDS_Z80_Z8_Z8ENCORE000ZCO_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -63,7 +63,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -73,4 +74,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_Z80_Z8_Z8ENCORE000ZCO__BOARD_H */

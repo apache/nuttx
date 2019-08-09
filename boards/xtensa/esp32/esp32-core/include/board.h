@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32-core/include/board.h
+ * boards/xtensa/esp32/esp32-core/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_CORE_INCLUDE_BOARD_H
-#define __BOARDS_XTENSA_ESP32_CORE_INCLUDE_BOARD_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H
+#define __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
+
 /* The ESP32 Core board V2 is fitted with either a 26 a 40MHz crystal */
 
 #ifdef CONFIG_ESP32CORE_XTAL_26MHz
@@ -68,4 +69,4 @@
 #  define BOARD_CLOCK_FREQUENCY BOARD_XTAL_FREQUENCY
 #endif
 
-#endif /* __BOARDS_XTENSA_ESP32_CORE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H */

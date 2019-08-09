@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/z80sim/src/z80_irq.c
+ * boards/z80/z80/z80sim/src/z80_irq.c
  *
  *   Copyright (C) 2007-2009, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

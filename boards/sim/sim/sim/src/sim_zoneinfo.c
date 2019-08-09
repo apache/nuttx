@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sim/src/sim_zoneinfo.c
+ * boards/sim/sim/sim/src/sim_zoneinfo.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -91,9 +91,9 @@
  *   - It will then, optionally, build a ROMFS filesystem image containing
  *     the data base.
  *
- *   The ROMFS filesystem image can that be mounted during the boot-up sequence
- *   so that it is available for the localtime logic.  There are two steps to
- *   doing this:
+ *   The ROMFS filesystem image can that be mounted during the boot-up
+ *   sequence so that it is available for the localtime logic.
+ *   There are two steps to doing this:
  *
  *   - First, a ROM disk device must be created.  This is done by calling
  *     the function romdisk_register() as described in
@@ -116,8 +116,8 @@
 
 int sim_zoneinfo(int minor)
 {
-   char devname[32];
-   int  ret;
+  char devname[32];
+  int  ret;
 
   /* Create a RAM disk for the test */
 

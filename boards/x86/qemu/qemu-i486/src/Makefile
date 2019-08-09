@@ -1,5 +1,5 @@
 ############################################################################
-# boards/qemu-i486/src/Makefile
+# boards/x86/qemu/qemu-i486/src/Makefile
 #
 #   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

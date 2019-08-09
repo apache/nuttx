@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/renesas/skp16c26/include/board.h
+/****************************************************************************
+ * boards/renesas/m32262f8/skp16c26/include/board.h
  * arch/board/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -32,25 +32,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_RENESAS_SKP16C26_INCLUDE_BOARD_H
-#define __BOARDS_RENESAS_SKP16C26_INCLUDE_BOARD_H
+#ifndef __BOARDS_RENESAS_M32262F8_SKP16C26_INCLUDE_BOARD_H
+#define __BOARDS_RENESAS_M32262F8_SKP16C26_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* User configuration checks ********************************************************/
+/* User configuration checks ************************************************/
 
-/* According to SKP16C26 documention, "SIO/UART1 pins are used for communication
- * between the SKP16C26 board kernel and KD30 Debugger through the ICD. Do not
- * connect these pins to any other circuit, as UART1 cannot be used in the user
- * program. For details, please see ICD (RTA-FoUSB-MON) User Manual on Target M16C
+/* According to SKP16C26 documention, "SIO/UART1 pins are used for
+ * communication between the SKP16C26 board kernel and KD30 Debugger through
+ * the ICD. Do not connect these pins to any other circuit, as UART1 cannot
+ * be used in the user program.
+ * For details, please see ICD (RTA-FoUSB-MON) User Manual on Target M16C
  * ROM Monitor Resources or related ICD application notes."
  *
  * However, the schematic appears to show that SIO/UART2 is actual connection.
@@ -61,13 +62,13 @@
 #  error "UART1/2 should not be used on SKP16C26"
 #endif
 
-/* Hardware defintitions ************************************************************/
+/* Hardware defintitions ****************************************************/
 
 /* Xin Freq */
 
 #define	M16C_XIN_FREQ	20000000	/* 20MHz */
 
-/* Interrupt Priority Levels ********************************************************/
+/* Interrupt Priority Levels ************************************************/
 
 /* IPL settings */
 
@@ -117,18 +118,18 @@
 
 /* *=FLASHING **=if INIRQ, SIGNAL, or ASSERTION will be flashing */
 
-/* BUTTON definitions **************************************************************/
+/* BUTTON definitions *******************************************************/
 
 #define SW1_PRESSED       0x01   /* Bit 0: 1=SW1 pressed */
 #define SW2_PRESSED       0x02   /* Bit 1: 1=SW2 pressed */
 #define SW3_PRESSED       0x04   /* Bit 2: 1=SW3 pressed */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #endif
 
-#endif  /* __BOARDS_RENESAS_SKP16C26_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_RENESAS_M32262F8_SKP16C26_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/or1kf4discovery/src/or1k_appinit.c
+ * boards/or1k/mor1kx/or1k/src/or1k_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

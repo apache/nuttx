@@ -148,7 +148,7 @@ Debugger
      ./configure  --enable-jlink --enable-maintainer-mode --enable-ftdi --prefix=~/riscv CFLAGS=-g
 
   The configuration scripts for openocd and nr5m100-nexys4 have been provided in the
-  nuttx/boards/nr5m100-nexys4/scripts directory.  They are configured to use a J-LINK JTAG
+  nuttx/boards/nr5m100/nr5m100-nexys4/scripts directory.  They are configured to use a J-LINK JTAG
   probe and to search for the IQ-Analog (the company I work for) IDCODE and part number for
   the FPGA board (7a10 for Artix xc7a100 part on the Digilent Nexys4 board).  With FPGA
   source directly from the nr5m100 github site (to be provided), this ID will match the

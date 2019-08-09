@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/risc-v/nr5m100-nexys4/include/board.h
+/****************************************************************************
+ * boards/risc-v/nr5m100/nr5m100-nexys4/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
@@ -37,14 +37,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_RISC-V_NR5M100_NEXYS4_INCLUDE_BOARD_H
-#define __BOARDS_RISC-V_NR5M100_NEXYS4_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISC-V_NR5M100_NR5M100_NEXYS4_INCLUDE_BOARD_H
+#define __BOARDS_RISC-V_NR5M100_NR5M100_NEXYS4_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,24 +54,26 @@
 
 #include "nr5.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The NR5M100_Nexys4 system uses a 100 MHz main oscillator */
 
 #define NR5_HCLK_FREQUENCY      100000000ul
 #define NR5_SCLK_FREQUENCY      100000000ul
 
-/* Timer Frequencies are the same as the HCLK frequency
- */
+/* Timer Frequencies are the same as the HCLK frequency */
 
 #define NR5_TIMER_FREQUENCY     NR5_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control
+ * the LEDs in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with stm32_setled() */
@@ -97,8 +99,9 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * stm32f4discovery.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs
+ * on the board.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -110,8 +113,7 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
-/* The STM32F4 Discovery supports one button: */
+/* Button definitions *******************************************************/
 
 #define BUTTON_USER        0
 
@@ -121,9 +123,9 @@
 
 #endif  /* 0 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -136,19 +138,21 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  nr5_ledinit, nr5_setled, and nr5_setleds
  *
  * Description:
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
- *   CONFIG_ARCH_LEDS is not defined, then the following interfacesare available to
+ *   If CONFIG_ARCH_LEDS is defined,
+ *   then NuttX will control the on-board LEDs.
+ *   If CONFIG_ARCH_LEDS is not defined,
+ *   then the following interfacesare available to
  *   control the LEDs from user applications.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
 void nr5_ledinit(void);
@@ -161,5 +165,5 @@ void nr5_setleds(uint8_t ledset);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC-V_NR5M100_NEXYS4_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISC-V_NR5M100_NR5M100_NEXYS4_INCLUDE_BOARD_H */
 

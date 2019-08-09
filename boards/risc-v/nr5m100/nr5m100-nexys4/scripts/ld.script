@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/nr5m100-nexys4/scripts/ld.script
+ * boards/risc-v/nr5m100/nr5m100-nexys4/scripts/ld.script
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Ken Pettit.

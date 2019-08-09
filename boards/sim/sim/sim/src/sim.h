@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sim/src/sim.h
+ * boards/sim/sim/sim/src/sim.h
  *
  *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_SIM_SIM_SRC_SIM_H
-#define __BOARDS_SIM_SIM_SRC_SIM_H
+#ifndef __BOARDS_SIM_SIM_SIM_SRC_SIM_H
+#define __BOARDS_SIM_SIM_SIM_SRC_SIM_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -84,9 +85,9 @@ int sim_bringup(void);
  *   - It will then, optionally, build a ROMFS filesystem image containing
  *     the data base.
  *
- *   The ROMFS filesystem image can that be mounted during the boot-up sequence
- *   so that it is available for the localtime logic.  There are two steps to
- *   doing this:
+ *   The ROMFS filesystem image can that be mounted during the boot-up
+ *   sequence so that it is available for the localtime logic.
+ *   There are two steps todoing this:
  *
  *   - First, a ROM disk device must be created.  This is done by calling
  *     the function romdisk_register() as described in
@@ -144,4 +145,4 @@ int sim_gpio_initialize(void);
 int sim_tsc_setup(int minor);
 #endif
 
-#endif /* __BOARDS_SIM_SIM_SRC_SIM_H */
+#endif /* __BOARDS_SIM_SIM_SIM_SRC_SIM_H */

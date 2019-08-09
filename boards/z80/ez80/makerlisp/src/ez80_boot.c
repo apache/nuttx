@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/makerlisp/src/ez80_boot.c
+ * boards/z80/ez80/makerlisp/src/ez80_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -89,8 +89,8 @@ static void ez80_vga_initialize(void)
       /* Wait for VGA ready */
 
       for (delay = 0; delay < VGA_MAX_DELAY; delay++)
-       {
-          if *(inp(EZ80_PB_DR) & EZ80_GPIOD1) != 0)
+        {
+          if ((inp(EZ80_PB_DR) & EZ80_GPIOD1) != 0)
             {
               vgapresent = true;
               break;

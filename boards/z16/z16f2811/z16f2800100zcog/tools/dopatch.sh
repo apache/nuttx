@@ -1,6 +1,6 @@
 #!/bin/sh
 ############################################################################
-# boards/z16f2800100zcog/tools/dopatch.sh
+# boards/z16/z16f2811/z16f2800100zcog/tools/dopatch.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

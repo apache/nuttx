@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/elf32-core/scripts/esp32_peripherals.ld
+ * boards/xtensa/esp32/esp32-core/scripts/esp32_peripherals.ld
  ****************************************************************************/
 
 PROVIDE ( UART0 = 0x3ff40000 );

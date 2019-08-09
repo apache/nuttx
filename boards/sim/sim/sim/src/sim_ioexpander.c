@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/src/sim_ioexpander.c
+ * boards/sim/sim/sim/src/sim_ioexpander.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>

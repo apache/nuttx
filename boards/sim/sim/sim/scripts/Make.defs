@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sim/scripts/Make.defs
+# boards/sim/sim/sim/scripts/Make.defs
 #
 #   Copyright (C) 2008, 2011-2012, 2017-2018 Gregory Nutt. All rights
 #     reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/or1k/or1k/src/or1k_autoled.c
+ * boards/or1k/mor1kx/or1k/src/or1k_autoled.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/us7032evb1/include/board.h
+ * boards/renesas/sh7032/us7032evb1/include/board.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_US7032EVB1_BOARD_H
-#define _CONFIGS_US7032EVB1_BOARD_H
+#ifndef __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H
+#define __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -77,7 +77,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -92,4 +93,4 @@ extern "C" {
 #endif
 #endif
 
-#endif  /* _CONFIGS_US7032EVB1_BOARD_H */
+#endif  /* __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H */

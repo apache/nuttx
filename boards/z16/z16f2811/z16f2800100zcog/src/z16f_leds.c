@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z16/z16f2800100zcog/z16f_leds.c
+ * boards/z16/z16f2811/z16f2800100zcog/z16f_leds.c
  *
  *   Copyright (C) 2008, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,7 +78,7 @@ void board_autoled_initialize(void)
   /* The following is performed up_board_initialize() as well */
 
   putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
-  putreg8(getreg8(Z16F_GPIOA_DD) & 0xF8, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_DD) & 0xf8, Z16F_GPIOA_DD);
 }
 
 /****************************************************************************

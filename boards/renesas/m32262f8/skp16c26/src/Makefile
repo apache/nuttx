@@ -1,5 +1,5 @@
 ############################################################################
-# boards/renesas/skp16c26/src/Makefile
+# boards/renesas/m32262f8/skp16c26/src/Makefile
 #
 #   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

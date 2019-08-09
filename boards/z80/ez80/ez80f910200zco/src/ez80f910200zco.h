@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/ez80f910200zco/src/ez80f910200zco.h
+ * boards/z80/ez80/ez80f910200zco/src/ez80f910200zco.h
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
-#define _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
+#ifndef __BOARDS_Z80_EZ80_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
+#define __BOARDS_Z80_EZ80_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H
 
 /****************************************************************************
  * Included Files
@@ -118,18 +118,17 @@
  *   The TX signal at D4 indicates that data is tranmitted to the modem.
  */
 
- /* Push buttons:
-  *
-  * PB0   SW1 Bit 0 of GPIO Port B
-  * PB1   SW2 Bit 1 of GPIO Port B
-  * PB2   SW3 Bit 2 of GPIO Port B
-  * RESET SW4
-  */
+/* Push buttons:
+ *
+ * PB0   SW1 Bit 0 of GPIO Port B
+ * PB1   SW2 Bit 1 of GPIO Port B
+ * PB2   SW3 Bit 2 of GPIO Port B
+ * RESET SW4
+ */
 
 #define EZ80_PB0_IRQ EZ80_PORTB0_IRQ  /* Vector Oxa0 */
 #define EZ80_PB1_IRQ EZ80_PORTB1_IRQ  /* Vector Oxa4 */
 #define EZ80_PB2_IRQ EZ80_PORTB2_IRQ  /* Vector Oxa8 */
-
 
 /****************************************************************************
  * Public Functions
@@ -138,7 +137,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -148,4 +148,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* _CONFIGS_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H */
+#endif  /* __BOARDS_Z80_EZ80_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H */

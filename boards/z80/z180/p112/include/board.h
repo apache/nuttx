@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/p112/include/board.h
+ * boards/z80/z180/p112/include/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_Z80_P112_INCLUDE_BOARD_H
-#define __BOARDS_Z80_P112_INCLUDE_BOARD_H
+#ifndef __BOARDS_Z80_Z180_P112_INCLUDE_BOARD_H
+#define __BOARDS_Z80_Z180_P112_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -63,4 +63,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __BOARDS_Z80_P112_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_Z80_Z180_P112_INCLUDE_BOARD_H */

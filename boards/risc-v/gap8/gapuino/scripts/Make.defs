@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/gapuino/scripts/Make.defs
+# boards/risc-v/gap8/gapuino/scripts/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

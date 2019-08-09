@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/src/sam_bringup.c
+ * boards/sim/sim/sim/src/sam_bringup.c
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

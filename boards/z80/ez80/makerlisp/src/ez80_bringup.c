@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/makerlisp/src/ez80_bringup.c
+ * boards/z80/ez80/makerlisp/src/ez80_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

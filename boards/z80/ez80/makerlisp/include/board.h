@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/makerlisp/include/board.h
+ * boards/z80/ez80/makerlisp/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_Z80_MAKERLISP_INCLUDE_BOARD_H
-#define __BOARDS_Z80_MAKERLISP_INCLUDE_BOARD_H
+#ifndef __BOARDS_Z80_EZ80_MAKERLISP_INCLUDE_BOARD_H
+#define __BOARDS_Z80_EZ80_MAKERLISP_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -103,4 +103,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __BOARDS_Z80_MAKERLISP_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_Z80_EZ80_MAKERLISP_INCLUDE_BOARD_H */

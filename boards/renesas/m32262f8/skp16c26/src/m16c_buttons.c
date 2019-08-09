@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/skp16c26/src/m16c_buttons.c
+ * boards/renesas/m32262f8/skp16c26/src/m16c_buttons.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

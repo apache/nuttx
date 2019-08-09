@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/z80/makerlisp/src/ez80_spi.c
+ * boards/z80/ez80/makerlisp/src/ez80_spi.c
  *
  *   Copyright (C) 2019 Greg Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -110,7 +110,7 @@ void ez80_spidev_initialize(void)
  *   3. Add a call to ez80_spibus_initialize() in your low level
  *      initialization logic
  *   4. The handle returned by ez80_spibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling 
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -148,9 +148,9 @@ uint8_t ez80_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef HAVE_MMCSD
   if (devid == SPIDEV_MMCSD(0))
     {
-       /* No card detect pin.. Always claim that the card is present in
-        * slot 0
-        */
+      /* No card detect pin.. Always claim that the card is present in
+       * slot 0
+       */
 
        status |= SPI_STATUS_PRESENT;
     }

@@ -277,7 +277,7 @@ OpenOCD for the ESP32
   to reflect the physical JTAG adapter connected.
 
   NOTE: A copy of this OpenOCD configuration file available in the NuttX
-  source tree at nuttx/boards/esp32-core/scripts/esp32.cfg .  It has these
+  source tree at nuttx/boards/tensa/esp32/esp32-core/scripts/esp32.cfg .  It has these
   modifications:
 
     - The referenced "set ESP32_RTOS none" line has been uncommented
@@ -533,7 +533,7 @@ OpenOCD for the ESP32
   I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
   is a synopsis of my debug steps:
 
-  boards/esp32-core/nsh with
+  boards/xtensa/esp32/esp32-core/configs/nsh with
 
     CONFIG_DEBUG_ASSERTIONS=y
     CONFIG_DEBUG_FEATURES=y
@@ -549,7 +549,7 @@ OpenOCD for the ESP32
   Start OpenOCD:
 
     cd ../openocde-esp32
-    cp ../nuttx/boards/esp32-core/scripts/esp32.cfg .
+    cp ../nuttx/boards/xtensa/esp32/esp32-core/scripts/esp32.cfg .
     sudo ./src/openocd -s ./tcl/ -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
 
   Start GDB and load code:
@@ -648,8 +648,8 @@ NOTES:
        to provide that logic -- hopefully that is coming.  As a
        consequence, whatever clock setup was left when NuttX started is
        used.  For the case of execution out of IRAM with GDB, the
-       settings in boards/esp32-core/include/board.h work.  To check
-       the timing, I use a stop watch and:
+       settings in boards/xtensa/esp32/esp32-core/include/board.h work.
+       To check the timing, I use a stop watch and:
 
          nsh> sleep 60
 

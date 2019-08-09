@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/or1k/or1k/src/or1k_boot.c
+ * boards/or1k/mor1kx/or1k/src/or1k_boot.c
  *
  *   Copyright (C) 2018 Extent3D. All rights reserved.
  *   Author: Matt Thompson <matt@extent3d.com>

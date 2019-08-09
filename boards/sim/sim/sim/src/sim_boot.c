@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sim/src/sim_boot.c
+ * boards/sim/sim/sim/src/sim_boot.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

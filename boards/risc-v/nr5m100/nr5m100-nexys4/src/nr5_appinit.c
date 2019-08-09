@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v//nr5m100-nexys4/src/nr5_appinit.c
+ * boards/risc-v/nr5m100/nr5m100-nexys4/src/nr5_appinit.c
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -81,6 +81,5 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-
   return OK;
 }

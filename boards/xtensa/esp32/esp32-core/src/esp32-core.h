@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32-core/src/esp32-core.h
+ * boards/xtensa/esp32/esp32-core/src/esp32-core.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_CORE_SRC_ESP32_CORE_H
-#define __BOARDS_XTENSA_ESP32_CORE_SRC_ESP32_CORE_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
+#define __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@
 int esp32_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_CORE_SRC_ESP32_CORE_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */

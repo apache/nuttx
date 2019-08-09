@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nr5m100-nexys4/src/Makefile
+# boards/risc-v/nr5m100/nr5m100-nexys4/src/Makefile
 #
 #   Copyright (C) 2016 Ken Pettit. All rights reserved.
 #   Author: Ken Pettit <pettitkd@gmail.com>

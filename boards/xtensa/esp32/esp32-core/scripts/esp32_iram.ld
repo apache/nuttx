@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/elf32-core/scripts/esp32_iram.ld
+ * boards/xtensa/esp32/esp32-core/scripts/esp32_iram.ld
  ****************************************************************************/
 
 /* Default entry point: */

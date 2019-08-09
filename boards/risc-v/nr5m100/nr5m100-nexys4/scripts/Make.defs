@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/stm32f4discovery/nsh/Make.defs
+# boards/risc-v/nr5m100/nr5m100-nexys4/scripts/Make.defs
 #
 #   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

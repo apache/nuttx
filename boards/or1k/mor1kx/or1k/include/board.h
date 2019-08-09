@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/or1k/or1k/include/board.h
+ * boards/or1k/mor1kx/or1k/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_OR1K_OR1K_INCLUDE_BOARD_H
-#define __BOARDS_OR1K_OR1K_INCLUDE_BOARD_H
+#ifndef __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H
+#define __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -57,4 +57,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_OR1K_OR1K_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H */

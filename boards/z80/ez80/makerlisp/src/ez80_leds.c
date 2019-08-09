@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/makerlisp/src/ez80_leds.c
+ * boards/z80/ez80/makerlisp/src/ez80_leds.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

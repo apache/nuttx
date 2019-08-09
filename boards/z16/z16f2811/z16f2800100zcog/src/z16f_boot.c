@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z16/z16f2800100zcog/src/z16f_boot.c
+ * boards/z16/z16f2811/z16f2800100zcog/src/z16f_boot.c
  *
  *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,7 +67,7 @@ static void z16f_gpioinit(void)
 
   putreg8(getreg8(Z16F_GPIOA_DD) | 0x87, Z16F_GPIOA_DD);
   putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
-  putreg8(getreg8(Z16F_GPIOA_DD) & 0xF8, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_DD) & 0xf8, Z16F_GPIOA_DD);
 
   /* Configure rate switch port */
 

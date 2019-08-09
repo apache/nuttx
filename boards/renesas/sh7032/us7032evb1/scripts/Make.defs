@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/renesas/us7032evb1/scripts/Make.defs
+# boards/renesas/sh7032/us7032evb1/scripts/Make.defs
 #
 #   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

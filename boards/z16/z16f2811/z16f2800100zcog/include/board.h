@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z16/z16f2800100zcog/board.h
+ * boards/z16/z16f2811/z16f2800100zcog/board.h
  *
  *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_Z16_Z16F2800100ZCOG_INCLUDE_BOARD_H
-#define __BOARDS_Z16_Z16F2800100ZCOG_INCLUDE_BOARD_H
+#ifndef __BOARDS_Z16_Z16F2811_Z16F2800100ZCOG_INCLUDE_BOARD_H
+#define __BOARDS_Z16_Z16F2811_Z16F2800100ZCOG_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -112,7 +112,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -122,4 +123,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* __BOARDS_Z16_Z16F2800100ZCOG_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_Z16_Z16F2811_Z16F2800100ZCOG_INCLUDE_BOARD_H */

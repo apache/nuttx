@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/z8encore000zco/src/z8_leds.c
+ * boards/z80/z8/z8encore000zco/src/z8_leds.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

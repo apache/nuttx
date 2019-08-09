@@ -1,5 +1,5 @@
 ############################################################################
-# boards/makerlisp/Makefile
+# boards/z80/ez80/makerlisp/Makefile
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
