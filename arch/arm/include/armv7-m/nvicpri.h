@@ -86,13 +86,26 @@
  */
 
 #if defined(CONFIG_ARCH_HIPRI_INTERRUPT) && defined(CONFIG_ARCH_INT_DISABLEALL)
+
+/* In this case, disabling interrupts will disable all interrupts EXCEPT
+ * SVCALL.  NOTE that this will add jitter to the high priority interrupt
+ * response because it may be deferred by SVCALL interupt handling.
+ */
+
 #  define NVIC_SYSH_MAXNORMAL_PRIORITY  NVIC_SYSH_PRIORITY_DEFAULT
 #  define NVIC_SYSH_HIGH_PRIORITY       (NVIC_SYSH_PRIORITY_DEFAULT - 1*NVIC_SYSH_PRIORITY_STEP)
 #  define NVIC_SYSH_DISABLE_PRIORITY    (NVIC_SYSH_PRIORITY_DEFAULT - 1*NVIC_SYSH_PRIORITY_STEP)
 #  define NVIC_SYSH_SVCALL_PRIORITY     (NVIC_SYSH_PRIORITY_DEFAULT - 2*NVIC_SYSH_PRIORITY_STEP)
 #else
+
+/* In this case, the high priority interrupt must be highest priority.  This
+ * prevents SVCALL handling from adding jitter to high priority interrupt
+ * response.  Disabling interrupts will disable all interrupts EXCEPT SVCALL
+ * and the high priority interrupts.
+ */
+
 #  define NVIC_SYSH_MAXNORMAL_PRIORITY  NVIC_SYSH_PRIORITY_DEFAULT
-#  define NVIC_SYSH_HIGH_PRIORITY       (NVIC_SYSH_PRIORITY_DEFAULT - 1*NVIC_SYSH_PRIORITY_STEP)
+#  define NVIC_SYSH_HIGH_PRIORITY       (NVIC_SYSH_PRIORITY_DEFAULT - 2*NVIC_SYSH_PRIORITY_STEP)
 #  define NVIC_SYSH_DISABLE_PRIORITY    NVIC_SYSH_PRIORITY_DEFAULT
 #  define NVIC_SYSH_SVCALL_PRIORITY     (NVIC_SYSH_PRIORITY_DEFAULT - 1*NVIC_SYSH_PRIORITY_STEP)
 #endif
