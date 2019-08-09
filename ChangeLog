@@ -6516,7 +6516,7 @@
 	* Rename up_buttons() to board_buttons() for the same reason (2014-
 	  1-14).
 	* Rename up_irqbutton() to board_button_irq() (2014-1-24).
-	* Rename up_ledinit() to board_led_intialize() (2014-1-24).
+	* Rename up_ledinit() to board_led_initialize() (2014-1-24).
 	* Rename up_ledon() to board_led_on() and up_ledoff() to board_led_off()
 	  (2014-1-24).
 	* arch/x86/src/qemu-i486/gemu_head.S:  Patch from Matt Campbell
@@ -7990,7 +7990,7 @@
 	  the Nxplayer can recover gracefully:  Send and Audio Complete message
 	  (2014-8-5).
 	* arch/*/src/*/*_timerisr.c, up_initialize.c, and up_internal.h: Re-name
-	  up_timerinit() to up_timer_intialaize() for compatibility with new
+	  up_timerinit() to up_timer_initialize() for compatibility with new
 	  tickless OS interface name (2014-8-6).
 	* arch/*/src/*/Make.def:  Don't build existing timer initialization
 	  logic if CONFIG_SCHED_TICKLESS is defined (2014-8-6).
@@ -11377,29 +11377,29 @@
 	  (2016-01-26).
 	* SPI: Rename the SAM up_spiinitialize() to sam_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_intialize()
+	* SPI: Rename the Tiva up_spiinitialize() to tiva_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the PIC32MX/MZ up_spiinitialize() to pic32mx/mz_spibus_intialize()
+	* SPI: Rename the PIC32MX/MZ up_spiinitialize() to pic32mx/mz_spibus_initialize()
 	  (2016-01-26).
 	* SPI: Rename EFM32's efm32_spi_initialize to efm32_spibus_initialize()
 	  for compatibility with these other changes (2016-01-26).
-	* SPI: Rename the KL up_spiinitialize() to kl_spibus_intialize() (2016-01-26).
-	* SPI: Rename the Kinetis up_spiinitialize() to kinetis_spibus_intialize()
+	* SPI: Rename the KL up_spiinitialize() to kl_spibus_initialize() (2016-01-26).
+	* SPI: Rename the Kinetis up_spiinitialize() to kinetis_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the LPC31xx up_spiinitialize() to lpc31_spibus_intialize(),
-	  Rename the LPC17xx lpc17_spiinitialize() to lpc31_spibus_intialize(),
-	  Rename the LPC43xx up_spiinitialize() to lpc43_spibus_intialize()
+	* SPI: Rename the LPC31xx up_spiinitialize() to lpc31_spibus_initialize(),
+	  Rename the LPC17xx lpc17_spiinitialize() to lpc31_spibus_initialize(),
+	  Rename the LPC43xx up_spiinitialize() to lpc43_spibus_initialize()
 	  (2016-01-26).
-	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_intialize(),
-	  Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_intialize(),
-	  Rename the Calypso up_spiinitialize() to calypso_spibus_intialize(),
-	  Rename the eZ80 up_spiinitialize() to ez80_spibus_intialize(),
-	  Rename the STR71xx up_spiinitialize() to str71_spibus_intialize(),
-	  Rename the i.MX1 up_spiinitialize() to imx_spibus_intialize(),
-	  Rename the LPC2378 up_spiinitialize() to lpc23_spibus_intialize(),
-	  Rename the M9S12 up_spiinitialize() to hcs12_spibus_intialize(),
-	  Rename the x86 up_spiinitialize() to i486_spibus_intialize(),
-	  Rename the z16f up_spiinitialize() to z16_spibus_intialize().
+	* SPI: Rename the AVR up_spiinitialize() to avr_spibus_initialize(),
+	  Rename the LPC2148 up_spiinitialize() to lpc214x_spibus_initialize(),
+	  Rename the Calypso up_spiinitialize() to calypso_spibus_initialize(),
+	  Rename the eZ80 up_spiinitialize() to ez80_spibus_initialize(),
+	  Rename the STR71xx up_spiinitialize() to str71_spibus_initialize(),
+	  Rename the i.MX1 up_spiinitialize() to imx_spibus_initialize(),
+	  Rename the LPC2378 up_spiinitialize() to lpc23_spibus_initialize(),
+	  Rename the M9S12 up_spiinitialize() to hcs12_spibus_initialize(),
+	  Rename the x86 up_spiinitialize() to i486_spibus_initialize(),
+	  Rename the z16f up_spiinitialize() to z16_spibus_initialize().
 	  up_spiinitialize() has been completely eliminated. (2016-01-27).
 	* fs/vfs/fs_poll.c: Fix handling of sem_tickwait() return value
 	  sem_tickwait() does not return an -1+errno, it returns a negated
@@ -21635,7 +21635,7 @@
 	     MAC address which is not being changed here.
 
 	     From Gregory Nutt (2018-11-10).
-	* drivers/power/pm_initialize.c:  Fix pm_domain_s.stime unintialize caused
+	* drivers/power/pm_initialize.c:  Fix pm_domain_s.stime uninitialize caused
 	  time error.  Bug detail:
 
 	  1. open CONFIG_DEBUG_FEATURES CONFIG_SYSTEM_TIME64 CONFIG_CLOCK_MONOTONIC

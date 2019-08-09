@@ -226,7 +226,7 @@ void up_idle(void);
  *   has been created. This function is called to initialize
  *   the processor specific portions of the new TCB.
  *
- *   This function must setup the intial architecture registers
+ *   This function must setup the initial architecture registers
  *   and/or  stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
@@ -1418,8 +1418,8 @@ int up_prioritize_irq(int irq, int priority);
  * following custom functions.
  *
  *   Architecture specific timer initialiation logic initializes the timer
- *     facilities.  This happens early in the intialization sequence (via
- *     up_intialize()).
+ *     facilities.  This happens early in the initialization sequence (via
+ *     up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *

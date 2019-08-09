@@ -837,7 +837,7 @@ config ARCH_HIPRI_INTERRUPT
 	---help---
 		NOTE: This description is currently unique to the Cortex-M family
 		which is the only family that currently supports this feature.  The
-		general feature is not conceptually unique to the Cortex-M but it
+		general feature is not conceptually unique to the Cortex-M but if it
 		is extended to any other family, then this discussion will have to
 		be generalized.
 

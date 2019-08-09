@@ -5678,7 +5678,7 @@ Additional new features and extended functionality:
       - Many functions renamed to better conform with the naming standard:
         up_buttoninit() renamed to board_button_initialize(), up_buttons()
         renamed to board_buttons(), up_irqbutton() renamed to
-        board_button_irq(), up_ledinit() renamed to board_led_intialize(),
+        board_button_irq(), up_ledinit() renamed to board_led_initialize(),
         up_ledon() renamed to board_led_on(), and up_ledoff() renamed to
         board_led_off(). All prototypes removed from board.h header files.
         Now ONLY prototypes in include/nuttx/arch.h.
@@ -13857,7 +13857,7 @@ Additional new features and extended functionality:
         STM32 was added by Anthony Merlino.  This board, along with the
         MRF24J40 Click board is the platform used to deveop the IEEE
         802.15.4 support.  The boad configuration includes the MRF24J40
-        intialization logic and SPI support.  Configurations exist for nsh,
+        initialization logic and SPI support.  Configurations exist for nsh,
         knsh, usbnsh, and mrf24j40-radio.
       - Nucleo_F334R8:  Add ADC example.  From Mateusz Szafoni.
       - Nucleo-F334R8:  Add COMP support.  From Mateusz Szafoni.
@@ -20185,7 +20185,7 @@ detailed bugfix information):
         Gregory Nutt.
       - PM:  Use the start time of state btime to calculate thrcnt; remove the
         loop whose count may be very big after the long idle  From ligd.
-      - PM Uninitialization:  Fix pm_domain_s.stime un-intialize caused time
+      - PM Uninitialization:  Fix pm_domain_s.stime un-initialize caused time
         error.  From ligd.
       - sched_kfree() and sched_ufree():  This patch prevent heap corruption
         in a corner case where memory is freed while switching contexts.  This
