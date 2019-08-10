@@ -473,7 +473,7 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
           attrval->phy.fcslen = 2;
           ret = IEEE802154_STATUS_SUCCESS;
         }
-        break
+        break;
 
       case IEEE802154_ATTR_PHY_REGDUMP:
         {
