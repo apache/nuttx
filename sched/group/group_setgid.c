@@ -57,18 +57,39 @@
  *   privileges.
  *
  * Input Parameters:
- *   uid - User identity to set the various process' user ID attributes to.
+ *   gid - Identity to set the various process' group ID attributes to.
  *
  * Returned Value:
  *   Zero if successful and -1 in case of failure, in which case errno is set
- *   appropriately.
+ *   to one of he following values:
+ *
+ *   EINVAL - The value of the uid argument is invalid and not supported by
+ *            the implementation.
+ *   EPERM  - The process does not have appropriate privileges and uid does
+ *            not match the real group ID or the saved set-group-ID.
  *
  ****************************************************************************/
 
 int setgid(gid_t gid)
 {
-  FAR struct tcb_s *rtcb          = this_task();
-  FAR struct task_group_s *rgroup = rtcb->group;
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
+
+  /* Verify that the GID is in the valid range of 0 through INT16_MAX.
+   * OpenGroup.org does not specify a GID_MAX or GID_MIN.  Instead we use a
+   * priori knowledge that gid_t is type int16_t.
+   */
+
+  if ((uint16_t)gid > INT16_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Get the currently executing thread's task group. */
+
+  rtcb   = this_task();
+  rgroup = rtcb->group;
 
   /* Set the task group's group identity. */
 

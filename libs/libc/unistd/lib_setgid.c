@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -55,7 +56,7 @@
  *   privileges.
  *
  * Input Parameters:
- *   uid - User identity to set the various process' user ID attributes to.
+ *   gid - Identity to set the various process' group ID attributes to.
  *
  * Returned Value:
  *   Zero if successful and -1 in case of failure, in which case errno is set

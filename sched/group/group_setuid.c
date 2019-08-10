@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -61,14 +62,35 @@
  *
  * Returned Value:
  *   Zero if successful and -1 in case of failure, in which case errno is set
- *   appropriately.
+ *   to one of he following values:
+ *
+ *   EINVAL - The value of the uid argument is invalid and not supported by
+ *            the implementation.
+ *   EPERM  - The process does not have appropriate privileges and uid does
+ *            not match the real user ID or the saved set-user-ID.
  *
  ****************************************************************************/
 
 int setuid(uid_t uid)
 {
-  FAR struct tcb_s *rtcb          = this_task();
-  FAR struct task_group_s *rgroup = rtcb->group;
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
+
+  /* Verify that the UID is in the valid range of 0 through INT16_MAX.
+   * OpenGroup.org does not specify a UID_MAX or UID_MIN.  Instead we use a
+   * priori knowledge that uid_t is type int16_t.
+   */
+
+  if ((uint16_t)uid > INT16_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Get the currently executing thread's task group. */
+
+  rtcb   = this_task();
+  rgroup = rtcb->group;
 
   /* Set the task group's group identity. */
 
