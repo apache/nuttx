@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/atmel_same70_xplained.cfg/README.txt for information about
 # this file.

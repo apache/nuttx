@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/lm3s6965-ek/README.txt for information about
 # this file.

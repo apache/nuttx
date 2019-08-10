@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/define.sh
 #
 #   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.

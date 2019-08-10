@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/sethost.sh
 #
 #   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.

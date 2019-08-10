@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/configure.sh
 #
 #   Copyright (C) 2007, 2008, 2011, 2015, 2017-2019 Gregory Nutt. All rights

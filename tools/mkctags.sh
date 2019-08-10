@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # mkctags.sh
 #
 #   Copyright (C) 2013 Ken pettit All rights reserved.

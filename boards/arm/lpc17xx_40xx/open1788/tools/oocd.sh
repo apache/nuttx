@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/open1788/README.txt for information about
 # this file.

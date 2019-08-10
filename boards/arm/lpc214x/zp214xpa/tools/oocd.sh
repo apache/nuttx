@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/zp214xpa/README.txt for information about
 # this file.

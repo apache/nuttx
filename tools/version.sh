@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # version.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.

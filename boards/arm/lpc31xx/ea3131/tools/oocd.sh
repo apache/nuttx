@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 TOPDIR=$1
 USAGE="$0 <TOPDIR> [-d]"

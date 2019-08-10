@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #set -x
 
 # This script must be executed in the NuttX top-level directory.  We'll check..

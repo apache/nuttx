@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/dk-tm4c129x/README.txt for information about
 # this file.

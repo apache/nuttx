@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/olimex-lpc1766stk/README.txt for information about
 # this file.

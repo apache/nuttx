@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # zipme.sh
 #
 #   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.

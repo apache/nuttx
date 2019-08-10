@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # testbuild.sh
 #
 #   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.

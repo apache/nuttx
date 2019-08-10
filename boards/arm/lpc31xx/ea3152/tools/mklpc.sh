@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # This script lies in sub-directory boards/ea3152/tools but make be executed
 # from either that directory or TOPDIR

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # See boards/tm4c123g-launchpad/README.txt for information about
 # this file.
