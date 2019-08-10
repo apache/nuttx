@@ -165,6 +165,10 @@ struct macnet_driver_s
   pid_t   md_notify_pid;
   struct sigevent md_notify_event;
   struct sigwork_s md_notify_work;
+
+#ifdef CONFIG_NET_6LOWPAN
+  struct sixlowpan_reassbuf_s md_iobuffer;
+#endif
 };
 
 /****************************************************************************
@@ -230,10 +234,6 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#ifdef CONFIG_NET_6LOWPAN
-static struct sixlowpan_reassbuf_s g_iobuffer;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -489,7 +489,7 @@ static int macnet_rxframe(FAR struct macnet_driver_s *priv,
         {
           /* Make sure the our single packet buffer is attached */
 
-          priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+          priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 
           /* And give the packet to 6LoWPAN */
 
@@ -584,7 +584,7 @@ static void macnet_txpoll_work(FAR void *arg)
 #ifdef CONFIG_NET_6LOWPAN
   /* Make sure the our single packet buffer is attached */
 
-  priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+  priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 #endif
 
   /* Then perform the poll */
@@ -865,7 +865,7 @@ static void macnet_txavail_work(FAR void *arg)
 #ifdef CONFIG_NET_6LOWPAN
       /* Make sure the our single packet buffer is attached */
 
-      priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+      priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 #endif
 
       /* Then poll the network for new XMIT data */
