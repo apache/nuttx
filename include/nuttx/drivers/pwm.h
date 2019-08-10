@@ -154,9 +154,6 @@ struct pwm_info_s
   uint32_t           count;     /* The number of pulse to generate.  0 means to
                                  * generate an indefinite number of pulses */
 #  endif
-#  ifdef CONFIG_PWM_MULTICHAN_SELECT
-  uint8_t            chan_num;  /* Selects the PWM channel number to modify */
-#endif
 #endif /* CONFIG_PWM_MULTICHAN */
 };
 

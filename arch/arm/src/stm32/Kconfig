@@ -3244,7 +3244,7 @@ config STM32_TIM1_DEADTIME
 	---help---
 		Timer 1 initial dead-time
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM1_CHANNEL1
 	bool "TIM1 Channel 1"
@@ -3408,9 +3408,9 @@ config STM32_TIM1_CH6OUT
 
 endif # STM32_TIM1_CHANNEL6
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM1_CHANNEL
 	int "TIM1 PWM Output Channel"
@@ -3486,7 +3486,7 @@ config STM32_TIM1_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM1_PWM
 
@@ -3513,7 +3513,7 @@ config STM32_TIM2_MODE
 	---help---
 		Specifies the timer mode.
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM2_CHANNEL1
 	bool "TIM2 Channel 1"
@@ -3611,9 +3611,9 @@ config STM32_TIM2_CH4OUT
 
 endif # STM32_TIM2_CHANNEL4
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM2_CHANNEL
 	int "TIM2 PWM Output Channel"
@@ -3671,7 +3671,7 @@ config STM32_TIM2_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM2_PWM
 
@@ -3698,7 +3698,7 @@ config STM32_TIM3_MODE
 	---help---
 		Specifies the timer mode.
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM3_CHANNEL1
 	bool "TIM3 Channel 1"
@@ -3796,9 +3796,9 @@ config STM32_TIM3_CH4OUT
 
 endif # STM32_TIM3_CHANNEL4
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM3_CHANNEL
 	int "TIM3 PWM Output Channel"
@@ -3856,7 +3856,7 @@ config STM32_TIM3_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM3_PWM
 
@@ -3883,7 +3883,7 @@ config STM32_TIM4_MODE
 	---help---
 		Specifies the timer mode.
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM4_CHANNEL1
 	bool "TIM4 Channel 1"
@@ -3981,9 +3981,9 @@ config STM32_TIM4_CH4OUT
 
 endif # STM32_TIM4_CHANNEL4
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM4_CHANNEL
 	int "TIM4 PWM Output Channel"
@@ -4041,7 +4041,7 @@ config STM32_TIM4_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM4_PWM
 
@@ -4068,7 +4068,7 @@ config STM32_TIM5_MODE
 	---help---
 		Specifies the timer mode.
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM5_CHANNEL1
 	bool "TIM5 Channel 1"
@@ -4166,9 +4166,9 @@ config STM32_TIM5_CH4OUT
 
 endif # STM32_TIM5_CHANNEL4
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM5_CHANNEL
 	int "TIM5 PWM Output Channel"
@@ -4226,7 +4226,7 @@ config STM32_TIM5_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM5_PWM
 
@@ -4274,7 +4274,7 @@ config STM32_TIM8_TDTS
 	---help---
 		Timer 8 dead-time and sampling clock (t_DTS) division
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM8_CHANNEL1
 	bool "TIM8 Channel 1"
@@ -4438,9 +4438,9 @@ config STM32_TIM8_CH6OUT
 
 endif # STM32_TIM8_CHANNEL6
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM8_CHANNEL
 	int "TIM8 PWM Output Channel"
@@ -4516,7 +4516,7 @@ config STM32_TIM8_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM8_PWM
 
@@ -4536,7 +4536,7 @@ config STM32_TIM9_PWM
 
 if STM32_TIM9_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM9_CHANNEL1
 	bool "TIM9 Channel 1"
@@ -4586,9 +4586,9 @@ config STM32_TIM9_CH2OUT
 
 endif # STM32_TIM9_CHANNEL2
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM9_CHANNEL
 	int "TIM9 PWM Output Channel"
@@ -4626,7 +4626,7 @@ config STM32_TIM9_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM9_PWM
 
@@ -4646,7 +4646,7 @@ config STM32_TIM10_PWM
 
 if STM32_TIM10_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM10_CHANNEL1
 	bool "TIM10 Channel 1"
@@ -4672,9 +4672,9 @@ config STM32_TIM10_CH1OUT
 
 endif # STM32_TIM10_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM10_CHANNEL
 	int "TIM10 PWM Output Channel"
@@ -4702,7 +4702,7 @@ config STM32_TIM10_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM10_PWM
 
@@ -4722,7 +4722,7 @@ config STM32_TIM11_PWM
 
 if STM32_TIM11_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM11_CHANNEL1
 	bool "TIM11 Channel 1"
@@ -4748,9 +4748,9 @@ config STM32_TIM11_CH1OUT
 
 endif # STM32_TIM11_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM11_CHANNEL
 	int "TIM11 PWM Output Channel"
@@ -4778,7 +4778,7 @@ config STM32_TIM11_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM11_PWM
 
@@ -4798,7 +4798,7 @@ config STM32_TIM12_PWM
 
 if STM32_TIM12_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM12_CHANNEL1
 	bool "TIM12 Channel 1"
@@ -4848,9 +4848,9 @@ config STM32_TIM12_CH2OUT
 
 endif # STM32_TIM12_CHANNEL2
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM12_CHANNEL
 	int "TIM12 PWM Output Channel"
@@ -4888,7 +4888,7 @@ config STM32_TIM12_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM12_PWM
 
@@ -4908,7 +4908,7 @@ config STM32_TIM13_PWM
 
 if STM32_TIM13_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM13_CHANNEL1
 	bool "TIM13 Channel 1"
@@ -4934,9 +4934,9 @@ config STM32_TIM13_CH1OUT
 
 endif # STM32_TIM13_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM13_CHANNEL
 	int "TIM13 PWM Output Channel"
@@ -4964,7 +4964,7 @@ config STM32_TIM13_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM13_PWM
 
@@ -4984,7 +4984,7 @@ config STM32_TIM14_PWM
 
 if STM32_TIM14_PWM
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM14_CHANNEL1
 	bool "TIM14 Channel 1"
@@ -5010,9 +5010,9 @@ config STM32_TIM14_CH1OUT
 
 endif # STM32_TIM14_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM14_CHANNEL
 	int "TIM14 PWM Output Channel"
@@ -5040,7 +5040,7 @@ config STM32_TIM14_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM14_PWM
 
@@ -5080,7 +5080,7 @@ config STM32_TIM15_DEADTIME
 	---help---
 		Timer 15 initial dead-time
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM15_CHANNEL1
 	bool "TIM15 Channel 1"
@@ -5136,9 +5136,9 @@ config STM32_TIM15_CH2OUT
 
 endif # STM32_TIM15_CHANNEL2
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM15_CHANNEL
 	int "TIM15 PWM Output Channel"
@@ -5188,7 +5188,7 @@ config STM32_TIM15_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM15_PWM
 
@@ -5228,7 +5228,7 @@ config STM32_TIM16_DEADTIME
 	---help---
 		Timer 16 initial dead-time
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM16_CHANNEL1
 	bool "TIM16 Channel 1"
@@ -5253,9 +5253,9 @@ config STM32_TIM16_CH1OUT
 
 endif # STM32_TIM16_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM16_CHANNEL
 	int "TIM16 PWM Output Channel"
@@ -5282,7 +5282,7 @@ config STM32_TIM16_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM16_PWM
 
@@ -5322,7 +5322,7 @@ config STM32_TIM17_DEADTIME
 	---help---
 		Timer 17 initial dead-time
 
-if STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+if STM32_PWM_MULTICHAN
 
 config STM32_TIM17_CHANNEL1
 	bool "TIM17 Channel 1"
@@ -5347,9 +5347,9 @@ config STM32_TIM17_CH1OUT
 
 endif # STM32_TIM17_CHANNEL1
 
-endif # STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT
+endif # STM32_PWM_MULTICHAN
 
-if !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+if !STM32_PWM_MULTICHAN
 
 config STM32_TIM17_CHANNEL
 	int "TIM17 PWM Output Channel"
@@ -5376,7 +5376,7 @@ config STM32_TIM17_CHMODE
 	---help---
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
-endif # !(STM32_PWM_MULTICHAN || STM32_PWM_MULTICHAN_SELECT)
+endif # !STM32_PWM_MULTICHAN
 
 endif # STM32_TIM17_PWM
 
@@ -5388,15 +5388,6 @@ config STM32_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
 		channels per timer.
-
-config STM32_PWM_MULTICHAN_SELECT
-	bool "PWM Multiple Output Channels with unit selection"
-	default n
-	depends on STM32_TIM1_PWM || STM32_TIM2_PWM || STM32_TIM3_PWM || STM32_TIM4_PWM || STM32_TIM5_PWM || STM32_TIM8_PWM || STM32_TIM9_PWM || STM32_TIM10_PWM || STM32_TIM11_PWM || STM32_TIM12_PWM || STM32_TIM13_PWM || STM32_TIM14_PWM || STM32_TIM15_PWM || STM32_TIM16_PWM || STM32_TIM17_PWM
-	select ARCH_HAVE_PWM_MULTICHAN
-	---help---
-		Specifies that the PWM driver supports multiple output
-		channels per timer and each output is individually configurable.
 
 config STM32_PWM_TRGO
 	bool "TIM PWM TRGO support"

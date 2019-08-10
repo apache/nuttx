@@ -1871,8 +1871,13 @@ static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
-          ret = stm32l4pwm_update_duty(priv,info->channels[i].channel,
-                                info->channels[i].duty);
+          /* Set output if channel configured */
+
+          if (info->channels[i].channel != 0)
+            {
+              ret = stm32l4pwm_update_duty(priv,info->channels[i].channel,
+                                           info->channels[i].duty);
+            }
         }
 #else
       ret = stm32l4pwm_update_duty(priv,priv->channels[0].channel,info->duty);

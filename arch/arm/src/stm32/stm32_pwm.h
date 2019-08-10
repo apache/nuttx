@@ -125,7 +125,7 @@
 
 /* PWM driver channels configuration */
 
-#if defined(CONFIG_STM32_PWM_MULTICHAN) || defined(CONFIG_STM32_PWM_MULTICHAN_SELECT)
+#ifdef CONFIG_STM32_PWM_MULTICHAN
 
 #ifdef CONFIG_STM32_TIM1_CHANNEL1
 #  define PWM_TIM1_CHANNEL1 1
@@ -365,7 +365,7 @@
 #endif
 #define PWM_TIM17_NCHANNELS PWM_TIM17_CHANNEL1
 
-#else  /* !(CONFIG_STM32_PWM_MULTICHAN || CONFIG_STM32_PWM_MULTICHAN_SELECT) */
+#else  /* !CONFIG_PWM_MULTICHAN */
 
 /* For each timer that is enabled for PWM usage, we need the following additional
  * configuration settings:
