@@ -1433,6 +1433,15 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   xbeenet_ifdown(dev);
 
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached. We must do this before
+   * registering the device since, once the device is registered, a packet may
+   * be attempted to be forwarded and require the buffer.
+   */
+
+  priv->xd_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   (void)netdev_register(&priv->xd_dev.r_dev, NET_LL_IEEE802154);

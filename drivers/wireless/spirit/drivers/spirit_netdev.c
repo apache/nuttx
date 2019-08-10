@@ -2857,6 +2857,15 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
       goto errout_with_attach;
     }
 
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached. We must do this before
+   * registering the device since, once the device is registered, a packet may
+   * be attempted to be forwarded and require the buffer.
+   */
+
+  priv->radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
+
   /* Register the device with the OS so that socket IOCTLs can be performed. */
 
   ret = netdev_register(dev, NET_LL_PKTRADIO);
