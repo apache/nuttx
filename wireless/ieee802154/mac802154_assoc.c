@@ -234,6 +234,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
+  txdesc->ackreq = true;
 
   /* Save a copy of the destination addressing infromation into the tx
    * descriptor.  We only do this for commands to help with handling their
@@ -422,6 +423,7 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
+  txdesc->ackreq = true;
 
   txdesc->destaddr.mode = IEEE802154_ADDRMODE_EXTENDED;
   IEEE802154_PANIDCOPY(txdesc->destaddr.panid, priv->addr.panid);

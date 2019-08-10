@@ -342,6 +342,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
+  txdesc->ackreq = true;
 
   /* Save a copy of the destination addressing information into the tx
    * descriptor.  We only do this for commands to help with handling their
@@ -1632,6 +1633,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_DATA;
+  txdesc->ackreq = false;
 
   mac802154_unlock(priv)
 
