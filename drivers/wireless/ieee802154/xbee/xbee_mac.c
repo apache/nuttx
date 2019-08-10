@@ -468,7 +468,14 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
         }
         break;
 
-      case IEEE802154_ATTR_RADIO_REGDUMP:
+      case IEEE802154_ATTR_PHY_FCS_LEN:
+        {
+          attrval->phy.fcslen = 2;
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break
+
+      case IEEE802154_ATTR_PHY_REGDUMP:
         {
           xbee_regdump(priv);
         }

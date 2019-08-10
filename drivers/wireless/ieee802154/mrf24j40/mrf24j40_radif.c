@@ -564,6 +564,13 @@ int mrf24j40_getattr(FAR struct ieee802154_radio_s *radio,
         }
         break;
 
+      case IEEE802154_ATTR_PHY_FCS_LEN:
+        {
+          attrval->phy.fcslen = 2;
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+
       default:
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
     }
