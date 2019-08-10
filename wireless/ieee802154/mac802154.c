@@ -2132,8 +2132,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 {
   FAR struct ieee802154_privmac_s *mac;
   FAR struct ieee802154_radiocb_s *radiocb;
-  uint8_t eaddr[IEEE802154_EADDRSIZE];
-  int i;
 
   /* Allocate object */
 
@@ -2179,15 +2177,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac802154_resetqueues(mac);
 
   mac802154_req_reset((MACHANDLE)mac, true);
-
-  /* Set the default extended address */
-
-  for (i = 0; i < IEEE802154_EADDRSIZE; i++)
-    {
-      eaddr[i] = (CONFIG_IEEE802154_DEFAULT_EADDR >> (8 * i)) & 0xFF;
-    }
-
-  mac802154_seteaddr(mac, eaddr);
 
   return (MACHANDLE)mac;
 }

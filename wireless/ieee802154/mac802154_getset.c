@@ -193,7 +193,9 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         break;
       case IEEE802154_ATTR_MAC_EADDR:
         {
-          mac802154_seteaddr(priv, attrval->mac.eaddr);
+          /* macExtendedAddress is a read-only attribute */
+
+          ret = IEEE802154_STATUS_DENIED;
         }
         break;
       case IEEE802154_ATTR_MAC_COORD_SADDR:

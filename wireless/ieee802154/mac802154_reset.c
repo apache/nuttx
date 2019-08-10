@@ -116,13 +116,11 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
       priv->trans_persisttime = 0x01F4;
 
       /* Reset the short address and PAN ID. The extended address does not
-       * get reset but must be set at the radio layer again. The only time the
-       * MAC layer sets the extended address internally is immediately after
-       * this function is called in mac802154_create()
+       * get reset. It is a read-only attribute and the radio driver should
+       * be in charge of managing it. We pull a local copy for us to use below.
        */
 
       priv->addr.mode = IEEE802154_ADDRMODE_EXTENDED;
-      mac802154_seteaddr(priv, priv->addr.eaddr);
       mac802154_setsaddr(priv, IEEE802154_SADDR_UNSPEC);
       mac802154_setpanid(priv, IEEE802154_PANID_UNSPEC);
 
@@ -136,6 +134,9 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
        * for easy access.  Copy in the radio's values now that they've been
        * reset.
        */
+
+      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_EADDR, &attr);
+      IEEE802154_EADDRCOPY(priv->addr.eaddr, attr.mac.eaddr);
 
       priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
                             &attr);
