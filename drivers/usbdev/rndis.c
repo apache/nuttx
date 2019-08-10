@@ -69,7 +69,9 @@
 
 #define CONFIG_RNDIS_EP0MAXPACKET 64
 
-#define CONFIG_RNDIS_NWRREQS    (2)
+#ifndef CONFIG_RNDIS_NWRREQS
+#  define CONFIG_RNDIS_NWRREQS  (2)
+#endif
 
 #define RNDIS_PACKET_HDR_SIZE   (sizeof(struct rndis_packet_msg))
 #define CONFIG_RNDIS_BULKIN_REQLEN \
