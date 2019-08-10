@@ -467,6 +467,7 @@ FAR struct ieee802154_radio_s *
   dev->radio.txnotify     = mrf24j40_txnotify;
   dev->radio.txdelayed    = mrf24j40_txdelayed;
   dev->radio.rxenable     = mrf24j40_rxenable;
+  dev->radio.energydetect = mrf24j40_energydetect;
   dev->radio.beaconstart  = mrf24j40_beaconstart;
   dev->radio.beaconupdate = mrf24j40_beaconupdate;
   dev->radio.beaconstop   = mrf24j40_beaconstop;

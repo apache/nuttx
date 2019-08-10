@@ -426,6 +426,11 @@ int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
   return OK;
 }
 
+int mrf24j40_energydetect(FAR struct ieee802154_radio_s *radio, uint32_t nsymbols)
+{
+  return -ENOTTY;
+}
+
 int mrf24j40_reset(FAR struct ieee802154_radio_s *radio)
 {
   FAR struct mrf24j40_radio_s *dev = (FAR struct mrf24j40_radio_s *)radio;

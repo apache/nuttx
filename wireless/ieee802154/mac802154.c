@@ -88,6 +88,9 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_data_ind_s *ind);
 static void mac802154_rxframe_worker(FAR void *arg);
 
+static void mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
+                               uint8_t edval);
+
 static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
                               enum ieee802154_sfevent_e sfevent);
 
@@ -1635,6 +1638,45 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
   priv->radio->txdelayed(priv->radio, txdesc, 0);
 }
 
+/****************************************************************************
+ * Name: mac802154_edresult
+ *
+ * Description:
+ *   Called from the radio driver through the callback struct.  This
+ *   function is called when the radio has finished an energy detect operation.
+ *   This is triggered by a SCAN.request primitive with ScanType set to Energy
+ *   Detect (ED)
+ *
+ ****************************************************************************/
+
+static void mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
+                               uint8_t edval)
+{
+  FAR struct mac802154_radiocb_s *cb =
+    (FAR struct mac802154_radiocb_s *)radiocb;
+  FAR struct ieee802154_privmac_s *priv;
+
+  DEBUGASSERT(cb != NULL && cb->priv != NULL);
+  priv = cb->priv;
+
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again.
+   */
+
+  mac802154_lock(priv, false);
+
+  /* If we are actively performing a scan operation, notify the scan handler */
+
+  if (priv->curr_op == MAC802154_OP_SCAN)
+    {
+      mac802154_edscan_onresult(priv, edval);
+    }
+
+  /* Relinquish control of the private structure */
+
+  mac802154_unlock(priv);
+}
+
 static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
                               enum ieee802154_sfevent_e sfevent)
 {
@@ -2125,6 +2167,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   radiocb->txdone    = mac802154_txdone;
   radiocb->rxframe   = mac802154_rxframe;
   radiocb->sfevent   = mac802154_sfevent;
+  radiocb->edresult  = mac802154_edresult;
 
   /* Bind our callback structure */
 

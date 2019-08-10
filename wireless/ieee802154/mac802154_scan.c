@@ -124,11 +124,13 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
   priv->scanindex = 0;
   priv->npandesc = 0;
 
+  priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION * ((1 << req->duration) + 1);
+
   switch (req->type)
     {
       case IEEE802154_SCANTYPE_PASSIVE:
         {
-          wlinfo("MLME: Starting Passive scan\n");
+          wlinfo("MLME: Starting Passive Scan\n");
 
           /* Set the channel to the first channel in the list */
 
@@ -154,9 +156,6 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
            */
 
           mac802154_rxenable(priv);
-
-          priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION *
-                                     ((1 << req->duration) + 1);
           mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
         }
         break;
@@ -168,8 +167,15 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
         break;
       case IEEE802154_SCANTYPE_ED:
         {
-          ret = -ENOTTY;
-          goto errout_with_sem;
+          wlinfo("MLME: Starting Energy Scan\n");
+
+          /* Set the channel to the first channel in the list, and trigger an
+           * energy detect operation with the radio layer.
+           */
+
+          mac802154_setchpage(priv, req->chpage);
+          mac802154_setchannel(priv, req->channels[priv->scanindex]);
+          priv->radio->energydetect(priv->radio, priv->scansymdur);
         }
         break;
       case IEEE802154_SCANTYPE_ORPHAN:
@@ -213,31 +219,103 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
   scanconf->type = priv->currscan.type;
   scanconf->chpage = priv->currscan.chpage;
 
-  /* Copy in the channels that did not get scanned */
-
-  if (priv->scanindex != priv->currscan.numchan)
+  if (priv->currscan.type == IEEE802154_SCANTYPE_ED)
     {
-      scanconf->numunscanned = priv->currscan.numchan - priv->scanindex;
-      memcpy(scanconf->unscanned, &priv->currscan.channels[priv->scanindex],
-             scanconf->numunscanned);
+      /* "The list of energy measurements, one for each channel searched during an
+       *  ED scan. This parameter is null for active, passive, and orphan scans." [1]
+       */
+
+      memcpy(scanconf->edlist, priv->edlist, sizeof(scanconf->edlist));
+      memcpy(scanconf->chlist, priv->currscan.channels, sizeof(scanconf->chlist));
+      scanconf->numresults = priv->currscan.numchan;
     }
 
-  /* Copy the PAN descriptors into the primitive */
+  else
+    {
+        /* "A list of the channels given in the request which were not scanned. This
+         *  parameter is not valid for ED scans." [1]
+         */
 
-  memcpy(scanconf->pandescs, priv->pandescs,
-         sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
+        scanconf->numunscanned = priv->currscan.numchan - priv->scanindex;
+        if (scanconf->numunscanned)
+        {
+          memcpy(scanconf->chlist, &priv->currscan.channels[priv->scanindex],
+                 scanconf->numunscanned);
+        }
 
-  scanconf->numdesc = priv->npandesc;
+        /* "The list of PAN descriptors, one for each beacon found during an active or
+         *  passive scan if macAutoRequest is set to TRUE. This parameter is null for
+         *  ED and orphan scans or when macAutoRequest is set to FALSE during an
+         *  active or passive scan." [1]
+         */
+
+        if (priv->currscan.type != IEEE802154_SCANTYPE_ORPHAN && priv->autoreq)
+          {
+            memcpy(scanconf->pandescs, priv->pandescs,
+                   sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
+            scanconf->numresults = priv->npandesc;
+          }
+
+        if (priv->currscan.type == IEEE802154_SCANTYPE_PASSIVE)
+          {
+            /* Reset the PAN ID to the setting before the scan started */
+
+            mac802154_setpanid(priv, priv->panidbeforescan);
+          }
+    }
+
   scanconf->status = status;
-
-  /* Reset the PAN ID to the setting before the scan started */
-
-  mac802154_setpanid(priv, priv->panidbeforescan);
 
   priv->curr_op = MAC802154_OP_NONE;
   mac802154_givesem(&priv->opsem);
 
   mac802154_notify(priv, primitive);
+}
+
+/****************************************************************************
+ * Name: mac802154_edscan_onresult
+ *
+ * Description:
+ *   Function indirectly called from the radio layer via the radiocb edresult()
+ *   call.
+ *
+ * Assumptions:
+ *   Called with the priv mac struct locked
+ *
+ ****************************************************************************/
+
+void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv, uint8_t edval)
+{
+  DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN &&
+              priv->currscan.type == IEEE802154_SCANTYPE_ED);
+
+  /* Copy the energy value into our local list */
+
+  priv->edlist[priv->scanindex] = edval;
+
+  /* If we got here it means we are done scanning that channel */
+
+  priv->scanindex++;
+
+  /* Check to see if this was the last channel to scan */
+
+  if (priv->scanindex == priv->currscan.numchan)
+    {
+      mac802154_scanfinish(priv, IEEE802154_STATUS_SUCCESS);
+      return;
+    }
+
+  /* Continue on with the next channel in the list */
+
+  mac802154_setchannel(priv, priv->currscan.channels[priv->scanindex]);
+
+  /* ...after switching to the channel for a passive scan, the device
+   * shall enable its receiver for at most
+   * [aBaseSuperframeDuration × (2 * n + 1)],
+   * where n is the value of the ScanDuration parameter. [1] pg. 25
+   */
+
+  priv->radio->energydetect(priv->radio, priv->scansymdur);
 }
 
 /****************************************************************************

@@ -1425,11 +1425,14 @@ struct ieee802154_scan_conf_s
   enum ieee802154_status_e status;
   enum ieee802154_scantype_e type;
   uint8_t chpage;
-  uint8_t unscanned[15];
+
+  uint8_t chlist[15]; /* Used for both scanned channels (ED) and unscanned
+                       * channels (Active/Passive) */
   uint8_t numunscanned;
-  uint8_t numdesc;
+
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
-  uint8_t edlist[MAC802154_NPANDESC];
+  uint8_t edlist[15];
+  uint8_t numresults;
 };
 
 /*****************************************************************************

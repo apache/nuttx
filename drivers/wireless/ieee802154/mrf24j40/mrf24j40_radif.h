@@ -57,6 +57,8 @@ int mrf24j40_txdelayed(FAR struct ieee802154_radio_s *radio,
 
 int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable);
 
+int mrf24j40_energydetect(FAR struct ieee802154_radio_s *radio, uint32_t nsymbols);
+
 int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
                          FAR const struct ieee802154_superframespec_s *sfspec,
                          FAR struct ieee802154_beaconframe_s *beacon);

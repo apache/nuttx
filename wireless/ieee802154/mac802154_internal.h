@@ -150,9 +150,8 @@ struct ieee802154_privmac_s
 
   /******************* Fields related to SCAN operation ***********************/
 
-  /* List of PAN descriptors to track during scan procedures */
-
   uint8_t scanindex;
+  uint8_t edlist[15];
   uint8_t npandesc;
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
   uint8_t panidbeforescan[IEEE802154_PANIDSIZE];
