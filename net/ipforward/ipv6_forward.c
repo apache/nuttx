@@ -348,6 +348,15 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 #endif
   int ret;
 
+  /* If the interface isn't "up", we can't forward. */
+
+  if ((fwddev->d_flags & IFF_UP) == 0)
+    {
+      nwarn("WARNING: device is DOWN\n");
+      ret = -EHOSTUNREACH;
+      goto errout;
+    }
+
   /* Perform any necessary packet conversions. */
 
   ret = ipv6_packet_conversion(dev, fwddev, ipv6);
