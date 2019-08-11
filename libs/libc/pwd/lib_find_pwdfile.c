@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 typedef CODE int (pwd_foreach_match_t)(FAR const struct passwd *entry,
-                                       FAR void *arg);
+                                       uintptr_t arg);
 
 /****************************************************************************
  * Private Functions
@@ -76,7 +76,7 @@ typedef CODE int (pwd_foreach_match_t)(FAR const struct passwd *entry,
  *
  ****************************************************************************/
 
-static int pwd_match_name(FAR const struct passwd *entry, FAR void *arg)
+static int pwd_match_name(FAR const struct passwd *entry, uintptr_t arg)
 {
   FAR const char *uname = (FAR const char *)arg;
   return strcmp(entry->pw_name, uname) == 0 ? 1 : 0;
@@ -100,9 +100,9 @@ static int pwd_match_name(FAR const struct passwd *entry, FAR void *arg)
  *
  ****************************************************************************/
 
-static int pwd_match_uid(FAR const struct passwd *entry, FAR void *arg)
+static int pwd_match_uid(FAR const struct passwd *entry, uintptr_t arg)
 {
-  int match_uid = (int)((uintptr_t)arg);
+  int match_uid = (int)arg;
   return match_uid == entry->pw_uid ? 1 : 0;
 }
 
@@ -126,7 +126,7 @@ static int pwd_match_uid(FAR const struct passwd *entry, FAR void *arg)
  *
  ****************************************************************************/
 
-static int pwd_foreach(pwd_foreach_match_t match, FAR void *arg,
+static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
                        FAR struct passwd *entry, FAR char *buffer,
                        size_t buflen)
 {
@@ -289,7 +289,7 @@ static int pwd_foreach(pwd_foreach_match_t match, FAR void *arg,
 int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
                     FAR char *buffer, size_t buflen)
 {
-  return pwd_foreach(pwd_match_name, (FAR void *)uname, entry, buffer, buflen);
+  return pwd_foreach(pwd_match_name, (uintptr_t)uname, entry, buffer, buflen);
 }
 
 /****************************************************************************
@@ -314,6 +314,15 @@ int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
 int pwd_findby_uid(uid_t uid, FAR struct passwd *entry, FAR char *buffer,
                    size_t buflen)
 {
-  return pwd_foreach(pwd_match_uid, (FAR void *)((uintptr_t)uid), entry,
-                     buffer, buflen);
+  /* Verify that the UID is in the valid range of 0 through INT16_MAX.
+   * OpenGroup.org does not specify a UID_MAX or UID_MIN.  Instead we use a
+   * priori knowledge that uid_t is type int16_t.
+   */
+
+  if ((uint16_t)uid > INT16_MAX)
+    {
+      return -EINVAL;
+    }
+
+  return pwd_foreach(pwd_match_uid, (uintptr_t)uid, entry, buffer, buflen);
 }

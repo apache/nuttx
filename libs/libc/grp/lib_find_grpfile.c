@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 typedef CODE int (grp_foreach_match_t)(FAR const struct group *entry,
-                                       FAR void *arg);
+                                       uintptr_t arg);
 
 /****************************************************************************
  * Private Functions
@@ -76,7 +76,7 @@ typedef CODE int (grp_foreach_match_t)(FAR const struct group *entry,
  *
  ****************************************************************************/
 
-static int grp_match_name(FAR const struct group *entry, FAR void *arg)
+static int grp_match_name(FAR const struct group *entry, uintptr_t arg)
 {
   FAR const char *gname = (FAR const char *)arg;
   return strcmp(entry->gr_name, gname) == 0 ? 1 : 0;
@@ -100,9 +100,9 @@ static int grp_match_name(FAR const struct group *entry, FAR void *arg)
  *
  ****************************************************************************/
 
-static int grp_match_gid(FAR const struct group *entry, FAR void *arg)
+static int grp_match_gid(FAR const struct group *entry, uintptr_t arg)
 {
-  int match_gid = (int)((uintptr_t)arg);
+  int match_gid = (int)arg;
   return match_gid == entry->gr_gid ? 1 : 0;
 }
 
@@ -126,7 +126,7 @@ static int grp_match_gid(FAR const struct group *entry, FAR void *arg)
  *
  ****************************************************************************/
 
-static int grp_foreach(grp_foreach_match_t match, FAR void *arg,
+static int grp_foreach(grp_foreach_match_t match, uintptr_t arg,
                        FAR struct group *entry, FAR char *buffer,
                        size_t buflen)
 {
@@ -312,7 +312,7 @@ static int grp_foreach(grp_foreach_match_t match, FAR void *arg,
 int grp_findby_name(FAR const char *gname, FAR struct group *entry,
                     FAR char *buffer, size_t buflen)
 {
-  return grp_foreach(grp_match_name, (FAR void *)gname, entry, buffer, buflen);
+  return grp_foreach(grp_match_name, (uintptr_t)gname, entry, buffer, buflen);
 }
 
 /****************************************************************************
@@ -337,6 +337,15 @@ int grp_findby_name(FAR const char *gname, FAR struct group *entry,
 int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
                    size_t buflen)
 {
-  return grp_foreach(grp_match_gid, (FAR void *)((uintptr_t)gid), entry,
-                     buffer, buflen);
+  /* Verify that the GID is in the valid range of 0 through INT16_MAX.
+   * OpenGroup.org does not specify a GID_MAX or GID_MIN.  Instead we use a
+   * priori knowledge that gid_t is type int16_t.
+   */
+
+  if ((uint16_t)gid > INT16_MAX)
+    {
+      return -EINVAL;
+    }
+
+  return grp_foreach(grp_match_gid, (uintptr_t)gid, entry, buffer, buflen);
 }
