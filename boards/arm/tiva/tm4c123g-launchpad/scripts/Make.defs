@@ -1,5 +1,5 @@
 ############################################################################
-# boards/tm4c123g-launchpad/scripts/Make.defs
+# boards/arm/tiva/tm4c123g-launchpad/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

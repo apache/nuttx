@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/tm4c123g-launchpad/src/tm4c123g-launchpad.h
+ * boards/arm/tiva/tm4c123g-launchpad/src/tm4c123g-launchpad.h
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
