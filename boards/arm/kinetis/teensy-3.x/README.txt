@@ -30,9 +30,9 @@ README
     --------------- -------------- -------------- ---------------------------
 
   NOTES:
-  1. Settings in boards/teensy-3.x/include/board.h will automatically
+  1. Settings in boards/arm/kinetis/teensy-3.x/include/board.h will automatically
      select the correct clocking based on CONFIG_ARCH_CHIP_MK20DX128VLH5=y.
-  2. The linker script at boards/teensy-3.x/scripts/mk30dx128vlh5.ld will
+  2. The linker script at boards/arm/kinetis/teensy-3.x/scripts/mk30dx128vlh5.ld will
      automatically be selected when CONFIG_ARCH_CHIP_MK20DX128VLH5=y.  It
      will use the correct FLASH and SRAM sizes.
 

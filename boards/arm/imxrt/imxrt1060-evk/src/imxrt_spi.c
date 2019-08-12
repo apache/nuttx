@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/imxrt/imxrt1060-evk/src/imxrt_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,17 +58,18 @@
 #if defined(CONFIG_IMXRT_LPSPI1) || defined(CONFIG_IMXRT_LPSPI2) || \
     defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the imxrt1060-evk board.
+ *   Called to configure SPI chip select GPIO pins for the imxrt1060-evk
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function imxrt_spidev_initialize(void)
 {
@@ -85,31 +86,35 @@ void weak_function imxrt_spidev_initialize(void)
  * Name:  imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
  *
  * Description:
- *   The external functions, imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including imxrt_lpspibus_initialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *  The external functions, imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
+ *  must be provided by board-specific logic.
+ *  They are implementations of the select and status methods of the SPI
+ *  interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *  All other methods (including imxrt_lpspibus_initialize())
+ *  are provided by common STM32 logic.
+ *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in imxrt_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide imxrt_lpspi1/2/3select() and imxrt_lpspi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to imxrt_lpspibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by imxrt_lpspibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   2. Provide imxrt_lpspi1/2/3select() and imxrt_lpspi1/2/3status()
+ *      functions in your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using GPIOs in the way your board is configured.
+ *   3. Add a calls to imxrt_lpspibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by imxrt_lpspibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPSPI1
-void imxrt_lpspi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void imxrt_lpspi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   imxrt_gpio_write(GPIO_LPSPI1_CS, !selected);
 }
@@ -121,9 +126,11 @@ uint8_t imxrt_lpspi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_IMXRT_LPSPI2
-void imxrt_lpspi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void imxrt_lpspi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   imxrt_gpio_write(GPIO_LPSPI2_CS, !selected);
 }
@@ -135,9 +142,11 @@ uint8_t imxrt_lpspi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_IMXRT_LPSPI3
-void imxrt_lpspi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void imxrt_lpspi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   imxrt_gpio_write(GPIO_LPSPI3_CS, !selected);
 }
@@ -149,9 +158,11 @@ uint8_t imxrt_lpspi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_IMXRT_LPSPI4
-void imxrt_lpspi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void imxrt_lpspi4select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   imxrt_gpio_write(GPIO_LPSPI4_CS, !selected);
 }

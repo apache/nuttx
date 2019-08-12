@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_charger.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_charger.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H
-#define __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CHARGER_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CHARGER_H
 
 /****************************************************************************
  * Included Files
@@ -91,4 +91,4 @@ int board_charger_uninitialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_CHARGER_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CHARGER_H */

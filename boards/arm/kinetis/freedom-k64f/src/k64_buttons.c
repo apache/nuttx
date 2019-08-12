@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k64f/src/k64_buttons.c
+ * boards/arm/kinetis/freedom-k64f/src/k64_buttons.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,10 +54,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is
- * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
- * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
- * SW3 can be a non-maskable interrupt.
+/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2
+ * is connected to PTC6 and SW3 is connected to PTA4.
+ * Besides the general purpose input/output functions, SW2 and SW3 can be
+ * low-power wake up signal.
+ * Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
  *   --------- ---------------------------------------------------------------
@@ -82,10 +83,10 @@
 
 void board_button_initialize(void)
 {
-   /* Configure the two buttons as inputs */
+  /* Configure the two buttons as inputs */
 
-   kinetis_pinconfig(GPIO_SW2);
-   kinetis_pinconfig(GPIO_SW3);
+  kinetis_pinconfig(GPIO_SW2);
+  kinetis_pinconfig(GPIO_SW3);
 }
 
 /****************************************************************************

@@ -50,7 +50,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
+
 /* Clock Sources
  *   - 1-28 MHz High Frequency RC Oscillator (HFRCO)
  *   - 4-32 MHz High Frequency Crystal Oscillator (HFXO)
@@ -163,6 +165,7 @@
  */
 
 /* LEDs *********************************************************************/
+
 /* The EFM32 Gecko Starter Kit supports 4 yellow LEDs.  One side is grounded
  * so these LEDs are illuminated by outputting a high value.
  *
@@ -205,6 +208,7 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Buttons ******************************************************************/
+
 /* The Olimex board has four buttons, BUT1-4.  Each is grounded and so should
  * have a weak pull-up so that it will be sensed as "1" when open and "0"
  * when closed.
@@ -231,6 +235,7 @@
 #define BUTTON_4_BIT  (1 << BUTTON_4)
 
 /* Pin routing **************************************************************/
+
 /* UART0:
  *
  *   U0_RX #1 PE1  **AVAILABLE at EXT-19**

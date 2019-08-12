@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ntods-dm320/include/board/board.h
+/****************************************************************************
+ * boards/arm/dm320/ntods-dm320/include/board/board.h
  *
  *   Copyright (C) 2007-201, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,20 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NTOSD_DM320_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NTOSD_DM320_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_DM320_NTOSD_DM320_INCLUDE_BOARD_H
+#define __BOARDS_ARM_DM320_NTOSD_DM320_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* This platform has the ARM at 175 MHz and the DSP at 101.25 MHz */
 
 #define DM320_ARM_CLOCK  175500000
@@ -61,10 +62,11 @@
 
 #define DM9000_BASE      CONFIG_DM9000_BASE
 
-/* Memory Map ***********************************************************************/
+/* Memory Map ***************************************************************/
 
-/* The Neuros development board has 16MiB RAM starting at 0x01000000 (physical) and
- * 8MiB of FLASH.  The Neuros OSD 1.0 consumer  has 32MiB RAM starting at 0x01100000
+/* The Neuros development board has 16MiB RAM starting at 0x01000000
+ * (physical) and 8MiB of FLASH.
+ * The Neuros OSD 1.0 consumer  has 32MiB RAM starting at 0x01100000
  * (physical) and 16MiB of FLASH.
  *
  * FIXME: Flash location may also differ on OSD 1.0 consumer unit!
@@ -135,13 +137,11 @@
 #define LED_PANIC        GIO_LED_RED
 #define LED_IDLE         0
 
-
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #endif
-
-#endif  /* __BOARDS_ARM_NTOSD_DM320_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_DM320_NTOSD_DM320_INCLUDE_BOARD_H */

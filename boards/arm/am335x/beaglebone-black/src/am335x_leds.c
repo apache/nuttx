@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/beaglebone-black/src/am335x_leds.c
+ * boards/arm/am335x/beaglebone-black/src/am335x_leds.c
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -203,20 +203,21 @@ void board_autoled_off(int led)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
  *
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
- *   until the completion of boot.  The it will continue to control LED1; LED0 is
- *   available for application use.
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board
+ *   LEDs up until the completion of boot.
+ *   Then it will continue to control LED1; LED0 is available for
+ *   application use.
  *
- *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
- *   use.
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for
+ *   application use.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_userled_initialize(void)
 {

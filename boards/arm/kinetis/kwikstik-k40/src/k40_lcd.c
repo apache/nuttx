@@ -1,5 +1,5 @@
-/**************************************************************************************
- * boards/kwikstik-k40/src/k40_lcd.c
+/****************************************************************************
+ * boards/arm/kinetis/kwikstik-k40/src/k40_lcd.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,19 +49,20 @@
 #include "up_arch.h"
 #include "kwikstik-k40.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared, and the LCD ready to use, but with the power setting at 0
+ *   (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -70,14 +71,14 @@ int board_lcd_initialize(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -86,13 +87,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return NULL;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {

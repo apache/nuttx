@@ -378,7 +378,7 @@ Configurations
 
     STATUS:
       This configuration builds and runs, but only if the patch at
-      nuttx/boards/pcduino-a10/nsh/pcduino-140107.patch is applied.  This patchfile
+      nuttx/boards/arm/a1x/pcduino-a10/nsh/pcduino-140107.patch is applied.  This patchfile
       contains some fixes that are as-of-yet not well understood and so cannot be checked
       in.  Below is a summary of the kludges currently in this patch file:
 

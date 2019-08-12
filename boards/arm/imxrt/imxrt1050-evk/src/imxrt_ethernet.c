@@ -70,6 +70,7 @@
 #define IMXRT_ENET_DEVNAME "eth0"
 
 /* Debug ********************************************************************/
+
 /* Extra, in-depth debug output that is only available if
  * CONFIG_NETDEV_PHY_DEBUG us defined.
  */
@@ -84,13 +85,13 @@
 #  define phyinfo(x...)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_enet_phy_enable
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
 static void imxrt_enet_phy_enable(bool enable)
@@ -108,27 +109,29 @@ static void imxrt_enet_phy_enable(bool enable)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Function: imxrt_phy_boardinitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be
- *   used.  This may include such things as configuring GPIOs, resetting the PHY,
- *   etc.  If CONFIG_IMXRT_ENET_PHYINIT is defined in the configuration then the
- *   board specific logic must provide imxrt_phyinitialize();  The i.MX RT Ethernet
- *   driver will call this function one time before it first uses the PHY.
+ *  Some boards require specialized initialization of the PHY before it can
+ *  be used.
+ *  This may include such things as configuring GPIOs, resetting the PHY, etc.
+ *  If CONFIG_IMXRT_ENET_PHYINIT is defined in the configuration then the
+ *  board specific logic must provide imxrt_phyinitialize();
+ *  The i.MX RT Ethernet driver will call this function one time before it
+ *  first uses the PHY.
  *
  * Input Parameters:
- *   intf - Always zero for now.
+ *  intf - Always zero for now.
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *  OK on success; Negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_phy_boardinitialize(int intf)
 {

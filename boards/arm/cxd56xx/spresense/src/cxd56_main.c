@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/spresense_main.c
+ * boards/arm/cxd56xx/spresense/src/spresense_main.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

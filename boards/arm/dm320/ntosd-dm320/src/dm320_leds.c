@@ -1,5 +1,5 @@
 /****************************************************************************
- * confgs/ntosd-dm320/src/dm320_leds.c
+ * boards/arm/dm320/ntosd-dm320/src/dm320_leds.c
  *
  *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

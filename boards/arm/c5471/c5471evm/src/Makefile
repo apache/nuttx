@@ -1,5 +1,5 @@
 ############################################################################
-# boards/c5471/c5471evm/src/Makefile
+# boards/arm/c5471/c5471/c5471evm/src/Makefile
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

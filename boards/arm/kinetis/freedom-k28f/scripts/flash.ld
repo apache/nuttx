@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k28f/scripts/flash.ld
+ * boards/arm/kinetis/freedom-k28f/scripts/flash.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

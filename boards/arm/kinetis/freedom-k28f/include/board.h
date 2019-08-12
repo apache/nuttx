@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k28f/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k28f/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FREEDOM_K28F_INCLUDE_BOARD_H
-#define __BOARDS_ARM_FREEDOM_K28F_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,16 +49,18 @@
 # include <arch/chip/kinetis_mcg.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* The Freedom K28F uses a 12MHz external Oscillator.  The Kinetis MCU startup from an
- * internal digitally-controlled oscillator (DCO). Nuttx will enable the main external
- * oscillator (EXTAL0/XTAL0).   The external oscillator/resonator can range from
- * 32.768 KHz up to 50 MHz. The default external source for the MCG oscillator inputs
- * is 12 MHz oscillator
+/* Clocking *****************************************************************/
+
+/* The Freedom K28F uses a 12MHz external Oscillator.
+ * The Kinetis MCU startup from an internal digitally-controlled oscillator
+ * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
+ * The default external source for the MCG oscillator inputs is 12 MHz
+ * oscillator
  *
  * X501 a High-frequency, low-power Xtal
  */
@@ -67,21 +69,22 @@
 #define BOARD_EXTAL_FREQ     12000000       /* 12MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  Either the external clock or crystal frequency is used to
- * select the PRDIV value. Only reference clock frequencies are supported that will
- * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
- * clock to the PLL.
+/* PLL Configuration.
+ * Either the external clock or crystal frequency is used to select the
+ * PRDIV value. Only reference clock frequencies are supported that will
+ * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX
+ * reference clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 MHz  / 1  = 12 MHz
- *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 25 = 300 MHz
- *   MCG Frequency:         PLLOUT = 150 MHz = 300 MHz / KINETIS_MCG_PLL_INTERNAL_DIVBY
- *
+ * PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 MHz  / 1  = 12 MHz
+ * PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 25 = 300 MHz
+ * MCG Frequency:         PLLOUT = 150 MHz = 300 MHz /
+ *                                           KINETIS_MCG_PLL_INTERNAL_DIVBY
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
  * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
-#define BOARD_PRDIV          1              /* PLL External Reference Divider */
-#define BOARD_VDIV           25             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          1        /* PLL External Reference Divider */
+#define BOARD_VDIV           25       /* PLL VCO Divider (frequency multiplier) */
 
 /* Define additional MCG_C2 Setting */
 
@@ -144,36 +147,46 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ *   Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.  Possible values for prescaler and divisor are:
+ * The SDHC module is always configure configured so that the core clock is
+ * the baseclock.
+ * Possible values for prescaler and divisor are:
  *
  *   SDCLKFS: {2, 4, 8, 16, 32, 63, 128, 256}
  *   DVS:     {1..16}
  */
 
-/* Identification mode:  Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz */
+/* Identification mode:
+ *  Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz
+ */
 
 #define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV32
 #define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(15)
 
-/* MMC normal mode: Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+/* MMC normal mode:
+ * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ */
 
 #define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
 
-/* SD normal mode (1-bit): Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+/* SD normal mode (1-bit):
+ * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ */
 
 #define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
 
-/* SD normal mode (4-bit): Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
- * SD normal mode (4-bit): Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
+/* SD normal mode (4-bit):
+ * Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
+ * SD normal mode (4-bit):
+ * Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
  */
 
 #ifdef CONFIG_SDIO_DMA
@@ -194,6 +207,7 @@
 #define BOARD_USB_FLASHACCESS
 
 /* PWM Configuration */
+
 /* FTM0 Channels */
 
 #define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_2  /* Pin 22: PTC1 */
@@ -215,9 +229,10 @@
 #define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
 #define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
-/* LED definitions ******************************************************************/
-/* A single LED is available driven by PTC5.  The LED is grounded so bringing PTC5
- * high will illuminate the LED.
+/* LED definitions **********************************************************/
+
+/* A single LED is available driven by PTC5.  The LED is grounded so bringing
+ * PTC5 high will illuminate the LED.
  */
 
 /* LED index values for use with board_userled() */
@@ -230,10 +245,11 @@
 #define BOARD_LED_BIT                (1 << BOARD_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control the LED as defined below.  Thus if the LED is statically on, NuttX has
- * successfully booted and is, apparently, running normally.  If the LED is
- * flashing at approximately 2Hz, then a fatal error has been detected and the
- * system has halted.
+ * control the LED as defined below.
+ * Thus if the LED is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.
+ * If the LED is flashing at approximately 2Hz, then a fatal error has been
+ * detected and the system has halted.
  */
 
 #define LED_STARTED                  0 /* STATUS LED=OFF */
@@ -245,10 +261,12 @@
 #define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The freedom-k28f board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* The Freedom K28F has five LPUARTs with pin availability as follows:
  *
  *    ----- --------------- -------------------------------
@@ -397,7 +415,8 @@
 #endif
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The Freedom K28F has a single RGB LED driven by the K28F as follows:
  *
  *   LED    K28
@@ -406,8 +425,8 @@
  *   BLUE   PTE7
  *   GREEN  PTE8
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -429,7 +448,9 @@
  *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
- *   -------------------  ----------------------------  ----------------- */
+ *   -------------------  ----------------------------  -----------------
+ */
+
 #define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
 #define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
 #define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
@@ -440,14 +461,15 @@
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
 #undef  LED_IDLE            /* K28 is in sleep mode     (Not used)        */
 
-/* Button definitions ***************************************************************/
-/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2 is
- * connected to PTA4 and SW3 is connected to PTD0. Besides the general purpose
- * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
- * SW3 can be a non-maskable interrupt.
+/* Button definitions *******************************************************/
+
+/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board,
+ * where SW2 is connected to PTA4 and SW3 is connected to PTD0.
+ * Besides the general purpose input/output functions, SW2 and SW3 can be
+ * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
+ *   --------- --------------------------------------------------------------
  *   SW2       PTA4/NMI_B
  *   SW3       PTA4/NMI_B
  */
@@ -459,4 +481,4 @@
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
-#endif  /* __BOARDS_ARM_FREEDOM_K28F_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H */

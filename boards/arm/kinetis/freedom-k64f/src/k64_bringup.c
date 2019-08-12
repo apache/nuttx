@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/freedom-k64f/src/k64_bringup.c
+ * boards/arm/kinetis/freedom-k64f/src/k64_bringup.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

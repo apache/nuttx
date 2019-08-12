@@ -218,12 +218,12 @@ static void led_setonoff(unsigned int bits)
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED0-4 GPIOs for output */
+  /* Configure LED0-4 GPIOs for output */
 
-   efm32_configgpio(GPIO_LED0);
-   efm32_configgpio(GPIO_LED1);
-   efm32_configgpio(GPIO_LED2);
-   efm32_configgpio(GPIO_LED3);
+  efm32_configgpio(GPIO_LED0);
+  efm32_configgpio(GPIO_LED1);
+  efm32_configgpio(GPIO_LED2);
+  efm32_configgpio(GPIO_LED3);
 }
 
 /****************************************************************************

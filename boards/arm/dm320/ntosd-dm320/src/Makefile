@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ntosd-dm320/src/Makefile
+# boards/arm/dm320/ntosd-dm320/src/Makefile
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

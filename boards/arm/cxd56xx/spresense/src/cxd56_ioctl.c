@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_ioctl.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_ioctl.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

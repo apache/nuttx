@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/kwikstik-k40/src/k40_usbdev.c
+/****************************************************************************
+ * boards/arm/kinetis/kwikstik-k40/src/k40_usbdev.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,42 +51,43 @@
 #include "kinetis.h"
 #include "kwikstik-k40.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the KwikStik-K40 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_usbinitialize(void)
 {
 # warning "Missing logic"
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  kinetis_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide kinetis_pullup.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   kinetis_pullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined
+ *   to be NULL.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
@@ -95,16 +96,17 @@ int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  kinetis_usbsuspend
  *
  * Description:
- *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV
+ *   driver is used.
+ *   This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {

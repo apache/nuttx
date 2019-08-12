@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k66f/src/k66_automount.c
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k66f/src/k66_automount.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,9 @@
 
 #ifdef HAVE_AUTOMOUNTER
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef NULL
 #  define NULL (FAR void *)0
@@ -66,9 +66,10 @@
 #  define OK 0
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* This structure represents the changeable state of the automounter */
 
 struct k66_automount_state_s
@@ -83,26 +84,27 @@ struct k66_automount_state_s
 
 struct k66_automount_config_s
 {
-  /* This must be first thing in structure so that we can simply cast from struct
-   * automount_lower_s to struct k66_automount_config_s
+  /* This must be first thing in structure so that we can simply cast from
+   * struct automount_lower_s to struct k66_automount_config_s
    */
 
   struct automount_lower_s lower;          /* Publicly visible part */
   FAR struct k66_automount_state_s *state; /* Changeable state */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 static int  k66_attach(FAR const struct automount_lower_s *lower,
                        automount_handler_t isr, FAR void *arg);
-static void k66_enable(FAR const struct automount_lower_s *lower, bool enable);
+static void k66_enable(FAR const struct automount_lower_s *lower,
+                       bool enable);
 static bool k66_inserted(FAR const struct automount_lower_s *lower);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static struct k66_automount_state_s g_sdhc_state;
 static const struct k66_automount_config_s g_sdhc_config =
@@ -121,11 +123,11 @@ static const struct k66_automount_config_s g_sdhc_config =
   .state        = &g_sdhc_state
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k66_attach
  *
  * Description:
@@ -139,7 +141,7 @@ static const struct k66_automount_config_s g_sdhc_config =
  *  Returned Value:
  *    Always returns OK
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int k66_attach(FAR const struct automount_lower_s *lower,
                       automount_handler_t isr, FAR void *arg)
@@ -165,7 +167,7 @@ static int k66_attach(FAR const struct automount_lower_s *lower,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k66_enable
  *
  * Description:
@@ -178,7 +180,7 @@ static int k66_attach(FAR const struct automount_lower_s *lower,
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void k66_enable(FAR const struct automount_lower_s *lower, bool enable)
 {
@@ -216,7 +218,7 @@ static void k66_enable(FAR const struct automount_lower_s *lower, bool enable)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: k66_inserted
  *
  * Description:
@@ -228,18 +230,18 @@ static void k66_enable(FAR const struct automount_lower_s *lower, bool enable)
  *  Returned Value:
  *    True if the card is inserted; False otherwise
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static bool k66_inserted(FAR const struct automount_lower_s *lower)
 {
   return k66_cardinserted();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k66_automount_initialize
  *
  * Description:
@@ -251,7 +253,7 @@ static bool k66_inserted(FAR const struct automount_lower_s *lower)
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void k66_automount_initialize(void)
 {
@@ -268,20 +270,20 @@ void k66_automount_initialize(void)
     }
 }
 
-/************************************************************************************
+/*****************************************************************************
  * Name:  k66_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The SDHC card detection logic has detected an insertion or removal event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the SDHC0 slot: SDHC0_SLOTNO or SDHC1_SLOTNO.  There is a
- *      terminology problem here:  Each SDHC supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the SDHC0 slot: SDHC0_SLOTNO or SDHC1_SLOTNO.
+ *       There is a terminology problem here:  Each SDHC supports two slots,
+ *       slot A and slot B. Only slot A is used.
+ *       So this is not a really a slot, but an HSCMI peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:
@@ -290,7 +292,7 @@ void k66_automount_initialize(void)
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 void k66_automount_event(bool inserted)
 {

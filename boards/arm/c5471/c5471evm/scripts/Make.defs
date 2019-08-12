@@ -1,5 +1,5 @@
 ############################################################################
-# boards/c5471evm/scripts/Make.defs
+# boards/arm/c5471/c5471evm/scripts/Make.defs
 #
 #   Copyright (C) 2007, 2008, 2011, 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

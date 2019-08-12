@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k64f/src/freedom-k64f.h
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k64f/src/freedom-k64f.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,25 +32,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FREEDOM_K64F_SRC_FREEDOM_K64F_H
-#define __BOARDS_ARM_FREEDOM_K64F_SRC_FREEDOM_K64F_H
+#ifndef __BOARDS_ARM_KINETIS_FREEDOM_K64F_SRC_FREEDOM_K64F_H
+#define __BOARDS_ARM_KINETIS_FREEDOM_K64F_SRC_FREEDOM_K64F_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 #include <arch/kinetis/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Application Configuration ********************************************************/
+/* Application Configuration ************************************************/
 
 /* Assume we have everything */
 
@@ -84,8 +84,8 @@
 
 #define MMCSD_SLOTNO 0
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
@@ -169,11 +169,13 @@
 #  undef CONFIG_KINETIS_SPI2
 #endif
 
-/* FREEDOM-K64F GPIOs ****************************************************************/
-/* A micro Secure Digital (SD) card slot is available on the FRDM-K64F connected to
- * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
- * format SD memory cards. The SD card detect pin (PTE6) is an open switch that
- * shorts with VDD when card is inserted.
+/* FREEDOM-K64F GPIOs *******************************************************/
+
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K64F
+ * connected to the SD Host Controller (SDHC) signals of the MCU.
+ * This slot will accept micro format SD memory cards.
+ * The SD card detect pin (PTE6) is an open switch that shorts with VDD when
+ * card is inserted.
  *
  *   ------------ ------------- --------
  *    SD Card Slot Board Signal  K64F Pin
@@ -192,13 +194,14 @@
 
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN6)
 
-/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board, where SW2 is
- * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
- * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
- * SW3 can be a non-maskable interrupt.
+/* Two push buttons, SW2 and SW3, are available on FRDM-K64F board,
+ * where SW2 is connected to PTC6 and SW3 is connected to PTA4.
+ * Besides the general purpose input/output functions,
+ * SW2 and SW3 can be low-power wake up signal.
+ * Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
+ *   --------- --------------------------------------------------------------
  *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
  *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
@@ -219,43 +222,43 @@
 #define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
 #define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the FREEDOM-K64F board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function k64_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the FREEDOM-K64F board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function k64_usbinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int k64_bringup(void);
@@ -275,13 +278,13 @@ int k64_sdhc_initialize(void);
 #  define k64_sdhc_initialize() (OK)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the SDHC slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 bool k64_cardinserted(void);
@@ -289,13 +292,13 @@ bool k64_cardinserted(void);
 #  define k64_cardinserted() (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_writeprotected
  *
  * Description:
  *   Check if the card in the MMC/SD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 bool k64_writeprotected(void);
@@ -303,7 +306,7 @@ bool k64_writeprotected(void);
 #  define k64_writeprotected() (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k64_automount_initialize
  *
  * Description:
@@ -315,20 +318,20 @@ bool k64_writeprotected(void);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void k64_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k64_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The SDHC card detection logic has detected an insertion or removal event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
  *   inserted - True if the card is inserted in the slot.  False otherwise.
@@ -339,23 +342,23 @@ void k64_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void k64_automount_event(bool inserted);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int k64_pwm_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_FREEDOM_K64F_SRC_FREEDOM_K64F_H */
+#endif /* __BOARDS_ARM_KINETIS_FREEDOM_K64F_SRC_FREEDOM_K64F_H */

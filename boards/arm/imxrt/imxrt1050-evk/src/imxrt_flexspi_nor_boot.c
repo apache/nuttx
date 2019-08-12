@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arm/imxrt/imxrt1050-evk/src/imxrt_flexspi_nor_boot.c
+ * boards/arm/imxrt/imxrt1050-evk/src/imxrt_flexspi_nor_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
@@ -61,7 +61,7 @@ const struct boot_data_s g_boot_data =
 {
   FLASH_BASE,                         /* boot start location */
   (FLASH_END - FLASH_BASE),           /* size */
-  PLUGIN_FLAG,                        /* Plugin flag*/
-  0xFFFFFFFF                          /* empty - extra data word */
+  PLUGIN_FLAG,                        /* Plugin flag */
+  0xffffffff                          /* empty - extra data word */
 };
 

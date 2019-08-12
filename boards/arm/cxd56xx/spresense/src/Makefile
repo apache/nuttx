@@ -1,5 +1,5 @@
 ############################################################################
-# boards/spresense/src/Makefile
+# boards/arm/cxd56x/spresense/src/Makefile
 #
 #   Copyright 2018 Sony Semiconductor Solutions Corporation
 #

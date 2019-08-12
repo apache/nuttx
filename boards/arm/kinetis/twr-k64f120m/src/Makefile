@@ -1,5 +1,5 @@
 ############################################################################
-# boards/twr-k64f120m/src/Makefile
+# boards/arm/kinetis/twr-k64f120m/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -217,7 +217,7 @@ enum flexspi_serial_clkfreq_e
   FLEXSPI_SERIAL_CLKFREQ_200MHz = 9,
 };
 
-/* FlexSPI clock configuration type*/
+/* FlexSPI clock configuration type */
 
 enum flexspi_serial_clockmode_e
 {
@@ -229,7 +229,7 @@ enum flexspi_serial_clockmode_e
 
 enum flash_read_sample_clk_e
 {
-  FLASH_READ_SAMPLE_CLK_LOOPBACK_INTERNELLY= 0,
+  FLASH_READ_SAMPLE_CLK_LOOPBACK_INTERNELLY = 0,
   FLASH_READ_SAMPLE_CLK_LOOPBACK_FROM_DQSPAD = 1,
   FLASH_READ_SAMPLE_CLK_LOOPBACK_FROM_SCKPAD = 2,
   FLASH_READ_SAMPLE_CLK_EXTERNALINPUT_FROM_DQSPAD = 3,
@@ -300,9 +300,11 @@ struct flexspi_mem_config_s
   uint8_t read_sample_clksrc;
   uint8_t cs_hold_time;
   uint8_t cs_setup_time;
-  uint8_t column_address_width;       /* [0x00f-0x00f] Column Address with, for
-                                       * HyperBus protocol, it is fixed to 3, For
-                                       * Serial NAND, need to refer to datasheet */
+  uint8_t column_address_width;     /* [0x00f-0x00f] Column Address with, for
+                                     * HyperBus protocol, it is fixed to 3,
+                                     * For Serial NAND, need to refer to
+                                     * datasheet
+                                     */
   uint8_t device_mode_cfg_enable;
   uint8_t device_mode_type;
   uint16_t wait_time_cfg_commands;

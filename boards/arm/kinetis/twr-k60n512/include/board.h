@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/twr-k60n512/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/twr-k60n512/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -32,42 +32,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The K60 tower board uses a 50MHz external clock */
 
 #define BOARD_EXTCLOCK       1              /* External clock */
 #define BOARD_EXTAL_FREQ     50000000       /* 50MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  Either the external clock or crystal frequency is used to
- * select the PRDIV value. Only reference clock frequencies are supported that will
- * produce a 2MHz reference clock to the PLL.
+/* PLL Configuration.  Either the external clock or crystal frequency is used
+ * to select the PRDIV value.
+ * Only reference clock frequencies are supported that will produce a 2MHz
+ * reference clock to the PLL.
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/25 = 2MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
-#define BOARD_PRDIV          25             /* PLL External Reference Divider */
-#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          25   /* PLL External Reference Divider */
+#define BOARD_VDIV           48   /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
@@ -85,14 +87,15 @@
 #define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ * Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.
+ * The SDHC module is always configure configured so that the core clock is
+ * the base clock.
  */
 
 /* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
@@ -124,7 +127,8 @@
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The TWR-K60N512 has four LEDs:
  *
  * 1. E1 / Orange LED   PTA11
@@ -144,7 +148,8 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The TWR-K60N512 has user buttons (plus a reset button):
  *
  * 1. SW1 (IRQ0)   PTA19
@@ -157,12 +162,13 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* If there are alternative configurations for various pins in the
- * kinetis_k60pinmux.h header file, those alternative pins will be labeled with a
- * suffix like _1, _2, etc.  The logic in this file must select the correct pin
- * configuration for the board by defining a pin configuration (with no suffix) that
- * maps to the correct alternative.
+ * kinetis_k60pinmux.h header file, those alternative pins will be labeled
+ * with a suffix like _1, _2, etc.  The logic in this file must select the
+ * correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  */
 
 /* On-Board Connections
@@ -369,4 +375,4 @@
  * B80 EBI_D0               PTC15
  */
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H */

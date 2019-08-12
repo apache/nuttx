@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/twr-k64f120m/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/twr-k64f120m/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,33 +31,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TWR_K64F120M_INCLUDE_BOARCH_H
-#define __BOARDS_ARM_TWR_K64F120M_INCLUDE_BOARCH_H
+#ifndef __BOARDS_ARM_KINETIS_TWR_K64F120M_INCLUDE_BOARCH_H
+#define __BOARDS_ARM_KINETIS_TWR_K64F120M_INCLUDE_BOARCH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The K64 tower board uses a 50MHz external clock */
 
 #define BOARD_EXTCLOCK       1              /* External clock */
 #define BOARD_EXTAL_FREQ     50000000       /* 50MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  Either the external clock or crystal frequency is used to
- * select the PRDIV value. Only reference clock frequencies are supported that will
+/* PLL Configuration.
+ * Either the external clock or crystal frequency is used to select the
+ * PRDIV value. Only reference clock frequencies are supported that will
  * produce a range 2MHz-4MHz reference clock to the PLL.
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/20 = 2.5 MHz
@@ -65,8 +67,8 @@
  *   MCG Frequency:         PLLOUT = 120 Mhz
  */
 
-#define BOARD_PRDIV          20             /* PLL External Reference Divider */
-#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          20  /* PLL External Reference Divider */
+#define BOARD_VDIV           48  /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
@@ -79,24 +81,25 @@
 
 /* SIM CLKDIV1 dividers */
 
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 120MHz */
-#define BOARD_OUTDIV2        2              /* Bus         = MCG/2, 60MHz */
-#define BOARD_OUTDIV3        2              /* FlexBus     = MCG/2, 60MHz */
-#define BOARD_OUTDIV4        5              /* Flash clock = MCG/5, 24MHz */
+#define BOARD_OUTDIV1        1          /* Core        = MCG, 120MHz */
+#define BOARD_OUTDIV2        2          /* Bus         = MCG/2, 60MHz */
+#define BOARD_OUTDIV3        2          /* FlexBus     = MCG/2, 60MHz */
+#define BOARD_OUTDIV4        5          /* Flash clock = MCG/5, 24MHz */
 
 #define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
 #define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ * Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.
+ * The SDHC module is always configure configured so that the core clock is
+ * the base clock.
  */
 
 /* Identification mode:  375KHz = 120MHz / ( 64 * 5) <= 400 KHz */
@@ -104,12 +107,12 @@
 #define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV64
 #define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(5)
 
-/* MMC normal mode: 15MHz  = 120MHz / (8 * 1) <= 16 MHz*/
+/* MMC normal mode: 15MHz  = 120MHz / (8 * 1) <= 16 MHz */
 
 #define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(1)
 
-/* SD normal mode (1-bit): 15MHz  = 120MHz / (8 * 1) <= 16 MHz*/
+/* SD normal mode (1-bit): 15MHz  = 120MHz / (8 * 1) <= 16 MHz */
 
 #define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(1)
@@ -126,8 +129,8 @@
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(1)
 #endif
 
+/* LED definitions **********************************************************/
 
-/* LED definitions ******************************************************************/
 /* The TWR-K64F120M has four LEDs:
  *
  * 1. D5 / Green LED    PTE6
@@ -148,12 +151,10 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* LED1 (blink) */
 
-
 /* Open SDA serial link */
 
 #define PIN_UART1_RX  PIN_UART1_RX_1
 #define PIN_UART1_TX  PIN_UART1_TX_1
-
 
 /* Ethernet */
 
@@ -161,4 +162,4 @@
 #  define CONFIG_KINETIS_NENET 1
 #endif
 
-#endif  /* __BOARDS_ARM_TWR_K64F120M_INCLUDE_BOARCH_H */
+#endif  /* __BOARDS_ARM_KINETIS_TWR_K64F120M_INCLUDE_BOARCH_H */

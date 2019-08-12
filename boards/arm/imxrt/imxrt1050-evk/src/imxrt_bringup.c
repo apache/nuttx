@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arm/imxrt/imxrt1050-evk/src/imxrt_bringup.c
+ * boards/arm/imxrt/imxrt1050-evk/src/imxrt_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -122,7 +122,7 @@ static int nsh_sdmmc_initialize(void)
         }
     }
   return OK;
-  }
+}
 #else
 #  define nsh_sdmmc_initialize() (OK)
 #endif

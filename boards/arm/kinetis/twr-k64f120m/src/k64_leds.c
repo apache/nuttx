@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/twr-k64f120m/src/k64_leds.c
+ * boards/arm/kinetis/twr-k64f120m/src/k64_leds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -173,7 +173,6 @@ static inline void led_clrbits(unsigned int clrbits)
     {
       kinetis_gpiowrite(GPIO_LED3, true);
     }
-
 }
 
 static inline void led_setbits(unsigned int setbits)
@@ -192,7 +191,6 @@ static inline void led_setbits(unsigned int setbits)
     {
       kinetis_gpiowrite(GPIO_LED3, false);
     }
-
 }
 
 static void led_setonoff(unsigned int bits)
@@ -216,11 +214,11 @@ static void led_setonoff(unsigned int bits)
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-3 GPIOs for output */
+  /* Configure LED1-3 GPIOs for output */
 
-   kinetis_pinconfig(GPIO_LED1);
-   kinetis_pinconfig(GPIO_LED2);
-   kinetis_pinconfig(GPIO_LED3);
+  kinetis_pinconfig(GPIO_LED1);
+  kinetis_pinconfig(GPIO_LED2);
+  kinetis_pinconfig(GPIO_LED3);
 }
 
 /****************************************************************************

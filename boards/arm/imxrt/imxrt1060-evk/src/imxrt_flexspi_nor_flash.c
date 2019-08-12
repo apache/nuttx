@@ -34,16 +34,15 @@
  *
  ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
-
+ ****************************************************************************/
 
 #include "imxrt_flexspi_nor_flash.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Public Data
- ******************************************************************************/
+ ****************************************************************************/
 
 #if defined (CONFIG_IMXRT1060_EVK_HYPER_FLASH)
 __attribute__((section(".boot_hdr.conf")))
@@ -72,7 +71,7 @@ const struct flexspi_nor_config_s g_flash_config =
     {
       /* Read LUTs */
 
-      FLEXSPI_LUT_SEQ(CMD_DDR, FLEXSPI_8PAD, 0xA0, RADDR_DDR, FLEXSPI_8PAD, 0x18),
+      FLEXSPI_LUT_SEQ(CMD_DDR, FLEXSPI_8PAD, 0xa0, RADDR_DDR, FLEXSPI_8PAD, 0x18),
       FLEXSPI_LUT_SEQ(CADDR_DDR, FLEXSPI_8PAD, 0x10, DUMMY_DDR, FLEXSPI_8PAD, 0x06),
       FLEXSPI_LUT_SEQ(READ_DDR, FLEXSPI_8PAD, 0x04, STOP, FLEXSPI_1PAD, 0x0),
     },
@@ -103,10 +102,11 @@ const struct flexspi_nor_config_s g_flash_config =
     .lookup_table           =
     {
       /* LUTs */
-      /* 0 Fast read Quad IO DTR Mode Operation in SPI Mode (normal read)*/
 
-      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xED, RADDR_DDR, FLEXSPI_4PAD, 0x18),
-      FLEXSPI_LUT_SEQ(DUMMY_DDR, FLEXSPI_4PAD, 0x0C, READ_DDR, FLEXSPI_4PAD, 0x08),
+      /* 0 Fast read Quad IO DTR Mode Operation in SPI Mode (normal read) */
+
+      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xed, RADDR_DDR, FLEXSPI_4PAD, 0x18),
+      FLEXSPI_LUT_SEQ(DUMMY_DDR, FLEXSPI_4PAD, 0x0c, READ_DDR, FLEXSPI_4PAD, 0x08),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
 
@@ -140,7 +140,7 @@ const struct flexspi_nor_config_s g_flash_config =
 
       /* 5 Erase Sector */
 
-      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xD7, RADDR_SDR, FLEXSPI_1PAD, 0x18),
+      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xd7, RADDR_SDR, FLEXSPI_1PAD, 0x18),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
@@ -182,11 +182,10 @@ const struct flexspi_nor_config_s g_flash_config =
 
       /* 11 Chip Erase */
 
-      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xC7, STOP, FLEXSPI_1PAD, 0x0),
+      FLEXSPI_LUT_SEQ(CMD_SDR, FLEXSPI_1PAD, 0xc7, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
       FLEXSPI_LUT_SEQ(STOP, FLEXSPI_1PAD, 0x0, STOP, FLEXSPI_1PAD, 0x0),
-
     },
   },
 

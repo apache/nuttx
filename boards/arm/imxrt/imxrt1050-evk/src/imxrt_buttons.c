@@ -81,9 +81,9 @@
 
 void board_button_initialize(void)
 {
-   /* Configure the button as input */
+  /* Configure the button as input */
 
-   imxrt_config_gpio(GPIO_SW8);
+  imxrt_config_gpio(GPIO_SW8);
 }
 
 /****************************************************************************

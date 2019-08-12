@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k64f/src/k64_autoleds.c
+ * boards/arm/kinetis/freedom-k64f/src/k64_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

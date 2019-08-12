@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/teensy-3.x/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/teensy-3.x/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TEENSY_3X_INCLUDE_BOARD_H
-#define __BOARDS_ARM_TEENSY_3X_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_TEENSY_3X_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_TEENSY_3X_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,31 +48,35 @@
 # include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The teensy-3.1 has a 16MHz crystal on board */
 
-#undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_EXTAL_LP                      /* Low Power, as opposed to Hi Gain */
+#undef  BOARD_EXTCLOCK                /* Crystal */
+#define BOARD_EXTAL_LP                /* Low Power, as opposed to Hi Gain */
 
-/* BOARD_FRDIV is MCG_C1_FRDIV_DIV512 from kinetis_mcg.h. According to the k20
- * reference manual, when transitioning MCG clock modes to FLL Bypassed External
- * the C1 divider must be set so that the FLL clock is between 31.25 and 39.0625 khz.
+/* BOARD_FRDIV is MCG_C1_FRDIV_DIV512 from kinetis_mcg.h.
+ * According to the k20 reference manual, when transitioning MCG clock modes
+ * to FLL Bypassed External the C1 divider must be set so that the FLL clock
+ * is between 31.25 and 39.0625 khz.
  * For teensy-3.x that works out to a divider of 512.
  */
 
 #define BOARD_FRDIV          MCG_C1_FRDIV_DIV512
 
-#define BOARD_EXTAL_FREQ     16000000       /* 16MHz crystal frequency (REFCLK) */
-#define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator (not populated) */
+#define BOARD_EXTAL_FREQ     16000000 /* 16MHz crystal frequency (REFCLK) */
+#define BOARD_XTAL32_FREQ    32768    /* 32KHz RTC Oscillator (not populated) */
 
-/* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
- * produce a 2MHz reference clock to the PLL.  The rated speed for the MK20DX256VLH7
- * is 72MHz and 50MHz for the MK20DX128VLH5, but according to the PJRC website,
- * both can be overclocked at 96MHz
+/* PLL Configuration.
+ * NOTE: Only even frequency crystals are supported that will produce a 2MHz
+ * reference clock to the PLL.
+ * The rated speed for the MK20DX256VLH7 is 72MHz and 50MHz for the
+ * MK20DX128VLH5, but according to the PJRC website, both can be overclocked
+ * at 96MHz
  *
  * MK20DX128VLH5 Rated Frequency 50MHz (selecting 48Mhz to use USB)
  *
@@ -95,42 +99,42 @@
 #if defined(CONFIG_TEENSY_3X_OVERCLOCK)
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
-#  define BOARD_VDIV         48             /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8    /* PLL External Reference Divider */
+#  define BOARD_VDIV         48   /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
-#  define BOARD_OUTDIV1      1              /* Core        = MCG, 96MHz */
-#  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 48MHz */
-#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
-#  define BOARD_OUTDIV4      4              /* Flash clock = MCG/4, 24MHz */
+#  define BOARD_OUTDIV1      1     /* Core        = MCG, 96MHz */
+#  define BOARD_OUTDIV2      2     /* Bus         = MCG/2, 48MHz */
+#  define BOARD_OUTDIV3      0     /* N/A         = No  OUTDIV3 */
+#  define BOARD_OUTDIV4      4     /* Flash clock = MCG/4, 24MHz */
 
 #elif defined(CONFIG_ARCH_CHIP_MK20DX256VLH7)
 
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
-#  define BOARD_VDIV         36             /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8     /* PLL External Reference Divider */
+#  define BOARD_VDIV         36    /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
-#  define BOARD_OUTDIV1      1              /* Core        = MCG, 72MHz */
-#  define BOARD_OUTDIV2      2              /* Bus         = MCG/2, 36MHz */
-#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
-#  define BOARD_OUTDIV4      3              /* Flash clock = MCG/3, 72MHz */
+#  define BOARD_OUTDIV1      1     /* Core        = MCG, 72MHz */
+#  define BOARD_OUTDIV2      2     /* Bus         = MCG/2, 36MHz */
+#  define BOARD_OUTDIV3      0     /* N/A         = No  OUTDIV3 */
+#  define BOARD_OUTDIV4      3     /* Flash clock = MCG/3, 72MHz */
 
 #elif defined(CONFIG_ARCH_CHIP_MK20DX128VLH5)
 /* PLL Configuration */
 
-#  define BOARD_PRDIV        8              /* PLL External Reference Divider */
-#  define BOARD_VDIV         24             /* PLL VCO Divider (frequency multiplier) */
+#  define BOARD_PRDIV        8     /* PLL External Reference Divider */
+#  define BOARD_VDIV         24    /* PLL VCO Divider (frequency multiplier) */
 
 /* SIM CLKDIV1 dividers */
 
-#  define BOARD_OUTDIV1      1              /* Core        = MCG, 48MHz */
-#  define BOARD_OUTDIV2      1              /* Bus         = MCG/1, 48MHz */
-#  define BOARD_OUTDIV3      0              /* N/A         = No  OUTDIV3 */
-#  define BOARD_OUTDIV4      2              /* Flash clock = MCG/2, 24MHz */
+#  define BOARD_OUTDIV1      1     /* Core        = MCG, 48MHz */
+#  define BOARD_OUTDIV2      1     /* Bus         = MCG/1, 48MHz */
+#  define BOARD_OUTDIV3      0     /* N/A         = No  OUTDIV3 */
+#  define BOARD_OUTDIV4      2     /* Flash clock = MCG/2, 24MHz */
 #endif
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
@@ -149,9 +153,9 @@
 #define BOARD_SOPT2_PLLFLLSEL        SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
 #define BOARD_SOPT2_FREQ             BOARD_MCG_FREQ
 
- /* Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
- *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
- */
+  /* Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
+   *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
+   */
 
 #if BOARD_SOPT2_FREQ == 96000000
   /* USBFRAC/USBDIV = 1/2 of 96Mhz clock = 48MHz */
@@ -184,6 +188,7 @@
 #define BOARD_USB_FLASHACCESS
 
 /* PWM Configuration */
+
 /* FTM0 Channels */
 
 #define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_2  /* Pin 22: PTC1 */
@@ -205,9 +210,10 @@
 #define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
 #define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
-/* LED definitions ******************************************************************/
-/* A single LED is available driven by PTC5.  The LED is grounded so bringing PTC5
- * high will illuminate the LED.
+/* LED definitions **********************************************************/
+
+/* A single LED is available driven by PTC5.
+ * The LED is grounded so bringing PTC5 high will illuminate the LED.
  */
 
 /* LED index values for use with board_userled() */
@@ -220,10 +226,11 @@
 #define BOARD_LED_BIT                (1 << BOARD_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control the LED as defined below.  Thus if the LED is statically on, NuttX has
- * successfully booted and is, apparently, running normally.  If the LED is
- * flashing at approximately 2Hz, then a fatal error has been detected and the
- * system has halted.
+ * control the LED as defined below.
+ * Thus if the LED is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.
+ * If the LED is flashing at approximately 2Hz, then a fatal error has been
+ * detected and the system has halted.
  */
 
 #define LED_STARTED                  0 /* STATUS LED=OFF */
@@ -235,10 +242,12 @@
 #define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The teensy-3.1 board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* The K20 has three UARTs with pin availability as follows:
  *
  *   --------- ------ ----------- -------------------------
@@ -296,4 +305,4 @@
 #endif
 #endif
 
-#endif  /* __BOARDS_ARM_TEENSY_3X_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_KINETIS_TEENSY_3X_INCLUDE_BOARD_H */

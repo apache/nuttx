@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_gs2200m.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_gs2200m.c
  *
  *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -109,6 +109,7 @@ static void gs2200m_irq_enable(void)
   if (1 == _enable_count)
     {
       /* NOTE: This would happen if we received an event */
+
       return;
     }
 

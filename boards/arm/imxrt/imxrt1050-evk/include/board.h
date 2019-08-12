@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/arm/imxrt/imxrt1050/include/board.h
+/****************************************************************************
+ * boards/arm/imxrt/imxrt1050-evk/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,22 +33,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_IMXRT_IMXRT1050_EVK_INCLUDE_BOARD_H
 #define __BOARDS_ARM_IMXRT_IMXRT1050_EVK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* Set VDD_SOC to 1.25V */
 
@@ -108,10 +108,10 @@
 #define BOARD_CPU_FREQUENCY \
   (BOARD_XTAL_FREQUENCY * (IMXRT_ARM_PLL_DIV_SELECT / 2)) / IMXRT_ARM_PODF_DIVIDER
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
-/* There are four LED status indicators located on the EVK Board.  The functions of
- * these LEDs include:
+/* There are four LED status indicators located on the EVK Board.
+ *  The functions of these LEDs include:
  *
  *   - Main Power Supply(D3)
  *     Green: DC 5V main supply is normal.
@@ -140,7 +140,8 @@
  *
  *   -------------------- ----------------------------- ------
  *   SYMBOL                   Meaning                   LED
- *   -------------------- ----------------------------- ------ */
+ *   -------------------- ----------------------------- ------
+ */
 
 #define LED_STARTED       0  /* NuttX has been started  OFF    */
 #define LED_HEAPALLOCATE  0  /* Heap has been allocated OFF    */
@@ -157,7 +158,7 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 /* The IMXRT board has one external user button
  *
@@ -168,18 +169,19 @@
 
 #define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
 
-/* SDIO *****************************************************************************/
+/* SDIO *********************************************************************/
 
-/* Pin drive characteristics - drive strength in particular may need tuning for
- * specific boards, but has been checked by scope on the EVKB to make sure shapes
- * are square with minimal ringing.
+/* Pin drive characteristics - drive strength in particular may need tuning
+ * for specific boards, but has been checked by scope on the EVKB to make
+ * sure shapes are square with minimal ringing.
  */
 
 #define USDHC1_DATAX_IOMUX  (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
                              IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
 #define USDHC1_CMD_IOMUX    (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
                              IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
-#define USDHC1_CLK_IOMUX    (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | IOMUX_SPEED_MAX)
+#define USDHC1_CLK_IOMUX    (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
+                             IOMUX_SPEED_MAX)
 #define USDHC1_CD_IOMUX     (0)
 
 #define PIN_USDHC1_D0       (GPIO_USDHC1_DATA0 | USDHC1_DATAX_IOMUX)
@@ -206,7 +208,8 @@
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
-/* ETH Disambiguation ***************************************************************/
+/* ETH Disambiguation *******************************************************/
+
 #define GPIO_ENET_MDIO                  GPIO_ENET_MDIO_3
 #define GPIO_ENET_MDC                   GPIO_ENET_MDC_3
 #define GPIO_ENET_RX_EN                 GPIO_ENET_RX_EN_1
@@ -214,7 +217,7 @@
 #define GPIO_ENET_TX_CLK                GPIO_ENET_TX_CLK_1
 #define GPIO_ENET_TX_EN                 GPIO_ENET_TX_EN_1
 
-/* PIO Disambiguation ***************************************************************/
+/* PIO Disambiguation *******************************************************/
 
 /* LPUARTs
  *
@@ -261,13 +264,13 @@
 #define GPIO_LPSPI3_MISO  GPIO_LPSPI3_SDI_2 /* GPIO_AD_B0_02 */
 #define GPIO_LPSPI3_MOSI  GPIO_LPSPI3_SDO_2 /* GPIO_AD_B0_01 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -280,9 +283,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

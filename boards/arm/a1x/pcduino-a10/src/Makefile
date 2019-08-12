@@ -1,5 +1,5 @@
 ############################################################################
-# boards/pcduino-a10/src/Makefile
+# boards/arm/a1x/pcduino-a10/src/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

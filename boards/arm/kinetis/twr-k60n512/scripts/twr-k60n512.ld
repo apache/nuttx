@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/twr-k60n512/scripts/twr-k60n512.ld
+ * boards/arm/kinetis/twr-k60n512/scripts/twr-k60n512.ld
  *
  *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ntosd-dm320/src/dm320_network.c
+ * boards/arm/dm320/ntosd-dm320/src/dm320_network.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

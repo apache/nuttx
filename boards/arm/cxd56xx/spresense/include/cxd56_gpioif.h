@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_gpioif.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_gpioif.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_GPIOIF_H
-#define __BOARD_COMMON_INCLUDE_CXD56_GPIOIF_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GPIOIF_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GPIOIF_H
 
 /****************************************************************************
  * Included Files
@@ -71,8 +71,7 @@ extern "C"
 #define PIN_PULLDOWN            (2) /**< Internal Weak Pull Down */
 #define PIN_BUSKEEPER           (3) /**< Internal Bus-Keeper */
 
-/*
- * GPIO Interrupt Setting
+/* GPIO Interrupt Setting
  * GPIO interrupt level and edge trigger types
  */
 
@@ -88,8 +87,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/*
- * GPIO Configure
+/* GPIO Configure
  *
  * [in] pin: Pin number
  * [in] mode: Function mode 0=GPIO
@@ -107,8 +105,7 @@ extern "C"
 int board_gpio_config(uint32_t pin, int mode, bool input, bool drive,
                       int pull);
 
-/*
- * GPIO Status
+/* GPIO Status
  *
  * [in] pin: Pin number
  * [out] input: Input Enable true=enable, false=disable
@@ -126,8 +123,7 @@ int board_gpio_config(uint32_t pin, int mode, bool input, bool drive,
 int board_gpio_status(uint32_t pin, bool *input, bool *output, bool *drive,
                       int *pull);
 
-/*
- * GPIO Write
+/* GPIO Write
  *
  * [in] pin: Pin number
  * [in] value: Write Value 0<high, 0=low, 0>hiz
@@ -135,8 +131,7 @@ int board_gpio_status(uint32_t pin, bool *input, bool *output, bool *drive,
 
 void board_gpio_write(uint32_t pin, int value);
 
-/*
- * GPIO Read
+/* GPIO Read
  *
  * param: [in] pin: Pin number
  *
@@ -145,8 +140,7 @@ void board_gpio_write(uint32_t pin, int value);
 
 int board_gpio_read(uint32_t pin);
 
-/*
- * GPIO Interrupt Configure
+/* GPIO Interrupt Configure
  *
  * [in] pin: Pin number
  * [in] mode: Interrupt polarity
@@ -163,8 +157,7 @@ int board_gpio_read(uint32_t pin);
 
 int board_gpio_intconfig(uint32_t pin, int mode, bool filter, xcpt_t isr);
 
-/*
- * GPIO Interrupt Configure
+/* GPIO Interrupt Configure
  *
  * [in] pin: Pin number
  * [out] mode: Interrupt polarity
@@ -182,8 +175,7 @@ int board_gpio_intconfig(uint32_t pin, int mode, bool filter, xcpt_t isr);
 int board_gpio_intstatus(uint32_t pin, int *mode,
                          bool *filter, bool *enabled);
 
-/*
- * GPIO Interrupt Enable/Disable
+/* GPIO Interrupt Enable/Disable
  *
  * [in] pin: Pin number
  * [in] enable: Interrupt true=enable, false=disable
@@ -199,4 +191,4 @@ int board_gpio_int(uint32_t pin, bool enable);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_GPIOIF_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GPIOIF_H */

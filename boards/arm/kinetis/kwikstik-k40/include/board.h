@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/kwikstik-k40/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/kwikstik-k40/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -32,41 +32,42 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_KWIKSTIK-K40_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_KWIKSTIK-K40_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Kwikstik-K40 has a 4MHz crystal on board */
 
-#undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_EXTAL_FREQ     4000000        /* 4MHz crystal frequency (REFCLK) */
-#define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
+#undef  BOARD_EXTCLOCK                  /* Crystal */
+#define BOARD_EXTAL_FREQ     4000000    /* 4MHz crystal frequency (REFCLK) */
+#define BOARD_XTAL32_FREQ    32768      /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
- * produce a 2MHz reference clock to the PLL.
+/* PLL Configuration.  NOTE: Only even frequency crystals are supported that
+ * will produce a 2MHz reference clock to the PLL.
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 4MHz/2 = 2MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
-#define BOARD_PRDIV          2              /* PLL External Reference Divider */
-#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          2   /* PLL External Reference Divider */
+#define BOARD_VDIV           48  /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
@@ -84,14 +85,15 @@
 #define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ * Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.
+ * The SDHC module is always configure configured so that the core clock is
+ * the base clock.
  */
 
 /* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
@@ -123,7 +125,8 @@
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
 
 #define LED_STARTED       0
@@ -135,15 +138,18 @@
 #define LED_ASSERTION     6
 #define LED_PANIC         7
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The KwikStik-K40 board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* If there are alternative configurations for various pins in the
- * kinetis_k40pinmux.h header file, those alternative pins will be labeled with a
- * suffix like _1, _2, etc.  The logic in this file must select the correct pin
- * configuration for the board by defining a pin configuration (with no suffix) that
- * maps to the correct alternative.
+ * kinetis_k40pinmux.h header file, those alternative pins will be labeled
+ * with a suffix like _1, _2, etc.
+ * The logic in this file must select the correct pin configuration for the
+ * board by defining a pin configuration (with no suffix) that maps to the
+ * correct alternative.
  */
 
 /* On-Board Connections
@@ -247,4 +253,4 @@
 #define PIN_I2C1_SCL    PIN_I2C1_SCL_2
 #define PIN_I2C1_SDA    PIN_I2C1_SDA_2
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_KINETIS_KWIKSTIK-K40_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/twr-k64f120m/src/k64_boot.c
+/****************************************************************************
+ * boards/arm/kinetis/twr-k64f120m/src/k64_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,32 +47,33 @@
 #include "up_arch.h"
 #include "twrk64.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_boardinitialize
  *
  * Description:
- *   All Kinetis architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All Kinetis architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * kinetis_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function kinetis_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
@@ -82,10 +83,10 @@ void kinetis_boardinitialize(void)
     }
 #endif
 
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function kinetis_usbinitialize() has been brought
-    * into the build.
-    */
+  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+   * disabled, and 3) the weak function kinetis_usbinitialize() has been
+   * brought into the build.
+   */
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USB)
   if (kinetis_usbinitialize)

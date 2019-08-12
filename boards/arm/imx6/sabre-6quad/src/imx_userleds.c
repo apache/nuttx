@@ -82,5 +82,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  imx_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0));
+  imx_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0);
 }

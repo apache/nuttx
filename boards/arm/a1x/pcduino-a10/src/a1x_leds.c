@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pcduino-a10/src/a1x_leds.c
+ * boards/arm/a1x/pcduino-a10/src/a1x_leds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,8 +66,8 @@
 
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *   SYMBOL            Meaning                      LED state
  *                                              LED1 LED3 LED4
@@ -82,9 +82,9 @@
  *   LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
  *   LED_IDLE          MCU is is sleep mode         Not used
  *
- * After booting, LED1 and 3 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+ * After booting, LED1 and 3 are not longer used by the system and can be used
+ * for other purposes by the application (Of course, all LEDs are available to
+ * the application if CONFIG_ARCH_LEDS is not defined.
  */
 
 /****************************************************************************
@@ -201,20 +201,21 @@ void board_autoled_off(int led)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
  *
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
- *   until the completion of boot.  The it will continue to control LED2; LED1 is
- *   avaiable for application use.
- *
- *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board
+ *   LEDs up until the completion of boot.
+ *   The it will continue to control LED2; LED1 is avaiable for application
  *   use.
  *
- ************************************************************************************/
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for
+ *   application use.
+ *
+ ****************************************************************************/
 
 void board_userled_initialize(void)
 {

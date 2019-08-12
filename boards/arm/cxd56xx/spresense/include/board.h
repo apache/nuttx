@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/board.h
+ * boards/arm/cxd56xx/spresense/include/board.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_SPRESENSE_INCLUDE_BOARD_H
-#define _CONFIGS_SPRESENSE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -286,4 +286,4 @@ void cxd56_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* _CONFIGS_SPRESENSE_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H */

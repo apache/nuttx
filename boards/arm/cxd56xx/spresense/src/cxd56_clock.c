@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_clock.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_clock.c
  *
  *   Copyright 2019 Sony Semiconductor Solutions Corporation
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/twr-k64f120m/src/k64_appinit.c
+ * boards/arm/kinetis/twr-k64f120m/src/k64_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

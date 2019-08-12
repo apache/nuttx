@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k28f/src/k28_boot.c
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k28f/src/k28_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,25 +46,26 @@
 
 #include "freedom-k28f.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_boardinitialize
  *
  * Description:
- *   All Kinetis architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All Kinetis architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_boardinitialize(void)
 {
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * k28_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function k28_spidev_initialize() has been brought into the link.
    */
 
   if (k28_spidev_initialize)

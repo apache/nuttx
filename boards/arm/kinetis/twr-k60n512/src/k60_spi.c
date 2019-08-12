@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/twr-k60n512/src/k60_spi.c
+/****************************************************************************
+ * boards/arm/kinetis/twr-k60n512/src/k60_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,19 +52,19 @@
 #include "twr-k60n512.h"
 
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || \
-	defined(CONFIG_KINETIS_SPI2)
+            defined(CONFIG_KINETIS_SPI2)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the TWR-K60N512 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function kinetis_spidev_initialize(void)
 {
@@ -75,31 +75,34 @@ void weak_function kinetis_spidev_initialize(void)
  * Name:  kinetis_spi0/1/2select and kinetis_spi0/1/2status
  *
  * Description:
- *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including kinetis_spibus_initialize())
- *   are provided by common Kinetis logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, kinetis_spi0/1/2select and kinetis_spi0/1/2status
+ *   must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including kinetis_spibus_initialize()) are provided
+ *   by common Kinetis logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide kinetis_spi0/1/2select() and kinetis_spi0/1/2status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to kinetis_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by kinetis_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip
+ *      select pins.
+ *   2. Provide kinetis_spi0/1/2select() and kinetis_spi0/1/2status()
+ *      functions in your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using GPIOs in the way your board is configured.
+ *   3. Add a calls to kinetis_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by kinetis_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
-void kinetis_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void kinetis_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
@@ -111,9 +114,11 @@ uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_KINETIS_SPI1
-void kinetis_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void kinetis_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 
@@ -125,9 +130,11 @@ uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_KINETIS_SPI2
-void kinetis_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void kinetis_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 # warning "Missing logic"
 }
 

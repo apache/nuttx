@@ -50,7 +50,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
+
 /* Clock Sources
  *   - 1-28 MHz High Frequency RC Oscillator (HFRCO)
  *   - 4-32 MHz High Frequency Crystal Oscillator (HFXO)
@@ -169,6 +171,7 @@
  */
 
 /* LEDs *********************************************************************/
+
 /* The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
  * These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
  * connected to pins PE2 and PE3 in an active high configuration:
@@ -204,7 +207,9 @@
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                         LED0     LED1
- *      ----------------- ---   -----------------------  -------- --------   */
+ *      ----------------- ---   -----------------------  -------- --------
+ */
+
 #define LED_STARTED       0  /* NuttX has been started     OFF      OFF      */
 #define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      */
 #define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      */
@@ -216,6 +221,7 @@
 #undef  LED_IDLE             /* MCU is is sleep mode         Not used        */
 
 /* Buttons ******************************************************************/
+
 /* The EFM32 Giant Gecko Start Kit has two buttons marked PB0 and PB1. They
  * are connected to the EFM32, and are debounced by RC filters with a time
  * constant of 1ms. The buttons are connected to pins PB9 and PB10:
@@ -238,6 +244,7 @@
 #define BUTTON_PB1_BIT    (1 << BUTTON_PB1)
 
 /* Pin routing **************************************************************/
+
 /* UART0:
  *
  *   The kit contains a board controller that is responsible for performing

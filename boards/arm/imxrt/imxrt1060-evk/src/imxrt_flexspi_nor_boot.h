@@ -117,11 +117,11 @@ struct ivt_s
 
   uint32_t boot_data;
 
-  /* Absolute address of the IVT.*/
+  /* Absolute address of the IVT. */
 
   uint32_t self;
 
-  /* Absolute address of the image CSF.*/
+  /* Absolute address of the image CSF. */
 
   uint32_t csf;
 

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/kwikstik-k40/scripts/Make.defs
+# boards/arm/kinetis/kwikstik-k40/scripts/Make.defs
 #
 #   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/kwikstik-k40/src/k40_leds.c
+ * boards/arm/kinetis/kwikstik-k40/src/k40_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/beaglebone-black/src/am335x_buttons.c
+ * boards/arm/am335x/beaglebone-black/src/am335x_buttons.c
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>

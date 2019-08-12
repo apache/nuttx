@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/teensy-3.x/src/k20_appinit.c
+ * boards/arm/kinetis/teensy-3.x/src/k20_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/am335x/beaglebone-black/include/board.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
@@ -31,41 +31,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_AM335X_BEAGLEBONE_BLACK_INCLUDE_BOARD_H
 #define __BOARDS_ARM_AM335X_BEAGLEBONE_BLACK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/am335x_pinmux.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* Since NuttX is booted from a loader on the AM335X, clocking should already be setup
- * when NuttX starts.
+/* Clocking *****************************************************************/
+
+/* Since NuttX is booted from a loader on the AM335X, clocking should already
+ * be setup when NuttX starts.
  */
 
-/* LED definitions ******************************************************************/
-/* The beaglebone black has four user LEDs; all four can be controlled from software.
- * All are tied to ground and, hence, illuminated by driving the output pins to a high
- * value:
+/* LED definitions **********************************************************/
+
+/* The beaglebone black has four user LEDs; all four can be controlled from
+ * software.
+ * All are tied to ground and, hence, illuminated by driving the output pins
+ * to a high value:
  *
- *  1. LED0 GPMC_A5  GPMC_A5/GMII2_TXD0/RGMII2_TD0/RMII2_TXD0/GPMC_A21/PR1_MII1_RXD3/
- *                   eQEP1B_IN/GPIO1_21
- *  2. LED1 GPMC_A6  GPMC_A6/GMII2_TXCLK/RGMII2_TCLK/MMC2_DAT4/GPMC_A22/PR1_MII1_RXD2/
- *                   eQEP1_INDEX/GPIO1_22
- *  3. LED2 GPMC_A7  GPMC_A7/GMII2_RXCLK/RGMII2_RCLK/MMC2_DAT5/GPMC_A23/PR1_MII1_RXD1/
- *                   eQEP1_STROBE/GPIO1_23
- *  4. LED3 GPMC_A8  GPMC_A8/GMII2_RXD3/RGMII2_RD3/MMC2_DAT6/GPMC_A24/PR1_MII1_RXD0/
- *                   MCASP0_ACLKX/GPIO1_24
+ *  1. LED0 GPMC_A5  GPMC_A5/GMII2_TXD0/RGMII2_TD0/RMII2_TXD0/GPMC_A21/
+ *                   PR1_MII1_RXD3/eQEP1B_IN/GPIO1_21
+ *  2. LED1 GPMC_A6  GPMC_A6/GMII2_TXCLK/RGMII2_TCLK/MMC2_DAT4/GPMC_A22/
+ *                   PR1_MII1_RXD2/eQEP1_INDEX/GPIO1_22
+ *  3. LED2 GPMC_A7  GPMC_A7/GMII2_RXCLK/RGMII2_RCLK/MMC2_DAT5/GPMC_A23/
+ *                   PR1_MII1_RXD1/eQEP1_STROBE/GPIO1_23
+ *  4. LED3 GPMC_A8  GPMC_A8/GMII2_RXD3/RGMII2_RD3/MMC2_DAT6/GPMC_A24/
+ *                   PR1_MII1_RXD0/MCASP0_ACLKX/GPIO1_24
  */
 
 /* LED index values for use with board_userled() */
@@ -85,12 +88,13 @@
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/am335x_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/am335x_leds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *      SYMBOL            Value Meaning                       LED state
  *                                                          LED0 LED1 LED2
- *      ----------------- ----- -----------------------  ---- ---- ------------ */
+ *      ----------------- ----- -----------------------  ---- ---- ---------*
+ */
 
 #define LED_STARTED         0   /* NuttX has been started   ON   OFF  OFF */
 #define LED_HEAPALLOCATE    1   /* Heap has been allocated  OFF  ON   OFF */
@@ -103,34 +107,35 @@
 
 /*      LED_IDLE           ---  /* MCU is is sleep mode         Not used
  *
- * After booting, LED0 and 1 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+ * After booting, LED0 and 1 are not longer used by the system and can be
+ * used for other purposes by the application (Of course, all LEDs are
+ * available to the application if CONFIG_ARCH_LEDS is not defined.
  */
 
-/* NAND *****************************************************************************/
+/* NAND *********************************************************************/
 
-/* GPIO pin disambiguation **********************************************************/
-/* UARTs ****************************************************************************/
+/* GPIO pin disambiguation **************************************************/
+
+/* UARTs ********************************************************************/
+
 /* One UART connections is available:
  *
  * 1. UART0 is available on FT2232H USB to Serial Adapter.
  *
- *    FT2232H BDBUS1 Pin       UART0-RXD  UART0_RXD/SPI1_CS0/DCAN0_TX/I2C2_SDA/
-                                          eCAP2_IN_PWM2_OUT/PR1_PRU1_PRU_R30_14/
- *                                        PR1_PRU1_PRU_R31_14/GPIO1_10
- *    FT2232H BDBUS0 Pin       UART0-TXD  UART0_TXD/SPI1_CS1/DCAN0_RX/I2C2_SCL/
- *                                        eCAP1_IN_PWM1_OUT/PR1_PRU1_PRU_R30_15/
- *                                        PR1_PRU1_PRU_R31_15/GPIO1_11
+ *    FT2232H BDBUS1 Pin     UART0-RXD  UART0_RXD/SPI1_CS0/DCAN0_TX/I2C2_SDA/
+ *                                      eCAP2_IN_PWM2_OUT/PR1_PRU1_PRU_R30_14/
+ *                                      PR1_PRU1_PRU_R31_14/GPIO1_10
+ *    FT2232H BDBUS0 Pin     UART0-TXD  UART0_TXD/SPI1_CS1/DCAN0_RX/I2C2_SCL/
+ *                                      eCAP1_IN_PWM1_OUT/PR1_PRU1_PRU_R30_15/
+ *                                      PR1_PRU1_PRU_R31_15/GPIO1_11
  */
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Language Macros
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __ASSEMBLY__
-	.macro	config_sdram
-	.endm
+  .macro  config_sdram
+  .endm
 #endif /* __ASSEMBLY__ */
-
 #endif  /* __BOARDS_ARM_AM335X_BEAGLEBONE_BLACK_INCLUDE_BOARD_H */

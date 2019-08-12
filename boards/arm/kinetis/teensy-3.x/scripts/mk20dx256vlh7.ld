@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/teensy-3.x/scripts/mk20dx256vlh7.ld
+ * boards/arm/kinetis/teensy-3.x/scripts/mk20dx256vlh7.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

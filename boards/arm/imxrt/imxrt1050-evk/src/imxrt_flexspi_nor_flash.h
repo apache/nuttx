@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arm/imxrt/imxrt1050-evk/src/imxrt_flexspi_nor_flash.h
+ * boards/arm/imxrt/imxrt1050-evk/src/imxrt_flexspi_nor_flash.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
@@ -138,8 +138,6 @@
      FLEXSPI_LUT_OPCODE0(cmd0) | FLEXSPI_LUT_OPERAND1(op1) | \
      FLEXSPI_LUT_NUM_PADS1(pad1) | FLEXSPI_LUT_OPCODE1(cmd1))
 
-/*  */
-
 #define NOR_CMD_INDEX_READ          CMD_INDEX_READ
 #define NOR_CMD_INDEX_READSTATUS    CMD_INDEX_READSTATUS
 #define NOR_CMD_INDEX_WRITEENABLE   CMD_INDEX_WRITEENABLE
@@ -216,7 +214,7 @@ enum flexspi_serial_clkfreq_e
   FLEXSPI_SERIAL_CLKFREQ_200MHz = 9,
 };
 
-/* FlexSPI clock configuration type*/
+/* FlexSPI clock configuration type */
 
 enum flexspi_serial_clockmode_e
 {
@@ -228,7 +226,7 @@ enum flexspi_serial_clockmode_e
 
 enum flash_read_sample_clk_e
 {
-  FLASH_READ_SAMPLE_CLK_LOOPBACK_INTERNELLY= 0,
+  FLASH_READ_SAMPLE_CLK_LOOPBACK_INTERNELLY = 0,
   FLASH_READ_SAMPLE_CLK_LOOPBACK_FROM_DQSPAD = 1,
   FLASH_READ_SAMPLE_CLK_LOOPBACK_FROM_SCKPAD = 2,
   FLASH_READ_SAMPLE_CLK_EXTERNALINPUT_FROM_DQSPAD = 3,
@@ -301,7 +299,8 @@ struct flexspi_mem_config_s
   uint8_t cs_setup_time;
   uint8_t column_address_width;       /* [0x00f-0x00f] Column Address with, for
                                        * HyperBus protocol, it is fixed to 3, For
-                                       * Serial NAND, need to refer to datasheet */
+                                       * Serial NAND, need to refer to datasheet
+                                       */
   uint8_t device_mode_cfg_enable;
   uint8_t device_mode_type;
   uint16_t wait_time_cfg_commands;

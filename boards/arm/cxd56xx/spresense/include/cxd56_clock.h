@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_clock.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_clock.h
  *
  *   Copyright 2019 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_CLOCK_H
-#define __BOARD_COMMON_INCLUDE_CXD56_CLOCK_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CLOCK_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CLOCK_H
 
 /****************************************************************************
  * Included Files
@@ -83,4 +83,4 @@ void board_clock_enable(void);
 }
 #endif
 
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_CLOCK_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_CLOCK_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_leds.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_leds.c
  *
  *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -116,10 +116,10 @@ static inline void led_setbits(unsigned int setbits)
 
 void board_autoled_initialize(void)
 {
-   cxd56_gpio_config(GPIO_LED1,false);
-   cxd56_gpio_config(GPIO_LED2,false);
-   cxd56_gpio_config(GPIO_LED3,false);
-   cxd56_gpio_config(GPIO_LED4,false);
+  cxd56_gpio_config(GPIO_LED1, false);
+  cxd56_gpio_config(GPIO_LED2, false);
+  cxd56_gpio_config(GPIO_LED3, false);
+  cxd56_gpio_config(GPIO_LED4, false);
 }
 
 /****************************************************************************
@@ -128,7 +128,8 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT | BOARD_LED4_BIT);
+  led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT |
+              BOARD_LED3_BIT | BOARD_LED4_BIT);
   led_setbits(led);
 }
 

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/pcduino-a10/src/pcduino-a10.h
+/****************************************************************************
+ * boards/arm/a1x/pcduino-a10/src/pcduino-a10.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PCDUINO_A10_PCDUINO_A10_H
-#define __BOARDS_ARM_PCDUINO_A10_PCDUINO_A10_H
+#ifndef __BOARDS_ARM_A1X_PCDUINO_A10_PCDUINO_A10_H
+#define __BOARDS_ARM_A1X_PCDUINO_A10_PCDUINO_A10_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,21 +50,24 @@
 
 #include "a1x_pio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
 
-/* LEDs *****************************************************************************/
-/* The pcDuino v1 has four green LEDs; three can be controlled from software. Two
- * are tied to ground and, hence, illuminated by driving the output pins to a high
- * value:
+/* Configuration ************************************************************/
+
+/* LEDs *********************************************************************/
+
+/* The pcDuino v1 has four green LEDs; three can be controlled from software.
+ * Two are tied to ground and, hence, illuminated by driving the output pins
+ * to a high value:
  *
  *  1. LED1 SPI0_CLK  SPI0_CLK/UART5_RX/EINT23/PI11
  *  2. LED5 IPSOUT    From the PMU (not controllable by software)
  */
 
-#define PIO_LED1 (PIO_OUTPUT | PIO_PULL_NONE | PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+#define PIO_LED1 (PIO_OUTPUT | PIO_PULL_NONE | \
+                  PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
                   PIO_OUTPUT_CLEAR | PIO_PORT_PIOI | PIO_PIN11)
 
 /* And two are pull high and, hence, illuminated by grounding the output:
@@ -73,16 +76,18 @@
  *   4. LED4 TX_LED    LCD1_D15/ATAD11/KP_IN5/SMC_VPPPP/EINT15/CSI1_D15/PH15
  */
 
-#define PIO_LED3 (PIO_OUTPUT | PIO_PULL_NONE | PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+#define PIO_LED3 (PIO_OUTPUT | PIO_PULL_NONE | \
+                  PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
                   PIO_OUTPUT_SET | PIO_PORT_PIOH | PIO_PIN16)
 
-#define PIO_LED4 (PIO_OUTPUT | PIO_PULL_NONE | PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
+#define PIO_LED4 (PIO_OUTPUT | PIO_PULL_NONE | \
+                  PIO_DRIVE_MEDLOW | PIO_INT_NONE | \
                   PIO_OUTPUT_SET | PIO_PORT_PIOH | PIO_PIN15)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *   SYMBOL            Meaning                      LED state
  *                                              LED1 LED3 LED4
@@ -97,14 +102,15 @@
  *   LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
  *   LED_IDLE          MCU is is sleep mode         Not used
  *
- * After booting, LED1 and 3 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+ * After booting, LED1 and 3 are not longer used by the system and can be used
+ * for other purposes by the application (Of course, all LEDs are available to
+ * the application if CONFIG_ARCH_LEDS is not defined.
  */
 
-/* Buttons **************************************************************************/
-/* There are a total of five switches on-board.  All pulled high and, hence, will be
- * sensed as low when closed.
+/* Buttons ******************************************************************/
+
+/* There are a total of five switches on-board.  All pulled high and, hence,
+ * will be sensed as low when closed.
  *
  *   SW1 Reset     (not available to software)
  *   SW2 UBOOT     UBOOT_SEL (?)
@@ -129,21 +135,21 @@
                         PIO_INT_NONE | IO_PORT_PIOH | PIO_PIN19)
 #endif
 
-/* SPI Chip Selects *****************************************************************/
+/* SPI Chip Selects *********************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: a1x_led_initialize
@@ -156,4 +162,4 @@
 void a1x_led_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_PCDUINO_A10_PCDUINO_A10_H */
+#endif /* __BOARDS_ARM_A1X_PCDUINO_A10_PCDUINO_A10_H */

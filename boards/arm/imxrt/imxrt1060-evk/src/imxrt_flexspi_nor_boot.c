@@ -61,7 +61,7 @@ const struct boot_data_s g_boot_data =
 {
   FLASH_BASE,                         /* boot start location */
   (FLASH_END - FLASH_BASE),           /* size */
-  PLUGIN_FLAG,                        /* Plugin flag*/
-  0xFFFFFFFF                          /* empty - extra data word */
+  PLUGIN_FLAG,                        /* Plugin flag */
+  0xffffffff                          /* empty - extra data word */
 };
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_ostest.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_ostest.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

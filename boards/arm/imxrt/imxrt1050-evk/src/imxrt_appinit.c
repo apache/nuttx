@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arm/imxrt/imxrt1050-evk/src/imxrt_appinit.c
+ * boards/arm/imxrt/imxrt1050-evk/src/imxrt_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/spresense.h
+ * boards/arm/cxd56xx/spresense/src/spresense.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SPRESENSE_SRC_SPRESENSE_H
-#define __BOARDS_ARM_SPRESENSE_SRC_SPRESENSE_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_SRC_SPRESENSE_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_SRC_SPRESENSE_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@
 int cxd56_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SPRESENSE_SRC_SPRESENSE_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_SRC_SPRESENSE_H */

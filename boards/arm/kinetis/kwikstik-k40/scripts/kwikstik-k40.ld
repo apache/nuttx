@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/kwikstik-k40/scripts/kwikstik-k40.ld
+ * boards/arm/kinetis/kwikstik-k40/scripts/kwikstik-k40.ld
  *
  *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

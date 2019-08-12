@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_composite.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_composite.c
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -209,6 +209,7 @@ FAR void *board_composite_connect(int port, int configid)
       int strbase  = COMPOSITE_NSTRIDS;
 
       /* Configure the mass storage device device */
+
       /* Ask the usbmsc driver to fill in the constants we didn't
        * know here.
        */
@@ -216,6 +217,7 @@ FAR void *board_composite_connect(int port, int configid)
       usbmsc_get_composite_devdesc(&dev[0]);
 
       /* Overwrite and correct some values... */
+
       /* The callback functions for the USBMSC class */
 
       dev[0].classobject  = board_mscclassobject;
@@ -249,6 +251,7 @@ FAR void *board_composite_connect(int port, int configid)
       cdcacm_get_composite_devdesc(&dev[1]);
 
       /* Overwrite and correct some values... */
+
       /* The callback functions for the CDC/ACM class */
 
       dev[1].classobject  = cdcacm_classobject;

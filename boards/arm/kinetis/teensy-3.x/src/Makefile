@@ -1,5 +1,5 @@
 ############################################################################
-# boards/teensy-3.x/src/Makefile
+# boards/arm/kinetis/teensy-3.x/src/Makefile
 #
 #   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

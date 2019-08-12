@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/beaglebone-black/src/am335x_lcd.c
+ * boards/arm/am335x/beaglebone-black/src/am335x_lcd.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -140,13 +140,14 @@ int up_fbinitialize(int display)
 #ifdef HAVE_TDA19988
   TDA19988_HANDLE handle;
 
-  /* Initialize the TDA19988 GPIO interrupt input */
-  /* Initialize the TDA19988 lower half state instance */
-  /* Initialize the TDA19988 HDMI controller driver */
-  /* Allocate a buffer to hold the EDID data */
-  /* Read raw EDID data from the connected monitor */
-  /* Select a compatible video mode from the EDID data */
-  /* Free the allocated EDID buffer */
+  /* Initialize the TDA19988 GPIO interrupt input
+   * Initialize the TDA19988 lower half state instance
+   * Initialize the TDA19988 HDMI controller driver
+   * Allocate a buffer to hold the EDID data
+   * Read raw EDID data from the connected monitor
+   * Select a compatible video mode from the EDID data
+   * Free the allocated EDID buffer
+   */
 
 #warning Missing logic
 #else
@@ -163,7 +164,7 @@ int up_fbinitialize(int display)
 #endif
   /* Convert the selected video mode to a AM335X LCD panel configuration */
 
-   am335x_lcd_videomode(videomode, &panel);
+  am335x_lcd_videomode(videomode, &panel);
 
   /* Initialize the LCD controller using this panel configuration */
 

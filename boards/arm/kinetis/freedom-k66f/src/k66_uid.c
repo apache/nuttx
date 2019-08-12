@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k66/src/kinetis_uid.c
+ * boards/arm/kinetis/freedom-k66/src/kinetis_uid.c
  *
  *   Copyright (C) 2016 Neil Hancock. All rights reserved.
  *

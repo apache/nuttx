@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_pwm.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_pwm.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_PWM_H
-#define __BOARD_COMMON_INCLUDE_CXD56_PWM_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_PWM_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_PWM_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_pwm_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_PWM_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_PWM_H */

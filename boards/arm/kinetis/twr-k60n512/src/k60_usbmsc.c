@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/twr-k60n512/src/k60_usbmsc.c
+ * boards/arm/kinetis/twr-k60n512/src/k60_usbmsc.c
  *
  *   Copyright (C) 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,7 +67,8 @@
 #  undef KINETIS_MMCSDSLOTNO
 #  define KINETIS_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new Kinetis boards here */
+  /* Add configuration for new Kinetis boards here */
+
 #  error "Unrecognized Kinetis board"
 #endif
 
@@ -87,7 +88,8 @@
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see k60_appinit.c).
+   * already have been initialized in board_app_initialize()
+   * (see k60_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 
@@ -95,5 +97,5 @@ int board_usbmsc_initialize(int port)
 #  warning "Missing logic"
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
-   return OK;
+  return OK;
 }

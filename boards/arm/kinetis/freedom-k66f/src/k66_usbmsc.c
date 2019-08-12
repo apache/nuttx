@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k66f/src/k66_usbmsc.c
+ * boards/arm/kinetis/freedom-k66f/src/k66_usbmsc.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -68,7 +68,8 @@
 #  undef k66_MMCSDSLOTNO
 #  define k66_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new Kinetis boards here */
+  /* Add configuration for new Kinetis boards here */
+
 #  error "Unrecognized Kinetis board"
 #endif
 
@@ -88,7 +89,8 @@
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see k66_appinit.c).
+   * already have been initialized in board_app_initialize()
+   * (see k66_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 
@@ -96,5 +98,5 @@ int board_usbmsc_initialize(int port)
 #  warning "Missing logic"
 #endif /* CONFIG_NSH_BUILTIN_APPS */
 
-   return OK;
+  return OK;
 }

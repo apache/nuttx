@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/c5471/c5471evm/src/c5471_leds.c
+ * boards/arm/c5471/c5471evm/src/c5471_leds.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

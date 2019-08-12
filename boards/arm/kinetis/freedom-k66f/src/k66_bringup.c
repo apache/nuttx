@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/freedom-k66f/src/k66_bringup.c
+ * boards/arm/kinetis/freedom-k66f/src/k66_bringup.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -110,7 +110,7 @@ int k66_bringup(void)
 
       if (ret < 0)
         {
-          syslog(LOG_ERR,"ERROR: Failed to mount %s: %d\n",
+          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
                  CONFIG_FRDMK66F_SDHC_MOUNT_MOUNTPOINT, errno);
         }
     }

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k66f/include/board.h
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k66f/include/board.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FREEDOM_K66F_INCLUDE_BOARD_H
-#define __BOARDS_ARM_FREEDOM_K66F_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_FREEDOM_K66F_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_FREEDOM_K66F_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -48,16 +48,18 @@
 
 #include <arch/chip/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* The Freedom K66F uses a 12Mhz external Oscillator.  The Kinetis MCU startup from an
- * internal digitally-controlled oscillator (DCO). Nuttx will enable the main external
- * oscillator (EXTAL0/XTAL0).   The external oscillator/resonator can range from
- * 32.768 KHz up to 50 MHz. The default external source for the MCG oscillator inputs
- * is 12 MHz oscillator
+/* Clocking *****************************************************************/
+
+/* The Freedom K66F uses a 12Mhz external Oscillator.
+ * The Kinetis MCU startup from an internal digitally-controlled oscillator
+ * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
+ * The default external source for the MCG oscillator inputs is 12 MHz
+ * oscillator
  *
  * X501 a High-frequency, low-power Xtal
  */
@@ -66,21 +68,23 @@
 #define BOARD_EXTAL_FREQ     12000000       /* 12MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  Either the external clock or crystal frequency is used to
- * select the PRDIV value. Only reference clock frequencies are supported that will
- * produce a KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
+/* PLL Configuration.  Either the external clock or crystal frequency is used
+ * to select the PRDIV value.
+ * Only reference clock frequencies are supported that will produce a
+ * KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
  * clock to the PLL.
  *
  *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 Mhz  / 1  = 12 MHz
  *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 Mhz  * 30 = 360 MHz
- *   MCG Frequency:         PLLOUT = 180 Mhz = 360 MHz / KINETIS_MCG_PLL_INTERNAL_DIVBY
+ *   MCG Frequency:         PLLOUT = 180 Mhz = 360 MHz /
+ *                                             KINETIS_MCG_PLL_INTERNAL_DIVBY
  *
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
  * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
-#define BOARD_PRDIV          1             /* PLL External Reference Divider */
-#define BOARD_VDIV           30            /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV          1    /* PLL External Reference Divider */
+#define BOARD_VDIV           30   /* PLL VCO Divider (frequency multiplier) */
 
 /* Define additional MCG_C2 Setting */
 
@@ -93,10 +97,10 @@
 
 /* SIM CLKDIV1 dividers */
 
-#define BOARD_OUTDIV1        1              /* Core        = MCG,    180   MHz */
-#define BOARD_OUTDIV2        3              /* Bus         = MCG / 3, 60   MHz */
-#define BOARD_OUTDIV3        3              /* FlexBus     = MCG / 3, 60   MHz */
-#define BOARD_OUTDIV4        7              /* Flash clock = MCG / 7, 25.7 MHz */
+#define BOARD_OUTDIV1        1            /* Core        = MCG,    180   MHz */
+#define BOARD_OUTDIV2        3            /* Bus         = MCG / 3, 60   MHz */
+#define BOARD_OUTDIV3        3            /* FlexBus     = MCG / 3, 60   MHz */
+#define BOARD_OUTDIV4        7            /* Flash clock = MCG / 7, 25.7 MHz */
 
 #define BOARD_CORECLK_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
@@ -143,36 +147,46 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ * Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.  Possible values for prescaler and divisor are:
+ * The SDHC module is always configure configured so that the core clock is
+ * the base clock.
+ * Possible values for prescaler and divisor are:
  *
  *   SDCLKFS: {2, 4, 8, 16, 32, 63, 128, 256}
  *   DVS:     {1..16}
  */
 
-/* Identification mode:  Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz */
+/* Identification mode:
+ * Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz
+ */
 
 #define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV32
 #define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(15)
 
-/* MMC normal mode: Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+/* MMC normal mode:
+ * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ */
 
 #define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
 
-/* SD normal mode (1-bit): Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz */
+/* SD normal mode (1-bit):
+ * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ */
 
 #define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
 
-/* SD normal mode (4-bit): Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
- * SD normal mode (4-bit): Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
+/* SD normal mode (4-bit):
+ * Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
+ * SD normal mode (4-bit):
+ * Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
  */
 
 #ifdef CONFIG_SDIO_DMA
@@ -184,7 +198,9 @@
 #endif
 
 /* PWM Configuration */
+
 /* FTM0 Channels */
+
 /* Channels can be modified using kinetis_k66pinmux.h */
 
 #define GPIO_FTM0_CH0OUT PIN_FTM0_CH0_1
@@ -195,7 +211,9 @@
 #define GPIO_FTM0_CH5OUT PIN_FTM0_CH5_1
 
 /* PWM Configuration */
+
 /* FTM3 Channels */
+
 /* Channels can be modified using kinetis_k66pinmux.h */
 
 #define GPIO_FTM3_CH0OUT PIN_FTM3_CH0_1
@@ -204,7 +222,8 @@
 #define GPIO_FTM3_CH3OUT PIN_FTM3_CH3_1
 #define GPIO_FTM3_CH4OUT PIN_FTM3_CH4_1
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The Freedom K66F has a single RGB LED driven by the K66F as follows:
  *
  *   LED    K66
@@ -213,8 +232,8 @@
  *   BLUE   PTB21/SPI2_SCK/FB_AD30/CMP1_OUT
  *   GREEN  PTE26/ENET_1588_CLKIN/UART4_CTS_b/RTC_CLKOUT/USB0_CLKIN
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -236,7 +255,9 @@
  *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
- *   -------------------  ----------------------------  ----------------- */
+ *   -------------------  ----------------------------  -----------------
+ */
+
 #define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
 #define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
 #define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
@@ -247,11 +268,12 @@
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
 #undef  LED_IDLE            /* K66 is in sleep mode     (Not used)        */
 
-/* Button definitions ***************************************************************/
-/* Two push buttons, SW2 and SW3, are available on FRDM-K66F board, where SW2 is
- * connected to PTC6 and SW3 is connected to PTA4. Besides the general purpose
- * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
- * SW3 can be a non-maskable interrupt.
+/* Button definitions *******************************************************/
+
+/* Two push buttons, SW2 and SW3, are available on FRDM-K66F board, where SW2
+ * is connected to PTC6 and SW3 is connected to PTA4.
+ * Besides the general purpose input/output functions, SW2 and SW3 can be
+ * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
  *   --------- ---------------------------------------------------------------
@@ -266,15 +288,17 @@
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* If there are alternative configurations for various pins in the
- * kinetis_k66pinmux.h header file, those alternative pins will be labeled with a
- * suffix like _1, _2, etc.  The logic in this file must select the correct pin
- * configuration for the board by defining a pin configuration (with no suffix) that
- * maps to the correct alternative.
+ * kinetis_k66pinmux.h header file, those alternative pins will be labeled
+ * with a suffix like _1, _2, etc.  The logic in this file must select the
+ * correct pin configuration for the board by defining a pin configuration
+ * (with no suffix) that maps to the correct alternative.
  */
 
-/* The primary serial port interface signals are PTB16 UART0_RX and PTB17 UART0_TX.
+/* The primary serial port interface signals are PTB16 UART0_RX and PTB17
+ *  UART0_TX.
  * These signals are connected to the OpenSDAv2 circuit.
  */
 
@@ -357,8 +381,7 @@
 #define PIN_SPI1_OUT     PIN_SPI1_SOUT_3
 #define PIN_SPI1_SIN     PIN_SPI1_SIN_3
 
-/*
- * Ethernet MAC/KSZ8081 PHY
+/* Ethernet MAC/KSZ8081 PHY
  *  ------------------------
  *  ------------ ----------------- --------------------------------------------
  * KSZ8081      Board Signal(s)   K66F Pin
@@ -396,4 +419,4 @@
 #define PIN_RMII0_MDIO  PIN_RMII0_MDIO_1
 #define PIN_RMII0_MDC   PIN_RMII0_MDC_1
 
-#endif  /* __BOARDS_ARM_FREEDOM_K66F_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_KINETIS_FREEDOM_K66F_INCLUDE_BOARD_H */

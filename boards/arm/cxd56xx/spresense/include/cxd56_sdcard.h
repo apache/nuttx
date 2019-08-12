@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_sdcard.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_sdcard.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_SDCARD_H
-#define __BOARD_COMMON_INCLUDE_CXD56_SDCARD_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SDCARD_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SDCARD_H
 
 /****************************************************************************
  * Included Files
@@ -151,4 +151,4 @@ void board_sdcard_set_low_voltage(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_SDCARD_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SDCARD_H */

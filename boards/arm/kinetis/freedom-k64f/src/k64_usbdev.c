@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-k64f/src/k64_usbdev.c
+/****************************************************************************
+ * boards/arm/kinetis/freedom-k64f/src/k64_usbdev.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,34 +51,35 @@
 #include "kinetis.h"
 #include "freedom-k64f.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the FREEDOM-K64F board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void k64_usbinitialize(void)
 {
 # warning "Missing logic"
 }
 
-/************************************************************************************
+/*****************************************************************************
  * Name:  kinetis_usbpullup
  *
  * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide kinetis_usbpullup.
+ *   If USB is supported and the board supports a pullup via GPIO (for USB
+ *   software connect and disconnect), then the board software must provide
+ *   kinetis_usbpullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined
+ *   to be NULL.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
@@ -87,16 +88,17 @@ int kinetis_usbpullup(FAR struct usbdev_s *dev, bool enable)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  kinetis_usbsuspend
  *
  * Description:
- *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the kinetis_usbsuspend logic if the USBDEV
+ *   driver is used.  This function is called whenever the USB enters or
+ *   leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {

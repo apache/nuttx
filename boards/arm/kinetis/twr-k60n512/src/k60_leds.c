@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/twr-k60n512/src/k60_leds.c
+ * boards/arm/kinetis/twr-k60n512/src/k60_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -221,12 +221,12 @@ static void led_setonoff(unsigned int bits)
 #ifdef CONFIG_ARCH_LEDS
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   kinetis_pinconfig(GPIO_LED1);
-   kinetis_pinconfig(GPIO_LED2);
-   kinetis_pinconfig(GPIO_LED3);
-   kinetis_pinconfig(GPIO_LED4);
+  kinetis_pinconfig(GPIO_LED1);
+  kinetis_pinconfig(GPIO_LED2);
+  kinetis_pinconfig(GPIO_LED3);
+  kinetis_pinconfig(GPIO_LED4);
 }
 
 /****************************************************************************

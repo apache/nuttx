@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/kwikstik-k40/src/k40_buttons.c
+ * boards/arm/kinetis/kwikstik-k40/src/k40_buttons.c
  *
  *   Copyright (C) 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,8 +60,8 @@
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -87,8 +87,8 @@ uint32_t board_buttons(void)
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   After board_button_initialize() has been called, board_buttons() may be
  *   called to collect the state of all buttons.  board_buttons() returns an
@@ -96,9 +96,10 @@ uint32_t board_buttons(void)
  *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
  *   of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource.
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.
+ *   The ID value is a button enumeration value that uniquely identifies a
+ *   button resource.
  *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
  *   of enumeration value.
  *

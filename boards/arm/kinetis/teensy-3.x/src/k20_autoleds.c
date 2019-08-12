@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/teensy-3.x/src/k20_autoleds.c
+ * boards/arm/kinetis/teensy-3.x/src/k20_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

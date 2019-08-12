@@ -166,7 +166,7 @@ uint32_t board_buttons(void)
 #if defined(CONFIG_EFM32_GPIO_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  if (id >=0 && id < NUM_BUTTONS)
+  if (id >= 0 && id < NUM_BUTTONS)
     {
       irqstate_t flags;
 

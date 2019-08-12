@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/efm32gg-stk3700/scripts/ld.script
+ * boards/arm/efm32/efm32gg-stk3700/scripts/ld.script
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *

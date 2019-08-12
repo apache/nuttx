@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/twr-k64f120m/src/twrk64.h
+/****************************************************************************
+ * boards/arm/kinetis/twr-k64f120m/src/twrk64.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,23 +34,23 @@
  *
  * This header file is only accessible from the src directory.
  * For /arch/arm/src accessibilty use ../include/board.h instead.
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TWR_K64F120M_SRC_TWRK64_H
-#define __BOARDS_ARM_TWR_K64F120M_SRC_TWRK64_H
+#ifndef __BOARDS_ARM_KINETIS_TWR_K64F120M_SRC_TWRK64_H
+#define __BOARDS_ARM_KINETIS_TWR_K64F120M_SRC_TWRK64_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 #include <arch/kinetis/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Assume we have everything */
 
@@ -84,8 +84,8 @@
 
 #define MMCSD_SLOTNO 0
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
@@ -169,7 +169,8 @@
 #  undef CONFIG_KINETIS_SPI2
 #endif
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The TWR-K64F120M has 2 user buttons (plus a reset button):
  *
  * 1. SW1 (IRQ?)   PTC6
@@ -182,12 +183,14 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
-/* Alternative pin resolution *******************************************************/
+/* Alternative pin resolution ***********************************************/
+
 /* If there are alternative configurations for various pins in the
- * kinetis_k64pinmux.h header file, those alternative pins will be labeled with a
- * suffix like _1, _2, etc.  The logic in this file must select the correct pin
- * configuration for the board by defining a pin configuration (with no suffix) that
- * maps to the correct alternative.
+ * kinetis_k64pinmux.h header file, those alternative pins will be labeled
+ * with a suffix like _1, _2, etc.
+ * The logic in this file must select the correct pin configuration for the
+ * board by defining a pin configuration (with no suffix) that maps to the
+ * correct alternative.
  * Please refer to board README for pin explanation.
  */
 
@@ -196,7 +199,7 @@
 #define PIN_I2C0_SCL  PIN_I2C0_SCL_3
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
-TODO See README
+ * TODO See README
  */
 
 #define PIN_SPI2_SIN   PIN_SPI2_SIN_2
@@ -204,7 +207,7 @@ TODO See README
 #define PIN_SPI2_SCK   PIN_SPI2_SCK_2
 
 /* Connections via the Tower Primary Connector Side A
-TODO See README
+ * TODO See README
  */
 
 /* PTE 26/27 */
@@ -218,14 +221,15 @@ TODO See README
 #define PIN_UART4_TX   PIN_UART4_TX_2
 
 /* Connections via the Tower Primary Connector Side B
-TODO See README
+ * TODO See README
  */
 #endif
 
 /* SDHC
-   important notice: on TWR-K64F120M, R521 (close to the SD card holder) is not placed,
-   hence WRPROTEC is always ON. Either place a 4.7KOhm resistor or change PIN config
-   to PULLDOWN, loosing Write Protect function */
+ * important notice: on TWR-K64F120M, R521 (close to the SD card holder) is
+ * not placed, hence WRPROTEC is always ON. Either place a 4.7KOhm resistor
+ * or change PIN config to PULLDOWN, loosing Write Protect function
+ */
 
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTB | PIN20)
 #define GPIO_SD_WRPROTECT  (GPIO_PULLUP | PIN_PORTB | PIN21)
@@ -242,47 +246,47 @@ TODO See README
 #define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
 #define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN9)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the TWR-K64F120M board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function k64_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the TWR-K64F120M board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function k64_usbinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int k64_bringup(void);
@@ -302,13 +306,13 @@ int k64_sdhc_initialize(void);
 #  define k64_sdhc_initialize() (OK)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the SDHC slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 bool k64_cardinserted(void);
@@ -316,13 +320,13 @@ bool k64_cardinserted(void);
 #  define k64_cardinserted() (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_writeprotected
  *
  * Description:
  *   Check if the card in the MMC/SD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 bool k64_writeprotected(void);
@@ -330,7 +334,7 @@ bool k64_writeprotected(void);
 #  define k64_writeprotected() (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k64_automount_initialize
  *
  * Description:
@@ -342,20 +346,20 @@ bool k64_writeprotected(void);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void k64_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  k64_automount_event
  *
  * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The SDHC card detection logic has detected an insertion or removal event.
+ *   It has already scheduled the MMC/SD block driver operations. Now we need
+ *   to schedule the auto-mount event which will occur with a substantial
+ *   delay to make sure that everything has settle down.
  *
  * Input Parameters:
  *   inserted - True if the card is inserted in the slot.  False otherwise.
@@ -366,23 +370,23 @@ void k64_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void k64_automount_event(bool inserted);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: k64_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int k64_pwm_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TWR_K64F120M_SRC_TWRK64_H */
+#endif /* __BOARDS_ARM_KINETIS_TWR_K64F120M_SRC_TWRK64_H */

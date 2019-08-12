@@ -1,5 +1,5 @@
 ############################################################################
-# boards/freedom-k28f/src/Makefile
+# boards/arm/kinetis/freedom-k28f/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

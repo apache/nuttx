@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arm/imx6/sabre-6quad/src/imx_appinit.c
+ * boards/arm/imx6/sabre-6quad/src/imx_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

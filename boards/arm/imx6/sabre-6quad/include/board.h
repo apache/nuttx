@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/imx6/sabre-6quad/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -31,21 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_IMX6_SABRE_6QUAD_INCLUDE_BOARD_H
 #define __BOARDS_ARM_IMX6_SABRE_6QUAD_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
 /* The Sabre-6Quad board has two crystals:
  *
  *   Y1    24     MHz CPU_XTALI/CPU_XTALO
@@ -55,9 +57,10 @@
 #define BOARD_CPUXTAL_FREQUENCY 24000000
 #define BAORD_RTCXTAL_FREQUENCY    32768
 
-/* Clocking will be configured at 792 MHz initially when started via U-Boot.  The
- * Linux kernel will use the CPU frequency scaling code which will switch the
- * processor frequency between 400 MHz and 1GHz based on load and temperature.
+/* Clocking will be configured at 792 MHz initially when started via U-Boot.
+ * The Linux kernel will use the CPU frequency scaling code which will switch
+ * the processor frequency between 400 MHz and 1GHz based on load and
+ * temperature.
  *
  * These are the frequencies reported with U-Boot starts up:
  *
@@ -83,12 +86,14 @@
  * For now, NuttX simply leaves the clocking at 792MHz.
  */
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* LEDs
  *
- * A single LED is available driven GPIO1_IO02.  On the schematic this is
- * USR_DEF_RED_LED signal to pin T1 (GPIO_2).  This signal is shared with KEY_ROW6
- * (ALT2).  A high value illuminates the LED.
+ * A single LED is available driven GPIO1_IO02.
+ * On the schematic this is USR_DEF_RED_LED signal to pin T1 (GPIO_2).
+ * This signal is shared with KEY_ROW6 (ALT2).
+ * A high value illuminates the LED.
  */
 
 /* LED index values for use with board_userled() */
@@ -107,7 +112,8 @@
  *
  *   ---------------------- ---------------------------- ------
  *   SYMBOL                     Meaning                  LED
- *   ---------------------- ---------------------------- ------   */
+ *   ---------------------- ---------------------------- ------
+ */
 
 #define LED_STARTED         0 /* NuttX has been started  OFF      */
 #define LED_HEAPALLOCATE    0 /* Heap has been allocated OFF      */
@@ -124,23 +130,25 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
-/* GPIO Disambiguation **************************************************************/
-/* A DEBUG VCOM is available MICRO USB AB 5 J509.  This corresponds to UART1 from
- * the i.MX6.  UART1 connects to J509 via the CSIO_DAT10 and CSIO_DAT11 pins:
+/* GPIO Disambiguation ******************************************************/
+
+/* A DEBUG VCOM is available MICRO USB AB 5 J509.
+ * This corresponds to UART1 from the i.MX6.
+ * UART1 connects to J509 via the CSIO_DAT10 and CSIO_DAT11 pins:
  */
 
 #define GPIO_UART1_RX_DATA  GPIO_UART1_RX_DATA_2
 #define GPIO_UART1_TX_DATA  GPIO_UART1_TX_DATA_2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -153,9 +161,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

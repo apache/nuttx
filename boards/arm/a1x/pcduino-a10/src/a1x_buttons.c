@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pcduino-a10/src/a1x_buttons.c
+ * boards/arm/a1x/pcduino-a10/src/a1x_buttons.c
  *
  *   Copyright (C) 2013-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,10 +61,10 @@
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -77,10 +77,11 @@ void board_button_initialize(void)
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   32-bit bit set with each bit associated with a button.
+ *   See the BUTTON* definitions above for the meaning of each bit in the
+ *   returned value.
  *
  ****************************************************************************/
 

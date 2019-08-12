@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_power.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_power.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_POWER_H
-#define __BOARD_COMMON_INCLUDE_CXD56_POWER_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_POWER_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_POWER_H
 
 /****************************************************************************
  * Included Files
@@ -199,4 +199,4 @@ int board_lna_power_control(bool en);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_POWER_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_POWER_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/include/cxd56_wdt.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_wdt.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_COMMON_INCLUDE_CXD56_WDT_H
-#define __BOARD_COMMON_INCLUDE_CXD56_WDT_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_WDT_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_WDT_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int cxd56_wdt_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARD_COMMON_INCLUDE_CXD56_WDT_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_WDT_H */

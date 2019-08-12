@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/src/cxd56_netinit.c
+ * boards/arm/cxd56xx/spresense/src/cxd56_netinit.c
  *
  *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/twr-k60n512/src/k60_appinit.c
+ * boards/arm/kinetis/twr-k60n512/src/k60_appinit.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -72,7 +73,8 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new Kinetis boards here */
+  /* Add configuration for new Kinetis boards here */
+
 #  error "Unrecognized Kinetis board"
 #  undef NSH_HAVEUSBDEV
 #  undef NSH_HAVEMMCSD
@@ -84,8 +86,8 @@
 #  undef NSH_HAVEUSBDEV
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
@@ -231,6 +233,7 @@ int board_app_initialize(uintptr_t arg)
   kinetis_pinconfig(GPIO_SD_WRPROTECT);
 
   /* Mount the SDHC-based MMC/SD block driver */
+
   /* First, get an instance of the SDHC interface */
 
   syslog(LOG_INFO, "Initializing SDHC slot %d\n",
@@ -252,7 +255,8 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_nsh.sdhc);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-k28f/src/freedom-k28f.h
+ * boards/arm/kinetis/freedom-k28f/src/freedom-k28f.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FREEDOM_K28F_SRC_FREEDOM_K28F_H
-#define __BOARDS_ARM_FREEDOM_K28F_SRC_FREEDOM_K28F_H
+#ifndef __BOARDS_ARM_KINETIS_FREEDOM_K28F_SRC_FREEDOM_K28F_H
+#define __BOARDS_ARM_KINETIS_FREEDOM_K28F_SRC_FREEDOM_K28F_H
 
 /****************************************************************************
  * Included Files
@@ -48,6 +48,7 @@
  ****************************************************************************/
 
 /* Freedom-K28F GPIOs *******************************************************/
+
 /* An RGB LED is connected through GPIO as shown below:
  *
  *   LED    K28
@@ -61,10 +62,11 @@
 #define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
 #define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
 
-/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2 is
- * connected to PTA4 and SW3 is connected to PTD0. Besides the general purpose
- * input/output functions, SW2 and SW3 can be low-power wake up signal. Also, only
- * SW3 can be a non-maskable interrupt.
+/* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2
+ * is connected to PTA4 and SW3 is connected to PTD0.
+ * Besides the general purpose input/output functions, SW2 and SW3 can be
+ * low-power wake up signal.
+ * Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
  *   --------- ---------------------------------------------------------------

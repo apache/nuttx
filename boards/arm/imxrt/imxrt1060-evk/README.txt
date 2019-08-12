@@ -33,7 +33,7 @@ README
       - Ethernet (10/100T) connector
       - CAN transceivers
       - Arduino® interface
-      
+
     o Sensors
 
       - FXOS8700CQ 6-Axis Ecompass (3-Axis Mag, 3-Axis Accel)

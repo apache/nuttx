@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/spresense/scripts/ramconfig.ld
+ * boards/arm/cxd56xx/spresense/scripts/ramconfig.ld
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

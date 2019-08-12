@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/twr-k64f120m/src/k64_sdhc.c
+ * boards/arm/kinetis/twr-k64f120m/src/k64_sdhc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,10 +33,11 @@
  *
  ****************************************************************************/
 
-/* A micro Secure Digital (SD) card slot is available on the FRDM-K64F connected to
- * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
- * format SD memory cards. The SD card detect pin (PTE6) is an open switch that
- * shorts with VDD when card is inserted.
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K64F
+ * connected to the SD Host Controller (SDHC) signals of the MCU.
+ * This slot will accept micro format SD memory cards.
+ * The SD card detect pin (PTE6) is an open switch that shorts with VDD when
+ * card is inserted.
  *
  *   ------------ ------------- --------
  *    SD Card Slot Board Signal  K64F Pin
@@ -171,6 +172,7 @@ int k64_sdhc_initialize(void)
   /* Configure the write protect GPIO -- None */
 
   /* Mount the SDHC-based MMC/SD block driver */
+
   /* First, get an instance of the SDHC interface */
 
   mcinfo("Initializing SDHC slot %d\n", MMCSD_SLOTNO);
@@ -189,7 +191,8 @@ int k64_sdhc_initialize(void)
   ret = mmcsd_slotinitialize(MMSCD_MINOR, g_sdhc.sdhc);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n",
+             ret);
       return ret;
     }
 
@@ -204,6 +207,7 @@ int k64_sdhc_initialize(void)
   kinetis_pinirqenable(GPIO_SD_CARDDETECT);
 
   /* Initialize automount system if configured */
+
 #ifdef CONFIG_TWR_K64F120M_SDHC_AUTOMOUNT
   k64_automount_initialize();
 #endif

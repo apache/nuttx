@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/fredom-k66f/src/k66_reset.c
+ * boards/arm/kinetis/freedom-k66f/src/k66_reset.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

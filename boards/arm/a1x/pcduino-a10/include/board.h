@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/a1x/pcduino-a10/include/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,32 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_A1X_PCDUINO_A10_INCLUDE_BOARD_H
 #define __BOARDS_ARM_A1X_PCDUINO_A10_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/a1x_piocfg.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* Since NuttX is booted from a loader on the A10, clocking should already be setup
- * when NuttX starts.
+/* Clocking *****************************************************************/
+
+/* Since NuttX is booted from a loader on the A10, clocking should already
+ * be setup when NuttX starts.
  */
 
-/* LED definitions ******************************************************************/
-/* The pcDuino v1 has four green LEDs; three can be controlled from software. Two
- * are tied to ground and, hence, illuminated by driving the output pins to a high
- * value:
+/* LED definitions **********************************************************/
+
+/* The pcDuino v1 has four green LEDs; three can be controlled from software.
+ * Two are tied to ground and, hence, illuminated by driving the output pins
+ * to a high value:
  *
  *  1. LED1 SPI0_CLK  SPI0_CLK/UART5_RX/EINT23/PI11
  *  2. LED5 IPSOUT    From the PMU (not controllable by software)
@@ -87,7 +89,8 @@
  *
  *      SYMBOL            Value Meaning                    LED state
  *                                                    LED1 LED3 LED4
- *      ----------------- ----- -----------------------  ---- ---- ------------ */
+ *      ----------------- ----- -----------------------  ---- ---- --------
+ */
 
 #define LED_STARTED         0   /* NuttX has been started   ON   OFF  OFF */
 #define LED_HEAPALLOCATE    1   /* Heap has been allocated  OFF  ON   OFF */
@@ -100,14 +103,15 @@
 
 /*      LED_IDLE           ---  /* MCU is is sleep mode         Not used
  *
- * After booting, LED1 and 3 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+ * After booting, LED1 and 3 are not longer used by the system and can be
+ * used for other purposes by the application (Of course, all LEDs are
+ * available to the application if CONFIG_ARCH_LEDS is not defined.
  */
 
-/* Button definitions ***************************************************************/
-/* There are a total of five switches on-board.  All pulled high and, hence, will be
- * sensed as low when closed.
+/* Button definitions *******************************************************/
+
+/* There are a total of five switches on-board.
+ * All pulled high and, hence, will be sensed as low when closed.
  *
  *   SW1 Reset     (not available to software)
  *   SW2 UBOOT     UBOOT_SEL (?)
@@ -125,10 +129,12 @@
 #define BUTTON_KEY_HOME_BIT (1 << BUTTON_KEY_HOME)
 #define BUTTON_KEY_MENU_BIT (1 << BUTTON_KEY_MENU)
 
-/* NAND *****************************************************************************/
+/* NAND *********************************************************************/
 
-/* GPIO pin disambiguation **********************************************************/
-/* UARTs ****************************************************************************/
+/* GPIO pin disambiguation **************************************************/
+
+/* UARTs ********************************************************************/
+
 /* Two UART connections are available:
  *
  * 1. UART0 is available on J5 Debug Port.
@@ -148,13 +154,12 @@
 #define PIO_UART2_RX    PIO_UART2_RX_1
 #define PIO_UART2_TX    PIO_UART2_TX_1
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Language Macros
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __ASSEMBLY__
-	.macro	config_sdram
-	.endm
+  .macro config_sdram
+  .endm
 #endif /* __ASSEMBLY__ */
-
 #endif  /* __BOARDS_ARM_A1X_PCDUINO_A10_INCLUDE_BOARD_H */

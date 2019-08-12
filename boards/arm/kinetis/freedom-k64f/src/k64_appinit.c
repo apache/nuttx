@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/freedom-k64f/src/k64_appinit.c
+ * boards/arm/kinetis/freedom-k64f/src/k64_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -122,7 +122,7 @@ static int nsh_sdmmc_initialize(void)
         }
     }
   return OK;
-  }
+}
 #else
 #  define nsh_sdmmc_initialize() (OK)
 #endif

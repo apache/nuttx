@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/freedom-k28f/src/k28_bringup.c
+ * boards/arm/kinetis/freedom-k28f/src/k28_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

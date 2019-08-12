@@ -1,5 +1,5 @@
 ############################################################################
-# boards/kwikstik-k40/src/Makefile
+# boards/arm/kinetis/kwikstik-k40/src/Makefile
 #
 #   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
