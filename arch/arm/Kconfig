@@ -212,6 +212,13 @@ config ARCH_CHIP_NUC1XX
 	---help---
 		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_S32K1XX
+	bool "NXP S32K1XX"
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	---help---
+		NPX LPC54XX architectures (ARM Cortex-M0+ and Cortex-M4F).
+
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
 	select ARCH_CORTEXA5
@@ -670,6 +677,7 @@ config ARCH_CHIP
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
+	default "s32k1xx"	if ARCH_CHIP_S32K1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samd2l2"	if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
 	default "samd5e5"	if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
@@ -887,6 +895,9 @@ source arch/arm/src/lpc43xx/Kconfig
 endif
 if ARCH_CHIP_LPC54XX
 source arch/arm/src/lpc54xx/Kconfig
+endif
+if ARCH_CHIP_S32K1XX
+source arch/arm/src/s32k1xx/Kconfig
 endif
 if ARCH_CHIP_MAX326XX
 source arch/arm/src/max326xx/Kconfig
