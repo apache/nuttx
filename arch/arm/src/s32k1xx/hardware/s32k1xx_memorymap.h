@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Included Files
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #define S32K1XX_AIPS_LITE_BASE   0x40000000  /* Peripheral bridge (AIPS-Lite) */
@@ -80,7 +80,7 @@
 #define S32K1XX_PORTA_BASE       0x40049000  /* Port A multiplexing control */
 #define S32K1XX_PORTB_BASE       0x4004a000  /* Port B multiplexing control */
 #define S32K1XX_PORTC_BASE       0x4004b000  /* Port C multiplexing control */
-#define S32K1XX_PORTE_BASE       0x4004c000  /* Port D multiplexing control */
+#define S32K1XX_PORTD_BASE       0x4004c000  /* Port D multiplexing control */
 #define S32K1XX_PORTE_BASE       0x4004d000  /* Port E multiplexing control */
 #define S32K1XX_WDOG_BASE        0x40052000  /* Software watchdog */
 #define S32K1XX_SAI0_BASE        0x40054000  /* Synchronous Audio Interface 0 */
