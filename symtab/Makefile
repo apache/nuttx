@@ -98,10 +98,10 @@ depend: .depend
 
 clean:
 	$(call DELFILE, $(BIN))
-	symtab.c
-	rm -f tmp.csv
 
 distclean: clean
+	$(call DELFILE, symtab.c)
+	$(call DELFILE, tmp.csv)
 
 -include Make.dep
 
