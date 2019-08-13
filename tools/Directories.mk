@@ -1,7 +1,7 @@
 ############################################################################
 # tools/Directories.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016-2018 Gregory Nutt. All rights
+#   Copyright (C) 2007-2012, 2014, 2016-2019 Gregory Nutt. All rights
 #     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
@@ -84,6 +84,12 @@ FSDIRS = fs binfmt
 CONTEXTDIRS = boards $(APPDIR)
 USERDIRS =
 OTHERDIRS = pass1
+
+ifeq ($(CONFIG_EXECFUNCS_GENERATE_SYSTEM_SYMTAB),y)
+USERDIRS += symtab
+else
+OTHERDIRS += symtab
+endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 

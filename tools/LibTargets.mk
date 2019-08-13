@@ -1,7 +1,7 @@
 ############################################################################
 # tools/LibTargets.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -198,6 +198,12 @@ syscall$(DELIM)libproxies$(LIBEXT): context
 	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT) KERNEL=n
 
 staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+symtab$(DELIM)libsymtab$(LIBEXT): context
+	$(Q) $(MAKE) -C symtab TOPDIR="$(TOPDIR)" libsymtab$(LIBEXT) KERNEL=n
+
+staging$(DELIM)libsymtab$(LIBEXT): symtab$(DELIM)libsymtab$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 # Possible non-kernel builds

@@ -76,6 +76,19 @@ config EXECFUNCS_NSYMBOLS_VAR
 		symbols in that table.  This selection provides the name of an 'int'
 		variable that contains the number of symbols in the symbol table.
 
+config EXECFUNCS_GENERATE_SYSTEM_SYMTAB
+	bool "Generate and include system symbol table"
+	default n
+	---help---
+		Generate symbol table which includes symbols for all available
+		syscalls, libc and libm functions. It makes system significantly
+		larger but actual applications can reuse maximum from the system
+		image.
+
+		The symbol table array is named g_symtab and variable holding
+		number of exported symbols g_nsymbols. It matches expected defaults
+		from entries above. But they can be changed and generated symbol table
+		can be used as template by application.
 endif # EXECFUNCS_HAVE_SYMTAB
 endif # LIBC_EXECFUNCS
 
