@@ -106,6 +106,11 @@
 #define S32K1XX_SMC_BASE         0x4007e000  /* System Mode controller */
 #define S32K1XX_RCM_BASE         0x4007f000  /* Reset Control Module */
 #define S32K1XX_GPIO_BASE        0x400ff000  /* GPIO controller */
+#  define S32K1XX_GPIOA_BASE     0x400ff000  /* GPIOA controller */
+#  define S32K1XX_GPIOB_BASE     0x400ff040  /* GPIOB controller */
+#  define S32K1XX_GPIOC_BASE     0x400ff080  /* GPIOC controller */
+#  define S32K1XX_GPIOD_BASE     0x400ff0c0  /* GPIOD controller */
+#  define S32K1XX_GPIOE_BASE     0x400ff100  /* GPIOE controller */
 
 #if defined(CONFIG_ARCH_CHIP_S32K14X)
 #  define S32K1XX_ITM_BASE       0xe0000000  /* Instrumentation Trace Macrocell */
