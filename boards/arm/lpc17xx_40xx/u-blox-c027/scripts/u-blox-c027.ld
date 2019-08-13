@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/u-blox-c027/scripts/u-blox-c027.ld
+ * boards/arm/lpc17xx_40xx/u-blox-c027/scripts/u-blox-c027.ld
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

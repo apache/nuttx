@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1768/src/lpc17_40_appinit.c
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_appinit.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -160,15 +160,18 @@ int board_app_initialize(uintptr_t arg)
 
   /* Bind the SSP port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, ssp);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  syslog(LOG_INFO, "Successfuly bound SSP port %d to MMC/SD slot %d\n",
+  syslog(LOG_INFO,
+         "Successfuly bound SSP port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
 

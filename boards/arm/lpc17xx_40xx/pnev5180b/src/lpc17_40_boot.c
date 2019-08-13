@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/pnev5180b/src/lpc17_40_boot.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -57,9 +57,9 @@
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
+ *   All LPC17xx/LPC40xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
  *   initialized.
  *
  *****************************************************************************/

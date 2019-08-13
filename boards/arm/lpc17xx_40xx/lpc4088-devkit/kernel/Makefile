@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4088-devkit/kernel/Makefile
+# boards/arm/lpc17xx_40xx/lpc4088-devkit/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-devkit/src/lpc17_40_buttons.c
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_buttons.c
  *
  *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -106,10 +106,10 @@ static const uint8_t g_buttonirq[NUM_BUTTONS] =
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -150,16 +150,16 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed. */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = lpc17_40_gpioread(g_buttoncfg[i]);
+      bool released = lpc17_40_gpioread(g_buttoncfg[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
+      if (!released)
+        {
             ret |= (1 << i);
-         }
+        }
     }
 
   return ret;
@@ -181,8 +181,8 @@ uint32_t board_buttons(void)
  *
  *   Note that board_button_irq() also enables button interrupts.  Button
  *   interrupts will remain enabled after the interrupt handler is attached.
- *   Interrupts may be disabled (and detached) by calling board_button_irq with
- *   irqhandler equal to NULL.
+ *   Interrupts may be disabled (and detached) by calling board_button_irq
+ *   with irqhandler equal to NULL.
  *
  ****************************************************************************/
 

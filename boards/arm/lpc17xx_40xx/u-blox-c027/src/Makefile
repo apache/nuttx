@@ -1,5 +1,5 @@
 ############################################################################
-# boards/u-blox-c027/src/Makefile
+# boards/arm/lpc17xx_40xx/u-blox-c027/src/Makefile
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

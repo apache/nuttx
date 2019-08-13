@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lincoln60/scripts/ld.script
+ * boards/arm/lpc17xx_40xx/lincoln60/scripts/ld.script
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

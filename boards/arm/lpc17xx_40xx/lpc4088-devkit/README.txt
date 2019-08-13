@@ -108,7 +108,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
     I have been using the Olimex ARM-USB-OCD debugger.  OpenOCD
     requires a configuration file.  I keep the one I used last here:
 
-      boards/lpc4088-devkit/tools/lpc4088-devkit.cfg
+      boards/arm/lpc17xx_40xx/lpc4088-devkit/tools/lpc4088-devkit.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -136,7 +136,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
     installations.  They could be most anywhwere if you are using a
     windows version of OpenOCD.
 
-      boards/lpc4088-devkit/tools/lpc4088-devkit.cfg
+      boards/arm/lpc17xx_40xx/lpc4088-devkit/tools/lpc4088-devkit.cfg
         This is simply openocd-usb.cfg, lpc40xx.cfg, and lpc1xxx.cfg
         concatenated into one file for convenience.  Don't use it
         unless you have to.
@@ -147,20 +147,21 @@ Using OpenOCD with the Olimex ARM-USB-OCD
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      boards/lpc4088-devkit/tools/lpc4088-devkit.cfg
+      boards/arm/lpc17xx_40xx/lpc4088-devkit/tools/lpc4088-devkit.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon as follows.  This
     assumes that you have already CD'ed to the NuttX build directory and
-    that you have set the full path to the boards/lpc4088-devkit/tools in your
-    PATH environment variable:
+    that you have set the full path to the
+    boards/arm/lpc17xx_40xx/lpc4088-devkit/tools in your PATH environment
+    variable:
 
       oocd.sh $PWD
 
     or, if the PATH variable is not so configured:
 
-      boards/lpc4088-devkit/tools/oocd.sh $PWD
+      boards/arm/lpc17xx_40xx/lpc4088-devkit/tools/oocd.sh $PWD
 
   Connecting GDB
 

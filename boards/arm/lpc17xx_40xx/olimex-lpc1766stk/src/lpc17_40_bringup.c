@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-lpc1766stk/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2010, 2013-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -156,12 +156,13 @@ static int nsh_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      syslog(LOG_INFO, "nsh_waiter: %s\n", hport->connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -275,7 +276,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_msc_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -285,7 +287,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
@@ -295,7 +298,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_mouse_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register USB HID mouse device class\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to register USB HID mouse device class\n");
     }
 #endif
 
@@ -305,7 +309,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_kbdinit();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register USB HID KBD keyboard class\n");
+      syslog(LOG_ERR,
+             "ERROR: Failed to register USB HID KBD keyboard class\n");
     }
 #endif
 
@@ -337,7 +342,7 @@ static int nsh_usbhostinitialize(void)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_bringup
  *
  * Description:
@@ -349,7 +354,7 @@ static int nsh_usbhostinitialize(void)
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc17_40_bringup(void)
 {

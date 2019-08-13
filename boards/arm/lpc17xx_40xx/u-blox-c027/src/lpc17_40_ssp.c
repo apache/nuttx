@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/u-blox-c027/src/lpc17_40_ssp.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_ssp.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,9 @@
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Dump GPIO registers */
 
@@ -66,17 +66,17 @@
 #  define ssp_dumpgpio(m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: c027_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the C027.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function c027_sspdev_initialize(void)
 {
@@ -94,35 +94,39 @@ void weak_function c027_sspdev_initialize(void)
   ssp_dumpgpio("c027_sspdev_initialize() Exit");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc17_40_ssp0/ssp1select and lpc17_40_ssp0/ssp1status
  *
  * Description:
- *   The external functions, lpc17_40_ssp0/ssp1select and lpc17_40_ssp0/ssp1status
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_40_sspbus_initialize())
- *   are provided by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, lpc17_40_ssp0/ssp1select and
+ *   lpc17_40_ssp0/ssp1status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including lpc17_40_sspbus_initialize())
+ *   are provided by common LPC17xx/LPC40xx logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip select
- *      pins.
- *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
+ *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
+ *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_40_ssp0select() Entry");
 
 #warning "Assert CS here (false)"
@@ -138,9 +142,11 @@ uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   ssp_dumpgpio("lpc17_40_ssp1select() Entry");
 
   if (devid == SPIDEV_MMCSD(0))
@@ -177,5 +183,4 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
   return 0;
 }
 #endif
-
 #endif /* CONFIG_LPC17_40_SSP0 || CONFIG_LPC17_40_SSP1 */

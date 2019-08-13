@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/zkit-arm-1769/src/lpc17_40_usbmsc.c
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/src/lpc17_40_usbmsc.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
@@ -75,7 +75,8 @@
 #  undef LPC17XX_40XX_MMCSDSLOTNO
 #  define LPC17XX_40XX_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new LPC17xx/LPC40xx boards here */
+  /* Add configuration for new LPC17xx/LPC40xx boards here */
+
 #  error "Unrecognized LPC17xx/LPC40xx board"
 #endif
 

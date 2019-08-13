@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc1766stk/src/lpc17_40_ssp.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_ssp.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,9 +59,10 @@
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #undef HAVE_SPI_CALLBACK
@@ -74,6 +75,7 @@
 #endif
 
 /* Debug ********************************************************************/
+
 /* Dump GPIO registers */
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
@@ -84,9 +86,9 @@
 #  define ssp_dumpssp1gpio(m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes on media change callback */
 
@@ -98,9 +100,9 @@ struct lpc17_40_mediachange_s
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Registered media change callback */
 
@@ -113,17 +115,17 @@ static struct lpc17_40_mediachange_s g_ssp1callback;
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: ssp_cdirqsetup
  *
  * Description:
  *   Setup to receive a card detection interrupt
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* #ifdef HAVE_SPI_CALLBACK */
 static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
@@ -157,13 +159,13 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: ssp0/1_cdinterrupt
  *
  * Description:
  *   Handle card detection interrupt
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* ifdef HAVE_SPI_CALLBACK */
 #ifdef CONFIG_LPC17_40_SSP0
@@ -193,21 +195,23 @@ static int ssp1_cdinterrupt(int irq, FAR void *context)
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc1766stk_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lpc1766stk_sspdev_initialize(void)
 {
-  /* Configure the SSP0 chip select GPIOs.  Only the Nokia LCD is connected to SSP0 */
+  /* Configure the SSP0 chip select GPIOs.
+   * Only the Nokia LCD is connected to SSP0
+   */
 
 #ifdef CONFIG_LPC17_40_SSP0
   ssp_dumpssp0gpio("BEFORE SSP0 Initialization");
@@ -215,15 +219,17 @@ void weak_function lpc1766stk_sspdev_initialize(void)
   ssp_dumpssp0gpio("AFTER SSP0 Initialization");
 #endif
 
-  /* Configure SSP1 chip select GPIOs.  Only the SD/MMC card slot is connected to SSP1 */
+  /* Configure SSP1 chip select GPIOs.
+   * Only the SD/MMC card slot is connected to SSP1
+   */
 
 #ifdef CONFIG_LPC17_40_SSP1
   ssp_dumpssp0gpio("BEFORE SSP1 Initialization");
   lpc17_40_configgpio(LPC1766STK_MMC_CS);
 
-  /* Also configure the SD/MMC power GPIO (but leave power off).  This really has
-   * nothing to do with SSP, but does belong with other SD/MMC GPIO configuration
-   * settings.
+  /* Also configure the SD/MMC power GPIO (but leave power off).
+   * This really has nothing to do with SSP, but does belong with other
+   * SD/MMC GPIO configuration settings.
    */
 
   lpc17_40_configgpio(LPC1766STK_MMC_PWR);
@@ -237,35 +243,39 @@ void weak_function lpc1766stk_sspdev_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc17_40_ssp0/ssp1select and lpc17_40_ssp0/ssp1status
  *
  * Description:
- *   The external functions, lpc17_40_ssp0/ssp1select and lpc17_40_ssp0/ssp1status
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_40_sspbus_initialize())
- *   are provided by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, lpc17_40_ssp0/ssp1select and
+ *   lpc17_40_ssp0/ssp1status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including lpc17_40_sspbus_initialize())
+ *   are provided by common LPC17xx/LPC40xx logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip select
- *      pins.
- *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
+ *   2. Provide lpc17_40_ssp0/ssp1select() and lpc17_40_ssp0/ssp1status()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your board
+ *      is configured.
+ *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert/de-assert the CS pin to the card */
@@ -284,9 +294,11 @@ uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD(0))
     {
       /* Assert/de-assert the CS pin to the card */
@@ -304,7 +316,7 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_ssp0/1register
  *
  * Description:
@@ -322,7 +334,7 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
  * Returned Value:
  *   0 on success; negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC17_40_SSP0
@@ -330,7 +342,9 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
    * would be configured.
    */
 
-int lpc17_40_ssp0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback, void *arg)
+int lpc17_40_ssp0register(FAR struct spi_dev_s *dev,
+                          spi_mediachange_t callback,
+                          void *arg)
 {
   /* Save the callback information */
 
@@ -347,7 +361,9 @@ int lpc17_40_ssp0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-int lpc17_40_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback, void *arg)
+int lpc17_40_ssp1register(FAR struct spi_dev_s *dev,
+                          spi_mediachange_t callback,
+                          void *arg)
 {
   /* Save the callback information */
 
@@ -363,5 +379,4 @@ int lpc17_40_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 }
 #endif
 #endif
-
 #endif /* CONFIG_LPC17_40_SSP0 || CONFIG_LPC17_40_SSP1 */

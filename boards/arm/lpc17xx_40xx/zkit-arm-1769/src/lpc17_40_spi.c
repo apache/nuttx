@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/zkit-arm-1769/src/lpc17_40_spi.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/src/lpc17_40_spi.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Kannan <code@zilogic.com>
@@ -36,11 +36,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,9 +59,9 @@
 
 #if defined(CONFIG_LPC17_40_SPI)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Dump GPIO registers */
 
@@ -71,18 +71,18 @@
 #  define spi_dumpgpio(m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: zkit_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select and card detect GPIO pins for the
  *   ZKIT-ARM-1769 Kit.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function zkit_spidev_initialize(void)
 {
@@ -98,34 +98,38 @@ void weak_function zkit_spidev_initialize(void)
   spi_dumpgpio("zkit_spidev_initialize() Exit");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc17_40_spiselect and lpc17_40_spistatus
  *
  * Description:
  *   The external functions, lpc17_40_spiselect and  lpc17_40_spistatus
- *   must be provided by board-specific logic. They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_40_spibus_initialize())
- *   are provided by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
- *   board:
+ *   must be provided by board-specific logic. They are implementations of
+ *   the select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including lpc17_40_spibus_initialize())
+ *   are provided by common LPC17xx/LPC40xx logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip select
- *      pins.
+ *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP
+ *      chip select pins.
  *   2. Provide lpc17_40_spiselect and  lpc17_40_spistatus functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_40_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by lpc17_40_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to lpc17_40_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by lpc17_40_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void  lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   spi_dumpgpio("lpc17_40_spiselect() Entry");
 
   if (devid == SPIDEV_MMCSD(0))

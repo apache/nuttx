@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/open1788/scripts/user-space.ld
+ * boards/arm/lpc17xx_40xx/open1788/scripts/user-space.ld
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

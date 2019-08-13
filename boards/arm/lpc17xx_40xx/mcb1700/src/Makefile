@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mcb1700/src/Makefile
+# boards/arm/lpc17xx_40xx/mcb1700/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/open1788/scripts/memory.ld
+ * boards/arm/lpc17xx_40xx/open1788/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,9 +41,10 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 256KB of
  * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
- * also boards/open1788/scripts/kernel-space.ld); 256KB is probably much
- * more than is needed by the RTOS!  That size is selected only because it
- * is available due to alignment issues for the user space FLASH memory.
+ * also boards/arm/lpc17xx_40xx/open1788/scripts/kernel-space.ld);
+ * 256KB is probably much more than is needed by the RTOS!
+ * That size is selected only because it is available due to alignment issues
+ * for the user space FLASH memory.
  *
  * Alignment of the user space FLASH partition is a critical factor: The
  * user space FLASH partition will be spanned with a single region of size

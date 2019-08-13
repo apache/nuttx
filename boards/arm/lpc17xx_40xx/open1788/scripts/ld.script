@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/open1788/scripts/ld.script
+ * boards/arm/lpc17xx_40xx/open1788/scripts/ld.script
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Rommel Marcelo

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc1766stk/src/lpc17_40_leds.c
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_leds.c
  *
  *   Copyright (C) 2010-2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

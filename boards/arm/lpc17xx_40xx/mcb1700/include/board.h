@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mcb1700/include/board.h
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/mcb1700/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,24 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MCB1700_INCLUDE_BOARD_H
-#define __BOARDS_ARM_MCB1700_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_MCB1700_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_MCB1700_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+/* Clocking *****************************************************************/
+
+/* NOTE:  The following definitions require lpc17_40_syscon.h.
+ * It is not included here because the including C file may not have that
+ * file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
@@ -58,15 +60,15 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multiplier=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multiplier=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz*/
 
-/* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main oscillator.
+/* Select the main oscillator as the frequency source.
+ * SYSCLK is then the frequency of the main oscillator.
  */
 
 #undef CONFIG_LPC17_40_MAINOSC
@@ -127,12 +129,15 @@
 //#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The MCB1700 has 4 LEDs along the bottom of the board. Blue or off.
- * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for NuttX
- * debug functionality (where NC means "No Change").
+ * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
+ * for NuttX debug functionality (where NC means "No Change").
  *
- * During the boot phases.  LED1 and LED2 will show boot status.  LED3/4 Not used.
+ * During the boot phases.
+ *  LED1 and LED2 will show boot status.
+ *  LED3/4 Not used.
  */
                                       /* LED1   LED2    */
 #define LED_STARTED                0  /* OFF    OFF     */
@@ -150,7 +155,6 @@
 #define LED_ASSERTION              6  /*  NC     NC    NC   ON  (momentary) */
 #define LED_PANIC                  7  /*  NC     NC    NC   ON  (1Hz flashing) */
 
-
 #define GPIO_SSP0_SCK              GPIO_SSP0_SCK_1
 #define GPIO_SSP0_SSEL             GPIO_SSP0_SSEL_1
 #define GPIO_SSP0_MISO             GPIO_SSP0_MISO_1
@@ -167,9 +171,10 @@
 #  endif
 #endif
 
-/* Alternate pin selections *********************************************************/
+/* Alternate pin selections *************************************************/
+
 /* Pin Description                  Connector On Board       Base Board
- * -------------------------------- --------- -------------- ---------------------
+ * -------------------------------- --------- -------------- ----------------
  * P0[0]/RD1/TXD3/SDA1               J6-9     I2C E2PROM SDA TXD3/SDA1
  * P0[1]/TD1/RXD3/SCL                J6-10                   RXD3/SCL1
  * P0[2]/TXD0/AD0[7]                 J6-21
@@ -273,15 +278,15 @@
  * P4[29]/TX-MCLK/MAT2.1/RXD3        PAD16                   N/A
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -292,17 +297,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
- *   Once the system has booted, these functions can be used to control LEDs 1, 2 & 3
+ *   Once the system has booted, these functions can be used to control
+ *   LEDs 1, 2 & 3
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void lpc17_40_led(int lednum, int state);
@@ -314,4 +320,4 @@ void lpc17_40_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_MCB1700_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_MCB1700_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-lpc1766stk/src/lpc17_40_appinit.c
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_appinit.c
  *
  *   Copyright (C) 2010, 2013-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

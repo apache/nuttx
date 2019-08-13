@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_reset.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_reset.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450-xgevk.h
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450-xgevk.h
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_H
-#define __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_H
+#ifndef __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_H
+#define __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_H
 
 /****************************************************************************
  * Included Files
@@ -99,4 +99,4 @@ int lc823450_wm8776initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_H */
+#endif /* __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_H */

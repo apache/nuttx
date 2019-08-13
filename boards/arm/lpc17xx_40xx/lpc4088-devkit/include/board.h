@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lpc4088-devkit/include/board.h
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC4088_DEVKIT_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LPC4088_DEVKIT_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_LPC4088_DEVKIT_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_LPC4088_DEVKIT_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,12 +49,16 @@
 #  include <nuttx/irq.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* NOTE:
+ * The following definitions require lpc17_40_syscon.h.
+ * It is not included here because the including C file may not have that
+ * file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY       (12000000)            /* XTAL oscillator frequency */
@@ -65,27 +69,28 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (10 * SYSCLK) / 1 = 120MHz -> PLL0 multipler=10, pre-divider=1
- *   CCLCK = 120MHz  -> CCLK divider = 1
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz -> Select Main oscillator for source
+ * PLL0CLK = (10 * SYSCLK) / 1 = 120MHz -> PLL0 multipler=10, pre-divider=1
+ * CCLCK = 120MHz  -> CCLK divider = 1
  */
 
-#define LPC17_40_CCLK                 120000000 /* 120Mhz */
-#define BOARD_PCLKDIV              2         /* Peripheral clock = LPC17_40_CCLK/2 */
+#define LPC17_40_CCLK              120000000  /* 120Mhz */
+#define BOARD_PCLKDIV              2  /* Peripheral clock = LPC17_40_CCLK/2 */
 #define BOARD_PCLK_FREQUENCY       (LPC17_40_CCLK / BOARD_PCLKDIV)
 
-/* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main oscillator.
+/* Select the main oscillator as the frequency source.
+ *  SYSCLK is then the frequency of the main oscillator.
  *
- * If BOARD_XTAL_FREQUENCY > 15000000, then the SCS OSCRS bit (bit 4) should also
- * be set in the BOARD_SCS_VALUE.
+ * If BOARD_XTAL_FREQUENCY > 15000000, then the SCS OSCRS bit (bit 4)
+ * should also be set in the BOARD_SCS_VALUE.
  */
 
 #undef CONFIG_LPC17_40_MAINOSC
 #define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
-/* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
+/* Select the main oscillator and CCLK divider.
+ * The output of the divider is CCLK.
  * The input to the divider (PLLCLK) will be determined by the PLL output.
  */
 
@@ -121,10 +126,11 @@
    ((BOARD_PLL1CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
 #ifdef CONFIG_LPC17_40_EMC
+
 /* EMC clock selection.
  *
- * The EMC clock should not be driven above 80MHz.  As a result the EMC
- * uses the CPU clock divided by two.
+ * The EMC clock should not be driven above 80MHz.
+ * As a result the EMC uses the CPU clock divided by two.
  */
 
 #  define BOARD_EMCCLKSEL_DIVIDER  2
@@ -133,7 +139,9 @@
 #endif
 
 #if defined(CONFIG_LPC17_40_USBHOST) || (CONFIG_LPC17_40_USBDEV)
-/* USB divider.  The output of the PLL is used as the USB clock
+
+/* USB divider.
+ * The output of the PLL is used as the USB clock
  *
  *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
  */
@@ -157,9 +165,11 @@
 #define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV48
 
 #ifdef CONFIG_LPC17_40_SDCARD
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.
+
+/* SDIO dividers.
+ * Note that slower clocking is required when DMA is disabled in order to
+ * avoid RX overrun/TX underrun errors due to delayed responses to
+ * service FIFOs in interrupt driven mode.
  * SDCARD_CLOCK=PCLK/(2*(SDCARD_CLKDIV+1))
  */
 
@@ -214,14 +224,16 @@
 #endif
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
  *
  * LED1 : Connected to P2[26]
  * LED2 : Connected to P2[27]
  *
- * These LEDs are connected to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate
+ * them.
  */
 
 /* LED index values for use with board_userled() */
@@ -236,25 +248,29 @@
 #define BOARD_LED2_BIT             (1 << BOARD_LED2)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the two LEDs
- * on the LPC4088 OEM Board.  The following definitions describe how NuttX
- * controls the LEDs:
+ * on the LPC4088 OEM Board.
+ * The following definitions describe how NuttX controls the LEDs:
  */
                                       /* LED1 LED2 LED3 LED4                        */
 #define LED_STARTED                0  /*  OFF  OFF  OFF  OFF                        */
 #define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
 #define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
 #define LED_STACKCREATED           3  /*  ON    ON  OFF  OFF                        */
-#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt          */
+#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt         */
 #define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
 #define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
 #define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
-#define LED_IDLE                   5  /*  LED4 glows: ON while active               *
-                                       *              OFF while sleeping            */
+#define LED_IDLE                   5  /*  LED4 glows: ON while active
+                                       *              OFF while sleeping
+                                       */
 
 /* Button definitions ***************************************************************/
-/* The LPC4088 Developer's Kit supports several buttons.  All have external
- * pullup resistors.  When closed, the pins will be pulled to ground.  So the buttons
- * will read "1" when open and "0" when closed.  All are capable of generating interrupts.
+
+/* The LPC4088 Developer's Kit supports several buttons.
+ * All have external pullup resistors.
+ * When closed, the pins will be pulled to ground.
+ * So the buttons will read "1" when open and "0" when closed.
+ * All are capable of generating interrupts.
  *
  * USER1           -- Connected to P2[10]
  *
@@ -266,10 +282,9 @@
  * JOY_D           -- Connected to P2[27]
  * JOY_CTR         -- Connected to P2[22]
  *
- * For the interrupting buttons, interrupts are generated on both edges (press and
- * release).
+ * For the interrupting buttons, interrupts are generated on both edges
+ * (press and release).
  */
-
 
 #define BOARD_BUTTON_USER1         0
 
@@ -289,7 +304,7 @@
 #define BOARD_JOYSTICK_D_BIT       (1 << BOARD_JOYSTICK_D)
 #define BOARD_JOYSTICK_CTR_BIT     (1 << BOARD_JOYSTICK_CTR)
 
-/* Alternate pin selections *********************************************************/
+/* Alternate pin selections *************************************************/
 
 /* UART0:
  *
@@ -303,7 +318,8 @@
 /* UART1:
  *
  * All pin options are controlled by jumpers on the board.
- * RXD is set with JP12, TXD is set with JP13, modem control lines are set with JP11.
+ * RXD is set with JP12, TXD is set with JP13, modem control lines are set
+ * with JP11.
  *
  * RTS   --- Connected to P3[30]
  * RI    --- Connected to P3[22]
@@ -349,9 +365,9 @@
 #define GPIO_ENET_MDC     GPIO_ENET_MDC_1
 #define GPIO_ENET_MDIO    GPIO_ENET_MDIO_1
 
-
 /* External LCD is currently untested.
- * These pins will probably need to be updated before using the LCD. */
+ * These pins will probably need to be updated before using the LCD.
+ */
 
 #if 0
 /* LCD R:
@@ -416,24 +432,22 @@
 
 /* XPT2046 Touchscreen:
  *
-/* -------------- -------------------- ------------ --------------------------------
+ * -------------- -------------------- ------------ -------------------------
  * XTPT2046       Module               Module
  *                Signal               Connector    Connector
- * -------------- -------------------- ------------ ---------------------------------
+ * -------------- -------------------- ------------ -------------------------
  * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
  * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP LED)
  * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
  * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device up LED and SD CD pin)
  * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO   (Also RMII_CRS_DV)
  * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
- * -------------- -------------------- ------------ ---------------------------------
+ * -------------- -------------------- ------------ -------------------------
  */
-
 
 #define GPIO_SSP1_MISO   GPIO_SSP1_MISO_3
 #define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
 #define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
 
 #endif
-
-#endif  /* __BOARDS_ARM_LPC4088_DEVKIT_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_LPC4088_DEVKIT_INCLUDE_BOARD_H */

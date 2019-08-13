@@ -1,5 +1,5 @@
 ############################################################################
-# boards/zkit-arm-1769/src/Makefile
+# boards/arm/lpc17xx_40xx/zkit-arm-1769/src/Makefile
 #
 #   Copyright (C) 2013 Zilogic Systems. All rights reserved.
 #   Author: BabuSubashChandar <code@zilogic.com>

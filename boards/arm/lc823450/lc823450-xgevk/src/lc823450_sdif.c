@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_sdif.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_sdif.c
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_mux.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_mux.c
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>

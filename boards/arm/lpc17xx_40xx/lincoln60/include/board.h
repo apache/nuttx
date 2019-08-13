@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lincoln60/include/board.h
+ * boards/arm/lpc17xx_40xx/lincoln60/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LINCOLN60_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LINCOLN60_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_LINCOLN60_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_LINCOLN60_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -53,8 +53,10 @@
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+
+/* NOTE:  The following definitions require lpc17_40_syscon.h.
+ * It is not included here because the including C file may not have that
+ * file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
@@ -133,6 +135,7 @@
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
 /* LED definitions *********************************************************/
+
 /* The Lincoln 60 has 2 LEDs along the bottom of the board. Green or off.
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
  * for NuttX debug functionality (where NC means "No Change").
@@ -218,4 +221,4 @@ void lpc17_40_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_LINCOLN60_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_LINCOLN60_INCLUDE_BOARD_H */

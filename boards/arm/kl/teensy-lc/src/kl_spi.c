@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/teensy-lc/src/kl_spi.c
+ * boards/arm/kl/teensy-lc/src/kl_spi.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -104,6 +104,7 @@ void weak_function kl_spidev_initialize(void)
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Name: kl_spi[n]select
  *
@@ -207,5 +208,4 @@ int kl_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 }
 #endif
 #endif
-
 #endif /* CONFIG_KL_SPI */

@@ -323,7 +323,7 @@ Code Red IDE
   --------------
 
   All of the above steps are automated in the bash script flash.sh that can
-  be found in the boards/lpcxpresso/tools directory.
+  be found in the boards/arm/lpc17xx_40xx/lpcxpresso/tools directory.
 
 LEDs
 ^^^^
@@ -331,12 +331,14 @@ LEDs
   If CONFIG_ARCH_LEDS is defined, then support for the LPCXpresso LEDs will be
   included in the build.  See:
 
-  - boards/lpcxpresso-lpc1768/include/board.h - Defines LED constants, types and
-    prototypes the LED interface functions.
+  - boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/include/board.h - Defines LED
+           constants, types and prototypes the LED interface functions.
 
-  - boards/lpcxpresso-lpc1768/src/lpcxpresso-lpc1768.h - GPIO settings for the LEDs.
+  - boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpcxpresso-lpc1768.h - GPIO
+           settings for the LEDs.
 
-  - boards/lpcxpresso-lpc1768/src/up_leds.c - LED control logic.
+  - boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/up_leds.c - LED control
+           logic.
 
   The LPCXpresso LPC1768 has a single LEDs (there are more on the Embedded Artists
   base board, but those are not controlled by NuttX).  Usage this single LED by NuttX

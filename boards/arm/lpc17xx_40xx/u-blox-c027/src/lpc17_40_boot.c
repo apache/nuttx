@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/u-blox-c027/src/lpc17_40_boot.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,24 +51,26 @@
 #include "lpc17_40_ssp.h"
 #include "u-blox-c027.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx/LPC40xx architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_boardinitialize(void)
 {
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function c027_sspdev_initialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2)
+   * the weak function c027_sspdev_initialize() has been brought into the
+   * link.
    */
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
@@ -91,7 +93,7 @@ void lpc17_40_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
+ *   function called board_late_initialize(). board_late_initialize() will be
  *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.

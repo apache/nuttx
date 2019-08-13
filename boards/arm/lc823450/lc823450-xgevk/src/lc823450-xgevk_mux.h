@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450-xgevk_mux.h
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450-xgevk_mux.h
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H
-#define __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H
+#ifndef __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H
+#define __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,7 +134,6 @@
   0 << 13 | /* GPIO0D  0:0,  1:1       */                   \
   0 << 14 | /* GPIO0E  0:0,  1:1       */                   \
   0 << 15   /* GPIO0F  0:0,  1:1       */                   \
-
 
 /****************************************************************************
  * PORT1
@@ -576,7 +575,6 @@
   0 <<  8 | /* GPIO58  0:0,  1:1       */                   \
   0 <<  9   /* GPIO59  0:0,  1:1       */
 
-
 /****************************************************************************
  * PORT6
  ****************************************************************************/
@@ -605,4 +603,4 @@
   0 << 22 | /* XTALI0  0:2mA, 1:---, 2:4mA, 3:8mA  */       \
   0 << 24   /* XTALI1  0:2mA, 1:---, 2:4mA, 3:8mA  */
 
-#endif /* __BOARDS_ARM_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H */
+#endif /* __BOARDS_ARM_LC823450_LC823450_XGEVK_SRC_LC823450_XGEVK_MUX_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_adc.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_adc.c
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -51,13 +51,13 @@
 #include "lc823450-xgevk.h"
 #include "lc823450_adc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Name: lc823450_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lc823450_adc_setup(void)
 {

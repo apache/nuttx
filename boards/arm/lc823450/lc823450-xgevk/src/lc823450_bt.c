@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_bt.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_bt.c
  *
  *   Copyright 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

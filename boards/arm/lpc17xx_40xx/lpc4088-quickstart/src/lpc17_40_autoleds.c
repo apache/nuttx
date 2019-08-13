@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-quickstart/src/lpc17_40_autoleds.c
+ * boards/arm/lpc17xx_40xx/lpc4088-quickstart/src/lpc17_40_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,13 +60,14 @@
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
  *
- * These LEDs are driven through a PNP transistor so a low output value will 
+ * These LEDs are driven through a PNP transistor so a low output value will
  * illuminate them.
- 
+ *
  * LED1 : Connected to P1[18]
  * LED2 : Connected to P0[13]
  *
- * These LEDs are connected to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate
+ * them.
  *
  * LED3 : Connected to P1[13]
  * LED4 : Connected to P2[19]
@@ -74,8 +75,8 @@
 
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the four LEDs
- * on the LPC4088 Quickstart Board.  The following definitions describe how NuttX
- * controls the LEDs:
+ * on the LPC4088 Quickstart Board.  The following definitions describe how
+ * NuttX controls the LEDs:
  *
  *                                 LED1 LED2 LED3 LED4
  *   LED_STARTED                0  OFF  OFF  OFF  OFF

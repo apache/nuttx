@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc1768/src/lpc17_40_leds.c
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_leds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/open1788/src/lpc17_40_autoleds.c
+ * boards/arm/lpc17xx_40xx/open1788/src/lpc17_40_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,15 +57,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.  The following definitions are used to access individual LEDs.
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.
+ * The following definitions are used to access individual LEDs.
  *
  * LED1 -- Connected to P1[14]
  * LED2 -- Connected to P0[16]
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
- * These LEDs are connected to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate
+ * them.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the four LEDs
  * on the WaveShare Open1788K.  The following definitions describe how NuttX

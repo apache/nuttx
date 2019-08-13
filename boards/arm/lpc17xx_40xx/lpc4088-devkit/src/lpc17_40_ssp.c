@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-devkit/src/lpc17_40_ssp.c
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_ssp.c
  * arch/arm/src/board/lpc17_40_ssp.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -104,35 +104,39 @@ void weak_function lpc4088_devkit_sspdev_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc17_40_ssp0/1/2select and lpc17_40_ssp0/1/2status
  *
  * Description:
- *   The external functions, lpc17_40_ssp0/1/2select and lpc17_40_ssp0/1/2status
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_40_sspbus_initialize())
- *   are provided by common LPC17xx/LPC40xx logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, lpc17_40_ssp0/1/2select and
+ *   lpc17_40_ssp0/1/2status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including lpc17_40_sspbus_initialize())
+ *   are provided by common LPC17xx/LPC40xx logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip select
- *      pins.
- *   2. Provide lpc17_40_ssp0/1/2select() and lpc17_40_ssp0/1/2status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
+ *   2. Provide lpc17_40_ssp0/1/2select() and lpc17_40_ssp0/1/2status()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
+ *   3. Add a calls to lpc17_40_sspbus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by lpc17_40_sspbus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 }
 
 uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -143,9 +147,11 @@ uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   if (devid == SPIDEV_TOUCHSCREEN(0))
     {
       /* Assert/de-assert the CS pin to the touchscreen */
@@ -164,9 +170,11 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP2
-void  lpc17_40_ssp2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void  lpc17_40_ssp2select(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 }
 
 uint8_t lpc17_40_ssp2status(FAR struct spi_dev_s *dev, uint32_t devid)

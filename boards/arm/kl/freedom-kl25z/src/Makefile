@@ -1,5 +1,5 @@
 ############################################################################
-# boards/freedom-kl25z/src/Makefile
+# boards/arm/kl/freedom-kl25z/src/Makefile
 #
 #   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

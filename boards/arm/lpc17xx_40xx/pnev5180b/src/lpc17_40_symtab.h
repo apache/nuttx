@@ -1,5 +1,5 @@
 /*****************************************************************************
- * config/pnev5180b/src/lpc17_40_symtab.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_symtab.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -33,8 +33,8 @@
  *
  *****************************************************************************/
 
-#ifndef __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_SYMTAB_H
-#define __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_SYMTAB_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_SYMTAB_H
+#define __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_SYMTAB_H
 
 /*****************************************************************************
  * Included Files
@@ -53,4 +53,4 @@ extern const struct symtab_s lpc17_40_exports[];
 extern const int lpc17_40_nexports;
 
 #endif
-#endif /* __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_SYMTAB_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_SYMTAB_H */

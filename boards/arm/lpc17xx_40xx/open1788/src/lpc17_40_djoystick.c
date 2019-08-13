@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/open1788/src/lpc17_40_djoystick.c
+ * boards/arm/lpc17xx_40xx/open1788/src/lpc17_40_djoystick.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -97,7 +97,6 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
 
-
 static void djoy_disable(void);
 static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
 
@@ -176,16 +175,16 @@ static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-       /* A LOW value means that the key is pressed. */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = lpc17_40_gpioread(g_joygpio[i]);
+      bool released = lpc17_40_gpioread(g_joygpio[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
+      if (!released)
+        {
             ret |= (1 << i);
-         }
+        }
     }
 
   iinfo("Returning: %02x\n", DJOY_ALLBITS);

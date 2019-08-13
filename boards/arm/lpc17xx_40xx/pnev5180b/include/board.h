@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pnev5180b/include/board.h
+ * boards/arm/lpc17xx_40xx/pnev5180b/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -38,8 +38,8 @@
  *
  *****************************************************************************/
 
-#ifndef __BOARDS_ARM_PNEV5180B_INCLUDE_BOARD_H
-#define __BOARDS_ARM_PNEV5180B_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_INCLUDE_BOARD_H
 
 /*****************************************************************************
  * Included Files
@@ -207,10 +207,10 @@ extern "C"
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   All LPC17xx/LPC40xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have
+ *   been initialized.
  *
  *****************************************************************************/
 
@@ -234,4 +234,4 @@ void lpc17_40_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_PNEV5180_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_PNEV5180_INCLUDE_BOARD_H */

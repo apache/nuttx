@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-kl25z/src/kl_adxl345.c
+/****************************************************************************
+ * boards/arm/kl/freedom-kl25z/src/kl_adxl345.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -55,6 +55,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_SENSORS_ADXL345
@@ -153,6 +154,7 @@ static struct kl_adxl345config_s g_adxl345config =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /* This is the ADXL345 Interrupt handler */
 
 int adxl345_interrupt(int irq, FAR void *context)
@@ -181,7 +183,8 @@ int adxl345_interrupt(int irq, FAR void *context)
 static int adxl345_attach(FAR struct adxl345_config_s *state,
                            adxl345_handler_t handler, FAR void *arg)
 {
-  FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
+  FAR struct kl_adxl345config_s *priv =
+      (FAR struct kl_adxl345config_s *)state;
 
   sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
@@ -197,7 +200,8 @@ static int adxl345_attach(FAR struct adxl345_config_s *state,
 
 static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
 {
-  FAR struct kl_adxl345config_s *priv = (FAR struct kl_adxl345config_s *)state;
+  FAR struct kl_adxl345config_s *priv =
+     (FAR struct kl_adxl345config_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -275,7 +279,8 @@ int adxl345_archinitialize(int minor)
       dev = kl_spibus_initialize(CONFIG_ADXL345_SPIDEV);
       if (!dev)
         {
-          snerr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADXL345_SPIDEV);
+          snerr("ERROR: Failed to initialize SPI bus %d\n",
+                CONFIG_ADXL345_SPIDEV);
           return -ENODEV;
         }
 

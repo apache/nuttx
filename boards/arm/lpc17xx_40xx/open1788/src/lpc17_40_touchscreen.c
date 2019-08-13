@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/open1788/src/lpc17_40_touchscreen.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/open1788/src/lpc17_40_touchscreen.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -178,7 +178,8 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   iinfo("enable:%d\n", enable);
   if (enable)
     {
-      /* Enable PENIRQ interrupts.  NOTE: The pin interrupt is enabled from worker thread
+      /* Enable PENIRQ interrupts.
+       * NOTE: The pin interrupt is enabled from worker thread
        * logic after completion of processing of the touchscreen interrupt.
        */
 
@@ -186,7 +187,8 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     }
   else
     {
-      /* Disable PENIRQ interrupts.  NOTE: The PENIRQ interrupt will be disabled from
+      /* Disable PENIRQ interrupts.
+       * NOTE: The PENIRQ interrupt will be disabled from
        * interrupt handling logic.
        */
 
@@ -239,7 +241,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 
 static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 {
-  /* XPT2046 uses an an internal pullup resistor.  The PENIRQ output goes low
+  /* XPT2046 uses an an internal pullup resistor. The PENIRQ output goes low
    * due to the current path through the touch screen to ground, which
    * initiates an interrupt to the processor via TP_INT.
    */
@@ -293,7 +295,8 @@ int open1788_tsc_setup(int minor)
   dev = lpc17_40_sspbus_initialize(CONFIG_ADS7843E_SPIDEV);
   if (!dev)
     {
-      ierr("ERROR: Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+      ierr("ERROR: Failed to initialize SPI bus %d\n",
+           CONFIG_ADS7843E_SPIDEV);
       return -ENODEV;
     }
 
@@ -304,7 +307,9 @@ int open1788_tsc_setup(int minor)
     {
       ierr("ERROR: Failed to register touchscreen device minor=%d\n",
            CONFIG_ADS7843E_DEVMINOR);
+
       /* up_spiuninitialize(dev); */
+
       return -ENODEV;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpcxpresso-lpc1768/src/lpc17_40_oled.c
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_oled.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* This module is only built if CONFIG_NX_LCDDRIVER is selected.  In this
  * case, it would be an error if SSP1 is not also enabled.
  */
@@ -181,7 +183,8 @@ int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 throuh CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 throuh
+ *      CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *   on - true:turn power on, false: turn power off.
  *

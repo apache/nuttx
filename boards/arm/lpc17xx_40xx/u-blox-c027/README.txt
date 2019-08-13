@@ -114,7 +114,8 @@ pppd app is located in apps/examples/pppd and requires setting correct login
 details in the source code.
 
 To connect using the internal u-blox TCP/IP stack, use the chat app. Its
-configuration is done in boards/u-blox-c027/nsh/defconfig and can be adjusted
+configuration is done in
+boards/arm/lpc17xx_40xx/u-blox-c027/nsh/defconfig and can be adjusted
 using 'make menuconfig'.
 
 The NuttX u-blox modem driver is included like this:

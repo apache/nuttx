@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/mcb1700/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/mcb1700/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -157,12 +157,13 @@ static int nsh_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
       DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
-      syslog(LOG_INFO, "nsh_waiter: %s\n", hport->connected ? "connected" : "disconnected");
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             hport->connected ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -258,7 +259,8 @@ static int nsh_usbhostinitialize(void)
    * that we care about:
    */
 
-  syslog(LOG_INFO, "Register class drivers\n");
+  syslog(LOG_INFO,
+         "Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_HUB
   /* Initialize USB hub support */
@@ -266,7 +268,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_hub_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: usbhost_hub_initialize failed: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: usbhost_hub_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -276,7 +279,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -286,7 +290,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
@@ -341,7 +346,8 @@ int mcb1700_bringup(void)
   ret = nsh_sdinitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI-based SD card: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SPI-based SD card: %d\n", ret);
     }
 
   /* Initialize USB host */
@@ -349,7 +355,8 @@ int mcb1700_bringup(void)
   ret = nsh_usbhostinitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize USB host: %d\n", ret);
     }
 
 #ifdef CONFIG_CAN

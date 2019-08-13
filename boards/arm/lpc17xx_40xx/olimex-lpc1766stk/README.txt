@@ -161,7 +161,8 @@ Olimex LPC1766-STK development board
   to use because it relied on a 9-bit SPI inteface (the 9th bit being
   the command/data bit which is normally a discrete input).  All support
   for the Nokia 6100 was removed on May 19, 2018.  That obsoleted
-  driver can be viewed in the nuttx/drivers/lcd and boards/olimex-lpc1766stk
+  driver can be viewed in the
+  nuttx/drivers/lcd and boards/arm/lpc17xx_40xx/olimex-lpc1766stk
   directories of the Obsoleted repository.
 
   The obsoleted driver attempted to created the 9th bit on-they-flay in the
@@ -177,12 +178,13 @@ LEDs
   If CONFIG_ARCH_LEDS is defined, then support for the LPC1766-STK LEDs will be
   included in the build.  See:
 
-  - boards/olimex-lpc1766stk/include/board.h - Defines LED constants, types and
-    prototypes the LED interface functions.
+  - boards/arm/lpc17xx_40xx/olimex-lpc1766stk/include/board.h - Defines LED
+           constants, types and prototypes the LED interface functions.
 
-  - boards/olimex-lpc1766stk/src/lpc1766stk.h - GPIO settings for the LEDs.
+  - boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc1766stk.h - GPIO settings
+           for the LEDs.
 
-  - boards/olimex-lpc1766stk/src/up_leds.c - LED control logic.
+  - boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/up_leds.c - LED control logic.
 
   The LPC1766-STK has two LEDs.  If CONFIG_ARCH_LEDS is defined, these LEDs will
   be controlled as follows for NuttX debug functionality (where NC means "No Change").
@@ -370,7 +372,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     LPC1766-STK (http://www.olimex.com).  OpenOCD requires a configuration
     file.  I keep the one I used last here:
 
-      boards/olimex-lpc1766stk/tools/olimex.cfg
+      boards/arm/lpc17xx_40xx/olimex-lpc1766stk/tools/olimex.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -392,13 +394,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      boards/olimex-lpc1766stk/tools/olimex.cfg
+      boards/arm/lpc17xx_40xx/olimex-lpc1766stk/tools/olimex.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/olimex-lpc1766stk/tools/oocd.sh $PWD
+      boards/arm/lpc17xx_40xx/olimex-lpc1766stk/tools/oocd.sh $PWD
 
     If you add the path to oocd.sh to your PATH environment variable,
     the command simplifies to just:

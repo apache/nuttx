@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mcb1700/src/lpc17_40_dac.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/mcb1700/src/lpc17_40_dac.c
  *
  * Based on boards/zkit-arm-1769/src/lpc17_40_dac.c
  *
@@ -38,11 +38,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,14 +59,14 @@
 
 #ifdef CONFIG_DAC
 
-/************************************************************************************
+/****************************************************************************
  * Name: dac_devinit
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following interface to work with
- *   examples/diag.
+ *   All LPC17xx/LPC40xx architectures must provide the following interface
+ *   to work with examples/diag.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int dac_devinit(void)
 {
@@ -75,8 +75,10 @@ int dac_devinit(void)
   int ret;
 
   if (!initialized)
-  {
-    /* Call lpc17_40_dacinitialize() to get an instance of the dac interface */
+    {
+    /* Call lpc17_40_dacinitialize() to get an instance
+     * of the dac interface
+     */
 
     dac = lpc17_40_dacinitialize();
     if (dac == NULL)
@@ -93,7 +95,7 @@ int dac_devinit(void)
       }
 
     initialized = true;
-  }
+    }
 
   return OK;
 }

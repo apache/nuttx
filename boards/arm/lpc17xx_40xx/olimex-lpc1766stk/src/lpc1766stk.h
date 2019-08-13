@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc1766stk/src/lpc1766stk.h
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc1766stk.h
  *
  *   Copyright (C) 2010-2011, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,23 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
-#define _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
+#define __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_SRC_LPC1766STK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* LPC1766-STK GPIO Pin Definitions *************************************************/
+/* LPC1766-STK GPIO Pin Definitions *****************************************/
+
 /* Board GPIO Usage:
  *
  *  GPIO                             PIN  SIGNAL NAME
@@ -143,9 +144,9 @@
  * NOTES:
  * 1. Pull-ups are not required because the pins are already pulled-up by
  *    through resistors on the board.
- * 2. All buttons are capable of supporting interrupts if board_button_irq() is
- *    called to attach an interrupt handler.  Interrupts are configured to
- *    occur on both edges.
+ * 2. All buttons are capable of supporting interrupts if board_button_irq()
+ *    is called to attach an interrupt handler.
+ *    Interrupts are configured to occur on both edges.
  */
 
 #define LPC1766STK_BUT1       (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN23)
@@ -169,9 +170,9 @@
  * NOTES:
  * 1. Pull-ups are not required because the pins are already pulled-up by
  *    through resistors on the board.
- * 2. All buttons are capable of supporting interrupts if board_button_irq() is
- *    called to attach an interrupt handler.  Interrupts are configured to
- *    occur on both edges.
+ * 2. All buttons are capable of supporting interrupts if board_button_irq()
+ *    is called to attach an interrupt handler.
+ *    Interrupts are configured to occur on both edges.
  */
 
 #define LPC1766STK_CENTER     (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN5)
@@ -236,21 +237,21 @@
  * P2[10]/#EINT0/NMI                 53  ISP_E4
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_bringup
  *
  * Description:
@@ -262,31 +263,32 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc17_40_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc1766stk_sspdev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Olimex LPC1766-STK board.
+ *   Called to configure SPI chip select GPIO pins for the Olimex LPC1766-STK
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lpc1766stk_sspdev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc1766stk_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CAN
 int lpc1766stk_can_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */

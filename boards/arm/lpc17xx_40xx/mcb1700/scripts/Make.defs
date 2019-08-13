@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mcb1700/scripts/Make.defs
+# boards/arm/lpc17xx_40xx/mcb1700/scripts/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

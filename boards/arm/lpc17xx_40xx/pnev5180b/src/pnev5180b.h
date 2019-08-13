@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pnev5180b/src/pnev5180b.h
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/pnev5180b.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_PNEV5180B_SRC_PNEV5180B_H
-#define _CONFIGS_PNEV5180B_SRC_PNEV5180B_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_PNEV5180B_H
+#define __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_PNEV5180B_H
 
 /****************************************************************************
  * Included Files
@@ -124,4 +124,4 @@ void pnev5180b_autoled_initialize(void);
 void weak_function pnev5180b_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_PNEV5180B_SRC_PNEV5180B_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_PNEV5180B_H */

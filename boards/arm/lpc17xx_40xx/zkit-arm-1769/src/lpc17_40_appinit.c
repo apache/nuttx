@@ -1,10 +1,10 @@
 /****************************************************************************
- * config/zkit-arm-1769/src/lpc17_40_appinit.c
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/src/lpc17_40_appinit.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
  *
- * Based on config/lpcxpresso-lpc1768/src/lpc17_40_appinit.c
+ * Based on boards/lpcxpresso-lpc1768/src/lpc17_40_appinit.c
  *
  *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -182,7 +182,8 @@ int board_app_initialize(uintptr_t arg)
 
   /* Bind the SPI port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       message("board_app_initialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",

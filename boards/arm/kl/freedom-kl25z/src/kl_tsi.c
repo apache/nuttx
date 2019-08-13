@@ -1,13 +1,14 @@
 /****************************************************************************
- * boards/freedom-kl25z/src/kl_tsi.c
+ * boards/arm/kl/freedom-kl25z/src/kl_tsi.c
  *
  *   Copyright (C) 2013 Alan Carvalho de Assis
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *           with adaptions from Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference: https://community.freescale.com/community/
- *            the-embedded-beat/blog/2012/10/15/
- *            using-the-touch-interface-on-the-freescale-freedom-development-platform
+ * Reference:
+ * https://community.freescale.com/community/
+ * the-embedded-beat/blog/2012/10/15/
+ * using-the-touch-interface-on-the-freescale-freedom-development-platform
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,7 +76,8 @@
  ****************************************************************************/
 
 static void    tsi_calibrate(void);
-static ssize_t tsi_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t tsi_read(FAR struct file *filep,
+                        FAR char *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -135,7 +137,7 @@ static void tsi_calibrate(void)
       while (!(getreg32(KL_TSI_GENCS) & TSI_GENCS_EOSF));
 
       g_defcap[i] = getreg32(KL_TSI_DATA) & TSI_DATA_TSICNT_MASK;
-      iinfo("Sensor %d = %d\n", i+1, g_defcap[i]);
+      iinfo("Sensor %d = %d\n", i + 1, g_defcap[i]);
     }
 }
 
@@ -171,7 +173,7 @@ static ssize_t tsi_read(FAR struct file *filep, FAR char *buf, size_t buflen)
   regval |= TSI_DATA_SWTS;
   putreg32(regval, KL_TSI_DATA);
 
-  /* Wait until the conversion is done*/
+  /* Wait until the conversion is done */
 
   while (!(getreg32(KL_TSI_GENCS) & TSI_GENCS_EOSF));
 

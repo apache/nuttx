@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/teensy-lc/src/teensy-lc.h
+ * boards/arm/kl/teensy-lc/src/teensy-lc.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TEENSY_LC_SRC_TEENSY_LC_H
-#define __BOARDS_ARM_TEENSY_LC_SRC_TEENSY_LC_H
+#ifndef __BOARDS_ARM_KL_TEENSY_LC_SRC_TEENSY_LC_H
+#define __BOARDS_ARM_KL_TEENSY_LC_SRC_TEENSY_LC_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define GPIO_LED (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTC | PIN5)
@@ -79,13 +80,13 @@
 
 void weak_function kl_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int kl_pwm_setup(void);
@@ -104,5 +105,5 @@ void kl_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TEENSY_LC_SRC_TEENSY_LC_H */
+#endif /* __BOARDS_ARM_KL_TEENSY_LC_SRC_TEENSY_LC_H */
 

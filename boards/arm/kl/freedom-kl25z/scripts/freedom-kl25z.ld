@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/kwikstik-k40/scripts/freedom-kl25z.ld
+ * boards/arm/kl/freedom-kl25z/scripts/freedom-kl25z.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

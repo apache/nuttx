@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/freedom-kl26z/include/board.h
+/****************************************************************************
+ * boards/arm/kl/freedom-kl26z/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,25 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FREEDOME_KL26Z_BOARD_H
-#define __BOARDS_ARM_FREEDOME_KL26Z_BOARD_H
+#ifndef __BOARDS_ARM_KL_FREEDOM_KL26Z_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KL_FREEDOM_KL26Z_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The KL26Z has an 8MHz crystal on board */
 
 #undef  BOARD_EXTCLOCK                      /* Crystal */
@@ -63,14 +64,15 @@
  *   MCGPLLCLK Frequency:   MCGPLLCLK = 96MHz
  */
 
-#define BOARD_PRDIV0         2              /* PLL External Reference Divider */
-#define BOARD_VDIV0          24             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV0         2  /* PLL External Reference Divider */
+#define BOARD_VDIV0          24 /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_XTAL_FREQ / BOARD_PRDIV0)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV0)
 #define BOARD_MCGPLLCLK_FREQ  BOARD_PLLOUT_FREQ
 
-/* MCGOUTCLK: MCG output of either IRC, MCGFLLCLK, MCGPLLCLK, or MCG's external
+/* MCGOUTCLK:
+ * MCG output of either IRC, MCGFLLCLK, MCGPLLCLK, or MCG's external
  * reference clock that sources the core, system, bus, and flash clock.
  *
  * MCGOUTCLK = MCGPLLCLK = 96MHz
@@ -87,20 +89,21 @@
  *   System clock divided by OUTDIV4, clocks the bus slaves and peripherals.
  */
 
-#define BOARD_OUTDIV1        2              /* Core/system = MCGOUTCLK / 2, 48MHz */
-#define BOARD_OUTDIV4        2              /* Bus clock   = System clock / 2, 24MHz */
+#define BOARD_OUTDIV1        2   /* Core/system = MCGOUTCLK / 2, 48MHz */
+#define BOARD_OUTDIV4        2   /* Bus clock   = System clock / 2, 24MHz */
 
 #define BOARD_CORECLK_FREQ  (BOARD_MCGOUTCLK_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUSCLK_FREQ   (BOARD_CORECLK_FREQ / BOARD_OUTDIV4)
 
-/* SDHC clocking ********************************************************************/
+/* SDHC clocking ************************************************************/
 
-/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+/* SDCLK configurations corresponding to various modes of operation.
+ * Formula is:
  *
  *   SDCLK  frequency = (base clock) / (prescaler * divisor)
  *
- * The SDHC module is always configure configured so that the core clock is the base
- * clock.
+ * The SDHC module is always configure configured so that the core clock is
+ * the base clock.
  */
 
 /* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
@@ -133,6 +136,7 @@
 #endif
 
 /* PWM Configuration */
+
 /* TPM0 Channels */
 
 #define GPIO_TPM0_CH0OUT PIN_TPM0_CH0_3 //PIN_TPM0_CH0_1
@@ -152,7 +156,8 @@
 #define GPIO_TPM2_CH0OUT PIN_TPM2_CH0_1
 #define GPIO_TPM2_CH1OUT PIN_TPM2_CH1_1
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The Freedom KL26Z has a single RGB LED driven by the KL26Z as follows:
  *
  *   ------------- --------
@@ -162,10 +167,12 @@
  *   Green Cathode PTE31
  *   Blue Cathode  PTD5
  *
- * NOTE: PTD5 is also connected to the I/O header on J2 pin 12 (also known as D13).
+ * NOTE:
+ * PTD5 is also connected to the I/O header on J2 pin 12 (also known as D13).
  *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * Freedom KL26Z.  The following definitions describe how NuttX controls the LEDs:
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom KL26Z.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
@@ -190,15 +197,18 @@
 #define LED_ASSERTION     6
 #define LED_PANIC         7
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Freedom KL26Z board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution *******************************************************/
-/* If there are alternative configurations for various pins in the k26z128_pinmux.h
- * header file, those alternative pins will be labeled with a suffix like _1, _2,
- * etc.  The logic in this file must select the correct pin configuration for the
- * board by defining a pin configuration (with no suffix) that maps to the correct
- * alternative.
+/* Alternative pin resolution ***********************************************/
+
+/* If there are alternative configurations for various pins in the
+ * k26z128_pinmux.h header file, those alternative pins will be labeled with
+ * a suffix like _1, _2, etc.
+ * The logic in this file must select the correct pin configuration for the
+ * board by defining a pin configuration (with no suffix) that maps to the
+ * correct alternative.
  */
 
 /* SPI0 Pinout
@@ -217,9 +227,9 @@
 #define PIN_SPI1_MISO  (PIN_SPI1_MISO_3 | PIN_ALT2_PULLUP)
 #define PIN_SPI1_MOSI  (PIN_SPI0_MOSI_7 | PIN_ALT2_PULLUP)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -232,19 +242,19 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_tsi_initialize
  *
  * Description:
- *   Initialize the TSI hardware and interface for the sliders on board the Freedom
- *   KL26Z board.  Register a character driver at /dev/tsi that may be used to read
- *   from each sensor.
+ *   Initialize the TSI hardware and interface for the sliders on board the
+ *   Freedom KL26Z board.  Register a character driver at /dev/tsi that may
+ *   be used to read from each sensor.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_TSI
 void kl_tsi_initialize(void);
@@ -256,4 +266,4 @@ void kl_tsi_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_FREEDOME_KL26Z_BOARD_H */
+#endif  /* __BOARDS_ARM_KL_FREEDOM_KL26Z_INCLUDE_BOARD_H */

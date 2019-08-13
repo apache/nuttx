@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/zkit-arm-1769/include/board.h
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
@@ -37,14 +37,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_ZKIT_ARM_1769_INCLUDE_BOARD_H
-#define __BOARDS_ARM_ZKIT_ARM_1769_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1769_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1769_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,12 +54,15 @@
 #  include <nuttx/irq.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* NOTE:  The following definitions require lpc17_40_syscon.h.
+ * It is not included here because the including C file may not have that
+ * file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
@@ -76,22 +79,24 @@
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz */
 
-/* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main oscillator.
+/* Select the main oscillator as the frequency source.
+ * SYSCLK is then the frequency of the main oscillator.
  */
 
 #undef CONFIG_LPC17_40_MAINOSC
 #define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
-/* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
+/* Select the main oscillator and CCLK divider.
+ * The output of the divider is CCLK.
  * The input to the divider (PLLCLK) will be determined by the PLL output.
  */
 
 #define BOARD_CCLKCFG_DIVIDER      6
 #define BOARD_CCLKCFG_VALUE        ((BOARD_CCLKCFG_DIVIDER-1) << SYSCON_CCLKCFG_SHIFT)
 
-/* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
+/* PLL0.
+ * PLL0 is used to generate the CPU clock divider input (PLLCLK).
  *
  *  Source clock:               Main oscillator
  *  PLL0 Multiplier value (M):  20
@@ -119,8 +124,9 @@
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLL1CFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLL1CFG_NSEL_SHIFT))
 
-/* USB divider.  This divider is used when PLL1 is not enabled to get the
- * USB clock from PLL0:
+/* USB divider.
+ * This divider is used when PLL1 is not enabled to get the USB clock
+ * from PLL0:
  *
  *  USBCLK = PLL0CLK / 10 = 48MHz
  */
@@ -138,7 +144,8 @@
 //#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
  *
@@ -178,9 +185,10 @@
 #define LED_ASSERTION              6  /*  NC     ON  (momentary) */
 #define LED_PANIC                  7  /*  NC     ON  (1Hz flashing) */
 
-/* Button definitions ***************************************************************/
-/* The ZKIT-ARM-1769 supports several buttons.  All will read "1" when open and "0"
- * when closed
+/* Button definitions *******************************************************/
+
+/* The ZKIT-ARM-1769 supports several buttons.
+ * All will read "1" when open and "0" when closed
  *
  * KEY1            -- Connected to P1[19]
  * KEY2            -- Connected to P1[27]
@@ -189,6 +197,7 @@
  * KEY5            -- Connected to P2[13]
  *
  */
+
 #define BOARD_BUTTON_1             0
 #define BOARD_BUTTON_2             1
 #define BOARD_BUTTON_3             2
@@ -202,7 +211,8 @@
 #define BOARD_BUTTON4_BIT          (1 << BOARD_BUTTON_4)
 #define BOARD_BUTTON5_BIT          (1 << BOARD_BUTTON_5)
 
-/* Alternate pin selections *********************************************************/
+/* Alternate pin selections *************************************************/
+
 /* Pin Description                      On Board       Connector
  * -------------------------------- ---------------- -------------
  * P0.0/RD1/TXD3/SDA1                   RD1            AUX-CON
@@ -309,35 +319,36 @@
  * P4.28/RX_MCLK/MAT2.0/TXD3            GPIO3
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
  *   Once the system has booted, these functions can be used to control LEDs 1
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void lpc17_40_led(int lednum, int state);
@@ -349,4 +360,4 @@ void lpc17_40_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_ZKIT_ARM_1769_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1769_INCLUDE_BOARD_H */

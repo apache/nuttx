@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pnev5180b/src/lpc17_40_spi.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_spi.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -80,12 +80,12 @@ void weak_function pnev5180b_spidev_initialize(void)
  *   must be provided by board-specific logic. They are implementations of
  *   the select and status methods of the SPI interface defined by struct
  *   spi_ops_s (see include/nuttx/spi/spi.h). All other methods (including
- *   lpc17_40_spibus_initialize()) are provided by common LPC17xx/LPC40xx logic.  To
- *   use this common SPI logic on your board:
+ *   lpc17_40_spibus_initialize()) are provided by common LPC17xx/LPC40xx
+ *   logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in lpc17_40_boardinitialize() to configure SPI/SSP chip
- *      select
- *      pins.
+ *      select pins.
  *   2. Provide lpc17_40_spiselect and  lpc17_40_spistatus functions
  *      in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
@@ -99,7 +99,8 @@ void weak_function pnev5180b_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lpc4088-devkit/src/lpc17_40_sdraminitialize.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_sdraminitialize.c
  * arch/arm/src/board/lpc17_40_sdraminitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,12 +54,13 @@
 
 #if defined(CONFIG_LPC17_40_EMC) && defined(CONFIG_LPC17_40_EXTDRAM)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK* (undivided), or
- * LPC17_40_CCLK / 2 as determined by settings in the board.h header file.
+/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK*
+ * (undivided), or LPC17_40_CCLK / 2 as determined by settings in the board.h
+ * header file.
  *
  * For example:
  *   LPC17_40_CCLCK      =  120,000,000
@@ -97,17 +98,17 @@
 
 #define SDRAM_BASE          0xa0000000 /* CS0 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc4088_devkit_sdram_initialize
  *
  * Description:
  *   Initialize SDRAM
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc4088_devkit_sdram_initialize(void)
 {
@@ -143,7 +144,7 @@ void lpc4088_devkit_sdram_initialize(void)
   putreg32(                 1, LPC17_40_EMC_DYNAMICAPR);  /* TAPR  = 2 clocks? */
   putreg32(EMC_NS2CLK(20) + 2, LPC17_40_EMC_DYNAMICDAL);  /* TDAL  = TRP + TDPL = 20ns + 2clk  */
   putreg32(                 1, LPC17_40_EMC_DYNAMICWR);   /* TWR   = 2 clocks */
-  putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRC);   /* H57V2562GTR-75C TRC = 63ns(min)*/
+  putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRC);   /* H57V2562GTR-75C TRC = 63ns(min) */
   putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
   putreg32(                15, LPC17_40_EMC_DYNAMICXSR);  /* Exit self-refresh to active */
   putreg32(    EMC_NS2CLK(63), LPC17_40_EMC_DYNAMICRRD);  /* 3 clock, TRRD = 15ns (min) */
@@ -158,27 +159,29 @@ void lpc4088_devkit_sdram_initialize(void)
   putreg32(MDKCFG_RASCAS0VAL, LPC17_40_EMC_DYNAMICRASCAS0);
 
 #ifdef CONFIG_LPC17_40_SDRAM_16BIT
-    /* For Manley lpc1778 SDRAM: H57V2562GTR-75C, 256Mb, 16Mx16, 4 banks, row=13, column=9:
-     *
-     * 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC
-     */
+
+  /* For Manley lpc1778 SDRAM:
+   * H57V2562GTR-75C, 256Mb, 16Mx16, 4 banks, row=13, column=9:
+   *
+   * 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC
+   */
 
   putreg32(EMC_DYNAMICCONFIG_MD_SDRAM |  EMC_DYNAMICCONFIG_AM0(13),
            LPC17_40_EMC_DYNAMICCONFIG0);
 
 #elif defined CONFIG_LPC17_40_SDRAM_32BIT
-    /* 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC */
+  /* 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC */
 
-  putreg32(EMC_DYNAMICCONFIG_MD_SDRAM |  EMC_DYNAMICCONFIG_AM0(13) | EMC_DYNAMICCONFIG_AM1,
-           LPC17_40_EMC_DYNAMICCONFIG0);
+  putreg32(EMC_DYNAMICCONFIG_MD_SDRAM |  EMC_DYNAMICCONFIG_AM0(13) |
+           EMC_DYNAMICCONFIG_AM1, LPC17_40_EMC_DYNAMICCONFIG0);
 #endif
 
   up_mdelay(100);
 
   /* Issue NOP command */
 
-  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS | EMC_DYNAMICCONTROL_I_NOP,
-           LPC17_40_EMC_DYNAMICCONTROL);
+  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS |
+           EMC_DYNAMICCONTROL_I_NOP, LPC17_40_EMC_DYNAMICCONTROL);
 
   /* Wait 200 Msec */
 
@@ -186,8 +189,8 @@ void lpc4088_devkit_sdram_initialize(void)
 
   /* Issue PALL command */
 
-  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS | EMC_DYNAMICCONTROL_I_PALL,
-           LPC17_40_EMC_DYNAMICCONTROL);
+  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS |
+           EMC_DYNAMICCONTROL_I_PALL, LPC17_40_EMC_DYNAMICCONTROL);
 
   putreg32(2, LPC17_40_EMC_DYNAMICREFRESH); /* ( n * 16 ) -> 32 clock cycles */
 
@@ -195,7 +198,7 @@ void lpc4088_devkit_sdram_initialize(void)
 
   for (i = 0; i < 128; i++);
 
-  /* 64ms/8192 = 7.8125us, nx16x8.33ns < 7.8125us, n < 58.6*/
+  /* 64ms/8192 = 7.8125us, nx16x8.33ns < 7.8125us, n < 58.6 */
 
   regval = 64000000 / (1 << 13);
   regval -= 16;
@@ -205,8 +208,8 @@ void lpc4088_devkit_sdram_initialize(void)
 
   /* Issue MODE command */
 
-  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS | EMC_DYNAMICCONTROL_I_MODE,
-           LPC17_40_EMC_DYNAMICCONTROL);
+  putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS |
+           EMC_DYNAMICCONTROL_I_MODE, LPC17_40_EMC_DYNAMICCONTROL);
 
 #ifdef CONFIG_LPC17_40_SDRAM_16BIT
   (void)getreg16(SDRAM_BASE | (0x33 << 12));  /* 8 burst, 3 CAS latency */

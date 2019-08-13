@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_st7565.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_st7565.c
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -75,11 +75,12 @@
 static void lc823450_st7565_reset(FAR struct st7565_lcd_s *lcd, bool on);
 static void lc823450_st7565_select(FAR struct st7565_lcd_s *lcd);
 static void lc823450_st7565_deselect(FAR struct st7565_lcd_s *lcd);
-static void lc823450_st7565_cmddata(FAR struct st7565_lcd_s *lcd, const uint8_t cmd);
-static int lc823450_st7565_senddata(FAR struct st7565_lcd_s *lcd, FAR const uint8_t *data,
+static void lc823450_st7565_cmddata(FAR struct st7565_lcd_s *lcd,
+                                    const uint8_t cmd);
+static int lc823450_st7565_senddata(FAR struct st7565_lcd_s *lcd,
+                                    FAR const uint8_t *data,
                                     int size);
 static int lc823450_st7565_backlight(FAR struct st7565_lcd_s *lcd, int level);
-
 
 static FAR struct spi_dev_s *g_spidev;
 static FAR struct lcd_dev_s *g_lcddev;
@@ -136,7 +137,8 @@ static void lc823450_st7565_deselect(FAR struct st7565_lcd_s *lcd)
  * Name: lc823450_st7565_cmddata
  ****************************************************************************/
 
-static void lc823450_st7565_cmddata(FAR struct st7565_lcd_s *lcd, const uint8_t cmd)
+static void lc823450_st7565_cmddata(FAR struct st7565_lcd_s *lcd,
+                                    const uint8_t cmd)
 {
   lc823450_gpio_write(GPIO_LCD_A0, !cmd);
 }

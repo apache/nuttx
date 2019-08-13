@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mcb1700/src/lpc17_40_leds.c
+ * boards/arm/lpc17xx_40xx/mcb1700/src/lpc17_40_leds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,6 +73,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The MCB1700 has 4 LEDs along the bottom of the board. Blue or off.
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
  * for NuttX debug functionality (where NC means "No Change").
@@ -145,8 +146,8 @@ void board_autoled_on(int led)
           led2 = 1;
         }
 
-      lpc17_40_led(MCB1700_LED1,led1);
-      lpc17_40_led(MCB1700_LED2,led2);
+      lpc17_40_led(MCB1700_LED1, led1);
+      lpc17_40_led(MCB1700_LED2, led2);
     }
 
   /* We will always control the HB LED */
@@ -184,13 +185,14 @@ void board_autoled_off(int led)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
- *   Once the system has booted, these functions can be used to control the LEDs
+ *   Once the system has booted, these functions can be used to control the
+ *   LEDs
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_led(int lednum, int state)
 

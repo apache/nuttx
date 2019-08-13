@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lpc4088_quickstart/src/lpc17_40_boardinitialize.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/lpc4088_quickstart/src/lpc17_40_boardinitialize.c
  *
  *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,27 +51,28 @@
 
 #include "lpc4088-quickstart.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx/LPC40xx architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_boardinitialize(void)
 {
@@ -92,8 +93,8 @@ void lpc17_40_boardinitialize(void)
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1) || \
     defined(CONFIG_LPC17_40_SSP2)
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2)
-   * the weak function lpc4088_quickstart_sspdev_initialize() has been brought
-   * into the link.
+   * the weak function lpc4088_quickstart_sspdev_initialize() has been
+   * brought into the link.
    */
 
   if (lpc4088_quickstart_sspdev_initialize)
@@ -107,7 +108,6 @@ void lpc17_40_boardinitialize(void)
 
   board_autoled_initialize();
 #endif
-
 }
 
 /****************************************************************************

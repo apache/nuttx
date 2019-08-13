@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mbed/src/Makefile
+# boards/arm/lpc17xx_40xx/mbed/src/Makefile
 #
 #   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

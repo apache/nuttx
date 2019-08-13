@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/src/lc823450_wm8776.c
+ * boards/arm/lc823450/lc823450-xgevk/src/lc823450_wm8776.c
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -72,7 +72,6 @@ static struct wm8776_lower_s g_wm8776info =
   .address = WM8776_I2C_ADDR,
   .frequency = 400000,
 };
-
 
 /****************************************************************************
  * Name: lc823450_wm8776initialize

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lincoln60/src/lincoln60.h
+ * boards/arm/lpc17xx_40xx/lincoln60/src/lincoln60.h
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/teensy-lc/src/Makefile
+# boards/arm/kl/teensy-lc/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

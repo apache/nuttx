@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lpc4088-quickstart/src/lpc17_40_nandinitialize.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/lpc4088-quickstart/src/lpc17_40_nandinitialize.c
  * arch/arm/src/board/lpc17_40_nandinitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,17 +51,17 @@
 
 #if defined(CONFIG_LPC17_40_SPIFI)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc4088_quickstart_nand_initialize
  *
  * Description:
  *   Initialize NAND FLASH
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void _lpc4088_quickstart_nand_initialize(void)
 {
@@ -83,8 +83,8 @@ void _lpc4088_quickstart_nand_initialize(void)
   putreg32(31, LPC17_40_EMC_STATICWAITWR1);
   putreg32(31, LPC17_40_EMC_STATICWAITTURN1);
 
-  /* GPIO P2[21] connects to the Ready/Busy pin of the NAND part.  We need to
-   * reconfigure this pin as normal GPIO input.
+  /* GPIO P2[21] connects to the Ready/Busy pin of the NAND part.
+   * We need to reconfigure this pin as normal GPIO input.
    */
 
   lpc17_40_gpioconfig(GPIO_NAND_RB);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-kl26z/src/kl_led.c
+ * boards/arm/kl/freedom-kl26z/src/kl_led.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,8 +41,9 @@
  *   Green Cathode PTE31
  *   Blue Cathode  PTD5
  *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * Freedom KL26Z.  The following definitions describe how NuttX controls the LEDs:
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom KL26Z.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF

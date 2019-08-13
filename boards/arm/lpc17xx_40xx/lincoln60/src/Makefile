@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lincoln60/src/Makefile
+# boards/arm/lpc17xx_40xx/lincoln60/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

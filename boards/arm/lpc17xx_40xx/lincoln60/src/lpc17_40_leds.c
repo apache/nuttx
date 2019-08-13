@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lincoln60/src/lpc17_40_leds.c
+ * boards/arm/lpc17xx_40xx/lincoln60/src/lpc17_40_leds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,23 +72,22 @@
  * Private Data
  ****************************************************************************/
 
-/* LED definitions ******************************************************************
+/* LED definitions **********************************************************/
 
-The Lincoln 60 has 2 LEDs along the bottom of the board. Green or off.
-If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for NuttX
-debug functionality (where NC means "No Change").
-
-During the boot phases.  LED1 and LED2 will show boot status.
-
-               LED1   LED2
-STARTED         OFF    OFF
-HEAPALLOCATE   BLUE    OFF
-IRQSENABLED     OFF   BLUE
-STACKCREATED    OFF    OFF
-
-After the system is booted, this logic will no longer use LEDs 1 & 2.  They
-are available for use by applications using lpc17_40_led (prototyped below)
-*/
+/* The Lincoln 60 has 2 LEDs along the bottom of the board. Green or off.
+ * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for
+ * NuttXdebug functionality (where NC means "No Change").
+ * During the boot phases.  LED1 and LED2 will show boot status.
+ *
+ *                LED1   LED2
+ * STARTED         OFF    OFF
+ * HEAPALLOCATE   BLUE    OFF
+ * IRQSENABLED     OFF   BLUE
+ * STACKCREATED    OFF    OFF
+ *
+ * After the system is booted, this logic will no longer use LEDs 1 & 2.  They
+ * are available for use by applications using lpc17_40_led (prototyped below)
+ */
 
 static bool g_initialized;
 static int  g_nestcount;
@@ -144,8 +143,8 @@ void board_autoled_on(int led)
         case LED_IRQSENABLED:
           led2 = 1;
         }
-      lpc17_40_led(LINCOLN60_LED1,led1);
-      lpc17_40_led(LINCOLN60_LED2,led2);
+      lpc17_40_led(LINCOLN60_LED1, led1);
+      lpc17_40_led(LINCOLN60_LED2, led2);
     }
 
   /* We will always control the HB LED */
@@ -183,13 +182,14 @@ void board_autoled_off(int led)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
- *   Once the system has booted, these functions can be used to control the LEDs
+ *   Once the system has booted, these functions can be used to control the
+ *   LEDs
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_led(int lednum, int state)
 

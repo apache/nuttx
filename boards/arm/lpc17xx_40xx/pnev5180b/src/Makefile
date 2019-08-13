@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/pnev5180b/src/Makefile
+# boards/arm/lpc17xx_40xx/pnev5180b/src/Makefile
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Michael Jung <mijung@gmx.net>

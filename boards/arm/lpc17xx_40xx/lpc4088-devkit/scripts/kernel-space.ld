@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-devkit/scripts/kernel-space.ld
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/scripts/kernel-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

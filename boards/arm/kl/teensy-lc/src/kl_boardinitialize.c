@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/teensy-lc/src/kl_boardinitialize.c
+/****************************************************************************
+ * boards/arm/kl/teensy-lc/src/kl_boardinitialize.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,27 +50,28 @@
 #include "up_arch.h"
 #include "teensy-lc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_boardinitialize
  *
  * Description:
- *   All K25Z architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All K25Z architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kl_boardinitialize(void)
 {
@@ -83,8 +84,8 @@ void kl_boardinitialize(void)
   kl_configgpio(PIN_UART0_TX_3);
 #endif
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * kl_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function kl_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)

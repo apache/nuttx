@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc1766stk/include/board.h
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_BOARD_H
+#define __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,12 +49,15 @@
 #  include <nuttx/irq.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* NOTE:  The following definitions require lpc17_40_syscon.h.
+ * It is not included here because the including C file may not have that
+ * file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
@@ -64,22 +67,23 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz */
 
-/* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
- * of the main oscillator.
+/* Select the main oscillator as the frequency source.
+ * SYSCLK is then the frequency of the main oscillator.
  */
 
 #undef CONFIG_LPC17_40_MAINOSC
 #define CONFIG_LPC17_40_MAINOSC       1
 #define BOARD_SCS_VALUE            SYSCON_SCS_OSCEN
 
-/* Select the main oscillator and CCLK divider. The output of the divider is CCLK.
+/* Select the main oscillator and CCLK divider.
+ * The output of the divider is CCLK.
  * The input to the divider (PLLCLK) will be determined by the PLL output.
  */
 
@@ -114,7 +118,8 @@
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLL1CFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLL1CFG_NSEL_SHIFT))
 
-/* USB divider.  This divider is used when PLL1 is not enabled to get the
+/* USB divider.
+ * This divider is used when PLL1 is not enabled to get the
  * USB clock from PLL0:
  *
  *  USBCLK = PLL0CLK / 10 = 48MHz
@@ -133,9 +138,11 @@
 //#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.  The following definitions are used to access individual LEDs.
+ * any way.
+ * The following definitions are used to access individual LEDs.
  *
  * LED1            -- Connected to P1[25]
  * LED2            -- Connected to P0[4]
@@ -167,9 +174,10 @@
 #define LED_PANIC                  2  /*  N/C  ON  = Oops! We crashed. (flashing) */
 #define LED_IDLE                   3  /*  OFF  N/C = LPC17 in sleep mode (LED1 glowing) */
 
-/* Button definitions ***************************************************************/
-/* The LPC1766-STK supports several buttons.  All will read "1" when open and "0"
- * when closed
+/* Button definitions *******************************************************/
+
+/* The LPC1766-STK supports several buttons.
+ * All will read "1" when open and "0" when closed
  *
  * BUT1            -- Connected to P0[23]
  * BUT2            -- Connected to P2[13]
@@ -206,7 +214,7 @@
 #define BOARD_JOYSTICK_LEFT_BIT    (1 << BOARD_JOYSTICK_LEFT)
 #define BOARD_JOYSTICK_RIGHT_BIT   (1 << BOARD_JOYSTICK_RIGHT)
 
-/* Alternate pin selections *********************************************************/
+/* Alternate pin selections *************************************************/
 
 /* CAN1 GPIO                        PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
@@ -275,6 +283,7 @@
  * -------------------------------- ---- --------------
  * P0[24]/AD0[1]/I2SRX_WS/CAP3[1]     8  TEMP
  * P0[25]/AD0[2]/I2SRX_SDA/TXD3       7  MIC IN
+ */
 
 /* USB GPIO                         PIN  SIGNAL NAME
  * -------------------------------- ---- --------------
@@ -349,4 +358,4 @@
  *  P1[31]/SCK1/AD0[5]                20  AIN5
  */
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC17XX_40XX_OLIMEX_LPC1766STK_INCLUDE_BOARD_H */

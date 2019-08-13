@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpcxpresso-lpc1768/src/Makefile
+# boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/Makefile
 #
 #   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

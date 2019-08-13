@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/u-blox-c027/src/lpc17_40_ubxmdm.c
+ * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_ubxmdm.c
  *
  *   Copyright (C) 2016 Vladimir Komendantskiy. All rights reserved.
  *   Author: Vladimir Komendantskiy <vladimir@moixaenergy.com>
@@ -59,7 +59,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Debug ********************************************************************/
+
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_U_BLOX_DEBUG
@@ -133,6 +135,7 @@ static struct lpc17_40_ubxmdm_lower lpc17_40_ubxmdm_lower;
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct lpc17_40_ubxmdm_pins lpc17_40_ubxmdm_pins =
@@ -200,7 +203,7 @@ static int lpc17_40_poweron(FAR struct ubxmdm_lower* lower)
   nxsig_usleep(1 * 1000);  /* Delay to obtain correct voltage on shifters */
 
   lpc17_40_configgpio(priv->pins->shifter_en_n | GPIO_VALUE_ZERO); /* UART shifter enabled */
-/* lpc17_40_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE);   * Stop current through switch */
+/* lpc17_40_configgpio(priv->pins->power_on_n  | GPIO_VALUE_ONE);    Stop current through switch */
 
   return OK;
 }

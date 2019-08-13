@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/kl_appinit.c
+ * boards/arm/kl/freedom-kl26z/src/kl_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

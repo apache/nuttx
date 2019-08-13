@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpc4088-devkit/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define NSH_HAVE_MMCSD      1
@@ -83,7 +84,9 @@
 #  undef NSH_HAVE_MMCSD
 #endif
 
-/* MMC/SD support requires that an SPI support is enabled and an SPI port is selected */
+/* MMC/SD support requires that an SPI support is enabled
+ * and an SPI port is selected
+ */
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
@@ -176,7 +179,7 @@ static int nsh_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -287,7 +290,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -297,7 +301,8 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
     }
 #endif
 
@@ -355,7 +360,7 @@ int lpc4088_devkit_bringup(void)
     }
 #endif
 
-  /* Initialize SD Card*/
+  /* Initialize SD Card */
 
   ret = nsh_sdinitialize();
   if (ret == OK)
@@ -371,7 +376,8 @@ int lpc4088_devkit_bringup(void)
   ret = fb_register(0, 0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -381,7 +387,8 @@ int lpc4088_devkit_bringup(void)
   ret = lpc4088_devkit_tsc_setup(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: lpc4088_devkit_tsc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: lpc4088_devkit_tsc_setup failed: %d\n",
+             ret);
     }
 #endif
 
@@ -391,7 +398,8 @@ int lpc4088_devkit_bringup(void)
   ret = lpc17_40_djoy_initialization();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to register the joystick driver: %d\n",
+             ret);
       return ret;
     }
 #endif

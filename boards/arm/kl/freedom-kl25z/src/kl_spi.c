@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-kl25z/src/kl_spi.c
+ * boards/arm/kl/freedom-kl25z/src/kl_spi.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -101,12 +101,13 @@ void weak_function kl_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to kl_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by kl_spibus_initialize() may then be used to bind
- *      the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by kl_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Name: kl_spi[n]select
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/pnev5180b/src/lpc17_40_romfs.h
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_romfs.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung (mijung@gmx.net)
@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_ROMFS_H
-#define __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_ROMFS_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_ROMFS_H
+#define __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_ROMFS_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@ int lpc17_40_romfs_initialize(void);
 
 #endif /* CONFIG_LPC17_40_ROMFS */
 
-#endif /* __BOARDS_ARM_PNEV5180B_SRC_LPC17_40_ROMFS_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_PNEV5180B_SRC_LPC17_40_ROMFS_H */

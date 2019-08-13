@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/zkit-arm-1769/src/lpc17_40_lcd.c
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/src/lpc17_40_lcd.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Manikandan <code@zilogic.com>

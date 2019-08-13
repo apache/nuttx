@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/teensy-lc/src/kl_led.c
+ * boards/arm/kl/teensy-lc/src/kl_led.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

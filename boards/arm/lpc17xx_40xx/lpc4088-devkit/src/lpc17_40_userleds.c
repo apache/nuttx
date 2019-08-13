@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-devkit/src/lpc17_40_userleds.c
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_userleds.c
  * arch/arm/src/board/lpc17_40_userleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/u-blox-c027/src/lpc17_40_usbmsc.c
+ * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_usbmsc.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,7 +69,7 @@
 #  undef LPC17XX_40XX_MMCSDSLOTNO
 #  define LPC17XX_40XX_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new LPC17xx/LPC40xx boards here */
+  /* Add configuration for new LPC17xx/LPC40xx boards here */
 
 #  error "Unrecognized LPC17xx/LPC40xx board"
 #endif
@@ -112,7 +112,8 @@ int board_usbmsc_initialize(int port)
   syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
          LPC17XX_40XX_MMCSDSPIPORTNO, LPC17XX_40XX_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, LPC17XX_40XX_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
+                                LPC17XX_40XX_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       syslog(LOG_ERR,

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mbed/scripts/ld.script
+ * boards/arm/lpc17xx_40xx/mbed/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

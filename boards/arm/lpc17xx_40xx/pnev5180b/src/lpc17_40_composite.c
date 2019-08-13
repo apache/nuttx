@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/pnev5180b/src/lpc17_40_composite.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_composite.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
@@ -64,9 +64,9 @@
 
 int board_composite_initialize(int port)
 {
-   syslog(LOG_INFO, "board_composite_initialize(port: %d)\n", port);
+  syslog(LOG_INFO, "board_composite_initialize(port: %d)\n", port);
 
-   return OK;
+  return OK;
 }
 
 /*****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-quickstart/kernel/lpc17_40_userspace.c
+ * boards/arm/lpc17xx_40xx/lpc4088-quickstart/kernel/lpc17_40_userspace.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE
@@ -64,14 +65,14 @@
  * Public Data
  ****************************************************************************/
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.
+ * They are not actual uint32_t storage locations!
+ * They are only used meaningfully in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data
+ *    (it is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */

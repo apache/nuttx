@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-lpc1766stk/src/Makefile
+# boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/Makefile
 #
 #   Copyright (C) 2010, 2012, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

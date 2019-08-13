@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-quickstart/src/lpc17_40_userleds.c
+ * boards/arm/lpc17xx_40xx/lpc4088-quickstart/src/lpc17_40_userleds.c
  * arch/arm/src/board/lpc17_40_userleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
@@ -106,21 +106,21 @@ void board_userled(int led, bool ledon)
   switch ((unsigned)led)
     {
       case BOARD_LED1:
-      
+
         /* LED1 and LED2 are inverted */
-      
+
       case BOARD_LED2:
         lpc17_40_gpiowrite(g_ledcfg[led], !ledon);
         break;
-      
+
       case BOARD_LED3:
-      
+
         /* LED3 and LED4 are driven normally */
-      
+
       case BOARD_LED4:
         lpc17_40_gpiowrite(g_ledcfg[led], ledon);
         break;
-      
+
       default:
         break;
     }

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/open1788/kernel/Makefile
+# boards/arm/lpc17xx_40xx/open1788/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

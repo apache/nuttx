@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/scripts/ld.script
+ * boards/arm/lc823450/lc823450-xgevk/scripts/ld.script
  *
  *   Copyright 2017 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>

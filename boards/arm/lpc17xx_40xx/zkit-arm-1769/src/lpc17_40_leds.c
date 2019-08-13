@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/zkit-arm-1769/src/lpc17_40_leds.c
+ * boards/arm/lpc17xx_40xx/zkit-arm-1769/src/lpc17_40_leds.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: BabuSubashChandar <code@zilogic.com>
@@ -65,8 +65,8 @@
 /* LED definitions **********************************************************/
 
 /* The ZKit-ARM-1769 has 2 LEDs along the bottom of the board. Red or off.
- * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for NuttX
- * debug functionality (where NC means "No Change").
+ * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows for
+ * NuttX debug functionality (where NC means "No Change").
  *
  * During the boot phases.  LED1 and LED2 will show boot status.
  *
@@ -176,13 +176,13 @@ void board_autoled_off(int led)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_led
  *
  * Description:
  *   Once the system has booted, this functions can be used to control LED 1
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_led(int lednum, int state)
 {

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * config/pnev5180b/src/lpc17_40_bringup.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>

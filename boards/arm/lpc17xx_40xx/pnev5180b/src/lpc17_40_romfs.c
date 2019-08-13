@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/pnev5180b/src/lpc17_40_romfs.c
+ * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_romfs.c
  * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.

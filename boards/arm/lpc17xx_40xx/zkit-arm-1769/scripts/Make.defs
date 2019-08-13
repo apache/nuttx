@@ -1,5 +1,5 @@
 ############################################################################
-# boards/zkit-arm-1769/scripts/Make.defs
+# boards/arm/lpc17xx_40xx/zkit-arm-1769/scripts/Make.defs
 #
 #   Copyright (C) 2013 Zilogic Systems. All rights reserved.
 #   Author: BabuSubashChandar <code@zilogic.com>

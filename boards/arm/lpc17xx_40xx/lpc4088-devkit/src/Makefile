@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4088-devkit/src/Makefile
+# boards/arm/lpc17xx_40xx/lpc4088-devkit/src/Makefile
 #
 #   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

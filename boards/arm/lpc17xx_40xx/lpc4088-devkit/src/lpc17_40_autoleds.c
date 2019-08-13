@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4088-devkit/src/lpc17_40_autoleds.c
+ * boards/arm/lpc17xx_40xx/lpc4088-devkit/src/lpc17_40_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -65,11 +65,12 @@
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
- * These LEDs are connected to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate
+ * them.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the two LEDs
- * on the LPC4088 Developer's Kit.  The following definitions describe how NuttX
- * controls the LEDs:
+ * on the LPC4088 Developer's Kit.  The following definitions describe how
+ * NuttX controls the LEDs:
  *
  *                                 LED1 LED2 LED3 LED4
  *   LED_STARTED                0  OFF  OFF  OFF  OFF

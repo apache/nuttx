@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lc823450-xgevk/kernel/lc823450_userspace.c
+ * boards/arm/lc823450/lc823450-xgevk/kernel/lc823450_userspace.c
  *
  *   Copyright 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE

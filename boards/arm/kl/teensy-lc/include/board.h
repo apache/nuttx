@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/teensy-lc/include/board.h
+/****************************************************************************
+ * boards/arm/kl/teensy-lc/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,29 +31,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_KL_TEENSY_LC_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KL_TEENSY_LC_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The board has a 16MHz crystal. */
 
-#undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_XTAL_FREQ      16000000       /* 16 MHz crystal frequency (REFCLK) */
+#undef  BOARD_EXTCLOCK                 /* Crystal */
+#define BOARD_XTAL_FREQ      16000000  /* 16 MHz crystal frequency (REFCLK) */
 
 /* PLL Configuration.
  *
@@ -62,14 +63,15 @@
  *   MCGPLLCLK Frequency:   MCGPLLCLK = 96MHz
  */
 
-#define BOARD_PRDIV0         4              /* PLL External Reference Divider */
-#define BOARD_VDIV0          24             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV0         4   /* PLL External Reference Divider */
+#define BOARD_VDIV0          24  /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_XTAL_FREQ / BOARD_PRDIV0)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV0)
 #define BOARD_MCGPLLCLK_FREQ  BOARD_PLLOUT_FREQ
 
-/* MCGOUTCLK: MCG output of either IRC, MCGFLLCLK, MCGPLLCLK, or MCG's external
+/* MCGOUTCLK:
+ * MCG output of either IRC, MCGFLLCLK, MCGPLLCLK, or MCG's external
  * reference clock that sources the core, system, bus, and flash clock.
  *
  * MCGOUTCLK = MCGPLLCLK = 96MHz
@@ -86,13 +88,14 @@
  *   System clock divided by OUTDIV4, clocks the bus slaves and peripherals.
  */
 
-#define BOARD_OUTDIV1        2              /* Core/system = MCGOUTCLK / 2 = 48 MHz */
-#define BOARD_OUTDIV4        2              /* Bus clock   = System clock / 2 = 24 MHz */
+#define BOARD_OUTDIV1        2  /* Core/system = MCGOUTCLK / 2 = 48 MHz */
+#define BOARD_OUTDIV4        2  /* Bus clock   = System clock / 2 = 24 MHz */
 
 #define BOARD_CORECLK_FREQ  (BOARD_MCGOUTCLK_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUSCLK_FREQ   (BOARD_CORECLK_FREQ / BOARD_OUTDIV4)
 
 /* PWM Configuration */
+
 /* TPM0 Channels */
 
 #define GPIO_TPM0_CH0OUT PIN_TPM0_CH0_2  // Pin 22: PTC1
@@ -112,8 +115,10 @@
 #define GPIO_TPM2_CH0OUT PIN_TPM2_CH0_1  // Pin  3: PTA1
 #define GPIO_TPM2_CH1OUT PIN_TPM2_CH1_1  // Pin  4: PTA2
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The Teensy LC has a single LED. */
+
 #define LED_STARTED       0  /* LED off */
 #define LED_HEAPALLOCATE  0  /* LED off */
 #define LED_IRQSENABLED   0  /* LED off */
@@ -129,7 +134,9 @@
  */
 
 /* Note that the Teensy maps SCK0 to pin 13 which conflicts with the
- * LED.  Use pin 14 instead. */
+ * LED.  Use pin 14 instead.
+ */
+
 #define PIN_SPI0_SCK   (PIN_SPI0_SCK_3 | PIN_ALT2_PULLUP)  // Pin 14: PTD1
 #define PIN_SPI0_MISO  (PIN_SPI0_MISO_4 | PIN_ALT2_PULLUP) // Pin 12: PTC7
 #define PIN_SPI0_MOSI  (PIN_SPI0_MOSI_3 | PIN_ALT2_PULLUP) // Pin 11: PTC6
@@ -138,4 +145,4 @@
 #define PIN_SPI1_MISO  (PIN_SPI1_MISO_2 | PIN_ALT2_PULLUP) // Pin 1: PTB17
 #define PIN_SPI1_MOSI  (PIN_SPI0_MOSI_1 | PIN_ALT2_PULLUP) // Pin 0: PTB16
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_KL_TEENSY_LC_INCLUDE_BOARD_H */

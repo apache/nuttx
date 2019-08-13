@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lpcxpresso-lpc1768/src/lpc17_40_boot.c
+/****************************************************************************
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_boot.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,32 +50,34 @@
 #include "lpc17_40_ssp.h"
 #include "lpcxpresso-lpc1768.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx/LPC40xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx/LPC40xx architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_boardinitialize(void)
 {
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpcxpresso_sspdev_initialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2)
+   * the weak function lpcxpresso_sspdev_initialize() has been brought into
+   * the link.
    */
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)

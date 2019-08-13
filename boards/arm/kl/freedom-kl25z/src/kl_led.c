@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/freedom-kl25z/src/kl_led.c
+ * boards/arm/kl/freedom-kl25z/src/kl_led.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
  *
  *   ------------- --------
@@ -41,8 +42,9 @@
  *   Green Cathode PTB19
  *   Blue Cathode  PTD1
  *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom KL25Z.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF

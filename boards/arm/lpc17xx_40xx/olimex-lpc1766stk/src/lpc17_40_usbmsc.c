@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc1766stk/src/lpc17_40_usbmsc.c
+ * boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_usbmsc.c
  *
  *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -71,7 +71,8 @@
 #  undef LPC17XX_40XX_MMCSDSLOTNO
 #  define LPC17XX_40XX_MMCSDSLOTNO 0
 #else
-   /* Add configuration for new LPC17xx/LPC40xx boards here */
+  /* Add configuration for new LPC17xx/LPC40xx boards here */
+
 #  error "Unrecognized LPC17xx/LPC40xx board"
 #endif
 

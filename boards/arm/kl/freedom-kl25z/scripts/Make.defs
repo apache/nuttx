@@ -1,5 +1,5 @@
 ############################################################################
-# boards/freedom-kl25z/scripts/Make.defs
+# boards/arm/kl/freedom-kl25z/scripts/Make.defs
 #
 #   Copyright (C) 2013m, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
