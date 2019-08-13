@@ -475,8 +475,8 @@
 #  define __SYS_pthread_cleanup        (__SYS_pthread_signals + 3)
 
 #  ifdef CONFIG_PTHREAD_CLEANUP
-#    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup + 0)
-#    define __SYS_pthread_cleanup_pop  (__SYS_pthread_cleanup + 1)
+#    define SYS_pthread_cleanup_push   (__SYS_pthread_cleanup + 0)
+#    define SYS_pthread_cleanup_pop    (__SYS_pthread_cleanup + 1)
 #    define __SYS_mqueue               (__SYS_pthread_cleanup + 2)
 #  else
 #    define __SYS_mqueue               __SYS_pthread_cleanup
