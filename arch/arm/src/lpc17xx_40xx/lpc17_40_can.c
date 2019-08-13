@@ -167,7 +167,12 @@
 /* Timing *******************************************************************/
 /* CAN clocking is provided at CCLK divided by the configured divisor */
 
-#define CAN_CLOCK_FREQUENCY(d) ((uint32_t)LPC17_40_CCLK / (uint32_t)(d))
+#ifdef BOARD_CCLKSEL_DIVIDER
+#  define CAN_CLOCK_FREQUENCY(d) \
+    ((uint32_t)LPC17_40_CCLK * BOARD_CCLKSEL_DIVIDER / (uint32_t)(d))
+#else
+#  define CAN_CLOCK_FREQUENCY(d) ((uint32_t)LPC17_40_CCLK / (uint32_t)(d))
+#endif
 
 /****************************************************************************
  * Private Types
