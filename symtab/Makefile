@@ -36,9 +36,22 @@
 -include $(TOPDIR)/Make.defs
 
 MKSYMTAB = $(TOPDIR)$(DELIM)tools$(DELIM)mksymtab$(HOSTEXEEXT)
-CSVFILES = $(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv \
-	$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)libc.csv \
-	$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)math.csv
+
+# C library and math library symbols should be available in the FLAT
+# and PROTECTED builds.  KERNEL builds are separately linked and so should
+# not need symbol tables.
+
+CSVFILES  = $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)libc.csv
+CSVFILES += $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)math.csv
+
+# In the PROTECTED and KERNEL builds, the syscall symbol table is not
+# necessary.  In those build modes, the applications should link with
+# libproxy which will provide symbol-compatible access to OS functions
+# via a call gate.
+
+ifeq ($(CONFIG_BUILD_FLAT),y)
+CSVFILES += $(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv
+endif
 
 DEPPATH = --dep-path .
 
