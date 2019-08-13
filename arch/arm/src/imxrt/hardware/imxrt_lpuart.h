@@ -340,7 +340,9 @@
 #  define LPUART_MODIR_TXCTSSRC_CTSB   (0 << 5)  /* Bit nn:  CTS input is CTS_B pin */
 #  define LPUART_MODIR_TXCTSSRC_RXMAT  (1 << 5)  /* Bit nn:  Transmit CTS Source */
                                                  /* Bits 6-7:  Reserved */
-#define LPUART_MODIR_RTSWATER          (8)       /* Bits 8-9: Receive RTS Configuration */
+#define LPUART_MODIR_RTSWATER_SHIFT    (8)       /* Bits 8-9: Receive RTS Configuration */
+#define LPUART_MODIR_RTSWATER_MASK     (3 << LPUART_MODIR_RTSWATER_SHIFT)
+#  define LPUART_MODIR_RTSWATER(n)     ((uint32_t)(n) << LPUART_MODIR_RTSWATER_SHIFT)
                                                  /* Bits 10-15:  Reserved */
 #define LPUART_MODIR_TNP_SHIFT         (16)      /* Bits 16-17: Transmitter narrow pulse */
 #define LPUART_MODIR_TNP_MASK          (3 << LPUART_MODIR_TNP_SHIFT)
@@ -360,6 +362,7 @@
 #  define LPUART_FIFO_RXFIFOSIZE_64    (5 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 64 datawords */
 #  define LPUART_FIFO_RXFIFOSIZE_128   (6 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 128 datawords */
 #  define LPUART_FIFO_RXFIFOSIZE_256   (7 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* 256 datawords */
+#define LPUART_FIFO_RXFE               (1 << 3)  /* Bit 3:  Receive FIFO Enable */
 #define LPUART_FIFO_TXFIFOSIZE_SHIFT   (4)       /* Bits 4-6: Transmit FIFO. Buffer Depth */
 #define LPUART_FIFO_TXFIFOSIZE_MASK    (7 << LPUART_FIFO_TXFIFOSIZE_SHIFT)
 #  define LPUART_FIFO_TXFIFOSIZE_1     (0 << LPUART_FIFO_TXFIFOSIZE_SHIFT) /* 1 datawords */

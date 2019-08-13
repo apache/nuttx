@@ -1643,7 +1643,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void imxrt_earlyserialinit(void)
 {
   /* NOTE: This function assumes that low level hardware configuration
    * -- including all clocking and pin configuration -- was performed by the
