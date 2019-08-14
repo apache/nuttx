@@ -614,6 +614,10 @@ boards/qemu-i486
 boards/nr5m100-nexys4
   Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
 
+boards/arm/s32k1xx/s32k118evb
+  This directory holds the port of NuttX to the NXP S32K118EVB board
+  featuring the S32K118 Cortex-M0+.
+
 boards/sabre-6quad
   This directory holds a port of NuttX to the NXP/Freescale Sabre board
   featuring the iMX 6Quad CPU.
