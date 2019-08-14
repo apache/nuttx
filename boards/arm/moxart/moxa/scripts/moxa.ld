@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/moxa/scripts/moxa.ld
+ * boards/arm/moxart/moxa/scripts/moxa.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

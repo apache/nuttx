@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/max32660-evsys/include/board.h
+ * boards/arm/max326xx/max32660-evsys/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MAX32660_EVSYS_INCLUDE_BOARD_H
-#define __BOARDS_ARM_MAX32660_EVSYS_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_INCLUDE_BOARD_H
+#define __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -75,7 +75,8 @@
  *
  *   ------------------- ---------------------------- ------
  *   SYMBOL                  Meaning                  LED
- *   ------------------- ---------------------------- ------   */
+ *   ------------------- ---------------------------- ------
+ */
 
 #define LED_STARTED      0 /* NuttX has been started  OFF      */
 #define LED_HEAPALLOCATE 0 /* Heap has been allocated OFF      */
@@ -185,4 +186,4 @@
 
 /* DMA **********************************************************************/
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nrf52-generic/scripts/Make.defs
+# boards/arm/nrf52/nrf52-generic/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nutiny-nuc120/include/board.h
+/****************************************************************************
+ * boards/arm/nuc1xx/nutiny-nuc120/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUTINY_NUC12_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUTINY_NUC12_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H
+#define __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,10 +47,12 @@
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
 /* Crystal frequencies */
 
 #define BOARD_XTALHI_FREQUENCY 12000000
@@ -93,15 +95,18 @@
 #define BOARD_USB_N     1
 #define BOARD_USB_FREQUENCY (BOARD_PLL_FOUT / BOARD_USB_N)
 
-/* LED definitions ******************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.  This LED
- * is connected to PIN17.  It is pulled high so a low value will illuminate the LED.
+/* LED definitions **********************************************************/
+
+/* The NuTiny has a single green LED that can be controlled from sofware.
+ * This LED is connected to PIN17.
+ * It is pulled high so a low value will illuminate the LED.
  */
 
 #define BOARD_NLEDS       1
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the NuTiny.
+ * The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
@@ -112,7 +117,8 @@
  *   LED_STACKCREATED     Idle stack created       LED ON
  *   LED_INIRQ            In an interrupt          LED should glow
  *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
+ *   LED_ASSERTION        An assertion failed      LED ON while handling the
+ *                                                        assertion
  *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
  *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
  */
@@ -126,9 +132,10 @@
 #define LED_ASSERTION     0
 #define LED_PANIC         0
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The NuTiny has no buttons */
 
 #define NUM_BUTTONS        0
 
-#endif  /* __BOARDS_ARM_NUTINY_NUC12_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/max32660-evsys/src/Makefile
+# boards/arm/max326xx/max32660-evsys/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

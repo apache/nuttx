@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/tms570f103-minimum/src/tms570_spi.c
+/****************************************************************************
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,23 +54,24 @@
 
 #if defined(CONFIG_TMS570_SPI1) || defined(CONFIG_TMS570_SPI4)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the HY-MiniTMS570 board.
+ *   Called to configure SPI chip select GPIO pins for the HY-MiniTMS570
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_spidev_initialize(void)
 {
 #ifdef CONFIG_MMCSD_SPI
 #if defined (CONFIG_TMS570_SPI1)
-    tms570_spi_gio_config(SPI1_SDCARD_CS);           /* SD/MMC Card chip select */
+    tms570_spi_gio_config(SPI1_SDCARD_CS);       /* SD/MMC Card chip select */
 #endif
 #if defined (CONFIG_TMS570_SPI4)
     tms570_spi_gio_config(SPI4_SDCARD_CS);
@@ -82,22 +83,24 @@ void tms570_spidev_initialize(void)
  * Name:  tms570_spi1/2select and tms570_spi1/2status
  *
  * Description:
- *   The external functions, tms570_spi1/2/3select and tms570_spi1/2/3status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including tms570_spibus_initialize())
- *   are provided by common TMS570 logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, tms570_spi1/2/3select and tms570_spi1/2/3status
+ *   must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including tms570_spibus_initialize())
+ *   are provided by common TMS570 logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in tms570_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide tms570_spi1/2/3select() and tms570_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to tms570_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by tms570_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in tms570_boardinitialize() to configure SPI chip
+ *      select pins.
+ *   2. Provide tms570_spi1/2/3select() and tms570_spi1/2/3status() functions
+ *      in your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using GPIOs in the way your board is configured.
+ *   3. Add a calls to tms570_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by tms570_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -156,5 +159,4 @@ uint8_t tms570_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
   return status;
 }
 #endif
-
 #endif /* CONFIG_TMS570_SPI1 || CONFIG_TMS570_SPI2 */

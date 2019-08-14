@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nutiny-nuc120/src/nuc_boardinitialize.c
+/****************************************************************************
+ * boards/arm/nuc1xx/nutiny-nuc120/src/nuc_boardinitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,32 +46,33 @@
 #include "up_arch.h"
 #include "nutiny-nuc120.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: nuc_boardinitialize
  *
  * Description:
- *   All NUC1XX architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All NUC1XX architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void nuc_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * nuc_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function nuc_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_NUC1XX_SPI1) || defined(CONFIG_NUC1XX_SPI2) || defined(CONFIG_NUC1XX_SPI3)
@@ -81,9 +82,10 @@ void nuc_boardinitialize(void)
     }
 #endif
 
-  /* Initialize USB if the 1) USB device controller is in the configuration and 2)
-   * disabled, and 3) the weak function nuc_usbinitialize() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV is also selected.
+  /* Initialize USB if the 1) USB device controller is in the configuration
+   * and 2) disabled, and 3) the weak function nuc_usbinitialize() has been
+   * brought into the build.
+   * Presumeably either CONFIG_USBDEV is also selected.
    */
 
 #ifdef CONFIG_NUC1XX_USB

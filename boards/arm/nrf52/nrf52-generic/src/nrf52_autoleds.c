@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nrf52-generic/src/lpc43_autoleds.c
+ * boards/arm/nrf52/nrf52-generic/src/lpc43_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

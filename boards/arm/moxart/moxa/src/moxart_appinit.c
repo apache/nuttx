@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/moxart/src/moxart_appinit.c
+ * boards/arm/moxart/moxart/src/moxart_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>

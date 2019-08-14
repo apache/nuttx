@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d2-xult/src/sam_buttons.c
+ * boards/arm/max326xx/max32660-evsys/src/max326_buttons.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -145,5 +145,4 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   return ret;
 }
 #endif
-
 #endif /* CONFIG_ARCH_BUTTONS */

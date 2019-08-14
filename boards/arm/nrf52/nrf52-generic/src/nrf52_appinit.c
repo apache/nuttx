@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nrf52-generic/src/nrf52_appinit.c
+ * boards/arm/nrf52/nrf52-generic/src/nrf52_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>

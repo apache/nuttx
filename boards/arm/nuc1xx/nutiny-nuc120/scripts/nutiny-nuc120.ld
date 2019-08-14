@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nutiny-nuc120/scripts/nutiny-nuc120.ld
+ * boards/arm/nuc1xx/nutiny-nuc120/scripts/nutiny-nuc120.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

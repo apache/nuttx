@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nrf52-generic/scripts/flash_config.ld
+ * boards/arm/nrf52/nrf52-generic/scripts/flash_config.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>

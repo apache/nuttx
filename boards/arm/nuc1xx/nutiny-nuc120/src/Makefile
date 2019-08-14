@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nutiny-nuc120/src/Makefile
+# boards/arm/nuc1xx/nutiny-nuc120/src/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

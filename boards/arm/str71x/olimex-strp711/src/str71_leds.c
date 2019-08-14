@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-strp711/src/str71_leds.c
+ * boards/arm/str71x/olimex-strp711/src/str71_leds.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -154,7 +154,7 @@ void board_autoled_on(int led)
     {
     default:
     case LED_STARTED:
-      str71_setleds(0, STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT); /* Clear LED1&2 */
+      str71_setleds(0, STR71X_LED1GPIO1_BIT | STR71X_LED2GPIO1_BIT); /* Clear LED1&2 */
       break;
 
     case LED_HEAPALLOCATE:
@@ -166,11 +166,11 @@ void board_autoled_on(int led)
     case LED_INIRQ:
     case LED_SIGNAL:
     case LED_ASSERTION:
-      str71_setleds(STR71X_LED1GPIO1_BIT|STR71X_LED2GPIO1_BIT, 0); /* Set LED1&2 */
+      str71_setleds(STR71X_LED1GPIO1_BIT | STR71X_LED2GPIO1_BIT, 0); /* Set LED1&2 */
       break;
 
     case LED_PANIC:
-      str71_setleds(STR71X_LED2GPIO1_BIT|g_led2set, g_led2set); /* Set LED1, preserve LED2 */
+      str71_setleds(STR71X_LED2GPIO1_BIT | g_led2set, g_led2set); /* Set LED1, preserve LED2 */
       break;
     }
 }
@@ -213,7 +213,7 @@ void board_autoled_off(int led)
       break;
 
     case LED_PANIC:
-      str71_setleds(g_led2set, STR71X_LED1GPIO1_BIT|g_led2clr); /* Clear LED1, preserve LED2 */
+      str71_setleds(g_led2set, STR71X_LED1GPIO1_BIT | g_led2clr); /* Clear LED1, preserve LED2 */
       break;
     }
 }

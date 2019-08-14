@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl_tms57004/src/sim_appinit.c
+ * boards/arm/tms570/launchxl_tms57004/src/sim_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>

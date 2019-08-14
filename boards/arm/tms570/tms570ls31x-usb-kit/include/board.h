@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/tms570ls31x-usb-kit/include/board.h
+/****************************************************************************
+ * boards/arm/tms570/tms570ls31x-usb-kit/include/board.h
  *
  *   Copyright (C) 2017 Ivan Ucherdzhiev. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TMX570LS31X_USB_KIT_INCLUDE_BOARD_H
-#define __BOARDS_ARM_TMX570LS31X_USB_KIT_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +47,12 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The tms570ls31x-usb-kit has a 16 MHz external crystal. */
 
 #define BOARD_FCLKIN_FREQUENCY 16000000  /* 16 MHz crystal frequency */
@@ -144,10 +145,10 @@
 #define BOARD_RWAIT            3   /* One read access wait state */
 #define BOARD_EWAIT            3   /* Four wait states for EEPROM access */
 
-/* PIN Multiplexor Initializer ******************************************************/
+/* PIN Multiplexor Initializer **********************************************/
 
-/* You may specify one alternative from each set (the first is the default and,
- * hence, could probably be omitted):
+/* You may specify one alternative from each set
+ * (the first is the default and, hence, could probably be omitted):
  *
  *  1. {GIOA0, SPI3nCS3}
  *  2. {GIOA1, SPI3nCS2}
@@ -185,7 +186,8 @@
   PINMUX_MIBSPI1NENA_PIN, \
   PINMUX_MIBSPI1NCS1_PIN
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* LEDs
  *
  * The launchpad has several LEDs:
@@ -197,8 +199,9 @@
  *   - Two white, user LEDs labeled D12 that connects to the NHET08
  *     pin and D11 that connects to GIOA2.
  *
- * NHET08 is one of 32 N2HET pins than can be available to the user if not used by
- * N2HET.  This implementation, however, uses only the single LED driven by GIOA2.
+ * NHET08 is one of 32 N2HET pins than can be available to the user if not
+ * used by N2HET.
+ * This implementation, however, uses only the single LED driven by GIOA2.
  * That LED is tied to ground and illuminated with a high level output value.
  */
 
@@ -228,7 +231,8 @@
  *
  *   ---------------------- ---------------------------- ------
  *   SYMBOL                 Meaning                      LED
- *   ---------------------- ---------------------------- ------   */
+ *   ---------------------- ---------------------------- ------
+ */
 
 #define LED_STARTED         1 /* NuttX has been started  OFF      */
 #define LED_HEAPALLOCATE    0 /* Heap has been allocated OFF      */
@@ -245,13 +249,16 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Buttons
  *
- *  The launchpad has three mechanical buttons. Two of these are reset buttons: One
- *  button is labeled PORRST performs a power-on reset and one labeled RST performs
- *  an MCU reset.  Only one button is available for general software usage.  That
- *  button is labeled GIOA7 and is, obviously, sensed on GIOA7.
+ *  The launchpad has three mechanical buttons.
+ *  Two of these are reset buttons:
+ *  One button is labeled PORRST performs a power-on reset and one labeled RST
+ *  performs an MCU reset.
+ *  Only one button is available for general software usage.
+ *  That button is labeled GIOA7 and is, obviously, sensed on GIOA7.
  *
  * GIOA7 is tied to ground, but will be pulled high if the GIOA7 button is
  * depressed.
@@ -262,9 +269,9 @@
 
 #define BUTTON_GIOA7_BIT    (1 << BUTTON_GIOA7)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -277,9 +284,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -287,4 +294,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_LAUNCHXL_TMS57004_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_INCLUDE_BOARD_H */

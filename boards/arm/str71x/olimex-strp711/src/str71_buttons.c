@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-strp711/src/str71_buttons.c
+ * boards/arm/str71x/olimex-strp711/src/str71_buttons.c
  *
  *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

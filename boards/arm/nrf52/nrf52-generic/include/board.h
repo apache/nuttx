@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nrf52_generic/include/board.h
+ * boards/arm/nrf52/nrf52_generic/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_NRF52_GENERIC_INCLUDE_BOARD_H
-#define _CONFIGS_NRF52_GENERIC_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_NRF52_NRF52_GENERIC_INCLUDE_BOARD_H
+#define __BOARDS_ARM_NRF52_NRF52_GENERIC_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -56,8 +56,8 @@
 #define BOARD_SYSTICK_CLOCK         (64000000)
 
 /* LED definitions *********************************************************/
-/*
- * A low output illuminates the LED.
+
+/* A low output illuminates the LED.
  *
  * LED index values for use with board_userled()
  */
@@ -98,6 +98,7 @@
  */
 
 /* Button definitions *******************************************************/
+
 /* Board supports four buttons. */
 
 #define BUTTON_BTN1       0
@@ -113,12 +114,12 @@
 #define BUTTON_BTN4_BIT  (1 << BUTTON_BTN4)
 
 /* UART Pins ****************************************************************/
-/*
- * The following definitions must be provided so that the NRF52 serial
+
+/* The following definitions must be provided so that the NRF52 serial
  * driver can set up the UART for the serial console properly.
  */
 
 #define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PIN(CONFIG_NRF52_GENERIC_UART0_RX_PIN))
 #define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_UART0_TX_PIN))
 
-#endif  /* _CONFIGS_NRF52_GENERIC_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_NRF52_NRF52_GENERIC_INCLUDE_BOARD_H */

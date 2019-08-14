@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xmc4500-relax/include/xmc4_autoleds.c
+ * boards/arm/xmc4/xmc4500-relax/include/xmc4_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -150,7 +150,7 @@ static void board_led2_off(int led)
         return;
     }
 
-   xmc4_gpio_write(GPIO_LED2, false);
+    xmc4_gpio_write(GPIO_LED2, false);
 }
 
 /****************************************************************************
@@ -163,7 +163,7 @@ static void board_led2_off(int led)
 
 void board_autoled_initialize(void)
 {
-   /* Configure LED1-2 GPIOs for output */
+  /* Configure LED1-2 GPIOs for output */
 
   (void)xmc4_gpio_config(GPIO_LED1);
   (void)xmc4_gpio_config(GPIO_LED2);

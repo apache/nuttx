@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-tms57004/src/tms570_userleds.c
+ * boards/arm/tms570/launchxl-tms57004/src/tms570_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -100,5 +100,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  tms570_giowrite(GIO_LED_D11, (ledset & BOARD_LED_D11_BIT) == 0));
+  tms570_giowrite(GIO_LED_D11, (ledset & BOARD_LED_D11_BIT) == 0);
 }

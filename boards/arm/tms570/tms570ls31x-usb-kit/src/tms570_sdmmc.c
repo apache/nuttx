@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/tms570f103-minimum/src/tms570_mmcsd.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570_mmcsd.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

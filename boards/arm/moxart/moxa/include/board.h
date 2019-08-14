@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/arduino-due/include/board.h
+/****************************************************************************
+ * boards/arm/moxart/moxa/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MOXA_INCLUDE_BOARD_H
-#define __BOARDS_ARM_MOXA_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_MOXART_MOXA_INCLUDE_BOARD_H
+#define __BOARDS_ARM_MOXART_MOXA_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,18 +47,19 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the device is running on a 4MHz internal RC.  These
- * definitions will configure clocking
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the device is running on a 4MHz internal RC.
+ * These definitions will configure clocking
  *
- *   MAINOSC:  Frequency = 12MHz (crysta)
- *   PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
- *   CPU clock: 84MHz
+ * MAINOSC:  Frequency = 12MHz (crysta)
+ * PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
+ * Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
+ * CPU clock: 84MHz
  */
 
 #define BOARD_32KOSC_FREQUENCY     (32768)
@@ -140,7 +141,8 @@
 
 #define BOARD_FWS                  4
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /*  There are three user-controllable LEDs on board the Moxa board:
  *
  *     LED              GPIO
@@ -175,7 +177,9 @@
  *
  *  SYMBOL                MEANING                         LED STATE
  *                                                         L         TX       RX
- *  -----------------------  --------------------------  -------- -------- --------    */
+ *  -----------------------  --------------------------  -------- -------- --------
+ */
+
 #define LED_STARTED       0  /* NuttX has been started     OFF      OFF      OFF       */
 #define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      OFF       */
 #define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      OFF       */
@@ -194,14 +198,15 @@
  * at approximately 2Hz, then a fatal error has been detected and the system
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /*   There are no buttons on the Moxa board. */
 
-/* GPIO pin configurations **********************************************************/
+/* GPIO pin configurations **************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -214,9 +219,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 inline void ftintc010_set_trig_mode(int irq, int mode);
 inline void ftintc010_set_trig_level(int irq, int level);
@@ -225,6 +230,5 @@ inline void ftintc010_set_trig_level(int irq, int level);
 #if defined(__cplusplus)
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_MOXA_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_MOXART_MOXA_INCLUDE_BOARD_H */

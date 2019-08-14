@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xmc4500-relax/src/xmc4_userleds.c
+ * boards/arm/xmc4/xmc4500-relax/src/xmc4_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 
 void board_userled_initialize(void)
 {
-   /* Configure LED1-2 GPIOs for output */
+  /* Configure LED1-2 GPIOs for output */
 
   (void)xmc4_gpio_config(GPIO_LED1);
   (void)xmc4_gpio_config(GPIO_LED2);

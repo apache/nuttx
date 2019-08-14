@@ -1,5 +1,5 @@
 ############################################################################
-# boards/launchxl-tms57004/scripts/Make.defs
+# boards/arm/tms570/launchxl-tms57004/scripts/Make.defs
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

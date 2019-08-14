@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4e-ek/src/tms570_buttons.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570_buttons.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

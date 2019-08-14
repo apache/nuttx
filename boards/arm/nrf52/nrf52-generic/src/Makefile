@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nrf52-generic/src/Makefile
+# boards/arm/nrf52/nrf52-generic/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author:  Janne Rosberg <janne@offcode.fi>

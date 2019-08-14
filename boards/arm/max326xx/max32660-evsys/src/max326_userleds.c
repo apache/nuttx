@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/max32660-evsys/src/max326_userleds.c
+ * boards/arm/max326xx/max32660-evsys/src/max326_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,5 +83,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  max326_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0));
+  max326_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0);
 }

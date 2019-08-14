@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tms570ls31x-usb-kit/src/tms570ls31x_usb_kit.h
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570ls31x_usb_kit.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
-#define __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
+#ifndef __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_SRC_TMS570LS31X_USB_KIT_H
+#define __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_SRC_TMS570LS31X_USB_KIT_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@ int tms570_bringup(void);
 int tms570_mmcsd_initialize(int minor);
 #endif
 
-#endif /* __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H */
+#endif /* __BOARDS_ARM_TMS570_TMS570LS31X_USB_KIT_SRC_TMS570LS31X_USB_KIT_H */

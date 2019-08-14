@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nrf52-generic/src/nrf52_userleds.c
+ * boards/arm/nrf52/nrf52-generic/src/nrf52_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -56,9 +56,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED definitions **********************************************************/
-/*
- * If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
+
+/* If CONFIG_ARCH_LEDS is not defined, then the LEDs are completely under
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *

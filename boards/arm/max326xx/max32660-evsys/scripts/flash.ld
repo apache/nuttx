@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/max32660-evsys/scripts/flash.ld
+ * boards/arm/max326xx/max32660-evsys/scripts/flash.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

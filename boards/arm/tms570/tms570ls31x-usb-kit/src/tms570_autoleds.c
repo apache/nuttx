@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-tms57004/include/tms570_autoleds.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/include/tms570_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

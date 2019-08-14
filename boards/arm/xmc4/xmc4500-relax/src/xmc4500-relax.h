@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xmc4500-relax/src/xmc4500-relax.h
+ * boards/arm/xmc4/xmc4500-relax/src/xmc4500-relax.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_XMC4500_RELAX_SRC_XMC4500_RELAX_H
-#define __BOARDS_ARM_XMC4500_RELAX_SRC_XMC4500_RELAX_H
+#ifndef __BOARDS_ARM_XMC4_XMC4500_RELAX_SRC_XMC4500_RELAX_H
+#define __BOARDS_ARM_XMC4_XMC4500_RELAX_SRC_XMC4500_RELAX_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@
 int xmc4_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_XMC4500_RELAX_SRC_XMC4500_RELAX_H */
+#endif /* __BOARDS_ARM_XMC4_XMC4500_RELAX_SRC_XMC4500_RELAX_H */

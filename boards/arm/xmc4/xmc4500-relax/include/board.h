@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/xmc4500-relax/include/board.h
+/****************************************************************************
+ * boards/arm/xmc4/xmc4500-relax/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_XMC4500_RELAX_INCLUDE_BOARD_H
-#define __BOARDS_ARM_XMC4500_RELAX_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_XMC4_XMC4500_RELAX_INCLUDE_BOARD_H
+#define __BOARDS_ARM_XMC4_XMC4500_RELAX_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +47,11 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* The maximum frequency for the XMC4500 is 120MHz. */
 
@@ -76,14 +76,14 @@
 
 /* On-board crystals
  *
- *   NOTE: Only the XMC4500 Relax Kit-V1 provides the 32.768KHz RTC crystal.  It
- *   is not available on XMC4500 Relax Lite Kit-V1.
+ *   NOTE: Only the XMC4500 Relax Kit-V1 provides the 32.768KHz RTC crystal.
+ *   It is not available on XMC4500 Relax Lite Kit-V1.
  */
 
 #define BOARD_XTAL_FREQUENCY        12000000 /* 12MHz XTAL */
 #undef  BOARD_RTC_XTAL_FRQUENCY              /* 32.768KHz RTC XTAL not available on the Relax Lite */
-/*
- * TODO: enable the RTC osc, use RTC for time/date
+
+/* TODO: enable the RTC osc, use RTC for time/date
  */
 
 /* Select the external crystal as the PLL clock source */
@@ -111,8 +111,8 @@
 /* TODO: Automate PLL calculations */
 
 #if CPU_FREQ == 120
-/*
- *      120 MHz
+
+/*      120 MHz
  *
  * fVCO = 12MHz * 40 / 2  = 480MHz
  * fPLL = 480MHz / 2  = 240MHz
@@ -133,8 +133,8 @@
 #  define BOARD_PLL_EBUDIV          4
 
 #elif CPU_FREQ == 144
-/*
- *      144 MHz
+
+/*     144 MHz
  *
  * fVCO = 12MHz * 36 / 1  = 432MHz
  * fPLL = 432MHz / 3  = 144MHz
@@ -157,7 +157,6 @@
 #else
 #  error "Illegal or Unsupported CPU Frequency"
 #endif
-
 
 #  define BOARD_CCUDIV_ENABLE       (BOARD_PLL_CCUDIV - 1)
 #  define BOARD_CPUDIV_ENABLE       (BOARD_PLL_CPUDIV - 1)
@@ -183,7 +182,8 @@
 #  define MHz_260   (260 * MHz_1)
 #  define MHz_520   (520 * MHz_1)
 
-   /* range check VCO frequency */
+/* range check VCO frequency */
+
 #  if (BOARD_VCO_FREQUENCY < MHz_260)
 #     error "VCO freq must be >= 260 MHz"
 #  endif
@@ -192,16 +192,16 @@
 #     error "VCO freq must be <= 520 MHz"
 #  endif
 
-   /* range check Ethernet MAC frequency */
+/* range check Ethernet MAC frequency */
+
 #  if (BOARD_ETH_FREQUENCY <= MHz_50)
 #     error "ETH freq must be > 50 MHz"
 #  endif
 
-
-
 /* check ccudiv cpudiv pbdiv against Table 11-5
  * of XMC4500 User Manual
  */
+
 #define CLKDIV_INDEX        (4 * (BOARD_PLL_CCUDIV-1) + \
                              2 * (BOARD_PLL_CPUDIV-1) + \
                                  (BOARD_PLL_PBDIV-1) )
@@ -210,8 +210,8 @@
 #  error "Illegal combination of dividers!  Ref: Table 11-5 of UM"
 #endif
 
-
 /* EXT clock settings */
+
 #define BOARD_EXTCKL_ENABLE         1   /* 0 disables output */
 
 #if BOARD_EXTCKL_ENABLE
@@ -223,11 +223,11 @@
 #  define BOARD_EXTDIV              (BOARD_PLL_FREQUENCY / BOARD_EXT_FREQUENCY)
 
 /* range check EXTDIV */
+
 #  if BOARD_EXTDIV > 512
 #    error "EXTCLK Divisor out of range!"
 #  endif
 #endif
-
 
 /* Standby clock source selection
  *
@@ -255,14 +255,16 @@
 
 #define BOARD_FLASH_WS            5
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The XMC4500 Relax Lite v1 board has two LEDs:
  *
  * LED1 P1.1 High output illuminates
  * LED2 P1.0 High output illuminates
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -283,7 +285,8 @@
  *
  *   SYMBOL                  Meaning                     LED state
  *                                                      LED2   LED1
- *   ---------------------  --------------------------  ------ ------ */
+ *   ---------------------  --------------------------  ------ ------
+ */
 
 #define LED_STARTED       0 /* NuttX has been started   OFF    OFF    */
 #define LED_HEAPALLOCATE  0 /* Heap has been allocated  OFF    OFF    */
@@ -300,7 +303,8 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The XMC4500 Relax Lite v1 board has two buttons:
  *
  * BUTTON1 P1.14 Low input sensed when button pressed
@@ -314,7 +318,8 @@
 #define BUTTON_0_BIT      (1 << BUTTON_0)
 #define BUTTON_1_BIT      (1 << BUTTON_1)
 
-/* USIC0 ****************************************************************************/
+/* USIC0 ********************************************************************/
+
 /* USIC0 CH0 is used as UART0
  *
  *  RX - P1.4
@@ -347,9 +352,9 @@
 #define GPIO_UART3_RXD    (GPIO_U1C1_DX0D | GPIO_INPUT_PULLUP)
 #define GPIO_UART3_TXD    (GPIO_U1C1_DOUT0_2 | GPIO_PADA1P_STRONGSOFT | GPIO_OUTPUT_SET)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -362,9 +367,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -372,4 +377,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_XMC4500_RELAX_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_XMC4_XMC4500_RELAX_INCLUDE_BOARD_H */

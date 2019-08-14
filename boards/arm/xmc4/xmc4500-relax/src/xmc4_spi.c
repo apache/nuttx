@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xmc4500-relax/src/xmc4_spi.c
+ * boards/arm/xmc4/xmc4500-relax/src/xmc4_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -107,8 +107,8 @@ void weak_function xmc4_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to xmc4_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by xmc4_spibus_initialize() may then be used to bind
- *      the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by xmc4_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -169,7 +169,6 @@ void xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
       xmc4_gpio_write(GPIO_CS_MAX6675, !selected);
     }
 #endif
-
 }
 #endif
 

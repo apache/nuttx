@@ -1,5 +1,5 @@
 ############################################################################
-# boards/launchxl-tms57004/src/Makefile
+# boards/arm/tms570/tms570ls31x-usb-kit/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

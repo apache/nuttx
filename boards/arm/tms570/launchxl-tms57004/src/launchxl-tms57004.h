@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/launchxl-tms57004/src/launchxl-tms57004.h
+ * boards/arm/tms570/launchxl-tms57004/src/launchxl-tms57004.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
-#define __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
+#ifndef __BOARDS_ARM_TMS570_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
+#define __BOARDS_ARM_TMS570_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +96,4 @@
 
 int tms570_bringup(void);
 
-#endif /* __BOARDS_ARM_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H */
+#endif /* __BOARDS_ARM_TMS570_LAUNCHXL_TMS57004_SRC_LAUNCHXL_TMS57004_H */

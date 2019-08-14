@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/max32660-evsys/src/ma326_spi.c
+/****************************************************************************
+ * boards/arm/max326xx/max32660-evsys/src/ma326_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,17 +54,18 @@
 
 #ifdef CONFIG_MAX326XX_HAVE_SPIM
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: max326_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the MAX3660-EVSYS board.
+ *   Called to configure SPI chip select GPIO pins for the MAX3660-EVSYS
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void max326_spidev_initialize(void)
 {
@@ -78,31 +79,35 @@ void max326_spidev_initialize(void)
  * Name:  max326_spi0/1select and max326_spi0/1status
  *
  * Description:
- *   The external functions, max326_spi0/1select and max326_spi0/1status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including max326_spibus_initialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, max326_spi0/1select and max326_spi0/1status must
+ *   be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including max326_spibus_initialize())
+ *   are provided by common STM32 logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in max326_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide max326_spi0/1select() and max326_spi0/1status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to max326_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by max326_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   2. Provide max326_spi0/1select() and max326_spi0/1status() functions in
+ *      your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using GPIOs in the way your board is configured.
+ *   3. Add a calls to max326_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by max326_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_MAX326XX_SPIM0
-void max326_spi0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void max326_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 }
 
 uint8_t max326_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -112,9 +117,11 @@ uint8_t max326_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_MAX326XX_SPIM1
-void max326_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void max326_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 }
 
 uint8_t max326_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -168,5 +175,4 @@ int max326_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 }
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
-
 #endif /* CONFIG_MAX326XX_HAVE_SPIM */

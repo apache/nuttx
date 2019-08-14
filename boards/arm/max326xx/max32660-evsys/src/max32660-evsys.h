@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/max32660-evsys/src/max32660-evsys.h
+ * boards/arm/max326xx/max32660-evsys/src/max32660-evsys.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MAX32660_EVSYS_SRC_MAX32660_EVSYS_H
-#define __BOARDS_ARM_MAX32660_EVSYS_SRC_MAX32660_EVSYS_H
+#ifndef __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_SRC_MAX32660_EVSYS_H
+#define __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_SRC_MAX32660_EVSYS_H
 
 /****************************************************************************
  * Included Files
@@ -110,10 +110,11 @@
  * Description:
  *   Bring up board features.
  *
- *   If CONFIG_BOARD_LATE_INITIALIZE=y, then this function will be called from
- *   board_late_initialize().
+ *   If CONFIG_BOARD_LATE_INITIALIZE=y, then this function will be called
+ *   from board_late_initialize().
  *
- *   If CONFIG_BOARD_LATE_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   If CONFIG_BOARD_LATE_INITIALIZE is not selected,
+ *   but CONFIG_LIB_BOARDCTL=y
  *   then this function will *probably* be called from application logic via
  *   boardctl().
  *
@@ -124,13 +125,14 @@
 
 int max326_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: max326_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the MAX3660-EVSYS board.
+ *   Called to configure SPI chip select GPIO pins for the MAX3660-EVSYS
+ *   board.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifdef CONFIG_MAX326XX_HAVE_SPIM
 void max326_spidev_initialize(void);
@@ -148,4 +150,4 @@ void max326_spidev_initialize(void);
 int max326_mmcsd_initialize(int minor);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_MAX326XX_MAX32660_EVSYS_SRC_MAX32660_EVSYS_H */

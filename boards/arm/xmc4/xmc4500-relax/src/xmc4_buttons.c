@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xmc4500-relax/src/xmc4_buttons.c
+ * boards/arm/xmc4/xmc4500-relax/src/xmc4_buttons.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

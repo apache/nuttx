@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-strp711/src/str71_spi.c
+ * boards/arm/str71x/olimex-strp711/src/str71_spi.c
  *
  *   Copyright (C) 2008-2010, 2012, 2016-2017 Gregory Nutt. All rights
  *     reserved.
@@ -140,9 +140,10 @@
 
 /* ENC28J60 Module
  *
- * The ENC28J60 module does not come on the Olimex-STR-P711, but this describes
- * how I have connected it. NOTE that the ENC28J60 requires an external interrupt
- * (XTI) pin.  The only easily accessible XTI pins are on SPI0/1 so you can't have
+ * The ENC28J60 module does not come on the Olimex-STR-P711, but this
+ * describes how I have connected it.
+ * NOTE that the ENC28J60 requires an external interrupt (XTI) pin.
+ * The only easily accessible XTI pins are on SPI0/1 so you can't have
  * both SPI0 and 1 together with this configuration.
  *
  * STR-P711 PIN            PIN CONFIGURATION ENC28J60 CONNECTION
@@ -394,22 +395,29 @@ struct str71x_spidev_s
 
 /* Helpers */
 
-static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv, uint8_t offset);
-static inline void   spi_putreg(FAR struct str71x_spidev_s *priv, uint8_t offset, uint16_t value);
+static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv,
+                                  uint8_t offset);
+static inline void   spi_putreg(FAR struct str71x_spidev_s *priv,
+                                uint8_t offset, uint16_t value);
 static inline void spi_drain(FAR struct str71x_spidev_s *priv);
 
 /* SPI methods */
 
 static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void   spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static void   spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                         bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                         uint32_t frequency);
 static uint8_t  spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int    spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+static int    spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+                          bool cmd);
 #endif
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static void   spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t buflen);
-static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen);
+static void   spi_sndblock(FAR struct spi_dev_s *dev,
+                           FAR const void *buffer, size_t buflen);
+static void   spi_recvblock(FAR struct spi_dev_s *dev,
+                            FAR void *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -473,7 +481,8 @@ static struct str71x_spidev_s g_spidev1 =
  *
  ****************************************************************************/
 
-static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv, uint8_t offset)
+static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv,
+                                  uint8_t offset)
 {
   return getreg16(priv->spibase + offset);
 }
@@ -494,7 +503,8 @@ static inline uint16_t spi_getreg(FAR struct str71x_spidev_s *priv, uint8_t offs
  *
  ****************************************************************************/
 
-static inline void spi_putreg(FAR struct str71x_spidev_s *priv, uint8_t offset, uint16_t value)
+static inline void spi_putreg(FAR struct str71x_spidev_s *priv,
+                              uint8_t offset, uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
 }
@@ -614,7 +624,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   uint16_t reg16;
@@ -657,7 +668,8 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   uint32_t divisor;
@@ -692,13 +704,13 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   /* The BSPI must be disable when the following setting is made. */
 
   cr1 = spi_getreg(priv, STR71X_BSPI_CSR1_OFFSET);
-  cr1 &= ~(STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
+  cr1 &= ~(STR71X_BSPICSR1_BSPE | STR71X_BSPICSR1_MSTR);
   spi_putreg(priv, STR71X_BSPI_CSR1_OFFSET, cr1);
   spi_putreg(priv, STR71X_BSPI_CLK_OFFSET, (uint16_t)divisor);
 
   /* Now we can enable the BSP in master mode */
 
-  cr1 |= (STR71X_BSPICSR1_BSPE|STR71X_BSPICSR1_MSTR);
+  cr1 |= (STR71X_BSPICSR1_BSPE | STR71X_BSPICSR1_MSTR);
   spi_putreg(priv, STR71X_BSPI_CSR1_OFFSET, cr1);
 
   return STR71X_PCLK1 / divisor;
@@ -872,9 +884,9 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
         }
 
       /* There is a race condition where TFNE may go false just before
-       * RFNE goes true and this loop terminates prematurely.  The nasty little
-       * delay in the following solves that (it could probably be tuned to
-       * improve performance).
+       * RFNE goes true and this loop terminates prematurely.
+       * The nasty little delay in the following solves that
+       * (it could probably be tuned to improve performance).
        */
 
       else if ((csr2 & STR71X_BSPICSR2_TFNE) != 0)
@@ -895,17 +907,20 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
- *   buflen - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
+ *   buflen - the length of data that can be received in the buffer in
+ *            number of words.
+ *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t buflen)
 {
   FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
@@ -913,7 +928,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
 
   DEBUGASSERT(priv && priv->spibase);
 
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
+  /* While there is remaining to be sent
+   * (and no synchronization error has occurred)
+   */
 
   while (buflen || fifobytes)
     {
@@ -976,9 +993,10 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 
       if (!g_spidev0.initialized)
         {
-          /* The default, alternate functionality of the GPIO0 pin selections is
-           * UART3/I2C1.  In order to have BSP0 functionality, we also have to
-           * set the BSPI0 enable bit in the PCU BOOTCR register.
+          /* The default, alternate functionality of the GPIO0 pin
+           * selections is UART3/I2C1.
+           * In order to have BSP0 functionality, we also have to set the
+           * BSPI0 enable bit in the PCU BOOTCR register.
            */
 
           reg16 = getreg16(STR71X_PCU_BOOTCR);
@@ -995,17 +1013,18 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 
           reg16  = getreg16(STR71X_GPIO0_PC0);
           reg16 &= ~BSPI0_GPIO0_ALL;
-          reg16 |= (BSPI0_GPIO0_ALT|BSPI0_GPIO0_INTTL|BSPI0_GPIO0_OUTPP);
+          reg16 |= (BSPI0_GPIO0_ALT | BSPI0_GPIO0_INTTL |
+                    BSPI0_GPIO0_OUTPP);
           putreg16(reg16, STR71X_GPIO0_PC0);
 
           reg16  = getreg16(STR71X_GPIO0_PC1);
           reg16 &= ~BSPI0_GPIO0_ALL;
-          reg16 |= (BSPI0_GPIO0_ALT|BSPI0_GPIO0_INCMOS);
+          reg16 |= (BSPI0_GPIO0_ALT | BSPI0_GPIO0_INCMOS);
           putreg16(reg16, STR71X_GPIO0_PC1);
 
           reg16  = getreg16(STR71X_GPIO0_PC2);
           reg16 &= ~BSPI0_GPIO0_ALL;
-          reg16 |= (BSPI0_GPIO0_ALT|BSPI0_GPIO0_OUTPP);
+          reg16 |= (BSPI0_GPIO0_ALT | BSPI0_GPIO0_OUTPP);
           putreg16(reg16, STR71X_GPIO0_PC2);
 
           /* Start with enc28j60 de-selected (active low) and in
@@ -1039,7 +1058,7 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 #ifdef BSPI0_GPIO1_ALL
           reg16  = getreg16(STR71X_GPIO1_PC0);
           reg16 &= ~BSPI0_GPIO1_ALL;
-          reg16 |= (BSPI0_GPIO1_INTTL|BSPI0_GPIO1_OUTPP);
+          reg16 |= (BSPI0_GPIO1_INTTL | BSPI0_GPIO1_OUTPP);
           putreg16(reg16, STR71X_GPIO1_PC0);
 
           reg16  = getreg16(STR71X_GPIO1_PC1);
@@ -1080,17 +1099,18 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 
           reg16  = getreg16(STR71X_GPIO0_PC0);
           reg16 &= ~BSPI1_GPIO0_ALL;
-          reg16 |= (BSPI1_GPIO0_ALT|BSPI1_GPIO0_INTTL|BSPI1_GPIO0_OUTPP);
+          reg16 |= (BSPI1_GPIO0_ALT | BSPI1_GPIO0_INTTL |
+                    BSPI1_GPIO0_OUTPP);
           putreg16(reg16, STR71X_GPIO0_PC0);
 
           reg16  = getreg16(STR71X_GPIO0_PC1);
           reg16 &= ~BSPI1_GPIO0_ALL;
-          reg16 |= (BSPI1_GPIO0_ALT|BSPI1_GPIO0_INCMOS);
+          reg16 |= (BSPI1_GPIO0_ALT | BSPI1_GPIO0_INCMOS);
           putreg16(reg16, STR71X_GPIO0_PC1);
 
           reg16  = getreg16(STR71X_GPIO0_PC2);
           reg16 &= ~BSPI1_GPIO0_ALL;
-          reg16 |= (BSPI1_GPIO0_ALT|BSPI1_GPIO0_OUTPP);
+          reg16 |= (BSPI1_GPIO0_ALT | BSPI1_GPIO0_OUTPP);
           putreg16(reg16, STR71X_GPIO0_PC2);
 
           /* Start with MMC/SD disabled */
@@ -1120,7 +1140,7 @@ FAR struct spi_dev_s *str71_spibus_initialize(int port)
 #ifdef BSPI1_GPIO1_ALL
           reg16  = getreg16(STR71X_GPIO1_PC0);
           reg16 &= ~BSPI1_GPIO1_ALL;
-          reg16 |= (BSPI1_GPIO1_INTTL|BSPI1_GPIO1_OUTPP);
+          reg16 |= (BSPI1_GPIO1_INTTL | BSPI1_GPIO1_OUTPP);
           putreg16(reg16, STR71X_GPIO1_PC0);
 
           reg16  = getreg16(STR71X_GPIO1_PC1);

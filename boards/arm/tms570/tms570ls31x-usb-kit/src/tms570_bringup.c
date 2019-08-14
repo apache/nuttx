@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-tms57004/src/tms570_bringup.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/tms570_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,13 +53,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Checking needed by MMC/SDCard */
+/* Checking needed by MMC/SDCard */
 
- #ifdef CONFIG_NSH_MMCSDMINOR
- #  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
- #else
- #  define MMCSD_MINOR 0
- #endif
+#ifdef CONFIG_NSH_MMCSDMINOR
+#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#else
+#  define MMCSD_MINOR 0
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -82,7 +82,7 @@ int tms570_bringup(void)
   ret = tms570_mmcsd_initialize(MMCSD_MINOR);
   if (ret < 0)
     {
-      serr( "Failed to initialize SD slot %d: %d\n", ret);
+      serr("Failed to initialize SD slot %d: %d\n", ret);
       return ret;
     }
 #endif

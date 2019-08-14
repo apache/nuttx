@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-strp711/src/str71_enc28j60.c
+ * boards/arm/str71x/olimex-strp711/src/str71_enc28j60.c
  *
  *   Copyright (C) 2010, 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,7 @@
  *
  ****************************************************************************/
 
-/*
- * ENC28J60 Module
+/* ENC28J60 Module
  *
  * The ENC28J60 module does not come on the Olimex-STR-P711, but this
  * describes how I have connected it.  NOTE that the ENC28J60 requires an
@@ -43,7 +42,8 @@
  *
  * Module CON5     QFN ENC2860 Description
  * --------------- -------------------------------------------------------
- * 1  J8-1 NET CS   5  ~CS    Chip select input pin for SPI interface (active low)
+ * 1  J8-1 NET CS   5  ~CS    Chip select input pin for SPI interface
+ *                            (active low)
  * 2     2 SCK      4  SCK    Clock in pin for SPI interface
  * 3     3 MOSI     3  SI     Data in pin for SPI interface
  * 4     4 MISO     2  SO     Data out pin for SPI interface
@@ -227,11 +227,12 @@ void up_netinitialize(void)
   ret = str71x_xticonfig(ENC28J60_IRQ, false);
   if (ret < 0)
     {
-      nerr("ERROR: Failed configure interrupt for IRQ %d: %d\n", ENC28J60_IRQ, ret);
+      nerr("ERROR: Failed configure interrupt for IRQ %d: %d\n",
+           ENC28J60_IRQ, ret);
       return;
     }
 
-  /* Take ENC28J60 out of reset (active low)*/
+  /* Take ENC28J60 out of reset (active low) */
 
   reg16  = getreg16(STR71X_GPIO0_PD);
   reg16 &= ~ENC_GPIO0_NETRST;

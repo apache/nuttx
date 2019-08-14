@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nrf52-generic/src/nrf52-generic.h
+ * boards/arm/nrf52/nrf52-generic/src/nrf52-generic.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H
-#define _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H
+#ifndef __BOARDS_ARM_NRF52_NRF52GENERIC_SRC_NRF52GENERIC_H
+#define __BOARDS_ARM_NRF52_NRF52GENERIC_SRC_NRF52GENERIC_H
 
 /****************************************************************************
  * Included Files
@@ -50,6 +50,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* Definitions to configure LED GPIO as outputs */
 
 #define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED1_PIN))
@@ -58,6 +59,7 @@
 #define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED4_PIN))
 
 /* Button definitions *******************************************************/
+
 /* Board supports four buttons. */
 
 #define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN13)
@@ -96,4 +98,4 @@
 int nrf52_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H */
+#endif /* __BOARDS_ARM_NRF52_NRF52GENERIC_SRC_NRF52GENERIC_H */

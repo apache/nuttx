@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-strp711/include/board.h
+ * boards/arm/str71x/olimex-strp711/include/board.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Features:
  *
  * - MCU: STR711FR2T6 16/32 bit ARM7TDMI™ with 256K Bytes Program Flash,
  *   64K Bytes RAM, USB 2.0, RTC, 12 bit ADC, 4x UARTs, 2x I2C,2x SPI,
  *   5x 32bit TIMERS, 2x PWM, 2x CCR, WDT, up to 50MHz operation
- * - Standard JTAG connector with ARM 2x10 pin layout for programming/debugging
- *   with ARM-JTAG
+ * - Standard JTAG connector with ARM 2x10 pin layout for programming/
+ *   debugging with ARM-JTAG
  * - USB connector
  * - Two channel RS232 interface and drivers
  * - SD/MMC card connector
@@ -62,8 +63,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_OLIMEX_STRP711_BOARD_H
-#define _CONFIGS_OLIMEX_STRP711_BOARD_H
+#ifndef __BOARDS_ARM_STR71X_OLIMEX_STRP711_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STR71X_OLIMEX_STRP711_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -150,7 +151,9 @@
 
 /* Button definitions *******************************************************/
 
-/* The Olimex board has two buttons, one labled "BUT" and the other "WAKEUP" */
+/* The Olimex board has two buttons,
+ * one labled "BUT" and the other "WAKEUP"
+ */
 
 #define BUT_BUTTON              1 /* Bit 0: BUT button is depressed */
 #define WAKEUP_BUTTON           2 /* Bit 1: WAKEUP button is depressed */
@@ -162,7 +165,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -177,4 +181,4 @@ extern "C" {
 #endif
 #endif
 
-#endif  /* _CONFIGS_OLIMEX_STRP711_BOARD_H */
+#endif  /* __BOARDS_ARM_STR71X_OLIMEX_STRP711_INCLUDE_BOARD_H */

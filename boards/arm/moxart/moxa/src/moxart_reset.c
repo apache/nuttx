@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/moxa/src/moxart_reset.c
+ * boards/arm/moxart/moxa/src/moxart_reset.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

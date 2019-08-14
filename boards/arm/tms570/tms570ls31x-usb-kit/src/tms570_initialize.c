@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/launchxl-tms57004/src/moxart_boot.c
+ * boards/arm/tms570/tms570ls31x-usb-kit/src/moxart_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -92,9 +92,11 @@ void tms570_board_initialize(void)
   putreg32(0x00000000, 0xfff7b800 + 0x64);
 
   /* - This if statement is a placeholder for ArgoBoard/USBStick check */
+
   /* - Configure NHET pins as output */
 
   putreg32(0xaa178035, 0xfff7b800 + 0x004c);
+
   /* - Turn all LEDs off */
 
   putreg32(0x08110034, 0xfff7b800 + 0x0054);
