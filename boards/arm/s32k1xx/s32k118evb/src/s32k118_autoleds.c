@@ -49,7 +49,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32.h"
+
 #include "s32k118evb.h"
 
 #ifdef CONFIG_ARCH_LEDS

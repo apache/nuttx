@@ -36,8 +36,9 @@
 # Common ARM source files
 
 HEAD_ASRC  =
-CMN_ASRCS  = up_allocateheap.c up_exit.c up_initialize.c up_interruptcontext.c
-CMN_ASRCS += up_lowputs.c up_mdelay.c up_modifyreg8.c up_modifyreg16.c
+CMN_ASRCS  =
+CMN_CSRCS  = up_allocateheap.c up_exit.c up_initialize.c up_interruptcontext.c
+CMN_CSRCS += up_lowputs.c up_mdelay.c up_modifyreg8.c up_modifyreg16.c
 CMN_CSRCS += up_modifyreg32.c up_puts.c up_releasestack.c up_stackframe.c
 CMN_CSRCS += up_task_start.c up_udelay.c up_usestack.c up_vfork.c
 
