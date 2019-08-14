@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpc54_timerisr.c
+ * arch/arm/src/s32k1xx/s32k14x/s32k14x_timerisr.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "hardware/lpc54_syscon.h"
+#include "hardware/s32k14x_syscon.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,7 +94,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  lpc54_timerisr
+ * Function:  s32k14x_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -102,7 +102,7 @@
  *
  ****************************************************************************/
 
-static int lpc54_timerisr(int irq, uint32_t *regs, void *arg)
+static int s32k14x_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -136,11 +136,11 @@ void arm_timer_initialize(void)
 
   regval = (SYSCON_SYSTICKCLKDIV_DIV(BOARD_SYSTICKCLKDIV) |
             SYSCON_SYSTICKCLKDIV_REQFLAG);
-  putreg32(regval, LPC54_SYSCON_SYSTICKCLKDIV);
+  putreg32(regval, S32K1XX_SYSCON_SYSTICKCLKDIV);
 
   /* The request flag will be cleared when the divider change is complete */
 
-  while ((getreg32(LPC54_SYSCON_SYSTICKCLKDIV) & SYSCON_SYSTICKCLKDIV_REQFLAG) != 0)
+  while ((getreg32(S32K1XX_SYSCON_SYSTICKCLKDIV) & SYSCON_SYSTICKCLKDIV_REQFLAG) != 0)
     {
     }
 
@@ -160,7 +160,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LPC54_IRQ_SYSTICK, (xcpt_t)lpc54_timerisr, NULL);
+  (void)irq_attach(S32K1XX_IRQ_SYSTICK, (xcpt_t)s32k14x_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -169,5 +169,5 @@ void arm_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(LPC54_IRQ_SYSTICK);
+  up_enable_irq(S32K1XX_IRQ_SYSTICK);
 }

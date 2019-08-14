@@ -131,7 +131,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)s32k11x_timerisr, NULL);
+  (void)irq_attach(S32K1XX_IRQ_SYSTICK, (xcpt_t)s32k11x_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -139,5 +139,5 @@ void arm_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(SAM_IRQ_SYSTICK);
+  up_enable_irq(S32K1XX_IRQ_SYSTICK);
 }
