@@ -90,7 +90,7 @@
  * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
  * control input pins. It must always be running when UART is enabled.
  *
- * The default lpuart1 ipg_clk is 66MHz (max 66.5MHz).  ipg_clk is shared
+ * The default lpuart0 ipg_clk is 66MHz (max 66.5MHz).  ipg_clk is shared
  * among many modules and should not be controlled by the UART logic.
  *
  * The module_clock is for all the state machines, writing RxFIFO, reading
@@ -99,10 +99,10 @@
  * peripheral_clock without changing configuration of baud rate.
  *
  * The default ipg_perclk is 80MHz (max 80MHz).  ipg_perclk is gated by
- * CCGR5[CG12], lpuart1_clk_enable.  The clock generation sequence is:
+ * CCGR5[CG12], lpuart0_clk_enable.  The clock generation sequence is:
  *
  *   pll3_sw_clk (480M) -> CCGR5[CG12] -> 3 bit divider cg podf=6 ->
- *     PLL3_80M (80Mhz) -> CDCDR1: lpuart1_clk_podf ->
+ *     PLL3_80M (80Mhz) -> CDCDR1: lpuart0_clk_podf ->
  *       6 bit divider default=1 -> LPUART0_CLK_ROOT
  *
  * REVISIT:  This logic assumes that all dividers are at the default value
@@ -138,15 +138,15 @@ void s32k1xx_lpuart_clock_enable (uint32_t base)
 {
   if (base == S32K1XX_LPUART0_BASE)
     {
-      s32k1xx_clockall_lpuart1();
+      s32k1xx_clockall_lpuart0();
     }
   else if (base == S32K1XX_LPUART1_BASE)
     {
-      s32k1xx_clockall_lpuart2();
+      s32k1xx_clockall_lpuart1();
     }
   else if (base == S32K1XX_LPUART2_BASE)
     {
-      s32k1xx_clockall_lpuart3();
+      s32k1xx_clockall_lpuart2();
     }
 }
 

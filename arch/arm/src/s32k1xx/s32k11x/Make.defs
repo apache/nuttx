@@ -58,8 +58,7 @@ endif
 # Source file specific to the S32k11x family
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = s32k11x_irq.c s32k11x_lowputc.c s32k11x_port.c s32k11x_serial.c
-CHIP_CSRCS += s32k11x_lpuart.c
+CHIP_CSRCS  = s32k11x_irq.c
 
 # Configuration-dependent S32k11x files
 

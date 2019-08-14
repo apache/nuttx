@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/sam_irq.h
+ * arch/arm/src/s32k1xx/s32k14x/s32k14x_irq.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_IRQ_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_IRQ_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32K14X_S32K14X_IRQ_H
+#define __ARCH_ARM_SRC_S32K1XX_S32K14X_S32K14X_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -43,21 +43,18 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_dumpnvic
+ * Name: s32k14x_clrpend
  *
  * Description:
- *   Dump some interesting NVIC registers
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_IRQ_INFO
-void sam_dumpnvic(const char *msg, int irq);
-#else
-#  define sam_dumpnvic(msg, irq)
-#endif
+void s32k14x_clrpend(int irq);
 
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_IRQ_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32K14X_S32K14X_IRQ_H */
