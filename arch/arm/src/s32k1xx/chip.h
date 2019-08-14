@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/x32k1xx/chip.h
+ * arch/arm/src/s32k1xx/chip.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_S32K1XX_CHIP_H
-#define __ARCH_ARM_INCLUDE_S32K1XX_CHIP_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_CHIP_H
+#define __ARCH_ARM_SRC_S32K1XX_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -42,33 +42,25 @@
 
 #include <nuttx/config.h>
 
+/* Include the memory map and the chip definitions file.  Other chip hardware files
+ * should then include this file for the proper setup.
+ */
+
+#include <arch/irq.h>
+#include "hardware/s32k1xx_memorymap.h"
+
+/* The common ARMv6/7-M vector handling logic expects the following definitions in
+ * this file.  ARMV6/7M_PERIPHERAL_INTERRUPTS provides the number of supported
+ * external interrupts which, for this architecture, is provided in the
+ * arch/s32k1xx/irq.h header file.
+ */
+
+#define ARMV6M_PERIPHERAL_INTERRUPTS S32K_IRQ_NEXTINT
+#define ARMV7M_PERIPHERAL_INTERRUPTS S32K_IRQ_NEXTINT
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* NVIC priority levels *************************************************************/
-
-/* Each priority field holds a priority value. The lower the value, the greater the
- * priority of the corresponding interrupt.
- */
-
-#if defined(CONFIG_ARCH_CORTEXM4)
-/* The Cortex-M4F core supports 16 programmable interrupt priority levels. */
-
-#  define NVIC_SYSH_PRIORITY_MIN        0xf0 /* All bits[7:4] set is minimum priority */
-#  define NVIC_SYSH_PRIORITY_DEFAULT    0x80 /* Midpoint is the default */
-#  define NVIC_SYSH_PRIORITY_MAX        0x00 /* Zero is maximum priority */
-#  define NVIC_SYSH_PRIORITY_STEP       0x10 /* Steps between priorities */
-
-#elif defined(CONFIG_ARCH_CORTEXM0)
-/* The Cortex-M0+ core supports 4 programmable interrupt priority levels. */
-
-#  define NVIC_SYSH_PRIORITY_MIN        0xc0 /* All bits[7:4] set is minimum priority */
-#  define NVIC_SYSH_PRIORITY_DEFAULT    0x80 /* Midpoint is the default */
-#  define NVIC_SYSH_PRIORITY_MAX        0x00 /* Zero is maximum priority */
-#  define NVIC_SYSH_PRIORITY_STEP       0x40 /* Steps between priorities */
-
-#endif
 
 /************************************************************************************
  * Public Types
@@ -82,4 +74,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_S32K1XX_CHIP_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_CHIP_H */

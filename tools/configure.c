@@ -192,6 +192,7 @@ static const char *g_chipnames[] =
   "moxart",
   "nrf52",
   "nuc1xx",
+  "s32k1xx",
   "sam34",
   "sama5",
   "samd2l2",
