@@ -59,6 +59,7 @@
  */
 
 /* NVIC priority levels *************************************************************/
+
 /* Each priority field holds a priority value, 0-31. The lower the value, the greater
  * the priority of the corresponding interrupt.
  *
