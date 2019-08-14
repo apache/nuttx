@@ -41,14 +41,17 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <assert.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "nvic.h"
-#include "clock/clock.h"
-#include "up_internal.h"
 #include "up_arch.h"
+#include "up_internal.h"
+#include "clock/clock.h"
+#include "s32k1xx_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,9 +62,13 @@
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * Then, for example, if the CPU clock is the SysTick and
- * BOARD_CPU_FREQUENCY is 48MHz and CLK_TCK is 100, then the reload value
- * would be:
+ * The CLKSOURCE field in SysTick Control and Status register selects either
+ * the core clock (when CLKSOURCE = 1) or a divide-by-16 of the core clock
+ * (when CLKSOURCE = 0).
+
+ * Then, for example, if the core clock is the SysTick close source and
+ * the core clock is 48MHz and CLK_TCK is 100, then the reload value would
+ * be:
  *
  *   SYSTICK_RELOAD = (48,000,000 / 100) - 1
  *                  = 479,999
@@ -70,15 +77,7 @@
  * Which fits within the maximum 24-bit reload value.
  */
 
-#define SYSTICK_RELOAD ((BOARD_CPU_FREQUENCY / CLK_TCK) - 1)
-
-/* The size of the reload field is 24 bits.  Verify that the reload value
- * will fit in the reload register.
- */
-
-#if SYSTICK_RELOAD > 0x00ffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
-#endif
+#define SYSTICK_RELOAD(coreclk) (((coreclk) / CLK_TCK) - 1)
 
 /****************************************************************************
  * Private Functions
@@ -116,18 +115,35 @@ static int s32k11x_timerisr(int irq, uint32_t *regs, void *arg)
 
 void arm_timer_initialize(void)
 {
+  uint32_t coreclk;
+  uint32_t reload;
   uint32_t regval;
 
   /* Set the SysTick interrupt to the default priority */
 
-  regval = getreg32(ARMV6M_SYSCON_SHPR3);
+  regval  = getreg32(ARMV6M_SYSCON_SHPR3);
   regval &= ~SYSCON_SHPR3_PRI_15_MASK;
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << SYSCON_SHPR3_PRI_15_SHIFT);
   putreg32(regval, ARMV6M_SYSCON_SHPR3);
 
+  /* Set set CSR CLKSOURCE bit to select the core clock as the SysTick
+   * source clock.
+   */
+
+  putreg32(SYSTICK_CSR_CLKSOURCE, ARMV6M_SYSTICK_CSR);
+
+  /* Get the reload value */
+
+  coreclk = s32k1xx_get_coreclk();
+  reload  = SYSTICK_RELOAD(coreclk);
+
+  /* The size of the reload field is 24 bits. */
+
+  DEBUGASSERT(reload <= 0x00ffffff);
+
   /* Configure SysTick to interrupt at the requested rate */
 
-  putreg32(SYSTICK_RELOAD, ARMV6M_SYSTICK_RVR);
+  putreg32(reload, ARMV6M_SYSTICK_RVR);
 
   /* Attach the timer interrupt vector */
 
@@ -135,7 +151,8 @@ void arm_timer_initialize(void)
 
   /* Enable SysTick interrupts */
 
-  putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE), ARMV6M_SYSTICK_CSR);
+  putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE |SYSTICK_CSR_CLKSOURCE),
+           ARMV6M_SYSTICK_CSR);
 
   /* And enable the timer interrupt */
 

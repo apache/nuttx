@@ -52,7 +52,7 @@ endif
 # Source files common to all S32K1xx chip families.
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = s32k1xx_start.c
+CHIP_CSRCS  = s32k1xx_start.c s32k1xx_clockconfig.c
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family
 

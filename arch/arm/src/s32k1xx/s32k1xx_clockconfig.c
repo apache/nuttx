@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k118evb/src/s32k118_boot.c
+ * arch/arm/src/s32k1xx/s32k1xx_clockconfig.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,63 +39,37 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
 
-#include "s32k118evb.h"
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "s32k1xx_clockconfig.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k1xx_board_initialize
+ * Name: s32k1xx_clockconfig
  *
  * Description:
- *   All S32K1XX architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Called to initialize the S32K1XX.  This does whatever setup is needed
+ *   to put the MCU in a usable state.  This includes the initialization of
+ *   clocking using the settings in board.h.  This function also performs
+ *   other low-level chip as necessary.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-void s32k1xx_board_initialize(void)
+void s32k1xx_clockconfig(FAR const struct pll_setup_s *pllsetup)
 {
-#ifdef CONFIG_S32K1XX_SPI
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
-   * function s32k118_spidev_initialize() has been brought into the link.
-   */
-
-  s32k118_spidev_initialize();
-#endif
-
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
-#endif
+#warning Missing logic
 }
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  (void)s32k118_bringup();
-}
-#endif

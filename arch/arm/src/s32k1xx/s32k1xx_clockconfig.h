@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/s32k1xx/s32k14x/s32k14x_timerisr.c
+ * arch/arm/src/s32k1xx/s32k1xx_clockconfig.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,115 +33,94 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_CLKCONFIG_H
+#define __ARCH_ARM_SRC_S32K1XX_S32K1XX_CLKCONFIG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <stdint.h>
-#include <time.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
-
-#include "nvic.h"
-#include "up_internal.h"
-#include "up_arch.h"
-
-#include "clock/clock.h"
-#include "s32k1xx_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The SysTick clock input (Fsystick) is determined by the CLKSOURCE file of
- * the SysTick CSR register:  The CLKSOURCE field in SysTick Control and
- * Status register selects either the core clock (when CLKSOURCE = 1) or a
- * divide-by-16 of the core clock (when CLKSOURCE = 0).
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* PLL setup structure.
  *
- * The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- *    reload = (Fsystick / CLK_TICK) - 1
+ * This structure can be used to define a PLL configuration.  If powering
+ * up or waiting for PLL lock, the PLL input clock source should be
+ * configured prior to PLL setup.
  */
 
-#define SYSTICK_RELOAD(coreclk) (((coreclk) / CLK_TCK) - 1)
+struct pll_setup_s
+{
+  uint32_t pllclksel;       /* PLL clock source register SYSPLLCLKSEL */
+  uint32_t pllctrl;         /* PLL control register SYSPLLCTRL */
+  uint32_t pllndec;         /* PLL NDEC register SYSPLLNDEC */
+  uint32_t pllpdec;         /* PLL PDEC register SYSPLLPDEC */
+  uint32_t pllmdec;         /* PLL MDEC registers SYSPLLPDEC */
+  uint32_t pllfout;         /* Actual PLL output frequency */
+  uint32_t pllfrac;         /* Only aduio PLL has this function*/
+  uint32_t pllflags;        /* PLL setup flags */
+  uint32_t ahbdiv;          /* AHB divider */
+};
 
 /****************************************************************************
- * Private Functions
+ * Inline Functions
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  s32k14x_timerisr
+ * Name: s32k1xx_clockconfig
  *
  * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
+ *   Called to initialize the S32K1XX.  This does whatever setup is needed
+ *   to put the MCU in a usable state.  This includes the initialization of
+ *   clocking using the settings in board.h.  This function also performs
+ *   other low-level chip as necessary.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-static int s32k14x_timerisr(int irq, uint32_t *regs, void *arg)
-{
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
+void s32k1xx_clockconfig(FAR const struct pll_setup_s *pllsetup);
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  arm_timer_initialize
+ * Name: s32k1xx_get_coreclk
  *
  * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   Return the current selection of the CORE clock.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-void arm_timer_initialize(void)
-{
-  uint32_t coreclk;
-  uint32_t reload;
-  uint32_t regval;
+uint32_t s32k1xx_get_coreclk(void);
 
-  /* Make sure that the SYSTICK clock source is set to use the SysTick
-   * function clock (CLKSOURCE==1).
-   */
-
-  putreg32(NVIC_SYSTICK_CTRL_CLKSOURCE, NVIC_SYSTICK_CTRL);
-
-  /* Get the reload value */
-
-  coreclk = s32k1xx_get_coreclk();
-  reload  = SYSTICK_RELOAD(coreclk);
-
-  /* The size of the reload field is 24 bits. */
-
-  DEBUGASSERT(reload <= 0x00ffffff);
-
-  /* Configure SysTick to interrupt at the requested rate */
-
-  putreg32(reload, NVIC_SYSTICK_RELOAD);
-
-  /* Attach the timer interrupt vector */
-
-  (void)irq_attach(S32K1XX_IRQ_SYSTICK, (xcpt_t)s32k14x_timerisr, NULL);
-
-  /* Enable SysTick interrupts */
-
-  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
-            NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(S32K1XX_IRQ_SYSTICK);
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32K1XX_CLKCONFIG_H */

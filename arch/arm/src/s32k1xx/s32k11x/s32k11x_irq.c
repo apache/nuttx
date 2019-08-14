@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "s32k14x/s32k14x_irq.h"
+#include "s32k11x/s32k11x_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -137,7 +137,8 @@ static inline void s32k11x_clrpend(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= S32K1XX_IRQ_INTERRUPT && irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NINTS)
+  if (irq >= S32K1XX_IRQ_INTERRUPT &&
+      irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NEXTINT)
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
@@ -222,7 +223,8 @@ void up_disable_irq(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= S32K1XX_IRQ_INTERRUPT && irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NINTS)
+  if (irq >= S32K1XX_IRQ_INTERRUPT &&
+      irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NEXTINT)
     {
       /* Set the appropriate bit in the ICER register to disable the
        * interrupt
@@ -259,7 +261,8 @@ void up_enable_irq(int irq)
 
   /* Check for external interrupt */
 
-  if (irq >= S32K1XX_IRQ_INTERRUPT && irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NINTS)
+  if (irq >= S32K1XX_IRQ_INTERRUPT &&
+      irq < S32K1XX_IRQ_INTERRUPT + S32K1XX_IRQ_NEXTINT)
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
