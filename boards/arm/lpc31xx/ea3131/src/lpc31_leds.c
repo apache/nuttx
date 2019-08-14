@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3131/src/lpc31_leds.c
+ * boards/arm/lpc31xx/ea3131/src/lpc31_leds.c
  *
  *   Copyright (C) 2009-2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

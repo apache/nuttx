@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/zp214xpa/src/lpc2148_appinit.c
+ * boards/arm/lpc214x/zp214xpa/src/lpc2148_appinit.c
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

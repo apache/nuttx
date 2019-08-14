@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mcu123-lpc214x/src/Makefile
+# boards/arm/lpc214x/mcu123-lpc214x/src/Makefile
 #
 #   Copyright (C) 2007-2010, 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4337-ws/src/lpc43_appinit.c
+ * boards/arm/lpc43xx/lpc4337-ws/src/lpc43_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

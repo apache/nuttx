@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #############################################################################
-# boards/mcu123-lpc214x/lpc21isp.sh
+# boards/arm/lpc214x/mcu123-lpc214x/lpc21isp.sh
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

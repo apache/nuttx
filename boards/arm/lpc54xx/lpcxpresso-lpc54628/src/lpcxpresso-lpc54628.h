@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
+ * boards/arm/lpc54xx/lpcxpresso-lpc54628/src/lpcxpresso-lpc54628.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+#ifndef __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
+#define __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H
 
 /****************************************************************************
  * Included Files
@@ -219,6 +219,7 @@
               I2C5CNT + I2C6CNT + I2C7CNT + I2C8CNT + I2C9CNT )
 
 /* LED definitions **********************************************************/
+
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
  * LEDs are for application use. They are illuminated when the driving
  * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
@@ -238,6 +239,7 @@
    GPIO_MODE_DIGITAL | GPIO_FILTER_OFF | GPIO_PUSHPULL | GPIO_PULLUP)
 
 /* Button definitions *******************************************************/
+
 /* The LPCXpresso has four switches:
  *
  *   SW2 ISP2         P0.6
@@ -262,6 +264,7 @@
   (GPIO_PORT1 | GPIO_PIN1 | GPIO_INTBOTH | GPIO_MODE_DIGITAL | GPIO_FILTER_ON)
 
 /* LCD/TSC definitions ******************************************************/
+
 /* The backlight is controlled by P3.31 and is intended to connect via PWM
  * to control the brightness level.  For simplicity here, it configured as a
  * simple GPIO output.
@@ -398,4 +401,4 @@ void lpc54_i2c_free(int ndx);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */
+#endif /* __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_SRC_LPCXPRESSO_LPC54628_H */

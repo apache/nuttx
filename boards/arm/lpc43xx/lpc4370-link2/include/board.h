@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4357-link2/include/board.h
+ * boards/arm/lpc43xx/lpc4357-link2/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC4357_LINK2_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LPC4357_LINK2_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -52,6 +52,7 @@
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
+
 /* NOTE:  The following definitions require lpc43_cgu.h.  It is not included
  * here because the including C file may not have that file in its include
  * path.
@@ -138,7 +139,6 @@
 
 #  define BOARD_FCLKOUT_FREQUENCY   (204000000) /* 17 * 12,000,000 / 1 */
 #  define BOARD_FCCO_FREQUENCY      (204000000) /* Fclockout */
-
 #endif
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
@@ -148,20 +148,17 @@
 #  define BOARD_ABP1_FREQUENCY      BOARD_XTAL_FREQUENCY
 #endif
 
-
 #if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_I2C1) || defined(CONFIG_LPC43_DAC) || defined(CONFIG_LPC43_ADC0) || defined(CONFIG_LPC43_ADC1)  || defined(CONFIG_LPC43_CAN0)
 #  define BOARD_ABP3_CLKSRC         BASE_APB_CLKSEL_XTAL
 #  define BOARD_ABP3_FREQUENCY      BOARD_XTAL_FREQUENCY
 #endif
 
-
-
 #define BOARD_IDIVA_DIVIDER         (2)
 #define BOARD_IDIVA_CLKSRC          IDIVA_CLKSEL_PLL1
 #define BOARD_IDIVA_FREQUENCY       (BOARD_FCLKOUT_FREQUENCY/BOARD_IDIVA_DIVIDER)
 
-
 /* USB0 ********************************************************************/
+
 /* Settings needed in lpc43_cpu.c */
 
 #define BOARD_USB0_CLKSRC           PLL0USB_CLKSEL_XTAL
@@ -169,6 +166,7 @@
 #define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
 /* SPIFI clocking **********************************************************/
+
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
  * for the selected divider
@@ -186,7 +184,6 @@
 #else
 #  define BOARD_SPIFI_DIVB          1           /* Use IDIVB */
 #endif
-
 
 /* We need to configure the divider so that its output is as close to the
  * desired SCLK value.  The peak data transfer rate will be about half of
@@ -222,6 +219,7 @@
 #endif
 
 /* UART clocking ***********************************************************/
+
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
 #define BOARD_USART0_CLKSRC         BASE_USART0_CLKSEL_XTAL
@@ -236,11 +234,10 @@
 #define BOARD_USART3_CLKSRC         BASE_USART3_CLKSEL_XTAL
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
+/* SSP clocking *************************************************************/
 
-/* SSP clocking ***********************************************************
- *
- * BOARD_SSPX_BASEFREQ may be further divided by 2-254 to get the SSP clock.  If we
- * want a usable range of 400KHz to 25MHz for the SSP, then:
+/* BOARD_SSPX_BASEFREQ may be further divided by 2-254 to get the SSP clock.
+ * If we want a usable range of 400KHz to 25MHz for the SSP, then:
  *
  * 1. SSPCLK must be greater than (2*25MHz) = 50MHz, and
  * 2. SSPCLK must be less than (254*400Khz) = 101.6MHz.
@@ -254,6 +251,7 @@
 #define BOARD_SSP1_BASEFREQ         BOARD_IDIVA_FREQUENCY
 
 /* LED definitions *********************************************************/
+
 /* LED1   K2  GPIO0[8]
  *
  * LED index values for use with board_userled()
@@ -287,8 +285,8 @@
 #define LED_PANIC                   3  /* Flashing */
 
 /* UART Pins ****************************************************************/
-/*
- * The following definitions must be provided so that the LPC43 serial
+
+/* The following definitions must be provided so that the LPC43 serial
  * driver can set up the U[S]ART for the serial console properly (see the
  * file arch/arc/src/lpc43xx/lpc43*_pinconf.h for more info).
  */
@@ -320,4 +318,4 @@
 #define PINCONF_SSP1_SCK            PINCONF_SSP1_SCK_1
 #define PINCONF_SSP1_SSEL           PINCONF_SSP1_SSEL_1
 
-#endif  /* __BOARDS_ARM_LPC4357_LINK2_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H */

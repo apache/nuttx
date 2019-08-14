@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/kernel/lpc43_userspace.c
+ * boards/arm/lpc43xx/bambino-200e/kernel/lpc43_userspace.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE
@@ -66,8 +67,8 @@
  ****************************************************************************/
 
 /* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+ * not actual uint32_t storage locations! They are only used meaningfully in
+ * the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe

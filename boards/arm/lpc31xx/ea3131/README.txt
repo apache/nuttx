@@ -195,11 +195,11 @@ Image Format
   it!
 
   To work around both of these issues, I have created a small program under
-  boards/ea3131/tools to add the header.  This program can be built under
+  boards/arm/lpc31xx/ea3131/tools to add the header.  This program can be built under
   either Linux or Cygwin (and probably other tool environments as well).  That
   tool can be built as follows:
 
-  - cd boards/ea3131/tools
+  - cd boards/arm/lpc31xx/ea3131/tools
   - make
 
   Then, to build the NuttX binary ready to load with the bootloader, just
@@ -216,10 +216,10 @@ Image Format
        to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
-    3. The CRC32 logic in boards/ea3131/tools doesn't seem to work.  As a result,
+    3. The CRC32 logic in boards/arm/lpc31xx/ea3131/tools doesn't seem to work.  As a result,
        the CRC is currently disabled in the header:
 
-       RCS file: /cvsroot/nuttx/nuttx/boards/ea3131/tools/lpchdr.c,v
+       RCS file: /cvsroot/nuttx/nuttx/boards/arm/lpc31xx/ea3131/tools/lpchdr.c,v
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
@@ -262,7 +262,7 @@ Using OpenOCD and GDB
 
   Then you should be able to start the OpenOCD daemon like:
 
-    boards/ea3131/tools/oocd.sh $PWD
+    boards/arm/lpc31xx/ea3131/tools/oocd.sh $PWD
 
   Where it is assumed that you are executing oocd.sh from the top level
   directory where NuttX is installed.
@@ -282,7 +282,8 @@ On-Demand Paging
 ^^^^^^^^^^^^^^^^
 
   There is a configuration that was used to verify the On-Demand Paging
-  feature for the ARM926 (see https://bitbucket.org/nuttx/documentation/src/master/NuttXDemandPaging.html).
+  feature for the ARM926
+  (see https://bitbucket.org/nuttx/documentation/src/master/NuttXDemandPaging.html).
   That configuration is contained in the pgnsh sub-directory.  The pgnsh configuration
   is only a test configuration, and lacks some logic to provide the full On-Demand
   Paging solution (see below).
@@ -383,16 +384,17 @@ On-Demand Paging
 
   This example uses a two-pass build.  The top-level Makefile recognizes the
   configuration option CONFIG_BUILD_2PASS and will execute the Makefile in
-  boards/ea3131/locked/Makefile to build the first pass object, locked.r.
+  boards/arm/lpc31xx/ea3131/locked/Makefile to build the first pass object, locked.r.
   This first pass object contains all of the code that must be in the locked
   text region. The Makefile in arch/arm/src/Makefile then includes this 1st
-  pass in build, positioning it as controlled by boards/ea3131/scripts/pg-ld.script.
+  pass in build, positioning it as controlled by
+  boards/arm/lpc31xx/ea3131/scripts/pg-ld.script.
 
   Finishing the Example:
   ----------------------
 
   This example is incomplete in that it does not have any media to reload the
-  page text region from:  The file boards/ea3131/src/up_fillpage.c is only
+  page text region from:  The file boards/arm/lpc31xx/ea3131/src/up_fillpage.c is only
   a stub.  That logic to actually reload the page from some storage medium
   (among other things) would have to be implemented in order to complete this
   example.  At present, the example works correctly up to the point where
@@ -438,7 +440,8 @@ On-Demand Paging
   Alternative:
   ------------
 
-  I have implemented an alternative within boards/ea3131/src/up_fillpage.c
+  I have implemented an alternative within
+  boards/arm/lpc31xx/ea3131/src/up_fillpage.c
   which is probably only useful for testing.  Here is the usage module
   for this alternative
 

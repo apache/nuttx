@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4357-evb/include/board.h
+ * boards/arm/lpc43xx/lpc4357-evb/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4357_EVB_INCLUDE_BOARD_H
-#define _CONFIGS_LPC4357_EVB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4357_EVB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC43XX_LPC4357_EVB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -52,6 +52,7 @@
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
+
 /* NOTE:  The following definitions require lpc43_cgu.h.  It is not included
  * here because the including C file may not have that file in its include
  * path.
@@ -143,14 +144,15 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
 
 /* USB0 ********************************************************************/
+
 /* Settings needed in lpc43_cpu.c */
 
 #define BOARD_USB0_CLKSRC           PLL0USB_CLKSEL_XTAL
@@ -158,6 +160,7 @@
 #define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
 /* SPIFI clocking **********************************************************/
+
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
  * for the selected divider
@@ -176,7 +179,6 @@
 #  define BOARD_SPIFI_DIVB          1           /* Use IDIVB */
 #endif
 
-
 /* We need to configure the divider so that its output is as close to the
  * desired SCLK value.  The peak data transfer rate will be about half of
  * this frequency in bytes per second.
@@ -190,6 +192,7 @@
 #endif
 
 /* UART clocking ***********************************************************/
+
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
 #define BOARD_USART0_CLKSRC         BASE_USART0_CLKSEL_XTAL
@@ -205,6 +208,7 @@
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
 /* LED definitions *********************************************************/
+
 /* The LPC4357-EVB has one user-controllable LED labelled D6 controlled
  * by the signal LED_3V3:
  *
@@ -249,10 +253,13 @@
  */
 
 /* Button definitions *******************************************************/
+
 /* To be provided */
 
 /* UART Pins ****************************************************************/
+
 /* REVISIT: Thee are most likely left over from the LPC4330-Xplorer */
+
 /* The LPC4357-EVB does not have RS-232 drivers or serial connectors on
  * board. USART0 and UART1 are available on J8 as follows:
  *
@@ -286,4 +293,4 @@
 #define PINCONF_U3_RXD  PINCONF_U3_RXD_4
 #define PINCONF_U3_DIR  PINCONF_U3_DIR_3
 
-#endif  /* _CONFIGS_LPC4357_EVB_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC43XX_LPC4357_EVB_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3152/scripts/ea3152.ld
+ * boards/arm/lpc31xx/ea3152/scripts/ea3152.ld
  *
  *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3131/src/lpc31_clkinit.c
+ * boards/arm/lpc31xx/ea3131/src/lpc31_clkinit.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
  ****************************************************************************/
 
 /* Sub-domain Clock Bitsets *************************************************/
+
 /* The following bitsets group clocks into bitsets associated with each
  * domain and fractional divider subdomain.
  *
@@ -132,8 +133,9 @@
 #define CGU_CLKSET_DOMAIN2_DIV10 \
   (_D2B(CLKID_PWMCLK))
 
-/* Domain 3 (DOMAINID_AHB0APB2), Clocks 50-57, Fraction dividers 11-13.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB2_BASE_CLK.
+/* Domain 3 (DOMAINID_AHB0APB2), Clocks 50-57, Fraction dividers 11-13.
+ * Clocks not defined in the clock sets will be sourced with
+ * AHB_APB2_BASE_CLK.
  */
 
 /* Domain 3, Fractional divider 11: */
@@ -177,8 +179,9 @@
 #define CGU_CLKSET_DOMAIN6_DIV16 \
   (0)
 
-/* Domain 7 (DOMAINID_CLK1024FS), Clocks 73-86, Fraction dividers 17-22.  Clocks
- * not defined in the clock sets will be sourced with CLK1024FS_BASE_CLK.
+/* Domain 7 (DOMAINID_CLK1024FS), Clocks 73-86, Fraction dividers 17-22.
+ * Clocks not defined in the clock sets will be sourced with
+ * CLK1024FS_BASE_CLK.
  */
 
 /* Domain 7, Fractional divider 17: */
@@ -427,7 +430,6 @@ const struct lpc31_clkinit_s g_boardclks =
   }
 #endif
 };
-
 
 /****************************************************************************
  * Private Functions

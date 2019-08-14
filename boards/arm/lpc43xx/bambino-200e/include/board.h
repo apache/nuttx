@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/include/board.h
+ * boards/arm/lpc43xx/bambino-200e/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_BAMBINO_200E_INCLUDE_BOARD_H
-#define __BOARDS_ARM_BAMBINO_200E_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC43XX_BAMBINO_200E_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC43XX_BAMBINO_200E_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -53,6 +53,7 @@
  ****************************************************************************/
 
 /* Clocking ****************************************************************/
+
 /* NOTE:  The following definitions require lpc43_cgu.h.  It is not included
  * here because the including C file may not have that file in its include
  * path.
@@ -145,9 +146,9 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
  */
 
 #define LPC43_CCLK                  BOARD_FCLKOUT_FREQUENCY
@@ -160,7 +161,6 @@
 #  define BOARD_ABP1_CLKSRC         BASE_APB_CLKSEL_XTAL
 #  define BOARD_ABP1_FREQUENCY      BOARD_XTAL_FREQUENCY
 #endif
-
 
 #if defined(CONFIG_LPC43_BUS) || defined(CONFIG_LPC43_I2C1) || \
     defined(CONFIG_LPC43_DAC) || defined(CONFIG_LPC43_ADC0) || \
@@ -186,6 +186,7 @@
 #define BOARD_SDIO_CLKSRC           BASE_SDIO_CLKSEL_PLL1
 
 /* USB0 ********************************************************************/
+
 /* Settings needed in lpc43_cpu.c */
 
 #define BOARD_USB0_CLKSRC           PLL0USB_CLKSEL_XTAL
@@ -193,6 +194,7 @@
 #define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
 
 /* SPIFI clocking **********************************************************/
+
 /* The SPIFI will receive clocking from a divider per the settings provided
  * in this file.  The NuttX code will configure PLL1 as the input clock
  * for the selected divider
@@ -210,7 +212,6 @@
 #else
 #  define BOARD_SPIFI_DIVB          1           /* Use IDIVB */
 #endif
-
 
 /* We need to configure the divider so that its output is as close to the
  * desired SCLK value.  The peak data transfer rate will be about half of
@@ -245,13 +246,14 @@
  *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
  *
  * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
- * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
- * of 255 means divide by 2 * 255 = 510, and so on.
+ * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2,
+ * value of 255 means divide by 2 * 255 = 510, and so on.
  *
- * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.  So an
- * odd value calculated below will be moved up to next higher divider value.  So
- * the value 3 will cause 2 to be written as the divider value and the effective
- * divider will be 4.
+ * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.
+ * So an odd value calculated below will be moved up to next higher divider
+ * value.
+ * So the value 3 will cause 2 to be written as the divider value and the
+ * effective divider will be 4.
  */
 
 #define BOARD_CLKDIV_INIT       BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 400000)
@@ -260,6 +262,7 @@
 #define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
 /* UART clocking ***********************************************************/
+
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
 #define BOARD_USART0_CLKSRC         BASE_USART0_CLKSEL_XTAL
@@ -275,6 +278,7 @@
 #define BOARD_USART3_BASEFREQ       BOARD_XTAL_FREQUENCY
 
 /* LED definitions *********************************************************/
+
 /* The Bambino 200E has 2 user-controllable LEDs labeled LED1 and LED2 in the
  * schematic and on bus referred to has GPIO3[7] and GPIO5[5], respectively.
  *
@@ -317,6 +321,7 @@
 #define LED_PANIC           2  /* NC     ON      NC     OFF */
 
 /* UART Pins ****************************************************************/
+
 /* The Bambino 200E does not have RS-232 drivers or serial connectors on
  * board. UART1 and USART2 are availables on Socket 5 and 10, recpectively:
  *
@@ -350,6 +355,7 @@
 #define PINCONF_U3_DIR      PINCONF_U3_DIR_2
 
 /* SPI Pins ****************************************************************/
+
 /* The Bambino 200E has SPI peripheral pins reserved for SPIFI.
  * SSP0 and SSP1 are available on Socket 1 and 10, respectively:
  *
@@ -399,4 +405,4 @@
 #define GPIO_SD_CMD                PINCONF_SD_CMD_1
 #define GPIO_SD_CLK                CLKCONF_SD_CLK_2
 
-#endif  /* __BOARDS_ARM_BAMBINO_200E_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC43XX_BAMBINO_200E_INCLUDE_BOARD_H */

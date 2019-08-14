@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ####################################################################################
-# boards/lpc4357-evb/scripts/flash.sh
+# boards/arm/lpc43xx/lpc4357-evb/scripts/flash.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

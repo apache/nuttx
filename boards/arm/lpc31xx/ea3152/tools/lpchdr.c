@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ea3152/tools/lpchdr.c
+/****************************************************************************
+ * boards/arm/lpc31xx/ea3152/tools/lpchdr.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -48,24 +48,24 @@
 #include <errno.h>
 #include "lpchdr.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define IO_BUF_SIZE  1024
 #define HDR_SIZE     0x80
 #define HDR_CRC_SIZE 0x6c
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const char *g_infile;
 static const char *g_outfile;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static void show_usage(const char *progname, int exitcode)
 {
@@ -213,9 +213,9 @@ static inline void writefile(int infd, int outfd, size_t len, size_t padlen)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 int main(int argc, char **argv, char **envp)
 {
@@ -236,14 +236,16 @@ int main(int argc, char **argv, char **envp)
   infd = open(g_infile, O_RDONLY);
   if (infd < 0)
     {
-      fprintf(stderr, "Failed to open %s for reading: %s\n", g_infile, strerror(errno));
+      fprintf(stderr, "Failed to open %s for reading: %s\n", g_infile,
+              strerror(errno));
       exit(2);
     }
 
   outfd = open(g_outfile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
   if (outfd < 0)
     {
-      fprintf(stderr, "Failed to open %s for writing: %s\n", g_outfile, strerror(errno));
+      fprintf(stderr, "Failed to open %s for writing: %s\n", g_outfile,
+              strerror(errno));
       exit(2);
     }
 
@@ -282,7 +284,8 @@ int main(int argc, char **argv, char **envp)
   nbytes = write(outfd, &g_hdr, HDR_SIZE);
   if (nbytes != 0x80)
     {
-      fprintf(stderr, "write of header to of %s failed: %s\n", g_outfile, strerror(errno));
+      fprintf(stderr, "write of header to of %s failed: %s\n", g_outfile,
+              strerror(errno));
       exit(4);
     }
 
@@ -293,5 +296,3 @@ int main(int argc, char **argv, char **envp)
   close(outfd);
   return 0;
 }
-
-

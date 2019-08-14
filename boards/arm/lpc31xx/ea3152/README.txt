@@ -194,11 +194,11 @@ Image Format
   it!
 
   To work around both of these issues, I have created a small program under
-  boards/ea3152/tools to add the header.  This program can be built under
+  boards/arm/lpc31xx/ea3152/tools to add the header.  This program can be built under
   either Linux or Cygwin (and probably other tool environments as well).  That
   tool can be built as follows:
 
-  - cd boards/ea3152/tools
+  - cd boards/arm/lpc31xx/ea3152/tools
   - make
 
   Then, to build the NuttX binary ready to load with the bootloader, just
@@ -215,10 +215,10 @@ Image Format
        to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
-    3. The CRC32 logic in boards/ea3152/tools doesn't seem to work.  As a result,
+    3. The CRC32 logic in boards/arm/lpc31xx/ea3152/tools doesn't seem to work.  As a result,
        the CRC is currently disabled in the header:
 
-       RCS file: /cvsroot/nuttx/nuttx/boards/ea3152/tools/lpchdr.c,v
+       RCS file: /cvsroot/nuttx/nuttx/boards/arm/lpc31xx/ea3152/tools/lpchdr.c,v
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
@@ -261,7 +261,7 @@ Using OpenOCD and GDB
 
   Then you should be able to start the OpenOCD daemon like:
 
-    boards/ea3152/tools/oocd.sh $PWD
+    boards/arm/lpc31xx/ea3152/tools/oocd.sh $PWD
 
   Where it is assumed that you are executing oocd.sh from the top level
   directory where NuttX is installed.

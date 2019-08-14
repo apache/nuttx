@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mcu123-lpc214x/src/lpc2148_composite.c
+ * boards/arm/lpc214x/mcu123-lpc214x/src/lpc2148_composite.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -212,6 +212,7 @@ static FAR void *board_composite0_connect(int port)
   cdcacm_get_composite_devdesc(&dev[0]);
 
   /* Overwrite and correct some values... */
+
   /* The callback functions for the CDC/ACM class */
 
   dev[0].classobject  = cdcacm_classobject;
@@ -222,7 +223,7 @@ static FAR void *board_composite0_connect(int port)
   dev[0].devinfo.ifnobase = ifnobase;             /* Offset to Interface-IDs */
   dev[0].minor = 0;                               /* The minor interface number */
 
-   /* Strings */
+  /* Strings */
 
   dev[0].devinfo.strbase = strbase;               /* Offset to String Numbers */
 
@@ -238,6 +239,7 @@ static FAR void *board_composite0_connect(int port)
   strbase  += dev[0].devinfo.nstrings;
 
   /* Configure the mass storage device device */
+
   /* Ask the usbmsc driver to fill in the constants we didn't
    * know here.
    */
@@ -245,6 +247,7 @@ static FAR void *board_composite0_connect(int port)
   usbmsc_get_composite_devdesc(&dev[1]);
 
   /* Overwrite and correct some values... */
+
   /* The callback functions for the USBMSC class */
 
   dev[1].classobject  = board_mscclassobject;
@@ -304,6 +307,7 @@ static FAR void *board_composite1_connect(int port)
       cdcacm_get_composite_devdesc(&dev[i]);
 
       /* Overwrite and correct some values... */
+
       /* The callback functions for the CDC/ACM class */
 
       dev[i].classobject = cdcacm_classobject;
@@ -347,7 +351,8 @@ static FAR void *board_composite1_connect(int port)
 int board_composite_initialize(int port)
 {
   /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see lpc2148_appinit.c).
+   * already have been initialized in board_app_initialize()
+   * (see lpc2148_appinit.c).
    * In this case, there is nothing further to be done here.
    *
    * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH

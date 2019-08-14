@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/bambino-200e/src/lpc43_boot.c
+/****************************************************************************
+ * boards/arm/lpc43xx/bambino-200e/src/lpc43_boot.c
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -66,19 +66,20 @@ enum ssp_channel_e
   SSP1
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_boardinitialize
  *
  * Description:
- *   All LPC43xx architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All LPC43xx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc43_boardinitialize(void)
 {
@@ -88,8 +89,9 @@ void lpc43_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-  /* Configure SSP chip selects if 1) Any SSP channel is not disabled, and 2) the
-   * weak function lpc43_sspdev_initialize() has been brought into the link.
+  /* Configure SSP chip selects if 1) Any SSP channel is not disabled, and 2)
+   * the weak function lpc43_sspdev_initialize() has been brought into the
+   * link.
    */
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
@@ -106,10 +108,11 @@ void lpc43_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   function called board_late_initialize().
+ *   board_late_initialize() will be called immediately after up_initialize()
+ *   is called and just before the initial application is started.
+ *   This additional initialization phase may be used, for example, to
+ *   initialize board-specific device drivers.
  *
  ****************************************************************************/
 

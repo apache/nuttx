@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_boot.c
+/****************************************************************************
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_boot.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,27 +49,28 @@
 #include "lpc31.h"
 #include "lpc_h3131.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_boardinitialize
  *
  * Description:
- *   All LPC31XX architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All LPC31XX architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_boardinitialize(void)
 {
@@ -79,8 +80,8 @@ void lpc31_boardinitialize(void)
   lpc31_meminitialize();
 #endif
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * lpc31_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function lpc31_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC31_SPI)
@@ -90,10 +91,10 @@ void lpc31_boardinitialize(void)
     }
 #endif
 
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function lpc31_usbdev_initialize() has been brought
-    * into the build.
-    */
+  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
+   * disabled, and 3) the weak function lpc31_usbdev_initialize() has
+   * been brought into the build.
+   */
 
 #ifdef HAVE_USBDEV
   if (lpc31_usbdev_initialize)
@@ -103,8 +104,8 @@ void lpc31_boardinitialize(void)
 #endif
 
   /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function lpc31_usbhost_bootinitialize() has
-   * been brought into the build. Presumably either CONFIG_USBDEV or
+   * configuration and 2) the weak function lpc31_usbhost_bootinitialize()
+   * has been brought into the build. Presumably either CONFIG_USBDEV or
    * CONFIG_USBHOST is also selected.
    */
 

@@ -6,4 +6,3 @@ TIMEOUT /T 5
 
 %LPCScrypt%\lpcscrypt.exe erase SPIFI
 %LPCScrypt%\lpcscrypt.exe program ..\..\..\nuttx.bin SPIFI
-	

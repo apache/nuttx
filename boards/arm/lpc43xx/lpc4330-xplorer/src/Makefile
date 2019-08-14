@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4330-xplorer/src/Makefile
+# boards/arm/lpc43xx/lpc4330-xplorer/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

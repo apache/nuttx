@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4357-evb/src/lpc4357-evb.h
+ * boards/arm/lpc43xx/lpc4357-evb/src/lpc4357-evb.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4357_EVB_SRC_LPC3257_EVB_H
-#define _CONFIGS_LPC4357_EVB_SRC_LPC3257_EVB_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H
+#define __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H
 
 /****************************************************************************
  * Included Files
@@ -49,7 +49,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED definitions **********************************************************/
+
 /* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by
  * the signal LED_3V3:
  *
@@ -75,6 +77,7 @@
 #define GPIO_LED       (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT7 | GPIO_PIN7)
 
 /* Button definitions *******************************************************/
+
 /* to be provided */
 
 /****************************************************************************
@@ -92,4 +95,4 @@
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPC4357_EVB_SRC_LPC3257_EVB_H */
+#endif /* __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H */

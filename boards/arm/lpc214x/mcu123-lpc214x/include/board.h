@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mcu123-lpc214x/include/board.h
+ * boards/arm/lpc214x/mcu123-lpc214x/include/board.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_LPC214X_MCU123_LPC214X_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC214X_MCU123_LPC214X_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -76,4 +76,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC214X_MCU123_LPC214X_INCLUDE_BOARD_H */

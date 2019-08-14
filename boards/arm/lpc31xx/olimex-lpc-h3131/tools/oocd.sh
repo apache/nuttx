@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/olimex-lpc-h3131/README.txt for information about
+# See boards/arm/lpc31xx/olimex-lpc-h3131/README.txt for information about
 # this file.
 
 TOPDIR=$1
@@ -22,8 +22,8 @@ TARGET_PATH="/usr/local/share/openocd/scripts"
 # OPENOCD_EXE=openocd-ftd2xx.exe
 OPENOCD_EXE=openocd.exe
 
-#OPENOCD_CFG=`cygpath -w "${TOPDIR}/boards/olimex-lpc1766stk/tools/olimex.cfg"`
-OPENOCD_CFG="${TOPDIR}/boards/olimex-lpc-h3131/tools/armusbocd.cfg"
+#OPENOCD_CFG=`cygpath -w "${TOPDIR}/boards/arm/lpc31xx/olimex-lpc1766stk/tools/olimex.cfg"`
+OPENOCD_CFG="${TOPDIR}/boards/arm/lpc31xx/olimex-lpc-h3131/tools/armusbocd.cfg"
 
 # OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}` -s `cygpath -w  ${TARGET_PATH}`"
 # OPENOCD_ARGS="-f interface/arm-usb-ocd.cfg -f target/lpc3131.cfg -c \"adapter_khz 1000\""

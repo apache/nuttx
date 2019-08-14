@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/bambino-200e/src/lpc43_ssp.c
+/****************************************************************************
+ * boards/arm/lpc43xx/bambino-200e/src/lpc43_ssp.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,9 +55,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/random.h>
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: lpc43_sspdev_initialize
@@ -86,22 +86,25 @@ void weak_function lpc43_sspdev_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_ssp0select
  *
  * Description:
- *   Perform chip selection using GPIO pins, controlling data flow in SSP0 channel.
+ *   Perform chip selection using GPIO pins, controlling data flow in SSP0
+ *   channel.
  *
  * Input parameters:
  *   devpath  - The full path to the driver.  E.g., "/dev/temp0"
  *   devid    - Minor device number.  E.g., 0, 1, 2, etc.
  *   selected - Logical state of the pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+                      bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_SENSORS_MAX31855)
   if (devid == SPIDEV_TEMPERATURE(0))
@@ -116,7 +119,7 @@ void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_ssp0status
  *
  * Description:
@@ -128,29 +131,32 @@ void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
  *
  * Returned Value:
  *   Zero
- ************************************************************************************/
+ ****************************************************************************/
 
 uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_ssp1select
  *
  * Description:
- *   Perform chip selection using GPIO pins, controlling data flow in SSP1 channel.
+ *   Perform chip selection using GPIO pins, controlling data flow in SSP1
+ *   channel.
  *
  * Input parameters:
  *   devpath  - The full path to the driver.  E.g., "/dev/temp0"
  *   devid    - Minor device number.  E.g., 0, 1, 2, etc.
  *   selected - Logical state of the pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                      bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_SENSORS_MAX31855)
   if (devid == SPIDEV_TEMPERATURE(0))
@@ -165,7 +171,7 @@ void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_ssp1status
  *
  * Description:
@@ -177,7 +183,7 @@ void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
  *
  * Returned Value:
  *   Zero
- ************************************************************************************/
+ ****************************************************************************/
 
 uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {

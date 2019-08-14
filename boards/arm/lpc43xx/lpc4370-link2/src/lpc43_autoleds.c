@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4370-link2/src/lpc43_autoleds.c
+ * boards/arm/lpc43xx/lpc4370-link2/src/lpc43_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -146,4 +146,3 @@ void board_autoled_off(int led)
 }
 
 #endif /* CONFIG_ARCH_LEDS */
-

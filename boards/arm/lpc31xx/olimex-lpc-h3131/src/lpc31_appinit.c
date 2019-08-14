@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_appinit.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_appinit.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -120,8 +121,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  lpc31_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  lpc31_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
   syslog(LOG_INFO, "Start USB host services\n");

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpc4330-xplorer/src/lpc43_appinit.c
+ * boards/arm/lpc43xx/lpc4330-xplorer/src/lpc43_appinit.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,6 +60,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SPIFI_DEVNO

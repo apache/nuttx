@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3152/src/lpc31_buttons.c
+ * boards/arm/lpc31xx/ea3152/src/lpc31_buttons.c
  *
  *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

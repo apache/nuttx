@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mcu123-lpc214x/src/lpc2148_leds.c
+ * boards/arm/lpc214x/mcu123-lpc214x/src/lpc2148_leds.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -91,9 +91,9 @@ void board_autoled_initialize(void)
 {
   /* Initilize GIOs P1.16-P1.23 */
 
-  putled(ALLLEDS,LED_DIR_OFFSET);
-  putled(ALLLEDS,LED_SET_OFFSET);
-  putled(LEDBIT(0),LED_CLR_OFFSET);
+  putled(ALLLEDS, LED_DIR_OFFSET);
+  putled(ALLLEDS, LED_SET_OFFSET);
+  putled(LEDBIT(0), LED_CLR_OFFSET);
 }
 
 /****************************************************************************
@@ -102,7 +102,7 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  putled(LEDBIT(led),LED_CLR_OFFSET);
+  putled(LEDBIT(led), LED_CLR_OFFSET);
 }
 
 /****************************************************************************
@@ -111,6 +111,6 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  putled(LEDBIT(led),LED_SET_OFFSET);
+  putled(LEDBIT(led), LED_SET_OFFSET);
 }
 #endif /* CONFIG_ARCH_LEDS */

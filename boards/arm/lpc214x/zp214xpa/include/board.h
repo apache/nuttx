@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/zp214xpa/include/board.h
+ * boards/arm/lpc214x/zp214xpa/include/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_ZP214XPA_INCLUDE_BOARD_H
-#define __BOARDS_ARM_ZP214XPA_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC214X_ZP214XPA_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC214X_ZP214XPA_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -65,4 +65,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_ZP214XPA_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC214X_ZP214XPA_INCLUDE_BOARD_H */

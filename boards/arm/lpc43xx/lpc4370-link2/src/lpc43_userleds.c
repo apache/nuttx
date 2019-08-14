@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4370-link2/src/lpc43_userleds.c
+ * boards/arm/lpc43xx/lpc4370-link2/src/lpc43_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -115,4 +115,3 @@ void board_userled_all(uint8_t ledset)
 }
 
 #endif /* !CONFIG_ARCH_LEDS */
-

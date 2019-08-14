@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4337-ws/src/lpc4337-ws.h
+ * boards/arm/lpc43xx/lpc4337-ws/src/lpc4337-ws.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4337_WS_SRC_LPC4337_WS_H
-#define _CONFIGS_LPC4337_WS_SRC_LPC4337_WS_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4337_WS_SRC_LPC4337_WS_H
+#define __BOARDS_ARM_LPC43XX_LPC4337_WS_SRC_LPC4337_WS_H
 
 /****************************************************************************
  * Included Files
@@ -67,17 +67,17 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_ADC0
 int lpc43_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif
+#endif /* __BOARDS_ARM_LPC43XX_LPC4337_WS_SRC_LPC4337_WS_H */

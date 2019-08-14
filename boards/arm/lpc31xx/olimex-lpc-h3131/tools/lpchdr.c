@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/olimex-lpc-h3131/tools/lpchdr.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/tools/lpchdr.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

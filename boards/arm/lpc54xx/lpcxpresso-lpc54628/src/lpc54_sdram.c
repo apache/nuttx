@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc54628/src/lpc54_bringup.c
+ * boards/arm/lpc54xx/lpcxpresso-lpc54628/src/lpc54_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -124,7 +124,7 @@ static const struct emc_dynamic_chip_config_s g_emc_dynchipconfig =
   .rasnclk  = 2,
   .mode     = 0x23,
   .extmode  = 0,    /* SDRAM only */
-  .addrmap  = 0x09, /* 128Mbits (8M*16, 4banks, 12 rows, 9 columns)*/
+  .addrmap  = 0x09, /* 128Mbits (8M*16, 4banks, 12 rows, 9 columns) */
 };
 
 /****************************************************************************

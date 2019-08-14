@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/ea3131/tools/lpchdr.c
+ * boards/arm/lpc31xx/ea3131/tools/lpchdr.c
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

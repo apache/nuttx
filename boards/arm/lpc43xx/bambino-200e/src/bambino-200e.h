@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/src/bambino-200e.h
+ * boards/arm/lpc43xx/bambino-200e/src/bambino-200e.h
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_BAMBINO_200E_SRC_BAMBINO_H
-#define _CONFIGS_BAMBINO_200E_SRC_BAMBINO_H
+#ifndef __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H
+#define __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H
 
 /****************************************************************************
  * Included Files
@@ -166,7 +166,7 @@
 
 void weak_function lpc43_sspdev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_max31855initialize
  *
  * Description:
@@ -181,17 +181,18 @@ void weak_function lpc43_sspdev_initialize(void);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int lpc43_max31855initialize(FAR const char *devpath, int bus, uint16_t devid);
+int lpc43_max31855initialize(FAR const char *devpath, int bus,
+                             uint16_t devid);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43xx_timerinitialize()
  *
  * Description:
  *   Perform architecture-specific initialization of the timer hardware.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_TIMER
 int lpc43_timerinitialize(void);
@@ -200,4 +201,4 @@ int lpc43_timerinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_BAMBINO_200E_SRC_BAMBINO_H */
+#endif /* __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H */

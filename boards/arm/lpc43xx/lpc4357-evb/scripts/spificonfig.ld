@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4357-evb/scripts/spificonfig.ld
+ * boards/arm/lpc43xx/lpc4357-evb/scripts/spificonfig.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_mmcsd.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_mmcsd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -96,9 +96,9 @@ int lpc31_mmcsd_initialize(int slot, int minor)
 
   finfo("Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the LPC-H3131 board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the LPC-H3131 board supports a GPIO to detect
+   * if there is a card in the slot.
    */
 
   sdio_mediachange(sdio, true);

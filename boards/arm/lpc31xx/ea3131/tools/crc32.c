@@ -1,5 +1,5 @@
 /************************************************************************************************
- * boards/ea3131/tools/crc32.c
+ * boards/arm/lpc31xx/ea3131/tools/crc32.c
  *
  * This file is a part of NuttX:
  *

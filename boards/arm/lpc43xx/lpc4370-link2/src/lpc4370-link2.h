@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4370-link2/src/lpc4370-link2.h
+ * boards/arm/lpc43xx/lpc4370-link2/src/lpc4370-link2.h
  *
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H
-#define _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4370_LINK2_SRC_LPC3257_LINK2_H
+#define __BOARDS_ARM_LPC43XX_LPC4370_LINK2_SRC_LPC3257_LINK2_H
 
 /****************************************************************************
  * Included Files
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Do we need to register I2C drivers on behalf of the I2C tool? */
 
 #define HAVE_I2CTOOL 1
@@ -58,6 +59,7 @@
 #endif
 
 /* LED definitions **********************************************************/
+
 /* The LPC4370-LINK2 has one user-controllable LED labelled D6 controlled by
  * the signal LED_3V3:
  *
@@ -83,6 +85,7 @@
 #define GPIO_LED       (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN8)
 
 /* Button definitions *******************************************************/
+
 /* to be provided */
 
 /****************************************************************************
@@ -99,28 +102,27 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_spifi_initialize
  *
  * Description:
  *   Initialize SPIFI.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_spifi_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int lpc43_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H */
-
+#endif /* __BOARDS_ARM_LPC43XX_LPC4370_LINK2_SRC_LPC3257_LINK2_H */

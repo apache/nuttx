@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/ea3131/src/lpc31_appinit.c
+ * boards/arm/lpc31xx/ea3131/src/lpc31_appinit.c
  *
  *   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,7 +72,7 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new LPC31XX boards here */
+  /* Add configuration for new LPC31XX boards here */
 
 #  error "Unrecognized LPC31XX board"
 #  undef NSH_HAVEUSBDEV
@@ -85,8 +85,8 @@
 #  undef NSH_HAVEUSBDEV
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31_MCI)
@@ -151,18 +151,19 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the LPC313X10E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the LPC313X10E-EVAL board supports a GPIO to
+   * detect if there is a card in the slot.
    */
 
-   sdio_mediachange(sdio, true);
+  sdio_mediachange(sdio, true);
 #endif
   return OK;
 }

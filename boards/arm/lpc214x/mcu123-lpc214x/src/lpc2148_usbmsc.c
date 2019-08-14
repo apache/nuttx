@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mcu123-lpc214x/src/lpc2148_usbmsc.c
+ * boards/arm/lpc214x/mcu123-lpc214x/src/lpc2148_usbmsc.c
  *
  *   Copyright (C) 2008-2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +70,7 @@
 #  define LPC214X_MMCSDSLOTNO 0
 
 #else
-   /* Add configuration for new LPC214x boards here */
+  /* Add configuration for new LPC214x boards here */
 
 #  error "Unrecognized LPC214x board"
 #endif

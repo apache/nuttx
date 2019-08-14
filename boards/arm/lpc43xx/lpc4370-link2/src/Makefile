@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4370-link2/src/Makefile
+# boards/arm/lpc43xx/lpc4370-link2/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

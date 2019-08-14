@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-lpc2378/src/lpc2378_appinit.c
+ * boards/arm/lpc2378/olimex-lpc2378/src/lpc2378_appinit.c
  *
  *   Copyright (C) 2010, 2016 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

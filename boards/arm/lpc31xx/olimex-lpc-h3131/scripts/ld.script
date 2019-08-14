@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/scripts/ld.script
+ * boards/arm/lpc31xx/olimex-lpc-h3131/scripts/ld.script
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

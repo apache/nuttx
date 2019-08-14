@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc-h3131/include/board.h
+/****************************************************************************
+ * boards/arm/lpc31xx/olimex-lpc-h3131/include/board.h
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_H
-#define __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -46,11 +46,12 @@
 # include "lpc31_cgudrvr.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Frequency of the FFAST input */
 
 #define BOARD_FREQIN_FFAST     (12000000) /* ffast (12 MHz crystal) */
@@ -79,8 +80,8 @@
 #define BOARD_HPLL1_MODE   0                  /* PLL mode */
 #define BOARD_HPLL1_FREQ  180000000           /* Frequency of the PLL in MHz */
 
-/* The following 3 bitsets determine which clocks will be enabled at initialization
- * time.
+/* The following 3 bitsets determine which clocks will be enabled at
+ * initialization time.
  */
 
 #define BOARD_CLKS_0_31 \
@@ -99,9 +100,10 @@
 #define BOARD_CLKS_64_92 \
  (0)
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -120,7 +122,8 @@
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                         LED2   LED1
- *   ------------------------  --------------------------  ------ ------ */
+ *   ------------------------  --------------------------  ------ ------
+ */
 
 #define LED_STARTED          0 /* NuttX has been started   OFF    OFF    */
 #define LED_HEAPALLOCATE     0 /* Heap has been allocated  OFF    OFF    */
@@ -140,12 +143,13 @@
  * be used by other board-specific logic.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex LPC_H3131 has no user buttons */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -158,34 +162,35 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent condition
+ *   is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   Zero (OK) returned on success; a negated errno value is returned on failure.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not ready yet */
 int lpc31_setup_overcurrent(xcpt_t handler, void *arg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */

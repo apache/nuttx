@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/src/lp31_mem.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lp31_mem.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,8 +73,8 @@
                                    (0x20 << SYSCREG_MPMC_DELAYMODES_DEL2_SHIFT) | \
                                    (0x24 << SYSCREG_MPMC_DELAYMODES_DEL3_SHIFT))
 
-
 /* Delay constants in nanosecondss for K4S561632J-UC/L75 SDRAM on board */
+
 /* 90MHz SDRAM Clock */
 
 #define H3131_SDRAM_REFRESH        (15625)
@@ -150,7 +150,10 @@ static inline void lpc31_sdraminitialize(void)
 # define HCLK hclk
 #endif
 
-  /* Check RTL for divide by 2 possible. If so change then enable the following logic */
+  /* Check RTL for divide by 2 possible.
+   * If so change then enable the following logic
+   */
+
 #if 0
   uint32_t hclk2 = hclk;
 
@@ -182,7 +185,7 @@ static inline void lpc31_sdraminitialize(void)
   regval &= ~(MPMC_DYNCONFIG0_B | MPMC_DYNCONFIG0_P);
   putreg32(regval, LPC31_MPMC_DYNCONFIG0);
 
-  /* Set RAS/CAS delays*/
+  /* Set RAS/CAS delays */
 
   putreg32((MPMC_DYNRASCAS0_RAS2CLK | MPMC_DYNRASCAS0_CAS2CLK),
            LPC31_MPMC_DYNRASCAS0);
@@ -210,8 +213,8 @@ static inline void lpc31_sdraminitialize(void)
 
   /* Issue continuous NOP commands  */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_INOP), LPC31_MPMC_DYNCONTROL);
 
   /* Wait ~200us */
 
@@ -219,8 +222,8 @@ static inline void lpc31_sdraminitialize(void)
 
   /* Issue a "pre-charge all" command */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IPALL),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_IPALL), LPC31_MPMC_DYNCONTROL);
 
   /* Minimum refresh pulse interval (tRFC) for MT48LC32M16A2=80nsec,
    * 100nsec provides more than adequate interval.
@@ -244,11 +247,12 @@ static inline void lpc31_sdraminitialize(void)
 
   /* Select mode register update mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IMODE),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_IMODE), LPC31_MPMC_DYNCONTROL);
 
   /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
-   * the SDRAM chips.  Bus speeds up to 90MHz requires use of a CAS latency = 2.
+   * the SDRAM chips.
+   *  Bus speeds up to 90MHz requires use of a CAS latency = 2.
    * To get correct value on address bus CAS cycle, requires a shift by 12 for
    * 16bit mode
    */

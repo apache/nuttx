@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-lpc-h3131/tools/Makefile
+# boards/arm/lpc31xx/olimex-lpc-h3131/tools/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/mcu123-lpc214x/src/lpc2148_spi1.c
+ * boards/arm/lpc214x/mcu123-lpc214x/src/lpc2148_spi1.c
  *
  *   Copyright (C) 2008-2010, 2012, 2016-2016 Gregory Nutt. All rights
  *     reserved.
@@ -109,15 +109,19 @@
  ****************************************************************************/
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency);
 static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords);
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords);
 
 /****************************************************************************
  * Private Data
@@ -217,7 +221,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
   uint32_t bit = 1 << 20;
 
@@ -273,7 +278,8 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   uint32_t divisor = LPC214X_PCLKFREQ / frequency;
 
@@ -401,14 +407,16 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8,
+ *            the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
   uint8_t sr;
@@ -470,21 +478,26 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to recieve data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
+ *            of words.
+ *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8,
+ *            the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
   uint32_t rxpending = 0;
 
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
+  /* While there is remaining to be sent
+   * (and no synchronization error has occurred)
+   */
 
   spiinfo("nwords: %d\n", nwords);
   while (nwords || rxpending)
@@ -553,14 +566,15 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
    *   PINSEL1 P0.17/CAP1.2/SCK1/MAT1.2  Bits 2-3=10 for SCK1
    *   PINSEL1 P0.18/CAP1.3/MISO1/MAT1.3 Bits 4-5=10 for MISO1
    *   PINSEL1 P0.19/MAT1.2/MOSI1/CAP1.2 Bits 6-7=10 for MOSI1
-   *   PINSEL1 P0.20/MAT1.3/SSEL1/EINT3  Bits 8-9=10 for P0.20 (we'll control it via GPIO or FIO)
+   *   PINSEL1 P0.20/MAT1.3/SSEL1/EINT3  Bits 8-9=10 for P0.20
+   *   (we'll control it via GPIO or FIO)
    */
 
   regval32  = getreg32(LPC214X_PINSEL1);
-  regval32 &= ~(LPC214X_PINSEL1_P017_MASK|LPC214X_PINSEL1_P018_MASK|
-                LPC214X_PINSEL1_P019_MASK|LPC214X_PINSEL1_P020_MASK);
-  regval32 |= (LPC214X_PINSEL1_P017_SCK1|LPC214X_PINSEL1_P018_MISO1|
-                LPC214X_PINSEL1_P019_MOSI1|LPC214X_PINSEL1_P020_GPIO);
+  regval32 &= ~(LPC214X_PINSEL1_P017_MASK | LPC214X_PINSEL1_P018_MASK |
+                LPC214X_PINSEL1_P019_MASK | LPC214X_PINSEL1_P020_MASK);
+  regval32 |= (LPC214X_PINSEL1_P017_SCK1 | LPC214X_PINSEL1_P018_MISO1 |
+                LPC214X_PINSEL1_P019_MOSI1 | LPC214X_PINSEL1_P020_GPIO);
   putreg32(regval32, LPC214X_PINSEL1);
 
   /* Disable chip select using P0.20 (SSEL1)  (low enables) */
@@ -578,7 +592,8 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
 
   /* Configure 8-bit SPI mode */
 
-  putreg16(LPC214X_SPI1CR0_DSS8BIT|LPC214X_SPI1CR0_FRFSPI, LPC214X_SPI1_CR0);
+  putreg16(LPC214X_SPI1CR0_DSS8BIT | LPC214X_SPI1CR0_FRFSPI,
+           LPC214X_SPI1_CR0);
 
   /* Disable the SSP and all interrupts (we'll poll for all data) */
 

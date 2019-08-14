@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/scripts/memory.ld
+ * boards/arm/lpc43xx/bambino-200e/scripts/memory.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

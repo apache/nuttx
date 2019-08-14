@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# This script lies in sub-directory boards/ea3152/tools but make be executed
+# This script lies in sub-directory boards/arm/lpc31xx/ea3152/tools but make be executed
 # from either that directory or TOPDIR
 
 MYNAME=`basename $0`
 if [ -x "$PWD/$MYNAME" ]; then
 	TOPDIR="$PWD/../../.."
 else
-	if [ -x "$PWD/boards/ea3152/tools/$MYNAME" ]; then
+	if [ -x "$PWD/boards/arm/lpc31xx/ea3152/tools/$MYNAME" ]; then
 		TOPDIR="$PWD"
 	else
 		echo "This script must be executed from a known director"
@@ -19,7 +19,7 @@ echo "TOOLDIR: $TOOLDIR"
 # The lpchdr could be named lpchdr.exe if we are running under Cygwin or
 # just lpchdr under Linux
 
-TOOLDIR=$TOPDIR/boards/ea3152/tools
+TOOLDIR=$TOPDIR/boards/arm/lpc31xx/ea3152/tools
 
 if [ ! -d "$TOOLDIR" ]; then
 	echo "Tool directory $TOOLDIR does not exist"

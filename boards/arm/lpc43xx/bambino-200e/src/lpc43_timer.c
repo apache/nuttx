@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/src/lpc43_timer.c
+ * boards/arm/lpc43xx/bambino-200e/src/lpc43_timer.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #if !(defined(CONFIG_LPC43_TMR0) || defined(CONFIG_LPC43_TMR1) || defined(CONFIG_LPC43_TMR2) \

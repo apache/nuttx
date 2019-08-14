@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc54628/src/lpc54_ft5x06.c
+ * boards/arm/lpc54xx/lpcxpresso-lpc54628/src/lpc54_ft5x06.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

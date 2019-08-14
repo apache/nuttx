@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lpc4370-link2/src/lpc43_appinit.c
+ * boards/arm/lpc43xx/lpc4370-link2/src/lpc43_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

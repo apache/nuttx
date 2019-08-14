@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4330-xplorer/src/lpc43_autoleds.c
+ * boards/arm/lpc43xx/lpc4330-xplorer/src/lpc43_autoleds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,6 +55,7 @@
 #ifdef CONFIG_ARCH_LEDS
 
 /* LED definitions **********************************************************/
+
 /* The LPC4330-Xplorer has 2 user-controllable LEDs labeled D2 an D3 in the
  * schematic and on but referred to has LED1 and LED2 here, respectively.
  *

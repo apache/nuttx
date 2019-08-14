@@ -265,8 +265,8 @@ Code Red IDE/Tools
 
   The LPC18xx/LPC43xx debug driver can also be used to program the LPC43xx
   flash directly from the command line.  The script flash.sh that may be
-  found in the boards/LPC4370-Link2/scripts directory can do that with
-  a single command line command.
+  found in the boards/arm/lpc43xx/lpc4370-Link2/scripts directory can do that
+  with a single command line command.
 
   Executing from SPIFI
   --------------------

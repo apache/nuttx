@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc2378/include/board.h
+ * boards/arm/lpc2378/olimex-lpc2378/include/board.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo
@@ -38,12 +38,12 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_LPC2378_INCLUDE_BOARD_H
-#define __BOARDS_ARM_OLIMEX_LPC2378_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC2348_OLIMEX_LPC2378_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC2348_OLIMEX_LPC2378_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* If  USB is enabled, PLL must be configured for 48MHz to provide USB
  * clocking.
@@ -69,7 +69,7 @@
 
 #define LPC23XX_CCLK      57600000
 
- /* LED definitions **********************************************************/
+/* LED definitions **********************************************************/
 
 #define LED_STARTED       0
 #define LED_HEAPALLOCATE  1
@@ -84,4 +84,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_OLIMEX_LPC2378_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC2348_OLIMEX_LPC2378_INCLUDE_BOARD_H */

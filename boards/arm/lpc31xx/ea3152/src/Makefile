@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ea3152/src/Makefile
+# boards/arm/lpc31xx/ea3152/src/Makefile
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

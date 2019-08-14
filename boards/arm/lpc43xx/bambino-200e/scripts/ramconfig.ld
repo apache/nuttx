@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/scripts/ramconfig.ld
+ * boards/arm/lpc43xx/bambino-200e/scripts/ramconfig.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

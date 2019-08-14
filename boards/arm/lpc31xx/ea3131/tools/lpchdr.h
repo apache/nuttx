@@ -1,5 +1,5 @@
 /************************************************************************************
- * boards/ea3131/tools/lpchdr.h
+ * boards/arm/lpc31xx/ea3131/tools/lpchdr.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __BOARDS_ARM_EA3131_TOOLS_LPCHDR_H
-#define __BOARDS_ARM_EA3131_TOOLS_LPCHDR_H
+#ifndef __BOARDS_ARM_LPC31XX_EA3131_TOOLS_LPCHDR_H
+#define __BOARDS_ARM_LPC31XX_EA3131_TOOLS_LPCHDR_H
 
 /************************************************************************************
  * Included Files
@@ -101,5 +101,4 @@ struct lpc31_header_s
 extern uint32_t crc32part(const uint8_t *src, size_t len, uint32_t crc32val);
 extern uint32_t crc32(const uint8_t *src, size_t len);
 
-#endif /* __BOARDS_ARM_EA3131_TOOLS_LPCHDR_H */
-
+#endif /* __BOARDS_ARM_LPC31XX_EA3131_TOOLS_LPCHDR_H */

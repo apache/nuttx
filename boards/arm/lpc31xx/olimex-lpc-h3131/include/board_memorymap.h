@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc-h3131/include/board_memorymap.h
+/****************************************************************************
+ * boards/arm/lpc31xx/olimex-lpc-h3131/include/board_memorymap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H
-#define __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H
+#ifndef __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H
 
 /* This file should never be included directly, but only indirectly via
  * lpc31_memorymap.h.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* If the LPC31xx ROM page table is selected, then the board-logic is required
  * to provide:
@@ -59,7 +59,7 @@
  */
 
 #ifdef CONFIG_ARCH_ROMPGTABLE
-   /* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
+/* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
 
 #  define LPC31_SHADOWSPACE_VSECTION 0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
 #  define LPC31_INTSRAM_VSECTION     0x11028000 /*                        Internal SRAM 96Kb-192Kb */
@@ -83,34 +83,35 @@
 #  define LPC31_INTC_VSECTION        0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
 #  define LPC31_NAND_VSECTION        0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
 
-   /* Define the address of the page table within the ROM */
+/* Define the address of the page table within the ROM */
 
 #  define ROMPGTABLE_OFFSET          0x0001c000  /* Offset of the ROM page table in ROM */
 #  define PGTABLE_BASE_PADDR         (LPC31_INTSROM0_PSECTION+ROMPGTABLE_OFFSET)
 #  define PGTABLE_BASE_VADDR         (LPC31_INTSROM0_VSECTION+ROMPGTABLE_OFFSET)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H */
+#endif  /* __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_MEMORYMAP_H */

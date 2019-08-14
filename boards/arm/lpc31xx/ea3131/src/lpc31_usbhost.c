@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ea3131/src/lpc31_usbhost.c
+/****************************************************************************
+ * boards/arm/lpc31xx/ea3131/src/lpc31_usbhost.c
  *
  *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,9 +60,9 @@
 
 #if defined(CONFIG_LPC31_USBOTG) || defined(CONFIG_USBHOST)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_USBHOST_DEFPRIO
 #  define CONFIG_USBHOST_DEFPRIO 50
@@ -76,31 +76,32 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Retained device driver handle */
 
 static struct usbhost_connection_s *g_ehciconn;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: ehci_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to the EHCI root hub.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int ehci_waiter(int argc, char *argv[])
 {
   FAR struct usbhost_hubport_s *hport;
 
   uinfo("ehci_waiter:  Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -123,48 +124,54 @@ static int ehci_waiter(int argc, char *argv[])
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup USB
- *   host-related GPIO pins for the EA3131 board.
+ *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   USB host-related GPIO pins for the EA3131 board.
  *
- *   USB host VBUS power is controlled by a Micrel USB power switch.  That switch is
- *   driver by a discrete that comes from the I2C-contrrol PCA9532 GPIO expander.
+ *   USB host VBUS power is controlled by a Micrel USB power switch.
+ *   That switch is driver by a discrete that comes from the I2C-contrrol
+ *   PCA9532 GPIO expander.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lpc31_usbhost_bootinitialize(void)
 {
-  /* Get an instance of the I2C interface.  This will be needed to control the
-   * PCA9532 GPIO expander.
+  /* Get an instance of the I2C interface.
+   * This will be needed to control the PCA9532 GPIO expander.
    */
+
 #warning Missing logic
 
   /* Use the I2C interface to initialize the PCA9532 GPIO expander driver */
+
 #warning Missing logic
 
   /* Configure pin to drive VBUS power using the PCA8532 GPIO expander */
+
 #warning Missing logic
 
   /* Configure pin to detect overrcurrent errors */
+
 #warning Missing logic
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 int lpc31_usbhost_initialize(void)
 {
@@ -191,7 +198,8 @@ int lpc31_usbhost_initialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      usyslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      usyslog(LOG_ERR,
+              "ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 #endif
 
@@ -238,27 +246,28 @@ int lpc31_usbhost_initialize(void)
   return OK;
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided by
- *   each platform that implements the OHCI or EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.
+ *   This function must be provided by each platform that implements the OHCI
+ *   or EHCI host interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface. Since the LPC31
- *     has only a downstream port, zero is the only possible value for this
- *     parameter.
+ *   rhport - Selects root hub port to be powered host interface.
+ *     Since the LPC31 has only a downstream port, zero is the only possible
+ *     value for this parameter.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 void lpc31_usbhost_vbusdrive(int rhport, bool enable)
 {
-  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport + 1, enable);
 
   /* The LPC3131 has only a single root hub port */
 
@@ -269,44 +278,48 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
       if (enable)
         {
           /* Enable the Power Switch by driving the enable pin low */
+
 #warning Missing logic
         }
       else
         {
           /* Disable the Power Switch by driving the enable pin high */
+
 #warning Missing logic
         }
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   Zero (OK) returned on success; a negated errno value is returned on failure.
+ *   Zero (OK) returned on success; a negated errno value is returned on
+ *   failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not ready yet */
 int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
 {
   irqstate_t flags;
 
-  /* Disable interrupts until we are done.  This guarantees that the
-   * following operations are atomic.
+  /* Disable interrupts until we are done.
+   * This guarantees that the following operations are atomic.
    */
 
   flags = enter_critical_section();
 
   /* Configure the interrupt */
+
 #warning Missing logic
 
   leave_critical_section(flags);

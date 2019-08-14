@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/mcu123-lpc214x/scripts/Make.defs
+# boards/arm/lpc214x/mcu123-lpc214x/scripts/Make.defs
 #
 #   Copyright (C) 2008-2009, 2011, 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

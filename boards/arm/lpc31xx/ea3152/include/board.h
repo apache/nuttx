@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ea3152/include/board.h
+/****************************************************************************
+ * boards/arm/lpc31xx/ea3152/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_LPC31XX_EA3152_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC31XX_EA3152_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -47,11 +47,12 @@
 # include "lpc31_cgudrvr.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Frequency of the FFAST input */
 
 #define BOARD_FREQIN_FFAST     (12000000) /* ffast (12 MHz crystal) */
@@ -80,8 +81,8 @@
 #define BOARD_HPLL1_MODE   0                  /* PLL mode */
 #define BOARD_HPLL1_FREQ  180000000           /* Frequency of the PLL in MHz */
 
-/* The following 3 bitsets determine which clocks will be enabled at initialization
- * time.
+/* The following 3 bitsets determine which clocks will be enabled at
+ * initialization time.
  */
 
 #define BOARD_CLKS_0_31 \
@@ -100,7 +101,7 @@
 #define BOARD_CLKS_64_92 \
  (0)
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 #define LED_STARTED       0
 #define LED_HEAPALLOCATE  1
@@ -111,6 +112,6 @@
 #define LED_ASSERTION     6
 #define LED_PANIC         7
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC31XX_EA3152_INCLUDE__BOARD_H */

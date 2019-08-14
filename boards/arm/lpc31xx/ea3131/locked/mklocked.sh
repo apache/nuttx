@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###########################################################################
-# boards/ea3131/locked/mklocked.sh
+# boards/arm/lpc31xx/ea3131/locked/mklocked.sh
 #
 #   Copyright (C) 2010-2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/zp214xpa/scripts/ld.script
+ * boards/arm/lpc214x/zp214xpa/scripts/ld.script
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

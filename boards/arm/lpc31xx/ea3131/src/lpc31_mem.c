@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3131/src/lpc31_mem.c
+ * boards/arm/lpc31xx/ea3131/src/lpc31_mem.c
  *
  *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +70,7 @@
 
 #define EA3131_MPMC_DELAY           0x824
 
-/*Delay constants in nanosecondss for MT48LC32M16LF SDRAM on board */
+/* Delay constants in nanosecondss for MT48LC32M16LF SDRAM on board */
 
 #define EA3131_SDRAM_TRP            (20)
 #define EA3131_SDRAM_TRFC           (66)
@@ -90,7 +90,7 @@
  * the HCLK.
  */
 
-#define NS2HCLKS(ns,hclk2,mask) \
+#define NS2HCLKS(ns, hclk2, mask) \
   ((uint32_t)(((uint64_t)ns *(uint64_t)hclk2) / 1000000000ull) & mask)
 
 /****************************************************************************
@@ -169,7 +169,10 @@ static void lpc31_sdraminitialize(void)
 # define HCLK hclk
 #endif
 
-  /* Check RTL for divide by 2 possible. If so change then enable the followng logic */
+  /* Check RTL for divide by 2 possible.
+   * If so change then enable the followng logic
+   */
+
 #if 0
   uint32_t hclk2 = hclk;
 
@@ -189,9 +192,9 @@ static void lpc31_sdraminitialize(void)
 
   /* Configure device config register nSDCE0 for proper width SDRAM */
 
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
+  putreg32((MPMC_DYNCONFIG0_MDSDRAM | MPMC_DYNCONFIG_HP16_32MX16),
            LPC31_MPMC_DYNCONFIG0);
-  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
+  putreg32((MPMC_DYNRASCAS0_RAS2CLK | MPMC_DYNRASCAS0_CAS2CLK),
            LPC31_MPMC_DYNRASCAS0);
 
   /* Min 20ns program 1 so that at least 2 HCLKs are used */
@@ -222,8 +225,8 @@ static void lpc31_sdraminitialize(void)
 
   /* Issue continuous NOP commands  */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_INOP), LPC31_MPMC_DYNCONTROL);
 
   /* Wait ~200us  */
 
@@ -231,8 +234,8 @@ static void lpc31_sdraminitialize(void)
 
   /* Issue a "pre-charge all" command */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IPALL),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_IPALL), LPC31_MPMC_DYNCONTROL);
 
   /* Minimum refresh pulse interval (tRFC) for MT48LC32M16A2=80nsec,
    * 100nsec provides more than adequate interval.
@@ -247,34 +250,35 @@ static void lpc31_sdraminitialize(void)
 
   /* Recommended refresh interval for normal operation of the Micron
    * MT48LC16LFFG = 7.8125usec (128KHz rate). ((HCLK / 128000) - 1) =
-    * refresh counter interval rate, (subtract one for safety margin).
+   * refresh counter interval rate, (subtract one for safety margin).
    */
 
-  putreg32(NS2HCLKS(EA3131_SDRAM_OPERREFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
-           LPC31_MPMC_DYNREFRESH);
+  putreg32(NS2HCLKS(EA3131_SDRAM_OPERREFRESH, HCLK,
+                    MPMC_DYNREFRESH_TIMER_MASK), LPC31_MPMC_DYNREFRESH);
 
   /* Select mode register update mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IMODE),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_IMODE), LPC31_MPMC_DYNCONTROL);
 
   /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
-   * the SDRAM chips.  Bus speeds up to 90MHz requires use of a CAS latency = 2.
+   * the SDRAM chips.
+   * Bus speeds up to 90MHz requires use of a CAS latency = 2.
    * To get correct value on address bus CAS cycle, requires a shift by 13 for
    * 16bit mode
    */
 
   (void)getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
 
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
+  putreg32((MPMC_DYNCONFIG0_MDSDRAM | MPMC_DYNCONFIG_HP16_32MX16),
            LPC31_MPMC_DYNCONFIG0);
-  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
+  putreg32((MPMC_DYNRASCAS0_RAS2CLK | MPMC_DYNRASCAS0_CAS2CLK),
            LPC31_MPMC_DYNRASCAS0);
 
   /* Select normal operating mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INORMAL),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32((MPMC_DYNCONTROL_CE | MPMC_DYNCONTROL_CS |
+            MPMC_DYNCONTROL_INORMAL), LPC31_MPMC_DYNCONTROL);
 
   /* Enable buffers */
 
@@ -282,7 +286,7 @@ static void lpc31_sdraminitialize(void)
   regval |= MPMC_DYNCONFIG0_B;
   putreg32(regval, LPC31_MPMC_DYNCONFIG0);
 
-  putreg32((MPMC_DYNCONTROL_INORMAL|MPMC_DYNCONTROL_CS),
+  putreg32((MPMC_DYNCONTROL_INORMAL | MPMC_DYNCONTROL_CS),
            LPC31_MPMC_DYNCONTROL);
 }
 

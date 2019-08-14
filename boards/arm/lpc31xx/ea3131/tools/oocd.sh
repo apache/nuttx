@@ -10,9 +10,9 @@ fi
 
 OPENOCD_PATH="/cygdrive/c/gccfd/openocd/bin"
 OPENOCD_EXE=openocd-ftd2xx.exe
-OPENOCD_CFG="${TOPDIR}/boards/ea3131/tools/armusbocd.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/lpc31xx/ea3131/tools/armusbocd.cfg"
 OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
-~/projects/nuttx/nuttx/boards/ea3131/tool
+~/projects/nuttx/nuttx/boards/arm/lpc31xx/ea3131/tool
 
 if [ "X$2" = "X-d" ]; then
 	OPENOCD_ARGS=$OPENOCD_ARGS" -d3"

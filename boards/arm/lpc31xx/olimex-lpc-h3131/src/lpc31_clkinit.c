@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_clkinit.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_clkinit.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
  ****************************************************************************/
 
 /* Sub-domain Clock Bitsets *************************************************/
+
 /* The following bitsets group clocks into bitsets associated with each
  * domain and fractional divider subdomain.
  *
@@ -99,8 +100,9 @@
 #define CGU_CLKSET_DOMAIN0_DIV6 \
   (_D0B(CLKID_EBICLK))
 
-/* Domain 1 (DOMAINID_AHB0APB0), Clocks 30-39, Fraction dividers 7-8.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB0_BASE_CLK.
+/* Domain 1 (DOMAINID_AHB0APB0), Clocks 30-39, Fraction dividers 7-8.
+ * Clocks not defined in the clock sets will be sourced with
+ * AHB_APB0_BASE_CLK.
  */
 
 /* Domain 1, Fractional divider 7: */
@@ -116,8 +118,9 @@
    _D1B(CLKID_CGUPCLK)|_D1B(CLKID_SYSCREGPCLK)|_D1B(CLKID_OTPPCLK)|\
    _D1B(CLKID_RNGPCLK))
 
-/* Domain 2 (DOMAINID_AHB0APB1), Clocks 40-49, Fraction dividers 9-10.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB1_BASE_CLK.
+/* Domain 2 (DOMAINID_AHB0APB1), Clocks 40-49, Fraction dividers 9-10.
+ * Clocks not defined in the clock sets will be sourced with
+ * AHB_APB1_BASE_CLK.
  */
 
 /* Domain 2, Fractional divider 9: */
@@ -132,8 +135,9 @@
 #define CGU_CLKSET_DOMAIN2_DIV10 \
   (_D2B(CLKID_PWMCLK))
 
-/* Domain 3 (DOMAINID_AHB0APB2), Clocks 50-57, Fraction dividers 11-13.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB2_BASE_CLK.
+/* Domain 3 (DOMAINID_AHB0APB2), Clocks 50-57, Fraction dividers 11-13.
+ * Clocks not defined in the clock sets will be sourced with
+ * AHB_APB2_BASE_CLK.
  */
 
 /* Domain 3, Fractional divider 11: */
@@ -153,8 +157,9 @@
 #define CGU_CLKSET_DOMAIN3_DIV13 \
   (0)
 
-/* Domain 4 (DOMAINID_AHB0APB3), Clocks 58-70, Fraction divider 14.  Clocks
- * not defined in the clock sets will be sourced with AHB_APB3_BASE_CLK.
+/* Domain 4 (DOMAINID_AHB0APB3), Clocks 58-70, Fraction divider 14.
+ * Clocks not defined in the clock sets will be sourced with
+ * AHB_APB3_BASE_CLK.
  */
 
 #define CGU_CLKSET_DOMAIN4_DIV14 \
@@ -177,8 +182,9 @@
 #define CGU_CLKSET_DOMAIN6_DIV16 \
   (0)
 
-/* Domain 7 (DOMAINID_CLK1024FS), Clocks 73-86, Fraction dividers 17-22.  Clocks
- * not defined in the clock sets will be sourced with CLK1024FS_BASE_CLK.
+/* Domain 7 (DOMAINID_CLK1024FS), Clocks 73-86, Fraction dividers 17-22.
+ * Clocks not defined in the clock sets will be sourced with
+ * CLK1024FS_BASE_CLK.
  */
 
 /* Domain 7, Fractional divider 17: */

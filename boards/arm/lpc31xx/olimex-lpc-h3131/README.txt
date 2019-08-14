@@ -6,7 +6,7 @@ README
   NOTE:  This is a minimal port to the Olimex LPC-H3131.  According to Olimex
   documentation, the LPC-H3131 is similar in design to the Embedded Artists
   EA3131.  As a consequence, it should be possible to leverage additional
-  functionality from boards/ea3131 without too much difficulty.
+  functionality from boards/arm/lpc31xx/ea3131 without too much difficulty.
 
 Contents
 ========

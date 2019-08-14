@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/olimex-lpc2378/scripts/Make.defs
+# boards/arm/lpc2378/olimex-lpc2378/scripts/Make.defs
 #
 #   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
 #   Author: Rommel Marcelo

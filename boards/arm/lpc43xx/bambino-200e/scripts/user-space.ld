@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/scripts/user-space.ld
+ * boards/arm/lpc43xx/bambino-200e/scripts/user-space.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

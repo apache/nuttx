@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/bambino-200e/src/lpc43_buttons.c
+ * boards/arm/lpc43xx/bambino-200e/src/lpc43_buttons.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -108,9 +108,9 @@ void board_button_initialize(void)
  * Name: board_buttons
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons.
  *
  *   board_buttons() may be called at any time to harvest the state of every
  *   button.  The state of the buttons is returned as a bitset with one
@@ -129,16 +129,16 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed. */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = lpc43_gpio_read(g_buttoncfg[i]);
+      bool released = lpc43_gpio_read(g_buttoncfg[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
+      if (!released)
+        {
             ret |= (1 << i);
-         }
+        }
     }
 
   return ret;
@@ -148,19 +148,22 @@ uint32_t board_buttons(void)
  * Button support.
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_button_irq() may be called to register button interrupt handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BOARD_BUTTON_* and BOARD_JOYSTICK_* definitions in board.h for the meaning
- *   of enumeration values.
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.
+ *   The ID value is a button enumeration value that uniquely identifies a
+ *   button resource.
+ *   See the BOARD_BUTTON_* and BOARD_JOYSTICK_* definitions in board.h for
+ *   the meaning of enumeration values.
  *
- *   Note that board_button_irq() also enables button interrupts.  Button
- *   interrupts will remain enabled after the interrupt handler is attached.
- *   Interrupts may be disabled (and detached) by calling board_button_irq with
- *   irqhandler equal to NULL.
+ *   Note that board_button_irq() also enables button interrupts.
+ *   Button interrupts will remain enabled after the interrupt handler is
+ *   attached.
+ *   Interrupts may be disabled (and detached) by calling board_button_irq
+ *   with irqhandler equal to NULL.
  *
  ****************************************************************************/
 

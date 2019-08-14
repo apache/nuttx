@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-lpc-h3131/scripts/Make.defs
+# boards/arm/lpc31xx/olimex-lpc-h3131/scripts/Make.defs
 #
 #   Copyright (C) 2013i, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

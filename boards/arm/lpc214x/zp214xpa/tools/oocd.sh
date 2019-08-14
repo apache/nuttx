@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/zp214xpa/README.txt for information about
+# See boards/arm/lpc214x/zp214xpa/README.txt for information about
 # this file.
 
 TOPDIR=$1
@@ -19,7 +19,7 @@ OPENOCD_PATH="/usr/local/bin"
 TARGET_PATH="/usr/local/share/openocd/scripts"
 
 OPENOCD_EXE=openocd.exe
-OPENOCD_CFG="${TOPDIR}/boards/zp214xpa/tools/olimex.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/lpc214x/zp214xpa/tools/olimex.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then

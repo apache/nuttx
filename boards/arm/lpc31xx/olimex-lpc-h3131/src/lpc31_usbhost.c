@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_usbhost.c
+/****************************************************************************
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_usbhost.c
  *
  *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,9 +60,9 @@
 
 #ifdef HAVE_USBHOST
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_USBHOST_DEFPRIO
 #  define CONFIG_USBHOST_DEFPRIO 50
@@ -76,9 +76,10 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Retained device driver handle */
 
 static struct usbhost_connection_s *g_ehciconn;
@@ -89,24 +90,24 @@ static struct usbhost_connection_s *g_ehciconn;
 static xcpt_t g_ochandler;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: ehci_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to the EHCI root hub.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int ehci_waiter(int argc, char *argv[])
 {
   FAR struct usbhost_hubport_s *hport;
 
   uinfo("ehci_waiter:  Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -129,23 +130,23 @@ static int ehci_waiter(int argc, char *argv[])
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup USB
- *   host-related GPIO pins for the LPC-H3131 board.
+ *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   USB host-related GPIO pins for the LPC-H3131 board.
  *
  *   SIGNAL      GPIO
  *   ----------- -------
  *   #OTG_PWR_E  GPIO19
  *   #OTG_OVRCR  GPIO20
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lpc31_usbhost_bootinitialize(void)
 {
@@ -158,18 +159,20 @@ void weak_function lpc31_usbhost_bootinitialize(void)
   gpio_configinput(LPC31_IOCONFIG_GPIO, GPIO_NOTG_OVRCR);
 
   /* Configure to receive interrupts on the overrcurrent input pin */
+
 #warning Missing logic
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 int lpc31_usbhost_initialize(void)
 {
@@ -231,7 +234,7 @@ int lpc31_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,i
+  pid = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO, i
                        CONFIG_USBHOST_STACKSIZE,
                        (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
@@ -243,27 +246,28 @@ int lpc31_usbhost_initialize(void)
   return OK;
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: lpc31_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided by
- *   each platform that implements the OHCI or EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.
+ *   This function must be provided by each platform that implements the
+ *   OHCI or EHCI host interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface. Since the LPC31
- *     has only a downstream port, zero is the only possible value for this
- *     parameter.
+ *   rhport - Selects root hub port to be powered host interface.
+ *     Since the LPC31 has only a downstream port, zero is the only
+ *     possible value for this parameter.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 void lpc31_usbhost_vbusdrive(int rhport, bool enable)
 {
-  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport + 1, enable);
 
   /* The LPC3131 has only a single root hub port */
 
@@ -286,21 +290,22 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument that will accompany the interrupt
  *
  * Returned Value:
- *   Zero (OK) returned on success; a negated errno value is returned on failure.
+ *   Zero (OK) returned on success; a negated errno value is returned
+ *   on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not ready yet */
 int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
@@ -314,11 +319,11 @@ int lpc31_setup_overcurrent(xcpt_t handler, void *arg)
   flags = enter_critical_section();
 
   /* Configure the interrupt */
+
 #warning Missing logic
 
   leave_critical_section(flags);
   return oldhandler;
 }
 #endif /* 0 */
-
 #endif /* HAVE_USBHOST */

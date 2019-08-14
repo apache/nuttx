@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc54628/scripts/flash.ld
+ * boards/arm/lpc54xx/lpcxpresso-lpc54628/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

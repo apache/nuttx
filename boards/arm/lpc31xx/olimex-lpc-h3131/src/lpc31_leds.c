@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc-h3131/src/lpc31_leds.c
+ * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_leds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -157,20 +157,21 @@ void board_autoled_off(int led)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
  *   These interfaces allow user control of the board LEDs.
  *
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
- *   until the completion of boot.  The it will continue to control LED2; LED1 is
- *   avaiable for application use.
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board
+ *   LEDs up until the completion of boot.
+ *   Then it will continue to control LED2;
+ *   LED1 is avaiable for application use.
  *
- *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
- *   use.
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available
+ *   for application use.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_userled_initialize(void)
 {
@@ -193,9 +194,9 @@ void board_userled(int led, bool ledon)
       bit = GPIO_LED2;
     }
   else
-   {
+    {
       return;
-   }
+    }
 
   if (ledon)
     {

@@ -71,7 +71,7 @@ if [ "X${OPENOCD}" = "X0.4.0" ]; then
 
 	# Local search directory and configurations
 
-	OPENOCD_SEARCHDIR="${TOPDIR}/boards/ea3152/tools"
+	OPENOCD_SEARCHDIR="${TOPDIR}/boards/arm/lpc31xx/ea3152/tools"
 	OPENOCD_WSEARCHDIR="`cygpath -w ${OPENOCD_SEARCHDIR}`"
 
 	if [ "X${INTERFACE}" = "XJlink" ]; then
@@ -125,7 +125,7 @@ else
 			exit 1
 		fi
 
-		OPENOCD_CFG="${TOPDIR}/boards/ea3152/tools/armusbocd.cfg"
+		OPENOCD_CFG="${TOPDIR}/boards/arm/lpc31xx/ea3152/tools/armusbocd.cfg"
 		OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
 
 		# Verify that everything is what it claims it is and is located where it claims it is.

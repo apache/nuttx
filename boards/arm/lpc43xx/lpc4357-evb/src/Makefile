@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4357-evb/src/Makefile
+# boards/arm/lpc43xx/lpc4357-evb/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

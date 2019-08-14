@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4337-ws/scripts/ramconfig.ld
+ * boards/arm/lpc43xx/lpc4337-ws/scripts/ramconfig.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4357-evb/src/lpc43_userleds.c
+ * boards/arm/lpc43xx/lpc4357-evb/src/lpc43_userleds.c
  *
  *   Copyright (C) 2014, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +56,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* LED definitions **********************************************************/
+
 /* The LPC4357-EVB has one user-controllable LED labelled D6 controlled by
  * the signal LED_3V3:
  *

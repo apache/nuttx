@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mcu123-lpc214x/src/Makefile
+# boards/arm/lpc2378/olimex-lpc2378/src/Makefile
 #
 #   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
 #   Author: Rommel Marcelo

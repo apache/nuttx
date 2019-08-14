@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/zp214xpa/scripts/Make.defs
+# boards/arm/lpc214x/zp214xpa/scripts/Make.defs
 #
 #   Copyright (C) 2012, 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

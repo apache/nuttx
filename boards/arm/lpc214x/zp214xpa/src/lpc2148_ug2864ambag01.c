@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/zp214xpa/src/lpc2148_ug2864ambag01.c
+ * boards/arm/lpc214x/zp214xpa/src/lpc2148_ug2864ambag01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +56,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The pin configurations here requires that SPI1 is avaialable */
 
 /* SPI should be configured with CMD/DATA support (and no transfer methods) */
@@ -66,6 +68,7 @@
 #endif
 
 /* Pin Configuration ********************************************************/
+
 /* UG-2864AMBAG01 OLED Display:
  *
  *   PIN NAME PIN CONFIGURATION

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/bambino-200e/kernel/Makefile
+# boards/arm/lpc43xx/bambino-200e/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpcxpresso-lpc54628/include/board.h
+ * boards/arm/lpc54xx/lpcxpresso-lpc54628/include/board.h
  *
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H
-#define _CONFIGS_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -146,21 +146,23 @@
 #define BOARD_FRGCLK_INPUT       BOARD_MAIN_CLK   /* FRG input frequency */
 #define BOARD_FRGCLK             48000000         /* May not be exact */
 
-/* SysTick:  The SysTick clock may be clocked internally either by the by the
- * system clock (CLKSOURCE==1) or by the SysTick function clock (CLKSOURCE==0).
+/* SysTick:
+ * The SysTick clock may be clocked internally either by the by the system
+ * clock (CLKSOURCE==1) or by the SysTick function clock (CLKSOURCE==0).
  * The SysTick Function clock is equal to:
  *
  *   Fsystick = Fmainclk / SYSTICKCLKDIV
  *
- * Tips for selecting BOARD_SYSTICKCLKDIV:  The resulting SysTick reload value
- * should be as large as possible, but must be less than 2^24:
+ * Tips for selecting BOARD_SYSTICKCLKDIV:
+ * The resulting SysTick reload value should be as large as possible,
+ * but must be less than 2^24:
  *
  *   SYSTICKDIV > Fmainclk / CLK_TCK / 2^24
  *
- * The logic in lpc54_timerisr.c will always select the SysTick function clock
- * as the source (CLKSOURCE==0).  NOTE: When the system tick clock divider is
- * selected as the clock source, the CPU clock must be at least 2.5 times
- * faster than the divider output.
+ * The logic in lpc54_timerisr.c will always select the SysTick function
+ * clock as the source (CLKSOURCE==0).
+ * NOTE: When the system tick clock divider is selected as the clock source,
+ * the CPU clock must be at least 2.5 times faster than the divider output.
  *
  *   SysTick Divider:            (SYSTICKCLKDIV)
  */
@@ -193,7 +195,8 @@
 #endif
 #define BOARD_EMC_FREQUENCY      (BOARD_CPU_FREQUENCY / BOARD_EMC_CLKDIV)
 
-/* SD/MMC or SDIO interface/
+/* SD/MMC or SDIO interface */
+
 /* SD/MMC function clock.  The SDMMC source clock (Fsdmmc) is the main clock
  * which may be divided down by the SYSCON module (8-bit divider, functional
  * range, 1-256).  The SD clock is obtained by dividing the source clock
@@ -231,13 +234,13 @@
  *           BOARD_CLKDIV_SDXFR=6[5],     Fsdmmc=18MHz   (25MHz max)
  *
  * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
- * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
- * of 255 means divide by 2 * 255 = 510, and so on.
+ * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2,
+ * value of 255 means divide by 2 * 255 = 510, and so on.
  *
- * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.  So an
- * odd value calculated below will be moved up to next higher divider value.  So
- * the value 3 will cause 2 to be written as the divider value and the effective
- * divider will be 4.
+ * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.
+ * So an odd value calculated below will be moved up to next higher divider
+ * value.  So the value 3 will cause 2 to be written as the divider value
+ * and the effective divider will be 4.
  */
 
 #define BOARD_CLKDIV_INIT       BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 400000)
@@ -246,6 +249,7 @@
 #define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
 /* LED definitions *********************************************************/
+
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
  * LEDs are for application use. They are illuminated when the driving
  * signal from the LPC546xx is low. The LEDs are driven by ports P2-2 (D9),
@@ -295,6 +299,7 @@
  */
 
 /* Button definitions *******************************************************/
+
 /* The LPCXpresso has four switches:
  *
  *   SW2 ISP2         P0.6
@@ -319,6 +324,7 @@
 #define BUTTON_USER_BIT            (1 << BUTTON_USER)
 
 /* Pin Disambiguation *******************************************************/
+
 /* Flexcomm0/USART0
  *
  * USART0 connects to the serial bridge on LPC4322JET100 and is typically used
@@ -524,4 +530,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* _CONFIGS_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_LPC54XX_LPCXPRESSO_LPC54628_INCLUDE_BOARD_H */

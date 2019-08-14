@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/bambino-200e/src/lpc43_appinit.c
+ * boards/arm/lpc43xx/bambino-200e/src/lpc43_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

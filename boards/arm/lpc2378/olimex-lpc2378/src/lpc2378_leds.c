@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-lpc2378/src/lpc2378_leds.c
+ * boards/arm/lpc2378/olimex-lpc2378/src/lpc2378_leds.c
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo

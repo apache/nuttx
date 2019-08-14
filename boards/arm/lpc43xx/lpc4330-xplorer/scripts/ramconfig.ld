@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lpc4330-xplorer/scripts/ramconfig.ld
+ * boards/arm/lpc43xx/lpc4330-xplorer/scripts/ramconfig.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/ea3131/locked/ld-locked.script
+ * boards/arm/lpc31xx/ea3131/locked/ld-locked.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
