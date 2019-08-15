@@ -112,12 +112,20 @@ ifeq ($(CONFIG_STM32H7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_STM32H7_BBSRAM),y)
+CHIP_CSRCS += stm32_bbsram.c
+endif
+
 ifeq ($(CONFIG_STM32H7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
 ifeq ($(CONFIG_STM32H7_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
+endif
+
+ifeq ($(CONFIG_STM32H7_PWR),y)
+CHIP_CSRCS += stm32_pwr.c
 endif
 
 ifeq ($(CONFIG_STM32H7_SPI),y)

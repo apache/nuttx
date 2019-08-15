@@ -134,6 +134,10 @@ config STM32H7_TIM
 	bool
 	default n
 
+config STM32H7_PWR
+	bool "PWR"
+	default n
+
 config STM32H7_PWM
 	bool
 	default n
@@ -157,6 +161,11 @@ config STM32H7_ADC3
 	bool "ADC3"
 	default n
 	select STM32H7_ADC
+
+config STM32H7_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	select STM32H7_PWR
+	default n
 
 config STM32H7_DMA1
 	bool "DMA1"
@@ -974,6 +983,25 @@ config SDMMC2_SDIO_PULLUP
 
 endmenu # "SDMMC2 Configuration"
 endmenu # "SD/MMC Configuration"
+
+if STM32H7_BKPSRAM
+
+config STM32H7_BBSRAM
+	bool "BBSRAM File Support"
+	default n
+
+config STM32H7_BBSRAM_FILES
+	int "Max Files to support in BBSRAM"
+	default 4
+	depends on STM32H7_BBSRAM
+
+config STM32H7_SAVE_CRASHDUMP
+	bool "Enable Saving Panic to BBSRAM"
+	default n
+	depends on STM32H7_BBSRAM
+
+endif # STM32H7_BKPSRAM
+
 config STM32H7_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n

@@ -2368,10 +2368,12 @@ config STM32F7_BBSRAM
 config STM32F7_BBSRAM_FILES
 	int "Max Files to support in BBSRAM"
 	default 4
+	depends on STM32F7_BBSRAM
 
 config STM32F7_SAVE_CRASHDUMP
 	bool "Enable Saving Panic to BBSRAM"
 	default n
+	depends on STM32F7_BBSRAM
 
 endif # STM32F7_BKPSRAM
 
