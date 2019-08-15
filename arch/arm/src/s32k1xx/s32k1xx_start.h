@@ -67,6 +67,12 @@
 
 extern const uintptr_t g_idle_topstack;
 
+/* Each S32K1xx board must provide the following initialized structure.  This is
+ * needed to establish the initial board clocking.
+ */
+
+extern const struct clock_configuration_s g_initial_clkconfig;
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = s32k118_boot.c s32k118_bringup.c
+CSRCS = s32k118_boot.c s32k118_bringup.c s32k118_clockconfig.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += s32k118_autoleds.c

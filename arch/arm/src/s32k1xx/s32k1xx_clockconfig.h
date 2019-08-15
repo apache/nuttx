@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * Some of the definitions within this file derivesfrom NXP sample code for
+ * Some of the definitions within this file derives from NXP sample code for
  * the S32K1xx MCUs.  That sample code has this licensing information:
  *
  *   Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
@@ -188,7 +188,7 @@ enum scg_sosc_range_e
 struct scg_sosc_config_s
 {
   uint32_t freq;                       /* System OSC frequency */
-  enum scg_sosc_monitor_mode_e mod;    /* System OSC Clock monitor mode */
+  enum scg_sosc_monitor_mode_e mode;   /* System OSC Clock monitor mode */
   enum scg_sosc_ext_ref_e extref;      /* System OSC External Reference Select */
   enum scg_sosc_gain_e gain;           /* System OSC high-gain operation */
   enum scg_sosc_gain_e range;          /* System OSC frequency range */
@@ -389,7 +389,7 @@ struct sim_lpo_clock_config_s
 
 struct sim_tclk_config_s
 {
-  uint32_t tclkFreq[NUMBER_OF_TCLK_INPUTS]; /* TCLKx frequency */
+  uint32_t tclkfreq[NUMBER_OF_TCLK_INPUTS]; /* TCLKx frequency */
   bool initialize;                          /* true: Initialize the TCLKx clock */
 };
 
