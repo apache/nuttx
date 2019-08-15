@@ -64,6 +64,7 @@ config ARCH_CHIP_S32K14X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	select S32K1XX_HAVE_EWM
+	select S32K1XX_HAVE_SPLL
 	select S32K1XX_HAVE_HSRUN
 
 # Chip Capabilities
@@ -85,6 +86,10 @@ config S32K1XX_HAVE_HSRUN
 	default n
 
 config S32K1XX_HAVE_SAI
+	bool
+	default n
+
+config S32K1XX_HAVE_SPLL
 	bool
 	default n
 

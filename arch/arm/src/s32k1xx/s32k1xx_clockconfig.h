@@ -200,7 +200,7 @@ struct scg_sosc_config_s
   bool locked;                         /* true: Lock System OSC Control Register */
 };
 
-#ifdef CONFIG_ARCH_CHIP_S32K14X
+#ifdef CONFIG_S32K1XX_HAVE_SPLL
 /* SCG SPLL Clock Configuration */
 
 enum scg_spll_monitor_mode_e
@@ -276,7 +276,7 @@ enum scg_system_clock_src_e
   SCG_SYSTEM_CLOCK_SRC_SYS_OSC  = 1,   /* System OSC */
   SCG_SYSTEM_CLOCK_SRC_SIRC     = 2,   /* Slow IRC */
   SCG_SYSTEM_CLOCK_SRC_FIRC     = 3,   /* Fast IRC */
-#ifdef CONFIG_ARCH_CHIP_S32K14X
+#ifdef CONFIG_S32K1XX_HAVE_SPLL
   SCG_SYSTEM_CLOCK_SRC_SYS_PLL  = 6,   /* System PLL */
 #endif
   SCG_SYSTEM_CLOCK_SRC_NONE     = 255  /* MAX value */
@@ -294,7 +294,7 @@ struct scg_clock_mode_config_s
 {
   struct scg_system_clock_config_s rccr; /* Run Clock Control configuration */
   struct scg_system_clock_config_s vccr; /* VLPR Clock Control configuration */
-#ifdef CONFIG_ARCH_CHIP_S32K14X
+#ifdef CONFIG_S32K1XX_HAVE_HSRUN
   struct scg_system_clock_config_s hccr; /* HSRUN Clock Control configuration */
 #endif
   enum scg_system_clock_src_e altclk;    /* Alternate clock used during initialization */
@@ -308,7 +308,7 @@ struct scg_config_s
   struct scg_sirc_config_s sirc;             /* Slow internal reference clock configuration */
   struct scg_firc_config_s firc;             /* Fast internal reference clock configuration */
   struct scg_sosc_config_s sosc;             /* System oscillator configuration */
-#ifdef CONFIG_ARCH_CHIP_S32K14X
+#ifdef CONFIG_S32K1XX_HAVE_SPLL
   struct scg_spll_config_s spll;             /* System Phase locked loop configuration */
 #endif
   struct scg_rtc_config_s rtc;               /* Real Time Clock configuration */
