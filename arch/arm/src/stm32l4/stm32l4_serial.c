@@ -1805,14 +1805,15 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
 
         uint32_t cr = stm32l4serial_getreg(priv, STM32L4_USART_CR3_OFFSET);
 
-        if (arg == SER_SINGLEWIRE_ENABLED)
+        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            stm32l4_configgpio(priv->tx_gpio | GPIO_OPENDRAIN);
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PULLUP) ? GPIO_PULLUP : GPIO_OPENDRAIN;
+            stm32l4_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
             cr |= USART_CR3_HDSEL;
           }
         else
           {
-            stm32l4_configgpio(priv->tx_gpio | GPIO_PUSHPULL);
+            stm32l4_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | GPIO_PUSHPULL);
             cr &= ~USART_CR3_HDSEL;
           }
 

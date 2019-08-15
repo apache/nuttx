@@ -1304,6 +1304,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_KINETIS_UART_SINGLEWIRE
     case TIOCSSINGLEWIRE:
       {
+        if ((arg & SER_SINGLEWIRE_PULLUP) != 0)
+          {
+            ret = -EINVAL; // Not supported
+            break;
+          }
+
         /* Change to single-wire operation. the RXD pin is disconnected from
          * the UART and the UART implements a half-duplex serial connection.
          * The UART uses the TXD pin for both receiving and transmitting
@@ -1311,7 +1317,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         regval = up_serialin(priv, KINETIS_UART_C1_OFFSET);
 
-        if (arg == SER_SINGLEWIRE_ENABLED)
+        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
             regval |= (UART_C1_LOOPS | UART_C1_RSRC);
           }

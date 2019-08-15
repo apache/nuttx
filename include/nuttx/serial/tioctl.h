@@ -185,6 +185,7 @@
 #define TIOCGSINGLEWIRE _TIOC(0x0031)  /* Get single-wire mode */
 
 #  define SER_SINGLEWIRE_ENABLED   (1 << 0) /* Enable/disable single-wire support */
+#  define SER_SINGLEWIRE_PULLUP    (1 << 1) /* Enable Pull-up on TX (Open-Drain otherwise) */
 
 /* Debugging */
 

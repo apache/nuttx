@@ -1952,7 +1952,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t cr = up_serialin(priv, STM32_USART_CR3_OFFSET);
 
 #if defined(CONFIG_STM32_STM32F10XX)
-        if (arg == SER_SINGLEWIRE_ENABLED)
+        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
             stm32_configgpio((priv->tx_gpio & ~(GPIO_CNF_MASK)) | GPIO_CNF_AFOD);
             cr |= USART_CR3_HDSEL;
@@ -1963,14 +1963,15 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             cr &= ~USART_CR3_HDSEL;
           }
 #else
-        if (arg == SER_SINGLEWIRE_ENABLED)
+        if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            stm32_configgpio(priv->tx_gpio | GPIO_OPENDRAIN);
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PULLUP) ? GPIO_PULLUP : GPIO_OPENDRAIN;
+            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
             cr |= USART_CR3_HDSEL;
           }
         else
           {
-            stm32_configgpio(priv->tx_gpio | GPIO_PUSHPULL);
+            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | GPIO_PUSHPULL);
             cr &= ~USART_CR3_HDSEL;
           }
 #endif
