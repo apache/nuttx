@@ -60,6 +60,9 @@
 #include "hardware/tiva_pinmap.h"
 #include "hardware/tiva_memorymap.h"
 
+#include <arch/board/board.h>
+
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
