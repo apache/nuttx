@@ -222,7 +222,7 @@
 #define SCG_SOSCCFG_RANGE_MASK         (3 << SCG_SOSCCFG_RANGE_SHIFT)
 #  define SCG_SOSCCFG_RANGE_LOW        (1 << SCG_SOSCCFG_RANGE_SHIFT)  /* Low frequency range */
 #  define SCG_SOSCCFG_RANGE_MED        (2 << SCG_SOSCCFG_RANGE_SHIFT)  /* Medium frequency range */
-#  define SCG_SOSCCFG_RANGE_HIGH       (3 << SCG_SOSCCFG_RANGE_SHIFT)  /* High frequency range
+#  define SCG_SOSCCFG_RANGE_HIGH       (3 << SCG_SOSCCFG_RANGE_SHIFT)  /* High frequency range */
 
 /* Slow IRC Control Status Register */
 

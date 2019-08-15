@@ -80,7 +80,7 @@
 
 /* This describes the initial PLL configuration */
 
-static const struct pll_setup_s g_initial_pll_setup =
+static const struct clock_configuration_s g_initial_clkconfig =
 {
   0  /* REVISIT */
 #warning Missing logic
@@ -202,7 +202,7 @@ void __start(void)
    * .bss or .data have beeninitialized.
    */
 
-  s32k1xx_clockconfig(&g_initial_pll_setup);
+  s32k1xx_clockconfig(&g_initial_clkconfig);
   s32k1xx_lowsetup();
   showprogress('A');
 
