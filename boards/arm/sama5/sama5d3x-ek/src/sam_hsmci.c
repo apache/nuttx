@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/sam_hsmci.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_hsmci.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD card
- * slot (J7 labeled MCI0), and (2) a microSD memory card slot (J6 labeled MCI1).
+
+/* The SAMA5D3x-EK provides a two SD memory card slots:
+ * (1) a full size SD card slot (J7 labeled MCI0), and
+ * (2) a microSD memory card slot (J6 labeled MCI1).
  *
- * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PB17 (pulled high).  The write protect descrete is tied to
- * ground (via PP6) and not available to software.  The slot supports 8-bit
- * wide transfer mode, but the NuttX driver currently uses only the 4-bit
- * wide transfer mode
+ * The full size SD card slot connects via HSMCI0.
+ * The card detect discrete is available on PB17 (pulled high).
+ * The write protect descrete is tied to ground (via PP6) and not available
+ * to software.
+ * The slot supports 8-bit wide transfer mode, but the NuttX driver
+ * currently uses only the 4-bit wide transfer mode
  *
  *   PD17 MCI0_CD
  *   PD1  MCI0_DA0
@@ -53,8 +56,8 @@
  *   PD9  MCI0_CK
  *   PD0  MCI0_CDA
  *
- * The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PB18 (pulled high):
+ * The microSD connects vi HSMCI1.
+ * The card detect discrete is available on PB18 (pulled high):
  *
  *   PD18  MCI1_CD
  *   PB20  MCI1_DA0
@@ -89,6 +92,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one HSMCI peripheral */
 
 struct sam_hsmci_state_s
@@ -181,7 +185,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
       sdio_mediachange(state->hsmci, cd);
     }
 
-   return OK;
+  return OK;
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
@@ -262,6 +266,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   sam_configpio(state->pincfg);
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   state->hsmci = sdio_initialize(slotno);

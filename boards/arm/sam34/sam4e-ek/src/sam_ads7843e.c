@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4e-ek/src/sam_ads7843e.c
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/src/sam_ads7843e.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -60,6 +60,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAM34_SPI0
@@ -261,7 +262,9 @@ int sam_tsc_setup(int minor)
   if (ret < 0)
     {
       ierr("ERROR: Failed to initialize SPI chip select %d\n", TSC_CSNUM);
+
       /* sam_spibus_uninitialize(dev); */
+
       return -ENODEV;
     }
 

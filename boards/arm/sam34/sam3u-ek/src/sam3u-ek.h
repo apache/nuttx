@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/sam3u-ek.h
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam3u-ek.h
  *
  *   Copyright (C) 2009-2011, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM3U_EK_SRC_SAM3U_EK_H
-#define __BOARDS_ARM_SAM3U_EK_SRC_SAM3U_EK_H
+#ifndef __BOARDS_ARM_SAM34_SAM3U_EK_SRC_SAM3U_EK_H
+#define __BOARDS_ARM_SAM34_SAM3U_EK_SRC_SAM3U_EK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,11 +50,12 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* External Memory Usage ************************************************************/
+/* External Memory Usage ****************************************************/
+
 /* LCD on CS2 */
 
 #define LCD_BASE              SAM_EXTCS2_BASE
@@ -64,7 +65,7 @@
 #define CONFIG_TSC_ADS7843    1   /* ADS7843 present on board */
 #define CONFIG_TSC_SPI        0   /* On SPI0 */
 
-/* SAM3U-EK GPIO Pin Definitions ****************************************************/
+/* SAM3U-EK GPIO Pin Definitions ********************************************/
 
 /* LCD:
  *   LCD Module Pin Out:                         SAM3U PIO:
@@ -144,8 +145,8 @@
  * The IRQ is active low and pulled up.
  *
  * Pen Interrupt. Open anode output, requires 10kO to 100kO pull-up resistor
- * externally.  There is a 100KO pull-up on the SAM3U-EK board so no additional
- * pull-up should be required.
+ * externally.  There is a 100KO pull-up on the SAM3U-EK board so no
+ * additional pull-up should be required.
  *
  * BUSY is high impedance when CS is high (not selected).  When CS is
  * is low, BUSY is active high.  Since the pin is pulled up, it will appear
@@ -184,50 +185,53 @@
 
 /* SPI Chip Selects */
 
-/* Chip select pin connected to the touchscreen controller and to the ZigBee module
- * connector.  Notice that the touchscreen chip select is implemented as a GPIO
- * OUTPUT that must be controlled by board-specific.  This is because the ADS7843E
- * driver must be able to sample the device BUSY GPIO input between SPI transfers.
- * However, the AD7843E will tri-state the BUSY input whenever the chip select is
- * de-asserted.  So the only option is to control the chip select manually and hold
- * it low throughout the SPI transfer.
+/* Chip select pin connected to the touchscreen controller and to the ZigBee
+ * module connector.
+ * Notice that the touchscreen chip select is implemented as a GPIO OUTPUT
+ * that must be controlled by board-specific.
+ * This is because the ADS7843E driver must be able to sample the device BUSY
+ * GPIO input between SPI transfers.
+ * However, the AD7843E will tri-state the BUSY input whenever the chip
+ * select is de-asserted.
+ * So the only option is to control the chip select manually and hold it low
+ * throughout the SPI transfer.
  */
 
 #define GPIO_TSC_NPCS2 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                         GPIO_PORT_PIOC | GPIO_PIN14)
 #define TSC_CSNUM      2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmciinit
  *
  * Description:
  *   Initialize HSMCI support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 int weak_function sam_hsmciinit(void);
@@ -235,13 +239,13 @@ int weak_function sam_hsmciinit(void);
 # define sam_hsmciinit()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 bool sam_cardinserted(unsigned char slot);
@@ -249,13 +253,13 @@ bool sam_cardinserted(unsigned char slot);
 #  define sam_cardinserted(slot) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 bool sam_writeprotected(unsigned char slot);
@@ -263,26 +267,28 @@ bool sam_writeprotected(unsigned char slot);
 #  define sam_writeprotected(slot) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.
+ *   This function will register the driver as /dev/inputN where N is the
  *   minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.
+ *   Otherwise, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_INPUT_ADS7843E
 int sam_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAM3U_EK_SRC_SAM3U_EK_H */
+#endif /* __BOARDS_ARM_SAM34_SAM3U_EK_SRC_SAM3U_EK_H */

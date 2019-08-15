@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3x-ek/src/nor_main.c
+ * boards/arm/sama5/sama5d3x-ek/src/nor_main.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -100,7 +100,8 @@ int nor_main(int argc, char *argv)
 
   static volatile uint32_t wait = NOR_BOOT_MODE;
 
-  printf("Configuring NOR FLASH on CS0 and %s\n", wait ? "waiting" : "booting");
+  printf("Configuring NOR FLASH on CS0 and %s\n",
+         wait ? "waiting" : "booting");
 
   /* Make sure that the SMC peripheral is enabled (But of course it is... we
    * are executing from NOR FLASH now).
@@ -134,10 +135,10 @@ int nor_main(int argc, char *argv)
            HSMC_MODE_TDFCYCLES(1);
   putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
 
-  /* Interrupts must be disabled through the following.  In this configuration,
-   * there should only be timer interrupts.  Your NuttX configuration must use
-   * CONFIG_SERIAL_LOWCONSOLE=y or printf() will hang when the interrupts
-   * are disabled!
+  /* Interrupts must be disabled through the following.
+   * In this configuration, there should only be timer interrupts.
+   * Your NuttX configuration must use CONFIG_SERIAL_LOWCONSOLE=y or printf()
+   * will hang when the interrupts are disabled!
    */
 
   (void)up_irq_save();

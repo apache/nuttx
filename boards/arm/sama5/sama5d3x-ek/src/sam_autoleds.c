@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3x-ek/src/sam_autoleds.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_autoleds.c
  *
  *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

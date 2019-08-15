@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4s-xplained-pro/src/sam_appinit.c
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam_appinit.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -164,7 +164,8 @@ int board_app_initialize(uintptr_t arg)
   ret = usbmonitor_start();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d (%d)\n", ret, errno);
+      syslog(LOG_ERR,
+             "ERROR: Failed to start USB monitor: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif

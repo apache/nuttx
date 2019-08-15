@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/sam_appinit.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_appinit.c
  *
  *   Copyright (C) 2013-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

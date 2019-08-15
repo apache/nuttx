@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4e-ek/src/sam_appinit.c
+ * boards/arm/sam34/sam4e-ek/src/sam_appinit.c
  *
  *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d2-xult/src/sam_appinit.c
+ * boards/arm/sama5/sama5d2-xult/src/sam_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

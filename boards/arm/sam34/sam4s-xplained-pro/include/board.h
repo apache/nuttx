@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained-pro/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained-pro/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdbool.h>
@@ -51,13 +51,15 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the sam4s device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 120MHz, PLLA = 240, and CPU=120MHz.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the sam4s device is running on a 4MHz internal RC.
+ * These definitions will configure clocking with MCK = 120MHz, PLLA = 240,
+ * and CPU=120MHz.
  */
 
 #define BOARD_32KOSC_FREQUENCY      (32768)
@@ -69,6 +71,7 @@
 #define BOARD_CKGR_MOR_MOSCXTST     (63 << PMC_CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
 
 #ifdef CONFIG_SAM34_UDP
+
 /* PLLA configuration:
  *
  * Source: 12MHz crystall at 12MHz
@@ -138,6 +141,7 @@
 #define HSMCI_SDWIDEXFR_CLKDIV       HSMCI_SDXFR_CLKDIV
 
 #ifdef CONFIG_SAM34_UDP
+
 /* The PLL clock (USB_48M or UDPCK) is driven from the output of the PLL,
  * PLLACK.  The PLL clock must be 48MHz.  PLLACK can be divided down via the
  * PMC USB register to provide the PLL clock.  So in order to use the USB
@@ -191,9 +195,10 @@
 
 #define BOARD_FWS                    5
 
-/* LED definitions ******************************************************************/
-/* There are two LEDs on board the SAM4S Xplained Pro board, One of these can be
- * controlled by software in the SAM4S:
+/* LED definitions **********************************************************/
+
+/* There are two LEDs on board the SAM4S Xplained Pro board, One of these
+ * can be controlled by software in the SAM4S:
  *
  *   LED              GPIO
  *   ---------------- -----
@@ -212,13 +217,16 @@
 #define BOARD_D301_BIT       (1 << BOARD_D301)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
- * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * defined.
+ * In that case, the usage by the board port is defined in
+ * include/board.h and src/up_leds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *   SYMBOL                Val  Meaning                      LED state
  *                                                          D301
- * ----------------------- ---  -----------------------  --------------     */
+ * ----------------------- ---  -----------------------  --------------
+ */
+
 #define LED_STARTED          0 /* NuttX has been started    OFF             */
 #define LED_HEAPALLOCATE     0 /* Heap has been allocated   OFF             */
 #define LED_IRQSENABLED      0 /* Interrupts enabled        OFF             */
@@ -236,12 +244,14 @@
  * apparently, running normally.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Mechanical buttons:
  *
- * The SAM4S Xplained Pro has two mechanical buttons. One button is the RESET button
- * connected to the SAM4S reset line and the other is a generic user configurable
- * button labeled SW0. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4S Xplained Pro has two mechanical buttons.
+ * One button is the RESET button connected to the SAM4S reset line and the
+ * other is a generic user configurable button labeled SW0.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA2 SW0
  */
@@ -251,4 +261,4 @@
 
 #define BUTTON_SW0_BIT       (1 << BUTTON_SW0)
 
-#endif  /* __BOARDS_ARM_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_INCLUDE_BOARD_H */

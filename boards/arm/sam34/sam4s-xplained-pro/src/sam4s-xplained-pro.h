@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained-pro/src/sam4s-xplained-pro.h
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam4s-xplained-pro.h
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
-#define __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
+#ifndef __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
+#define __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -51,10 +51,11 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_HSMCI      1
 #define HAVE_PROC       1
@@ -62,6 +63,7 @@
 #undef  HAVE_USBMONITOR
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface is not enabled */
 
 #if !defined(CONFIG_SAM34_HSMCI)
@@ -92,6 +94,7 @@
 #endif
 
 /* USB Device */
+
 /* CONFIG_SAM34_UDP and CONFIG_USBDEV must be defined, or there is no USB
  * device.
  */
@@ -145,9 +148,10 @@
 
 /* Mechanical buttons:
  *
- * The SAM4S Xplained Pro has two mechanical buttons. One button is the RESET button
- * connected to the SAM4S reset line and the other is a generic user configurable
- * button labeled SW0. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4S Xplained Pro has two mechanical buttons.
+ * One button is the RESET button connected to the SAM4S reset line and the
+ * other is a generic user configurable button labeled SW0.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA2 SW0
  */
@@ -161,27 +165,27 @@
 #define GPIO_MCI_CD   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOC | GPIO_PIN12)
 #define MCI_CD_IRQ    SAM_IRQ_PC12
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmci_initialize
  *
  * Description:
  *   Initialize HSMCI support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(void);
@@ -189,25 +193,25 @@ int sam_hsmci_initialize(void);
 # define sam_hsmci_initialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_HSMCI) && defined(CONFIG_MMCSD_HAVE_CARDDETECT)
 bool sam_cardinserted(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
@@ -232,4 +236,4 @@ bool sam_writeprotected(int slotno);
 int sam_watchdog_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */

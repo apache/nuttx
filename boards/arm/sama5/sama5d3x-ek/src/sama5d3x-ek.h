@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3x-ek/src/sama5d3x-ek.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d3x-ek/src/sama5d3x-ek.h
  *
  *   Copyright (C) 2013-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H
-#define __BOARDS_ARM_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H
+#define __BOARDS_ARM_SAMA5_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,9 +50,10 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_HSMCI      1
@@ -67,6 +68,7 @@
 #define HAVE_WM8904     1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
 #if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
@@ -88,6 +90,7 @@
 #endif
 
 /* NAND FLASH */
+
 /* Can't support the NAND device if NAND flash is not configured on EBI CS3 */
 
 #ifndef CONFIG_SAMA5_EBICS3_NAND
@@ -133,6 +136,7 @@
 #endif
 
 /* AT25 Serial FLASH */
+
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
@@ -263,8 +267,9 @@
 #endif
 
 /* USB Host / USB Device */
-/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined, or there is
- * no USB of any kind.
+
+/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined,
+ * or there is no USB of any kind.
  */
 
 #if !defined(CONFIG_SAMA5_UHPHS)
@@ -320,6 +325,7 @@
 #endif
 
 /* Audio */
+
 /* PCM/WM8904 driver */
 
 #ifndef CONFIG_AUDIO_WM8904
@@ -387,7 +393,8 @@
 #  endif
 #endif
 
-/* LEDs *****************************************************************************/
+/* LEDs *********************************************************************/
+
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
@@ -414,7 +421,8 @@
                       PIO_PORT_PIOE | PIO_PIN24)
 #endif
 
-/* Buttons **************************************************************************/
+/* Buttons ******************************************************************/
+
 /* There are five push button switches on the SAMA5D3X-EK base board:
  *
  *   1. One Reset, board reset (BP1)
@@ -435,9 +443,11 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN27)
 #define IRQ_USER1     SAM_IRQ_PE27
 
-/* HSMCI Card Slots *****************************************************************/
-/* The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD card
- * slot (J7 labeled MCI0), and (2) a microSD memory card slot (J6 labeled MCI1).
+/* HSMCI Card Slots *********************************************************/
+
+/* The SAMA5D3x-EK provides a two SD memory card slots:
+ * (1) a full size SD card slot (J7 labeled MCI0), and
+ * (2) a microSD memory card slot (J6 labeled MCI1).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
  * is available on PB17 (pulled high).  The write protect descrete is tied to
@@ -478,7 +488,8 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN18)
 #define IRQ_MCI1_CD   SAM_IRQ_PD18
 
-/* USB Ports ************************************************************************/
+/* USB Ports ****************************************************************/
+
 /* The SAMA5D3 series-MB features three USB communication ports:
  *
  *   1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
@@ -558,11 +569,12 @@
 #ifdef CONFIG_SAMA5_EMACA
   /* ETH1: Ethernet 10/100 (EMAC A) Port
    *
-   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-   * The board supports MII and RMII interface modes.
+   * The main board contains a MICREL PHY device (KSZ8051) operating at
+   * 10/100 Mbps. The board supports MII and RMII interface modes.
    *
-   * The two independent PHY devices embedded on CM and MB boards are connected to
-   * independent RJ-45 connectors with built-in magnetic and status LEDs.
+   * The two independent PHY devices embedded on CM and MB boards are
+   * connected to independent RJ-45 connectors with built-in magnetic
+   * and status LEDs.
    *
    * At the De-Assertion of Reset:
    *   PHY ADD[2:0]:001
@@ -572,8 +584,9 @@
    *   Speed Mode:100Mbps
    *   Nway Auto-Negotiation:Enable
    *
-   * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1.  The sense of
-   * the interrupt is configurable but is, by default, active low.
+   * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1.
+   *  The sense of the interrupt is configurable but is, by default,
+   * active low.
    */
 
 #define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
@@ -585,15 +598,17 @@
 #ifdef CONFIG_SAMA5_GMAC
   /* ETH0: Tri-Speed Ethernet PHY
    *
-   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
-   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a 10/100/1000
-   * BaseT RJ45 connector integrated on the main board.
+   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices
+   * (MICREL KSZ9021/31) operating at 10/100/1000 Mbps.
+   * The board supports RGMII interface mode. The Ethernet interface
+   * consists of 4 pairs of low voltage differential pair signals
+   * designated from GRX± and GTx± plus control signals for link
+   * activity indicators. These signals can be used to connect to a
+   * 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
-   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.  The sense of
-   * the interrupt is configurable but is, by default, active low.
+   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.
+   *  The sense of the interrupt is configurable but is, by default,
+   * active low.
    */
 
 #define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
@@ -602,7 +617,8 @@
 
 #endif
 
-/* WM8904 Audio Codec ***************************************************************/
+/* WM8904 Audio Codec *******************************************************/
+
 /* SAMA5D3-EK Interface
  *   ------------- ---------------- -----------------
  *   WM8904        SAMA5D3          NuttX Pin Name
@@ -638,7 +654,8 @@
 
 #define WM8904_SSC_BUS      0
 
-/* SPI Chip Selects *****************************************************************/
+/* SPI Chip Selects *********************************************************/
+
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
  * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
  * connection is as follows:
@@ -660,42 +677,43 @@
                         PIO_PORT_PIOD | PIO_PIN13)
 #define AT25_PORT      SPI0_CS0
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PIO pins for the SAMA5D3x-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 void weak_function sam_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA5D3x-EK User guide: "Two SDRAM/DDR2 used as main system memory.
- *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to 2 Gb on-
- *   board, soldered DDR2 SDRAM. The memory bus is 32 bits wide and operates with
- *   up to 166 MHz."
+ *   Per the SAMA5D3x-EK User guide:
+ *   "Two SDRAM/DDR2 used as main system memory.
+ *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks,
+ *   the board provides up to 2 Gb on-board, soldered DDR2 SDRAM.
+ *   The memory bus is 32 bits wide and operates with up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
@@ -710,11 +728,11 @@ void weak_function sam_spidev_initialize(void);
  *    None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 void sam_sdram_config(void);
@@ -770,127 +788,130 @@ int sam_at24_automount(int minor);
 int sam_hsmci_initialize(int slotno, int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   PIO pins for the SAMA5D3x-EK board.
+ *   Called from sam_usbinitialize very early in inialization to setup
+ *   USB-related PIO pins for the SAMA5D3x-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
 void weak_function sam_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device connection/
- *   disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
+ *   This function will start a thread that will monitor for device
+ *   connection/disconnection events.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.
+ *   This function will register the driver as /dev/inputN where N is the
  *   minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.
+ *   Otherwise, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_TSD
 int sam_tsc_setup(int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int sam_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int sam_adc_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CAN
 int sam_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_wm8904_initialize
  *
  * Description:
@@ -905,12 +926,11 @@ int sam_can_setup(void);
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);
 #endif /* HAVE_WM8904 */
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H */
-
+#endif /* __BOARDS_ARM_SAMA5_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H */

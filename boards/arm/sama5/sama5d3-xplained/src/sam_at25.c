@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3-xplained/src/sam_at25.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_at25.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -101,6 +101,7 @@ int sam_at25_automount(int minor)
         }
 
 #if defined(CONFIG_SAMA5D3XPLAINED_AT25_FTL)
+
       /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(AT25_MINOR, mtd);
@@ -111,6 +112,7 @@ int sam_at25_automount(int minor)
         }
 
 #elif defined(CONFIG_SAMA5D3XPLAINED_AT25_NXFFS)
+
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);
@@ -129,6 +131,7 @@ int sam_at25_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initializeed */
 
       initialized = true;

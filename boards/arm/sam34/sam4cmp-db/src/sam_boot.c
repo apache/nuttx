@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4cmp-db/src/sam_boot.c
+/****************************************************************************
+ * boards/arm/sam34/sam4cmp-db/src/sam_boot.c
  *
  *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,19 +45,20 @@
 
 #include "sam4cmp-db.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3/4 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All SAM3/4 architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
@@ -69,9 +70,10 @@ void sam_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_intitialize() is called and just before the
- *   initial application is started.  This additional initialization phase
+ *   function called board_late_initialize().
+ *   board_late_initialize() will be called immediately after
+ *   up_intitialize() is called and just before the initial application
+ *   is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.
  *
  ****************************************************************************/

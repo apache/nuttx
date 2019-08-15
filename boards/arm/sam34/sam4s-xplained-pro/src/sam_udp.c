@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained-pro/src/sam_udp.c
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam_udp.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,36 +51,39 @@
 #include "up_arch.h"
 #include "sam4s-xplained-pro.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_udp_suspend
  *
  * Description:
  *   Board logic must provide the sam_udp_suspend logic if the UDP driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   used.
+ *   This function is called whenever the USB enters or leaves suspend mode.
  *
- *   When 'resume' is false, this function call provides an opportunity to perform
- *   board-specific power-saving actions so that less power is consumed while the
- *   USB is suspended.
+ *   When 'resume' is false, this function call provides an opportunity to
+ *   perform board-specific power-saving actions so that less power is
+ *   consumed while the USB is suspended.
  *
- *   Certain power-saving operations are performed by the UDP driver when it enters
- *   suspend mode:  The USB device peripheral clocks are be switched off.  MCK and
+ *   Certain power-saving operations are performed by the UDP driver when
+ *   it enters suspend mode:
+ *   The USB device peripheral clocks are be switched off.  MCK and
  *   UDPCK are switched off and the USB transceiver is disabled.
  *
- *   When 'resume' is true, normal clocking and operations must all be restored.
+ *   When 'resume' is true, normal clocking and operations must all be
+ *   restored.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume)
 {

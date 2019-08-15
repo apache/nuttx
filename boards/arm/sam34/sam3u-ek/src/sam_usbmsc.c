@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam3u-ek/src/sam_usbmsc.c
+ * boards/arm/sam34/sam3u-ek/src/sam_usbmsc.c
  *
  *   Copyright (C) 2009, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -116,13 +116,13 @@ int board_usbmsc_initialize(int port)
 
   syslog(LOG_INFO, "Successfully bound SDIO to the MMC/SD driver\n");
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Then let's guess and say that there is a card in the slot.
+   * I need to check to see if the SAM3U10E-EVAL board supports a GPIO
+   * to detect if there is a card in the slot.
    */
 
-   sdio_mediachange(sdio, true);
-   return OK;
+  sdio_mediachange(sdio, true);
+  return OK;
 }
 
 #endif /* CONFIG_SAM34_HSMCI */

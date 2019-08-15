@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-sam3x/src/sam_bringup.c
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,17 +79,18 @@ int sam_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR,"ERROR: Failed to mount procfs at /proc: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n",
             ret);
     }
 #endif
 
 #if defined(HAVE_SSD1306) && !defined(CONFIG_NXSTART_EXTERNINIT)
+
   /* Configure the SSD1306 OLED */
 
   if (sam_graphics_setup(0) == NULL)
     {
-      syslog(LOG_ERR,"ERROR: Failed to configure the SSD1306 OLED\n");
+      syslog(LOG_ERR, "ERROR: Failed to configure the SSD1306 OLED\n");
     }
 #endif
 

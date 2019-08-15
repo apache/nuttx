@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4e-ek/src/sam_spi.c
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/src/sam_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,30 +55,30 @@
 
 #if defined(CONFIG_SAM34_SPI0)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM4E-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void)
 {
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-   /* The touchscreen connects using NPCS0 (PA11). */
+  /* The touchscreen connects using NPCS0 (PA11). */
 
-   sam_configgpio(GPIO_TSC_CS);
+  sam_configgpio(GPIO_TSC_CS);
 #endif
 
 #if defined(CONFIG_MTD_AT25)
-   /* The AT25 Serial FLASH connects using NPCS3 (PA5). */
+  /* The AT25 Serial FLASH connects using NPCS3 (PA5). */
 
-   sam_configgpio(GPIO_FLASH_CS);
+  sam_configgpio(GPIO_FLASH_CS);
 #endif
 }
 
@@ -108,8 +108,8 @@ void weak_function sam_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -145,12 +145,14 @@ void sam_spi0select(uint32_t devid, bool selected)
   switch (devid)
     {
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-      /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
-       * be controlled by this function.  This is because the ADS7843E driver
-       * must be able to sample the device BUSY GPIO input between SPI transfers.
-       * However, the AD7843E will tri-state the BUSY input whenever the chip
-       * select is de-asserted.  So the only option is to control the chip select
-       * manually and hold it low throughout the SPI transfer.
+      /* The touchscreen chip select is implemented as a GPIO OUTPUT that
+       * must be controlled by this function.
+       * This is because the ADS7843E driver must be able to sample the
+       * device BUSY GPIO input between SPI transfers.
+       * However, the AD7843E will tri-state the BUSY input whenever the
+       * chip select is de-asserted.
+       * So the only option is to control the chip select manually and hold
+       * it low throughout the SPI transfer.
        */
 
       case SPIDEV_TOUCHSCREEN(0):

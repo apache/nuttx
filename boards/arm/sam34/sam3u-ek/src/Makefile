@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam3u-ek/src/Makefile
+# boards/arm/sam34/sam3u-ek/src/Makefile
 #
 #   Copyright (C) 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam3u-ek/scripts/kernel-space.ld
+ * boards/arm/sam34/sam3u-ek/scripts/kernel-space.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

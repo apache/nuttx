@@ -1,5 +1,5 @@
-/**************************************************************************************
- * boards/sam3u-ek/src/sam_lcd.c
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam_lcd.c
  *
  *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,12 +31,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
- * The SAM3U-EK developement board features a TFT/Transmissive color LCD module with
- * touch-screen, FTM280C12D, with integratd driver IC HX8346. The LCD display size
- * is 2.8 inches, with a native resolution of 240 x 320 pixels.
+/****************************************************************************
+ * The SAM3U-EK developement board features a TFT/Transmissive color LCD
+ * module with touch-screen, FTM280C12D, with integratd driver IC HX8346.
+ * The LCD display size is 2.8 inches, with a native resolution of 240 x 320
+ * pixels.
  *
  *   LCD Module Pin Out:                         SAM3U PIO:
  *  -------------------------------------------- --------------------------------------
@@ -82,31 +83,32 @@
  *   38  NC     No connection                    N/A            ---      ---     ---
  *   39  K      Backlight ground                 N/A            ---      ---     ---
  *
- * The LCD module gets its reset from NRST. As explained previously, this NRST is
- * shared with the JTAG port and the push button BP1. The LCD chip select signal is
- * connected to NCS2 (a dedicated jumper can disable it, making NCS2 available for
- * other custom usage).
+ * The LCD module gets its reset from NRST. As explained previously, this
+ * NRST is shared with the JTAG port and the push button BP1. The LCD chip
+ * select signal is connected to NCS2 (a dedicated jumper can disable it,
+ * making NCS2 available for other custom usage).
  *
  * The SAM3U4E communicates with the LCD through PIOB where a 16-bit parallel
  * 8080-like protocol data bus has to be implemented by software.
  *
- * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3194
- * charge pump, MN4. The AAT3194 is controlled by the SAM3U4E through a single line
- * Simple Serial Control (S2Cwire) interface, which permits to enable, disable, and
- * set the LED drive current (LED brightness control) from a 32-level logarithmic
- * scale. Four resistors R93/R94/R95/R96 are implemented for optional current
+ * LCD backlight is made of 4 white chip LEDs in parallel, driven by an
+ * AAT3194 charge pump, MN4. The AAT3194 is controlled by the SAM3U4E through
+ * a single line Simple Serial Control (S2Cwire) interface, which permits to
+ * enable, disable, and set the LED drive current (LED brightness control)
+ * from a 32-level logarithmic scale.
+ * Four resistors R93/R94/R95/R96 are implemented for optional current
  * limitation.
  *
  * The LCD module integrates a 4-wire touch screen panel controlled by
- * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus. The ADS7843 touch
- * ADC auxiliary inputs IN3/IN4 are connected to test points for optional function
- * extension.
+ * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus.
+ * The ADS7843 touch ADC auxiliary inputs IN3/IN4 are connected to test
+ * points for optional function extension.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -130,11 +132,11 @@
 #include "hardware/sam_smc.h"
 #include "sam3u-ek.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
 
 /* Define the following to enable register-level debug output */
 
@@ -157,12 +159,13 @@
 #  error "CONFIG_LCD_MAXCONTRAST must be defined in the range 1 to 31"
 #endif
 
-/* Graphics Capbilities ***************************************************************/
+/* Graphics Capbilities *****************************************************/
 
-/* LCD resolution: 320 (columns) by 240 (rows).  The physical dimensions of the device
- * are really 240 (columns) by 320 (rows), but unless CONFIG_LCD_PORTRAIT is defined,
- * we swap rows and columns in setcursor to make things behave nicer (there IS a
- * performance hit for this swap!).
+/* LCD resolution: 320 (columns) by 240 (rows).
+ * The physical dimensions of the device are really 240 (columns) by 320
+ * (rows), but unless CONFIG_LCD_PORTRAIT is defined, we swap rows and
+ * columns in setcursor to make things behave nicer (there IS a performance
+ * hit for this swap!).
  */
 
 #ifdef CONFIG_LCD_PORTRAIT
@@ -178,7 +181,7 @@
 #define SAM3UEK_BPP          16
 #define SAM3UEK_RGBFMT       FB_FMT_RGB16_565
 
-/* HX834x Definitions  ****************************************************************/
+/* HX834x Definitions  ******************************************************/
 
 /* HX834x register select */
 
@@ -274,9 +277,9 @@
 #define HX8347_R94H          0x94
 #define HX8347_R95H          0x95
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -291,9 +294,9 @@ struct sam_dev_s
   uint8_t power;    /* The current power setting */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Low-level HX834x Register access */
 
@@ -317,10 +320,12 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg);
 
 /* LCD Data Transfer Methods */
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int sam_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer,
+                      size_t npixels);
+static int sam_getrun(fb_coord_t row, fb_coord_t col,
+                      FAR uint8_t *buffer,
+                      size_t npixels);
 
 /* LCD Configuration */
 
@@ -348,9 +353,9 @@ static int sam_setpower(struct lcd_dev_s *dev, int power);
 static int sam_getcontrast(struct lcd_dev_s *dev);
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -397,6 +402,7 @@ static struct sam_dev_s g_lcddev_s =
     .getplaneinfo = sam_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -408,17 +414,17 @@ static struct sam_dev_s g_lcddev_s =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_putreg
  *
  * Description:
  *   Write to a HX834x register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void sam_putreg(uint16_t reg,  uint16_t data)
 {
@@ -428,13 +434,13 @@ static void sam_putreg(uint16_t reg,  uint16_t data)
   putreg16(data, LCD_BASE + HX843X_LCD_RS);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getreg
  *
  * Description:
  *   Read from a HX834x register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD_INFO
 static uint16_t sam_getreg(uint16_t reg)
@@ -449,13 +455,13 @@ static uint16_t sam_getreg(uint16_t reg)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_setcursor
  *
  * Description:
  *   Set the LCD cursor position.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void sam_setcursor(fb_coord_t row, fb_coord_t col)
 {
@@ -480,52 +486,52 @@ static void sam_setcursor(fb_coord_t row, fb_coord_t col)
   sam_putreg(HX8347_R07H, y1);        /* row low */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_wrsetup
  *
  * Description:
  *   Set up for a GRAM write operation.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_wrsetup(void)
 {
   putreg16(HX8347_R22H, LCD_BASE);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: sam_wrram
  *
  * Description:
  *   Write to the 16-bit GRAM register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_wrram(uint16_t color)
 {
   putreg16(color, LCD_BASE + HX843X_LCD_RS);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: sam_rdram
  *
  * Description:
  *   Read from the 16-bit GRAM register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t sam_rdram(void)
 {
   return getreg16(LCD_BASE + HX843X_LCD_RS);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdon
  *
  * Description:
  *   Turn the LCD on
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void sam_lcdon(void)
 {
@@ -541,13 +547,13 @@ static void sam_lcdon(void)
   sam_putreg(HX8347_R26H, 0x3c);      /* GON=1 DTE=1 D=11 */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdoff
  *
  * Description:
  *   Turn the LCD off
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void sam_lcdoff(void)
 {
@@ -556,13 +562,13 @@ static void sam_lcdoff(void)
   sam_putreg(HX8347_R26H, 0x00);      /* GON=0 DTE=0 D=00 */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_dumpreg
  *
  * Description:
  *   Dump a range of LCD registers.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* CONFIG_DEBUG_LCD_INFO */
 static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
@@ -578,7 +584,7 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_putrun
  *
  * Description:
@@ -590,9 +596,10 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int sam_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer,
                       size_t npixels)
 {
   uint16_t *run = (uint16_t*)buffer;
@@ -618,16 +625,19 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
       sam_wrram(*run++);
     }
 #else
-  /* Write the run to GRAM.  Because rows and colums are swapped, we need to reset
+  /* Write the run to GRAM.
+   * Because rows and colums are swapped, we need to reset
    * the cursor position for every pixel.  We could do this much faster if we
    * adapted to the strange device aspect ratio.
    */
 
-  col = 319-col;
+  col = 319 - col;
   for (i = 0; i < npixels; i++)
     {
-      /* Set up to write the next pixel. Swapping x and y orientations so that the image
-       * comes out with the 320x240 aspect ratio (not the native 240x320).  That is:
+      /* Set up to write the next pixel.
+       * Swapping x and y orientations so that the image
+       * comes out with the 320x240 aspect ratio (not the native 240x320).
+       * That is:
        *
        *   row: 0-239 maps to x: 0-239
        *   col: 0-319 maps to y: 319-0
@@ -644,7 +654,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getrun
  *
  * Description:
@@ -656,7 +666,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
@@ -683,16 +693,19 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       *run++ = sam_rdram();
     }
 #else
-  /* Read the run from GRAM  Because rows and colums are swapped, we need to reset
-   * the cursor position for every pixel.  We could do this much faster if we
-   * adapted to the strange device aspect ratio.
+  /* Read the run from GRAM  Because rows and colums are swapped, we need to
+   * reset the cursor position for every pixel.
+   * We could do this much faster if we adapted to the strange device aspect
+   * ratio.
    */
 
   col = 319 - col;
   for (i = 0; i < npixels; i++)
     {
-      /* Read the next pixel.. Swapping x and y orientations so that the image
-       * comes out with the 320x240 aspect ratio (not the native 240x320).  That is:
+      /* Read the next pixel..
+       * Swapping x and y orientations so that the image comes out with the
+       * 320x240 aspect ratio (not the native 240x320).
+       * That is:
        *
        *   row: 0-239 maps to x: 0-239
        *   col: 0-319 maps to y: 319-0
@@ -705,31 +718,32 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres,
+          g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                             FAR struct lcd_planeinfo_s *pinfo)
@@ -740,14 +754,15 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER:
+ *   full on.
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getpower(struct lcd_dev_s *dev)
 {
@@ -757,20 +772,23 @@ static int sam_getpower(struct lcd_dev_s *dev)
   return priv->power;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER:
+ *   full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- *   LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3194 charge
- *   pump, MN4. The AAT3194 is controlled by the SAM3U4E through a single line. Simple
- *   Serial Control (S2Cwire) interface, which permits to enable, disable, and set the
- *   LED drive current (LED brightness control) from a 32-level logarithmic scale. Four
- *   resistors R93/R94/R95/R96 are implemented for optional current limitation.
+ *   LCD backlight is made of 4 white chip LEDs in parallel, driven by an
+ *   AAT3194 charge pump, MN4. The AAT3194 is controlled by the SAM3U4E
+ *   through a single line. Simple Serial Control (S2Cwire) interface,
+ *   which permits to enable, disable, and set the LED drive current
+ *  (LED brightness control) from a 32-level logarithmic scale. Four
+ *   resistors R93/R94/R95/R96 are implemented for optional current
+ *   limitation.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -800,7 +818,9 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
       sam_gpiowrite(GPIO_LCD_BKL, true);
     }
 
-  /* This delay seems to be required... perhaps because of the big current jump? */
+  /* This delay seems to be required...
+   * perhaps because of the big current jump?
+   */
 
   if (power != LCD_FULL_OFF)
     {
@@ -811,13 +831,13 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
@@ -825,13 +845,13 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  sam_getcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -839,19 +859,19 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -904,20 +924,27 @@ int board_lcd_initialize(void)
 
   /* Configure SMC CS2 */
 
-  regval = (4 << SMCCS_SETUP_NWESETUP_SHIFT) | (2 << SMCCS_SETUP_NCSWRSETUP_SHIFT) |
-           (4 << SMCCS_SETUP_NRDSETUP_SHIFT) | (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
+  regval = (4 << SMCCS_SETUP_NWESETUP_SHIFT) |
+           (2 << SMCCS_SETUP_NCSWRSETUP_SHIFT) |
+           (4 << SMCCS_SETUP_NRDSETUP_SHIFT) |
+           (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
   putreg32(regval, SAM_SMCCS_SETUP(2));
 
-  regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) | (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
-           (5 << SMCCS_PULSE_NRDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
+  regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) |
+           (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
+           (5 << SMCCS_PULSE_NRDPULSE_SHIFT)  |
+           (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
   putreg32(regval, SAM_SMCCS_PULSE(2));
 
-  regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) | (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);
+  regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) |
+           (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);
   putreg32(regval, SAM_SMCCS_CYCLE(2));
 
   regval  = getreg32(SAM_SMCCS_MODE(2));
   regval &= ~(SMCCS_MODE_DBW_MASK | SMCCS_MODE_PMEN);
-  regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
+  regval |= (SMCCS_MODE_READMODE)  |
+            (SMCCS_MODE_WRITEMODE) |
+            (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM_SMCCS_MODE(2));
 
   lcdinfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
@@ -934,21 +961,24 @@ int board_lcd_initialize(void)
   lcdinfo("Chip ID: %04x\n", hxregval);
   if (hxregval != HX8347_CHIPID)
     {
-      lcderr("ERROR: Bad chip ID: %04x Expected: %04x\n", hxregval, HX8347_CHIPID);
+      lcderr("ERROR: Bad chip ID: %04x Expected: %04x\n",
+             hxregval, HX8347_CHIPID);
       return -ENODEV;
     }
 #endif
 
-  /* Initialize LCD controller (HX8347) -- Magic code from Atmel LCD example */
+  /* Initialize LCD controller (HX8347) --
+   * Magic code from Atmel LCD example
+   */
 
   /* Start internal OSC */
 
   sam_putreg(HX8347_R19H, 0x49);      /* OSCADJ=10 0000 OSD_EN=1 60Hz */
-  sam_putreg(HX8347_R93H, 0x0C);      /* RADJ=1100 */
+  sam_putreg(HX8347_R93H, 0x0c);      /* RADJ=1100 */
 
   /* Power on flow */
 
-  sam_putreg(HX8347_R44H, 0x4D);      /* VCM=100 1101 */
+  sam_putreg(HX8347_R44H, 0x4d);      /* VCM=100 1101 */
   sam_putreg(HX8347_R45H, 0x11);      /* VDV=1 0001 */
   sam_putreg(HX8347_R20H, 0x40);      /* BT=0100 */
   sam_putreg(HX8347_R1DH, 0x07);      /* VC1=111 */
@@ -1026,14 +1056,14 @@ int board_lcd_initialize(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   support for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -1041,13 +1071,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return lcddev == 0 ? &g_lcddev_s.dev : NULL;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the framebuffer support.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -1063,5 +1093,3 @@ void board_lcd_uninitialize(void)
 
   putreg32((1 << SAM_PID_SMC), SAM_PMC_PCDR);
 }
-
-

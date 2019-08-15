@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/up_touchscreen.c
+/****************************************************************************
+ * boards/arm/sam34/arduino-due/src/up_touchscreen.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -68,6 +68,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAM34_GPIOC_IRQ
@@ -119,6 +120,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Lower-half SPI */
 
 static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
@@ -383,7 +385,9 @@ int sam_tsc_setup(int minor)
   if (ret < 0)
     {
       ierr("ERROR: Failed to register touchscreen device\n");
+
       /* up_spiuninitialize(dev); */
+
       return -ENODEV;
     }
 

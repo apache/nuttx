@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4e-ek/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_SAM4E_EK_INCLUDE_BOARD_H
-#define __ARCH_SAM4E_EK_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM4E_EK_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM4E_EK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,25 +50,26 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAM4E16 device is running out of the Master Clock using
- * the Fast RC Oscillator running at 4 MHz.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAM4E16 device is running out of the Master
+ * Clock using the Fast RC Oscillator running at 4 MHz.
  *
  *   MAINOSC:  Frequency = 12MHz (crystal)
  *
  * CONFIG_SAM4EEK_120MHZ
- *   PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
- *   CPU clock: 120MHz
+ *  PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
+ *  Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
+ *  CPU clock: 120MHz
  *
  * CONFIG_SAM4EEK_96MHZ
- *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
- *   CPU clock: 96MHz
+ *  PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
+ *  Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
+ *  CPU clock: 96MHz
  */
 
 /* Main oscillator register settings.
@@ -147,28 +148,42 @@
  */
 
 #ifdef CONFIG_SAM4EEK_120MHZ
-  /* MCK = 120MHz, CLKDIV = 149 w/o CLKODD, MCI_SPEED = 120MHz / (2*149 + 0 + 2) = 400 KHz */
+
+/* MCK = 120MHz, CLKDIV = 149 w/o CLKODD,
+ * MCI_SPEED = 120MHz / (2*149 + 0 + 2) = 400 KHz
+ */
 
 #  define HSMCI_INIT_CLKDIV        (149 << HSMCI_MR_CLKDIV_SHIFT)
 
-  /* MCK = 120MHz, CLKDIV = 2 w/o CLKODD, MCI_SPEED = 120MHz / (2*2 + 0 + 2) = 20 MHz */
+/* MCK = 120MHz, CLKDIV = 2 w/o CLKODD,
+ * MCI_SPEED = 120MHz / (2*2 + 0 + 2) = 20 MHz
+ */
 
 #  define HSMCI_MMCXFR_CLKDIV      (3 << HSMCI_MR_CLKDIV_SHIFT)
 
-  /* MCK = 120MHz, CLKDIV = 1 w/ CLKODD, MCI_SPEED = 120MHz / (2*1 + 1 + 2) = 24 MHz */
+/* MCK = 120MHz, CLKDIV = 1 w/ CLKODD,
+ * MCI_SPEED = 120MHz / (2*1 + 1 + 2) = 24 MHz
+ */
 
 #  define HSMCI_SDXFR_CLKDIV       ((1 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
 #else
-/* MCK = 96MHz, CLKDIV = 119, w/o CLKODD, MCI_SPEED = 96MHz / (2 * 119 + 0 + 2) = 400 KHz */
+
+/* MCK = 96MHz, CLKDIV = 119, w/o CLKODD,
+ * MCI_SPEED = 96MHz / (2 * 119 + 0 + 2) = 400 KHz
+ */
 
 #  define HSMCI_INIT_CLKDIV        (119 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 96MHz, CLKDIV = 1 w/ CLKODD, MCI_SPEED = 96MHz / (2*1 + 1 + 2) = 19.2 MHz */
+/* MCK = 96MHz, CLKDIV = 1 w/ CLKODD,
+ * MCI_SPEED = 96MHz / (2*1 + 1 + 2) = 19.2 MHz
+ */
 
 #  define HSMCI_MMCXFR_CLKDIV      ((3 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 96MHz, CLKDIV = 1 w/o CLKODD, MCI_SPEED = 96MHz / (2*1 + 0 + 2) = 24 MHz */
+/* MCK = 96MHz, CLKDIV = 1 w/o CLKODD,
+ * MCI_SPEED = 96MHz / (2*1 + 0 + 2) = 24 MHz
+ */
 
 #  define HSMCI_SDXFR_CLKDIV       (1 << HSMCI_MR_CLKDIV_SHIFT)
 #endif
@@ -204,7 +219,8 @@
 #  define BOARD_FWS                  4
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The SAM4E-EK board has three, user-controllable LEDs labelled D2 (blue),
  * D3 (amber), and D4 (green) on the board.  Usage of these LEDs is defined
  * in include/board.h and src/up_leds.c. They are encoded as follows:
@@ -251,7 +267,8 @@
 #define BOARD_LED_D2_BIT           (1 << BOARD_LED_D2)
 #define BOARD_LED_D4_BIT           (1 << BOARD_LED_D4)
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Four buttons for software inputs:
  *
  *   PA1  BUTTON_SCROLL-UP    Grounded
@@ -265,9 +282,9 @@
 #define BUTTON_WAKU                4 /* Bit 2: Waku button */
 #define BUTTON_TAMP                8 /* Bit 3: Tamp button */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -280,20 +297,22 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAM4e-EK board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the SAM4e-EK board.
+ *   Because of the various rotations, clearing the display in the normal way
+ *   by writing a sequences of runs that covers the entire display can be
+ *   very slow.
+ *   Here the display is cleared by simply setting all GRAM memory to the
+ *   specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
 void sam_lcdclear(uint16_t color);
@@ -307,4 +326,4 @@ void sam_lcdclear(uint32_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_SAM4E_EK_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_SAM4E_EK_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4s-xplained/scripts/sam4s-xplained.ld
+ * boards/arm/sam34/sam4s-xplained/scripts/sam4s-xplained.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

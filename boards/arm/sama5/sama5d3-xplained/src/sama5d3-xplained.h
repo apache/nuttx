@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3-xplained/src/sama5d3-xplained.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d3-xplained/src/sama5d3-xplained.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H
-#define __BOARDS_ARM_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H
+#define __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,9 +50,10 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_HSMCI      1
@@ -64,6 +65,7 @@
 #define HAVE_NETWORK    1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
 #if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
@@ -85,6 +87,7 @@
 #endif
 
 /* NAND FLASH */
+
 /* Can't support the NAND device if NAND flash is not configured on EBI CS3 */
 
 #ifndef CONFIG_SAMA5_EBICS3_NAND
@@ -130,6 +133,7 @@
 #endif
 
 /* AT25 Serial FLASH */
+
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
@@ -203,8 +207,9 @@
 #endif
 
 /* USB Host / USB Device */
-/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined, or there is
- * no USB of any kind.
+
+/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined,
+ * or there is no USB of any kind.
  */
 
 #if !defined(CONFIG_SAMA5_UHPHS)
@@ -269,7 +274,8 @@
 #  endif
 #endif
 
-/* LEDs *****************************************************************************/
+/* LEDs *********************************************************************/
+
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
@@ -289,7 +295,8 @@
 #define PIO_RED      (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
                       PIO_PORT_PIOE | PIO_PIN24)
 
-/* Buttons **************************************************************************/
+/* Buttons ******************************************************************/
+
 /* There are five push button switches on the SAMA5D3-Xplained base board:
  *
  *   1. One Reset, board reset (BP1)
@@ -310,9 +317,11 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN29)
 #define IRQ_USER      SAM_IRQ_PE29
 
-/* HSMCI Card Slots *****************************************************************/
-/* The SAMA5D3-Xplained provides a two SD memory card slots:  (1) a full size SD card
- * slot (J10), and (2) a microSD memory card slot (J11).
+/* HSMCI Card Slots *********************************************************/
+
+/* The SAMA5D3-Xplained provides a two SD memory card slots:
+ *  (1) a full size SD card slot (J10), and
+ *  (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
  * is available on PD17 (pulled high).  The write protect descrete is tied to
@@ -353,7 +362,8 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN18)
 #define IRQ_MCI1_CD   SAM_IRQ_PD18
 
-/* USB Ports ************************************************************************/
+/* USB Ports ****************************************************************/
+
 /* The SAMA5D3 series-MB features three USB communication ports:
  *
  *   1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
@@ -438,11 +448,12 @@
 #ifdef CONFIG_SAMA5_EMACA
   /* ETH1: Ethernet 10/100 (EMAC A) Port
    *
-   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-   * The board supports MII and RMII interface modes.
+   * The main board contains a MICREL PHY device (KSZ8051) operating at
+   * 10/100 Mbps. The board supports MII and RMII interface modes.
    *
-   * The two independent PHY devices embedded on CM and MB boards are connected to
-   * independent RJ-45 connectors with built-in magnetic and status LEDs.
+   * The two independent PHY devices embedded on CM and MB boards are
+   * connected to independent RJ-45 connectors with built-in magnetic
+   * and status LEDs.
    *
    * At the De-Assertion of Reset:
    *   PHY ADD[2:0]:001
@@ -466,11 +477,12 @@
   /* ETH0: Tri-Speed Ethernet PHY
    *
    * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
-   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
+   * KSZ9021/31) operating at 10/100/1000 Mbps.
+   * The board supports RGMII interface mode.
+   * The Ethernet interface consists of 4 pairs of low voltage differential
    * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a 10/100/1000
-   * BaseT RJ45 connector integrated on the main board.
+   * activity indicators. These signals can be used to connect to a
+   * 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.  The sense of
    * the interrupt is configurable but is, by default, active low.
@@ -482,7 +494,8 @@
 
 #endif
 
-/* SPI Chip Selects *****************************************************************/
+/* SPI Chip Selects *********************************************************/
+
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
  * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
  * connection is as follows:
@@ -590,42 +603,44 @@
 #define PIO_JUMP     PIO_BUTTON_3
 #define IRQ_JUMP     IRQ_BUTTON_3
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select PIO pins for the SAMA5D3-Xplained board.
+ *   Called to configure SPI chip select PIO pins for the SAMA5D3-Xplained
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 void weak_function sam_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA5D3-Xplained User guide: "Two SDRAM/DDR2 used as main system memory.
- *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to 2 Gb on-
- *   board, soldered DDR2 SDRAM. The memory bus is 32 bits wide and operates with
- *   up to 166 MHz."
+ *   Per the SAMA5D3-Xplained User guide:
+ *  "Two SDRAM/DDR2 used as main system memory.
+ *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to
+ *   2 Gb on-board, soldered DDR2 SDRAM.
+ *   The memory bus is 32 bits wide and operates with up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
@@ -640,11 +655,11 @@ void weak_function sam_spidev_initialize(void);
  *     None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 void sam_sdram_config(void);
@@ -688,105 +703,105 @@ int sam_at25_automount(int minor);
 int sam_hsmci_initialize(int slotno, int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in initialization to setup USB-related
- *   PIO pins for the SAMA5D3-Xplained board.
+ *   Called from sam_usbinitialize very early in initialization to setup
+ *   USB-related PIO pins for the SAMA5D3-Xplained board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
 void weak_function sam_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device connection/
- *   disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
+ *   This function will start a thread that will monitor for device
+ *   connection/disconnection events.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int sam_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int sam_adc_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CAN
 int sam_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H */
-
+#endif /* __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H */

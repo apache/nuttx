@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4cmp-db/src/sam_bringup.c
+ * boards/arm/sam34/sam4cmp-db/src/sam_bringup.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

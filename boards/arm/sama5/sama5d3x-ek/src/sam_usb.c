@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3x-ek/src/sam_usb.c
+/****************************************************************************
+ * boards/arm/sama5/sama5d3x-ek/src/sam_usb.c
  *
  *   Copyright (C) 2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -61,9 +61,9 @@
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SAMA5D3xEK_USBHOST_PRIO
 #  define CONFIG_SAMA5D3xEK_USBHOST_PRIO 50
@@ -77,9 +77,10 @@
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Retained device driver handles */
 
 #ifdef CONFIG_SAMA5_OHCI
@@ -95,21 +96,22 @@ static struct usbhost_connection_s *g_ehciconn;
 static xcpt_t g_ochandler;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbhost_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to either the OHCI or EHCI hub.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if HAVE_USBHOST
 #ifdef CONFIG_DEBUG_USB
-static int usbhost_waiter(struct usbhost_connection_s *dev, const char *hcistr)
+static int usbhost_waiter(struct usbhost_connection_s *dev,
+                          const char *hcistr)
 #else
 static int usbhost_waiter(struct usbhost_connection_s *dev)
 #endif
@@ -117,7 +119,7 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
   struct usbhost_hubport_s *hport;
 
   uinfo("Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -140,13 +142,13 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: ohci_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to the OHCI hub.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
 static int ohci_waiter(int argc, char *argv[])
@@ -159,13 +161,13 @@ static int ohci_waiter(int argc, char *argv[])
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: ehci_waiter
  *
  * Description:
  *   Wait for USB devices to be connected to the EHCI hub.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EHCI
 static int ehci_waiter(int argc, char *argv[])
@@ -178,62 +180,62 @@ static int ehci_waiter(int argc, char *argv[])
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the SAMA5D3x-EK board.
+ *   Called from sam_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the SAMA5D3x-EK board.
  *
  * USB Ports
  *   The SAMA5D3 series-MB features three USB communication ports:
  *
- *     1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
- *        USB Device High Speed Micro AB connector, J20
+ *     1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed
+ *        with USB Device High Speed Micro AB connector, J20
  *
- *     2. Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
- *        connector, J19 upper port
+ *     2. Port B Host High Speed (EHCI) and Full Speed (OHCI) standard
+ *        type A connector, J19 upper port
  *
- *     3. Port C Host Full Speed (OHCI) only standard type A connector, J19
- *        lower port
+ *     3. Port C Host Full Speed (OHCI) only standard type A connector,
+ *        J19 lower port
  *
  *   All three USB host ports are equipped with 500 mA high-side power switch
- *   for self-powered and buspowered applications. The USB device port feature
- *   VBUS inserts detection function.
+ *   for self-powered and buspowered applications.
+ *   The USB device port feature VBUS inserts detection function.
  *
  *   Port A
  *
  *     PIO  Signal Name Function
- *     ---- ----------- -------------------------------------------------------
+ *     ---- ----------- -----------------------------------------------------
  *     PD29  VBUS_SENSE VBus detection
- *     PD25  EN5V_USBA  VBus power enable (via MN15 AIC1526 Dual USB High-Side
- *                      Power Switch.  The other channel of the switch is for
- *                      the LCD)
+ *     PD25  EN5V_USBA  VBus power enable (via MN15 AIC1526 Dual USB
+ *                      High-Side Power Switch.
+ *                       The other channel of the switch is for the LCD)
  *
  *   Port B
  *
  *     PIO  Signal Name Function
- *     ---- ----------- -------------------------------------------------------
- *     PD26 EN5V_USBB   VBus power enable (via MN14 AIC1526 Dual USB High-Side
- *                      Power Switch).  To the A1 pin of J19 Dual USB A
- *                      connector
+ *     ---- ----------- -----------------------------------------------------
+ *     PD26 EN5V_USBB   VBus power enable (via MN14 AIC1526 Dual USB
+ *                      High-Side Power Switch).
+ *                      To the A1 pin of J19 Dual USB A connector
  *
  *   Port C
  *
  *     PIO  Signal Name Function
- *     ---- ----------- -------------------------------------------------------
- *     PD27 EN5V_USBC   VBus power enable (via MN14 AIC1526 Dual USB High-Side
- *                      Power Switch).  To the B1 pin of J19 Dual USB A
- *                      connector
+ *     ---- ----------- -----------------------------------------------------
+ *     PD27 EN5V_USBC   VBus power enable (via MN14 AIC1526 Dual USB
+ *                      High-Side Power Switch).
+ *                      To the B1 pin of J19 Dual USB A connector
  *
  *    Both Ports B and C
  *
  *     PIO  Signal Name Function
- *     ---- ----------- -------------------------------------------------------
+ *     ---- ----------- -----------------------------------------------------
  *     PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
  *
  * That offers a lot of flexibility.  However, here we enable the ports only
@@ -243,7 +245,7 @@ static int ehci_waiter(int argc, char *argv[])
  *   Port B -- EHCI host
  *   Port C -- OHCI host
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_usbinitialize(void)
 {
@@ -253,6 +255,7 @@ void weak_function sam_usbinitialize(void)
   sam_configpio(PIO_USBA_VBUS_SENSE); /* VBUS sense */
 
   /* TODO:  Configure an interrupt on VBUS sense */
+
 #endif
 
 #ifdef HAVE_USBHOST
@@ -282,15 +285,16 @@ void weak_function sam_usbinitialize(void)
 #endif /* HAVE_USBHOST */
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: sam_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #if HAVE_USBHOST
 int sam_usbhost_initialize(void)
@@ -356,7 +360,8 @@ int sam_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = kthread_create("OHCI Monitor", CONFIG_SAMA5D3xEK_USBHOST_PRIO,
+  pid = kthread_create("OHCI Monitor",
+                      CONFIG_SAMA5D3xEK_USBHOST_PRIO,
                       CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
                       (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
@@ -392,29 +397,30 @@ int sam_usbhost_initialize(void)
 }
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: sam_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided by
- *   each platform that implements the OHCI or EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.
+ *   This function must be provided by each platform that implements the OHCI
+ *   or EHCI host interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface.  See SAM_RHPORT_*
- *            definitions above.
+ *   rhport - Selects root hub port to be powered host interface.
+ *            See SAM_RHPORT_* definitions above.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #if HAVE_USBHOST
 void sam_usbhost_vbusdrive(int rhport, bool enable)
 {
   pio_pinset_t pinset = 0;
 
-  uinfo("RHPort%d: enable=%d\n", rhport+1, enable);
+  uinfo("RHPort%d: enable=%d\n", rhport + 1, enable);
 
   /* Pick the PIO configuration associated with the selected root hub port */
 
@@ -448,7 +454,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #endif
 
     default:
-      uerr("ERROR: RHPort%d is not supported\n", rhport+1);
+      uerr("ERROR: RHPort%d is not supported\n", rhport + 1);
       return;
     }
 
@@ -469,15 +475,15 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected on port B or C.
+ *   Setup to receive an interrupt-level callback if an overcurrent condition
+ *   is detected on port B or C.
  *
- *   REVISIT: Since this is a common signal, we will need to come up with some way
- *   to inform both EHCI and OHCI drivers when this error occurs.
+ *   REVISIT: Since this is a common signal, we will need to come up with
+ *   some way to inform both EHCI and OHCI drivers when this error occurs.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
@@ -485,7 +491,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  * Returned Value:
  *   Old overcurrent interrupt handler
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if HAVE_USBHOST
 xcpt_t sam_setup_overcurrent(xcpt_t handler)
@@ -525,16 +531,17 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 }
 #endif /* CONFIG_SAMA5_PIOD_IRQ ... */
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_usbsuspend
  *
  * Description:
  *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   used.
+ *   This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power,
+ *   etc. while the USB is suspended.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
 void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)

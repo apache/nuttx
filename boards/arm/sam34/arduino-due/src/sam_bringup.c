@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arduino-due/src/sam_bringup.c
+ * boards/arm/sam34/arduino-due/src/sam_bringup.c
  *
  *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,9 @@
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
+
 /* Support for the SD card slot on the ITEAD TFT shield */
+
 /* Verify NSH PORT and SLOT settings */
 
 #  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
@@ -92,30 +94,30 @@ int sam_bringup(void)
   int ret;
 
 #ifdef CONFIG_FS_PROCFS
+
   /* Mount the procfs file system */
 
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR,"ERROR: Failed to mount procfs at /proc: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n",
             ret);
     }
 #endif
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
+
   /* Initialize the SPI-based MMC/SD slot */
 
-  {
-    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR,
-               "board_app_initialize: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
+  int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "board_app_initialize: Failed to initialize MMC/SD slot: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \

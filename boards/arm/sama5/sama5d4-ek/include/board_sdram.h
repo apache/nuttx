@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d4-ek/include/board_sdram.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d4-ek/include/board_sdram.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,30 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H
-#define __BOARDS_ARM_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H
+#define __BOARDS_ARM_SAMA5_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "sam_pmc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.  When
- * booting from SDRAM, NuttX is loaded in SDRAM by an intermediate bootloader.  That
- * bootloader had to have already configured the PLL and SDRAM for proper operation.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
+ * When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate
+ * bootloader.
+ * That bootloader had to have already configured the PLL and SDRAM for
+ * proper operation.
  *
- * In this case, we do not reconfigure the clocking.  Rather, we need to query
- * the register settings to determine the clock frequencies.  We can only assume that
- * the Main clock source is the on-board 12MHz crystal.
+ * In this case, we do not reconfigure the clocking.
+ * Rather, we need to query the register settings to determine the clock
+ * frequencies.  We can only assume that the Main clock source is the
+ * on-board 12MHz crystal.
  */
 
 #define BOARD_MAINCK_FREQUENCY     BOARD_MAINOSC_FREQUENCY
@@ -149,23 +153,24 @@
 
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -173,4 +178,4 @@ extern "C" {
 #endif
 
 #endif /* !__ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H */
+#endif  /* __BOARDS_ARM_SAMA5_SAMA5D4_EK_INCLUDE_BOARD_SDRAM_H */

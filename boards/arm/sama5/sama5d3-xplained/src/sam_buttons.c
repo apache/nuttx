@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3-xplained/src/sam_buttons.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are five push button switches on the SAMA5D3-Xplained base board:
  *
  *   1. One Reset, board reset (BP1)

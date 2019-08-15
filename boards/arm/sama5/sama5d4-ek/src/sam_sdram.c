@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/src/sam_sdram.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_sdram.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -166,6 +166,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* SDRAM differences */
 
 #if defined(CONFIG_SAMA5D4EK_MT47H128M16RT)
@@ -278,21 +279,22 @@ static void sam_config_slaveddr(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA5D3-EK User guide: "Two DDR2/SDRAM (MT47H64M16HR) used as
- *   main system memory (256 MByte). The board includes 2 Gbits of on-board soldered
- *   DDR2 (double data rate) SDRAM. The footprints can also host two DDR2
- *   (MT47H128M16RT) from Micron® for a total of 512 MBytes of DDR2 memory. The
- *   memory bus is 32 bits wide and operates with a frequency of up to 166 MHz."
+ *   Per the SAMA5D3-EK User guide:
+ *   "Two DDR2/SDRAM (MT47H64M16HR) used as main system memory (256 MByte).
+ *   The board includes 2 Gbits of on-board solderedDDR2 (double data rate)
+ *   SDRAM. The footprints can also host two DDR2 (MT47H128M16RT) from Micron®
+ *   for a total of 512 MBytes of DDR2 memory. The memory bus is 32 bits wide
+ *   and operates with a frequency of up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
@@ -307,11 +309,11 @@ static void sam_config_slaveddr(void)
  *    None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When
- *    we complete initialization of SDRAM and it is ready for use, we will
- *    make DRAM into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_sdram_config(void)
 {
@@ -376,6 +378,7 @@ void sam_sdram_config(void)
   putreg32(regval, SAM_MPDDRC_IO_CALIBR);
 
   /* Step 2: Program the features of DDR2-SDRAM device into the Timing Register */
+
 #if defined(CONFIG_SAMA5D4EK_MT47H128M16RT)
 
   /* For MT47H128M16RT
@@ -481,7 +484,8 @@ void sam_sdram_config(void)
 
   *ddr = 0;
 
-  /* Now CKE is driven high.*/
+  /* Now CKE is driven high. */
+
   /* Wait 400 ns min */
 
   sam_sdram_delay(NSEC_TO_COUNT(400));
@@ -540,9 +544,9 @@ void sam_sdram_config(void)
 
   /* An additional 200 cycles of clock are required for locking DLL */
 
-  sam_sdram_delay(10000 /* CYCLES_TO_COUNT(200) */);
+  sam_sdram_delay(10000); /* CYCLES_TO_COUNT(200) */
 
-  /* Step 9:  Program DLL field into the Configuration Register.*/
+  /* Step 9:  Program DLL field into the Configuration Register. */
 
   regval  = getreg32(SAM_MPDDRC_CR);
   regval |= MPDDRC_CR_DLL;

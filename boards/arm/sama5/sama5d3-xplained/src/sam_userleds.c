@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3-xplained/src/sam_userleds.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_userleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_appinit.c
+ * boards/arm/sam34/sam4l-xplained/src/sam_appinit.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,6 +52,7 @@
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
 /* Support for the SD card slot on the I/O1 module */
+
 /* Verify NSH PORT and SLOT settings */
 
 #  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
@@ -105,28 +106,24 @@ int board_app_initialize(uintptr_t arg)
 #if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
   /* Initialize the SLCD and register the SLCD device as /dev/slcd0 */
 
-  {
-    int ret = sam_slcd_initialize();
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize the LCD: %d\n",
-               ret);
-        return ret;
-      }
-  }
+  int ret = sam_slcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize the LCD: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 #if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
-  {
-    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
+  int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   return OK;

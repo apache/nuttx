@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/arduino-due/src/arduino-due.h
+/****************************************************************************
+ * boards/arm/sam34/arduino-due/src/arduino-due.h
  *
  *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_ARDUINO_DUE_SRC_ARDUNO_DUE_H
-#define __BOARDS_ARM_ARDUINO_DUE_SRC_ARDUNO_DUE_H
+#ifndef __BOARDS_ARM_SAM34_ARDUINO_DUE_SRC_ARDUNO_DUE_H
+#define __BOARDS_ARM_SAM34_ARDUINO_DUE_SRC_ARDUNO_DUE_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,9 +50,10 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /*  There are three user-controllable LEDs on board the Arduino Due board:
  *
  *     LED              GPIO
@@ -113,10 +114,10 @@
  * The Arduino 2.4" TFT Touch shield uses the S6D1121 controller , it
  * supports 8-bit data interface. The touch IC is TSC2046.
  *
- * ---------- --------------------------- ----------- --------------------------- ------------------
+ * ---------- --------------------------- ----------- --------------------------- ---
  * Arduino            ATSAM3X                 Due             ITHEAD
  * Due PIN    GPIO FUNCTION               SIGNAL      PIN              SIGNAL     NOTES
- * ---------- ---- ---------------------- ----------- ---------------- ---------- ------------------
+ * ---------- ---- ---------------------- ----------- ---------------- ---------- ---
  * PWMH
  * 10  SCL1   PA18 TWCK0/A20/WKUP9        SCL1         ---      ---    ---        SCL not available
  *  9  SDA1   PA17 TWD0SPCK0              SDA1         ---      ---    ---        SDA not available
@@ -138,7 +139,7 @@
  *  3  PWM2   PB25 RTS0/TIOA0             PWM2         J3 pin 3 D2     DB10       ---
  *  2  PWM1   PA9  UTXD/PWMH3             TX           J3 pin 2 D1     DB9        UART0 TX
  *  1  PWM0   PA8  URXD/PWMH0/WKUP4       RX           J3 pin 1 D0     DB8        UART0 RX
- * ---------- ---- ---------------------- ----------- ---------------- ---------- ------------------
+ * ---------- ---- ---------------------- ----------- ---------------- ---------- ---
  * POWER
  *  1  ---    ---  ---                    ---          ---      ---    ---        ---
  *  2  IOref  ---  ---                    IOREF +3V3   ---      ---    ---        ---
@@ -157,7 +158,7 @@
  *  6  A5     PA4  TCLK1/NWAIT/AD2        AD5          J1 pin 1 A5/D19 TFT_RS     ---
  *  7  A6     PA3  TIOB1/PWMFI1/AD1/WKUP1 AD6          ---      ---    ---        ---
  *  8  A7     PA2  TIOA1/NANDRDY/AD0      AD7          ---      ---    ---        ---
- * ---------- ---- ---------------------- ----------- ---------------- ---------- ------------------
+ * ---------- ---- ---------------------- ----------- ---------------- ---------- ---
  *
  * NOTES:
  *
@@ -294,21 +295,21 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_bringup
  *
  * Description:
@@ -320,39 +321,41 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdinitialize
  *
  * Description:
  *   Initialize the SPI-based SD card.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_MMCSD_SPI)
 int sam_sdinitialize(int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.
+ *   This function will register the driver as /dev/inputN where N is the
  *   minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.
+ *   Otherwise, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
     defined(CONFIG_INPUT_ADS7843E)
@@ -360,5 +363,4 @@ int sam_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_ARDUINO_DUE_SRC_ARDUNO_DUE_H */
-
+#endif /* __BOARDS_ARM_SAM34_ARDUINO_DUE_SRC_ARDUNO_DUE_H */

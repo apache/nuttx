@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam4e-ek/scripts/Make.defs
+# boards/arm/sam34/sam4e-ek/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

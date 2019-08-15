@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_mmcsd.c
+ * boards/arm/sam34/sam4l-xplained/src/sam_mmcsd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,6 +55,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_DISABLE_MOUNTPOINT

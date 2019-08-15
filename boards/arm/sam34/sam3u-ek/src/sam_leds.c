@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam3u-ek/src/sam_leds.c
+ * boards/arm/sam34/sam3u-ek/src/sam_leds.c
  *
  *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -82,28 +82,28 @@
 
 static const uint8_t g_ledon[8] =
 {
-  (LED0_OFF     |LED1_OFF     |LED2_OFF),      /* LED_STARTED  */
-  (LED0_ON      |LED1_OFF     |LED2_ON),       /* LED_HEAPALLOCATE */
-  (LED0_OFF     |LED1_ON      |LED2_OFF),      /* LED_IRQSENABLED  */
-  (LED0_ON      |LED1_ON      |LED2_ON),       /* LED_STACKCREATED  */
+  (LED0_OFF     | LED1_OFF     | LED2_OFF),      /* LED_STARTED  */
+  (LED0_ON      | LED1_OFF     | LED2_ON),       /* LED_HEAPALLOCATE */
+  (LED0_OFF     | LED1_ON      | LED2_OFF),      /* LED_IRQSENABLED  */
+  (LED0_ON      | LED1_ON      | LED2_ON),       /* LED_STACKCREATED  */
 
-  (LED0_NOCHANGE|LED1_OFF     |LED2_NOCHANGE), /* LED_INIRQ  */
-  (LED0_NOCHANGE|LED1_NOCHANGE|LED2_OFF),      /* LED_SIGNAL  */
-  (LED0_ON      |LED1_NOCHANGE|LED2_NOCHANGE), /* LED_ASSERTION  */
-  (LED0_ON      |LED1_NOCHANGE|LED2_NOCHANGE)  /* LED_PANIC */
+  (LED0_NOCHANGE | LED1_OFF      | LED2_NOCHANGE), /* LED_INIRQ  */
+  (LED0_NOCHANGE | LED1_NOCHANGE | LED2_OFF),      /* LED_SIGNAL  */
+  (LED0_ON       | LED1_NOCHANGE | LED2_NOCHANGE), /* LED_ASSERTION  */
+  (LED0_ON       | LED1_NOCHANGE | LED2_NOCHANGE)  /* LED_PANIC */
 };
 
 static const uint8_t g_ledoff[8] =
 {
-  (LED0_OFF     |LED1_OFF     |LED2_OFF),      /* LED_STARTED (does not happen) */
-  (LED0_ON      |LED1_OFF     |LED2_ON),       /* LED_HEAPALLOCATE (does not happen) */
-  (LED0_OFF     |LED1_ON      |LED2_OFF),      /* LED_IRQSENABLED (does not happen) */
-  (LED0_ON      |LED1_ON      |LED2_ON),       /* LED_STACKCREATED (does not happen) */
+  (LED0_OFF     | LED1_OFF     | LED2_OFF),      /* LED_STARTED (does not happen) */
+  (LED0_ON      | LED1_OFF     | LED2_ON),       /* LED_HEAPALLOCATE (does not happen) */
+  (LED0_OFF     | LED1_ON      | LED2_OFF),      /* LED_IRQSENABLED (does not happen) */
+  (LED0_ON      | LED1_ON      | LED2_ON),       /* LED_STACKCREATED (does not happen) */
 
-  (LED0_NOCHANGE|LED1_ON      |LED2_NOCHANGE), /* LED_INIRQ  */
-  (LED0_NOCHANGE|LED1_NOCHANGE|LED2_ON),       /* LED_SIGNAL */
-  (LED0_OFF     |LED1_NOCHANGE|LED2_NOCHANGE), /* LED_ASSERTION */
-  (LED0_OFF     |LED1_NOCHANGE|LED2_NOCHANGE)  /* LED_PANIC */
+  (LED0_NOCHANGE | LED1_ON       | LED2_NOCHANGE), /* LED_INIRQ  */
+  (LED0_NOCHANGE | LED1_NOCHANGE | LED2_ON),       /* LED_SIGNAL */
+  (LED0_OFF      | LED1_NOCHANGE | LED2_NOCHANGE), /* LED_ASSERTION */
+  (LED0_OFF      | LED1_NOCHANGE | LED2_NOCHANGE)  /* LED_PANIC */
 };
 
 /****************************************************************************

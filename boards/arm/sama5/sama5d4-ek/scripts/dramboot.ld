@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/scripts/dramboot.ld
+ * boards/arm/sama5/sama5d4-ek/scripts/dramboot.ld
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

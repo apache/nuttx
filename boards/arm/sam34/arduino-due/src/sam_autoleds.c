@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arduino-due/src/sam_autoleds.c
+ * boards/arm/sam34/arduino-due/src/sam_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

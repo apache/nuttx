@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam3u-ek/src/sam_appinit.c
+ * boards/arm/sam34/sam3u-ek/src/sam_appinit.c
  *
  *   Copyright (C) 2010, 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,8 +68,8 @@
 #  undef NSH_HAVE_MMCSD
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM34_HSMCI)
@@ -134,6 +134,7 @@ int board_app_initialize(uintptr_t arg)
   FAR struct sdio_dev_s *sdio;
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   syslog(LOG_INFO, "Initializing SDIO slot %d\n",
@@ -155,7 +156,8 @@ int board_app_initialize(uintptr_t arg)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -163,7 +165,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-   sdio_mediachange(sdio, sam_cardinserted(0));
+  sdio_mediachange(sdio, sam_cardinserted(0));
 #endif
 
 #ifdef CONFIG_INPUT

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam3u-ek/src/up_mmcsd.c
+ * boards/arm/sam34/arduino-due/src/up_mmcsd.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,8 +53,8 @@
 
 #include "arduino-due.h"
 
-/* In order to use the SD card on the ITEAD shield, you must enable the SPI bit-bang
- * driver as well as support for SPI-based MMC/SD cards.
+/* In order to use the SD card on the ITEAD shield, you must enable the SPI
+ * bit-bang driver as well as support for SPI-based MMC/SD cards.
  */
 
 #if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_DISABLE_MOUNTPOINT
@@ -120,6 +121,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Include the bit-band skeleton logic
  ****************************************************************************/

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/flipnclick-sam3x/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/flipnclick-sam3x/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H
-#define __BOARDS_ARM_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,18 +50,19 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.  These
- * definitions will configure clocking
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.
+ *  These definitions will configure clocking
  *
- *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
- *   CPU clock: 84MHz
+ * MAINOSC:  Frequency = 12MHz (crystal)
+ * PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
+ * Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
+ * CPU clock: 84MHz
  */
 
 #define BOARD_32KOSC_FREQUENCY     (32768)
@@ -143,7 +144,8 @@
 
 #define BOARD_FWS                  4
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are four LEDs on the top, blue side of the board.  Only one can be
  * controlled by software:
  *
@@ -194,13 +196,16 @@
 #endif
 
 /* These LEDs are available to the application and are all available to the
- * application unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by the
- * board port is defined in include/board.h and src/sam_autoleds.c.  The LEDs are
- * used to encode OS-related events as follows:
+ * application unless CONFIG_ARCH_LEDS is defined.
+ * In that case, the usage by the board port is defined in include/board.h
+ * and src/sam_autoleds.c.
+ * The LEDs are used to encode OS-related events as follows:
  *
  *      SYMBOL                MEANING                        LED STATE
  *                                                     L   A   B   C   D
- *      ----------------      ----------------------- --- --- --- --- ---*/
+ *      ----------------      ----------------------- --- --- --- --- ---
+ */
+
 #define LED_STARTED      0 /* NuttX has been started  OFF ON  OFF OFF OFF */
 #define LED_HEAPALLOCATE 1 /* Heap has been allocated OFF OFF ON  OFF OFF */
 #define LED_IRQSENABLED  2 /* Interrupts enabled      OFF OFF OFF ON  OFF */
@@ -211,46 +216,53 @@
 #define LED_PANIC        4 /* The system has crashed  2Hz N/C N/C N/C N/C */
 #undef  LED_IDLE           /* MCU is is sleep mode    ---- Not used ----- */
 
-/* Thus if LED L is faintly glowing and all other LEDs are off (except LED D which
- * was left on but is no longer controlled by NuttX and so may be in any state),
- * NuttX has successfully booted and is, apparently, running normally and taking
- * interrupts.  If any of LEDs A-D are statically set, then NuttX failed to boot
- * and the LED indicates the initialization phase where the failure occurred.  If
- * LED L is flashing at approximately 2Hz, then a fatal error has been detected and
- * the system has halted.
+/* Thus if LED L is faintly glowing and all other LEDs are off
+ * (except LED D which was left on but is no longer controlled by NuttX and
+ * so may be in any state),
+ * NuttX has successfully booted and is, apparently, running normally and
+ * taking interrupts.
+ * If any of LEDs A-D are statically set, then NuttX failed to boot and the
+ * LED indicates the initialization phase where the failure occurred.
+ * If LED L is flashing at approximately 2Hz, then a fatal error has been
+ * detected and the system has halted.
  *
  * NOTE: After booting, LEDs A-D are no longer used by the system and may be
  * controlled the application.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /*   There are no buttons on the Arduino Due board. */
 
-/* GPIO pin configurations **********************************************************/
+/* GPIO pin configurations **************************************************/
+
 /* Universal Asynchronous Receiver Transceiver (UART)
  *
  *   The SAM3X has a UART and 4 USARTS.  The Programming port uses a USB-to-
- *   serial chip connected to the first of the MCU (RX0 and TX0 on PA8 and PA9,
- *   respectively).  The output from that port is visible using the Arduino tool.
+ *   serial chip connected to the first of the MCU (RX0 and TX0 on PA8 and
+ *   PA9, respectively).
+ *   The output from that port is visible using the Arduino tool.
  *
- *   Any of UART and USART0-3 may be used as a serial console.  By default,
- *   UART0 is used as the serial console in all configurations.
+ *   Any of UART and USART0-3 may be used as a serial console.
+ *   By default, UART0 is used as the serial console in all configurations.
  *
  * There are no alternatives for these pins.
  */
 
 /* Universal Synchronous Asynchronous Receiver Transmitter (USART)
  *
- *   The RX and TX pins are available on the Arduino connector D0 and D1 pins,
- *   respectively.  These are connected to USART0, RXD0 and TXD0 which are PA10
- *   and PA11, respectively.
+ *   The RX and TX pins are available on the Arduino connector D0 and D1
+ *   pins, respectively.
+ *   These are connected to USART0, RXD0 and TXD0 which are PA10 and PA11,
+ *   respectively.
  *
- *   There are four Click bus connectors with serial ports available as follows:
+ *   There are four Click bus connectors with serial ports available as
+ *   follows:
  *
- *      Click A:  USART0 RXD0 and TXD0 which are, again, PA10 and PA11.
- *      Click B:  USART1 RXD1 and TXD1 which are PA12 and PA13, respectively.
- *      Click C:  USART3 RXD3 and TXD3 which are PD5 and PD4, respectively.
- *      Click D:  USART3 RXD3 and TXD3 which are, again, PD5 and PD4.
+ *   Click A:  USART0 RXD0 and TXD0 which are, again, PA10 and PA11.
+ *   Click B:  USART1 RXD1 and TXD1 which are PA12 and PA13, respectively.
+ *   Click C:  USART3 RXD3 and TXD3 which are PD5 and PD4, respectively.
+ *   Click D:  USART3 RXD3 and TXD3 which are, again, PD5 and PD4.
  *
  * There are no alternatives for these pins.
  */
@@ -288,7 +300,7 @@
  *   MOSI SPI0_MOSI    PA26   MOSI SPI0_MOSI    PA26
  *
  * Chip select pin definitions are provided in
- * boards/flipnclick-sam3x/src/flipnclick-3x.h.
+ * boards/arm/sam34/flipnclick-sam3x/src/flipnclick-3x.h.
  *
  * There are no alternative pin selections for SPI0_MISO and SPIO_MOSI.
  */
@@ -324,4 +336,4 @@
  * There are no alternative pin selections for TWI0 and TWI1.
  */
 
-#endif  /* __BOARDS_ARM_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H */

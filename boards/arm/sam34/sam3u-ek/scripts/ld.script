@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam3u-ek/scripts/ld.script
+ * boards/arm/sam34/sam3u-ek/scripts/ld.script
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

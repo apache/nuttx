@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/src/at25_main.c
+ * boards/arm/sama5/sama5d4-ek/src/at25_main.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef HAVE_AT25

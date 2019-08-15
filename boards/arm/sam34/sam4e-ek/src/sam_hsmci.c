@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4e-ek/src/sam_hsmci.c
+ * boards/arm/sam34/sam4e-ek/src/sam_hsmci.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,6 +61,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one HSMCI peripheral */
 
 struct sam_hsmci_state_s
@@ -111,7 +112,7 @@ static int sam_hsmci_cardetect(int irq, void *regs, FAR void *arg)
       sdio_mediachange(g_hsmci.hsmci, inserted);
     }
 
-   return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -139,6 +140,7 @@ int sam_hsmci_initialize(int minor)
       sam_configgpio(GPIO_MCI_CD);
 
       /* Mount the SDIO-based MMC/SD block driver */
+
       /* First, get an instance of the SDIO interface */
 
       g_hsmci.hsmci = sdio_initialize(0);

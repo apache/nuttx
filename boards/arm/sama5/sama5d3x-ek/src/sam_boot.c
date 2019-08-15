@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3x-ek/src/sam_boot.c
+/****************************************************************************
+ * boards/arm/sama5/sama5d3x-ek/src/sam_boot.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,27 +46,28 @@
 #include "sam_sckc.h"
 #include "sama5d3x-ek.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All SAMA5 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
@@ -89,20 +90,22 @@ void sam_boardinitialize(void)
 
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 
-  /* Configure SDRAM if (1) SDRAM has been enabled in the NuttX configuration and
-   * (2) if we are not currently running out of SDRAM.  If we are now running out
-   * of SDRAM then we have to assume that some second level bootloader has properly
-   * configured SDRAM for our use.
+  /* Configure SDRAM if
+   * (1) SDRAM has been enabled in the NuttX configuration and
+   * (2) if we are not currently running out of SDRAM.
+   * If we are now running out of SDRAM then we have to assume that some
+   * second level bootloader has properly configured SDRAM for our use.
    */
 
   sam_sdram_config();
 
 #endif
 
-  /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function sam_usbinitialize() has been brought
-   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
-   * selected.
+  /* Initialize USB if the
+   * 1) the HS host or device controller is in the configuration and
+   * 2) the weak function sam_usbinitialize() has been brought
+   * into the build.
+   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
@@ -112,8 +115,10 @@ void sam_boardinitialize(void)
     }
 #endif
 
-  /* Configure board resources to support networking if the 1) networking is enabled,
-   * 2) the EMAC or GMAC module is enabled, and 2) the weak function
+  /* Configure board resources to support networking if the
+   * 1) networking is enabled,
+   * 2) the EMAC or GMAC module is enabled, and
+   * 2) the weak function
    * sam_netinitialize() has been brought into the build.
    */
 

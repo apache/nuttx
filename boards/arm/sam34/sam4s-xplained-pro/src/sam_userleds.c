@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4s-xplained-pro/src/sam_userleds.c
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam_userleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

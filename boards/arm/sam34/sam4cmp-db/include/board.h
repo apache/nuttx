@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4cmp-db/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam4cmp-db/include/board.h
  *
  *   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4CMP_DB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAM4CMP_DB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM4CMP_DB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM4CMP_DB_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,13 +46,15 @@
 #  include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=120MHz.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the sam3u device is running on a 4MHz internal RC.
+ * These definitions will configure clocking with MCK = 48MHz, PLLA = 96,
+ * and CPU=120MHz.
  */
 
 /* Main oscillator register settings */
@@ -86,7 +88,6 @@
 #define BOARD_CKGR_PLLBR_MUL       (44 << PMC_CKGR_PLLBR_MUL_SHIFT)
 #define BOARD_CKGR_PLLBR_COUNT     (63 << PMC_CKGR_PLLBR_COUNT_SHIFT)
 #define BOARD_PLLB_FREQUENCY       (92160000)
-
 
 /* PMC master clock register settings */
 
@@ -139,4 +140,4 @@
 
 #define BOARD_FWS                  5
 
-#endif /* __BOARDS_ARM_SAM4CMP_DB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4CMP_DB_INCLUDE_BOARD_H */

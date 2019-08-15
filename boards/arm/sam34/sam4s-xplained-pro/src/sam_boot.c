@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained-pro/src/sam_boot.c
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained-pro/src/sam_boot.c
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,19 +46,20 @@
 
 #include "sam4s-xplained-pro.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All SAM3U architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
@@ -68,7 +69,6 @@ void sam_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
-
 
 /****************************************************************************
  * Name: board_late_initialize

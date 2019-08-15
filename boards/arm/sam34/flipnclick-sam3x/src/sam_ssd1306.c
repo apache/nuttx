@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-sam3x/src/sam_ssd1306.c
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_ssd1306.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,9 +35,10 @@
 
 /* SSD1306 OLED
  *
- * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C (SPI
- * is the default and is what is used here).  I have mounted the OLED on a
- * proto click board.  The OLED is connected as follows:
+ * The HiletGo is a 128x64 OLED that can be driven either via SPI or I2C
+ * (SPI is the default and is what is used here).
+ * I have mounted the OLED on a proto click board.
+ * The OLED is connected as follows:
  *
  * OLED  ALIAS       DESCRIPTION   PROTO CLICK
  * ----- ----------- ------------- -----------------
@@ -77,6 +78,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SPI_CMDDATA
@@ -138,6 +140,7 @@ FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
           (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
 
 #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
+
           /* Initialize and register the simulated framebuffer driver */
 
           ret = fb_register(0, 0);
@@ -168,5 +171,4 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   return sam_graphics_setup(devno);
 }
 #endif
-
 #endif /* HAVE_SSD1306 */

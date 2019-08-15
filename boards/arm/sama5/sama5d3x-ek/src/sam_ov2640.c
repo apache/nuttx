@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3x-ek/src/sam_ov2640.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_ov2640.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Typical OV2640 XVCLK is 24MHz */
 
 #define OV2640_FREQUENCY 24000000
@@ -111,7 +112,7 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
  *
  *   SAMA5D3x PIN             SAMA5D3x-EK    OV2640
  *   PIO  PER SIGNAL        ISI Socket J11
- *   ---- --- ------------- --- ------------ ----------------------------------------
+ *   ---- --- ------------- --- ------------ --------------------------------
  *   ---                     1  VDDISI       ---
  *   ---                     2  GND          ---
  *   ---                     3  VDDISI       ---
@@ -156,7 +157,7 @@ static inline int ov2640_camera_initialize(void)
   uint32_t actual;
   int ret;
 
-  /* Get the I2C driver that interfaces with the camers (OV2640_BUS)*/
+  /* Get the I2C driver that interfaces with the camers (OV2640_BUS) */
 
   i2c = sam_i2cbus_initialize(OV2640_BUS);
   if (!i2c)
@@ -203,6 +204,7 @@ static inline int ov2640_camera_initialize(void)
   sam_pck_enable(PCK1, true);
 
   /* Configure the ISI peripheral */
+
 #warning Missing Logic
 
   /* Initialize the OV2640 camera */
@@ -217,17 +219,17 @@ static inline int ov2640_camera_initialize(void)
   return EXIT_FAILURE;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: ov2640_main
  *
  * Description:
  *   Entry point for the OV2640 Camera Demo
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int ov2640_main(int argc, char *argv[])
 {

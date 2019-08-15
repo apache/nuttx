@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/sam_at24.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_at24.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -124,7 +124,8 @@ int sam_at24_automount(int minor)
 #if defined(CONFIG_SAMA5D3xEK_AT24_FTL)
       /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
-      finfo("Initialize the FTL layer to create /dev/mtdblock%d\n", AT24_MINOR);
+      finfo("Initialize the FTL layer to create /dev/mtdblock%d\n",
+            AT24_MINOR);
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/src/sam_pmic.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_pmic.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -103,7 +103,7 @@ void sam_pmic_initialize(void)
       buffer[0] = 0x03;
       buffer[1] = 0x0f;
       (void)i2c_write(i2c, &config, buffer, 2);
-   }
+    }
 }
 
 #endif /* HAVE_PMIC */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3x-ek/src/sam_ethernet.c
+/****************************************************************************
+ * boards/arm/sama5/sama5d3x-ek/src/sam_ethernet.c
  *
  *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -62,9 +62,9 @@
 
 #ifdef HAVE_NETWORK
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SAMA5_EMACA
 #  undef CONFIG_SAMA5_EMAC_ISETH0
@@ -79,6 +79,7 @@
 #endif
 
 /* Debug ********************************************************************/
+
 /* Extra, in-depth debug output that is only available if
  * CONFIG_NETDEV_PHY_DEBUG us defined.
  */
@@ -93,13 +94,13 @@
 #  define phyinfo(x...)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_emac_phy_enable and sam_gmac_enable
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
 #ifdef CONFIG_SAMA5_EMACA
@@ -134,28 +135,29 @@ static void sam_gmac_phy_enable(bool enable)
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_netinitialize(void)
 {
 #ifdef CONFIG_SAMA5_EMACA
   /* Ethernet 10/100 (EMAC A) Port
    *
-   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-   * The board supports MII and RMII interface modes.
+   * The main board contains a MICREL PHY device (KSZ8051) operating at
+   *  10/100 Mbps. The board supports MII and RMII interface modes.
    *
-   * The two independent PHY devices embedded on CM and MB boards are connected to
-   * independent RJ-45 connectors with built-in magnetic and status LEDs.
+   * The two independent PHY devices embedded on CM and MB boards are
+   * connected to independent RJ-45 connectors with built-in magnetic
+   * and status LEDs.
    *
    * At the De-Assertion of Reset:
    *   PHY ADD[2:0]:001
@@ -175,12 +177,13 @@ void weak_function sam_netinitialize(void)
 #ifdef CONFIG_SAMA5_GMAC
   /* Tri-Speed Ethernet PHY
    *
-   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
-   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
+   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices
+   * (MICREL KSZ9021/31) operating at 10/100/1000 Mbps.
+   * The board supports RGMII interface mode.
+   * The Ethernet interface consists of 4 pairs of low voltage differential
    * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a 10/100/1000
-   * BaseT RJ45 connector integrated on the main board.
+   * activity indicators. These signals can be used to connect to a
+   * 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
    */

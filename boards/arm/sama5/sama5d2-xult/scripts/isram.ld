@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d2-xult/scripts/isram.ld
+ * boards/arm/sama5/sama5d2-xult/scripts/isram.ld
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

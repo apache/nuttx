@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arduino-due/src/sam_boot.c
+ * boards/arm/sam34/arduino-due/src/sam_boot.c
  *
  *   Copyright (C) 2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

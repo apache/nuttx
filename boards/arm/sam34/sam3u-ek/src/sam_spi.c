@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/sam_spi.c
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam_spi.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,17 +55,17 @@
 
 #ifdef CONFIG_SAM34_SPI0
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void)
 {
@@ -73,10 +73,10 @@ void weak_function sam_spidev_initialize(void)
    * ZigBee support.
    */
 
-   /* The touchscreen connects using NPCS2 (PC14). */
+  /* The touchscreen connects using NPCS2 (PC14). */
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-   sam_configgpio(GPIO_TSC_NPCS2);
+  sam_configgpio(GPIO_TSC_NPCS2);
 #endif
 }
 
@@ -84,8 +84,8 @@ void weak_function sam_spidev_initialize(void)
  * Name:  sam_spi0select, sam_spi0status, and sam_spic0mddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They
- *   include:
+ *   These external functions must be provided by board-specific logic.
+ *   They include:
  *
  *   o sam_spi0select is a functions tomanage the board-specific chip selects
  *   o sam_spi0status and sam_spic0mddata:  Implementations of the status
@@ -106,8 +106,8 @@ void weak_function sam_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

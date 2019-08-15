@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/flipnclick-sam3x/src/sam_spi0.c
+/****************************************************************************
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_spi0.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -56,17 +56,17 @@
 
 #ifdef CONFIG_SAM34_SPI0
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM4E-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void)
 {
@@ -82,8 +82,8 @@ void weak_function sam_spidev_initialize(void)
  * Name:  sam_spi0select, sam_spi0status, and sam_spic0mddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They
- *   include:
+ *   These external functions must be provided by board-specific logic.
+ *   They include:
  *
  *   o sam_spi0select is a functions tomanage the board-specific chip selects
  *   o sam_spi0status and sam_spic0mddata:  Implementations of the status
@@ -95,17 +95,17 @@ void weak_function sam_spidev_initialize(void)
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi0select() and sam_spi0status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *   2. Provide sam_spi0select() and sam_spi0status() functions in your
+ *      board- specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spic0mddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -213,8 +213,6 @@ int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
   return 0;
-
 }
 #endif
-
 #endif /* CONFIG_SAM34_SPI0 */

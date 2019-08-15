@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3-xplained/include/board_384mhz.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d3-xplained/include/board_384mhz.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,32 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H
-#define __BOARDS_ARM_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H
+#define __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.  These
- * definitions will configure operational clocking.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
+ * These definitions will configure operational clocking.
  *
- * This is an alternative slower configuration that will produce a 48MHz USB clock
- * with the required accuracy.  When used with OHCI, an additional requirement is
- * the PLLACK be a multiple of 48MHz.  This setup results in a CPU clock of 384MHz.
+ * This is an alternative slower configuration that will produce a 48MHz USB
+ * clock with the required accuracy.
+ * When used with OHCI, an additional requirement is the PLLACK be a multiple
+ * of 48MHz.  This setup results in a CPU clock of 384MHz.
  *
- *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Divider = 1, Multiplier = 64 to generate PLLACK = 768MHz
- *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
+ * MAINOSC:  Frequency = 12MHz (crystal)
+ * PLLA: PLL Divider = 1, Multiplier = 64 to generate PLLACK = 768MHz
+ * Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
  *     MCK      =  128MHz
  *     CPU clock = 384MHz
  */
@@ -184,36 +186,43 @@
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 128MHz, CLKDIV = 159, MCI_SPEED = 128MHz / (2*159 + 0 + 2) = 400 KHz */
+/* MCK = 128MHz, CLKDIV = 159,
+ * MCI_SPEED = 128MHz / (2*159 + 0 + 2) = 400 KHz
+ */
 
 #define HSMCI_INIT_CLKDIV          (159 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 128MHz, CLKDIV = 2 w/CLOCKODD, MCI_SPEED = 128MHz /(2*2 + 1 + 2) = 18.3 MHz */
+/* MCK = 128MHz, CLKDIV = 2 w/CLOCKODD,
+ * MCI_SPEED = 128MHz /(2*2 + 1 + 2) = 18.3 MHz
+ */
 
 #define HSMCI_MMCXFR_CLKDIV        ((2 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 128MHz, CLKDIV = 2, MCI_SPEED = 128MHz /(2*2 + 0 + 2) = 21.3 MHz */
+/* MCK = 128MHz, CLKDIV = 2,
+ * MCI_SPEED = 128MHz /(2*2 + 0 + 2) = 21.3 MHz
+ */
 
 #define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
  #undef EXTERN
 #if defined(__cplusplus)
@@ -221,4 +230,4 @@ extern "C" {
 #endif
 
 #endif /* !__ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H */
+#endif  /* __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_INCLUDE_BOARD_384MHZ_H */

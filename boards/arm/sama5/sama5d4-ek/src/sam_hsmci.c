@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d4-ek/src/sam_hsmci.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_hsmci.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,9 +42,9 @@
  * transfer mode, but the NuttX driver currently uses only the 4-bit wide
  * transfer mode
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PC4/SPI0_NPCS1/MCI0_CK/PCK1    PC4                 MCI0_CK, ISI_MCK, EXP
  * PC5/D0/MCI0_CDA                PC5                 MCI0_CDA, NAND_IO0
  * PC6/D1/MCI0_DA0                PC6                 MCI0_DA0, NAND_IO1
@@ -56,15 +56,15 @@
  * PC12/D7/MCI0_DA6               PC12                MCI0_DA6, NAND_IO7
  * PC13/NRD/NANDOE/MCI0_DA7       PC13                MCI0_DA7, NAND_RE
  * PE5/A5/CTS3                    MCI0_CD_PE5         MCI0_CD
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  *
  * The microSD connects vi HSMCI1.  The card detect discrete is available on
  * PE6 (pulled high):
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
- * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD               ???
+ * ------------------------------ ------------------- -----------------------
+ * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD             ???
  * PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
  * PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
  * PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
@@ -73,7 +73,7 @@
  * PE22/A24/TIOB4/MCI1_DA2        PE22                MCI1_DA2, EXP
  * PE23/A25/TCLK4/MCI1_DA3        PE23                MCI1_DA3, EXP
  * PE6/A6/TIOA3                   MCI1_CD_PE6         MCI1_CD
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  */
 
 /****************************************************************************
@@ -104,6 +104,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one HSMCI peripheral */
 
 struct sam_hsmci_state_s
@@ -198,7 +199,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
       sdio_mediachange(state->hsmci, cd);
     }
 
-   return OK;
+  return OK;
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
@@ -316,6 +317,7 @@ int sam_hsmci_initialize(int slotno, int minor)
     }
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   state->hsmci = sdio_initialize(slotno);

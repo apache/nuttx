@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/sam_boot.c
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam_boot.c
  *
  *   Copyright (C) 2009-2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,32 +47,33 @@
 #include "up_arch.h"
 #include "sam3u-ek.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All SAM3U architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function sam_spidev_initialize() has been brought into the link.
    */
 
 #ifdef CONFIG_SAM34_SPI0
@@ -90,7 +91,7 @@ void sam_boardinitialize(void)
 
   /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak
    * function sam_hsmciinit() has been brought into the build.
-    */
+   */
 
 #ifdef CONFIG_SAM34_HSMCI
   if (sam_hsmciinit)

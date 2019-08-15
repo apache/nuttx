@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/arduino-due/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/arduino-due/include/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_ARDUINO_DUE_INCLUDE_BOARD_H
-#define __BOARDS_ARM_ARDUINO_DUE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_ARDUINO_DUE_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_ARDUINO_DUE_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,18 +50,19 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.  These
- * definitions will configure clocking
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.
+ * These definitions will configure clocking
  *
- *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
- *   CPU clock: 84MHz
+ * MAINOSC:  Frequency = 12MHz (crystal)
+ * PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
+ * Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
+ * CPU clock: 84MHz
  */
 
 #define BOARD_32KOSC_FREQUENCY     (32768)
@@ -107,8 +108,8 @@
 
 /* HSMCI clocking
  *
- * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
- * divided by (2*(CLKDIV+1)).
+ * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock
+ * (MCK) divided by (2*(CLKDIV+1)).
  *
  *   MCI_SPEED = MCCK / (2*(CLKDIV+1))
  *   CLKDIV = MCCK / MCI_SPEED / 2 - 1
@@ -116,7 +117,9 @@
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 84MHz, CLKDIV = 104, MCI_SPEED = 84MHz / 2 * (104+1) = 400 KHz */
+/* MCK = 84MHz, CLKDIV = 104,
+ * MCI_SPEED = 84MHz / 2 * (104+1) = 400 KHz
+ */
 
 #define HSMCI_INIT_CLKDIV          (104 << HSMCI_MR_CLKDIV_SHIFT)
 
@@ -143,7 +146,8 @@
 
 #define BOARD_FWS                  4
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /*  There are three user-controllable LEDs on board the Arduino Due board:
  *
  *     LED              GPIO
@@ -178,7 +182,9 @@
  *
  *  SYMBOL                MEANING                         LED STATE
  *                                                         L         TX       RX
- *  -----------------------  --------------------------  -------- -------- --------    */
+ *  -----------------------  --------------------------  -------- -------- --------
+ */
+
 #define LED_STARTED       0  /* NuttX has been started     OFF      OFF      OFF       */
 #define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      OFF       */
 #define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      OFF       */
@@ -195,15 +201,18 @@
  * at approximately 2Hz, then a fatal error has been detected and the system
  */
 
-/* Button definitions ***************************************************************/
-/*   There are no buttons on the Arduino Due board. */
+/* Button definitions *******************************************************/
 
-/* GPIO pin configurations **********************************************************/
+/* There are no buttons on the Arduino Due board. */
+
+/* GPIO pin configurations **************************************************/
 
 #if 1 /* #ifdef CONFIG_ARDUINO_DUE_REV3 works with REV2 as well */
-/* This port was performed on the Arduino Due Rev 2 board.  A NuttX user reported
- * issues with the serial port on his Aduino Due Rev 3 board.  That problem was
- * resolved as follows:
+
+/* This port was performed on the Arduino Due Rev 2 board.
+ * A NuttX user reported issues with the serial port on his Aduino Due Rev 3
+ * board.
+ * That problem was resolved as follows:
  *
  *  "... The issue was in my hardware. I found the difference between Arduino
  *   Due shematics (revision R2) and actual PCB layout of my Arduino (revision
@@ -223,5 +232,4 @@
 #  define GPIO_UART0_RXD  (GPIO_PERIPHA | GPIO_CFG_DEFAULT | GPIO_PORT_PIOA | \
                            GPIO_PIN8 | GPIO_CFG_PULLUP)
 #endif
-
-#endif  /* __BOARDS_ARM_ARDUINO_DUE_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_ARDUINO_DUE_INCLUDE_BOARD_H */

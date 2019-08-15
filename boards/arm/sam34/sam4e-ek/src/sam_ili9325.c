@@ -1,21 +1,24 @@
-/************************************************************************************
- * boards/sam4e-ek/src/sam_ili9335.c
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/src/sam_ili9335.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  * - This driver is a modification of the Shenzhou ILI9325 LCD driver.
- * - ILI9325 Datasheet, Version: V0.43, ILI9325DS_V0.43.pdf, ILI TECHNOLOGY CORP.,
+ * - ILI9325 Datasheet, Version: V0.43, ILI9325DS_V0.43.pdf,
+ *                  ILI TECHNOLOGY CORP.,
  * - SAM4Ex Datasheet, Atmel
  * - Atmel ILI9325 Sample code for the SAM4S
  *
- * Some the LCD and SMC initialization logic comes from Atmel sample code for the
- * SAM4S.  The Atmel sample code has a BSD-like license with an additional
+ * Some the LCD and SMC initialization logic comes from Atmel sample code
+ * for the SAM4S.
+ * The Atmel sample code has a BSD-like license with an additional
  * requirement that restricts the code from being used on anything but Atmel
  * microprocessors.  I do not believe that this file "derives" from the Atmel
- * sample code nor do I believe that it contains anything but generally available
- * ILI9325 and SAM4x logic.  Credit, however, needs to go where it is due.
+ * sample code nor do I believe that it contains anything but generally
+ * available ILI9325 and SAM4x logic.
+ * Credit, however, needs to go where it is due.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,16 +47,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  *
- * The SAM4E-EK carries a TFT transmissive LCD module with touch panel, FTM280C34D.
- * Its integrated driver IC is ILI9325. The LCD display area is 2.8 inches diagonally
- * measured, with a native resolution of 240 x 320 dots.
+ * The SAM4E-EK carries a TFT transmissive LCD module with touch panel,
+ * FTM280C34D.
+ * Its integrated driver IC is ILI9325. The LCD display area is 2.8 inches
+ * diagonally measured, with a native resolution of 240 x 320 dots.
  *
- * The SAM4E16 communicates with the LCD through PIOC where an 8-bit parallel "8080-
- * like" protocol data bus has to be implemented in software.
+ * The SAM4E16 communicates with the LCD through PIOC where an 8-bit parallel
+ * "8080-like" protocol data bus has to be implemented in software.
  *
  *  ---- ----- --------- --------------------------------
  *  PIN  PIO   SIGNAL    NOTES
@@ -102,18 +106,20 @@
  *   39        NC
  *  ---- ----- --------- --------------------------------
  *
- * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3155
- * charge pump, MN4. The AAT3155 is controlled by the SAM3U4E through a single line
- * Simple Serial Control (S2Cwire) interface, which permits to enable, disable, and
- * set the LED drive current (LED brightness control) from a 32-level logarithmic
- * scale. Four resistors R93/R94/R95/R96 are implemented for optional current
+ * LCD backlight is made of 4 white chip LEDs in parallel, driven by an
+ * AAT3155 charge pump, MN4.
+ * The AAT3155 is controlled by the SAM3U4E through a single line Simple
+ * Serial Control (S2Cwire) interface, which permits to enable, disable, and
+ * set the LED drive current (LED brightness control) from a 32-level
+ * logarithmic scale.
+ * Four resistors R93/R94/R95/R96 are implemented for optional current
  * limitation.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -142,9 +148,10 @@
 
 #ifdef CONFIG_LCD
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* SMC must be selected */
 
 #if !defined(CONFIG_SAM34_SMC)
@@ -197,7 +204,8 @@
 #  define CONFIG_SAM4EEK_LCD_BGCOLOR 0
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -233,7 +241,8 @@
 #  define RGB_BLUE(rgb)       ( (rgb)        & 0xff)
 #endif
 
-/* SAM4E-EK LCD Hardware Definitions **************************************************/
+/* SAM4E-EK LCD Hardware Definitions ****************************************/
+
 /* LCD /CS is CE4,  Bank 3 of NOR/SRAM Bank 1~4 */
 
 #define SAM_LCD_BASE          ((uintptr_t)SAM_EXTCS1_BASE)
@@ -251,11 +260,13 @@
 #define BKL_ENABLE_DURATION   (128*1024)
 #define BKL_DISABLE_DURATION  (128*1024)
 
-/************************************************************************************
+/****************************************************************************
  * Private Type Definition
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Type definition for the correct size of one pixel (from the application standpoint). */
+/* Type definition for the correct size of one pixel
+ * (from the application standpoint).
+ */
 
 #ifdef CONFIG_SAM4EEK_LCD_RGB565
 typedef uint16_t sam_color_t;
@@ -285,9 +296,10 @@ struct sam_dev_s
   bool     output;      /* True: Configured for output */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Low Level LCD access */
 
 static void sam_write_reg(uint8_t regaddr, uint16_t regval);
@@ -305,16 +317,19 @@ static int sam_poweroff(FAR struct sam_dev_s *priv);
 
 /* LCD Data Transfer Methods */
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int sam_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer,
+                      size_t npixels);
+static int sam_getrun(fb_coord_t row, fb_coord_t col,
+                      FAR uint8_t *buffer,
+                      size_t npixels);
 
 /* LCD Configuration */
 
 static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
              FAR struct fb_videoinfo_s *vinfo);
-static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int sam_getplaneinfo(FAR struct lcd_dev_s *dev,
+             unsigned int planeno,
              FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -343,9 +358,10 @@ static inline void sam_smc_initialize(void);
 static void sam_lcd9325_initialize(void);
 static inline int sam_lcd_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
+
 /* LCD GPIO configurations */
 
 static const uint32_t g_lcdpin[] =
@@ -403,6 +419,7 @@ static struct sam_dev_s g_lcddev =
     .getplaneinfo = sam_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -414,17 +431,17 @@ static struct sam_dev_s g_lcddev =
   },
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_write_reg
  *
  * Description:
  *   Write to an LCD register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_write_reg(uint8_t regaddr, uint16_t regval)
 {
@@ -437,13 +454,13 @@ static void sam_write_reg(uint8_t regaddr, uint16_t regval)
   LCD_DATA  = (uint8_t)(regval & 0xff);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_read_reg
  *
  * Description:
  *   Read from an LCD register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t sam_read_reg(uint8_t regaddr)
 {
@@ -460,13 +477,13 @@ static uint16_t sam_read_reg(uint8_t regaddr)
   return regval;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_gram_prepare
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_gram_prepare(void)
 {
@@ -474,13 +491,13 @@ static inline void sam_gram_prepare(void)
   LCD_INDEX = ILI9325_GRAM_DATA_REG;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_gram_write
  *
  * Description:
  *   Write one pixel to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_gram_write(sam_color_t color)
 {
@@ -489,13 +506,13 @@ static inline void sam_gram_write(sam_color_t color)
   LCD_DATA = RGB_BLUE(color);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_gram_read
  *
  * Description:
  *   Read one 16-bit pixel to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline sam_color_t sam_gram_read(void)
 {
@@ -517,19 +534,20 @@ static inline sam_color_t sam_gram_read(void)
       /* RRRR RGGG GGGB BBBB -> 0000 0000 RRRR R000 GGGG GG00 BBBB B000 */
 
   return ((value[0] & 0xf8)) |
-         ((value[0] & 0x07) << 13) | ((value[1] & 0xE0) << 5) |
+         ((value[0] & 0x07) << 13) | ((value[1] & 0xe0) << 5) |
          ((value[1] & 0x1f) << 19);
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_set_cursor
  *
  * Description:
- *   Set the cursor position.  In landscape mode, the "column" is actually the physical
+ *   Set the cursor position.
+ *   In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_set_cursor(uint16_t col, uint16_t row)
 {
@@ -537,7 +555,7 @@ static void sam_set_cursor(uint16_t col, uint16_t row)
   sam_write_reg(ILI9325_VERTICAL_GRAM_ADDR_SET, col);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_dumprun
  *
  * Description:
@@ -546,12 +564,14 @@ static void sam_set_cursor(uint16_t col, uint16_t row)
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+static void sam_dumprun(FAR const char *msg, FAR uint16_t *run,
+                        size_t npixels)
 {
-  int i, j;
+  int i;
+  int j;
 
   syslog(LOG_DEBUG, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
@@ -567,13 +587,13 @@ static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_disable_backlight
  *
  * Description:
  *   Turn the backlight off.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_disable_backlight(void)
 {
@@ -583,13 +603,13 @@ static void sam_disable_backlight(void)
   for (delay = 0; delay < BKL_DISABLE_DURATION; delay++);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_set_backlight
  *
  * Description:
  *   The the backlight to the level associated with the specified power value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_set_backlight(unsigned int power)
 {
@@ -626,14 +646,15 @@ static void sam_set_backlight(unsigned int power)
   for (delay = 0; delay < BKL_ENABLE_DURATION; delay++);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
@@ -651,7 +672,7 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_putrun
  *
  * Description:
@@ -663,10 +684,11 @@ static int sam_poweroff(FAR struct sam_dev_s *priv)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int sam_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer,
+                      size_t npixels)
 {
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
@@ -689,8 +711,8 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   sam_gram_prepare();
 
-  /* Then transfer the pixels as 3 8-bit transfers, each providing 6 bits of the
-   * color component in the MS bits.
+  /* Then transfer the pixels as 3 8-bit transfers, each providing 6 bits of
+   * the color component in the MS bits.
    */
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565) || defined(CONFIG_SAM4EEK_LCD_RGB32)
@@ -713,7 +735,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getrun
  *
  * Description:
@@ -725,7 +747,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
@@ -742,8 +764,8 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   sam_gram_prepare();
 
-  /* Then transfer the pixels, reading RGB565 and converting this to the format
-   * expected by the caller.
+  /* Then transfer the pixels, reading RGB565 and converting this to the
+   * format expected by the caller.
    */
 
   while (npixels--)
@@ -758,11 +780,13 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       /* Convert and transfer the color to the user buffer */
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
+
       /* Return the raw RGB565 color */
 
       *buffer++ = (sam_color_t)value[0] << 8 | (sam_color_t)value[1];
 
 #elif defined(CONFIG_SAM4EEK_LCD_RGB24)
+
       /* RRRR RGGG GGGB BBBB -> RRRR R000, GGGG GG00, BBBB B000 */
 
       *ptr++ = (value[0] & 0xf8);
@@ -770,10 +794,11 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       *ptr++ = (value[1] & 0x1f) << 3;
 
 #else /* if defined(CONFIG_SAM4EEK_LCD_RGB32) */
+
       /* RRRR RGGG GGGB BBBB -> 0000 0000 RRRR R000 GGGG GG00 BBBB B000 */
 
       *buffer++ = ((value[0] & 0xf8)) |
-                  ((value[0] & 0x07) << 13) | ((value[1] & 0xE0) << 5) |
+                  ((value[0] & 0x07) << 13) | ((value[1] & 0xe0) << 5) |
                   ((value[1] & 0x1f) << 19);
 #endif
     }
@@ -781,31 +806,32 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres,
+          g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
@@ -816,14 +842,15 @@ static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *   (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getpower(struct lcd_dev_s *dev)
 {
@@ -833,14 +860,15 @@ static int sam_getpower(struct lcd_dev_s *dev)
   return priv->power;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *   (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -875,13 +903,13 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_getcontrast(struct lcd_dev_s *dev)
 {
@@ -889,13 +917,13 @@ static int sam_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -903,13 +931,13 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_gpio_initialize
  *
  * Description:
  *   Configure LCD GPIO pins
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_gpio_initialize(void)
 {
@@ -923,13 +951,13 @@ static inline void sam_gpio_initialize(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_smc_initialize
  *
  * Description:
  *   Configure LCD SMC interface
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sam_smc_initialize(void)
 {
@@ -957,26 +985,27 @@ static inline void sam_smc_initialize(void)
   putreg32(regval, smcbase + SAM_SMCCS_MODE_OFFSET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcd9325_initialize
  *
  * Description:
  *   Initialize the ILI9325 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_lcd9325_initialize(void)
 {
   uint16_t regval;
 
-  /* Turn off the LCD ***************************************************************/
+  /* Turn off the LCD *******************************************************/
 
   sam_write_reg(ILI9325_DISP_CTRL1,
                 ILI9325_DISP_CTRL1_GON | ILI9325_DISP_CTRL1_DTE |
                 ILI9325_DISP_CTRL1_D(3));
 
-  /* Initial sequence ***************************************************************/
-  /* Disable sleep and standby mode*/
+  /* Initial sequence *******************************************************/
+
+  /* Disable sleep and standby mode */
 
   sam_write_reg(ILI9325_POWER_CTRL1, 0);
 
@@ -991,7 +1020,8 @@ static void sam_lcd9325_initialize(void)
   /* Set 1 line inversion */
 
   sam_write_reg(ILI9325_LCD_DRIVING_CTRL,
-                ILI9325_LCD_DRIVING_CTRL_BIT10 | ILI9325_LCD_DRIVING_CTRL_EOR |
+                ILI9325_LCD_DRIVING_CTRL_BIT10 |
+                ILI9325_LCD_DRIVING_CTRL_EOR |
                 ILI9325_LCD_DRIVING_CTRL_BC0);
 
   /* Disable resizing feature */
@@ -1023,7 +1053,8 @@ static void sam_lcd9325_initialize(void)
 
   sam_write_reg(ILI9325_RGB_DISP_INTERFACE_CTRL2, 0);
 
-  /* Power on sequence **************************************************************/
+  /* Power on sequence ******************************************************/
+
   /* Disable sleep and standby mode */
 
   sam_write_reg(ILI9325_POWER_CTRL1, 0);
@@ -1043,7 +1074,8 @@ static void sam_lcd9325_initialize(void)
   sam_write_reg(ILI9325_POWER_CTRL4, 0);
   up_mdelay(200);
 
-  /* Enable power supply and source driver ******************************************/
+  /* Enable power supply and source driver **********************************/
+
   /* Adjust the constant current and set the factor used in the step-up
    * circuits.
    */
@@ -1117,8 +1149,8 @@ static void sam_lcd9325_initialize(void)
    *  10 = Horizontal decrement, Vertical increment
    *  11 = Horizontal increment, Vertical increment
    *
-   * ORG moves the origin address according to the ID setting when a window address
-   * area is made.
+   * ORG moves the origin address according to the ID setting when a window
+   * address area is made.
    *   0 = The origin address is not moved.
    *   1 = The original address moves according to the I/D[1:0] setting.
    *
@@ -1126,49 +1158,55 @@ static void sam_lcd9325_initialize(void)
    *   0 = Follow the RGB order to write the pixel data.
    *   1 = Swap the RGB data to BGR in writing into GRAM.
    *
-   * TRI = 1: Data are transferred to the internal RAM in 8-bit x 3 transfers mode
-   *   via the 8-bit interface.
+   * TRI = 1: Data are transferred to the internal RAM in 8-bit x 3 transfers
+   *   mode via the 8-bit interface.
    *
    * DFM + TRI: Data is transferred as 3 byte transfers
    *
-   * Use the high speed write mode (HWM=1).  When TRI = 1, data are transferred to
-   * the internal RAM in 8-bit x 3 transfers mode via the 8-bit interface.  DFM set
-   * the mode of transferring data to the internal RAM when TRI = 1.
-   * I/D[1:0] = 11 Horizontal : increment Vertical : increment, AM=0:Horizontal
+   * Use the high speed write mode (HWM=1).
+   * When TRI = 1, data are transferred to the internal RAM in 8-bit x 3
+   * transfers mode via the 8-bit interface.
+   * DFM set the mode of transferring data to the internal RAM when TRI = 1.
+   * I/D[1:0] = 11 Horizontal : increment
+   * Vertical : increment, AM=0:Horizontal
    */
 
 #if defined(CONFIG_LCD_LANDSCAPE)
-  /* Landscape: Horizontal increment/ Vertical decrement, address is update in
-   * horizontal direction
+  /* Landscape: Horizontal increment/ Vertical decrement, address is update
+   * in horizontal direction
    */
 
-  regval = ILI9325_ENTRY_MODE_ID(1) | ILI9325_ENTRY_MODE_ORG | ILI9325_ENTRY_MODE_HWM |
-           ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI | ILI9325_ENTRY_MODE_DFM;
+  regval = ILI9325_ENTRY_MODE_ID(1) | ILI9325_ENTRY_MODE_ORG |
+           ILI9325_ENTRY_MODE_HWM | ILI9325_ENTRY_MODE_BGR |
+           ILI9325_ENTRY_MODE_TRI | ILI9325_ENTRY_MODE_DFM;
 
 #elif defined(CONFIG_LCD_RLANDSCAPE)
-  /* Landscape: Horizontal decrement/ Vertical increment, address is update in
-   * horizontal direction
+  /* Landscape: Horizontal decrement/ Vertical increment, address is update
+   * in horizontal direction
    */
 
-  regval = ILI9325_ENTRY_MODE_ID(2) | ILI9325_ENTRY_MODE_ORG | ILI9325_ENTRY_MODE_HWM |
-           ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI | ILI9325_ENTRY_MODE_DFM;
+  regval = ILI9325_ENTRY_MODE_ID(2) | ILI9325_ENTRY_MODE_ORG |
+           ILI9325_ENTRY_MODE_HWM | ILI9325_ENTRY_MODE_BGR |
+           ILI9325_ENTRY_MODE_TRI | ILI9325_ENTRY_MODE_DFM;
 
 #elif defined(CONFIG_LCD_PORTRAIT)
-  /* Landscape: Horizontal decrement/ Vertical decrement, address is update in
-   * vertical direction
+  /* Landscape: Horizontal decrement/ Vertical decrement, address is update
+   * in vertical direction
    */
 
-  regval = ILI9325_ENTRY_MODE_AM | ILI9325_ENTRY_MODE_ID(0) | ILI9325_ENTRY_MODE_ORG |
-           ILI9325_ENTRY_MODE_HWM | ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI |
+  regval = ILI9325_ENTRY_MODE_AM | ILI9325_ENTRY_MODE_ID(0) |
+           ILI9325_ENTRY_MODE_ORG | ILI9325_ENTRY_MODE_HWM |
+           ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI |
            ILI9325_ENTRY_MODE_DFM;
 
 #else /* if defined(CONFIG_LCD_RPORTRAIT) */
-  /* Landscape: Horizontal increment/ Vertical increment, address is update in
-   * vertical direction
+  /* Landscape: Horizontal increment/ Vertical increment, address is update
+   * in vertical direction
    */
 
-  regval = ILI9325_ENTRY_MODE_AM | ILI9325_ENTRY_MODE_ID(3) | ILI9325_ENTRY_MODE_ORG |
-           ILI9325_ENTRY_MODE_HWM | ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI |
+  regval = ILI9325_ENTRY_MODE_AM | ILI9325_ENTRY_MODE_ID(3) |
+           ILI9325_ENTRY_MODE_ORG | ILI9325_ENTRY_MODE_HWM |
+           ILI9325_ENTRY_MODE_BGR | ILI9325_ENTRY_MODE_TRI |
            ILI9325_ENTRY_MODE_DFM;
 #endif
 
@@ -1195,8 +1233,8 @@ static void sam_lcd9325_initialize(void)
 
   sam_write_reg(ILI9325_DRIVER_OUTPUT_CTRL1, regval);
 
-  /* Set the number of lines to drive the LCD at an interval of 8 lines. The scan
-   * direction is from G320 to G1
+  /* Set the number of lines to drive the LCD at an interval of 8 lines.
+   * The scan direction is from G320 to G1
    */
 
   regval = ILI9325_DRIVER_OUTPUT_CTRL2_NL((SAM_XRES / 8) - 1);
@@ -1209,7 +1247,8 @@ static void sam_lcd9325_initialize(void)
 
   sam_write_reg(ILI9325_DRIVER_OUTPUT_CTRL2, regval);
 
-  /* Vertical Scrolling *************************************************************/
+  /* Vertical Scrolling *****************************************************/
+
   /* Disable scrolling and enable the grayscale inversion */
 
   sam_write_reg(ILI9325_BASE_IMG_DISP_CTRL, ILI9325_BASE_IMG_DISP_CTRL_REV);
@@ -1246,13 +1285,13 @@ static void sam_lcd9325_initialize(void)
   sam_set_cursor(0, 0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcd_initialize
  *
  * Description:
  *   Initialize the LCD panel
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int sam_lcd_initialize(void)
 {
@@ -1275,19 +1314,20 @@ static inline int sam_lcd_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the
- *   power setting at 0 (full off).
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared, and the LCD ready to use, but with the  power setting at 0
+ *   (full off).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -1326,14 +1366,14 @@ int board_lcd_initialize(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   support for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -1341,13 +1381,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return &g_lcddev.dev;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Uninitialize the LCD support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -1358,16 +1398,17 @@ void board_lcd_uninitialize(void)
   sam_poweroff(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAM4E-EK board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the SAM4E-EK board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
 void sam_lcdclear(uint16_t color)

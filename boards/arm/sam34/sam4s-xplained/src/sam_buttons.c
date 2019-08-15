@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4s-xplained/src/sam_buttons.c
+ * boards/arm/sam34/sam4s-xplained/src/sam_buttons.c
  *
  *   Copyright (C) 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -147,5 +147,4 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   return ret;
 }
 #endif
-
 #endif /* CONFIG_ARCH_BUTTONS */

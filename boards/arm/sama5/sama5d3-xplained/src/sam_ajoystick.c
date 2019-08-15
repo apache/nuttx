@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3-xplained/src/sam_ajoystick.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_ajoystick.c
  *
  *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Check for pre-requisites and pin conflicts */
 
 #ifdef CONFIG_AJOYSTICK
@@ -112,6 +113,7 @@ static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each Itead joystick button.  Index using AJOY_*
  * button definitions in include/nuttx/input/ajoystick.h.
  */
@@ -239,7 +241,6 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
       return -EIO;
     }
 
-
   /* Sample the discrete button inputs */
 
   sample->as_buttons = ajoy_buttons(lower);
@@ -319,20 +320,20 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
 
       for (i = 0; i < AJOY_NGPIOS; i++)
         {
-           /* Enable interrupts on each pin that has either a press or
-            * release event associated with it.
-            */
+          /* Enable interrupts on each pin that has either a press or
+           * release event associated with it.
+           */
 
-           bit = (1 << i);
-           if ((either & bit) != 0)
-             {
-               /* REVISIT:  It would be better if we reconfigured for
-                * the edges of interest so that we do not get spurious
-                * interrupts.
-                */
+          bit = (1 << i);
+          if ((either & bit) != 0)
+            {
+              /* REVISIT:  It would be better if we reconfigured for
+               * the edges of interest so that we do not get spurious
+               * interrupts.
+               */
 
                sam_pioirqenable(g_joyirq[i]);
-             }
+            }
         }
     }
 
@@ -405,6 +406,7 @@ int sam_ajoy_initialization(void)
   int i;
 
   /* NOTE: The ADC driver was initialized earlier in the bring-up sequence. */
+
   /* Open the ADC driver for reading. */
 
   ret = file_open(&g_adcfile, "/dev/adc0", O_RDONLY);

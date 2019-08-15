@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3x-ek/src/sam_nandflash.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_nandflash.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -104,9 +104,10 @@ int board_nandflash_config(int cs)
   uint32_t regval;
 
   /* The Embest and Ronetix CM boards and one Hynix NAND HY27UF(08/16)2G2B
-   * Series NAND (MT29F2G08ABAEAWP).  This part has a capacity of 256Mx8bit
-   * () with spare 8Mx8 bit capacity. The device contains 2048 blocks, composed
-   * by 64 x 2112 byte pages.  The effective size is approximately 256MiB.
+   * Series NAND (MT29F2G08ABAEAWP).
+   * This part has a capacity of 256Mx8bit () with spare 8Mx8 bit capacity.
+   * The device contains 2048 blocks, composed by 64 x 2112 byte pages.
+   * The effective size is approximately 256MiB.
    *
    * NAND is available on CS3.
    */

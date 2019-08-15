@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3-xplained/src/sam_spi.c
+/****************************************************************************
+ * boards/arm/sama5/sama5d3-xplained/src/sam_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,17 +55,18 @@
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select PIO pins for the SAMA5D3-Xplained board.
+ *   Called to configure SPI chip select PIO pins for the SAMA5D3-Xplained
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void)
 {
@@ -73,7 +74,7 @@ void weak_function sam_spidev_initialize(void)
 #ifdef CONFIG_MTD_AT25
   /* The AT25 serial FLASH connects using NPCS0 */
 
-   sam_configpio(PIO_AT25_NPCS0);
+  sam_configpio(PIO_AT25_NPCS0);
 #endif
 #endif
 
@@ -85,30 +86,33 @@ void weak_function sam_spidev_initialize(void)
  * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They
- *   include:
+ *   These external functions must be provided by board-specific logic.
+ *   They include:
  *
- *   o sam_spi[0|1]select is a functions tomanage the board-specific chip selects
- *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the status
- *     and cmddata methods of the SPI interface defined by struct spi_ops_
- *     (see include/nuttx/spi/spi.h). All other methods including
- *     sam_spibus_initialize()) are provided by common SAM3/4 logic.
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
+ *           selects
+ *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:
+ *     Implementations of the status and cmddata methods of the SPI interface
+ *     defined by struct spi_ops_(see include/nuttx/spi/spi.h).
+ *     All other methods including sam_spibus_initialize()) are provided by
+ *     common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using PIOs in the way your board is configured.
+ *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in
+ *      your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using PIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

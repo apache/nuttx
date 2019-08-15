@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4l-xplained/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam4l-xplained/include/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM4L_XPLAINED_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM4L_XPLAINED_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +49,11 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* Select the DFLL as the source of the system clock.
  *
@@ -71,9 +71,10 @@
 
 #define BOARD_SYSCLK_SOURCE_DFLL0  1
 
-/* Nominal frequencies in on-chip RC oscillators.  These are *not* configurable
- * but appear here for use in frequency calculations.  NOTE: These may frequencies
- * may vary with temperature changes.
+/* Nominal frequencies in on-chip RC oscillators.
+ * These are *not* configurable but appear here for use in frequency
+ * calculations.
+ * NOTE: These may frequencies may vary with temperature changes.
  */
 
 #define BOARD_RCSYS_FREQUENCY      115000   /* Nominal frequency of RCSYS (Hz) */
@@ -193,7 +194,8 @@
 #define BOARD_USBC_SRC_DFLL        1 /* Source DFLL0 at 48MHz */
 #define BOARD_USBC_GCLK_DIV        1 /* Fusb = Fdfll / 1 = 48MHz */
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
  * one user controllable LED, a yellow LED labelled LED0 near the SAM4L USB
@@ -215,8 +217,8 @@
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control LED0 as defined below.  Thus if LED0 is statically on, NuttX has
  * successfully booted and is, apparently, running normally.  If LED0 is
- * flashing at approximately 2Hz, then a fatal error has been detected and the
- * system has halted.
+ * flashing at approximately 2Hz, then a fatal error has been detected and
+ * the system has halted.
  */
 
 #define LED_STARTED       0 /* LED0=OFF */
@@ -228,9 +230,10 @@
 #define LED_ASSERTION     2 /* LED0=no change */
 #define LED_PANIC         3 /* LED0=flashing */
 
-/* Button definitions ***************************************************************/
-/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
- * to the SAM4L is:
+/* Button definitions *******************************************************/
+
+/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.
+ * The connection to the SAM4L is:
  *
  *   PC13 CATB_SENSE15
  *   PC14 CATB_DIS
@@ -238,9 +241,10 @@
 
 /* Mechanical buttons:
  *
- * The SAM4L Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAM4L reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4L Xplained Pro contains two mechanical buttons.
+ * One button is the RESET button connected to the SAM4L reset line and the
+ * other is a generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PC24 SW0
  */
@@ -252,7 +256,8 @@
 
 #define BUTTON_SW0_BIT     (1 << BUTTON_SW0)
 
-/* Alternate Function Disambiguation ************************************************/
+/* Alternate Function Disambiguation ****************************************/
+
 /* USART0 is also available on connectors EXT1 and EXT4:
  *
  * EXT1  TXT4  GPIO  Function
@@ -264,10 +269,11 @@
 #define GPIO_USART0_RXD    GPIO_USART0_RXD_4
 #define GPIO_USART0_TXD    GPIO_USART0_TXD_4
 
-/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be used to
- * program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).  The Embedded
- * debugger also include a Virtual Com port interface over USART1.  Virtual COM
- * port connections:
+/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
+ * used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
+ * The Embedded debugger also include a Virtual Com port interface over
+ * USART1.
+ * Virtual COM port connections:
  *
  *   PC26 USART1 RXD
  *   PC27 USART1 TXD
@@ -287,4 +293,4 @@
 #define GPIO_SPI0_MOSI     GPIO_SPI0_MOSI_1
 #define GPIO_SPI0_SPCK     GPIO_SPI0_SPCK_4
 
-#endif  /* __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_SAM4L_XPLAINED_INCLUDE_BOARD_H */

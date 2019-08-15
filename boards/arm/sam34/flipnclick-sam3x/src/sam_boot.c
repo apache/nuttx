@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/flipnclick-sam3x/src/sam_boot.c
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,6 +63,7 @@
 void sam_boardinitialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
+
   /* Configure on-board LEDs if LED support has been selected. */
 
   board_autoled_initialize();

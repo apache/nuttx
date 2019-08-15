@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d2-xult/src/sam_userleds.c
+ * boards/arm/sama5/sama5d2-xult/src/sam_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There is an RGB LED on board the SAMA5D2-XULT.  The RED component is
  * driven by the SDHC_CD pin (PA13) and so will not be used.  The LEDs are
  * provided VDD_LED and so bringing the LED low will will illuminated the

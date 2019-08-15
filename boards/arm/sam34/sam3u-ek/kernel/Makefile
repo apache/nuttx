@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam3u-ek/kernel/Makefile
+# boards/arm/sam34/sam3u-ek/kernel/Makefile
 #
 #   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d2-xult/src/sam_buttons.c
+ * boards/arm/sama5/sama5d2-xult/src/sam_buttons.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* A single button, PB_USER (PB6), is available on the SAMA5D2-XULT
  *
  *  ------------------------------ ------------------- ----------------------
@@ -156,5 +157,4 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   return ret;
 }
 #endif
-
 #endif /* CONFIG_ARCH_BUTTONS */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d4-ek/src/sam_automount.c
+/****************************************************************************
+ * boards/arm/sama5/sama5d4-ek/src/sam_automount.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,9 +53,9 @@
 
 #ifdef HAVE_AUTOMOUNTER
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef NULL
 #  define NULL (FAR void *)0
@@ -65,9 +65,10 @@
 #  define OK 0
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* This structure represents the changeable state of the automounter */
 
 struct sam_automount_state_s
@@ -82,8 +83,8 @@ struct sam_automount_state_s
 
 struct sam_automount_config_s
 {
-  /* This must be first thing in structure so that we can simply cast from struct
-   * automount_lower_s to struct sam_automount_config_s
+  /* This must be first thing in structure so that we can simply cast from
+   * struct automount_lower_s to struct sam_automount_config_s
    */
 
   struct automount_lower_s lower;          /* Publicly visible part */
@@ -91,18 +92,19 @@ struct sam_automount_config_s
   FAR struct sam_automount_state_s *state; /* Changeable state */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 static int  sam_attach(FAR const struct automount_lower_s *lower,
                        automount_handler_t isr, FAR void *arg);
-static void sam_enable(FAR const struct automount_lower_s *lower, bool enable);
+static void sam_enable(FAR const struct automount_lower_s *lower,
+                       bool enable);
 static bool sam_inserted(FAR const struct automount_lower_s *lower);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
 static struct sam_automount_state_s g_hsmci0state;
@@ -144,11 +146,11 @@ static const struct sam_automount_config_s g_hsmci1config =
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_attach
  *
  * Description:
@@ -162,7 +164,7 @@ static const struct sam_automount_config_s g_hsmci1config =
  *  Returned Value:
  *    Always returns OK
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_attach(FAR const struct automount_lower_s *lower,
                       automount_handler_t isr, FAR void *arg)
@@ -188,7 +190,7 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_enable
  *
  * Description:
@@ -201,7 +203,7 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
 {
@@ -239,7 +241,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_inserted
  *
  * Description:
@@ -251,7 +253,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
  *  Returned Value:
  *    True if the card is inserted; False otherwise
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static bool sam_inserted(FAR const struct automount_lower_s *lower)
 {
@@ -263,11 +265,11 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower)
   return sam_cardinserted(config->hsmci);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_initialize
  *
  * Description:
@@ -279,7 +281,7 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower)
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_automount_initialize(void)
 {
@@ -308,20 +310,22 @@ void sam_automount_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_event
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The HSMCI card detection logic has detected an insertion or removal
+ *   event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0_SLOTNO or HSMCI1_SLOTNO.  There is a
- *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0_SLOTNO or HSMCI1_SLOTNO.
+ *      There is a terminology problem here:  Each HSMCI supports two slots,
+ *      slot A and slot B.
+ *      Only slot A is used.  So this is not a really a slot, but an HSCMI
+ *      peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:
@@ -330,7 +334,7 @@ void sam_automount_initialize(void)
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_automount_event(int slotno, bool inserted)
 {

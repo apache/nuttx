@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/sam_touchscreen.c
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam_touchscreen.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_INPUT_ADS7843E
@@ -264,7 +265,9 @@ int sam_tsc_setup(int minor)
   if (ret < 0)
     {
       ierr("ERROR: Failed to initialize SPI chip select %d\n", TSC_CSNUM);
+
       /* sam_spibus_uninitialize(dev); */
+
       return -ENODEV;
     }
 

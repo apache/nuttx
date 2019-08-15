@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/src/sam_userleds.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_userleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,22 +32,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
  * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
  * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  *
- * - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
- *   is used.  I am not sure of the LCD function, but the LED may not be available
+ * - D8: D8 is shared with other functions and cannot be used if the
+ *   1-Wire ROM is used.
+ *   I am not sure of the LCD function, but the LED may not be available
  *   if the LCD is used either.  We will avoid using D8 just for simplicity.
  * - D10:  Nothing special here.  A low output illuminates.
- * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
- *   be on when power is applied but otherwise, I think it works like D10.
+ * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.
+ *       This LED will be on when power is applied but otherwise,
+ *       I think it works like D10.
  */
 
 /****************************************************************************

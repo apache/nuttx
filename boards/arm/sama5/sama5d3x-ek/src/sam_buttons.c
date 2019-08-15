@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d3x-ek/src/sam_buttons.c
+ * boards/arm/sama5/sama5d3x-ek/src/sam_buttons.c
  *
  *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

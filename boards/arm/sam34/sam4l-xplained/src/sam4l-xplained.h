@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4l-xplained/src/sam4l-xplained.h
+/****************************************************************************
+ * boards/arm/sam34/sam4l-xplained/src/sam4l-xplained.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
-#define __BOARDS_ARM_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
+#ifndef __BOARDS_ARM_SAM34_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
+#define __BOARDS_ARM_SAM34_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,13 +50,14 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* LEDs: There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
- * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labeled LED0 near the SAM4L USB
- * connector.
+ ****************************************************************************/
+
+/* LEDs: There are three LEDs on board the SAM4L Xplained Pro board:
+ * The EDBG controls two of the LEDs, a power LED and a status LED.
+ * There is only one user controllable LED, a yellow LED labeled LED0 near
+ * the SAM4L USB connector.
  *
  * This LED is controlled by PC07 and LED0 can be activated by driving the
  * PC07 to GND.
@@ -83,8 +84,8 @@
 #define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
                        GPIO_PORTC | GPIO_PIN7)
 
-/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
- * to the SAM4L is:
+/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.
+ * The connection to the SAM4L is:
  *
  *   PC13 CATB_SENSE15
  *   PC14 CATB_DIS
@@ -92,9 +93,10 @@
 
 /* Mechanical buttons:
  *
- * The SAM4L Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAM4L reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4L Xplained Pro contains two mechanical buttons.
+ * One button is the RESET button connected to the SAM4L reset line and the
+ * other is a generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PC24 SW0
  */
@@ -174,9 +176,10 @@
 
 /* I/O1
  *
- * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and two GPIOs.    These the GPIOs will vary if the I/O1
- * is installed on the EXT1 or EXT2 connector:
+ * Support for the microSD card slot on the I/O1 module.
+ * The I/O1 requires SPI support and two GPIOs.
+ * These the GPIOs will vary if the I/O1 is installed on the EXT1 or EXT2
+ * connector:
  *
  *
  *   PIN EXT1           EXT2            Description
@@ -234,9 +237,10 @@
 
 /* OLED1
  *
- * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and three output GPIOs.  These the GPIOs will vary if the OLED1
- * is installed on the EXT1 or EXT2 connector:
+ * Support for the microSD card slot on the I/O1 module.
+ * The I/O1 requires SPI support and three output GPIOs.
+ * These the GPIOs will vary if the OLED1 is installed on the EXT1 or EXT2
+ * connector:
  *
  *
  *   PIN EXT1           EXT2            Description
@@ -308,38 +312,39 @@
                         GPIO_PORTB | GPIO_PIN11)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdinitialize
  *
  * Description:
- *   Initialize the SPI-based SD card.  Requires CONFIG_SAM4L_XPLAINED_IOMODULE=y,
+ *   Initialize the SPI-based SD card.
+ *   Requires CONFIG_SAM4L_XPLAINED_IOMODULE=y,
  *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and CONFIG_SAM34_SPI0=y
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
 int sam_sdinitialize(int minor);
@@ -349,8 +354,8 @@ int sam_sdinitialize(int minor);
  * Name: sam_slcd_initialize
  *
  * Description:
- *   Initialize the SAM4L Xplained Pro LCD hardware and register the character
- *   driver as /dev/slcd0.
+ *   Initialize the SAM4L Xplained Pro LCD hardware and register the
+ *   character driver as /dev/slcd0.
  *
  ****************************************************************************/
 
@@ -359,5 +364,5 @@ int sam_slcd_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H */
 

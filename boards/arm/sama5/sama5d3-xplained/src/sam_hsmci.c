@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3-xplained/src/sam_hsmci.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_hsmci.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,8 +32,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The SAMA5D3-Xplained provides a two SD memory card slots:  (1) a full size SD card
- * slot (J10), and (2) a microSD memory card slot (J11).
+
+/* The SAMA5D3-Xplained provides a two SD memory card slots:
+ *  (1) a full size SD card slot (J10), and
+ *  (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
  * is available on PB17 (pulled high).  The write protect descrete is tied to
@@ -89,6 +91,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one HSMCI peripheral */
 
 struct sam_hsmci_state_s
@@ -181,7 +184,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
       sdio_mediachange(state->hsmci, cd);
     }
 
-   return OK;
+  return OK;
 }
 
 #ifdef CONFIG_SAMA5_HSMCI0
@@ -262,6 +265,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   sam_configpio(state->pincfg);
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   state->hsmci = sdio_initialize(slotno);

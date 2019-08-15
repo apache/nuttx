@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4l-xlplained/src/sam_slcd.c
+ * boards/arm/sam34/sam4l-xlplained/src/sam_slcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -70,6 +70,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_LIB_SLCDCODEC
@@ -92,6 +93,7 @@
 #endif
 
 /* LCD **********************************************************************/
+
 /* LCD characteristics.  The logic in this driver is not portable; it is
  * tailored for the SAM4l Xplained Pro's LED1 module.  However, in an effort
  * to add some reusability to this module, some of the tunable settings are
@@ -268,6 +270,7 @@ struct slcd_pixel_s
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Debug */
 
 #ifdef CONFIG_DEBUG_LCD_INFO
@@ -298,13 +301,16 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
 static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                     bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure
+ * (there is no retained state information)
+ */
 
 static const struct file_operations g_slcdops =
 {
@@ -384,11 +390,17 @@ static void slcd_dumpstate(FAR const char *msg)
   lcdinfo("  curpos: %d\n",
           g_slcdstate.curpos);
   lcdinfo("  Display: [%c%c%c%c%c]\n",
-          g_slcdstate.buffer[0], g_slcdstate.buffer[1], g_slcdstate.buffer[2],
-          g_slcdstate.buffer[3], g_slcdstate.buffer[4]);
+          g_slcdstate.buffer[0],
+          g_slcdstate.buffer[1],
+          g_slcdstate.buffer[2],
+          g_slcdstate.buffer[3],
+          g_slcdstate.buffer[4]);
   lcdinfo("  Options: [%d%d%d%d%d]\n",
-          g_slcdstate.options[0], g_slcdstate.options[1], g_slcdstate.options[2],
-          g_slcdstate.options[3], g_slcdstate.options[4]);
+          g_slcdstate.options[0],
+          g_slcdstate.options[1],
+          g_slcdstate.options[2],
+          g_slcdstate.options[3],
+          g_slcdstate.options[4]);
 }
 #endif
 
@@ -541,7 +553,7 @@ static uint8_t slcd_getcontrast(void)
    * 0000 0020  ffff ffe0 -32    0
    */
 
-  scontrast   = (int32_t)(ucontrast << (32-6));
+  scontrast   = (int32_t)(ucontrast << (32 - 6));
   scontrast >>= (32 - 6);
   return scontrast + 32;
 }
@@ -611,7 +623,8 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
    */
 
   segment = g_startseg[curpos];
-  putreg32(LCDCA_CMCFG_TDG_14S4C | LCDCA_CMCFG_STSEG(segment), SAM_LCDCA_CMCFG);
+  putreg32(LCDCA_CMCFG_TDG_14S4C | LCDCA_CMCFG_STSEG(segment),
+           SAM_LCDCA_CMCFG);
   putreg32(ch, SAM_LCDCA_CMDR);
 
   /* Check if we need to decorate the character with a preceding dot. */
@@ -645,19 +658,22 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
     {
       /* Erasure */
 
-      case SLCDCODE_BACKDEL:         /* Backspace (backward delete) N characters */
+      case SLCDCODE_BACKDEL:  /* Backspace (backward delete) N characters */
         {
           int tmp;
 
-          /* If we are at the home position or if the count is zero, then ignore the action */
+          /* If we are at the home position or if the count is zero,
+           * then ignore the action
+           */
 
           if (g_slcdstate.curpos < 1 || count < 1)
             {
               break;
             }
 
-          /* Otherwise, BACKDEL is like moving the cursor back N characters then doing a
-           * forward deletion.  Decrement the cursor position and fall through.
+          /* Otherwise, BACKDEL is like moving the cursor back N characters
+           * then doing a forward deletion.
+           * Decrement the cursor position and fall through.
            */
 
            tmp = (int)g_slcdstate.curpos - count;
@@ -672,7 +688,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
            g_slcdstate.curpos = tmp;
          }
 
-      case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
+      case SLCDCODE_FWDDEL:   /* DELete (forward delete) N characters moving text */
         if (count > 0)
           {
             int nchars;
@@ -693,8 +709,8 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
             for (i = g_slcdstate.curpos + nmove; i < SLCD_NCHARS - 1; i++)
               {
-                slcd_writech(g_slcdstate.buffer[i-nmove], i,
-                            g_slcdstate.options[i-nmove]);
+                slcd_writech(g_slcdstate.buffer[i - nmove], i,
+                            g_slcdstate.options[i - nmove]);
               }
 
             /* Erase the last 'nmove' characters on the display */
@@ -706,7 +722,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
           }
         break;
 
-      case SLCDCODE_ERASE:           /* Erase N characters from the cursor position */
+      case SLCDCODE_ERASE:   /* Erase N characters from the cursor position */
         if (count > 0)
           {
             int last;
@@ -722,7 +738,9 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
                 last = SLCD_NCHARS - 1;
               }
 
-            /* Erase N characters after the current cursor position left by one */
+            /* Erase N characters after the current cursor position left
+             * by one
+             */
 
             for (i = g_slcdstate.curpos; i < last; i++)
               {
@@ -731,20 +749,22 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
           }
         break;
 
-      case SLCDCODE_CLEAR:           /* Home the cursor and erase the entire display */
+      case SLCDCODE_CLEAR:  /* Home the cursor and erase the entire display */
         {
-          /* This is like HOME followed by ERASEEOL.  Home the cursor and
-           * fall through.
+          /* This is like HOME followed by ERASEEOL.
+           * Home the cursor and fall through.
            */
 
           g_slcdstate.curpos = 0;
         }
 
-      case SLCDCODE_ERASEEOL:        /* Erase from the cursor position to the end of line */
+      case SLCDCODE_ERASEEOL:  /* Erase from the cursor position to the end of line */
         {
           int i;
 
-          /* Erase characters after the current cursor position to the end of the line */
+          /* Erase characters after the current cursor position to the end of
+           * the line
+           */
 
           for (i = g_slcdstate.curpos; i < SLCD_NCHARS; i++)
             {
@@ -850,6 +870,7 @@ static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
               ret++;
             }
         }
+
       /* Return the character */
 
       *buffer++ = g_slcdstate.buffer[i];
@@ -914,7 +935,7 @@ static ssize_t slcd_write(FAR struct file *filep,
                   slcd_action(SLCDCODE_HOME, 0);
                 }
 
-               /* Ignore dots before control characters (all of them?) */
+              /* Ignore dots before control characters (all of them?) */
 
                options = 0;
             }
@@ -982,11 +1003,10 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-
       /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
        *
-       * argument:  Pointer to struct slcd_attributes_s in which values will be
-       *            returned
+       * argument:  Pointer to struct slcd_attributes_s in which values will
+       *            be returned
        */
 
       case SLCDIOC_GETATTRIBUTES:
@@ -1134,7 +1154,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Data is always avaialble to be read / Data can always be written */
 
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           nxsem_post(fds->sem);
@@ -1180,10 +1200,10 @@ int sam_slcd_initialize(void)
 
       sam_lcdca_enableclk();
 
-      /* Here we require that either CONFIG_SAM34_OSC32K or CONFIG_SAM34_RC32K
-       * is defined in the configuration.  In that case, the source clock was
-       * initialized during boot up and we can be assured that it is read for
-       * use now.
+      /* Here we require that either CONFIG_SAM34_OSC32K or
+       * CONFIG_SAM34_RC32K is defined in the configuration.
+       * In that case, the source clock was initialized during boot up
+       * and we can be assured that it is read for use now.
        */
 
       /* Disable the LCD controller and frame counters */

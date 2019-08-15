@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/include/board.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_SAM3U_EK_INCLUDE_BOARD_H
-#define __ARCH_SAM3U_EK_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM3U_EK_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM3U_EK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,13 +49,14 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the sam3u device is running on a 4MHz internal RC.
+ * These definitions will configure clocking
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
  *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
@@ -139,7 +140,7 @@
 
 #define BOARD_FWS                  3
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 #define LED_STARTED                0 /* LED0=OFF LED1=OFF LED2=OFF */
 #define LED_HEAPALLOCATE           1 /* LED0=OFF LED1=OFF LED2=ON */
@@ -151,9 +152,9 @@
 #define LED_ASSERTION              6 /* LED0=TOG LED1=XXX LED2=XXX */
 #define LED_PANIC                  7 /* LED0=TOG LED1=XXX LED2=XXX */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 #define BUTTON1                    1 /* Bit 0: Button 1 */
 #define BUTTON2                    2 /* Bit 1: Button 2 */
 
-#endif  /* __ARCH_SAM3U_EK_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_SAM3U_EK_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d4-ek/src/sama5d4-ek.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d4-ek/src/sama5d4-ek.h
  *
  *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D4_EK_SRC_SAMA5D4_EK_H
-#define __BOARDS_ARM_SAMA5D4_EK_SRC_SAMA5D4_EK_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D4_EK_SRC_SAMA5D4_EK_H
+#define __BOARDS_ARM_SAMA5_SAMA5D4_EK_SRC_SAMA5D4_EK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -51,9 +51,10 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_HSMCI       1
@@ -73,6 +74,7 @@
 #define HAVE_I2CTOOL     1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
 #if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
@@ -94,6 +96,7 @@
 #endif
 
 /* NAND FLASH */
+
 /* Can't support the NAND device if NAND flash is not configured on EBI CS3 */
 
 #ifndef CONFIG_SAMA5_EBICS3_NAND
@@ -139,6 +142,7 @@
 #endif
 
 /* AT25 Serial FLASH */
+
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
@@ -294,8 +298,9 @@
 #endif
 
 /* USB Host / USB Device */
-/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined, or there is
- * no USB of any kind.
+
+/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined,
+ * or there is no USB of any kind.
  */
 
 #if !defined(CONFIG_SAMA5_UHPHS)
@@ -392,6 +397,7 @@
 #endif
 
 /* Audio */
+
 /* PCM/WM8904 driver */
 
 #ifndef CONFIG_AUDIO_WM8904
@@ -488,24 +494,26 @@
 #  endif
 #endif
 
-/* LEDs *****************************************************************************/
+/* LEDs *********************************************************************/
+
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
  * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
  * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  *
- * - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
- *   is used.  I am not sure of the LCD function, but the LED may not be available
+ * - D8: D8 is shared with other functions and cannot be used if the
+ *   1-Wire ROM is used.
+ *   I am not sure of the LCD function, but the LED may not be available
  *   if the LCD is used either.  We will avoid using D8 just for simplicity.
  * - D10:  Nothing special here.  A low output illuminates.
- * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
- *   be on when power is applied but otherwise; a low output value will turn it
- *   off.
+ * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.
+ *   This LED will be on when power is applied but otherwise;
+ *   a low output value will turn it off.
  */
 
 #define PIO_LED_USER  (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
@@ -513,24 +521,27 @@
 #define PIO_LED_POWER (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
                        PIO_PORT_PIOE | PIO_PIN9)
 
-/* Buttons **************************************************************************/
+/* Buttons ******************************************************************/
+
 /* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  *
- * Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
- * and 2) when PB2 is pressed, a low value will be senses.
+ * Closing JP2 will bring PE13 to ground so
+ * 1) PE13 should have a weak pull-up, and
+ * 2) when PB2 is pressed, a low value will be senses.
  */
 
 #define PIO_BTN_USER (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN13)
 #define IRQ_BTN_USER  SAM_IRQ_PE13
 
-/* TM7000 LCD/Touchscreen ***********************************************************/
+/* TM7000 LCD/Touchscreen ***************************************************/
+
 /* The TM7000 LCD is available for the SAMA5D4-EK.  See documentation
  * available on the Precision Design Associates website:
  * http://www.pdaatl.com/doc/tm7000.pdf
@@ -572,7 +583,8 @@
 #define MXT_TWI_BUS      0
 #define MXT_I2C_ADDRESS  0x4c
 
-/* HSMCI Card Slots *****************************************************************/
+/* HSMCI Card Slots *********************************************************/
+
 /* The SAMA5D4-EK provides a two SD memory card slots:  (1) a full size SD
  * card slot (J10), and (2) a microSD memory card slot (J11).
  *
@@ -582,9 +594,9 @@
  * transfer mode, but the NuttX driver currently uses only the 4-bit wide
  * transfer mode
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PC4/SPI0_NPCS1/MCI0_CK/PCK1    PC4                 MCI0_CK, ISI_MCK, EXP
  * PC5/D0/MCI0_CDA                PC5                 MCI0_CDA, NAND_IO0
  * PC6/D1/MCI0_DA0                PC6                 MCI0_DA0, NAND_IO1
@@ -596,7 +608,7 @@
  * PC12/D7/MCI0_DA6               PC12                MCI0_DA6, NAND_IO7
  * PC13/NRD/NANDOE/MCI0_DA7       PC13                MCI0_DA7, NAND_RE
  * PE5/A5/CTS3                    MCI0_CD_PE5         MCI0_CD
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  */
 
 #define PIO_MCI0_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
@@ -607,10 +619,10 @@
  * PE6 (pulled high)  NOTE that PE15 must be controlled to provide power
  * to the HSMCI1 slot (the HSMCI0 slot is always powered).
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
- * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD               ???
+ * ------------------------------ ------------------- -----------------------
+ * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD             ???
  * PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
  * PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
  * PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
@@ -619,7 +631,7 @@
  * PE22/A24/TIOB4/MCI1_DA2        PE22                MCI1_DA2, EXP
  * PE23/A25/TCLK4/MCI1_DA3        PE23                MCI1_DA3, EXP
  * PE6/A6/TIOA3                   MCI1_CD_PE6         MCI1_CD
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  */
 
 #define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
@@ -629,7 +641,8 @@
 #define IRQ_MCI1_PWR (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
                       PIO_PORT_PIOE | PIO_PIN15)
 
-/* USB Ports ************************************************************************/
+/* USB Ports ****************************************************************/
+
 /* The SAMA5D4-EK features three USB communication ports:
  *
  *   * Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
@@ -650,10 +663,11 @@
  * ------
  *
  *   PIO  Signal Name    Function
- *   ---- -------------- -------------------------------------------------------
- *   PE10 USBA_EN5V_PE10 VBus power enable (via MN2 power switch) to VBus pin of
- *                       the OTG connector (host)
- *   PE31 USBA_VBUS_PE31 VBus sensing from the VBus pin of the OTG connector (device)
+ *   ---- -------------- ----------------------------------------------------
+ *   PE10 USBA_EN5V_PE10 VBus power enable (via MN2 power switch) to VBus pin
+ *                       of the OTG connector (host)
+ *   PE31 USBA_VBUS_PE31 VBus sensing from the VBus pin of the OTG connector
+ *                      (device)
  */
 
 #ifdef CONFIG_SAMA5_UHPHS_RHPORT1
@@ -674,7 +688,7 @@
  * ------
  *
  *   PIO  Signal Name    Function
- *   ---- -------------- -------------------------------------------------------
+ *   ---- -------------- ----------------------------------------------------
  *   PE11 USBB_EN5V_PE11 VBus power enable (via MN4 power switch).  To the A1
  *                       pin of J5 Dual USB A connector
  */
@@ -689,7 +703,7 @@
  * ------
  *
  *   PIO  Signal Name    Function
- *   ---- -------------- -------------------------------------------------------
+ *   ---- -------------- ----------------------------------------------------
  *   PE12 USBC_EN5V_PE12 VBus power enable (via MN4 power switch).  To the B1
  *                       pin of J5 Dual USB A connector
  */
@@ -704,7 +718,7 @@
  * ------------------
  *
  *   PIO  Signal Name   Function
- *   ---- ------------- -------------------------------------------------------
+ *   ---- ------------- -----------------------------------------------------
  *   PD9  USB_OVCUR_PD9 Combined over-current indication from port A and B
  */
 
@@ -725,9 +739,9 @@
  * configuration options.  The SAMA5D44 supports two different 10/100Base-T
  * Ethernet MAC peripherals.
  *
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PB0/G0_TXCK                    PB0                 G0_TXCK, EXP
  * PB1/G0_RXCK/SCK2/ISI_PCK       ISI_PCK_PB1         ISI_PCK
  * PB2/G0_TXEN                    PB2                 G0_TXEN,EXP
@@ -747,7 +761,7 @@
  * PB16/G0_MDC                    PB16                G0_MDC, EXP
  * PB17/G0_MDIO                   PB17                G0_MDIO, EXP
  * PE1/A1/MCI0_DB0                G0_IRQ_PE1          G0_IRQ
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  * PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
  * PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
  * PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
@@ -767,20 +781,21 @@
  * PA22/LCDDAT22/G1_MDC           PA22                LCDDAT22, G1_MDC
  * PA23/LCDDAT23/G1_MDIO          PA23                LCDDAT23, G1_MDIO
  * PE2/A2/MCI0_DB1                G1_IRQ_PE2          G1_IRQ
- * ------------------------------ ------------------- -------------------------
+ * ------------------------------ ------------------- -----------------------
  *
  * EMAC2 connects (directly) to a KSZ8081RNB PHY (U10) and is available at
  * the ETH0 connector.
  *
- * EMAC1 connects (indirectly) to another KSZ8081RNB PHY (U7) and is available
- * at the ETH1 connector.  The ETH1 signals go through a line driver that is
- * enabled via LCD_ETH1_CONFIG when an LCD is detected:
+ * EMAC1 connects (indirectly) to another KSZ8081RNB PHY (U7) and is
+ * available at the ETH1 connector.
+ * The ETH1 signals go through a line driver that is enabled via
+ * LCD_ETH1_CONFIG when an LCD is detected:
  *
  * - LCD_ETH1_CONFIG = 0: LCD 5v disable
  * - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable.
  *
- * The sense of KSZ8081 interrupt is configurable but is, by default, active
- * low.
+ * The sense of KSZ8081 interrupt is configurable but is, by default,
+ * active low.
  */
 
 #ifdef CONFIG_SAMA5_EMAC0
@@ -796,11 +811,12 @@
 #endif
 #endif
 
-/* WM8904 Audio Codec ***************************************************************/
+/* WM8904 Audio Codec *******************************************************/
+
 /* SAMA5D4 Interface
- * ---- ------------------ ---------------- ---------- ------------------------------
+ * ---- ------------------ ---------------- ---------- ----------------------
  * PIO  USAGE              BOARD SIGNAL     WM8904 PIN NOTE
- * ---- ------------------ ---------------- ---------- ------------------------------
+ * ---- ------------------ ---------------- ---------- ----------------------
  * PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up, See J23 note below
  * PA31 TWCK0              AUDIO_TWCK0_PA31 SCLK       Pulled up
  * PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  MCLK
@@ -811,7 +827,7 @@
  * PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   ADCDAT
  * PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   ACDAT
  * PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    IRQ/GPIO1  Audio interrupt
- * ---- ------------------ ---------------- ---------- ------------------------------
+ * ---- ------------------ ---------------- ---------- ----------------------
  * Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
  */
 
@@ -819,9 +835,9 @@
 
 #define PIO_SSC0_TD    PIO_SSC0_TD_2
 
-/* Audio Interrupt. All interrupts are default, active high level.  Pull down
- * internally in the WM8904.  So we want no pull-up/downs and we want to
- * interrupt on the high level.
+/* Audio Interrupt. All interrupts are default, active high level.
+ * Pull down internally in the WM8904.
+ * So we want no pull-up/downs and we want to interrupt on the high level.
  */
 
 #define PIO_INT_WM8904 (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
@@ -837,9 +853,11 @@
 
 #define WM8904_SSC_BUS      0
 
-/* SPI Chip Selects *****************************************************************/
-/* The SAMA5D4-EK includes an Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial
- * FLASH on board.  The connection is as follows:
+/* SPI Chip Selects *********************************************************/
+
+/* The SAMA5D4-EK includes an Atmel AT25DF321A, 32-megabit,
+ * 2.7-volt SPI serial FLASH on board.
+ * The connection is as follows:
  *
  *   AT25DF321A SAMA5D4-EK      SAMA5
  *   ---------- --------------- --------------------------------
@@ -855,49 +873,51 @@
                         PIO_PORT_PIOC | PIO_PIN3)
 #define AT25_PORT      SPI0_CS0
 
-/* ACT8865 power management chip ****************************************************/
+/* ACT8865 power management chip ********************************************/
+
 /* The PMIC communicates on TWI0, I2C address 0x5b */
 
 #define PMIC_TWI_BUS       0
 #define PMIC_I2C_ADDRESS   0x5b
 #define PMIC_I2C_FREQUENCY 400000 /* 400KHz max */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PIO pins for the SAMA5D4-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 void weak_function sam_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA5D4-EK User guide: "Two SDRAM/DDR2 used as main system memory.
- *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to 2 Gb on-
- *   board, soldered DDR2 SDRAM. The memory bus is 32 bits wide and operates with
- *   up to 166 MHz."
+ *   Per the SAMA5D4-EK User guide:
+ *   "Two SDRAM/DDR2 used as main system memory.
+ *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to
+ *   2 Gb on- board, soldered DDR2 SDRAM.
+ *   The memory bus is 32 bits wide and operates with up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
@@ -912,11 +932,11 @@ void weak_function sam_spidev_initialize(void);
  *    None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 void sam_sdram_config(void);
@@ -970,19 +990,19 @@ int sam_at25_automount(int minor);
 int sam_hsmci_initialize(int slotno, int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_initialize
  *
  * Description:
@@ -994,26 +1014,27 @@ bool sam_cardinserted(int slotno);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_event
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The HSMCI card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There is a
- *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.
+ *      There is a terminology problem here:
+ *      Each HSMCI supports two slots, slot A and slot B.
+ *      Only slot A is used.
+ *      So this is not a really a slot, but an HSCMI peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:
@@ -1022,103 +1043,106 @@ void sam_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_event(int slotno, bool inserted);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_usbinitialize
  *
  * Description:
- *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   PIO pins for the SAMA5D4-EK board.
+ *   Called from sam_usbinitialize very early in inialization to setup
+ *   USB-related PIO pins for the SAMA5D4-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
 void weak_function sam_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device connection/
- *   disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
+ *   This function will start a thread that will monitor for device
+ *   connection/disconnection events.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.
+ *   This function will register the driver as /dev/inputN where N is the
  *   minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.
+ *   Otherwise, a negated errno value is returned to indicate the nature of
+ *   the failure.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MAXTOUCH
 int sam_tsc_setup(int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int sam_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int sam_adc_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
@@ -1185,5 +1209,4 @@ void sam_pmic_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMA5D4_EK_SRC_SAMA5D4_EK_H */
-
+#endif /* __BOARDS_ARM_SAMA5_SAMA5D4_EK_SRC_SAMA5D4_EK_H */

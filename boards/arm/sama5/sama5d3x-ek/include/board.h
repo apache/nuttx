@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d3x-ek/include/board.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d3x-ek/include/board.h
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,25 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D3X_EK_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAMA5D3X_EK_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D3X_EK_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMA5_SAMA5D3X_EK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.  These
- * definitions will configure operational clocking.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
+ * These definitions will configure operational clocking.
  */
 
 /* On-board crystal frequencies */
@@ -58,22 +59,26 @@
 #define BOARD_SLOWCLK_FREQUENCY    (32768)     /* Slow Clock: 32.768KHz */
 
 #if defined(CONFIG_SAMA5_BOOT_SDRAM)
-/* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate bootloader.
- * That bootloader had to have already configured the PLL and SDRAM for proper
- * operation.
+/* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate
+ * bootloader.
+ * That bootloader had to have already configured the PLL and SDRAM for
+ * proper operation.
  *
- * In this case, we don not reconfigure the clocking.  Rather, we need to query
- * the register settings to determine the clock frequencies.  We can only assume that
- * the Main clock source is the on-board 12MHz crystal.
+ * In this case, we don not reconfigure the clocking.
+ * Rather, we need to query the register settings to determine the clock
+ * frequencies.  We can only assume that the Main clock source is the
+ * on-board 12MHz crystal.
  */
 
 #  include <arch/board/board_sdram.h>
 
 #elif defined(CONFIG_SAMA5D3xEK_384MHZ)
-/* OHCI Only.  This is an alternative slower configuration that will produce a 48MHz
- * USB clock with the required accuracy using only PLLA.  When PPLA is used to clock
- * OHCI, an additional requirement is the PLLACK be a multiple of 48MHz.  This setup
- * results in a CPU clock of 384MHz.
+/* OHCI Only.
+ * This is an alternative slower configuration that will produce a 48MHz
+ * USB clock with the required accuracy using only PLLA.
+ * When PPLA is used to clock OHCI, an additional requirement is the PLLACK
+ * be a multiple of 48MHz.
+ * This setup results in a CPU clock of 384MHz.
  *
  * This case is only interesting for experimentation.
  */
@@ -89,8 +94,8 @@
 #  include <arch/board/board_528mhz.h>
 
 #else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
-/* This is the configuration provided in the Atmel example code.  This setup results
- * in a CPU clock of 396MHz.
+/* This is the configuration provided in the Atmel example code.
+ * This setup results in a CPU clock of 396MHz.
  *
  * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
  */
@@ -120,7 +125,8 @@
 #define BOARD_LCDC_PWMPS      LCDC_LCDCFG6_PWMPS_DIV1
 #define BOARD_LCDC_PWMPOL     LCDC_LCDCFG6_PWMPOL
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
@@ -159,7 +165,9 @@
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                         Blue     Red
- *      ----------------- ---   -----------------------  -------- --------   */
+ *      ----------------- ---   -----------------------  -------- --------
+ */
+
 #define LED_STARTED       0  /* NuttX has been started     OFF      OFF      */
 #define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      */
 #define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      */
@@ -180,7 +188,8 @@
  * has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* There are five push button switches on the SAMA5D3X-EK base board:
  *
  *   1. One Reset, board reset (BP1)
@@ -202,21 +211,22 @@
 
 #define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
 
-/* NAND *****************************************************************************/
+/* NAND *********************************************************************/
 
-/* Address for transferring command bytes to the nandflash, CLE A22*/
+/* Address for transferring command bytes to the nandflash, CLE A22 */
 
 #define BOARD_EBICS3_NAND_CMDADDR   0x60400000
 
-/* Address for transferring address bytes to the nandflash, ALE A21*/
+/* Address for transferring address bytes to the nandflash, ALE A21 */
 
 #define BOARD_EBICS3_NAND_ADDRADDR  0x60200000
 
-/* Address for transferring data bytes to the nandflash.*/
+/* Address for transferring data bytes to the nandflash. */
 
 #define BOARD_EBICS3_NAND_DATAADDR  0x60000000
 
-/* PIO configuration ****************************************************************/
+/* PIO configuration ********************************************************/
+
 /* LCDC */
 
 #define PIO_LCD_DAT16     PIO_LCD_DAT16_2
@@ -228,10 +238,12 @@
 #define PIO_LCD_DAT22     PIO_LCD_DAT22_1
 #define PIO_LCD_DAT23     PIO_LCD_DAT23_1
 
-/* PWM.  There are no dedicated PWM output pins available to the user for PWM
- * testing.  Care must be taken because all PWM output pins conflict with some other
- * usage of the pin by other devices. Furthermore, many of these pins have not been
- * brought out to an external connector:
+/* PWM.
+ * There are no dedicated PWM output pins available to the user for PWM
+ * testing.
+ * Care must be taken because all PWM output pins conflict with some other
+ * usage of the pin by other devices. Furthermore, many of these pins have
+ * not been brought out to an external connector:
  *
  *    -----+---+---+----+------+----------------
  *     PWM  PIN PER PIO   I/O   CONFLICTS
@@ -265,11 +277,11 @@
 
 /* PWM channel 0:
  *
- * PA20 and PA21 can be used if the LCDC or ISI are not selected.  These outputs are
- * available on J1, pins 14 and 16, respectively.
+ * PA20 and PA21 can be used if the LCDC or ISI are not selected.
+ *  These outputs are available on J1, pins 14 and 16, respectively.
  *
- * If the GMAC is not selected, then PB0 and PB1 could also be used.  However,
- * these pins are not available at the I/O expansion connectors.
+ * If the GMAC is not selected, then PB0 and PB1 could also be used.
+ * However, these pins are not available at the I/O expansion connectors.
  */
 
 #if !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
@@ -282,14 +294,15 @@
 
 /* PWM channel 1:
  *
- * PA22 and PA23 can be used if the LCDC or ISI are not selected.  These outputs are
- * available on J1, pins 18 and 20, respectively.
+ * PA22 and PA23 can be used if the LCDC or ISI are not selected.
+ * These outputs are available on J1, pins 18 and 20, respectively.
  *
- * PE31 can be used if the ISI is not selected (and the HDMI is not being used).
+ * PE31 can be used if the ISI is not selected
+ * (and the HDMI is not being used).
  * That signal is available at J3 pin 20.
  *
- * If the GMAC is not selected, then PB4 and PB5 could also be used.  However,
- * these pins are not available at the I/O expansion connectors.
+ * If the GMAC is not selected, then PB4 and PB5 could also be used.
+ * However, these pins are not available at the I/O expansion connectors.
  */
 
 #if !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
@@ -322,8 +335,10 @@
 
 /* PWM channel 3:
  *
- * If the GMAC is not selected, then PB12 can used and is available at J3 pin 7.
- * None of the other output pins are accessible at the I/O expansion connectors.
+ * If the GMAC is not selected, then PB12 can used and is available at
+ * J3 pin 7.
+ * None of the other output pins are accessible at the I/O expansion
+ * connectors.
  */
 
 #if !defined(CONFIG_SAMA5_GMAC)
@@ -334,13 +349,13 @@
 #  define PIO_PWM3_L  PIO_PWM3_L_1
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Assembly Language Macros
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __ASSEMBLY__
-	.macro	config_sdram
-	.endm
+  .macro config_sdram
+  .endm
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __BOARDS_ARM_SAMA5D3X_EK_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAMA5_SAMA5D3X_EK_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d4-ek/src/sam_bringup.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_bringup.c
  *
  *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -185,7 +185,10 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
   else
     {
-      /* REVISIT:  A delay seems to be required here or the mount will fail. */
+      /* REVISIT:
+       *  A delay seems to be required here or the mount will fail.
+       */
+
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV,
@@ -216,6 +219,7 @@ int sam_bringup(void)
   else
     {
       /* REVISIT:  A delay seems to be required here or the mount will fail. */
+
       /* Mount the volume on HSMCI1 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI1_MOUNT_BLKDEV,

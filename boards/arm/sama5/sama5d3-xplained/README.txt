@@ -976,7 +976,7 @@ Networking
       prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
       CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
       that it supports arch_phy_irq().  This logic can be found at
-      nuttx/boards/sama5d3-xplained/src/sam_ethernet.c.
+      nuttx/boards/arm/sama5/sama5d3-xplained/src/sam_ethernet.c.
 
     - One other thing: UDP support is required (CONFIG_NET_UDP).
 
@@ -1197,7 +1197,8 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
   However, to use the automounter you will to provide some additional
-  board-level support.  See boards/sama5d4-ek for and example of how
+  board-level support.
+  See boards/arm/sama5/sama5d4-xplaned for and example of how
   you might do this.
 
   WARNING:  SD cards should never be removed without first unmounting
@@ -2310,7 +2311,7 @@ SAMA5 PWM Support
                  B  PB13  ---  GMAC
       -----+---+---+----+--------------------
 
-    See boards/sama5d3-xplained/include/board.h for all of the default PWM
+    See boards/arm/sama5/sama5d3-xplained/include/board.h for all of the default PWM
     pin selections.  I used PWM channel 0, pins PA20 and PA21 for testing.
 
     Clocking is addressed in the next paragraph.

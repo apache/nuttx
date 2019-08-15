@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d4-ek/src/sam_at25.c
+ * boards/arm/sama5/sama5d4-ek/src/sam_at25.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

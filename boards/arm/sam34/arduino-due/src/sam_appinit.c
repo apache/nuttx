@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/arduino-due/src/sam_appinit.c
+ * boards/arm/sam34/arduino-due/src/sam_appinit.c
  *
  *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

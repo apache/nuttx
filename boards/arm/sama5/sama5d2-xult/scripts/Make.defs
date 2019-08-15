@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sama5d2-xult/scripts/Make.defs
+# boards/arm/sama5/sama5d2-xult/scripts/Make.defs
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

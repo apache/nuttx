@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam4cmp-db/scripts/Make.defs
+# boards/arm/sam34/sam4cmp-db/scripts/Make.defs
 #
 #   Copyright (C) 2016 Masayuki Ishikawa. All rights reserved.
 #   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

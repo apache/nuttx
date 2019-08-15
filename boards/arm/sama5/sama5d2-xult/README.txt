@@ -56,13 +56,13 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 DRAMBOOT, AT25BOOT, SRAMBOOT
 ----------------------------
 
-  See also boards/sama5d4-ek/README.txt for a description of the DRAMBOOT
+  See also boards/arm/sama5/sama5d4-xult/README.txt for a description of the DRAMBOOT
   program.  This is a tiny version of NuttX that can run out of internal
   SRAM.  If you put this program on the HSMCI1 microSD card as boot.bin, then
   it will boot on power up and you can download NuttX directly into DRAM by
   sending the nuttx.hex file over the serial connection.
 
-  The boards/sama5d4-ek/README.txt also describes variants AT25BOOT and
+  The boards/arm/sama5/sama5d4-xult/README.txt also describes variants AT25BOOT and
   SRAMBOOT.  This have not yet been ported to the SAMA5D2-XULT, but are
   available if they are usefult too you.
 

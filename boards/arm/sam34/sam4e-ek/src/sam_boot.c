@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4e-ek/src/sam_boot.c
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/src/sam_boot.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,21 +47,21 @@
 #include "up_arch.h"
 #include "sam4e-ek.h"
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_config_usart1
  *
  * Description:
- *   USART1: To avoid any electrical conflict, the RS232 and RS485 transceiver are
- *   isolated from the receiving line PA21.
+ *   USART1: To avoid any electrical conflict, the RS232 and RS485
+ *   transceiver are isolated from the receiving line PA21.
  *
  *   - Chose RS485 channel: Close 1-2 pins on JP11 and set PA23 to high level
  *   - Chose RS232 channel: Close 2-3 pins on JP11 and set PA23 to low level
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_USART1
 static inline void board_config_usart1(void)
@@ -76,19 +76,20 @@ static inline void board_config_usart1(void)
 #  define board_config_usart1()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All SAM3U architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_boardinitialize(void)
 {
@@ -96,8 +97,8 @@ void sam_boardinitialize(void)
 
   board_config_usart1();
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function sam_spidev_initialize() has been brought into the link.
    */
 
 #ifdef CONFIG_SAM34_SPI0
@@ -107,9 +108,9 @@ void sam_boardinitialize(void)
     }
 #endif
 
-  /* Configure board resources to support networkingif the 1) networking is enabled,
-   * 2) the EMAC module is enabled, and 2) the weak function sam_netinitialize()
-   * has been brought into the build.
+  /* Configure board resources to support networkingif the 1) networking is
+   * enabled, 2) the EMAC module is enabled, and 2) the weak function
+   * sam_netinitialize() has been brought into the build.
    */
 
 #ifdef HAVE_NETWORK

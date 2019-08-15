@@ -1507,7 +1507,7 @@ Networking
       prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
       CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
       that it supports arch_phy_irq().  This logic can be found at
-      nuttx/boards/sama5d4-ek/src/sam_ethernet.c.
+      nuttx/boards/arm/sama5/sama5d4-ek/src/sam_ethernet.c.
 
     - One other thing: UDP support is required (CONFIG_NET_UDP).
 
@@ -2768,7 +2768,7 @@ SAMA5 PWM Support
                  B  PB13  ---  GMAC
       -----+---+---+----+--------------------
 
-    See boards/sama5d4-ek/include/board.h for all of the default PWM
+    See boards/arm/sama5/sama5d4-ek/include/board.h for all of the default PWM
     pin selections.  I used PWM channel 0, pins PA20 and PA21 for testing.
 
     Clocking is addressed in the next paragraph.
@@ -3074,7 +3074,7 @@ TM7000 LCD/Touchscreen
   described in the tm7000.pdf file:  That document claims that the
   hardware interface to the LCD is 18-bit RGB666; but the one that
   I have is certainly 24-bit RGB888.  If you have LCD issues, you may
-  need to tweak some of the settings in boards/sama5d4-ek/include/board.h.
+  need to tweak some of the settings in boards/arm/sama5/sama5d4-ek/include/board.h.
 
   Jumper JP2 selects either the EMAC1 or the LCD by controlling the
   the LCD_ETH1_CONFIG signal on the board.
@@ -4194,7 +4194,7 @@ Configurations
 
         $ tools/configure.sh sama5d4-ek:knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
-        $ touch boards/sama5d4-ek/include/boot_romfsimg.h
+        $ touch boards/arm/sama5/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image
                                             : This should create the nuttx ELF
 
@@ -4213,7 +4213,7 @@ Configurations
         D. Create the ROMFS file system image
 
         $ tools/mkromfsimg.sh               : Create the real ROMFS image
-        $ mv boot_romfsimg.h ../nuttx/boards/sama5d4-ek/include/boot_romfsimg.h
+        $ mv boot_romfsimg.h ../nuttx/boards/arm/sama5/sama5d4-ek/include/boot_romfsimg.h
 
         E. Rebuild NuttX with the new file system image
 
@@ -4235,7 +4235,7 @@ Configurations
        configuration).  In any a event, this has stopped testing for the
        moment.
 
-       Also, the mount() in boards/sama5d4x-ek/src/sam_bringup.c will fail
+       Also, the mount() in boards/arm/sama5/sama5d4x-ek/src/sam_bringup.c will fail
        unless you add a delay between the HSMCI initialization and the mount.
        No idea why (and there they is now delay in the baseline code... one
        has to be added).
@@ -4451,9 +4451,9 @@ Configurations
          CONFIG_NSH_ROMFSMOUNTPT="/etc"  : Mount at /etc
          CONFIG_NSH_ROMFSDEVNO=0         : Device is /dev/ram0
          CONFIG_NSH_ARCHROMFS=y          : ROMFS image is at
-                                           boards/sama5d4-ek/include/nsh_romfsimg.h
+                                           boards/arm/sama5/sama5d4-ek/include/nsh_romfsimg.h
        The content of /etc/init.d/rcS can be see in the file rcS.template that
-       can be found at: boards/sama5d4-ek/include/rcS.template:
+       can be found at: boards/arm/sama5/sama5d4-ek/include/rcS.template:
 
          # Mount the procfs file system at /proc
 

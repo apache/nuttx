@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4e-ek/src/sam_usbmsc.c
+ * boards/arm/sam34/sam4e-ek/src/sam_usbmsc.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

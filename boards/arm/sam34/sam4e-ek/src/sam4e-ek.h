@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4e-ek/src/sam4e-ek.h
+/****************************************************************************
+ * boards/arm/sam34/sam4e-ek/src/sam4e-ek.h
  *
  *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4E_EK_SRC_SAM4E_EK_H
-#define __BOARDS_ARM_SAM4E_EK_SRC_SAM4E_EK_H
+#ifndef __BOARDS_ARM_SAM34_SAM4E_EK_SRC_SAM4E_EK_H
+#define __BOARDS_ARM_SAM34_SAM4E_EK_SRC_SAM4E_EK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,10 +50,11 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_HSMCI      1
 #define HAVE_AT25       1
@@ -62,6 +63,7 @@
 #define HAVE_NETWORK    1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface is not enabled */
 
 #if !defined(CONFIG_SAM34_HSMCI)
@@ -83,6 +85,7 @@
 #endif
 
 /* AT25 Serial FLASH */
+
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAM34_SPI0) || !defined(CONFIG_MTD_AT25)
@@ -116,6 +119,7 @@
 #endif
 
 /* USB Device */
+
 /* CONFIG_SAM34_UDP and CONFIG_USBDEV must be defined, or there is no USB
  * device.
  */
@@ -140,16 +144,17 @@
 #  undef HAVE_NETWORK
 #endif
 
-/* SAM4E-EK GPIO Pin Definitions ****************************************************/
+/* SAM4E-EK GPIO Pin Definitions ********************************************/
 
 /* LCD:
  *
- * The SAM4E-EK carries a TFT transmissive LCD module with touch panel, FTM280C34D.
- * Its integrated driver IC is ILI9325. The LCD display area is 2.8 inches diagonally
- * measured, with a native resolution of 240 x 320 dots.
+ * The SAM4E-EK carries a TFT transmissive LCD module with touch panel,
+ * FTM280C34D.
+ * Its integrated driver IC is ILI9325. The LCD display area is 2.8 inches
+ * diagonally measured, with a native resolution of 240 x 320 dots.
  *
- * The SAM4E16 communicates with the LCD through PIOC where an 8-bit parallel "8080-
- * like" protocol data bus has to be implemented in software.
+ * The SAM4E16 communicates with the LCD through PIOC where an 8-bit parallel
+ * "8080-like" protocol data bus has to be implemented in software.
  *
  *  ---- ----- --------- --------------------------------
  *  PIN  PIO   SIGNAL    NOTES
@@ -198,14 +203,15 @@
  *   39        NC
  *  ---- ----- --------- --------------------------------
  *
- * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3155
- * charge pump, MN4. The AAT3155 is controlled by the SAM3U4E through a single line
- * Simple Serial Control (S2Cwire) interface, which permits to enable, disable, and
- * set the LED drive current (LED brightness control) from a 32-level logarithmic
- * scale. Four resistors R93/R94/R95/R96 are implemented for optional current
+ * LCD backlight is made of 4 white chip LEDs in parallel, driven by an
+ * AAT3155 charge pump, MN4.
+ * The AAT3155 is controlled by the SAM3U4E through a single line
+ * Simple Serial Control (S2Cwire) interface, which permits to enable,
+ * disable, and set the LED drive current (LED brightness control) from
+ * a 32-level logarithmic scale.
+ * Four resistors R93/R94/R95/R96 are implemented for optional current
  * limitation.
  */
-
 
 /* LCD Backlight pin definition. */
 
@@ -215,9 +221,9 @@
 /* ADS7843 Touchscreen controller (TSC)
  *
  * The LCD module integrates a 4-wire touch screen panel controlled by
- * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus. The ADS7843 touch
- * ADC auxiliary inputs IN3/IN4 are connected to test points for optional function
- * extension.
+ * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus.
+ * The ADS7843 touch ADC auxiliary inputs IN3/IN4 are connected to test
+ * points for optional function extension.
  *
  *   ------ -------
  *   GPIO   PIN
@@ -233,8 +239,8 @@
  * The IRQ is active low and pulled up.
  *
  * Pen Interrupt. Open anode output, requires 10kO to 100kO pull-up resistor
- * externally.  There is a 100KO pull-up on the SAM4E-EK board so no additional
- * pull-up should be required.
+ * externally.  There is a 100KO pull-up on the SAM4E-EK board so no
+ * additional pull-up should be required.
  *
  * BUSY is high impedance when CS is high (not selected).  When CS is
  * is low, BUSY is active high.  Since the pin is pulled up, it will appear
@@ -333,12 +339,15 @@
  *   PA17   BUSY
  *   ------ -------
  *
- * Chip select pin connected to the touchscreen controller and to the ZigBee module
- * connector.  Notice that the touchscreen chip select is implemented as a GPIO
- * OUTPUT that must be controlled by board-specific.  This is because the ADS7843E
- * driver must be able to sample the device BUSY GPIO input between SPI transfers.
- * However, the AD7843E will tri-state the BUSY input whenever the chip select is
- * de-asserted.  So the only option is to control the chip select manually and hold
+ * Chip select pin connected to the touchscreen controller and to the ZigBee
+ * module connector.
+ * Notice that the touchscreen chip select is implemented as a GPIO
+ * OUTPUT that must be controlled by board-specific.
+ * This is because the ADS7843E driver must be able to sample the device BUSY
+ * GPIO input between SPI transfers.
+ * However, the AD7843E will tri-state the BUSY input whenever the chip
+ * select is de-asserted.
+ * So the only option is to control the chip select manually and hold
  * it low throughout the SPI transfer.
  */
 
@@ -362,37 +371,37 @@
                        GPIO_PORT_PIOA | GPIO_PIN5)
 #define FLASH_CSNUM   3
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM4E-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmci_initialize
  *
  * Description:
  *   Initialize HSMCI support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(int minor);
@@ -400,25 +409,25 @@ int sam_hsmci_initialize(int minor);
 # define sam_hsmci_initialize(minor) (-ENOSYS)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
@@ -426,13 +435,13 @@ bool sam_cardinserted(int slotno);
 #  define sam_cardinserted(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
@@ -440,14 +449,14 @@ bool sam_writeprotected(int slotno);
 #  define sam_writeprotected(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_at25_automount
  *
  * Description:
  *   Initialize, configure, and mount the AT25 serial FLASH.  The FLASH will
  *   be mounted at /dev/at25.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AT25
 int sam_at25_automount(int minor);
@@ -455,26 +464,27 @@ int sam_at25_automount(int minor);
 #  define sam_at25_automount(minor) (-ENOSYS)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.
+ *  This function will register the driver as /dev/inputN where N is the
  *   minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_INPUT_ADS7843E
 int sam_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAM4E_EK_SRC_SAM4E_EK_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4E_EK_SRC_SAM4E_EK_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4cmp-db/src/sam_appinit.c
+ * boards/arm/sam34/sam4cmp-db/src/sam_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

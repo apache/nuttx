@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4e-ek/src/sam_buttons.c
+ * boards/arm/sam34/sam4e-ek/src/sam_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -170,16 +170,20 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
   switch (id)
     {
       case BUTTON_SCROLLUP:
-        return board_button_irqx(GPIO_SCROLLUP, IRQ_SCROLLUP, irqhandler, arg);
+        return board_button_irqx(GPIO_SCROLLUP, IRQ_SCROLLUP,
+                                 irqhandler, arg);
 
       case BUTTON_SCROLLDOWN:
-        return board_button_irqx(GPIO_SCROLLDWN, IRQ_SCROLLDWN, irqhandler, arg);
+        return board_button_irqx(GPIO_SCROLLDWN, IRQ_SCROLLDWN,
+                                 irqhandler, arg);
 
       case BUTTON_WAKU:
-        return board_button_irqx(GPIO_WAKU, IRQ_WAKU, irqhandler, arg);
+        return board_button_irqx(GPIO_WAKU, IRQ_WAKU,
+                                 irqhandler, arg);
 
       case BUTTON_TAMP:
-        return board_button_irqx(GPIO_TAMP, IRQ_TAMP, irqhandler, arg);
+        return board_button_irqx(GPIO_TAMP, IRQ_TAMP,
+                                 irqhandler, arg);
 
       default:
         return -EINVAL;

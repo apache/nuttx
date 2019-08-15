@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained/src/sam4s-xplained.h
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained/src/sam4s-xplained.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
 #define __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,9 +50,10 @@
 
 #include "hardware/sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
  * controlled by software in the SAM4S:
  *
@@ -93,9 +94,10 @@
 
 /* Mechanical buttons:
  *
- * The SAM4S Xplained has two mechanical buttons. One button is the RESET button
- * connected to the SAM4S reset line and the other is a generic user configurable
- * button labeled BP2. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4S Xplained has two mechanical buttons.
+ * One button is the RESET button connected to the SAM4S reset line and the
+ * other is a generic user configurable button labeled BP2.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA5 BP2
  */
@@ -109,32 +111,31 @@
 #define GPIO_EBI_NLB (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                       GPIO_PORT_PIOC | GPIO_PIN16)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sram_initialize
  *
  * Description:
  *   Configure and enable SRAM on board the SAM4S Xplained
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAM34_EXTSRAM0
 void sam_sram_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */
-
+#endif /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */

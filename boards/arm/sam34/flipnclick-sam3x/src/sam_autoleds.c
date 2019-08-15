@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/flipnclick-sam3x/src/sam_autoleds.c
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,8 +32,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are four LEDs on the top, blue side of the board.  Only one can be
- * controlled by software:
+
+/* There are four LEDs on the top, blue side of the board.
+ *  Only one can be controlled by software:
  *
  *   LED L - PB27 (PWM13)
  *

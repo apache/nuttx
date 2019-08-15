@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3-xplained/src/sam_appinit.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_appinit.c
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -149,6 +149,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_USBMONITOR
+
   /* Start the USB Monitor */
 
   ret = usbmonitor_start();
@@ -159,6 +160,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_ADC
+
   /* Initialize ADC and register the ADC driver. */
 
   ret = sam_adc_setup();
@@ -169,6 +171,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_AJOYSTICK
+
   /* Initialize and register the joystick driver */
 
   ret = sam_ajoy_initialization();
@@ -182,6 +185,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_PWM
+
   /* Initialize PWM and register the PWM device. */
 
   ret = sam_pwm_setup();
@@ -203,6 +207,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_FS_PROCFS
+
   /* Mount the procfs file system */
 
   ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);

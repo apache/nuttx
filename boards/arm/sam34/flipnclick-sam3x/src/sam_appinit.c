@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/flipnclick-sam3x/src/sam_appinit.c
+ * boards/arm/sam34/flipnclick-sam3x/src/sam_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,10 +83,12 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
+
   /* Board initialization already performed by board_late_initialize() */
 
   return OK;
 #else
+
   /* Perform board-specific initialization */
 
   return sam_bringup();

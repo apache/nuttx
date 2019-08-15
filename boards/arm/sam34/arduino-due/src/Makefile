@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arduino-due/src/Makefile
+# boards/arm/sam34/arduino-due/src/Makefile
 #
 #   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

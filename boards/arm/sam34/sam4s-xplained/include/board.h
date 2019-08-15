@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam4s-xplained/include/board.h
+/****************************************************************************
+ * boards/arm/sam34/sam4s-xplained/include/board.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAM34_SAM4S_XPLAINED_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAM34_SAM4S_XPLAINED_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,13 +49,15 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=120MHz.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the sam3u device is running on a 4MHz internal RC.
+ * These definitions will configure clocking with MCK = 48MHz, PLLA = 96,
+ * and CPU=120MHz.
  */
 
 /* Main oscillator register settings */
@@ -149,7 +151,8 @@
 
 #define BOARD_FWS                  5
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
  * controlled by software in the SAM4S:
  *
@@ -179,7 +182,9 @@
  *
  *   SYMBOL                Val  Meaning                      LED state
  *                                                          D9       D10
- * ----------------------- ---  -----------------------  -------- --------    */
+ * ----------------------- ---  -----------------------  -------- --------
+ */
+
 #define LED_STARTED          0 /* NuttX has been started    OFF      OFF      */
 #define LED_HEAPALLOCATE     0 /* Heap has been allocated   OFF      OFF      */
 #define LED_IRQSENABLED      0 /* Interrupts enabled        OFF      OFF      */
@@ -195,12 +200,14 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Mechanical buttons:
  *
- * The SAM4S Xplained has two mechanical buttons. One button is the RESET button
- * connected to the SAM4S reset line and the other is a generic user configurable
- * button labeled BP2. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4S Xplained has two mechanical buttons.
+ * One button is the RESET button connected to the SAM4S reset line and the
+ * other is a generic user configurable button labeled BP2.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA5 BP2
  */
@@ -210,4 +217,4 @@
 
 #define BUTTON_BP2_BIT       (1 << BUTTON_BP2)
 
-#endif  /* __BOARDS_ARM_SAM4L_XPLAINED_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sam4s-xplained-pro/src/Makefile
+# boards/arm/sam34/sam4s-xplained-pro/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sama5d3-xplained/src/Makefile
+# boards/arm/sama5/sama5d3-xplained/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sama5d4-ek/src/dram_main.c
+ * boards/arm/sama5/sama5d4-ek/src/dram_main.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

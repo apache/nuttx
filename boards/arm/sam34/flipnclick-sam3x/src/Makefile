@@ -1,5 +1,5 @@
 ############################################################################
-# boards/flipnclick-sam3x/src/Makefile
+# boards/arm/sam34/flipnclick-sam3x/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

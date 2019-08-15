@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sam3u-ek/src/sam_mmcsd.c
+/****************************************************************************
+ * boards/arm/sam34/sam3u-ek/src/sam_mmcsd.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,17 +47,19 @@
 
 #ifdef CONFIG_SAM34_HSMCI
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
- * when the interrupt indicating that a card has been inserted or removed is received,
- * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam34/sam_hsmci.h for more information.
+/* This needs to be extended.
+ * The card detect GPIO must be configured as an interrupt.
+ * when the interrupt indicating that a card has been inserted or removed
+ * is received, this function must call sio_mediachange() to handle that
+ * event.
+ * See arch/arm/src/sam34/sam_hsmci.h for more information.
  *
- * Also see the SAMA5D3x-EK implementation of this same logic.  The card detect
- * interrupt handling should be a drop-in.
+ * Also see the SAMA5D3x-EK implementation of this same logic.
+ * The card detect interrupt handling should be a drop-in.
  */
 
 #ifdef GPIO_MCI_CD
@@ -70,22 +72,22 @@
 #  define OK 0
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmciinit
  *
  * Description:
  *   Initialize HSMCI support.  This function is called very early in board
  *   initialization.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_hsmciinit(void)
 {
@@ -98,13 +100,13 @@ int sam_hsmciinit(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool sam_cardinserted(unsigned char slot)
 {
@@ -121,13 +123,13 @@ bool sam_cardinserted(unsigned char slot)
   return false;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool sam_writeprotected(unsigned char slot)
 {

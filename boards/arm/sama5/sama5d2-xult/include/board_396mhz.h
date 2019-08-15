@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/sama5d2-xult/include/board_396mhz.h
+/****************************************************************************
+ * boards/arm/sama5/sama5d2-xult/include/board_396mhz.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,31 +31,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H
-#define __BOARDS_ARM_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H
+#ifndef __BOARDS_ARM_SAMA5_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H
+#define __BOARDS_ARM_SAMA5_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.  These
- * definitions will configure operational clocking.
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
+ * These definitions will configure operational clocking.
  *
- * This is the configuration provided in the Atmel example code.  This results in a
- * CPU clock of 396MHz:
+ * This is the configuration provided in the Atmel example code.
+ * This results in a CPU clock of 396MHz:
  *
- *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Multiplier = 66 to generate PLLACK = 792MHz
- *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
+ * MAINOSC:  Frequency = 12MHz (crystal)
+ * PLLA: PLL Multiplier = 66 to generate PLLACK = 792MHz
+ * Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
  *     MCK      =  132MHz
  *     CPU clock = 396MHz
  */
@@ -189,23 +190,24 @@
 #define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -213,4 +215,4 @@ extern "C" {
 #endif
 
 #endif /* !__ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H */
+#endif  /* __BOARDS_ARM_SAMA5_SAMA5D2_XULT_INCLUDE_BOARD_396MHZ_H */

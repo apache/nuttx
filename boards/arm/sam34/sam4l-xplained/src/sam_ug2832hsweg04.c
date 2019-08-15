@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_ug2832hsweg04.c
+ * boards/arm/sam34/sam4l-xplained/src/sam_ug2832hsweg04.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

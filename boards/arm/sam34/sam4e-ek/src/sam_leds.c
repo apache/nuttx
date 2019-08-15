@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4e-ek/src/sam_leds.c
+ * boards/arm/sam34/sam4e-ek/src/sam_leds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
