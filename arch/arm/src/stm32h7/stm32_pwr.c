@@ -74,7 +74,8 @@ static inline void stm32_pwr_putreg(uint32_t offset, uint32_t value)
   putreg32(value, STM32_PWR_BASE + offset);
 }
 
-static inline void stm32_pwr_modifyreg(uint32_t offset, uint32_t clearbits, uint32_t setbits)
+static inline void stm32_pwr_modifyreg(uint32_t offset, uint32_t clearbits,
+                                       uint32_t setbits)
 {
   modifyreg32(STM32_PWR_BASE + offset, clearbits, setbits);
 }
@@ -183,7 +184,7 @@ void stm32_pwr_enablebkp(bool writable)
       stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
       wait = true;
-	}
+    }
 
   leave_critical_section(flags);
 
@@ -282,7 +283,6 @@ void stm32_pwr_disablepvd(void)
 
 void stm32_pwr_enablebreg(bool regon)
 {
-
   irqstate_t flags;
   uint32_t regval;
   uint32_t reg_wait = 0;

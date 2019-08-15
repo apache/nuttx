@@ -53,6 +53,11 @@
 
 /* Clocking *****************************************************************/
 
+/* The S32K118EVB is fitted with a 40MHz Crystal */
+
+#define BOARD_XTAL_FREQUENCY 40000000
+
+/* The S32K118 will run at 48MHz *.
 
 /* LED definitions **********************************************************/
 

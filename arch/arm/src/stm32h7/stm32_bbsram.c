@@ -110,7 +110,6 @@
 
 /* File Header */
 
-
 struct bbsramfh_s
 {
   uint32_t        crc;         /* CRC calculated over data and this struct
@@ -118,14 +117,13 @@ struct bbsramfh_s
   union
   {
     uint32_t      unit32;      /* uint32 access to force ECC from preventing
-                                  commit */
+                                * commit */
     struct
     {
       uint8_t     fileno;      /* The minor number */
       uint8_t     dirty;       /* Data has been written to the file */
       uint16_t    len;         /* Total Bytes in this file */
     };
-
   };
 
   struct timespec lastwrite;   /* Last write time */
@@ -239,7 +237,7 @@ static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
  * Returned Value:
  *  None
  *
-****************************************************************************/
+ ****************************************************************************/
 
 static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
 {
@@ -470,6 +468,7 @@ static off_t stm32_bbsram_seek(FAR struct file *filep, off_t offset,
       break;
 
     default:
+
       /* Return EINVAL if the whence argument is invalid */
 
       stm32_bbsram_semgive(bbr);
@@ -739,7 +738,6 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
               pf->fileno != i ||
               pf->crc != stm32_bbsram_crc(pf))
             {
-
               /* Not Valid so wipe the file in BBSRAM */
 
               memset((uint8_t *)pf, 0, alloc);
