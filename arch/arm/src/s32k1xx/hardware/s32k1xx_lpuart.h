@@ -275,7 +275,7 @@
 #  define LPUART_MODIR_TXCTSSRC_CTSB   (0 << 5)  /* Bit nn:  CTS input is CTS_B pin */
 #  define LPUART_MODIR_TXCTSSRC_RXMAT  (1 << 5)  /* Bit nn:  Transmit CTS Source */
                                                  /* Bits 6-7:  Reserved */
-#define LPUART_MODIR_RTSWATER          (8)       /* Bits 8-9: Receive RTS Configuration */
+#define LPUART_MODIR_RTSWATER_SHIFT    (8)       /* Bits 8-9: Receive RTS Configuration */
 #define LPUART_MODIR_RTSWATER_MASK     (3 << LPUART_MODIR_RTSWATER_SHIFT)
 #  define LPUART_MODIR_RTSWATER(n)     ((uint32_t)(n) << LPUART_MODIR_RTSWATER_SHIFT)
                                                  /* Bits 10-15:  Reserved */

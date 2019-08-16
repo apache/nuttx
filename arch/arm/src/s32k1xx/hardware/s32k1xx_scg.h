@@ -174,12 +174,13 @@
 
 /* SCG CLKOUT Configuration Register */
 
-#define SCG_CLKOUTCNFG_SCS_SHIFT       (24)      /* Bits 24-27:  SCG Clkout Select */
-#define SCG_CLKOUTCNFG_SCS_MASK        (15 << SCG_CLKOUTCNFG_SCS_SHIFT)
-#  define SCG_CLKOUTCNFG_SCS_SOSC      (1 << SCG_CLKOUTCNFG_SCS_SHIFT)  /* System OSC (SOSC_CLK) */
-#  define SCG_CLKOUTCNFG_SCS_SIRC      (2 << SCG_CLKOUTCNFG_SCS_SHIFT)  /* Slow IRC (SIRC_CLK) */
-#  define SCG_CLKOUTCNFG_SCS_FIRC      (3 << SCG_CLKOUTCNFG_SCS_SHIFT)  /* Fast IRC (FIRC_CLK) */
-#  define SCG_CLKOUTCNFG_SPLL_FIRC     (6 << SCG_CLKOUTCNFG_SCS_SHIFT)  /* System PLL (SPLL_CLK) */
+#define SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT  (24)      /* Bits 24-27:  SCG Clkout Select */
+#define SCG_CLKOUTCNFG_CLKOUTSEL_MASK   (15 << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)
+#  define SCG_CLKOUTCNFG_CLKOUTSEL(src) ((uint32_t)(src) << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)
+#  define SCG_CLKOUTCNFG_CLKOUTSEL_SOSC (1 << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)  /* System OSC (SOSC_CLK) */
+#  define SCG_CLKOUTCNFG_CLKOUTSEL_SIRC (2 << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)  /* Slow IRC (SIRC_CLK) */
+#  define SCG_CLKOUTCNFG_CLKOUTSEL_FIRC (3 << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)  /* Fast IRC (FIRC_CLK) */
+#  define SCG_CLKOUTCNFG_CLKOUTSEL_SPLL (6 << SCG_CLKOUTCNFG_CLKOUTSEL_SHIFT)  /* System PLL (SPLL_CLK) */
 
 /* System OSC Control Status Register */
 
@@ -195,6 +196,7 @@
 
 #define SCG_SOSCDIV_SOSCDIV1_SHIFT     (0)       /* Bits 0-2:  System OSC Clock Divide 1 */
 #define SCG_SOSCDIV_SOSCDIV1_MASK      (7 << SCG_SOSCDIV_SOSCDIV1_SHIFT)
+#  define SCG_SOSCDIV_SOSCDIV1(n)      ((uint32_t)(n) << SCG_SOSCDIV_SOSCDIV1_SHIFT)
 #  define SCG_SOSCDIV_SOSCDIV1_DISABLE (0 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Output disabled */
 #  define SCG_SOSCDIV_SOSCDIV1_DIV1    (1 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 1 */
 #  define SCG_SOSCDIV_SOSCDIV1_DIV2    (2 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 2 */
@@ -205,6 +207,7 @@
 #  define SCG_SOSCDIV_SOSCDIV1_DIV64   (7 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 64 */
 #define SCG_SOSCDIV_SOSCDIV2_SHIFT     (8)       /* Bits 8-10:  System OSC Clock Divide 2 */
 #define SCG_SOSCDIV_SOSCDIV2_MASK      (7 << SCG_SOSCDIV_SOSCDIV2_SHIFT)
+#  define SCG_SOSCDIV_SOSCDIV2(n)      ((uint32_t)(n) << SCG_SOSCDIV_SOSCDIV2_SHIFT)
 #  define SCG_SOSCDIV_SOSCDIV2_DISABLE (0 << SCG_SOSCDIV_SOSCDIV2_SHIFT)  /* Output disabled */
 #  define SCG_SOSCDIV_SOSCDIV2_DIV1    (1 << SCG_SOSCDIV_SOSCDIV2_SHIFT)  /* Divide by 1 */
 #  define SCG_SOSCDIV_SOSCDIV2_DIV2    (2 << SCG_SOSCDIV_SOSCDIV2_SHIFT)  /* Divide by 2 */
@@ -220,6 +223,7 @@
 #define SCG_SOSCCFG_HGO                (1 << 3)  /* Bit 3:  High Gain Oscillator Select */
 #define SCG_SOSCCFG_RANGE_SHIFT        (4)       /* Bits 4-5:  System OSC Range Select */
 #define SCG_SOSCCFG_RANGE_MASK         (3 << SCG_SOSCCFG_RANGE_SHIFT)
+#  define SCG_SOSCCFG_RANGE(n)         ((uint32_t)(n) << SCG_SOSCCFG_RANGE_SHIFT)
 #  define SCG_SOSCCFG_RANGE_LOW        (1 << SCG_SOSCCFG_RANGE_SHIFT)  /* Low frequency range */
 #  define SCG_SOSCCFG_RANGE_MED        (2 << SCG_SOSCCFG_RANGE_SHIFT)  /* Medium frequency range */
 #  define SCG_SOSCCFG_RANGE_HIGH       (3 << SCG_SOSCCFG_RANGE_SHIFT)  /* High frequency range */
@@ -237,6 +241,7 @@
 
 #define SCG_SIRCDIV_SIRCDIV1_SHIFT     (0)       /* Bits 0-2:  Slow IRC Clock Divide 1 */
 #define SCG_SIRCDIV_SIRCDIV1_MASK      (7 << SCG_SIRCDIV_SIRCDIV1_SHIFT)
+#  define SCG_SIRCDIV_SIRCDIV1(n)      ((uint32_t)(n) << SCG_SIRCDIV_SIRCDIV1_SHIFT)
 #  define SCG_SIRCDIV_SIRCDIV1_DISABLE (0 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Output disabled */
 #  define SCG_SIRCDIV_SIRCDIV1_DIV1    (1 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 1 */
 #  define SCG_SIRCDIV_SIRCDIV1_DIV2    (2 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 2 */
@@ -247,6 +252,7 @@
 #  define SCG_SIRCDIV_SIRCDIV1_DIV64   (7 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 64 */
 #define SCG_SIRCDIV_SIRCDIV2_SHIFT     (8)       /* Bits 8-10:  Slow IRC Clock Divide 2 */
 #define SCG_SIRCDIV_SIRCDIV2_MASK      (7 << SCG_SIRCDIV_SIRCDIV2_SHIFT)
+#  define SCG_SIRCDIV_SIRCDIV2(n)      ((uint32_t)(n) << SCG_SIRCDIV_SIRCDIV2_SHIFT)
 #  define SCG_SIRCDIV_SIRCDIV2_DISABLE (0 << SCG_SIRCDIV_SIRCDIV2_SHIFT)  /* Output disabled */
 #  define SCG_SIRCDIV_SIRCDIV2_DIV1    (1 << SCG_SIRCDIV_SIRCDIV2_SHIFT)  /* Divide by 1 */
 #  define SCG_SIRCDIV_SIRCDIV2_DIV2    (2 << SCG_SIRCDIV_SIRCDIV2_SHIFT)  /* Divide by 2 */
@@ -275,6 +281,7 @@
 
 #define SCG_FIRCDIV_FIRCDIV1_SHIFT     (0)       /* Bits 0-2:  Fast IRC Clock Divide 1 */
 #define SCG_FIRCDIV_FIRCDIV1_MASK      (7 << SCG_FIRCDIV_FIRCDIV1_SHIFT)
+#  define SCG_FIRCDIV_FIRCDIV1(n)      ((uint32_t)(n) << SCG_FIRCDIV_FIRCDIV1_SHIFT)
 #  define SCG_FIRCDIV_FIRCDIV1_DISABLE (0 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Output disabled */
 #  define SCG_FIRCDIV_FIRCDIV1_DIV1    (1 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 1 */
 #  define SCG_FIRCDIV_FIRCDIV1_DIV2    (2 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 2 */
@@ -285,6 +292,7 @@
 #  define SCG_FIRCDIV_FIRCDIV1_DIV64   (7 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 64 */
 #define SCG_FIRCDIV_FIRCDIV2_SHIFT     (8)       /* Bits 8-10:  Fast IRC Clock Divide 2 */
 #define SCG_FIRCDIV_FIRCDIV2_MASK      (7 << SCG_FIRCDIV_FIRCDIV2_SHIFT)
+#  define SCG_FIRCDIV_FIRCDIV2(n)      ((uint32_t)(n) << SCG_FIRCDIV_FIRCDIV2_SHIFT)
 #  define SCG_FIRCDIV_FIRCDIV2_DISABLE (0 << SCG_FIRCDIV_FIRCDIV2_SHIFT)  /* Output disabled */
 #  define SCG_FIRCDIV_FIRCDIV2_DIV1    (1 << SCG_FIRCDIV_FIRCDIV2_SHIFT)  /* Divide by 1 */
 #  define SCG_FIRCDIV_FIRCDIV2_DIV2    (2 << SCG_FIRCDIV_FIRCDIV2_SHIFT)  /* Divide by 2 */
@@ -313,6 +321,7 @@
 
 #define SCG_SPLLDIV_SPLLDIV1_SHIFT     (0)       /* Bits 0-2:  System PLL Clock Divide 1 */
 #define SCG_SPLLDIV_SPLLDIV1_MASK      (7 << SCG_SPLLDIV_SPLLDIV1_SHIFT)
+#  define SCG_SPLLDIV_SPLLDIV1(n)      ((uint32_t)(n) << SCG_SPLLDIV_SPLLDIV1_SHIFT)
 #  define SCG_SPLLDIV_SPLLDIV1_DISABLE (0 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Output disabled */
 #  define SCG_SPLLDIV_SPLLDIV1_DIV1    (1 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 1 */
 #  define SCG_SPLLDIV_SPLLDIV1_DIV2    (2 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 2 */
@@ -323,6 +332,7 @@
 #  define SCG_SPLLDIV_SPLLDIV1_DIV64   (7 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 64 */
 #define SCG_SPLLDIV_SPLLDIV2_SHIFT     (8)       /* Bits 8-10:  System PLL Clock Divide 2 */
 #define SCG_SPLLDIV_SPLLDIV2_MASK      (7 << SCG_SPLLDIV_SPLLDIV2_SHIFT)
+#  define SCG_SPLLDIV_SPLLDIV2(n)      ((uint32_t)(n) << SCG_SPLLDIV_SPLLDIV2_SHIFT)
 #  define SCG_SPLLDIV_SPLLDIV2_DISABLE (0 << SCG_SPLLDIV_SPLLDIV2_SHIFT)  /* Output disabled */
 #  define SCG_SPLLDIV_SPLLDIV2_DIV1    (1 << SCG_SPLLDIV_SPLLDIV2_SHIFT)  /* Divide by 1 */
 #  define SCG_SPLLDIV_SPLLDIV2_DIV2    (2 << SCG_SPLLDIV_SPLLDIV2_SHIFT)  /* Divide by 2 */

@@ -190,7 +190,7 @@ void __start(void)
    * .bss or .data have been initialized.
    */
 
-  DEBUG_VERIFY(s32k1xx_clockconfig(&g_initial_clkconfig));
+  DEBUGVERIFY(s32k1xx_clockconfig(&g_initial_clkconfig));
   s32k1xx_lowsetup();
   showprogress('A');
 

@@ -56,7 +56,7 @@
 
 /* PORT Register Offsets ****************************************************************************/
 
-#define S32K1XX_PORT_PCR_OFFSET(n)  (0 + ((n) << 2) /* Pin Control Register n=0..31 */
+#define S32K1XX_PORT_PCR_OFFSET(n)  (0 + ((n) << 2)) /* Pin Control Register n=0..31 */
 #define S32K1XX_PORT_GPCLR_OFFSET   0x0080  /* Global Pin Control Low Register */
 #define S32K1XX_PORT_GPCHR_OFFSET   0x0084  /* Global Pin Control High Register */
 #define S32K1XX_PORT_GICLR_OFFSET   0x0088  /* Global Interrupt Control Low Register */
@@ -67,8 +67,6 @@
 #define S32K1XX_PORT_DFWR_OFFSET    0x00c8  /* Digital Filter Width Register */
 
 /* PORT Register Addresses **************************************************************************/
-
-#define S32K1XX_PORT_BASE(p)        (S32K1XX_PORTA_BASE + ((p) << 2)
 
 #define S32K1XX_PORT_PCR_BASE(p,n)  (S32K1XX_PORT_BASE(p) + S32K1XX_PORT_PCR_OFFSET(n))
 #define S32K1XX_PORT_GPCLR(p)       (S32K1XX_PORT_BASE(p) + S32K1XX_PORT_GPCLR_OFFSET)
@@ -142,7 +140,7 @@
 #define PORT_PCR_DSE                (1 << 6)  /* Bit 6:  Drive Strength Enable */
 #define PORT_PCR_MUX_SHIFT          (8)       /* Bits 8-10:  Pin Mux Control */
 #define PORT_PCR_MUX_MASK           (7 << PORT_PCR_MUX_SHIFT)
-#  define PORT_PCR_MUX_DISABLE      (0 << PORT_PCR_MUX_SHIFT) /* Alternative 0: Pin disable/analog */
+#  define PORT_PCR_MUX_ANALOG       (0 << PORT_PCR_MUX_SHIFT) /* Alternative 0: Pin disable/analog */
 #  define PORT_PCR_MUX_GPIO         (1 << PORT_PCR_MUX_SHIFT) /* Alternative 1 (GPIO) */
 #  define PORT_PCR_MUX_ALT2         (2 << PORT_PCR_MUX_SHIFT) /* Alternative 2 (chip-specific) */
 #  define PORT_PCR_MUX_ALT3         (3 << PORT_PCR_MUX_SHIFT) /* Alternative 3 (chip-specific) */
@@ -153,15 +151,15 @@
 #define PORT_PCR_LK                 (1 << 15) /* Bit 15: Lock Register */
 #define PORT_PCR_IRQC_SHIFT         (16)      /* Bits 16-19:  Interrupt Configuration */
 #define PORT_PCR_IRQC_MASK          (15 << PORT_PCR_IRQC_SHIFT)
-#  define PORT_PCR_IRQC_MASK        (0 << PORT_PCR_IRQC_SHIFT)  /* Interrupt Status Flag (ISF) is disabled */
+#  define PORT_PCR_IRQC_DISABLED    (0 << PORT_PCR_IRQC_SHIFT)  /* Interrupt Status Flag (ISF) is disabled */
 #  define PORT_PCR_IRQC_DMARISING   (1 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and DMA request on rising edge */
 #  define PORT_PCR_IRQC_DMAFALLING  (2 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and DMA request on falling edge */
 #  define PORT_PCR_IRQC_DMABOTH     (3 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and DMA request on either edge */
-#  define PORT_PCR_IRQC_INTZERO     (8 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and Interrupt when logic 0 */
-#  define PORT_PCR_IRQC_INTRISING   (9 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and Interrupt on rising-edge */
-#  define PORT_PCR_IRQC_INTFALLING  (10 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on falling-edge */
-#  define PORT_PCR_IRQC_INTEITHER   (11 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on either edge */
-#  define PORT_PCR_IRQC_INTONE      (12 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt when logic 1 */
+#  define PORT_PCR_IRQC_ZERO        (8 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and Interrupt when logic 0 */
+#  define PORT_PCR_IRQC_RISING      (9 << PORT_PCR_IRQC_SHIFT)  /* ISF flag and Interrupt on rising-edge */
+#  define PORT_PCR_IRQC_FALLING     (10 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on falling-edge */
+#  define PORT_PCR_IRQC_BOTH        (11 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt on either edge */
+#  define PORT_PCR_IRQC_ONE         (12 << PORT_PCR_IRQC_SHIFT) /* ISF flag and Interrupt when logic 1 */
 #define PORT_PCR_ISF                (1 << 24) /* Bit 24: Interrupt Status Flag */
 
 /* Global Pin Control Low Register */
@@ -212,7 +210,7 @@
 
 #define PORT_DFCR_CS                (1 << 0)  /* Bit 0:  Clock Source */
 #  define PORT_DFCR_BUSCLK          (0)       /*         Digital filters clocked by bus clock */
-#  define PORT_DFCR_BUSCLK          (1 << 0)  /*         Digital filters clocked by LPO clock */
+#  define PORT_DFCR_LPOPCLK         (1 << 0)  /*         Digital filters clocked by LPO clock */
 
 /* Digital Filter Width Register */
 

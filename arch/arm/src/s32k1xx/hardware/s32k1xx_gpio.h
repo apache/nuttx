@@ -56,8 +56,6 @@
 
 /* GPIO Register Offsets *************************************************************/
 
-#define S32K1XX_GPIO_OFFSET(g)      ((g) << 6)
-
 #define S32K1XX_GPIO_PDOR_OFFSET    0x0000  /* Port Data Output Register */
 #define S32K1XX_GPIO_PSOR_OFFSET    0x0004  /* Port Set Output Register */
 #define S32K1XX_GPIO_PCOR_OFFSET    0x0008  /* Port Clear Output Register */
@@ -67,8 +65,6 @@
 #define S32K1XX_GPIO_PIDR_OFFSET    0x0018  /* Port Input Disable Register */
 
 /* GPIO Register Addresses ***********************************************************/
-
-#define S32K1XX_GPIO_BASE(g)        (S32K1XX_GPIO_BASE + S32K1XX_GPIO_OFFSET(g))
 
 #define S32K1XX_GPIO_PDOR(g)        (S32K1XX_GPIO_BASE(g) + S32K1XX_GPIO_PDOR_OFFSET)
 #define S32K1XX_GPIO_PSOR(g)        (S32K1XX_GPIO_BASE(g) + S32K1XX_GPIO_PSOR_OFFSET)

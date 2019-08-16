@@ -103,7 +103,7 @@
 #define S32K1XX_IRQ_ADC0          (44) /* ADC0 Interrupt */
 #define S32K1XX_IRQ_CMP0          (45) /* CMP0 Interrupt */
 #define S32K1XX_IRQ_LPUART1       (46) /* LPUART1 Interrupt */
-#define S32K1XX_IRQ_LPUART1       (47) /* LPUART0 Interrupt */
+#define S32K1XX_IRQ_LPUART0       (47) /* LPUART0 Interrupt */
 
 #define S32K1XX_IRQ_NIRQS         (48)
 #define S32K1XX_IRQ_NEXTINT       (S32K1XX_IRQ_NIRQS - S32K1XX_IRQ_INTERRUPT)

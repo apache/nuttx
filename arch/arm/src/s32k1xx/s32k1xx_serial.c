@@ -66,9 +66,9 @@
 #include "up_internal.h"
 
 #include "hardware/s32k1xx_lpuart.h"
-#include "s32k1xx_gpio.h"
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_config.h"
+#include "s32k1xx_pin.h"
 #include "s32k1xx_lowputc.h"
 
 #ifdef USE_SERIALDRIVER

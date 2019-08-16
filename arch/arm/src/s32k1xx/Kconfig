@@ -93,6 +93,16 @@ config S32K1XX_HAVE_SPLL
 	bool
 	default n
 
+# Peripheral Group Selections
+
+config S32K1XX_HAVE_LPUART
+	bool
+	default n
+
+config S32K1XX_HAVE_LPSPI
+	bool
+	default n
+
 # Peripheral Selection
 
 menu "S32K1XX Peripheral Selection"
@@ -100,28 +110,70 @@ menu "S32K1XX Peripheral Selection"
 config S32K1XX_LPUART0
 	bool "LPUART0"
 	default n
+	select S32K1XX_HAVE_LPUART
 	select LPUART0_SERIALDRIVER
 
 config S32K1XX_LPUART1
 	bool "LPUART1"
 	default n
+	select S32K1XX_HAVE_LPUART
 	select LPUART1_SERIALDRIVER
 
 config S32K1XX_LPUART2
 	bool "LPUART2"
 	default n
+	select S32K1XX_HAVE_LPUART
 	select LPUART2_SERIALDRIVER
 
 config S32K1XX_LPSPI0
 	bool "LPSPI0"
 	default n
+	select S32K1XX_HAVE_LPSPI
 	select SPI
 
 config S32K1XX_LPSPI1
 	bool "LPSPI1"
 	default n
+	select S32K1XX_HAVE_LPSPI
 	select SPI
 
-endmenu # iMX Peripheral Selection
+endmenu # S32K1XX Peripheral Selection
+
+menu "S32K1xx GPIO Interrupt Configuration"
+
+config S32K1XX_GPIOIRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if S32K1XX_GPIOIRQ
+
+config S32K1XX_PORTAINTS
+	bool "GPIOA interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port A pins
+
+config S32K1XX_PORTBINTS
+	bool "GPIOB interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port B pins
+
+config S32K1XX_PORTCINTS
+	bool "GPIOC interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port C pins
+
+config S32K1XX_PORTDINTS
+	bool "GPIOD interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port D pins
+
+config S32K1XX_PORTEINTS
+	bool "GPIOE interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port E pins
+
+endif
+endmenu # S32K1xx GPIO Interrupt Configuration
 
 endif # ARCH_CHIP_S32K1XX

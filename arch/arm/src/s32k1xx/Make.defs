@@ -53,7 +53,24 @@ endif
 # Source files common to all S32K1xx chip families.
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = s32k1xx_start.c s32k1xx_clockconfig.c
+CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c
+CHIP_CSRCS += s32k1xx_pin.c
+
+ifeq ($(CONFIG_S32K1XX_HAVE_LPUART),y)
+CHIP_CSRCS += s32k1xx_serial.c
+endif
+
+ifeq ($(CONFIG_S32K1XX_GPIOIRQ),y)
+CHIP_CSRCS += s32k1xx_pinirq.c
+endif
+
+ifeq ($(CONFIG_S32K1XX_DMA),y)
+CHIP_CSRCS += s32k1xx_pindma.c
+endif
+
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
+CHIP_CSRCS += s32k1xx_pindump.c
+endif
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family
 
