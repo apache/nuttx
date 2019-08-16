@@ -66,6 +66,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* If we are not using the serial driver for the console, then we
+ * still must provide some minimal implementation of up_putc.
+ */
+
+#ifdef USE_SERIALDRIVER
+
 /* Some sanity checks *******************************************************/
 
 /* Is there a UART enabled? */
@@ -75,12 +81,6 @@
     !defined(CONFIG_TIVA_UART6) && !defined(CONFIG_TIVA_UART7)
 #  error "No UARTs enabled"
 #endif
-
-/* If we are not using the serial driver for the console, then we
- * still must provide some minimal implementation of up_putc.
- */
-
-#ifdef USE_SERIALDRIVER
 
 /* Which UART with be tty0/console and which tty1-7?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
