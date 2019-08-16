@@ -158,7 +158,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_ioballoc(false);
+  wrb->wb_iob = net_ioballoc(false, IOBUSER_NET_UDP_WRITEBUFFER);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");
@@ -190,7 +190,7 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
    * buffer chain first, then the write buffer structure.
    */
 
-  iob_free_chain(wrb->wb_iob);
+  iob_free_chain(wrb->wb_iob, IOBUSER_NET_UDP_WRITEBUFFER);
 
   /* Then free the write buffer structure */
 

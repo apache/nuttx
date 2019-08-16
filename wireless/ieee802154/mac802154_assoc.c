@@ -146,7 +146,7 @@ int mac802154_req_associate(MACHANDLE mac,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false);
+  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -159,7 +159,7 @@ int mac802154_req_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
-      iob_free(iob);
+      iob_free(iob, IOBUSER_WIRELESS_MAC802154);
       mac802154_unlock(priv)
       mac802154_givesem(&priv->opsem);
       return ret;
@@ -333,7 +333,7 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false);
+  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -407,7 +407,7 @@ int mac802154_resp_associate(MACHANDLE mac,
    ret = mac802154_lock(priv, true);
    if (ret < 0)
      {
-       iob_free(iob);
+       iob_free(iob, IOBUSER_WIRELESS_MAC802154);
        return ret;
      }
 
@@ -416,7 +416,7 @@ int mac802154_resp_associate(MACHANDLE mac,
   ret = mac802154_txdesc_alloc(priv, &txdesc, true);
   if (ret < 0)
     {
-      iob_free(iob);
+      iob_free(iob, IOBUSER_WIRELESS_MAC802154);
       mac802154_unlock(priv)
       return ret;
     }

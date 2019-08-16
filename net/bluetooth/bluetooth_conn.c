@@ -182,7 +182,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
 
       if (container->bn_iob)
         {
-          iob_free(container->bn_iob);
+          iob_free(container->bn_iob, IOBUSER_NET_SOCK_BLUETOOTH);
         }
 
       /* And free the container itself */

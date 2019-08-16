@@ -420,7 +420,7 @@ drop:
 
   if (ret < 0)
     {
-      iob_free(frame);
+      iob_free(frame, IOBUSER_WIRELESS_BLUETOOTH);
 
       /* Increment statistics */
 

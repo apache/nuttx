@@ -752,7 +752,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
 
       if (ret >= 0)
         {
-          iob_free(iob);
+          iob_free(iob, IOBUSER_NET_6LOWPAN);
         }
 
       /* Was the frame successfully processed? Is the packet in d_buf fully

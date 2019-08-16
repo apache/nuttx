@@ -496,7 +496,7 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
  /* Free the IOB */
 
- iob_free(ind->frame);
+ iob_free(ind->frame, IOBUSER_WIRELESS_MAC802154_CHARDEV);
 
  /* Deallocate the data indication */
 
@@ -542,7 +542,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false);
+  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154_CHARDEV);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -571,7 +571,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
   ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
   if (ret < 0)
     {
-      iob_free(iob);
+      iob_free(iob, IOBUSER_WIRELESS_MAC802154_CHARDEV);
       wlerr("ERROR: req_data failed %d\n", ret);
       return ret;
     }

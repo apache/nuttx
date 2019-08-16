@@ -50,6 +50,10 @@
 #include <stdarg.h>
 #include <semaphore.h>
 
+#ifdef CONFIG_MM_IOB
+#  include <nuttx/mm/iob.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -394,8 +398,7 @@ int net_lockedwait(sem_t *sem);
  ****************************************************************************/
 
 #ifdef CONFIG_MM_IOB
-struct iob_s;  /* Forward reference */
-FAR struct iob_s *net_ioballoc(bool throttled);
+FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
 #endif
 
 /****************************************************************************

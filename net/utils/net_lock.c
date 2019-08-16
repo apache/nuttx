@@ -392,11 +392,11 @@ int net_lockedwait(sem_t *sem)
  ****************************************************************************/
 
 #ifdef CONFIG_MM_IOB
-FAR struct iob_s *net_ioballoc(bool throttled)
+FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid)
 {
   FAR struct iob_s *iob;
 
-  iob = iob_tryalloc(throttled);
+  iob = iob_tryalloc(throttled, consumerid);
   if (iob == NULL)
     {
       irqstate_t flags;
@@ -409,7 +409,7 @@ FAR struct iob_s *net_ioballoc(bool throttled)
 
       flags    = enter_critical_section();
       blresult = net_breaklock(&count);
-      iob      = iob_alloc(throttled);
+      iob      = iob_alloc(throttled, consumerid);
       if (blresult >= 0)
         {
           net_restorelock(count);

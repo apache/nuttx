@@ -161,7 +161,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_ioballoc(false);
+  wrb->wb_iob = net_ioballoc(false, IOBUSER_NET_TCP_WRITEBUFFER);
 
   /* Did we get an IOB?  We should always get one except under some really
    * weird error conditions.
@@ -226,7 +226,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_tryalloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_tryalloc(false);
+  wrb->wb_iob = iob_tryalloc(false, IOBUSER_NET_TCP_WRITEBUFFER);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");
@@ -260,7 +260,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 
   if (wrb->wb_iob != NULL)
     {
-      iob_free_chain(wrb->wb_iob);
+      iob_free_chain(wrb->wb_iob, IOBUSER_NET_TCP_WRITEBUFFER);
     }
 
   /* Then free the write buffer structure */

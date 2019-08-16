@@ -1,8 +1,8 @@
 /****************************************************************************
- * mm/iob/iob_trimhead_queue.c
+ * net/procfs/netdev_statistics.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Anthony Merlino <anthony@vergeeaero.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,71 +39,98 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
 #include <debug.h>
 
-#include <nuttx/mm/iob.h>
-
-#include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+    !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Types
  ****************************************************************************/
 
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+struct iob_userstats_s g_iobuserstats[IOBUSER_NENTRIES];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_trimhead_queue
+ * Name: iob_stats_onalloc
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain at the head of the
- *   queue.  Emptied I/O buffers are freed and, hence, the head of the
- *   queue may change.
+ *   An IOB has just been allocated for the consumer. This is a hook for the
+ *   IOB statistics to be updated when /proc/iobinfo is enabled.
  *
- *   This function is just a wrapper around iob_trimhead() that assures that
- *   the I/O buffer chain at the head of queue is modified with the trimming
- *   operation.
+ * Input Parameters:
+ *   consumerid - id representing who is consuming the IOB
  *
  * Returned Value:
- *   The new I/O buffer chain at the head of the queue is returned.
+ *   None.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
-                                     unsigned int trimlen,
-                                     enum iob_user_e producerid)
+void iob_stats_onalloc(enum iob_user_e consumerid)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  DEBUGASSERT(consumerid < IOBUSER_NENTRIES);
+  g_iobuserstats[consumerid].totalconsumed++;
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
+  /* Increment the global statistic as well */
 
-  qentry = qhead->qh_head;
-  if (qentry)
-    {
-      /* Verify that the queue entry contains an I/O buffer chain */
-
-      iob = qentry->qe_head;
-      if (iob)
-        {
-          /* Trim the I/Buffer chain and update the queue head */
-
-          iob = iob_trimhead(iob, trimlen, producerid);
-          qentry->qe_head = iob;
-        }
-    }
-
-  /* Return the new I/O buffer chain at the head of the queue */
-
-  return iob;
+  g_iobuserstats[IOBUSER_GLOBAL].totalconsumed++;
 }
 
-#endif /* CONFIG_IOB_NCHAINS > 0 */
+/****************************************************************************
+ * Name: iob_stats_onfree
+ *
+ * Description:
+ *   An IOB has just been freed by the producer. This is a hook for the
+ *   IOB statistics to be updated when /proc/iobinfo is enabled.
+ *
+ * Input Parameters:
+ *   consumerid - id representing who is consuming the IOB
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void iob_stats_onfree(enum iob_user_e producerid)
+{
+  DEBUGASSERT(producerid < IOBUSER_NENTRIES);
+  g_iobuserstats[producerid].totalproduced++;
+
+  /* Increment the global statistic as well */
+
+  g_iobuserstats[IOBUSER_GLOBAL].totalproduced++;
+
+}
+
+/****************************************************************************
+ * Name: iob_getuserstats
+ *
+ * Description:
+ *   Return a reference to the IOB usage statitics for the IOB consumer/producer
+ *
+ * Input Parameters:
+ *   userid - id representing the IOB producer/consumer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+FAR struct iob_userstats_s * iob_getuserstats(enum iob_user_e userid)
+{
+  DEBUGASSERT(userid < IOBUSER_NENTRIES);
+  return &g_iobuserstats[userid];
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
+        * !CONFIG_FS_PROCFS_EXCLUDE_IOBINFO */

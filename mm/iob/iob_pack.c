@@ -59,7 +59,8 @@
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob,
+                           enum iob_user_e producerid)
 {
   FAR struct iob_s *head;
   FAR struct iob_s *next;
@@ -70,7 +71,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   while (iob->io_len <= 0)
     {
-      iob = iob_free(iob);
+      iob = iob_free(iob, producerid);
       if (iob == NULL)
         {
           return NULL;
@@ -132,7 +133,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
            {
              /* Yes.. free the next entry in I/O buffer chain */
 
-             next          = iob_free(next);
+             next          = iob_free(next, producerid);
              iob->io_flink = next;
            }
         }

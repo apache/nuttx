@@ -527,7 +527,7 @@ static int icmpv6_close(FAR struct socket *psock)
     {
       /* Yes... free any read-ahead data */
 
-      iob_free_queue(&conn->readahead);
+      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
 
       /* Then free the connection structure */
 

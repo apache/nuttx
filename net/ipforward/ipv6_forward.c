@@ -423,7 +423,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        * waiting for an IOB is a good idea
        */
 
-      fwd->f_iob = iob_tryalloc(false);
+      fwd->f_iob = iob_tryalloc(false, IOBUSER_NET_IPFORWARD);
       if (fwd->f_iob == NULL)
         {
           nwarn("WARNING: iob_tryalloc() failed\n");
@@ -441,7 +441,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        */
 
       ret = iob_trycopyin(fwd->f_iob, (FAR const uint8_t *)ipv6,
-                          dev->d_len, 0, false);
+                          dev->d_len, 0, false, IOBUSER_NET_IPFORWARD);
       if (ret < 0)
         {
           nwarn("WARNING: iob_trycopyin() failed: %d\n", ret);
@@ -474,7 +474,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 errout_with_iobchain:
   if (fwd != NULL && fwd->f_iob != NULL)
     {
-      iob_free_chain(fwd->f_iob);
+      iob_free_chain(fwd->f_iob, IOBUSER_NET_IPFORWARD);
     }
 
 errout_with_fwd:

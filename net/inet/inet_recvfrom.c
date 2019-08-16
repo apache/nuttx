@@ -359,7 +359,7 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
 
           /* And free the I/O buffer chain */
 
-          (void)iob_free_chain(iob);
+          (void)iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
         }
       else
         {
@@ -368,7 +368,8 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
            * buffer queue).
            */
 
-          (void)iob_trimhead_queue(&conn->readahead, recvlen);
+          (void)iob_trimhead_queue(&conn->readahead, recvlen,
+                                   IOBUSER_NET_TCP_READAHEAD);
         }
     }
 }
@@ -457,7 +458,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      (void)iob_free_chain(iob);
+      (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
     }
 }
 #endif

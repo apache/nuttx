@@ -159,7 +159,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Allocate an IOB to hold the frame data */
 
-      iob = net_ioballoc(false);
+      iob = net_ioballoc(false, IOBUSER_NET_SOCK_BLUETOOTH);
       if (iob == NULL)
         {
           nwarn("WARNING: Failed to allocate IOB\n");

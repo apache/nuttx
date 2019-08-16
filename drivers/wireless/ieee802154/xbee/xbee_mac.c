@@ -416,7 +416,7 @@ int xbee_req_data(XBEEHANDLE xbee,
   while (!priv->txdone);
 
   nxsem_post(&priv->tx_sem);
-  iob_free(frame);
+  iob_free(frame, IOBUSER_WIRELESS_MAC802154);
   return OK;
 }
 

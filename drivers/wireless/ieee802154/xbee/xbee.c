@@ -180,7 +180,7 @@ static void xbee_attnworker(FAR void *arg)
 
   /* Allocate an IOB for the incoming data. */
 
-  iob             = iob_alloc(false);
+  iob             = iob_alloc(false, IOBUSER_WIRELESS_RAD802154);
   iob->io_flink   = NULL;
   iob->io_len     = 0;
   iob->io_offset  = 0;
@@ -276,7 +276,9 @@ static void xbee_attnworker(FAR void *arg)
                            * processing.
                            */
 
-                          iob->io_flink = iob_tryalloc(false);
+                          iob->io_flink =
+                            iob_tryalloc(false, IOBUSER_WIRELESS_RAD802154);
+
                           iob = iob->io_flink;
 
                           if (iob != NULL)
@@ -340,7 +342,7 @@ static void xbee_attnworker(FAR void *arg)
               wlwarn("Partial API frame clocked in. Dropping!\n");
             }
 
-          iob_free(iob);
+          iob_free(iob, IOBUSER_WIRELESS_RAD802154);
         }
     }
 
@@ -784,7 +786,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
 
       nextframe = frame->io_flink;
       frame->io_flink = NULL;
-      iob_free(frame);
+      iob_free(frame, IOBUSER_WIRELESS_RAD802154);
       frame = nextframe;
     }
 }
@@ -1004,7 +1006,8 @@ static void xbee_notify_worker(FAR void *arg)
 
           if (dispose)
             {
-              iob_free(primitive->u.dataind.frame);
+              iob_free(primitive->u.dataind.frame,
+                       IOBUSER_WIRELESS_RAD802154);
               ieee802154_primitive_free(primitive);
             }
         }
@@ -1302,7 +1305,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
    * If we can't allocate an IOB, then we have to just drop the incoming data.
    */
 
-  iob             = iob_tryalloc(false);
+  iob             = iob_tryalloc(false, IOBUSER_WIRELESS_RAD802154);
   iob->io_flink   = NULL;
   iob->io_len     = 0;
   iob->io_offset  = 0;
@@ -1392,7 +1395,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
                            * processing.
                            */
 
-                          iob->io_flink = iob_tryalloc(false);
+                          iob->io_flink = iob_tryalloc(false, IOBUSER_WIRELESS_RAD802154);
                           iob = iob->io_flink;
 
                           if (iob != NULL)
@@ -1450,7 +1453,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
               wlwarn("Partial API frame clocked in. Dropping!\n");
             }
 
-          iob_free(iob);
+          iob_free(iob, IOBUSER_WIRELESS_RAD802154);
         }
     }
 

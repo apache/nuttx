@@ -198,7 +198,7 @@ static ssize_t bluetooth_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
 
       /* Free both the IOB and the container */
 
-      iob_free(iob);
+      iob_free(iob, IOBUSER_NET_SOCK_BLUETOOTH);
       bluetooth_container_free(container);
     }
 
