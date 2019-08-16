@@ -69,6 +69,7 @@
 
 #include "hardware/s32k1xx_scg.h"
 #include "hardware/s32k1xx_smc.h"
+#include "hardware/s32k1xx_pmc.h"
 #include "s32k1xx_clockconfig.h"
 
 #include <arch/board/board.h>  /* Include last.  May have dependencies */
@@ -1269,7 +1270,7 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
 }
 
 /****************************************************************************
- * Name: s32k1xx_scgconfig
+ * Name: s32k1xx_scg_config
  *
  * Description:
  *   Configure SCG clocking.
@@ -1283,7 +1284,7 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
  *
  *****************************************************************************/
 
-static int s32k1xx_scgconfig(const struct scg_config_s *scgcfg)
+static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
 {
   uint32_t regval;
   int ret = OK;
@@ -1353,7 +1354,7 @@ static int s32k1xx_scgconfig(const struct scg_config_s *scgcfg)
 }
 
 /****************************************************************************
- * Name: s32k1xx_pccconfig
+ * Name: s32k1xx_pcc_config
  *
  * Description:
  *   Configure PCC clocking.
@@ -1366,13 +1367,13 @@ static int s32k1xx_scgconfig(const struct scg_config_s *scgcfg)
  *
  *****************************************************************************/
 
-static void s32k1xx_pccconfig(const struct pcc_config_s *pcccfg)
+static void s32k1xx_pcc_config(const struct pcc_config_s *pcccfg)
 {
 #warning Missing logic
 }
 
 /****************************************************************************
- * Name: s32k1xx_simconfig
+ * Name: s32k1xx_sim_config
  *
  * Description:
  *   Configure PCC clocking.
@@ -1385,13 +1386,13 @@ static void s32k1xx_pccconfig(const struct pcc_config_s *pcccfg)
  *
  *****************************************************************************/
 
-static void s32k1xx_simconfig(const struct sim_clock_config_s *simcfg)
+static void s32k1xx_sim_config(const struct sim_clock_config_s *simcfg)
 {
 #warning Missing logic
 }
 
 /****************************************************************************
- * Name: s32k1xx_pmcconfig
+ * Name: s32k1xx_pmc_config
  *
  * Description:
  *   Configure PMC clocking.
@@ -1404,9 +1405,35 @@ static void s32k1xx_simconfig(const struct sim_clock_config_s *simcfg)
  *
  *****************************************************************************/
 
-static void s32k1xx_pmcconfig(const struct pmc_config_s *pmccfg)
+static void s32k1xx_pmc_config(const struct pmc_config_s *pmccfg)
 {
-#warning Missing logic
+  uint8_t regval;
+
+  DEBUGASSERT(pmccfg != NULL);
+
+  /* Low Power Clock settings from PMC. */
+
+  if (pmccfg->lpoclk.initialize)
+    {
+      /* Enable/disable the low power oscillator. */
+
+      regval = getreg8(S32K1XX_PMC_REGSC);
+
+      if (pmccfg->lpoclk.enable)
+        {
+          regval &= ~PMC_REGSC_LPODIS;
+        }
+      else
+        {
+          regval |= PMC_REGSC_LPODIS;
+        }
+
+      putreg8(regval, S32K1XX_PMC_REGSC);
+
+      /* Write trimming value. */
+
+      putreg8(pmccfg->lpoclk.trim & PMC_LPOTRIM_MASK, S32K1XX_PMC_LPOTRIM);
+    }
 }
 
 /****************************************************************************
@@ -1439,20 +1466,20 @@ int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg)
 
   /* Set SCG configuration */
 
-  ret = s32k1xx_scgconfig(&clkcfg->scg);
+  ret = s32k1xx_scg_config(&clkcfg->scg);
   if (ret >= 0)
     {
       /* Set PCC configuration */
 
-      s32k1xx_pccconfig(&clkcfg->pcc);
+      s32k1xx_pcc_config(&clkcfg->pcc);
 
       /* Set SIM configuration */
 
-      s32k1xx_simconfig(&clkcfg->sim);
+      s32k1xx_sim_config(&clkcfg->sim);
 
       /* Set PMC configuration */
 
-      s32k1xx_pmcconfig(&clkcfg->pmc);
+      s32k1xx_pmc_config(&clkcfg->pmc);
     }
 
   return ret;

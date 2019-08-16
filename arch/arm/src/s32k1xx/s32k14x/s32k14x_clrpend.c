@@ -70,13 +70,26 @@ void s32k14x_clrpend(int irq)
 
   if (irq >= S32K1XX_IRQ_EXTINT)
     {
-      if (irq < (S32K1XX_IRQ_EXTINT + 32))
+      irq -= S32K1XX_IRQ_EXTINT;
+      if (irq < 32)
         {
-          putreg32(1 << (irq - S32K1XX_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+          putreg32(1 << irq , NVIC_IRQ0_31_CLRPEND);
+        }
+      else if (irq < 64)
+        {
+          putreg32(1 << (irq - 32), NVIC_IRQ32_63_CLRPEND);
+        }
+      else if (irq < 96)
+        {
+          putreg32(1 << (irq - 64), NVIC_IRQ64_95_CLRPEND);
+        }
+      else if (irq < 128)
+        {
+          putreg32(1 << (irq - 96), NVIC_IRQ96_127_CLRPEND);
         }
       else if (irq < S32K1XX_IRQ_NIRQS)
         {
-          putreg32(1 << (irq - S32K1XX_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - 128), NVIC_IRQ128_159_CLRPEND);
         }
     }
 }
