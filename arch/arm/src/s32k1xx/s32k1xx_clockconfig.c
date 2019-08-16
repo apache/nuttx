@@ -59,6 +59,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -76,6 +77,84 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: s32k1xx_scgconfig
+ *
+ * Description:
+ *   Configure SCG clocking.
+ *
+ * Input Parameters:
+ *   scgcfg - Describes the new SCG clock configuration
+ *
+ * Returned Value:
+ *   Zero (OK) is returned a success;  A negated errno value is returned on
+ *   any failure.
+ *
+ *****************************************************************************/
+
+static inline int s32k1xx_scgconfig(const struct scg_config_s *scgcfg)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: s32k1xx_pccconfig
+ *
+ * Description:
+ *   Configure PCC clocking.
+ *
+ * Input Parameters:
+ *   pcccfg - Describes the new PCC clock configuration
+ *
+ * Returned Value:
+ *   None.
+ *
+ *****************************************************************************/
+
+static inline void s32k1xx_pccconfig(const struct pcc_config_s *pcccfg)
+{
+#warning Missing logic
+}
+
+/****************************************************************************
+ * Name: s32k1xx_simconfig
+ *
+ * Description:
+ *   Configure PCC clocking.
+ *
+ * Input Parameters:
+ *   simcfg - Describes the new SIM clock configuration
+ *
+ * Returned Value:
+ *   None.
+ *
+ *****************************************************************************/
+
+static inline void s32k1xx_simconfig(const struct sim_clock_config_s *simcfg)
+{
+#warning Missing logic
+}
+
+/****************************************************************************
+ * Name: s32k1xx_pmcconfig
+ *
+ * Description:
+ *   Configure PMC clocking.
+ *
+ * Input Parameters:
+ *   pmccfg - Describes the new PMC clock configuration
+ *
+ * Returned Value:
+ *   None.
+ *
+ *****************************************************************************/
+
+static inline void s32k1xx_pmcconfig(const struct pmc_config_s *pmccfg)
+{
+#warning Missing logic
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -88,11 +167,40 @@
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
+ * Input Parameters:
+ *   clkcfg - Describes the new clock configuration
+ *
+ * Returned Value:
+ *   Zero (OK) is returned a success;  A negated errno value is returned on
+ *   any failure.
+ *
  *****************************************************************************/
 
-void s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg)
+int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg)
 {
-#warning Missing logic
+  int ret;
+
+  DEBUGASSERT(clkcfg != NULL);
+
+  /* Set SCG configuration */
+
+  ret = s32k1xx_scgconfig(&clkcfg->scg);
+  if (ret >= 0)
+    {
+      /* Set PCC configuration */
+
+      s32k1xx_pccconfig(&clkcfg->pcc);
+
+      /* Set SIM configuration */
+
+      s32k1xx_simconfig(&clkcfg->sim);
+
+      /* Set PMC configuration */
+
+      s32k1xx_pmcconfig(&clkcfg->pmc);
+    }
+
+  return ret;
 }
 
 /****************************************************************************

@@ -537,15 +537,29 @@ extern "C"
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
+ * Input Parameters:
+ *   clkcfg - Describes the new clock configuration
+ *
+ * Returned Value:
+ *   Zero (OK) is returned a success;  A negated errno value is returned on
+ *   any failure.
+ *
  *****************************************************************************/
 
-void s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
+int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
 
 /****************************************************************************
  * Name: s32k1xx_get_coreclk
  *
  * Description:
  *   Return the current value of the CORE clock frequency.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   The current value of the CORE clock frequency.  Zero is returned on any
+ *   failure.
  *
  *****************************************************************************/
 

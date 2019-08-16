@@ -187,10 +187,10 @@ void __start(void)
 
   /* Configure the clocking and the console uart so that we can get debug
    * output as soon as possible.  NOTE: That this logic must not assume that
-   * .bss or .data have beeninitialized.
+   * .bss or .data have been initialized.
    */
 
-  s32k1xx_clockconfig(&g_initial_clkconfig);
+  DEBUG_VERIFY(s32k1xx_clockconfig(&g_initial_clkconfig));
   s32k1xx_lowsetup();
   showprogress('A');
 
