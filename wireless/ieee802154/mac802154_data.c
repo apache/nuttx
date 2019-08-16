@@ -110,7 +110,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   if ((frame->io_len - frame->io_offset) > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
-      *frame_ctrl |= IEEE802154_FRAMECTRL_VERSION;
+      *frame_ctrl |= (1 << IEEE802154_FRAMECTRL_SHIFT_VERSION);
     }
 
   /* If the TXOptions parameter specifies that an acknowledged transmission

@@ -206,7 +206,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       ret = mac802154_lock(priv, allow_interrupt);
       if (ret < 0)
         {
-          wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+          wlwarn("WARNING: mac802154_lock failed: %d\n", ret);
 
           mac802154_givesem(&priv->txdesc_sem);
           return -EINTR;

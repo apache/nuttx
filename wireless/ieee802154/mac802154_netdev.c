@@ -114,6 +114,10 @@
 #  define MACNET_FRAMELEN IEEE802154_MAX_PHY_PACKET_SIZE
 #endif
 
+#if (CONFIG_MAC802154_NTXDESC < CONFIG_IOB_NBUFFERS)
+#  warning "CONFIG_MAC802154_NTXDES should probably be equal to CONFIG_IOB_NBUFFERS to avoid waiting on req_data"
+#endif
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define TXPOLL_WDDELAY   (1*CLK_TCK)
