@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/same70-xplained/src/same70-xplained.h
+/****************************************************************************
+ * boards/arm/samv7/same70-xplained/src/same70-xplained.h
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H
-#define __BOARDS_ARM_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H
+#ifndef __BOARDS_ARM_SAMV7_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H
+#define __BOARDS_ARM_SAMV7_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,10 +48,11 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_HSMCI           1
 #define HAVE_AUTOMOUNTER     1
@@ -67,6 +68,7 @@
 #define HAVE_XBEE            1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface is not enabled */
 
 #if !defined(CONFIG_SAMV7_HSMCI0)
@@ -144,6 +146,7 @@
 #endif /* HAVE_AUTOMOUNTER */
 
 /* USB Device */
+
 /* CONFIG_SAMV7_UDP and CONFIG_USBDEV must be defined, or there is no USB
  * device.
  */
@@ -254,7 +257,7 @@
 #  undef HAVE_XBEE
 #endif
 
-/* SAME70-XPLD GPIO Pin Definitions *************************************************/
+/* SAME70-XPLD GPIO Pin Definitions *****************************************/
 
 /* Ethernet MAC.
  *
@@ -298,9 +301,9 @@
 /* Buttons
  *
  * SAM E70 Xplained contains two mechanical buttons. One button is the RESET
- * button connected to the SAM E70 reset line and the other, PA11, is a generic
- * user configurable button. When a button is pressed it will drive the I/O
- * line to GND.
+ * button connected to the SAM E70 reset line and the other, PA11, is a
+ * generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  * NOTE: There are no pull-up resistors connected to the generic user buttons
  * so it is necessary to enable the internal pull-up in the SAM E70 to use the
@@ -402,37 +405,37 @@
 #define MB1_CSNO           SPI0_CS1 /* GPIO_SPI0_NPCS1_1 */
 #define MB2_CSNO           SPI0_CS0 /* REVISIT PC9 is not one of the NPCS pins */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
  *   Configures the on-board SDRAM.  SAME70 Xplained features one external
- *   IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected to chip select
- *   NCS1.
+ *   IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected to chip
+ *   select NCS1.
  *
  *  Input Parameters:
  *     None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SDRAMC
 void sam_sdram_config(void);
@@ -440,49 +443,49 @@ void sam_sdram_config(void);
 #  define sam_sdram_config(t)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int sam_bringup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dacdev_initialize
  *
  * Description:
  *   Called to configure DAC peripheral module
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
 int sam_dacdev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAME70-XPLD board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI
 void sam_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmci_initialize
  *
  * Description:
  *   Initialize HSMCI support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(int slot, int minor);
@@ -490,14 +493,14 @@ int sam_hsmci_initialize(int slot, int minor);
 # define sam_hsmci_initialize(s,m) (-ENOSYS)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_usbinitialize
  *
  * Description:
- *   Called from stm32_boardinitialize very early in initialization to setup USB-
- *   related GPIO pins for the SAME70-XPLD board.
+ *   Called from stm32_boardinitialize very early in initialization to setup
+ *   USB- related GPIO pins for the SAME70-XPLD board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USB
 void sam_usbinitialize(void);
@@ -515,38 +518,38 @@ void sam_usbinitialize(void);
 int sam_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void sam_netinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_emac0_setmac
  *
  * Description:
- *   Read the Ethernet MAC address from the AT24 FLASH and configure the Ethernet
- *   driver with that address.
+ *   Read the Ethernet MAC address from the AT24 FLASH and configure the
+ *   Ethernet driver with that address.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MACADDR
 int sam_emac0_setmac(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
@@ -554,19 +557,19 @@ bool sam_cardinserted(int slotno);
 #  define sam_cardinserted(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_initialize
  *
  * Description:
@@ -578,26 +581,26 @@ bool sam_writeprotected(int slotno);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_event
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The HSMCI card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There is a
- *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.
+ *       There is a terminology problem here:  Each HSMCI supports two slots,
+ *      slot A and slot B. Only slot A is used.  So this is not a really a
+ *      slot, but an HSCMI peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:
@@ -606,19 +609,19 @@ void sam_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_event(int slotno, bool inserted);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
@@ -626,14 +629,14 @@ bool sam_writeprotected(int slotno);
 #  define sam_writeprotected(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_at24config
  *
  * Description:
- *   Create an AT24xx-based MTD configuration device for storage device configuration
- *   information.
+ *   Create an AT24xx-based MTD configuration device for storage device
+ *   configuration information.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MTDCONFIG
 int sam_at24config(void);
@@ -672,4 +675,4 @@ int sam_xbee_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H */
+#endif /* __BOARDS_ARM_SAMV7_SAME70_XPLAINED_SRC_SAME70_XPLAINED_H */

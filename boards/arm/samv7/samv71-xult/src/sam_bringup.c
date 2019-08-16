@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samv71-xult/src/sam_bringup.c
+ * boards/arm/samv7/samv71-xult/src/sam_bringup.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -273,7 +273,7 @@ int sam_bringup(void)
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the
    * Ethernet driver with that address.
-    */
+   */
 
   ret = sam_emac0_setmac();
   if (ret < 0)
@@ -319,6 +319,7 @@ int sam_bringup(void)
   else
     {
       /* REVISIT:  A delay seems to be required here or the mount will fail. */
+
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_SAMV71XULT_HSMCI0_MOUNT_BLKDEV,

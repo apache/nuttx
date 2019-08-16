@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c1294-launchpad/src/tm4c_appinit.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -76,8 +76,8 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  /* If CONFIG_BOARD_LATE_INITIALIZE is selected then board initialization was
-   * already performed in board_late_initialize.
+  /* If CONFIG_BOARD_LATE_INITIALIZE is selected then board initialization
+   * was already performed in board_late_initialize.
    */
 
 #ifndef CONFIG_BOARD_LATE_INITIALIZE

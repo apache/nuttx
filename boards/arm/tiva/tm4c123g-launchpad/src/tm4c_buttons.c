@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c123g-launchpad/src/tm4c_buttons.c
+ * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_buttons.c
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Bradley Noyes <bradley.noyes@trd2inc.com>
@@ -33,9 +33,9 @@
  *
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -73,8 +73,8 @@
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 

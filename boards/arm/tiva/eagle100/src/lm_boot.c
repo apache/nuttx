@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/eagle100/src/lm_boot.c
+/****************************************************************************
+ * boards/arm/tiva/eagle100/src/lm_boot.c
  *
  *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,35 +47,38 @@
 #include "up_arch.h"
 #include "eagle100.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_boardinitialize
  *
  * Description:
- *   All Stellaris architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All Stellaris architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tiva_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
+  /* Configure SPI chip selects if
+   * 1) SSI is not disabled, and
+   * 2) the weak function
    * lm_ssidev_initialize() has been brought into the link.
    */
 
-/* The Eagle100 microSD CS is on SSI0 */
+  /* The Eagle100 microSD CS is on SSI0 */
 
 #if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
   if (lm_ssidev_initialize)

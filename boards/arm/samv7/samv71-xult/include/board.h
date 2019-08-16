@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv71-xult/include/board.h
+/****************************************************************************
+ * boards/arm/samv7/samv71-xult/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,30 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMV71_XULT_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAMV71_XULT_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMV7_SAMV71_XULT_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMV7_SAMV71_XULT_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAMV71Q device is running out of the Master Clock using
- * the Fast RC Oscillator running at 4 MHz.
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMV71Q device is running out of the Master
+ * Clock using the Fast RC Oscillator running at 4 MHz.
  *
  *   MAINOSC:  Frequency = 12MHz (crystal)
  *
  * 300MHz Settings:
  *   PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
+ *   Master Clock (MCK):
+ *      Source = PLLACK,
+ *      Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
  * There are two on-board crystals:
@@ -66,10 +70,10 @@
 
 /* Main oscillator register settings.
  *
- * The main oscillator could be either the embedded 4/8/12 MHz fast RC oscillators
- * or an external 3-20 MHz crystal or ceramic resonator.  The external clock source
- * is selected by default in sam_clockconfig.c.  Here we need to specify the main
- * oscillator start-up time.
+ * The main oscillator could be either the embedded 4/8/12 MHz fast RC
+ * oscillators or an external 3-20 MHz crystal or ceramic resonator.
+ * The external clock source is selected by default in sam_clockconfig.c.
+ * Here we need to specify the main oscillator start-up time.
  *
  * REVISIT... this is old information:
  * The start up time should be should be:
@@ -79,7 +83,6 @@
 
 #define BOARD_CKGR_MOR_MOSCXTST    (62 << PMC_CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
 #define BOARD_CKGR_MOR_MOSCXTENBY  (PMC_CKGR_MOR_MOSCXTEN)             /* Crystal Oscillator Enable */
-
 
 /* PLLA configuration.
  *
@@ -185,11 +188,12 @@
 
 #define BOARD_FWS                  4
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* LEDs
  *
- * There are two yellow LED available on the SAM V71 Xplained Ultra board that
- * can be turned on and off.  The LEDs can be activated by driving the
+ * There are two yellow LED available on the SAM V71 Xplained Ultra board
+ * that can be turned on and off.  The LEDs can be activated by driving the
  * connected I/O line to GND.
  *
  *   ------ ----------- ---------------------
@@ -200,8 +204,8 @@
  *   PC09   Yellow LED1 LCD, and Shield
  *   ------ ----------- ---------------------
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -222,7 +226,8 @@
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                         LED2   LED1
- *   ------------------------  --------------------------  ------ ------ */
+ *   ------------------------  --------------------------  ------ ------
+ */
 
 #define LED_STARTED          0 /* NuttX has been started   OFF    OFF    */
 #define LED_HEAPALLOCATE     0 /* Heap has been allocated  OFF    OFF    */
@@ -242,7 +247,8 @@
  * be used by other board-specific logic.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Buttons
  *
  * SAM V71 Xplained Ultra contains three mechanical buttons. One button is the
@@ -262,8 +268,8 @@
  * NOTES:
  *
  *   - There are no pull-up resistors connected to the generic user buttons so
- *     it is necessary to enable the internal pull-up in the SAM V71 to use the
- *     button.
+ *     it is necessary to enable the internal pull-up in the SAM V71 to use
+ *     the button.
  *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
  *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
  *     the MATRIX module. For more information see the SAM V71 datasheet.
@@ -276,11 +282,13 @@
 #define BUTTON_SW0_BIT    (1 << BUTTON_SW0)
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 
-/* PIO Disambiguation ***************************************************************/
+/* PIO Disambiguation *******************************************************/
+
 /* Serial Console
  *
- * The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary to use
- * either the VCOM or an external RS-232 driver.  Here are some options.
+ * The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary
+ * to use either the VCOM or an external RS-232 driver.
+ * Here are some options.
  *
  *  - Arduino Serial Shield:  One option is to use an Arduino-compatible
  *    serial shield.  This will use the RXD and TXD signals available at pins
@@ -379,16 +387,16 @@
 
 #define GPIO_SSC0_TD   GPIO_SSC0_TD_1
 
-/* maXTouch Xplained Pro Standard Extension Header **********************************
+/* maXTouch Xplained Pro Standard Extension Header **************************
  * -----------------------------------------------
  * This LCD could be connected either via EXT1 or EXT2 using the 2x10
  * 20-pin cable and the maXTouch Xplained Pro standard extension
  * header.  Access is then performed in SPI mode.
  *
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  *                       SAMV71-XULT               maxTouch Xplained Pro
  * PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  *  1   ID        -    -           -    -          Communication line to ID chip
  *  2   GND       -    -           -    -          Ground
  *  3   N/C      PC31  -          PD30  -
@@ -409,10 +417,10 @@
  *  18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
  *  19  GND       -    -           -      -        Ground
  *  20  VCC       -    -           -      -        Target supply voltage
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  *
- * There are no alternatives for SPI0 and TWI0 pins.  Only the PWM pins require any
- * disambiguration.
+ * There are no alternatives for SPI0 and TWI0 pins.
+ * Only the PWM pins require any disambiguration.
  */
 
 #ifdef CONFIG_SAMV71XULT_MXTXPLND
@@ -427,16 +435,16 @@
 #    define GPIO_PWMC0_H2     GPIO_PWMC0_H2_5
 #    define GPIO_MXTXLND_PWM  GPIO_PWMC0_H2_5
 
-/* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************
+/* maXTouch Xplained Pro Xplained Pro LCD Connector *************************
  *
- * Only the parallel is supported by this BSP (via SMC/EBI).  The switch mode
- * selector on the back of the maXtouch should be set in the OFF-ON-OFF
- * positions to select 16-bit color mode.
+ * Only the parallel is supported by this BSP (via SMC/EBI).
+ * The switch mode selector on the back of the maXtouch should be set in
+ * the OFF-ON-OFF positions to select 16-bit color mode.
  *
- * ----------------- ------------- -------------------------------------------------
+ * ----------------- ------------- ------------------------------------------
  *        LCD            SAMV71    Description
  * Pin  Function     Pin  Function
- * ---- ------------ ---- -------- -------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  *  1   ID            -    -       Chip ID communication line
  *  2   GND           -   GND      Ground
  *  3   D0           PC0  D0       Data line
@@ -470,8 +478,9 @@
  * 31   N/C           -    -
  * 32   GND           -   GND      Ground
  * 33   PCLK/        PC30 GPIO     SMC: Pixel clock Display RAM select.
- *      CMD_DATA_SEL               SPI: One address line of the MCU for displays where
- *                                      it is possible to select either the register
+ *      CMD_DATA_SEL               SPI: One address line of the MCU for
+ *                                      displays where it is possible
+ *                                      to select either the register
  *                                      or the data interface
  * 34   VSYNC/CS     PD19 NCS3     SMC: Vertical synchronization.
  *                                 SPI: Chip select
@@ -493,7 +502,7 @@
  * 48   VCC           -    -       3.3V power supply for extension board
  * 49   VCC           -    -       3.3V power supply for extension board
  * 50   GND           -    -       Ground
- * ---- ------------ ---- -------- --------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  */
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
@@ -505,10 +514,10 @@
 
 /* MCAN1
  *
- * SAM V71 Xplained Ultra has two MCAN modules that performs communication according
- * to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch CAN FD
- * specification V1.0.  MCAN1 is connected to an on-board ATA6561 CAN physical-layer
- * transceiver.
+ * SAM V71 Xplained Ultra has two MCAN modules that performs communication
+ * according to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch
+ * CAN FD specification V1.0.
+ * MCAN1 is connected to an on-board ATA6561 CAN physical-layer transceiver.
  *
  *   ------- -------- -------- -------------
  *   SAM V71 FUNCTION ATA6561  SHARED
@@ -522,13 +531,13 @@
 #define GPIO_MCAN1_TX         GPIO_MCAN1_TX_2
 #define GPIO_MCAN1_RX         GPIO_MCAN1_RX_2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -541,20 +550,22 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAM4e-EK board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the SAM4e-EK board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.
+ *  Here the display is cleared by simply setting all GRAM memory to the
+ *  specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_lcdclear(uint16_t color);
 
@@ -564,4 +575,4 @@ void sam_lcdclear(uint16_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMV71_XULT_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAMV7_SAMV71_XULT_INCLUDE_BOARD_H */

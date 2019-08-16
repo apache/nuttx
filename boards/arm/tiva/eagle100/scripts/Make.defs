@@ -1,5 +1,5 @@
 ############################################################################
-# boards/eagle100/scripts/Make.defs
+# boards/arm/tiva/eagle100/scripts/Make.defs
 #
 #   Copyright (C) 2009, 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

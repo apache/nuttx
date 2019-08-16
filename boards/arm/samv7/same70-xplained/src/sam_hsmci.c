@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/same70-xplained/src/sam_hsmci.c
+ * boards/arm/samv7/same70-xplained/src/sam_hsmci.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,6 +79,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one HSMCI peripheral */
 
 struct sam_hsmci_state_s
@@ -159,8 +160,7 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 
       sdio_mediachange(state->hsmci, cd);
     }
-
-   return OK;
+  return OK;
 }
 
 #ifdef CONFIG_SAMV7_HSMCI0
@@ -242,6 +242,7 @@ int sam_hsmci_initialize(int slotno, int minor)
     }
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   state->hsmci = sdio_initialize(slotno);

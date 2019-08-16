@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/lm4f120-launchpad/README.txt for information about
+# See boards/arm/tiva/lm4f120-launchpad/README.txt for information about
 # this file.
 
 TOPDIR=$1
@@ -28,7 +28,7 @@ TARGET_PATH="/usr/local/share/openocd/scripts"
 # OPENOCD_EXE=openocd.exe
 OPENOCD_EXE=openocd
 
-OPENOCD_CFG="${TOPDIR}/boards/lm4f120-launchpad/tools/lm4f120-launchpad.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/tiva/lm4f120-launchpad/tools/lm4f120-launchpad.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then

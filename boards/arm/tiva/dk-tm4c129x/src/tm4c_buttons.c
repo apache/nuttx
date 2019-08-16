@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/dk-tm4c/src/tm4c_buttons.c
+ * boards/arm/tiva/dk-tm4c/src/tm4c_buttons.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,6 +59,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
@@ -127,27 +128,29 @@ uint32_t board_buttons(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.
+ *   board_buttons() returns an 32-bit bit set with each bit associated with
+ *   a button.
+ *   See the BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the
+ *    meaning of each bit.
  *
- *   board_button_irq() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
+ *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
+ *   of enumeration value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)

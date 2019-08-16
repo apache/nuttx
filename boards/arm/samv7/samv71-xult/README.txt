@@ -910,7 +910,7 @@ Pre-requisites:
     prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
     CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
     that it supports arch_phy_irq().  This logic can be found at
-    nuttx/boards/samv71-xult/src/sam_ethernet.c.
+    nuttx/boards/arm/samv7/samv71-xult/src/sam_ethernet.c.
 
   - One other thing: UDP support is required.
 
@@ -1055,7 +1055,7 @@ Testing has also been performed using the maXTouch Xplained Pro LCD
   *   maXTouch configuration with Nuttx you need to do these things:       *
   *                                                                        *
   *   - Copy the function atmxt_config() from the file                     *
-  *     boards/samv71-xult/src/atmxt_config.c into the file               *
+  *     boards/arm/samv7/samv71-xult/src/atmxt_config.c into the file               *
   *     drivers/input/mxt.c                                                *
   *   - Add a call to atmxt_config() in drivers/input/mxt.c in the         *
   *     function mxt_register() just before the touchscreen device is      *
@@ -1560,7 +1560,7 @@ Tickless OS
 
   NOTE: In most cases, the slow clock will be used as the timer/counter
   input.  The 32.768KHz crystal is selected by the definition
-  BOARD_HAVE_SLOWXTAL in the boards/samv71-xult/board.h file.
+  BOARD_HAVE_SLOWXTAL in the boards/arm/samv7/samv71-xult/board.h file.
 
   The slow clock has a resolution of about 30.518 microseconds.  Ideally,
   the value of CONFIG_USEC_PER_TICK should be the exact clock resolution.

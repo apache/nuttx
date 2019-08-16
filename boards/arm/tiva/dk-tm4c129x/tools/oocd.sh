@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/dk-tm4c129x/README.txt for information about
+# See boards/arm/tiva/dk-tm4c129x/README.txt for information about
 # this file.
 
 TOPDIR=$1
@@ -28,7 +28,7 @@ TARGET_PATH="/usr/share/openocd/scripts"
 # OPENOCD_EXE=openocd.exe
 OPENOCD_EXE=openocd
 
-OPENOCD_CFG="${TOPDIR}/boards/dk-tm4c129x/tools/dk-tm4c129x.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/tiva/dk-tm4c129x/tools/dk-tm4c129x.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then

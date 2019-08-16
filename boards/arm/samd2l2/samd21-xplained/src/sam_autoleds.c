@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samd21-xplained/src/sam_autoleds.c
+ * boards/arm/samd2l2/samd21-xplained/src/sam_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are three LEDs on board the SAMD21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
  * one user controllable LED, a yellow LED labelled STATUS near the SAMD21 USB
@@ -100,19 +101,23 @@ void board_autoled_on(int led)
 
   switch (led)
     {
-    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-      break;                  /* Leave ledstate == true to turn OFF */
+    case 0:   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF
+               * LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF
+               * LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF
+               */
+
+      break;   /* Leave ledstate == true to turn OFF */
 
     default:
-    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;                 /* Return to leave STATUS LED unchanged */
+    case 2:   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C
+               * LED_SIGNAL:       In a signal handler     STATUS LED=N/C
+               * LED_ASSERTION:    An assertion failed     STATUS LED=N/C
+               */
 
-    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+      return; /* Return to leave STATUS LED unchanged */
+
+    case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+    case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
       ledstate = false;       /* Set ledstate == false to turn ON */
       break;
     }
@@ -131,21 +136,25 @@ void board_autoled_off(int led)
     /* These should not happen and are ignored */
 
     default:
-    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+    case 0:   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF
+               * LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF
+               * LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF
+               */
+
+    case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
 
     /* These result in no-change */
 
-    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;                 /* Return to leave STATUS LED unchanged */
+    case 2:   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C
+               * LED_SIGNAL:       In a signal handler     STATUS LED=N/C
+               * LED_ASSERTION:    An assertion failed     STATUS LED=N/C
+               */
+
+      return; /* Return to leave STATUS LED unchanged */
 
     /* Turn STATUS LED off set driving the output high */
 
-    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+    case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
       sam_portwrite(PORT_STATUS_LED, true);
       break;
     }

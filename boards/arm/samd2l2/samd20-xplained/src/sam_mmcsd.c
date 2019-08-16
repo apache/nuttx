@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samd20-xplained/src/sam_mmcsd.c
+ * boards/arm/samd2l2/samd20-xplained/src/sam_mmcsd.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,6 +56,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_DISABLE_MOUNTPOINT
@@ -84,7 +85,8 @@
  *   - CONFIG_SAMD20_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
- *   - SAMD2L2_HAVE_SPI0=y (CONFIG_SAMD2L2_SERCOM0 && CONFIG_SAMD2L2_SERCOM0_ISSPI)
+ *   - SAMD2L2_HAVE_SPI0=y
+ *     (CONFIG_SAMD2L2_SERCOM0 && CONFIG_SAMD2L2_SERCOM0_ISSPI)
  *
  ****************************************************************************/
 

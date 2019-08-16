@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ekk-lm3s9b96/src/ekk-lm3s9b96.h
+/****************************************************************************
+ * boards/arm/tiva/ekk-lm3s9b96/src/ekk-lm3s9b96.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
-#define __BOARDS_ARM_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
+#ifndef __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
+#define __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -47,13 +47,13 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S9B96 supports 2 SSI
- * modules (others may support more than 2 -- in such case, the following must be
- * expanded).
+ * modules (others may support more than 2 -- in such case, the following must
+ * be expanded).
  */
 
 #if TIVA_NSSI == 0
@@ -91,22 +91,21 @@
 
 #define LED_GPIO          (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | 0)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 extern void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_EKK_LM3S9B96_SRC_EKKLM3S9B96_H */
-
+#endif /* __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H */

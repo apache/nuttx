@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lm3s8962-ek/src/lm_leds.c
+ * boards/arm/tiva/lm3s8962-ek/src/lm_leds.c
  *
  *   Copyright (C) 2010, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

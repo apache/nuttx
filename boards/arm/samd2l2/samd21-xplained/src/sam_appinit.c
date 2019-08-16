@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/samd21-xplained/src/sam_appinit.c
+ * boards/arm/samd2l2/samd21-xplained/src/sam_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some configuration checks */
 
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE_EXT1
@@ -70,6 +71,7 @@
 
 #ifdef CONFIG_SAMD21_XPLAINED_IOMODULE
 /* Support for the SD card slot on the I/O1 module */
+
 /* Verify NSH PORT and SLOT settings */
 
 #  define SAMD2L2_MMCSDSLOTNO  0 /* There is only one slot */
@@ -123,15 +125,13 @@ int board_app_initialize(uintptr_t arg)
 #if defined(SAMD2L2_HAVE_SPI0) && defined(CONFIG_SAMD21_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
-  {
-    int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
-               ret);
-       return ret;
-      }
-  }
+  int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   return OK;

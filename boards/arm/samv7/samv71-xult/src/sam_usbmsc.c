@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samv71-xult/src/sam_usbmsc.c
+ * boards/arm/samv7/samv71-xult/src/sam_usbmsc.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

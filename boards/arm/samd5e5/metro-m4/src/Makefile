@@ -1,5 +1,5 @@
 ############################################################################
-# boards/metro-m4/src/Makefile
+# boards/arm/samd5e5/metro-m4/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

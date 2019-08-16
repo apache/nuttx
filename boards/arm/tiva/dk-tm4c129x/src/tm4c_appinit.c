@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/dk-tm4c129x/src/tm4c_appinit.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_appinit.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

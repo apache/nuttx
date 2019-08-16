@@ -186,9 +186,9 @@ Unlocking FLASH
     into NVM.  See https://en.m.wikipedia.org/wiki/SREC_(file_format) for a
     description of the Motorola SREC format.
 
-    I wrote a small program at boards/metro-m4-scripts/nvm.c that will
+    I wrote a small program at boards/arm/samd5e5/metro-m4-scripts/nvm.c that will
     generate this Motorola SREC file with the correct checksum.  The file at
-    boards/metro-m4-scripts/nvm.c is the output of that program.
+    boards/arm/samd5e5/metro-m4-scripts/nvm.c is the output of that program.
 
       J-Link>mem8 804000,10
       00804000 = 39 92 9A F6 80 FF EC AE FF FF FF FF FF FF FF FF

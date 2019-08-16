@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/src/sam_userleds.c
+ * boards/arm/samv7/same70-xplained/src/sam_userleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -91,5 +91,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0));
+  sam_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) == 0);
 }

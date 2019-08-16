@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/tm4c1294-launchpad/src/ek-tm4c1294xl.h
+/****************************************************************************
+ * boards/arm/tiva/tm4c1294-launchpad/src/ek-tm4c1294xl.h
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H
-#define __BOARDS_ARM_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H
+#ifndef __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H
+#define __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -46,10 +46,12 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 #define HAVE_HCIUART    1
 
 #if !defined(CONFIG_TIVA_HCIUART) || !defined(CONFIG_BLUETOOTH_UART)
@@ -74,7 +76,6 @@
 #  error No HCI UART specifified
 #endif
 
-
 /* How many SSI modules does this chip support? */
 
 #if TIVA_NSSI < 1
@@ -91,7 +92,8 @@
 #  undef HAVE_I2CTOOL
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The EK-TM4C1294XL has a four green LEDs.
  *
  *   --- ------------
@@ -118,8 +120,10 @@
 #  undef HAVE_USERLED_DRIVER
 #endif
 
-/* Button definitions ***************************************************************/
-/* There are four push buttons on the board. Two of them are user controllable.
+/* Button definitions *******************************************************/
+
+/* There are four push buttons on the board.
+ * Two of them are user controllable.
  * The others are RESET and WAKE
  *
  *   --- ------------
@@ -142,11 +146,12 @@
 #  define GPIO_SW2    (GPIO_FUNC_INPUT | GPIO_PORTJ | GPIO_PIN_1)
 #endif
 
-/* SPI Chip selects ****************************************************************/
-/*   SSI0: PA3 is used for SSI0 chip select to the second booster pack (No pull-
-*          ups)
- *   SSI3: PH4 selects the SD card and PQ1 selects the on-board SPI flash.  Both
- *         pulled up on board.
+/* SPI Chip selects *********************************************************/
+
+/*   SSI0: PA3 is used for SSI0 chip select to the second booster pack
+ *         (No pull- ups)
+ *   SSI3: PH4 selects the SD card and PQ1 selects the on-board SPI flash.
+ *          Both pulled up on board.
  */
 
 #define GPIO_BSTR2_CS (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
@@ -156,31 +161,34 @@
 #define GPIO_SD_CS    (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_4MA | \
                        GPIO_VALUE_ONE | GPIO_PORTH | GPIO_PIN_4)
 
-/* I2C *****************************************************************************/
+/* I2C **********************************************************************/
+
 /*   I2C3: PG4-5 are provide to the BoostPack 1 interface
  *   I2C7: PA4-5 are provide to the BoostPack 2 interface
  *   I2C6: PB6-7 are used for I2C to the connector.
  */
 
-/* Speaker outputs *****************************************************************/
+/* Speaker outputs **********************************************************/
+
 /* PB2/PD4 are used for the speaker output */
 
-/* Touchscreen *********************************************************************/
+/* Touchscreen **************************************************************/
+
 /* PE7/PP7/PT2-3 are used for the touch screen */
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: tm4c_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EK-TM4C1294XL.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function tm4c_ssidev_initialize(void);
 
@@ -239,4 +247,4 @@ int hciuart_dev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H */
+#endif /* __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_TM4C1294_LAUNCHPAD_H */

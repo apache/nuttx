@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lm3s6965-ek/scripts/Make.defs
+# boards/arm/tiva/lm3s6965-ek/scripts/Make.defs
 #
 #   Copyright (C) 2010, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

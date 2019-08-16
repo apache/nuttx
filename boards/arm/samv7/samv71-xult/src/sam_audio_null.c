@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv71-xult/src/sam_audio_null.c
+/****************************************************************************
+ * boards/arm/samv7/samv71-xult/src/sam_audio_null.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -144,7 +144,8 @@ int sam_audio_null_initialize(int minor)
       ret = audio_register(devname, pcm);
       if (ret < 0)
         {
-          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
           goto errout_with_pcm;
         }
 

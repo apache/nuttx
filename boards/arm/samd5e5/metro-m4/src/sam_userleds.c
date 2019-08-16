@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/metro-m4/src/sam_userleds.c
+ * boards/arm/samd5e5/metro-m4/src/sam_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,7 +33,8 @@
  *
  ****************************************************************************/
 
-/* The Adafruit Metro M4 has four LEDs, but only two are controllable by software:
+/* The Adafruit Metro M4 has four LEDs, but only two are controllable by
+ * software:
  *
  *   1. The red LED on the Arduino D13 pin, and
  *   2. A NeoPixel RGB LED.
@@ -85,7 +86,6 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
 #endif
 
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -120,35 +120,30 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lm3s8962-ek/src/lm_oled.c
+ * boards/arm/tiva/lm3s8962-ek/src/lm_oled.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

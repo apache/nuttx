@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-cc1312r1/scripts/flash.ld
+ * boards/arm/tiva/launchxl-cc1312r1/scripts/flash.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

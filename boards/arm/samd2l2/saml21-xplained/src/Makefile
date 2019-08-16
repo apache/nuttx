@@ -1,5 +1,5 @@
 ############################################################################
-# boards/saml21-xplained/src/Makefile
+# boards/arm/samd2l2/saml21-xplained/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/dk-tm4c129x/scripts/Make.defs
+# boards/arm/tiva/dk-tm4c129x/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

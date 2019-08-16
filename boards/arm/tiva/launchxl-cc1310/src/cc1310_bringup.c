@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/launchxl-cc1310/src/cc1310_bringup.c
+ * boards/arm/tiva/launchxl-cc1310/src/cc1310_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,7 +62,8 @@
  *   If CONFIG_BOARD_LATE_INITIALIZE=y, then this function will be called from
  *   board_late_initialize().
  *
- *   If CONFIG_BOARD_LATE_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   If CONFIG_BOARD_LATE_INITIALIZE is not selected,
+ *   but CONFIG_LIB_BOARDCTL=y
  *   then this function will *probably* be called from application logic via
  *   boardctl().
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/dk-tm4c129x/src/tm4c_userleds.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_userleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/src/sam_xbee.c
+ * boards/arm/samv7/same70-xplained/src/sam_xbee.c
  *
  *   Copyright (C) 2017 Verge Inc, All rights reserver
  *   Author: Anthony Merlino <anthony@vergeaero.com>

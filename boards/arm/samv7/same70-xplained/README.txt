@@ -32,7 +32,7 @@ Status/Open Issues
   via the EDBG VCOM and LED and buttons support.  SDRAM and the HSMCI
   SD card slot also appear to be fully functional.
 
-See also boards/samv71-xult/README.txt
+See also boards/arm/samv7/samv71-xult/README.txt
 
 Serial Console
 ==============
@@ -581,7 +581,7 @@ Pre-requisites:
     prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
     CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
     that it supports arch_phy_irq().  This logic can be found at
-    nuttx/boards/same70-xplained/src/sam_ethernet.c.
+    nuttx/boards/arm/samv7/same70-xplained/src/sam_ethernet.c.
 
   - One other thing: UDP support is required.
 
@@ -982,7 +982,7 @@ Tickless OS
   you very bad timing.
 
   If you add a crystal to your board, you can select to use it with the
-  definition BOARD_HAVE_SLOWXTAL in the boards/same70-xplained/board.h
+  definition BOARD_HAVE_SLOWXTAL in the boards/arm/samv7/same70-xplained/board.h
   file.
 
   The slow clock has a resolution of about 30.518 microseconds.  Ideally,
@@ -1160,7 +1160,7 @@ Using OpenOCD and GDB to flash via the EDBG chip
 
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      boards/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -1178,13 +1178,13 @@ Using OpenOCD and GDB to flash via the EDBG chip
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      boards/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/same70-xplained/tools/oocd.sh $PWD
+      boards/arm/samv7/same70-xplained/tools/oocd.sh $PWD
 
   Connecting GDB
 

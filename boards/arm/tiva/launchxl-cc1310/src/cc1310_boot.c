@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-cc1310/src/cc1310_boot.c
+ * boards/arm/tiva/launchxl-cc1310/src/cc1310_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,6 +83,7 @@ void tiva_boardinitialize(void)
 #endif
 
   /* TODO: Initialize antenna switch */
+
   /* TODO: Shutdown external FLASH */
 }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/saml21-xplained/src/sam_ug2832hsweg04.c
+ * boards/arm/samd2l2/saml21-xplained/src/sam_ug2832hsweg04.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -125,7 +125,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The pin configurations here require that SPI1 is selected */
 
 #ifndef CONFIG_LCD_SSD1306

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/saml21-xplained/include/board.h
+/****************************************************************************
+ * boards/arm/samd2l2/saml21-xplained/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAML21_XPLAINED_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAML21_XPLAINED_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,27 +49,29 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Overview
  *
- * Since there is no high speed crystal, we will run from the OSC16M clock source.
- * We will use its default, POR frequency of 4MHz to avoid an additional clock
- * switch.
+ * Since there is no high speed crystal, we will run from the OSC16M clock
+ * source.
+ * We will use its default, POR frequency of 4MHz to avoid an additional
+ * clock switch.
  *
- * OSC16M               Output = 4MHz
- *  `- GCLK1            Input  = 4MHz Prescaler     = 1  output         = 4MHz
- *      `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
- *          `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
- *              `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
- *                                     APBA divider = 1  APBA frequency = 48MHz
- *                                     APBB divider = 1  APBB frequency = 48MHz
- *                                     APBC divider = 1  APBC frequency = 48MHz
- *                                     APBD divider = 1  APBD frequency = 48MHz
- *                                     APBE divider = 1  APBE frequency = 48MHz
+ * OSC16M              Output = 4MHz
+ * `- GCLK1            Input  = 4MHz  Prescaler    = 1  output         = 4MHz
+ *     `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
+ *         `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
+ *             `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
+ *                                    APBA divider = 1  APBA frequency = 48MHz
+ *                                    APBB divider = 1  APBB frequency = 48MHz
+ *                                    APBC divider = 1  APBC frequency = 48MHz
+ *                                    APBD divider = 1  APBD frequency = 48MHz
+ *                                    APBE divider = 1  APBE frequency = 48MHz
  *
  * The SAML21 Xplained Pro has one on-board crystal:
  *
@@ -153,7 +155,6 @@
  *   BOARD_OSC16M_ONDEMAND      - Boolean (defined / not defined)
  *   BOARD_OSC16M_RUNINSTANDBY  - Boolean (defined / not defined)
  */
-
 
 #if defined(CONFIG_SAML21_XPLAINED_OSC16M_4MHZ)
 #  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_4MHZ
@@ -427,9 +428,10 @@
 #undef  BOARD_GCLK8_OUTPUT_ENABLE
 #define BOARD_GCLK8_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK8_PRESCALER)
 
-/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0], this is
- * the clock feeding the Power Manager. The Power Manager, in turn, generates main
- * clock which is divided down to produce the CPU, AHB, and APB clocks.
+/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0],
+ * this is the clock feeding the Power Manager.
+ * The Power Manager, in turn, generates main clock which is divided
+ * down to produce the CPU, AHB, and APB clocks.
  *
  * The main clock is initially OSC16M divided by 8.
  */
@@ -483,13 +485,14 @@
 #  define BOARD_FLASH_WAITSTATES     1
 #endif
 
-/* SERCOM definitions ***************************************************************/
-/* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is common
- * to SERCOM modules 0-4.  It will generate clocking on the common SERCOM0-4
- * channel.
+/* SERCOM definitions *******************************************************/
+
+/* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is
+ * common to SERCOM modules 0-4.
+ * It will generate clocking on the common SERCOM0-4 channel.
  *
- * SERCOM5 uses a different channel and will probably need to use a different GCLK
- * generator.
+ * SERCOM5 uses a different channel and will probably need to use a different
+ * GCLK generator.
  */
 
 #define BOARD_SERCOM04_SLOW_GCLKGEN  0
@@ -593,7 +596,8 @@
 
 #define BOARD_SERCOM5_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
-/* USB definitions ******************************************************************/
+/* USB definitions **********************************************************/
+
 /* This is the source clock generator for the GCLK_USB clock
  */
 
@@ -606,14 +610,15 @@
 #define BOARD_USB_PADCAL_N       5
 #define BOARD_USB_PADCAL_TRIM    3
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled STATUS near the SAML21 USB
- * connector.
+ * one user controllable LED, a yellow LED labelled STATUS near the SAML21
+ * USB connector.
  *
- * This LED is controlled by PC07 and the LED can be activated by driving the
- * PB10 to GND.
+ * This LED is controlled by PC07 and the LED can be activated by driving
+ * the PB10 to GND.
  */
 
 /* LED index values for use with board_userled() */
@@ -626,10 +631,11 @@
 #define BOARD_STATUS LED_BIT         (1 << BOARD_STATUS_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control the LED as defined below.  Thus if the LED is statically on, NuttX has
- * successfully booted and is, apparently, running normally.  If the LED is
- * flashing at approximately 2Hz, then a fatal error has been detected and the
- * system has halted.
+ * control the LED as defined below.
+ * Thus if the LED is statically on, NuttX has successfully booted and is,
+ * apparently, running normally.
+ * If the LED is flashing at approximately 2Hz, then a fatal error has been
+ * detected and the system has halted.
  */
 
 #define LED_STARTED                  0 /* STATUS LED=OFF */
@@ -641,12 +647,14 @@
 #define LED_ASSERTION                2 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Mechanical buttons:
  *
- * The SAML21 Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAML21 reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * The SAML21 Xplained Pro contains two mechanical buttons.
+ * One button is the RESET button connected to the SAML21 reset line and the
+ * other is a generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA02 SW0
  */
@@ -658,4 +666,4 @@
 
 #define BUTTON_SW0_BIT               (1 << BUTTON_SW0)
 
-#endif  /* __BOARDS_ARM_SAML21_XPLAINED_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_INCLUDE_BOARD_H */

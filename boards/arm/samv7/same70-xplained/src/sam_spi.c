@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/same70-xplained/src/sam_spi.c
+/****************************************************************************
+ * boards/arm/samv7/same70-xplained/src/sam_spi.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,17 +55,17 @@
 
 #ifdef CONFIG_SAMV7_SPI
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PIO pins for the SAME70-XPLD board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_spidev_initialize(void)
 {
@@ -97,30 +97,33 @@ void sam_spidev_initialize(void)
  * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They
- *   include:
+ *   These external functions must be provided by board-specific logic.
+ *   They include:
  *
- *   o sam_spi[0|1]select is a functions tomanage the board-specific chip selects
- *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the status
- *     and cmddata methods of the SPI interface defined by struct spi_ops_
- *     (see include/nuttx/spi/spi.h). All other methods including
- *     sam_spibus_initialize()) are provided by common SAM3/4 logic.
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
+ *                selects
+ *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the
+ *     status and cmddata methods of the SPI interface defined by struct
+ *     spi_ops_ (see include/nuttx/spi/spi.h).
+ *     All other methods including sam_spibus_initialize()) are provided by
+ *     common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using PIOs in the way your board is configured.
+ *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in
+ *      your board-specific logic.
+ *      These functions will perform chip selection and status operations
+ *      using PIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -154,12 +157,14 @@ void sam_spidev_initialize(void)
 #ifdef CONFIG_SAMV7_SPI0_MASTER
 void sam_spi0select(uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 
   switch (devid)
     {
 #ifdef CONFIG_IEEE802154_MRF24J40
       case SPIDEV_IEEE802154(0):
+
         /* Set the GPIO low to select and high to de-select */
 
 #if defined(CONFIG_SAME70XPLAINED_MB1_BEE)
@@ -172,6 +177,7 @@ void sam_spi0select(uint32_t devid, bool selected)
 
 #ifdef CONFIG_IEEE802154_XBEE
       case SPIDEV_IEEE802154(0):
+
         /* Set the GPIO low to select and high to de-select */
 
 #if defined(CONFIG_SAME70XPLAINED_MB1_XBEE)
@@ -191,7 +197,8 @@ void sam_spi0select(uint32_t devid, bool selected)
 #ifdef CONFIG_SAMV7_SPI1_MASTER
 void sam_spi1select(uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
 }
 #endif
 

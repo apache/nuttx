@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-cc1310/include/board.h
+ * boards/arm/tiva/launchxl-cc1310/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LAUNCH_CC1310_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LAUNCH_CC1310_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_TIVA_LAUNCH_CC1310_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TIVA_LAUNCH_CC1310_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -86,7 +86,8 @@
  *
  *   ------------------- ---------------------------- ---- ----
  *   SYMBOL                  Meaning                  GLED RLED
- *   ------------------- ---------------------------- ---- ----  */
+ *   ------------------- ---------------------------- ---- ----
+ */
 
 #define LED_STARTED      0 /* NuttX has been started  OFF  OFF   */
 #define LED_HEAPALLOCATE 1 /* Heap has been allocated OFF  ON    */
@@ -148,4 +149,4 @@ extern const struct cc13xx_pinconfig_s g_gpio_uart0_rx;
 extern const struct cc13xx_pinconfig_s g_gpio_uart0_tx;
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_LAUNCH_CC1310_INCLUDE_BOARD_H */

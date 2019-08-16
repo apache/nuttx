@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/dk-tm4c129x/scripts/ld.script
+ * boards/arm/tiva/dk-tm4c129x/scripts/ld.script
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

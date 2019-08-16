@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sam4e-ek/src/sam_buttons.c
+ * boards/arm/samv7/samv71-xult/src/sam_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

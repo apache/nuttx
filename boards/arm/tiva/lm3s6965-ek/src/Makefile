@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lm3s6965-ek/src/Makefile
+# boards/arm/tiva/lm3s6965-ek/src/Makefile
 #
 #   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

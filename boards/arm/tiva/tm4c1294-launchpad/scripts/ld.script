@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tm4c1294-launchpad/scripts/ld.script
+ * boards/arm/tiva/tm4c1294-launchpad/scripts/ld.script
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

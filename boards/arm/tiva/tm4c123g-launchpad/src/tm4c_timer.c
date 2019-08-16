@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c123g-launchpad/src/tm4c_timer.c
+ * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_timer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_TIVA_TIMER32_PERIODIC
@@ -87,11 +88,13 @@ int tiva_timer_configure(void)
       timer_config.config.handler = 0;
       timer_config.config.arg     = 0;
 
-      ret = tiva_timer_initialize(CONFIG_EXAMPLES_TIMER_DEVNAME, &timer_config);
+      ret = tiva_timer_initialize(CONFIG_EXAMPLES_TIMER_DEVNAME,
+                                  &timer_config);
       if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to register timer driver: %d\n", ret);
-      }
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register timer driver: %d\n",
+                 ret);
+        }
 
       /* now we are initialized */
 

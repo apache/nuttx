@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/tm4c_at24.c
+ * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_at24.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -118,12 +118,15 @@ int tm4c_at24_automount(int minor)
         }
 
 #if defined(CONFIG_TM4C123G_LAUNCHPAD_AT24_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And finally,
+       * use the FTL layer to wrap the MTD driver as a block driver
+       */
 
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
+                 ret);
           return ret;
         }
 
@@ -142,7 +145,8 @@ int tm4c_at24_automount(int minor)
       ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n",
+                 errno);
           return ret;
         }
 #endif

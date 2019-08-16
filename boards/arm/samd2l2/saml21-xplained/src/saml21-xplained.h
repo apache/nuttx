@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/saml21-xplained/src/saml21-xplained.h
+/****************************************************************************
+ * boards/arm/samd2l2/saml21-xplained/src/saml21-xplained.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
-#define __BOARDS_ARM_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
+#ifndef __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
+#define __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -51,16 +51,17 @@
 #include "sam_config.h"
 #include "sam_pinmap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* LEDs: There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
- * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled STATIS near the SAML21 USB
- * connector.
+ ****************************************************************************/
+
+/* LEDs: There are three LEDs on board the SAML21 Xplained Pro board:
+ * The EDBG controls two of the LEDs, a power LED and a status LED.
+ * There is only one user controllable LED, a yellow LED labelled STATIS
+ * near the SAML21 USB connector.
  *
- * This LED is controlled by PB10 and the LED can be activated by driving PB10
- * to GND.
+ * This LED is controlled by PB10 and the LED can be activated by driving
+ * PB10 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED as follows:
@@ -87,8 +88,9 @@
 /* Mechanical buttons:
  *
  * The SAML21 Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAML21 reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * RESET button connected to the SAML21 reset line and the other is a generic
+ * user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA02 SW0
  */
@@ -102,14 +104,16 @@
  * SPI support and two PORTs.    These the PORTs will vary if the I/O1
  * is installed on the EXT1 or EXT2 connector:
  *
- *   --- ------------------ ---------------------- -------------------------------
+ *   --- ------------------ ---------------------- --------------------------
  *   PIN EXT1               EXT2                   Description
- *   --- ------------------ ---------------------- -------------------------------
- *   15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO]          Active low chip select OUTPUT,
- *                             SPI SS               pulled high on board.
- *   10 PA02 GPIO           10 PB15 GPIO           Active low card detect INPUT,
- *                                                 must use internal pull-up.
- *   --- ------------------ ---------------------- -------------------------------
+ *   --- ------------------ ---------------------- --------------------------
+ *   15 PA05 SERCOM0 PAD[1] 15 PA17 GPIO]          Active low chip select
+ *                             SPI SS              OUTPUT, pulled high on
+ *                                                 board.
+ *   10 PA02 GPIO           10 PB15 GPIO           Active low card detect
+ *                                                 INPUT, must use internal
+ *                                                 pull-up.
+ *   --- ------------------ ---------------------- --------------------------
  */
 
 #ifdef CONFIG_SAML21_XPLAINED_IOMODULE
@@ -151,19 +155,19 @@
 
 /* OLED1
  *
- * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and three output PORTs.  These the PORTs will vary if the OLED1
- * is installed on the EXT1 or EXT2 connector:
+ * Support for the microSD card slot on the I/O1 module.
+ * The I/O1 requires SPI support and three output PORTs.
+ * These the PORTs will vary if the OLED1 is installed on the EXT1
+ * or EXT2 connector:
  *
- *
- *   --- ------------------- -------------------- -------------------------------------
+ *   --- ------------------- -------------------- ---------------------------
  *   PIN EXT1                EXT2                 Description
- *   --- ------------------- -------------------- -------------------------------------
+ *   --- ------------------- -------------------- ---------------------------
  *   5   PB06 PA02           PA20 PA02            DATA_CMD_SEL
  *   10  PA02 PA02           PB15 PA02            DISPLAY_RESET. Active low.
  *   15  PA05 SERCOM0 PAD[1] PA17 SERCOM1 PAD[1]  DISPLAY_SS.  Active low.
  *            SPI SS              SPI SS
- *   --- ------------------- -------------------- -------------------------------------
+ *   --- ------------------- -------------------- ---------------------------
  */
 
 #ifdef CONFIG_SAML21_XPLAINED_OLED1MODULE
@@ -222,43 +226,44 @@
                         PORTB | PORT_PIN11) /* REVISIT */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PORT pins for the SAM3U-EK board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdinitialize
  *
  * Description:
- *   Initialize the SPI-based SD card.  Requires CONFIG_SAML21_XPLAINED_IOMODULE=y,
- *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and the appropriate SERCOM SPI
- *   port enabled.
+ *   Initialize the SPI-based SD card.
+ *   Requires CONFIG_SAML21_XPLAINED_IOMODULE=y,
+ *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y,
+ *   and the appropriate SERCOM SPI port enabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAML21_XPLAINED_IOMODULE
 int sam_sdinitialize(int port, int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H */
+#endif /* __BOARDS_ARM_SAMD2L2_SAML21_XPLAINED_SRC_SAML21_XPLAINED_H */

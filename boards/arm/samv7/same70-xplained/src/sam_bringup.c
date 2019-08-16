@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/same70-xplained/src/sam_bringup.c
+ * boards/arm/samv7/same70-xplained/src/sam_bringup.c
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -104,7 +104,8 @@ static void sam_i2c_register(int bus)
       ret = i2c_register(i2c, bus);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          syslog(LOG_ERR,
+                 "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
           sam_i2cbus_uninitialize(i2c);
         }
     }
@@ -164,7 +165,7 @@ int sam_bringup(void)
 #ifdef HAVE_MACADDR
   /* Read the Ethernet MAC address from the AT24 FLASH and configure the
    * Ethernet driver with that address.
-    */
+   */
 
   ret = sam_emac0_setmac();
   if (ret < 0)
@@ -210,6 +211,7 @@ int sam_bringup(void)
   else
     {
       /* REVISIT:  A delay seems to be required here or the mount will fail. */
+
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_BLKDEV,
@@ -352,7 +354,8 @@ int sam_bringup(void)
   ret = sam_dacdev_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Initialization of the DAC module failed: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Initialization of the DAC module failed: %d\n", ret);
     }
 #endif
 

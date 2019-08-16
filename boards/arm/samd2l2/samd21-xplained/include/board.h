@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samd21-xplained/include/board.h
+/****************************************************************************
+ * boards/arm/samd2l2/samd21-xplained/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMD21_XPLAINED_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAMD21_XPLAINED_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMD2L2_SAMD21_XPLAINED_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMD2L2_SAMD21_XPLAINED_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +49,12 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Overview
  *
  * OSC8M              Output = 8MHz
@@ -288,9 +289,10 @@
 #undef  BOARD_GCLK7_OUTPUT_ENABLE
 #define BOARD_GCLK7_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK7_PRESCALER)
 
-/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0], this is
- * the clock feeding the Power Manager. The Power Manager, in turn, generates main
- * clock which is divided down to produce the CPU, AHB, and APB clocks.
+/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0],
+ * this is the clock feeding the Power Manager.
+ * The Power Manager, in turn, generates main clock which is divided down to
+ * produce the CPU, AHB, and APB clocks.
  *
  * The main clock is initially OSC8M divided by 8.
  */
@@ -343,9 +345,10 @@
 #  define BOARD_FLASH_WAITSTATES     2
 #endif
 
-/* SERCOM definitions ***************************************************************/
-/* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is common
- * to all SERCOM modules.
+/* SERCOM definitions *******************************************************/
+
+/* This is the source clock generator for the GCLK_SERCOM_SLOW clock that is
+ * common to all SERCOM modules.
  */
 
 #define BOARD_SERCOM05_SLOW_GCLKGEN  0
@@ -469,7 +472,8 @@
 
 #define BOARD_SERCOM5_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
-/* USB definitions ******************************************************************/
+/* USB definitions **********************************************************/
+
 /* This is the source clock generator for the GCLK_USB clock
  */
 
@@ -482,14 +486,15 @@
 #define BOARD_USB_PADCAL_N       5
 #define BOARD_USB_PADCAL_TRIM    3
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are three LEDs on board the SAMD21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled STATUS near the SAMD21 USB
- * connector.
+ * one user controllable LED, a yellow LED labelled STATUS near the SAMD21
+ * USB connector.
  *
- * This LED is controlled by PC07 and the LED can be activated by driving the
- * PB30 to GND.
+ * This LED is controlled by PC07 and the LED can be activated by driving
+ * the PB30 to GND.
  */
 
 /* LED index values for use with board_userled() */
@@ -502,10 +507,10 @@
 #define BOARD_STATUS LED_BIT         (1 << BOARD_STATUS_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control the LED as defined below.  Thus if the LED is statically on, NuttX has
- * successfully booted and is, apparently, running normally.  If the LED is
- * flashing at approximately 2Hz, then a fatal error has been detected and the
- * system has halted.
+ * control the LED as defined below.  Thus if the LED is statically on, NuttX
+ * has successfully booted and is, apparently, running normally.
+ * If the LED is flashing at approximately 2Hz, then a fatal error
+ * has been detected and the system has halted.
  */
 
 #define LED_STARTED                  0 /* STATUS LED=OFF */
@@ -517,12 +522,14 @@
 #define LED_ASSERTION                2 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Mechanical buttons:
  *
- * The SAMD21 Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAMD21 reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * The SAMD21 Xplained Pro contains two mechanical buttons.
+ * One button is the RESET button connected to the SAMD21 reset line and the
+ * other is a generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  *   PA15 SW0
  */
@@ -534,4 +541,4 @@
 
 #define BUTTON_SW0_BIT               (1 << BUTTON_SW0)
 
-#endif  /* __BOARDS_ARM_SAMD21_XPLAINED_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAMD2L2_SAMD21_XPLAINED_INCLUDE_BOARD_H */

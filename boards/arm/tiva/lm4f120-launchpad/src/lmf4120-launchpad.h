@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm4f120-launchpad/src/lmf4120-launchpad.h
+/****************************************************************************
+ * boards/arm/tiva/lm4f120-launchpad/src/lmf4120-launchpad.h
  * arch/arm/src/board/lmf4120-launchpad.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H
-#define __BOARDS_ARM_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H
+#ifndef __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H
+#define __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -47,13 +47,13 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S6965 supports 1 SSI
- * module (others may support more than 2 -- in such case, the following must be
- * expanded).
+ * module (others may support more than 2 -- in such case, the following must
+ * be expanded).
  */
 
 #if TIVA_NSSI < 1
@@ -63,22 +63,23 @@
 #  undef CONFIG_TIVA_SSI1
 #endif
 
-/* LM4F LaunchPad *******************************************************************/
-/* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED which
- * will vary in color.  But, from the standpoint of the firmware, this appears as
- * three LEDs:
+/* LM4F LaunchPad ***********************************************************/
+
+/* The LM4F120 LaunchPad has a single RGB LED.
+ * There is only one visible LED which will vary in color.
+ * But, from the standpoint of the firmware, this appears as three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
  *   BOARD_LED_B    -- Connected to PF2
  *
- * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad LEDs
- * will be included in the build:
+ * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad
+ * LEDs will be included in the build:
  *
  * OFF:
- * - OFF means that the OS is still initializing. Initialization is very fast so
- *   if you see this at all, it probably means that the system is hanging up
- *   somewhere in the initialization phases.
+ * - OFF means that the OS is still initializing. Initialization is very fast
+ *   so if you see this at all, it probably means that the system is hanging
+ *   up somewhere in the initialization phases.
  *
  * GREEN or GREEN-ish
  * - This means that the OS completed initialization.
@@ -90,7 +91,8 @@
  *
  * Redish:
  * - If a recovered assertion occurs, the RED component will be illuminated
- *   briefly while the assertion is handled.  You will probably never see this.
+ *   briefly while the assertion is handled.
+ *   You will probably never see this.
  *
  * Flashing RED:
  * - In the event of a fatal crash, the BLUE and GREEN components will be
@@ -120,19 +122,19 @@
 #define GPIO_SW1     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | GPIO_PORTF | GPIO_PIN_1)
 #define GPIO_SW2     (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | GPIO_PORTF | GPIO_PIN_1)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm4f_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM4F LaunchPad.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lm4f_spidev_initialize(void);
 
@@ -149,5 +151,4 @@ void lm4f_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H */
-
+#endif /* __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/kernel/sam_userspace.c
+ * boards/arm/samv7/same70-xplained/kernel/sam_userspace.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE
@@ -64,9 +65,9 @@
  * Public Data
  ****************************************************************************/
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.
+ * They are not actual uint32_t storage locations!
+ * They are only used meaningfully in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/metro-m4/src/sam_autoleds.c
+ * boards/arm/samd5e5/metro-m4/src/sam_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,7 +33,8 @@
  *
  ****************************************************************************/
 
-/* The Adafruit Metro M4 has four LEDs, but only two are controllable by software:
+/* The Adafruit Metro M4 has four LEDs, but only two are controllable by
+ * software:
  *
  *   1. The red LED on the Arduino D13 pin, and
  *   2. A NeoPixel RGB LED.
@@ -95,7 +96,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
- /* LED Power Management */
+/* LED Power Management */
 
 #ifdef CONFIG_PM
 static void led_pm_notify(struct pm_callback_s *cb, int domain,
@@ -138,35 +139,30 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -220,19 +216,23 @@ void board_autoled_on(int led)
 
   switch (led)
     {
-    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-      break;                  /* Leave ledstate == true to turn OFF */
+    case 0:   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF
+               * LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF
+               * LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF
+               */
+
+      break;  /* Leave ledstate == true to turn OFF */
 
     default:
-    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;                 /* Return to leave STATUS LED unchanged */
+    case 2:   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C
+               * LED_SIGNAL:       In a signal handler     STATUS LED=N/C
+               * LED_ASSERTION:    An assertion failed     STATUS LED=N/C
+               */
 
-    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+      return; /* Return to leave STATUS LED unchanged */
+
+    case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+    case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
       ledstate = false;       /* Set ledstate == false to turn ON */
       break;
     }
@@ -251,21 +251,25 @@ void board_autoled_off(int led)
     /* These should not happen and are ignored */
 
     default:
-    case 0:                   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF */
-                              /* LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF */
-                              /* LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF */
-    case 1:                   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
+    case 0:   /* LED_STARTED:      NuttX has been started  STATUS LED=OFF
+               * LED_HEAPALLOCATE: Heap has been allocated STATUS LED=OFF
+               * LED_IRQSENABLED:  Interrupts enabled      STATUS LED=OFF
+               */
+
+    case 1:   /* LED_STACKCREATED: Idle stack created      STATUS LED=ON */
 
     /* These result in no-change */
 
-    case 2:                   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C */
-                              /* LED_SIGNAL:       In a signal handler     STATUS LED=N/C */
-                              /* LED_ASSERTION:    An assertion failed     STATUS LED=N/C */
-      return;                 /* Return to leave STATUS LED unchanged */
+    case 2:   /* LED_INIRQ:        In an interrupt         STATUS LED=N/C
+               * LED_SIGNAL:       In a signal handler     STATUS LED=N/C
+               * LED_ASSERTION:    An assertion failed     STATUS LED=N/C
+               */
+
+      return; /* Return to leave STATUS LED unchanged */
 
     /* Turn STATUS LED off set driving the output high */
 
-    case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
+    case 3:   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
       sam_portwrite(PORT_RED_LED, true);
       break;
     }

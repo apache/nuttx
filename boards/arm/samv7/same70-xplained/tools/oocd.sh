@@ -28,7 +28,7 @@ TARGET_PATH="/usr/local/share/openocd/scripts"
 #OPENOCD_EXE=openocd.exe
 OPENOCD_EXE=openocd
 
-OPENOCD_CFG="${TOPDIR}/boards/same70-xplained/tools/atmel_same70_xplained.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then

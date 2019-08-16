@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv71-xult/src/atmxt-xpro.h
+/****************************************************************************
+ * boards/arm/samv7/samv71-xult/src/atmxt-xpro.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,29 +31,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_ATMXT_XPRO_SRC_ATMXT_XPRO_H
-#define __BOARDS_ARM_ATMXT_XPRO_SRC_ATMXT_XPRO_H
+#ifndef __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_ATMXT_XPRO_H
+#define __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_ATMXT_XPRO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_MAXTOUCH    1
 #define HAVE_ILI9488_SMC 1
 #undef  HAVE_ILI9488_SPI    /* Not yet suppported */
 
-/* maXTouch and LCD only available if the maXTouch Xplained Pro is connected */
+/* maXTouch and LCD only available if the maXTouch Xplained Pro is
+ * connected
+ */
 
 #ifndef CONFIG_SAMV71XULT_MXTXPLND
 #  undef HAVE_MAXTOUCH
@@ -111,7 +114,10 @@
 /* ILI9488 LCD */
 
 #ifdef HAVE_ILI9488_SMC
-/* ILI9488 parallel mode requires use of LCD connector and SMC and DMA support */
+
+/* ILI9488 parallel mode requires use of LCD connector and SMC and DMA
+ * support
+ */
 
 #  ifndef CONFIG_SAMV71XULT_MXTXPLND_LCD
 #    warning The ILI8488 LCD must be connected on LCD EXT4 (CONFIG_SAMV71XULT_MXTXPLND_LCD)
@@ -132,6 +138,7 @@
 #endif
 
 #ifdef HAVE_ILI9488_SPI
+
 /* ILI9488 serial mode requires use of EXT1 or EXT2 connector */
 
 #  if !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT1) && !defined(CONFIG_SAMV71XULT_MXTXPLND_EXT2)
@@ -147,7 +154,7 @@
 #  endif
 #endif
 
-/* SAMV71-XULT GPIO Pin Definitions *************************************************/
+/* SAMV71-XULT GPIO Pin Definitions *****************************************/
 
 /* maXTouch Xplained Pro LCD
  *
@@ -157,10 +164,10 @@
  * 20-pin cable and the maXTouch Xplained Pro standard extension
  * header.  Access is then performed in SPI mode.
  *
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  *                       SAMV71-XULT               maxTouch Xplained Pro
  * PIN  FUNCTION EXT1 FUNC        EXT2 FUNC        Description
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  *  1   ID        -    -           -    -          Communication line to ID chip
  *  2   GND       -    -           -    -          Ground
  *  3   N/C      PC31  -          PD30  -
@@ -181,7 +188,7 @@
  *  18  SPI SCK  PD22 SPI0_SPCK   PD22 SPI0_SPCK   SPI Clock line
  *  19  GND       -    -           -      -        Ground
  *  20  VCC       -    -           -      -        Target supply voltage
- * ---- -------- ---- ----------- ---- ----------- ----------------------------------
+ * ---- -------- ---- ----------- ---- ----------- --------------------------
  */
 
 #ifdef CONFIG_SAMV71XULT_MXTXPLND
@@ -235,16 +242,16 @@
 #      define MXTXLPND_PORT     SPI0_CS3
 #    endif /* HAVE_ILI9488_SPI */
 
-/* maXTouch Xplained Pro Xplained Pro LCD Connector *********************************/
-/*
- * Only the parallel mode is supported by this BSP (via SMC/EBI).  The switch mode
- * selector on the back of the maXtouch should be set in the OFF-ON-OFF positions
- * to select 16-bit color mode.
+/* maXTouch Xplained Pro Xplained Pro LCD Connector *************************/
+
+/* Only the parallel mode is supported by this BSP (via SMC/EBI).
+ * The switch mode selector on the back of the maXtouch should be set in the
+ * OFF-ON-OFF positions to select 16-bit color mode.
  *
- * ----------------- ------------- --------------------------------------------------
+ * ----------------- ------------- ------------------------------------------
  *        LCD            SAMV71    Description
  * Pin  Function     Pin  Function
- * ---- ------------ ---- -------- --------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  *  1   ID            -    -       Chip ID communication line
  *  2   GND           -   GND      Ground
  *  3   D0           PC0  D0       Data line
@@ -278,9 +285,10 @@
  * 31   N/C           -    -
  * 32   GND           -   GND      Ground
  * 33   PCLK/        PC30 GPIO     SMC: Pixel clock Display RAM select.
- *      CMD_DATA_SEL               SPI: One address line of the MCU for displays where it
- *                                      is possible to select either the register or the
- *                                      data interface
+ *      CMD_DATA_SEL               SPI: One address line of the MCU for
+ *                                      displays where it is possible
+ *                                      to select either the register
+ *                                      or the data interface
  * 34   VSYNC/CS     PD19 NCS3     SMC: Vertical synchronization.
  *                                 SPI: Chip select
  * 35   HSYNC/WE     PC8  NWE      SMC: Horizontal synchronization
@@ -301,7 +309,7 @@
  * 48   VCC           -    -       3.3V power supply for extension board
  * 49   VCC           -    -       3.3V power supply for extension board
  * 50   GND           -    -       Ground
- * ---- ------------ ---- -------- --------------------------------------------------
+ * ---- ------------ ---- -------- ------------------------------------------
  */
 
 #  elif defined(CONFIG_SAMV71XULT_MXTXPLND_LCD)
@@ -333,7 +341,9 @@
 #  endif
 #  endif /* CONFIG_SAMV71XULT_MXTXLND_xyz */
 
-/* In all configurations, the touchscreen communicates on TWI0, I2C address 0x4a */
+/* In all configurations, the touchscreen communicates on TWI0,
+ * I2C address 0x4a
+ */
 
 #  ifdef HAVE_MAXTOUCH
 
@@ -343,9 +353,9 @@
 #  endif /* HAVE_MAXTOUCH */
 #endif /* CONFIG_SAMV71XULT_MXTXPLND */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct atmxt_config_s
 {
@@ -355,23 +365,23 @@ struct atmxt_config_s
   FAR const uint8_t *bytes;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 #ifdef HAVE_MAXTOUCH
-/* List of configuration settings.  Terminated with an entry with nbytes == 0 and
- * bytes == NULL;
+/* List of configuration settings.
+ *  Terminated with an entry with nbytes == 0 andbytes == NULL;
  */
 
 extern const struct atmxt_config_s g_atmxt_config[];
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_ATMXT_XPRO_SRC_ATMXT_XPRO_H */
+#endif /* __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_ATMXT_XPRO_H */

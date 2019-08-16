@@ -114,7 +114,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the on-board FT2232 JTAG/SWD/SWO interface.  OpenOCD
     requires a configuration file.  I keep the one I used last here:
 
-      boards/lm3s6965-ek/tools/lm3s6965-ek.cfg
+      boards/arm/tiva/lm3s6965-ek/tools/lm3s6965-ek.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -132,13 +132,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      boards/lm3s6965-ek/tools/lm3s6965-ek.cfg
+      boards/arm/tiva/lm3s6965-ek/tools/lm3s6965-ek.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/lm3s6965-ek/tools/oocd.sh $PWD
+      boards/arm/tiva/lm3s6965-ek/tools/oocd.sh $PWD
 
   Connecting GDB
 

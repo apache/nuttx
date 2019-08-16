@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ekk-lm3s9b96/src/Makefile
+# boards/arm/tiva/ekk-lm3s9b96/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Authors: Gregory Nutt <gnutt@nuttx.org>

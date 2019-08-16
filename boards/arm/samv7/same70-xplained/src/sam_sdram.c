@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/src/sam_sdram.c
+ * boards/arm/samv7/same70-xplained/src/sam_sdram.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -182,17 +182,18 @@ void sam_sdram_config(void)
    *    asynchronous timings (TRC, TRAS, etc.), number of columns, rows, CAS
    *    latency, and the data bus width.
    *
-   *    SDRAMC_CR_NC_COL8          8 column bits
-   *    SDRAMC_CR_NR_ROW11         1 row bits
-   *    SDRAMC_CR_NB_BANK2         2 banks
-   *    SDRAMC_CR_CAS_LATENCY3     3 cycle CAS latency
-   *    SDRAMC_CR_DBW             16 bit
-   *    SDRAMC_CR_TWR(4)           4 cycle write recovery delay
-   *    SDRAMC_CR_TRCTRFC(11)     63 ns min
-   *    SDRAMC_CR_TRP(5)          21 ns min Command period (PRE to ACT)
-   *    SDRAMC_CR_TRCD(5)         21 ns min Active Command to read/Write Command delay time
-   *    SDRAMC_CR_TRAS(8)         42 ns min Command period (ACT to PRE)
-   *    SDRAMC_CR_TXSR(13)        70 ns min Exit self-refresh to active time
+   * SDRAMC_CR_NC_COL8          8 column bits
+   * SDRAMC_CR_NR_ROW11         1 row bits
+   * SDRAMC_CR_NB_BANK2         2 banks
+   * SDRAMC_CR_CAS_LATENCY3     3 cycle CAS latency
+   * SDRAMC_CR_DBW             16 bit
+   * SDRAMC_CR_TWR(4)           4 cycle write recovery delay
+   * SDRAMC_CR_TRCTRFC(11)     63 ns min
+   * SDRAMC_CR_TRP(5)          21 ns min Command period (PRE to ACT)
+   * SDRAMC_CR_TRCD(5)         21 ns min Active Command to read/Write
+   *                               Command delay time
+   * SDRAMC_CR_TRAS(8)         42 ns min Command period (ACT to PRE)
+   * SDRAMC_CR_TXSR(13)        70 ns min Exit self-refresh to active time
    */
 
   regval = SDRAMC_CR_NC_COL8       |  /* 8 column bits */
@@ -216,11 +217,11 @@ void sam_sdram_config(void)
 
   putreg32(0, SAM_SDRAMC_LPR);
 
-  /* 3. The SDRAM memory type must be set in the Memory Device Register.*/
+  /* 3. The SDRAM memory type must be set in the Memory Device Register. */
 
   putreg32(SDRAMC_MDR_SDRAM, SAM_SDRAMC_MDR);
 
-  /* 4. A minimum pause of 200 usec is provided to precede any signal toggle.*/
+  /* 4. A minimum pause of 200 usec is provided to precede any signal toggle. */
 
   up_udelay(200);
 
@@ -247,13 +248,13 @@ void sam_sdram_config(void)
    *    any SDRAM location eight times.
    */
 
-    for (i = 0 ; i < 8; i++)
-      {
-        putreg32(SDRAMC_MR_MODE_AUTOREFRESH, SAM_SDRAMC_MR);
-        *psdram = 0;
-      }
+  for (i = 0 ; i < 8; i++)
+    {
+      putreg32(SDRAMC_MR_MODE_AUTOREFRESH, SAM_SDRAMC_MR);
+      *psdram = 0;
+    }
 
-    up_udelay(200);
+  up_udelay(200);
 
   /* 8. A Mode Register set (MRS) cycle is issued to program the parameters
    *    of the SDRAM devices, in particular CAS latency and burst length.
@@ -262,7 +263,7 @@ void sam_sdram_config(void)
    *    that BA[1:0] are set to 0. For example, with a 16-bit 128 MB SDRAM
    *    (12 rows, 9 columns, 4 banks) bank address, the SDRAM write access
    *    should be done at the address 0x70000000.
-    */
+   */
 
   putreg32(SDRAMC_MR_MODE_LOADMODE, SAM_SDRAMC_MR);
   *psdram = 0;
@@ -279,8 +280,9 @@ void sam_sdram_config(void)
    *     address 0x70800000 or 0x70400000.
    */
 
-  //putreg32(SDRAMC_MR_MODE_EXTLOADMODE, SDRAMC_MR_MODE_EXT_LOAD_MODEREG);
-  // *((uint8_t *)(psdram + SDRAM_BA0)) = 0;
+  /* putreg32(SDRAMC_MR_MODE_EXTLOADMODE, SDRAMC_MR_MODE_EXT_LOAD_MODEREG);
+   * ((uint8_t *)(psdram + SDRAM_BA0)) = 0;
+   */
 
   /* 10. The application must go into Normal Mode, setting Mode to 0 in the
    *     Mode Register and performing a write access at any location in the

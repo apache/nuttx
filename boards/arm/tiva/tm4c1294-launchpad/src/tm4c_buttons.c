@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tm4c1294-launchpad/src/tm4c_buttons.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_buttons.c
  *
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -146,7 +146,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   int ret;
 
-  if (id < 0 || id >= NUM_BUTTONS )
+  if (id < 0 || id >= NUM_BUTTONS)
     {
       ret = -EINVAL;
     }

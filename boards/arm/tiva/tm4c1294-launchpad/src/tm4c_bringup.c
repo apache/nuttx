@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c1294-launchpad/src/tm4c_bringup.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_bringup.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -166,18 +166,18 @@ static void tm4c_i2ctool(void)
 #endif
 
 /****************************************************************************
-* Name: tm4c_pwm_register
-*
-* Description:
-*   Register a PWM dev file with the upper_level PWM driver.
-*
-* Input Parameters:
-*   channel - A number identifying the PWM channel use.
-*
-* Returned Value:
-*   None.
-*
-****************************************************************************/
+ * Name: tm4c_pwm_register
+ *
+ * Description:
+ *   Register a PWM dev file with the upper_level PWM driver.
+ *
+ * Input Parameters:
+ *   channel - A number identifying the PWM channel use.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
 
 #ifdef HAVE_PWM
 static void tm4c_pwm_register(int channel)

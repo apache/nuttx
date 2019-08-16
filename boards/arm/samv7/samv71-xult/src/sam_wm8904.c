@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv71-xult/src/sam_wm8904.c
+/****************************************************************************
+ * boards/arm/samv7/samv71-xult/src/sam_wm8904.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -153,8 +153,9 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
 {
   if (isr)
     {
-      /* Just save the address of the handler and its argument for now.  The
-       * new handler will called via wm8904_interrupt() when the interrupt occurs.
+      /* Just save the address of the handler and its argument for now.
+       * The new handler will called via wm8904_interrupt() when the
+       * interrupt occurs.
        */
 
       audinfo("Attaching %p\n", isr);
@@ -288,7 +289,8 @@ int sam_wm8904_initialize(int minor)
           goto errout_with_i2c;
         }
 
-      /* Configure the DAC master clock.  This clock is provided by PCK2 (PB10)
+      /* Configure the DAC master clock.
+       * This clock is provided by PCK2 (PB10)
        * that is connected to the WM8904 MCLK.
        */
 
@@ -355,7 +357,8 @@ int sam_wm8904_initialize(int minor)
       ret = audio_register(devname, pcm);
       if (ret < 0)
         {
-          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname, ret);
+          auderr("ERROR: Failed to register /dev/%s device: %d\n",
+                 devname, ret);
           goto errout_with_pcm;
         }
 

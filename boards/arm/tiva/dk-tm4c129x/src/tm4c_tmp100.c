@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/dk-tm4c129x/src/tiva_tmp100.c
+ * boards/arm/tiva/dk-tm4c129x/src/tiva_tmp100.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

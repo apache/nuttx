@@ -1,5 +1,5 @@
 ############################################################################
-# boards/samv71-xult/scripts/Make.defs
+# boards/arm/samv7/samv71-xult/scripts/Make.defs
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

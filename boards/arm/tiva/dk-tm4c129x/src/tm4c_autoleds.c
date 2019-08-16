@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/dk-tm4c129x/src/tm4c_autoleds.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_autoleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -94,6 +94,7 @@ void board_autoled_on(int led)
   switch (led)
     {
     case 0: /* R=OFF, G=OFF, B=ON */
+
       /* Previous state was all OFF */
 
       tiva_gpiowrite(GPIO_LED_B, true);
@@ -104,6 +105,7 @@ void board_autoled_on(int led)
       break;
 
     case 2: /* R=OFF, G=ON, B=OFF */
+
       /* Previous state was all: R=OFF, G=OFF, B=ON */
 
       tiva_gpiowrite(GPIO_LED_G, true);
@@ -111,6 +113,7 @@ void board_autoled_on(int led)
       break;
 
     case 3: /* R=ON, G=OFF, B=OFF */
+
       /* Previous state was all: R=OFF, G=Unknown, B=Unknown */
 
       tiva_gpiowrite(GPIO_LED_R, true);
@@ -151,6 +154,7 @@ void board_autoled_off(int led)
       break;
 
     case 3: /* R=OFF, G=OFF, B=OFF */
+
       /* Previous state was all: R=ON, G=OFF, B=OFF */
 
       tiva_gpiowrite(GPIO_LED_R, false);

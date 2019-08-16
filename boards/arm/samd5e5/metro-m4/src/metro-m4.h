@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/metro-m4/src/metro-m4.h
+ * boards/arm/samd5e5/metro-m4/src/metro-m4.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_METRO_M4_SRC_METRO_M4_H
-#define __BOARDS_ARM_METRO_M4_SRC_METRO_M4_H
+#ifndef __BOARDS_ARM_SAMD5E5_METRO_M4_SRC_METRO_M4_H
+#define __BOARDS_ARM_SAMD5E5_METRO_M4_SRC_METRO_M4_H
 
 /****************************************************************************
  * Included Files
@@ -50,11 +50,12 @@
 
 /* Configuration ************************************************************/
 
-
 /* Metro-M4 GPIOs ***********************************************************/
+
 /* LEDs
  *
- * The Adafruit Metro M4 has four LEDs, but only two are controllable by software:
+ * The Adafruit Metro M4 has four LEDs, but only two are controllable by
+ * software:
  *
  *   1. The red LED on the Arduino D13 pin, and
  *   2. A NeoPixel RGB LED.
@@ -113,4 +114,4 @@ void sam_led_pminitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_METRO_M4_SRC_METRO_M4_H */
+#endif /* __BOARDS_ARM_SAMD5E5_METRO_M4_SRC_METRO_M4_H */

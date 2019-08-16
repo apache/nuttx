@@ -1,5 +1,5 @@
 ############################################################################
-# boards/samd20-xplained/src/Makefile
+# boards/arm/samd2l2/samd20-xplained/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

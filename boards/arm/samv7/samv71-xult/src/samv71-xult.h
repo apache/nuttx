@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv71-xult/src/samv71-xult.h
+/****************************************************************************
+ * boards/arm/samv7/samv71-xult/src/samv71-xult.h
  *
  *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMV71_XULT_SRC_SAMV71_XULT_H
-#define __BOARDS_ARM_SAMV71_XULT_SRC_SAMV71_XULT_H
+#ifndef __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_SAMV71_XULT_H
+#define __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_SAMV71_XULT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,10 +48,11 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_HSMCI           1
 #define HAVE_AUTOMOUNTER     1
@@ -75,6 +76,7 @@
 #define HAVE_MRF24J40        1
 
 /* HSMCI */
+
 /* Can't support MMC/SD if the card interface is not enabled */
 
 #if !defined(CONFIG_SAMV7_HSMCI0)
@@ -152,6 +154,7 @@
 #endif /* HAVE_AUTOMOUNTER */
 
 /* USB Device */
+
 /* CONFIG_SAMV7_UDP and CONFIG_USBDEV must be defined, or there is no USB
  * device.
  */
@@ -257,6 +260,7 @@
 #define PROGMEM_MTD_MINOR 1
 
 /* Audio */
+
 /* PCM/WM8904 driver */
 
 #ifndef CONFIG_AUDIO_WM8904
@@ -398,7 +402,7 @@
 #  undef HAVE_MRF24J40
 #endif
 
-/* SAMV71-XULT GPIO Pin Definitions *************************************************/
+/* SAMV71-XULT GPIO Pin Definitions *****************************************/
 
 /* Ethernet MAC.
  *
@@ -473,8 +477,8 @@
  * NOTES:
  *
  *   - There are no pull-up resistors connected to the generic user buttons so
- *     it is necessary to enable the internal pull-up in the SAM V71 to use the
- *     button.
+ *     it is necessary to enable the internal pull-up in the SAM V71 to use
+ *     the button.
  *   - PB12 is set up as a system flash ERASE pin when the firmware boots. To
  *     use the SW1, PB12 has to be configured as a normal regular I/O pin in
  *     the MATRIX module. For more information see the SAM V71 datasheet.
@@ -514,16 +518,17 @@
 
 /* USB Host
  *
- * The SAM V71 Xplained Ultra has a Micro-USB connector for use with the SAM V71
- * USB module labeled as TARGET USB on the kit. In USB host mode VBUS voltage is
- * provided by the kit and has to be enabled by setting the "VBUS Host Enable"
- * pin (PC16) low.
+ * The SAM V71 Xplained Ultra has a Micro-USB connector for use with the SAM
+ * V71 USB module labeled as TARGET USB on the kit. In USB host mode VBUS
+ * voltage is provided by the kit and has to be enabled by setting the
+ * "VBUS Host Enable" pin (PC16) low.
  */
 
 #define GPIO_VBUSON (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                      GPIO_PORT_PIOC | GPIO_PIN16)
 
-/* WM8904 Audio Codec ***************************************************************/
+/* WM8904 Audio Codec *******************************************************/
+
 /* SAMV71 Interface        WM8904 Interface
  * ---- ------------ ------- ----------------------------------
  * GPIO Usage        Pin     Function
@@ -621,37 +626,37 @@
 
 #define EDBG_CSNO           SPI0_CS2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_sdram_config
  *
  * Description:
- *   Configures the on-board SDRAM.  SAMV71 Xplained Ultra features one external
- *   IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected to chip select
- *   NCS1.
+ *   Configures the on-board SDRAM.  SAMV71 Xplained Ultra features one
+ *   external IS42S16100E-7BLI, 512Kx16x2, 10ns, SDRAM. SDRAM0 is connected
+ *   to chip select NCS1.
  *
  *  Input Parameters:
  *     None
  *
  *  Assumptions:
- *    The DDR memory regions is configured as strongly ordered memory.  When we
- *    complete initialization of SDRAM and it is ready for use, we will make DRAM
- *    into normal memory.
+ *    The DDR memory regions is configured as strongly ordered memory.
+ *    When we complete initialization of SDRAM and it is ready for use,
+ *    we will make DRAM into normal memory.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SDRAMC
 void sam_sdram_config(void);
@@ -659,49 +664,49 @@ void sam_sdram_config(void);
 #  define sam_sdram_config(t)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_bringup
  *
  * Description:
  *   Bring up board features
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int sam_bringup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAMV71-XULT board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI
 void sam_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN
 int sam_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_hsmci_initialize
  *
  * Description:
  *   Initialize HSMCI support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 int sam_hsmci_initialize(int slot, int minor);
@@ -709,51 +714,51 @@ int sam_hsmci_initialize(int slot, int minor);
 # define sam_hsmci_initialize(s,m) (-ENOSYS)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_usbinitialize
  *
  * Description:
- *   Called from stm32_boardinitialize very early in initialization to setup USB-
- *   related GPIO pins for the SAMV71-XULT board.
+ *   Called from stm32_boardinitialize very early in initialization to setup
+ *   USB- related GPIO pins for the SAMV71-XULT board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USB
 void sam_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETWORK
 void sam_netinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_emac0_setmac
  *
  * Description:
- *   Read the Ethernet MAC address from the AT24 FLASH and configure the Ethernet
- *   driver with that address.
+ *   Read the Ethernet MAC address from the AT24 FLASH and configure the
+ *   Ethernet driver with that address.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MACADDR
 int sam_emac0_setmac(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
@@ -761,19 +766,19 @@ bool sam_cardinserted(int slotno);
 #  define sam_cardinserted(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_initialize
  *
  * Description:
@@ -785,26 +790,27 @@ bool sam_writeprotected(int slotno);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_automount_event
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The HSMCI card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There is a
- *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There
+ *      is a terminology problem here:
+ *      Each HSMCI supports two slots, slot A and slot B.
+ *      Only slot A is used.  So this is not a really a slot,
+ *      but an HSCMI peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:
@@ -813,19 +819,19 @@ void sam_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void sam_automount_event(int slotno, bool inserted);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if the card in the MMCSD slot is write protected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
@@ -833,62 +839,62 @@ bool sam_writeprotected(int slotno);
 #  define sam_writeprotected(slotno) (false)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_at24config
  *
  * Description:
- *   Create an AT24xx-based MTD configuration device for storage device configuration
- *   information.
+ *   Create an AT24xx-based MTD configuration device for storage device
+ *   configuration information.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MTDCONFIG
 int sam_at24config(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen
- *   device.  This function will register the driver as /dev/inputN where N is the
- *   minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MAXTOUCH
 int sam_tsc_setup(int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_wm8904_initialize
  *
  * Description:
- *   This function is called by platform-specific, setup logic to configure and
- *   register the WM8904 device.  This function will register the driver as
- *   /dev/wm8904[x] where x is determined by the minor device number.
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the WM8904 device.  This function will register the driver
+ *   as /dev/wm8904[x] where x is determined by the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);
 #endif /* HAVE_WM8904 */
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_audio_null_initialize
  *
  * Description:
@@ -898,30 +904,30 @@ int sam_wm8904_initialize(int minor);
  *   minor - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUDIO_NULL
 int sam_audio_null_initialize(int minor);
 #endif /* HAVE_AUDIO_NULL */
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mrf24j40_initialize
  *
  * Description:
  *   Initialize the MRF24J40 device.
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_MRF24J40
 int sam_mrf24j40_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMV71_XULT_SRC_SAMV71_XULT_H */
+#endif /* __BOARDS_ARM_SAMV7_SAMV71_XULT_SRC_SAMV71_XULT_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-cc1310/src/cc1310_buttons.c
+ * boards/arm/tiva/launchxl-cc1310/src/cc1310_buttons.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

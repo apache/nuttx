@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samd20-xplained/src/sam_buttons.c
+ * boards/arm/samd2l2/samd20-xplained/src/sam_buttons.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -74,16 +74,18 @@ void board_button_initialize(void)
   (void)sam_configport(PORT_SW0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to collect
- *   the state of all buttons.  board_buttons() returns an 32-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
+ *   After board_button_initialize() has been called, board_buttons()
+ *   may be called to collect the state of all buttons.
+ *   board_buttons() returns an 32-bit bit set with each bit
+ *   associated with a button.
+ *   See the BUTTON* definitions above for the meaning of
  *   each bit in the returned value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint32_t board_buttons(void)
 {

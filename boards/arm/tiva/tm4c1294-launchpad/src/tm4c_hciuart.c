@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tm4c1294-launchpad/src/tm4c_hciuart.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_hciuart.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author:  Alan Carvalho de Assis <acassis@gmail.com>

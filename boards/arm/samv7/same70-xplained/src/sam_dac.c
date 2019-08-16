@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/same70-xplained/src/sam_dac.c
+/****************************************************************************
+ * boards/arm/samv7/same70-xplained/src/sam_dac.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,71 +53,71 @@
 
 #if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dacdev_initialize
  *
  * Description:
  *   Called to configure DAC peripheral module and register DAC device driver
- ************************************************************************************/
+ ****************************************************************************/
 
 int sam_dacdev_initialize(void)
 {
-    static bool initialized = false;
-    struct dac_dev_s *dac;
-    int ret;
+  static bool initialized = false;
+  struct dac_dev_s *dac;
+  int ret;
 
-    /* Check if we have already initialized */
+  /* Check if we have already initialized */
 
-    if (!initialized)
-      {
+  if (!initialized)
+    {
 #ifdef CONFIG_SAMV7_DAC0
-        /* Get an instance of the DAC0 interface */
+      /* Get an instance of the DAC0 interface */
 
-        dac = sam_dac_initialize(0);
-        if (dac == NULL)
-          {
-            aerr("ERROR:  Failed to get DAC0 interface\n");
-            return -ENODEV;
-          }
+      dac = sam_dac_initialize(0);
+      if (dac == NULL)
+        {
+          aerr("ERROR:  Failed to get DAC0 interface\n");
+          return -ENODEV;
+        }
 
-        /* Register the DAC driver at "/dev/dac0" */
+      /* Register the DAC driver at "/dev/dac0" */
 
-        ret = dac_register("/dev/dac0", dac);
-        if (ret < 0)
-          {
-            aerr("ERROR: dac_register failed: %d\n", ret);
-            return ret;
-          }
+      ret = dac_register("/dev/dac0", dac);
+      if (ret < 0)
+        {
+          aerr("ERROR: dac_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
 
 #ifdef CONFIG_SAMV7_DAC1
-        /* Get an instance of the DAC1 interface */
+      /* Get an instance of the DAC1 interface */
 
-        dac = sam_dac_initialize(1);
-        if (dac == NULL)
-          {
-            aerr("ERROR:  Failed to get DAC1 interface\n");
-            return -ENODEV;
-          }
+      dac = sam_dac_initialize(1);
+      if (dac == NULL)
+        {
+          aerr("ERROR:  Failed to get DAC1 interface\n");
+          return -ENODEV;
+        }
 
-        /* Register the DAC driver at "/dev/dac1" */
+      /* Register the DAC driver at "/dev/dac1" */
 
-        ret = dac_register("/dev/dac1", dac);
-        if (ret < 0)
-          {
-            aerr("ERROR: dac_register failed: %d\n", ret);
-            return ret;
-          }
+      ret = dac_register("/dev/dac1", dac);
+      if (ret < 0)
+        {
+          aerr("ERROR: dac_register failed: %d\n", ret);
+          return ret;
+        }
 #endif
-        /* Now we are initialized */
+      /* Now we are initialized */
 
-        initialized = true;
-      }
-    return OK;
+      initialized = true;
+    }
+  return OK;
 }
 
 #endif /* CONFIG_SAMV7_DAC0 || CONFIG_SAMV7_DAC1 */

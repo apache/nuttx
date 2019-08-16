@@ -56,7 +56,7 @@ Using OpenOCD and GDB with ICDI
     I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      boards/dk-tm4c129x/tools/dk-tm4c129x.cfg
+      boards/arm/tiva/dk-tm4c129x/tools/dk-tm4c129x.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -74,7 +74,7 @@ Using OpenOCD and GDB with ICDI
 
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
-      boards/dk-tm4c129x/tools/dk-tm4c129x.cfg
+      boards/arm/tiva/dk-tm4c129x/tools/dk-tm4c129x.cfg
 
   Starting OpenOCD
 
@@ -84,7 +84,7 @@ Using OpenOCD and GDB with ICDI
       oocd.sh $PWD
 
     Assuming that you have included the path to the oocd.sh script,
-    boards/dk-tm4c129x/tools, in PATH variable.
+    boards/arm/tiva/dk-tm4c129x/tools, in PATH variable.
 
     Note that OpenOCD needs to be run with administrator privileges in
     some environments (sudo).
@@ -513,7 +513,7 @@ Temperature Sensor
   More complex temperature sensor operations are also available.  See the IOCTL
   commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
   of the tiva_tmp100_initialize() and tiva_tmp100_attach() interfaces in the
-  arch/board/board.h file (sames as boards/dk-tm4c129x/include/board.h).
+  arch/board/board.h file (sames as boards/arm/tiva/dk-tm4c129x/include/board.h).
 
   NSH Command Line Application
   ----------------------------

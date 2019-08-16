@@ -27,8 +27,9 @@ Contents
 STATUS/ISSUES
 =============
 
-    1. See boards/samd20-xplained/README.txt.  This port derives from the
-       SAMD20 Xplained board board and all issues there should apply.
+    1. See boards/arm/samd2l2/samd20-xplained/README.txt.
+       This port derives from the SAMD20 Xplained board board and all issues
+       there should apply.
 
     2. 2015-07-06:  The basic NSH configuration is working properly, but
        not at 115200 baud which is the default BAUD selection in the

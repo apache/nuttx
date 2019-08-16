@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/launchxl-cc1310/src/launchxl-cc1310.h
+ * boards/arm/tiva/launchxl-cc1310/src/launchxl-cc1310.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
-#define __BOARDS_ARM_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
+#ifndef __BOARDS_ARM_TIVA_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
+#define __BOARDS_ARM_TIVA_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
 
 /****************************************************************************
  * Included Files
@@ -93,7 +93,8 @@ extern const struct cc13xx_pinconfig_s g_gpio_sw2;
  *   If CONFIG_BOARD_LATE_INITIALIZE=y, then this function will be called from
  *   board_late_initialize().
  *
- *   If CONFIG_BOARD_LATE_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   If CONFIG_BOARD_LATE_INITIALIZE is not selected,
+ *   but CONFIG_LIB_BOARDCTL=y
  *   then this function will *probably* be called from application logic via
  *   boardctl().
  *
@@ -104,16 +105,17 @@ extern const struct cc13xx_pinconfig_s g_gpio_sw2;
 
 int cc1310_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: cc1310_ssidev_initialize
  *
  * Description:
- *   Called to configure SSI chip select GPIO pins for the LAUNCHXL-CC1310 board.
+ *   Called to configure SSI chip select GPIO pins for the LAUNCHXL-CC1310
+ *   board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_TIVA_SSI
 void cc1310_ssidev_initialize(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H */

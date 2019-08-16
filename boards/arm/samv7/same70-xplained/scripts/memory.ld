@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/scripts/memory.ld
+ * boards/arm/samv7/same70-xplained/scripts/memory.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

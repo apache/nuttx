@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/tm4c1294-launchpad/include/board.h
+/****************************************************************************
+ * boards/arm/tiva/tm4c1294-launchpad/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,29 +31,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H
-#define __BOARDS_ARM_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* Crystals on-board the EK-TM4C1294XL include:
  *
- * 1. 25.0MHz (Y2) is connected to OSC0/1 pins and is used as the run mode input to
- *    the PLL.
+ * 1. 25.0MHz (Y2) is connected to OSC0/1 pins and is used as the run mode
+ *    input to the PLL.
  * 2. 32.768kHz (Y3) connected to XOSC0/1 and clocks the hibernation module.
  */
 
@@ -66,16 +66,17 @@
 #define RTCOSC_FREQUENCY     32768    /* Hibernation module RTC oscillator */
 #define LFIOSC_FREQUENCY     33000    /* Low frequency internal oscillator */
 
-/* The PLL generates Fvco according to the following formulae.  The input clock to
- * the PLL may be either the external crystal (Fxtal) or PIOSC (Fpiosc).  This
- * logic supports only the external crystal as the PLL source clock.
+/* The PLL generates Fvco according to the following formulae.
+ * The input clock to the PLL may be either the external crystal (Fxtal)
+ * or PIOSC (Fpiosc).
+ * This logic supports only the external crystal as the PLL source clock.
  *
  *   Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
  *   Mdiv = Mint + (MFrac / 1024)
  *   Fvco = Fin * Mdiv
  *
- * Where the register fields Q and N actually hold (Q-1) and (N-1).   The following
- * setup then generates Fvco = 480MHz:
+ * Where the register fields Q and N actually hold (Q-1) and (N-1).
+ * The following setup then generates Fvco = 480MHz:
  *
  *   Fin  = 25 MHz / 1 / 5 = 5 MHz
  *   Mdiv = 96
@@ -89,8 +90,8 @@
 
 #define BOARD_FVCO_FREQUENCY 480000000 /* Resulting Fvco */
 
-/* When the PLL is active, the system clock frequency (SysClk) is calculated using
- * the following equation:
+/* When the PLL is active, the system clock frequency (SysClk) is calculated
+ * using the following equation:
  *
  *   SysClk = Fvco/ (sysdiv + 1)
  *
@@ -109,17 +110,21 @@
 
 /* Alternate Clock (ALTCLK)
  *
- * The ALTCLK provides a clock source of numerous frequencies to the general-purpose
- * timer, SSI, and UART modules.  The default source for the ALTCLK is the Precision
- * Internal Oscillator (PIOSC).  The Hibernation Real-time Clock (RTCOSC) and Low
- * Frequency Internal Oscillator (LFIOSC) are alternatives.  If the RTCOSC Output is
- * selected, the clock source must also be enabled in the Hibernation module.
+ * The ALTCLK provides a clock source of numerous frequencies to the
+ * general-purpose timer, SSI, and UART modules.
+ * The default source for the ALTCLK is the Precision
+ * Internal Oscillator (PIOSC).
+ * The Hibernation Real-time Clock (RTCOSC) and Low
+ * Frequency Internal Oscillator (LFIOSC) are alternatives.
+ * If the RTCOSC Output is selected, the clock source must also be enabled
+ * in the Hibernation module.
  */
 
 #define BOARD_ALTCLKCFG      SYSCON_ALTCLKCFG_ALTCLK_PIOSC
 #define ALTCLK_FREQUENCY     PIOSC_FREQUENCY
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The EK-TM4C1294XL has 5 green LEDs.
  * LED D0 is lit when 3.3V power supply is available .
  * LEDs D1 and D2 are general purpose LEDs.
@@ -150,10 +155,12 @@
 #define BOARD_LED_D3_BIT  (1 << BOARD_LED_D3)
 #define BOARD_LED_D4_BIT  (1 << BOARD_LED_D4)
 
-/* If CONFIG_ARCH_LEDS is defined, then automated support for the EK-TM4C1294XL LED
+/* If CONFIG_ARCH_LEDS is defined,
+ * then automated support for the EK-TM4C1294XL LED
  * will be included in the build:
+ *                                 LED1  LED2  LED3  LED4
  */
-                                /* LED1  LED2  LED3  LED4 */
+
 #define LED_STARTED       1     /* ON    OFF   NC    NC   */
 #define LED_HEAPALLOCATE  0     /* NC    NC    NC    NC   */
 #define LED_IRQSENABLED   0     /* NC    NC    NC    NC   */
@@ -163,8 +170,10 @@
 #define LED_ASSERTION     0     /* NC    NC    NC    NC   */
 #define LED_PANIC         3     /* OFF   ON    NC    NC   (flashing 2Hz) */
 
-/* Button definitions ***************************************************************/
-/* There are four push buttons on the board. Two of them are user controllable.
+/* Button definitions *******************************************************/
+
+/* There are four push buttons on the board.
+ * Two of them are user controllable.
  * The others are RESET and WAKE
  *
  *   --- ------------
@@ -182,7 +191,8 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
-/* Pin Multiplexing Disambiguation **************************************************/
+/* Pin Multiplexing Disambiguation ******************************************/
+
 /* Ethernet LEDs
  *
  *    PF0/PF4/PF1 are used for Ethernet LEDs.
@@ -210,4 +220,4 @@
 #define UART7_GPIO_RTS    (GPIO_FUNC_OUTPUT | GPIO_PORTG | GPIO_PIN_0)
 #define UART7_GPIO_CTS    (GPIO_FUNC_INPUT | GPIO_PORTL | GPIO_PIN_4)
 
-#endif  /* __BOARDS_ARM_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_TIVA_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */

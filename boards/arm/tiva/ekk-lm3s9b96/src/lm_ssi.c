@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ekk-lm3s9b96/src/lm_ssi.c
+/****************************************************************************
+ * boards/arm/tiva/ekk-lm3s9b96/src/lm_ssi.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,9 +54,9 @@
 
 #if defined(CONFIG_TIVA_SSI0)  || defined(CONFIG_TIVA_SSI1)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* CONFIG_DEBUG_SPI enables debug output from this file */
 
@@ -66,21 +66,22 @@
 #  define ssi_dumpgpio(m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure chip select GPIO pins for the LM3S9B96 Eval board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the CS GPIO */
+
 #if 0
   ssi_dumpgpio("lm_ssidev_initialize() Entry");
   ssi_dumpgpio("lm_ssidev_initialize() Exit");
@@ -91,17 +92,18 @@ void weak_function lm_ssidev_initialize(void)
 /****************************************************************************
  * The external functions, tiva_ssiselect and tiva_ssistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
- * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including tiva_ssibus_initialize()) are provided by common
- * logic.  To use this common SPI logic on your board:
+ * methods SPI interface defined by struct spi_ops_s
+ * (see include/nuttx/spi/spi.h).
+ * All othermethods (including tiva_ssibus_initialize()) are provided by
+ * common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide tiva_ssiselect() and tiva_ssistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to tiva_ssibus_initialize() in your low level initialization
- *      logic
- *   3. The handle returned by tiva_ssibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   2. Add a call to tiva_ssibus_initialize() in your low level
+ *      initialization logic
+ *   3. The handle returned by tiva_ssibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -109,7 +111,8 @@ void weak_function lm_ssidev_initialize(void)
 
 void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
   ssi_dumpgpio("tiva_ssiselect() Entry");
   if (devid == SPIDEV_MMCSD(0))
     {

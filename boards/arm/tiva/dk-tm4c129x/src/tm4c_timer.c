@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/dk-tm4c129x/src/tm4c_timer.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_timer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_TIMER
@@ -102,7 +103,8 @@ int tiva_timer_configure(void)
 {
   int ret;
 
-  tmrinfo("Registering TIMER%d at %s\n", GPTM, CONFIG_DK_TM4C129X_TIMER_DEVNAME);
+  tmrinfo("Registering TIMER%d at %s\n", GPTM,
+          CONFIG_DK_TM4C129X_TIMER_DEVNAME);
 
   ret = tiva_timer_register(CONFIG_DK_TM4C129X_TIMER_DEVNAME, GPTM, ALTCLK);
   if (ret < 0)

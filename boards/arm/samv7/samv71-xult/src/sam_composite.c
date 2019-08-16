@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samv71-xult/src/sam_composite.c
+ * boards/arm/samv7/samv71-xult/src/sam_composite.c
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -216,6 +216,7 @@ FAR void *board_composite_connect(int port, int configid)
       cdcacm_get_composite_devdesc(&dev[0]);
 
       /* Overwrite and correct some values... */
+
       /* The callback functions for the CDC/ACM class */
 
       dev[0].classobject  = cdcacm_classobject;
@@ -242,6 +243,7 @@ FAR void *board_composite_connect(int port, int configid)
       strbase  += dev[0].devinfo.nstrings;
 
       /* Configure the mass storage device device */
+
       /* Ask the usbmsc driver to fill in the constants we didn't
        * know here.
        */
@@ -249,6 +251,7 @@ FAR void *board_composite_connect(int port, int configid)
       usbmsc_get_composite_devdesc(&dev[1]);
 
       /* Overwrite and correct some values... */
+
       /* The callback functions for the USBMSC class */
 
       dev[1].classobject  = board_mscclassobject;
@@ -314,6 +317,7 @@ FAR void *board_composite_connect(int port, int configid)
           cdcacm_get_composite_devdesc(&dev[ia]);
 
           /* Overwrite and correct some values... */
+
           /* The callback functions for the CDC/ACM class */
 
           dev[ia].classobject = cdcacm_classobject;

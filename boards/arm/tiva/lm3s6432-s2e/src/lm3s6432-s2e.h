@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm3s6432-s2e/src/lm3s6432-s2e.h
+/****************************************************************************
+ * boards/arm/tiva/lm3s6432-s2e/src/lm3s6432-s2e.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LM3S6432_S2E_SRC_LM3S6432S2E_H
-#define __BOARDS_ARM_LM3S6432_S2E_SRC_LM3S6432S2E_H
+#ifndef __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H
+#define __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -46,12 +46,13 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* How many SSI modules does this chip support? The LM3S6432 supports 1 SSI
- * module (others may support more than 2 -- in such case, the following must be
+/* How many SSI modules does this chip support?
+ * The LM3S6432 supports 1 SSI module
+ * (others may support more than 2 -- in such case, the following must be
  * expanded).
  */
 
@@ -60,7 +61,7 @@
 #endif
 #undef CONFIG_TIVA_SSI1
 
-/* LM3S6432 MDL-S2E *****************************************************************/
+/* LM3S6432 MDL-S2E *********************************************************/
 
 /* GPIO Usage
  *
@@ -103,22 +104,21 @@
 #define XCVR_ON_GPIO  (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORTB | 4)
 #define XCVR_OFF_GPIO (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORTB | 5)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the MDL-S2E.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LM3S6432_S2E_SRC_LM3S6432S2E_H */
-
+#endif /* __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H */

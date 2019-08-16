@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/same70-xplained/src/sam_appinit.c
+ * boards/arm/samv7/same70-xplained/src/sam_appinit.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samv71-xult/src/sam_ili9488.c
+ * boards/arm/samv7/samv71-xult/src/sam_ili9488.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -87,9 +87,10 @@
  * 31   N/C           -    -
  * 32   GND           -   GND      Ground
  * 33   PCLK/        PC30 GPIO     RGB: Pixel clock Display RAM select.
- *      CMD_DATA_SEL               MCU: One address line of the MCU for displays where it
- *                                      is possible to select either the register or the
- *                                      data interface
+ *      CMD_DATA_SEL               MCU: One address line of the MCU for
+ *                                      displays where it is possible
+ *                                      to select either the register
+ *                                      or the data interface
  * 34   VSYNC/CS     PD19 NCS3     RGB: Vertical synchronization.
  *                                 MCU: Chip select
  * 35   HSYNC/WE     PC8  NWE      RGB: Horizontal synchronization
@@ -155,6 +156,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* SMC must be selected */
 
 #if !defined(CONFIG_SAMV7_SMC)
@@ -203,6 +205,7 @@
 #endif
 
 /* Display/Color Properties **************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -226,6 +229,7 @@
 #define RGB_COLOR(r,g,b)      RGBTO16(r,g,b)
 
 /* SAMV7-XULT LCD Hardware Definitions ***************************************/
+
 /* LCD /CS is NCS3 */
 
 #define SAM_LCD_BASE          ((uintptr_t)SAM_EXTCS3_BASE)
@@ -256,9 +260,9 @@
 
 /* Buffer Alignment.
  *
- * If the data cache is enabled the a higher level of alignment is required.  That is
- * because the data will need to be invalidated and that cache invalidation will occur
- * in multiples of full change lines.
+ * If the data cache is enabled the a higher level of alignment is required.
+ * That is because the data will need to be invalidated and that cache
+ * invalidation will occur in multiples of full change lines.
  */
 
 #ifdef CONFIG_ARMV7M_DCACHE
@@ -344,6 +348,7 @@ struct sam_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Low Level LCD access */
 
 static int  sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd);
@@ -387,8 +392,9 @@ static int  sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
 
 /* LCD Data Transfer Methods */
 
-static int  sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-              size_t npixels);
+static int  sam_putrun(fb_coord_t row, fb_coord_t col,
+                       FAR const uint8_t *buffer,
+                       size_t npixels);
 static int  sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
               size_t npixels);
 
@@ -427,6 +433,7 @@ static inline int sam_lcd_initialize(void);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* LCD GPIO configurations */
 
 static const uint32_t g_lcdpin[] =
@@ -487,6 +494,7 @@ static struct sam_dev_s g_lcddev =
     .getplaneinfo = sam_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -527,8 +535,9 @@ static int sam_sendcmd(FAR struct sam_dev_s *priv, uint16_t cmd)
       lcderr("ERROR: Failed to send command %02x: %d\n", cmd, ret);
     }
 
-  /* Make sure that the CMD/DATA GPIO is reset for commands.  I don't understand
-   * the delay loop... it comes from the SAMV7 sample code and is, apparently, a
+  /* Make sure that the CMD/DATA GPIO is reset for commands.
+   * I don't understand the delay loop...
+   * it comes from the SAMV7 sample code and is, apparently, a
    * work-around for some issue.
    */
 
@@ -569,7 +578,7 @@ static int sam_lcd_put(FAR struct sam_dev_s *priv, uint16_t cmd,
       if (ret < 0)
         {
           lcderr("ERROR: Failed to send command %02x data: %d\n", cmd, ret);
-       }
+        }
     }
 
   return ret;
@@ -699,9 +708,11 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
  ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+static void sam_dumprun(FAR const char *msg, FAR uint16_t *run,
+                        size_t npixels)
 {
-  int i, j;
+  int i;
+  int j;
 
   syslog(LOG_DEBUG, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
@@ -728,8 +739,8 @@ static void sam_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
 
 static void sam_disable_backlight(void)
 {
-  /* PWM support is not yet available.  Backlight is currently just configured as a
-   * GPIO output.
+  /* PWM support is not yet available.
+   * Backlight is currently just configured as a GPIO output.
    */
 #warning Missing logic
 
@@ -770,8 +781,8 @@ static int sam_set_backlight(unsigned int power)
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER:
-  *  full on). On backlit LCDs, this setting may correspond to the backlight
-  *  setting.
+ *  full on). On backlit LCDs, this setting may correspond to the backlight
+ *  setting.
  *
  ****************************************************************************/
 
@@ -828,7 +839,8 @@ static void sam_lcd_sample(struct sam_dev_s *priv, int index)
 static void sam_lcd_sampleinit(struct sam_dev_s *priv)
 {
   priv->smplset = 0;
-  memset(priv->samples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(priv->samples, 0xff,
+         DEBUG_NDMASAMPLES * sizeof(struct sam_dmaregs_s));
 }
 #endif
 
@@ -1043,7 +1055,8 @@ static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
 
   /* Set up to transfer to the LCD */
 
-  ret = sam_dmatxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
+  ret = sam_dmatxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE,
+                      (uint32_t)buffer, buflen);
   if (ret == OK)
     {
       flags = enter_critical_section();
@@ -1084,7 +1097,8 @@ static int sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
 
   /* Set up to transfer to the LCD */
 
-  ret = sam_dmarxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE, (uint32_t)buffer, buflen);
+  ret = sam_dmarxsetup(priv->dmach, (uint32_t)SAM_LCD_BASE,
+                      (uint32_t)buffer, buflen);
   if (ret == OK)
     {
       flags = enter_critical_section();
@@ -1388,8 +1402,9 @@ static inline void sam_smc_initialize(void)
   regval = SMCCS_CYCLE_NWECYCLE(10) | SMCCS_CYCLE_NRDCYCLE(10);
   putreg32(regval, smcbase + SAM_SMCCS_CYCLE_OFFSET);
 
-  regval = SMCCS_MODE_READMODE | SMCCS_MODE_WRITEMODE | SMCCS_EXNWMODE_DISABLED |
-           SMCCS_MODE_DBW_16BIT | SMCCS_MODE_TDFCYCLES(15);
+  regval = SMCCS_MODE_READMODE | SMCCS_MODE_WRITEMODE |
+           SMCCS_EXNWMODE_DISABLED | SMCCS_MODE_DBW_16BIT |
+           SMCCS_MODE_TDFCYCLES(15);
   putreg32(regval, smcbase + SAM_SMCCS_MODE_OFFSET);
 }
 

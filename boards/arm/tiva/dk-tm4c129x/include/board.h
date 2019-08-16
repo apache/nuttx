@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/dk-tm4c129x/include/board.h
+/****************************************************************************
+ * boards/arm/tiva/dk-tm4c129x/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,29 +31,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_DK_TM4C129X_INCLUDE_BOARD_H
-#define __BOARDS_ARM_DK_TM4C129X_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_TIVA_DK_TM4C129X_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TIVA_DK_TM4C129X_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* Crystals on-board the DK-TM4C129X include:
  *
- * 1. 25.0MHz (Y2) is connected to OSC0/1 pins and is used as the run mode input to
- *    the PLL.
+ * 1. 25.0MHz (Y2) is connected to OSC0/1 pins and is used as the run mode
+ *    input to the PLL.
  * 2. 32.768kHz (Y3) connected to XOSC0/1 and clocks the hibernation module.
  */
 
@@ -66,16 +66,17 @@
 #define RTCOSC_FREQUENCY     32768    /* Hibernation Module RTC Oscillator */
 #define LFIOSC_FREQUENCY     33000    /* Low frequency internal oscillator */
 
-/* The PLL generates Fvco according to the following formulae.  The input clock to
- * the PLL may be either the external crystal (Fxtal) or PIOSC (Fpiosc).  This
- * logic supports only the external crystal as the PLL source clock.
+/* The PLL generates Fvco according to the following formulae.
+ * The input clock to the PLL may be either the external crystal
+ * (Fxtal) or PIOSC (Fpiosc).
+ * This logic supports only the external crystal as the PLL source clock.
  *
  *   Fin  = Fxtal / (Q + 1 )(N + 1) -OR- Fpiosc / (Q + 1)(N + 1)
  *   Mdiv = Mint + (MFrac / 1024)
  *   Fvco = Fin * Mdiv
  *
- * Where the register fields Q and N actually hold (Q-1) and (N-1).   The following
- * setup then generates Fvco = 480MHz:
+ * Where the register fields Q and N actually hold (Q-1) and (N-1).
+ * The following setup then generates Fvco = 480MHz:
  *
  *   Fin  = 25 MHz / 1 / 5 = 5 MHz
  *   Mdiv = 96
@@ -89,8 +90,8 @@
 
 #define BOARD_FVCO_FREQUENCY 480000000 /* Resulting Fvco */
 
-/* When the PLL is active, the system clock frequency (SysClk) is calculated using
- * the following equation:
+/* When the PLL is active, the system clock frequency (SysClk) is
+ * calculated using the following equation:
  *
  *   SysClk = Fvco / (sysdiv + 1)
  *
@@ -109,20 +110,22 @@
 
 /* Alternate Clock (ALTCLK)
  *
- * The ALTCLK provides a clock source of numerous frequencies to the general-purpose
- * timer, SSI, and UART modules.  The default source for the ALTCLK is the Precision
- * Internal Oscillator (PIOSC).  The Hibernation Real-time Clock (RTCOSC) and Low
- * Frequency Internal Oscillator (LFIOSC) are alternatives.  If the RTCOSC Output is
+ * The ALTCLK provides a clock source of numerous frequencies to the
+ * general-purpose timer, SSI, and UART modules.
+ * The default source for the ALTCLK is the Precision Internal Oscillator
+ * (PIOSC).  The Hibernation Real-time Clock (RTCOSC) and Low Frequency
+ * Internal Oscillator (LFIOSC) are alternatives.  If the RTCOSC Output is
  * selected, the clock source must also be enabled in the Hibernation module.
  */
 
 #define BOARD_ALTCLKCFG      SYSCON_ALTCLKCFG_ALTCLK_PIOSC
 #define ALTCLK_FREQUENCY     PIOSC_FREQUENCY
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The DK-TM4C129X has a single RGB LED.  There is only one visible LED which
- * will vary in color.  But, from the standpoint of the firmware, this appears as
- * three LEDs:
+ * will vary in color.  But, from the standpoint of the firmware, this
+ * appears as three LEDs:
  *
  *   --- ------------ -----------------
  *   Pin Pin Function Jumper
@@ -146,10 +149,11 @@
 #define BOARD_LED_G_BIT           (1 << BOARD_LED_G)
 #define BOARD_LED_B_BIT           (1 << BOARD_LED_B)
 
-/* If CONFIG_ARCH_LEDS is defined, then automated support for the DK-TM4C129X LED
- * will be included in the build:
+/* If CONFIG_ARCH_LEDS is defined, then automated support for the DK-TM4C129X
+ * LED will be included in the build:
+ *                                 RED  GREEN BLUE
  */
-                                /* RED  GREEN BLUE */
+
 #define LED_STARTED       0     /* OFF  OFF   ON   */
 #define LED_HEAPALLOCATE  1     /* NC   NC    NC   */
 #define LED_IRQSENABLED   1     /* NC   NC    NC   */
@@ -159,7 +163,8 @@
 #define LED_ASSERTION     1     /* NC   NC    NC   */
 #define LED_PANIC         3     /* ON   OFF   OFF (flashing 2Hz) */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* There are three push buttons on the board.
  *
  *   --- ------------ -----------------
@@ -180,12 +185,13 @@
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 #define BUTTON_SW4_BIT    (1 << BUTTON_SW4)
 
-/* Pin Multiplexing Disambiguation **************************************************/
+/* Pin Multiplexing Disambiguation ******************************************/
+
 /* UARTs
  *
  *   UART0: PA0-1 (fixed configuration)
- *   UART3: PJ0-1 to EM_TX/EM_RX or BOOSTER_PACK2_RX/BOOSTER_PACK2_TX(Depending
- *          on J12/J13)
+ *   UART3: PJ0-1 to EM_TX/EM_RX or BOOSTER_PACK2_RX/BOOSTER_PACK2_TX
+ *          (Depending on J12/J13)
  *   UART5: PH6-7 to BOOSTER_PACK1_RX/BOOSTER_PACK1_TX
  */
 
@@ -197,8 +203,10 @@
 
 /* SSI:
  *
- *   SSI0: PA2-5 are used for SSI0 to the second booster pack (fixed configuration)
- *   SSI3: PF0/PF4-5/PH4/PQ0-2 are used for the SPI flash (on-board and SD card).
+ *   SSI0: PA2-5 are used for SSI0 to the second booster pack
+ *         (fixed configuration)
+ *   SSI3: PF0/PF4-5/PH4/PQ0-2 are used for the SPI flash
+ *         (on-board and SD card).
  *         PH4 selects the SD card and PQ1 selects the on-board SPI flash.
  */
 
@@ -227,7 +235,8 @@
 
 /* USB:
  *
- *   PB0-1/PD6-7/PL6-7 are used for USB (Only PD6-7 are not fixed configuration)
+ *   PB0-1/PD6-7/PL6-7 are used for USB
+ *   (Only PD6-7 are not fixed configuration)
  */
 
 #define GPIO_USB0_EPEN   GPIO_USB0_EPEN_3
@@ -250,13 +259,13 @@
  *   PF6-7/PJ6/PS4-5/PR0-7 are used for the LCD (fixed configuration).
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_tmp100_initialize
  *
  * Description:
@@ -268,11 +277,11 @@
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_TIVA_I2C6)
 int tiva_tmp100_initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_DK_TM4C129X_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_TIVA_DK_TM4C129X_INCLUDE_BOARD_H */

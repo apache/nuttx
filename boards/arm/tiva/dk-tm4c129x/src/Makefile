@@ -1,5 +1,5 @@
 ############################################################################
-# boards/dk-tm4c129x/src/Makefile
+# boards/arm/tiva/dk-tm4c129x/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

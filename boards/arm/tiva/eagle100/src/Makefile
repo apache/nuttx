@@ -1,5 +1,5 @@
 ############################################################################
-# boards/eagle100/src/Makefile
+# boards/arm/tiva/eagle100/src/Makefile
 #
 #   Copyright (C) 2009 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

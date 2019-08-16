@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/same70-xplained/include/board.h
+/****************************************************************************
+ * boards/arm/samv7/same70-xplained/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,30 +31,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAME70_XPLAINED_INCLUDE_BOARD_H
-#define __BOARDS_ARM_SAME70_XPLAINED_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMV7_SAME70_XPLAINED_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMV7_SAME70_XPLAINED_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
-/* After power-on reset, the SAME70Q device is running out of the Master Clock using
- * the Fast RC Oscillator running at 4 MHz.
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAME70Q device is running out of the Master
+ * Clock using the Fast RC Oscillator running at 4 MHz.
  *
  *   MAINOSC:  Frequency = 12MHz (crystal)
  *
  * 300MHz Settings:
  *   PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
+ *   Master Clock (MCK): Source = PLLACK,
+ *                       Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
  * There can be two on-board crystals.  However, the 32.768 crystal is not
@@ -68,10 +71,10 @@
 
 /* Main oscillator register settings.
  *
- * The main oscillator could be either the embedded 4/8/12 MHz fast RC oscillators
- * or an external 3-20 MHz crystal or ceramic resonator.  The external clock source
- * is selected by default in sam_clockconfig.c.  Here we need to specify the main
- * oscillator start-up time.
+ * The main oscillator could be either the embedded 4/8/12 MHz fast RC
+ * oscillators or an external 3-20 MHz crystal or ceramic resonator.
+ * The external clock source is selected by default in sam_clockconfig.c.
+ * Here we need to specify the main oscillator start-up time.
  *
  * REVISIT... this is old information:
  * The start up time should be should be:
@@ -154,15 +157,21 @@
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 150MHz, CLKDIV = 186, MCI_SPEED = 150MHz / (2*186 + 1 + 2) = 400 KHz */
+/* MCK = 150MHz, CLKDIV = 186,
+ * MCI_SPEED = 150MHz / (2*186 + 1 + 2) = 400 KHz
+ */
 
 #define HSMCI_INIT_CLKDIV          ((186 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 150MHz, CLKDIV = 3 w/CLOCKODD, MCI_SPEED = 150MHz /(2*3 + 0 + 2) = 18.75 MHz */
+/* MCK = 150MHz, CLKDIV = 3 w/CLOCKODD,
+ * MCI_SPEED = 150MHz /(2*3 + 0 + 2) = 18.75 MHz
+ */
 
 #define HSMCI_MMCXFR_CLKDIV        (2 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 150MHz, CLKDIV = 2, MCI_SPEED = 150MHz /(2*2 + 0 + 2) = 25 MHz */
+/* MCK = 150MHz, CLKDIV = 2,
+ * MCI_SPEED = 150MHz /(2*2 + 0 + 2) = 25 MHz
+ */
 
 #define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
@@ -186,7 +195,8 @@
 
 #define BOARD_FWS                  4
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* LEDs
  *
  * A single LED is available driven by PC8.
@@ -208,7 +218,8 @@
  *
  *   ------------------- ---------------------------- ------
  *   SYMBOL                  Meaning                  LED
- *   ------------------- ---------------------------- ------   */
+ *   ------------------- ---------------------------- ------
+ */
 
 #define LED_STARTED      0 /* NuttX has been started  OFF      */
 #define LED_HEAPALLOCATE 0 /* Heap has been allocated OFF      */
@@ -225,13 +236,14 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* Buttons
  *
  * SAM E70 Xplained contains two mechanical buttons. One button is the RESET
- * button connected to the SAM E70 reset line and the other, PA11, is a generic
- * user configurable button. When a button is pressed it will drive the I/O
- * line to GND.
+ * button connected to the SAM E70 reset line and the other, PA11, is a
+ * generic user configurable button.
+ * When a button is pressed it will drive the I/O line to GND.
  *
  * NOTE: There are no pull-up resistors connected to the generic user buttons
  * so it is necessary to enable the internal pull-up in the SAM E70 to use the
@@ -243,11 +255,13 @@
 
 #define BUTTON_SW0_BIT    (1 << BUTTON_SW0)
 
-/* PIO Disambiguation ***************************************************************/
+/* PIO Disambiguation *******************************************************/
+
 /* Serial Console
  *
- * The SAME70-XPLD has no on-board RS-232 drivers so it will be necessary to use
- * either the VCOM or an external RS-232 driver.  Here are some options.
+ * The SAME70-XPLD has no on-board RS-232 drivers so it will be necessary to
+ * use either the VCOM or an external RS-232 driver.
+ * Here are some options.
  *
  *  - Arduino Serial Shield:  One option is to use an Arduino-compatible
  *    serial shield.  This will use the RXD and TXD signals available at pins
@@ -266,7 +280,6 @@
  */
 
 #define GPIO_UART3_TXD  GPIO_UART3_TXD_1
-
 
 /* - Arduino Communications.  Additional UART/USART connections are available
  *  on the Arduino Communications connection J505:
@@ -326,8 +339,8 @@
  *
  * SAM E70 Xplained has two MCAN modules that performs communication according
  * to ISO11898-1 (Bosch CAN specification 2.0 part A,B) and Bosch CAN FD
- * specification V1.0.  MCAN1 is connected to an on-board ATA6561 CAN physical-layer
- * transceiver.
+ * specification V1.0.
+ *  MCAN1 is connected to an on-board ATA6561 CAN physical-layer transceiver.
  *
  *   ------- -------- -------- -------------
  *   SAM E70 FUNCTION ATA6561  SHARED
@@ -341,13 +354,13 @@
 #define GPIO_MCAN1_TX         GPIO_MCAN1_TX_2
 #define GPIO_MCAN1_RX         GPIO_MCAN1_RX_2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -360,20 +373,21 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAM4e-EK board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the SAM4e-EK board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_lcdclear(uint16_t color);
 
@@ -383,4 +397,4 @@ void sam_lcdclear(uint16_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAME70_XPLAINED_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAMV7_SAME70_XPLAINED_INCLUDE_BOARD_H */

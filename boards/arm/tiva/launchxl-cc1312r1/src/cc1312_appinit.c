@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/launchxl-cc1312r1/src/cc1312_appinit.c
+ * boards/arm/tiva/launchxl-cc1312r1/src/cc1312_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

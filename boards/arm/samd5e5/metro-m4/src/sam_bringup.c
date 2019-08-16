@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/metro-m4/src/sam_bringup.c
+ * boards/arm/samd5e5/metro-m4/src/sam_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

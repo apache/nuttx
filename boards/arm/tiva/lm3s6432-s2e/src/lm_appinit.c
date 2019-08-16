@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lm3s6432-s2e/src/lm_appinit.c
+ * boards/arm/tiva/lm3s6432-s2e/src/lm_appinit.c
  *
  *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

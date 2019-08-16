@@ -54,21 +54,22 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* The TM4C123G LaunchPad has a single RGB LED.  There is only one visible LED
- * which will vary in color.  But, from the standpoint of the firmware, this
- * appears as three LEDs:
+
+/* The TM4C123G LaunchPad has a single RGB LED.
+ * There is only one visible LED  which will vary in color.
+ * But, from the standpoint of the firmware, this appears as three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
  *   BOARD_LED_B    -- Connected to PF2
  *
- * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad LEDs
- * will be included in the build:
+ * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad
+ * LEDs will be included in the build:
  *
  * OFF:
- * - OFF means that the OS is still initializing. Initialization is very fast so
- *   if you see this at all, it probably means that the system is hanging up
- *   somewhere in the initialization phases.
+ * - OFF means that the OS is still initializing. Initialization is very fast
+ *   so if you see this at all, it probably means that the system is hanging
+ *   up somewhere in the initialization phases.
  *
  * GREEN or GREEN-ish
  * - This means that the OS completed initialization.
@@ -80,7 +81,8 @@
  *
  * Redish:
  * - If a recovered assertion occurs, the RED component will be illuminated
- *   briefly while the assertion is handled.  You will probably never see this.
+ *   briefly while the assertion is handled.
+ *   You will probably never see this.
  *
  * Flashing RED:
  * - In the event of a fatal crash, the BLUE and GREEN components will be

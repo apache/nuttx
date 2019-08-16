@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm3s6965-ek/src/lm3s6965-ek.h
+/****************************************************************************
+ * boards/arm/tiva/lm3s6965-ek/src/lm3s6965-ek.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LM3S6965_EK_SRC_LM3S6965EK_H
-#define __BOARDS_ARM_LM3S6965_EK_SRC_LM3S6965EK_H
+#ifndef __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H
+#define __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -46,13 +46,13 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S6965 supports 1 SSI
- * module (others may support more than 2 -- in such case, the following must be
- * expanded).
+ * module (others may support more than 2 -- in such case, the following must
+ * be expanded).
  */
 
 #if TIVA_NSSI == 0
@@ -112,21 +112,21 @@
 #define OLEDEN_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
                      GPIO_VALUE_ONE | GPIO_PORTC | 6)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LM3S6965_EK_SRC_LM3S6965EK_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H */

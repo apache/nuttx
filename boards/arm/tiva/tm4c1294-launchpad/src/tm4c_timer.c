@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/tm4c1294-launchpad/src/tm4c_timer.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_timer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,6 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_TIMER

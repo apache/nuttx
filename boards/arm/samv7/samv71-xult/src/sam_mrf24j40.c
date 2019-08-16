@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samv71-xult/src/sam_mrf24j40.c
+ * boards/arm/samv7/samv71-xult/src/sam_mrf24j40.c
  *
  *   Copyright (C) 2017 Gregory Nutt, All rights reserver
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -87,7 +87,7 @@ struct sam_priv_s
  * varying boards and MCUs.
  *
  *   irq_attach - Attach the MRF24J40 interrupt handler to the GPIO
-                  interrupt
+ *                interrupt
  *   irq_enable - Enable or disable the GPIO interrupt
  */
 

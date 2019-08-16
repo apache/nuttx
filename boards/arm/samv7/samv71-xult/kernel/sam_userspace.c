@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samv71-xult/kernel/sam_userspace.c
+ * boards/arm/samv7/samv71-xult/kernel/sam_userspace.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

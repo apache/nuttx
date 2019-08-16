@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lm3s6965-ek/src/lm_appinit.c
+ * boards/arm/tiva/lm3s6965-ek/src/lm_appinit.c
  *
  *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -151,10 +151,12 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }

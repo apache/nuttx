@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/saml21-xplained/src/sam_spi.c
+ * boards/arm/samd2l2/saml21-xplained/src/sam_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,20 +68,20 @@
 
 void weak_function sam_spidev_initialize(void)
 {
-  /* The I/O module containing the SD connector may or may not be installed.  And, if
-   * it is installed, it may be in connector EXT1 or EXT2.
+  /* The I/O module containing the SD connector may or may not be installed.
+   *  And, if it is installed, it may be in connector EXT1 or EXT2.
    */
 
 #ifdef CONFIG_SAML21_XPLAINED_IOMODULE
   /* TODO: enable interrupt on card detect */
 
-   sam_configport(PORT_SD_CD);     /* Card detect input */
-   sam_configport(PORT_SD_CS);     /* Chip select output */
+  sam_configport(PORT_SD_CD);     /* Card detect input */
+  sam_configport(PORT_SD_CS);     /* Chip select output */
 #endif
 
 #ifdef CONFIG_SAML21_XPLAINED_OLED1MODULE
-   sam_configport(PORT_OLED_DATA); /* Command/data */
-   sam_configport(PORT_OLED_CS);   /* Card detect input */
+  sam_configport(PORT_OLED_DATA); /* Command/data */
+  sam_configport(PORT_OLED_CS);   /* Card detect input */
 #endif
 }
 
@@ -114,8 +114,8 @@ void weak_function sam_spidev_initialize(void)
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind
- *      the  SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

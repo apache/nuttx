@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/ekk-lm3s9b96/src/lm_boot.c
+/****************************************************************************
+ * boards/arm/tiva/ekk-lm3s9b96/src/lm_boot.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,32 +49,35 @@
 #include "up_internal.h"
 #include "ekk-lm3s9b96.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_boardinitialize
  *
  * Description:
- *   All Stellaris architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All Stellaris architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tiva_boardinitialize(void)
 {
-  /* Configure chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm_ssidev_initialize() has been brought into the link.
+  /* Configure chip selects if
+   * 1) SSI is not disabled, and
+   * 2) the weak function lm_ssidev_initialize() has been brought into the
+   *  link.
    */
 
 #if defined(CONFIG_TIVA_SSI0)  || defined(CONFIG_TIVA_SSI1)

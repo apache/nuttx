@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/lm4f120-launchpad/src/lm4f_appinit.c
+ * boards/arm/tiva/lm4f120-launchpad/src/lm4f_appinit.c
  * arch/arm/src/board/lm4f_appinit.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.

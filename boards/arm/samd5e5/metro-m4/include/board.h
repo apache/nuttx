@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/metro-m4/include/board.h
+/****************************************************************************
+ * boards/arm/samd5e5/metro-m4/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_METRO_M4_INCLUDE_BOARD_H
-#define __BOARDS_ARM_METRO_M4_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_SAMD5E5_METRO_M4_INCLUDE_BOARD_H
+#define __BOARDS_ARM_SAMD5E5_METRO_M4_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef TRUE
 #  define TRUE  1
@@ -54,17 +54,19 @@
 #  define FALSE 0
 #endif
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Overview
  *
  * Per the schematic Adafruit Metro M4 Pro has one on-board crystal:
  *
  *   X4 32.768KHz XOSC32
  *
- * However, I have been unsuccessful using it and have fallen back to using OSCULP32K
- * (Unless CONFIG_METRO_M4_32KHZXTAL=y)
+ * However, I have been unsuccessful using it and have fallen back to using
+ * OSCULP32K(Unless CONFIG_METRO_M4_32KHZXTAL=y)
  *
- * Since there is no high speed crystal, we will run from the OSC16M clock source.
+ * Since there is no high speed crystal, we will run from the OSC16M clock
+ * source.
  *
  * OSC48M               Output     = 48Mhz
  *  |
@@ -360,8 +362,10 @@
 
 #define BOARD_FLASH_WAITSTATES  6
 
-/* LED definitions ******************************************************************/
-/* The Adafruit Metro M4 has four LEDs, but only two are controllable by software:
+/* LED definitions **********************************************************/
+
+/* The Adafruit Metro M4 has four LEDs, but only two are controllable by
+ * software:
  *
  *   1. The red LED on the Arduino D13 pin, and
  *   2. A NeoPixel RGB LED.
@@ -390,7 +394,8 @@
  *
  *   ------------------- ---------------------------- ------
  *   SYMBOL                  Meaning                  LED
- *   ------------------- ---------------------------- ------   */
+ *   ------------------- ---------------------------- ------
+ */
 
 #define LED_STARTED      0 /* NuttX has been started  OFF      */
 #define LED_HEAPALLOCATE 0 /* Heap has been allocated OFF      */
@@ -407,17 +412,19 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
-/* SERCOM definitions ***************************************************************/
-/* The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the Main
- * Clock Controller.  The SERCOM uses two generic clocks: GCLK_SERCOMn_CORE and
- * GCLK_SERCOM_SLOW. The core clock (GCLK_SERCOMx_CORE) is required to clock the
- * SERCOM while working as a master.  The slow clock (GCLK_SERCOM_SLOW) is only
- * required for certain functions and is common to all SERCOM modules.
+/* SERCOM definitions *******************************************************/
+
+/* The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the
+ * Main Clock Controller.
+ * The SERCOM uses two generic clocks: GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
+ * The core clock (GCLK_SERCOMx_CORE) is required to clock the SERCOM while
+ * working as a master.  The slow clock (GCLK_SERCOM_SLOW) is only  required
+ * for certain functions and is common to all SERCOM modules.
  *
- * These clocks must be configured and enabled in the Generic Clock Controller (GCLK)
- * before using the SERCOM.
+ * These clocks must be configured and enabled in the Generic Clock
+ * Controller (GCLK) before using the SERCOM.
  */
 
 #define BOARD_SERCOM_SLOWGEN         3                   /* 32.768KHz, common to all SERCOMS */
@@ -426,8 +433,9 @@
 
 /* SERCOM3
  *
- * An Arduino compatible serial Shield is assumed (or equivalently, an external
- * RS-232 or serial-to-USB adapter connected on Arduino pins D0 and D1):
+ * An Arduino compatible serial Shield is assumed (or equivalently, an
+ * external RS-232 or serial-to-USB adapter connected on Arduino pins D0
+ * and D1):
  *
  *   ------ ----------------- ---------
  *   SHIELD SAMD5E5           FUNCTION
@@ -457,4 +465,4 @@
 
 #define BOARD_USB_GCLKGEN            1                   /* GCLK1, 48MHz */
 
-#endif  /* __BOARDS_ARM_METRO_M4_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_SAMD5E5_METRO_M4_INCLUDE_BOARD_H */

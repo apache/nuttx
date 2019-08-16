@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm4f120-launchpad/include/board.h
+/****************************************************************************
+ * boards/arm/tiva/lm4f120-launchpad/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* RCC settings.  Crytals on-board the LM4F120 LaunchPad include:
  *
@@ -114,10 +114,11 @@
                            SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
 #endif
 
-/* LED definitions ******************************************************************/
-/* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED which
- * will vary in color.  But, from the standpoint of the firmware, this appears as
- * three LEDs:
+/* LED definitions **********************************************************/
+
+/* The LM4F120 LaunchPad has a single RGB LED.
+ * There is only one visible LED which will vary in color.
+ *But, from the standpoint of the firmware, this appears as three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
@@ -136,13 +137,13 @@
 #define BOARD_LED1_BIT            (1 << BOARD_LED1)
 #define BOARD_LED2_BIT            (1 << BOARD_LED2)
 
-/* If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad LEDs
- * will be included in the build:
+/* If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad
+ * LEDs will be included in the build:
  *
  * OFF:
- * - OFF means that the OS is still initializing. Initialization is very fast so
- *   if you see this at all, it probably means that the system is hanging up
- *   somewhere in the initialization phases.
+ * - OFF means that the OS is still initializing. Initialization is very fast
+ *   so if you see this at all, it probably means that the system is hanging
+ *   up somewhere in the initialization phases.
  *
  * GREEN or GREEN-ish
  * - This means that the OS completed initialization.
@@ -154,13 +155,15 @@
  *
  * Redish:
  * - If a recovered assertion occurs, the RED component will be illuminated
- *   briefly while the assertion is handled.  You will probably never see this.
+ *   briefly while the assertion is handled.
+ *   You will probably never see this.
  *
  * Flashing RED:
  * - In the event of a fatal crash, the BLUE and GREEN components will be
  *   extinguished and the RED component will FLASH at a 2Hz rate.
+ *                                 RED  GREEN BLUE
  */
-                                /* RED  GREEN BLUE               */
+
 #define LED_STARTED       0     /* OFF  OFF   OFF                */
 #define LED_HEAPALLOCATE  0     /* OFF  OFF   OFF                */
 #define LED_IRQSENABLED   0     /* OFF  OFF   OFF                */
@@ -170,7 +173,8 @@
 #define LED_ASSERTION     3     /* ON   NC    NC  (momentary)    */
 #define LED_PANIC         4     /* ON   OFF   OFF (flashing 2Hz) */
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The LM4F120 LaunchPad has a two buttons:
  *
  *   BOARD_SW1    -- Connected to PF4
@@ -184,11 +188,11 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
-/* Pin Multiplexing Disambiguation **************************************************/
+/* Pin Multiplexing Disambiguation ******************************************/
 
 #define GPIO_UART1_CTS    GPIO_UART1_CTS_1
 #define GPIO_UART1_RTS    GPIO_UART1_RTS_1
 #define GPIO_UART1_RX     GPIO_UART1_RX_1
 #define GPIO_UART1_TX     GPIO_UART1_TX_1
 
-#endif  /* __BOARDS_ARM_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_TIVA_LM4F120_LAUNCHPAD_INCLUDE_BOARD_H */

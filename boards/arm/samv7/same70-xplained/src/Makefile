@@ -1,5 +1,5 @@
 ############################################################################
-# boards/same70-xplained/src/Makefile
+# boards/arm/samv7/same70-xplained/src/Makefile
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

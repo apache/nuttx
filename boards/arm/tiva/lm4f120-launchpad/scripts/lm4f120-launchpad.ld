@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/lm4f120-launchpad/scripts/lm4f120-launchpad.ld
+ * boards/arm/tiva/lm4f120-launchpad/scripts/lm4f120-launchpad.ld
  *
  *   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

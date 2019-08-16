@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/dk-tm4c129x/src/tm4c_bringup.c
+ * boards/arm/tiva/dk-tm4c129x/src/tm4c_bringup.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

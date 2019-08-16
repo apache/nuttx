@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/same70-xplained/src/sam_autoleds.c
+ * boards/arm/samv7/same70-xplained/src/sam_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

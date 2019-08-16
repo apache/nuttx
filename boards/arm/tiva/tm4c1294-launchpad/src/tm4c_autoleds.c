@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/tm4c1294-launchpad/src/tm4c_autoleds.c
+ * boards/arm/tiva/tm4c1294-launchpad/src/tm4c_autoleds.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,6 +63,7 @@
 void tm4c_led_initialize(void)
 {
   /* Configure LED PIOs for output */
+
   tiva_configgpio(GPIO_LED_D1);
   tiva_configgpio(GPIO_LED_D2);
   tiva_configgpio(GPIO_LED_D3);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/samd21-xplained/scripts/flash.ld
+ * boards/arm/samd2l2/samd21-xplained/scripts/flash.ld
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

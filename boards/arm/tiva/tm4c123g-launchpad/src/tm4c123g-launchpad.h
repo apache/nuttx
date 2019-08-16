@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * boards/arm/tiva/tm4c123g-launchpad/src/tm4c123g-launchpad.h
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H
-#define __BOARDS_ARM_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H
+#ifndef __BOARDS_ARM_TIVA_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H
+#define __BOARDS_ARM_TIVA_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -47,10 +47,11 @@
 #include "chip.h"
 #include "tiva_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_AT24 1
 
@@ -114,22 +115,23 @@
 #  undef CONFIG_TM4C123G_LAUNCHPAD_AT24_NXFFS
 #endif
 
-/* TM4C123G LaunchPad ***************************************************************/
-/* The TM4C123G LaunchPad has a single RGB LED.  There is only one visible LED which
- * will vary in color.  But, from the standpoint of the firmware, this appears as
- * three LEDs:
+/* TM4C123G LaunchPad *******************************************************/
+
+/* The TM4C123G LaunchPad has a single RGB LED.
+ * There is only one visible LED which will vary in color.
+ * But, from the standpoint of the firmware, this appears as three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
  *   BOARD_LED_B    -- Connected to PF2
  *
- * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad LEDs
- * will be included in the build:
+ * If CONFIG_ARCH_LEDS is defined, then automated support for the LaunchPad
+ * LEDs will be included in the build:
  *
  * OFF:
- * - OFF means that the OS is still initializing. Initialization is very fast so
- *   if you see this at all, it probably means that the system is hanging up
- *   somewhere in the initialization phases.
+ * - OFF means that the OS is still initializing. Initialization is very fast
+ *   so if you see this at all, it probably means that the system is hanging
+ *   up somewhere in the initialization phases.
  *
  * GREEN or GREEN-ish
  * - This means that the OS completed initialization.
@@ -141,7 +143,8 @@
  *
  * Redish:
  * - If a recovered assertion occurs, the RED component will be illuminated
- *   briefly while the assertion is handled.  You will probably never see this.
+ *   briefly while the assertion is handled.
+ *   You will probably never see this.
  *
  * Flashing RED:
  * - In the event of a fatal crash, the BLUE and GREEN components will be
@@ -175,19 +178,19 @@
                       GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
                       GPIO_PORTF | GPIO_PIN_0)
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name: tm4c_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the TM4C123G LaunchPad.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function tm4c_ssidev_initialize(void);
 
@@ -213,13 +216,13 @@ void tm4c_led_initialize(void);
 
 int tm4c_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: tm4c_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_TIVA_ADC
 int tm4c_adc_setup(void);
@@ -250,4 +253,4 @@ int tiva_timer_configure(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H */
+#endif /* __BOARDS_ARM_TIVA_TM4C123G_LAUNCHPAD_TM4C123G_LAUNCHPAD_H */

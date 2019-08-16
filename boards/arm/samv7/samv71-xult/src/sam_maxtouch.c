@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/samv7-xult/src/sam_maxtouch.c
+/****************************************************************************
+ * boards/arm/samv7/samv7-xult/src/sam_maxtouch.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMV71XULT_MXT_I2CFREQUENCY
@@ -158,8 +159,9 @@ static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
 {
   if (isr)
     {
-      /* Just save the address of the handler and its argument for now.  The
-       * new handler will called via mxt_interrupt() when the interrupt occurs.
+      /* Just save the address of the handler and its argument for now.
+       * The new handler will called via mxt_interrupt() when the interrupt
+       * occurs.
        */
 
       iinfo("Attaching %p\n", isr);
@@ -267,7 +269,9 @@ int sam_tsc_setup(int minor)
     {
       ierr("ERROR: Failed to register touchscreen device\n");
       irq_detach(IRQ_MXT_CHG);
+
       /* sam_i2cbus_uninitialize(i2c); */
+
       return -ENODEV;
     }
 

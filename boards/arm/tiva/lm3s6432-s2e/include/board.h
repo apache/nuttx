@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm3s6432-s2e/include/board.h
+/****************************************************************************
+ * boards/arm/tiva/lm3s6432-s2e/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -32,28 +32,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARDS_ARM_TIVA_LM3S6432_S2E_INCLUDE_BOARD_H
+#define __BOARDS_ARM_TIVA_LM3S6432_S2E_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* RCC settings */
 
 #define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL8000KHZ /* S2E on-board crystal is 8.00 MHz */
 #define XTAL_FREQUENCY       8000000
 
-/* Oscillator source is the main oscillator (not internal, internal/4, 30KHz or
- * 30KHz from hibernate module) */
+/* Oscillator source is the main oscillator (not internal, internal/4,
+ * 30KHz or 30KHz from hibernate module)
+ */
 
 #define SYSCON_RCC_OSCSRC    SYSCON_RCC_OSCSRC_MOSC
 #define SYSCON_RCC2_OSCSRC   SYSCON_RCC2_OSCSRC2_MOSC
@@ -92,19 +93,23 @@
 
 #define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(TIVA_SYSDIV))
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 /* The S2E has two LEDs on PF2/PF3, shared with the Ethernet.
- * In keeping with the other lm3s6xxx port, we use one of these for debugging.
- * Below is the mapping of this
- * single LED.  From this single LED, we can get the following information:
+ * In keeping with the other lm3s6xxx port, we use one of these for
+ * debugging.
+ * Below is the mapping of this  single LED.
+ * From this single LED, we can get the following information:
  *
- *   OFF Steady:    The system has failed to boot to the point of enabling interrupts
- *   ON Steady:     The systems has enabled interrupts, but none have been received
+ *   OFF Steady:    The system has failed to boot to the point of
+ *                  enabling interrupts
+ *   ON Steady:     The systems has enabled interrupts,
+ *                  but none have been received
  *   Dull glow:     The system is taking interrupts
  *   Slow blinking: The system has panicked
+ *                                 ON   OFF
  */
-                                /* ON   OFF */
+
 #define LED_STARTED       0     /* OFF  OFF */
 #define LED_HEAPALLOCATE  1     /* OFF  OFF */
 #define LED_IRQSENABLED   2     /* ON   ON */
@@ -114,4 +119,4 @@
 #define LED_ASSERTION     6     /* ON   OFF */
 #define LED_PANIC         7     /* ON   OFF */
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __BOARDS_ARM_TIVA_LM3S6432_S2E_INCLUDE_BOARD_H */

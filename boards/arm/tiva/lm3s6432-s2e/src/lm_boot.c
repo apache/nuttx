@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/lm3s6432-s2e/src/lm_boot.c
+/****************************************************************************
+ * boards/arm/tiva/lm3s6432-s2e/src/lm_boot.c
  *
  *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,35 +50,38 @@
 #include "tiva_gpio.h"
 #include "lm3s6432-s2e.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_TIVA_UART1) && defined(CONFIG_TIVA_SSI0)
 #  error Only one of UART1 and SSI0 can be enabled on this board.
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tiva_boardinitialize
  *
  * Description:
- *   All Stellaris architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All Stellaris architectures must provide the following entry point.
+ *   This entry point is called early in the intitialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tiva_boardinitialize(void)
 {
-  /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
+  /* Configure SPI chip selects if
+   * 1) SSI is not disabled, and
+   * 2) the weak function
    * lm_ssidev_initialize() has been brought into the link.
    */
 

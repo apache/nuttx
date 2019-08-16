@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lm3s8962-ek/src/Makefile
+# boards/arm/tiva/lm3s8962-ek/src/Makefile
 #
 #   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

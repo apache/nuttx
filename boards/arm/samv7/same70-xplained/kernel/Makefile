@@ -1,5 +1,5 @@
 ############################################################################
-# boards/same70-xplainged/kernel/Makefile
+# boards/arm/samv7/same70-xplainged/kernel/Makefile
 #
 #   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
