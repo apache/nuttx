@@ -29,4 +29,18 @@ config XBEE_NETDEV_RECVRPRIO
 		the MAC character driver (which should always be lowest priority since
 		it is a "catch-all" type receiver).
 
+config XBEE_LOCKUP_WORKAROUND
+	bool "Enable workaround to counteract XBee lockup"
+	default y
+	---help---
+		When receiving large amounts of data over the XBee, there is some probability
+		that the XBee will lockup and stop sending us data over SPI. In most cases,
+		querying the XBee will get it out of this state and communication will resume.
+		In some cases however, the XBee will freeze completely and won't ever respond
+		to our queries.
+
+		This workaround periodically queries the XBee if there hasn't been any
+		recent interaction. Additionally, if any query does not get a response
+		after 10 attempts, the XBee is reset.
+
 endif # IEEE802154_XBEE

@@ -167,6 +167,7 @@ struct xbee_priv_s
                                    * callback to registered receivers */
   WDOG_ID assocwd;                /* Association watchdog */
   struct work_s assocwork;        /* For polling for association status */
+  bool associating;               /* Are we currently associating */
   sem_t atquery_sem;              /* Only allow one AT query at a time */
   sem_t atresp_sem;               /* For signaling pending AT response received */
   char querycmd[2];               /* Stores the pending AT Query command */
@@ -177,6 +178,11 @@ struct xbee_priv_s
   sem_t tx_sem;                   /* Support a single pending transmit */
   sem_t txdone_sem;               /* For signalling tx is completed */
   bool txdone;
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  WDOG_ID lockup_wd;              /* Watchdog to protect for XBee lockup */
+  struct work_s lockupwork;       /* For deferring lockup query check to LPWORK queue*/
+  struct work_s backupwork;       /* For deferring backing up parameters to LPWORK queue*/
+#endif
 
   /******************* Fields related to Xbee radio ***************************/
 
@@ -382,7 +388,18 @@ void xbee_send_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand);
  *
  ****************************************************************************/
 
-#define xbee_query_assoc(priv) xbee_atquery(priv "AI")
+#define xbee_query_assoc(priv) xbee_atquery(priv, "AI")
+
+/****************************************************************************
+ * Name: xbee_save_params
+ *
+ * Description:
+ *   Sends API frame with AT command request to write current parameters to
+ *   non-volatile memory so that they are used after next reset.
+ *
+ ****************************************************************************/
+
+#define xbee_save_params(priv) xbee_atquery(priv, "WR")
 
 /****************************************************************************
  * Name: xbee_set_panid
