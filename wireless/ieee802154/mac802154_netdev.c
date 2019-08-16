@@ -258,7 +258,6 @@ static int macnet_update_nvaddr(FAR struct net_driver_s *dev)
   priv = (FAR struct macnet_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  uint8_t *eaddr;
 
   /* Get the eaddr from the MAC */
 
@@ -272,21 +271,7 @@ static int macnet_update_nvaddr(FAR struct net_driver_s *dev)
     }
   else
     {
-      /* Set the MAC address as the eaddr */
-
-      eaddr = arg.getreq.attrval.mac.eaddr;
-
-      /* Network layers expect address in Network Order (Big Endian) */
-
-      dev->d_mac.radio.nv_addr[0] = eaddr[7];
-      dev->d_mac.radio.nv_addr[1] = eaddr[6];
-      dev->d_mac.radio.nv_addr[2] = eaddr[5];
-      dev->d_mac.radio.nv_addr[3] = eaddr[4];
-      dev->d_mac.radio.nv_addr[4] = eaddr[3];
-      dev->d_mac.radio.nv_addr[5] = eaddr[2];
-      dev->d_mac.radio.nv_addr[6] = eaddr[1];
-      dev->d_mac.radio.nv_addr[7] = eaddr[0];
-
+      IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, arg.getreq.attrval.mac.eaddr);
       dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
       return OK;
     }
@@ -740,10 +725,10 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[3]  = HTONS(CONFIG_IEEE802154_NETDEV_DEFAULT_PREFIX_3);
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-      dev->d_ipv6addr[4]  = HTONS((uint16_t)nvaddr[7] << 8 | (uint16_t)nvaddr[6]);
-      dev->d_ipv6addr[5]  = HTONS((uint16_t)nvaddr[5] << 8 | (uint16_t)nvaddr[4]);
-      dev->d_ipv6addr[6]  = HTONS((uint16_t)nvaddr[3] << 8 | (uint16_t)nvaddr[2]);
-      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[1] << 8 | (uint16_t)nvaddr[0]);
+      dev->d_ipv6addr[4]  = HTONS((uint16_t)nvaddr[0] << 8 | (uint16_t)nvaddr[1]);
+      dev->d_ipv6addr[5]  = HTONS((uint16_t)nvaddr[2] << 8 | (uint16_t)nvaddr[3]);
+      dev->d_ipv6addr[6]  = HTONS((uint16_t)nvaddr[4] << 8 | (uint16_t)nvaddr[5]);
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[6] << 8 | (uint16_t)nvaddr[7]);
 
       /* Invert the U/L bit */
 
@@ -753,7 +738,7 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[4]  = 0;
       dev->d_ipv6addr[5]  = HTONS(0x00ff);
       dev->d_ipv6addr[6]  = HTONS(0xfe00);
-      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[1] << 8 |  (uint16_t)nvaddr[0]);
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[0] << 8 |  (uint16_t)nvaddr[1]);
 #endif
 
       wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",

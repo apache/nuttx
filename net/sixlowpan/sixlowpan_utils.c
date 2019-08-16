@@ -703,20 +703,8 @@ int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
       else
         {
           srcaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-
-          /* MAC802154 gives us Extended Address in Little Endinan Order, but
-           * we need it in Network Order.
-           */
-
-          srcaddr->nv_addr[0] = ind->src.eaddr[7];
-          srcaddr->nv_addr[1] = ind->src.eaddr[6];
-          srcaddr->nv_addr[2] = ind->src.eaddr[5];
-          srcaddr->nv_addr[3] = ind->src.eaddr[4];
-          srcaddr->nv_addr[4] = ind->src.eaddr[3];
-          srcaddr->nv_addr[5] = ind->src.eaddr[2];
-          srcaddr->nv_addr[6] = ind->src.eaddr[1];
-          srcaddr->nv_addr[7] = ind->src.eaddr[0];
-        }
+          memcpy(srcaddr->nv_addr, ind->src.eaddr, NET_6LOWPAN_EADDRSIZE);
+       }
 
       return OK;
     }
@@ -788,19 +776,7 @@ int sixlowpan_extract_destaddr(FAR struct radio_driver_s *radio,
       else
         {
           destaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
-
-          /* MAC802154 gives us Extended Address in Little Endinan Order, but
-           * we need it in Network Order.
-           */
-
-          destaddr->nv_addr[0] = ind->dest.eaddr[7];
-          destaddr->nv_addr[1] = ind->dest.eaddr[6];
-          destaddr->nv_addr[2] = ind->dest.eaddr[5];
-          destaddr->nv_addr[3] = ind->dest.eaddr[4];
-          destaddr->nv_addr[4] = ind->dest.eaddr[3];
-          destaddr->nv_addr[5] = ind->dest.eaddr[2];
-          destaddr->nv_addr[6] = ind->dest.eaddr[1];
-          destaddr->nv_addr[7] = ind->dest.eaddr[0];
+          memcpy(destaddr->nv_addr, ind->dest.eaddr, NET_6LOWPAN_EADDRSIZE);
         }
 
       return OK;
