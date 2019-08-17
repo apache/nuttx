@@ -75,7 +75,7 @@ endif
 # Source file specific to the S32k11x family
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = s32k14x_irq.c s32k14x_clrpend.c
+CHIP_CSRCS  = s32k14x_irq.c s32k14x_clrpend.c s32k14x_clockmapping.c
 
 # Configuration-dependent S32k14x files
 

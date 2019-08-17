@@ -54,9 +54,9 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c
-CHIP_CSRCS += s32k1xx_pin.c
+CHIP_CSRCS += s32k1xx_periphclocks.c s32k1xx_pin.c
 
-ifeq ($(CONFIG_S32K1XX_HAVE_LPUART),y)
+ifeq ($(CONFIG_S32K1XX_LPUART),y)
 CHIP_CSRCS += s32k1xx_serial.c
 endif
 

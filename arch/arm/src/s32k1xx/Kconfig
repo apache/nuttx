@@ -85,6 +85,10 @@ config S32K1XX_HAVE_HSRUN
 	bool
 	default n
 
+config S32K1XX_HAVE_QSPI
+	bool
+	default n
+
 config S32K1XX_HAVE_SAI
 	bool
 	default n
@@ -95,11 +99,11 @@ config S32K1XX_HAVE_SPLL
 
 # Peripheral Group Selections
 
-config S32K1XX_HAVE_LPUART
+config S32K1XX_LPUART
 	bool
 	default n
 
-config S32K1XX_HAVE_LPSPI
+config S32K1XX_LPSPI
 	bool
 	default n
 
@@ -110,31 +114,31 @@ menu "S32K1XX Peripheral Selection"
 config S32K1XX_LPUART0
 	bool "LPUART0"
 	default n
-	select S32K1XX_HAVE_LPUART
+	select S32K1XX_LPUART
 	select LPUART0_SERIALDRIVER
 
 config S32K1XX_LPUART1
 	bool "LPUART1"
 	default n
-	select S32K1XX_HAVE_LPUART
+	select S32K1XX_LPUART
 	select LPUART1_SERIALDRIVER
 
 config S32K1XX_LPUART2
 	bool "LPUART2"
 	default n
-	select S32K1XX_HAVE_LPUART
+	select S32K1XX_LPUART
 	select LPUART2_SERIALDRIVER
 
 config S32K1XX_LPSPI0
 	bool "LPSPI0"
 	default n
-	select S32K1XX_HAVE_LPSPI
+	select S32K1XX_LPSPI
 	select SPI
 
 config S32K1XX_LPSPI1
 	bool "LPSPI1"
 	default n
-	select S32K1XX_HAVE_LPSPI
+	select S32K1XX_LPSPI
 	select SPI
 
 endmenu # S32K1XX Peripheral Selection

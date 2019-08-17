@@ -142,7 +142,7 @@
 /* PCC Register Bitfield Definitions ************************************************/
 
 /* The form of each PCC register is the same as follows.  Some register, however, do
- * not support all of the files:
+ * not support all of the fields:
  *
  * PCD  - ENET
  * FRAC - ENET
@@ -158,6 +158,7 @@
 #define PCC_FRAC           (1 << 3)  /* Bits 3:  Peripheral Clock Divider Fraction */
 #define PCC_PCS_SHIFT      (24)      /* Bits 24-26:  Peripheral Clock Source Select */
 #define PCC_PCS_MASK       (7 << PCC_PCS_SHIFT)
+#  define PCC_PCS(n)       ((uint32_t)(n) << PCC_PCS_SHIFT)
 #  define PCC_PCS_OFF      (0 << PCC_PCS_SHIFT)  /* Clock is off */
 #  define PCC_PCS_OPTION1  (1 << PCC_PCS_SHIFT)  /* Clock option 1 */
 #  define PCC_PCS_OPTION2  (2 << PCC_PCS_SHIFT)  /* Clock option 2 */

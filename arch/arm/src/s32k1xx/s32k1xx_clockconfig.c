@@ -69,7 +69,9 @@
 
 #include "hardware/s32k1xx_scg.h"
 #include "hardware/s32k1xx_smc.h"
+#include "hardware/s32k1xx_sim.h"
 #include "hardware/s32k1xx_pmc.h"
+#include "s32k1xx_periphclocks.h"
 #include "s32k1xx_clockconfig.h"
 
 #include <arch/board/board.h>  /* Include last.  May have dependencies */
@@ -196,8 +198,12 @@ static const uint32_t g_hsrun_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
 };
 #endif
 
-#if 0 /* Not used */
+#if 0 /* Not currently used */
 static uint32_t g_rtc_clkin;                 /* RTC CLKIN clock */
+#endif
+
+#if 0 /* Not currently used */
+static uint32_t g_tclkfreq[NUMBER_OF_TCLK_INPUTS];  /* TCLKx clocks */
 #endif
 
 /****************************************************************************
@@ -1354,25 +1360,6 @@ static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
 }
 
 /****************************************************************************
- * Name: s32k1xx_pcc_config
- *
- * Description:
- *   Configure PCC clocking.
- *
- * Input Parameters:
- *   pcccfg - Describes the new PCC clock configuration
- *
- * Returned Value:
- *   None.
- *
- *****************************************************************************/
-
-static void s32k1xx_pcc_config(const struct pcc_config_s *pcccfg)
-{
-#warning Missing logic
-}
-
-/****************************************************************************
  * Name: s32k1xx_sim_config
  *
  * Description:
@@ -1388,7 +1375,149 @@ static void s32k1xx_pcc_config(const struct pcc_config_s *pcccfg)
 
 static void s32k1xx_sim_config(const struct sim_clock_config_s *simcfg)
 {
-#warning Missing logic
+  uint32_t regval;
+#ifdef CONFIG_S32K1XX_HAVE_QSPI
+  int i;
+#endif
+
+  DEBUGASSERT(simcfg != NULL);
+
+  /* ClockOut settings. */
+
+  if (simcfg->clockout.initialize)
+    {
+      regval  = getreg32(S32K1XX_SIM_CHIPCTL);
+      regval &= ~(SIM_CHIPCTL_CLKOUTEN | SIM_CHIPCTL_CLKOUTDIV_MASK |
+                  SIM_CHIPCTL_CLKOUTSEL_MASK);
+
+      if (simcfg->clockout.enable)
+        {
+          regval |= SIM_CHIPCTL_CLKOUTEN;
+        }
+
+      regval |= SIM_CHIPCTL_CLKOUTSEL(simcfg->clockout.source);
+      regval |= SIM_CHIPCTL_CLKOUTDIV(simcfg->clockout.divider);
+      putreg32(regval, S32K1XX_SIM_CHIPCTL);
+    }
+
+  /* Low Power Clock settings from SIM. */
+
+  if (simcfg->lpoclk.initialize)
+    {
+      regval  = getreg32(S32K1XX_SIM_LPOCLKS);
+      regval &= ~(SIM_LPOCLKS_LPO1KCLKEN | SIM_LPOCLKS_LPO32KCLKEN |
+                  SIM_LPOCLKS_LPOCLKSEL_MASK | SIM_LPOCLKS_RTCCLKSEL_MASK);
+
+      if (simcfg->lpoclk.lpo1k)
+        {
+          regval |= SIM_LPOCLKS_LPO1KCLKEN;
+        }
+
+      if (simcfg->lpoclk.lpo32k)
+        {
+          regval |= SIM_LPOCLKS_LPO32KCLKEN;
+        }
+
+      regval |= SIM_LPOCLKS_LPOCLKSEL(simcfg->lpoclk.lpo_source);
+      regval |= SIM_LPOCLKS_RTCCLKSEL(simcfg->lpoclk.rtc_source);
+
+      putreg32(regval, S32K1XX_SIM_LPOCLKS);
+    }
+
+  /* Platform Gate Clock settings. */
+
+  if (simcfg->platgate.initialize)
+    {
+      regval  = getreg32(S32K1XX_SIM_PLATCGC);
+      regval &= ~(SIM_PLATCGC_CGCMSCM | SIM_PLATCGC_CGCMPU |
+                  SIM_PLATCGC_CGCDMA | SIM_PLATCGC_CGCERM |
+                  SIM_PLATCGC_CGCEIM);
+
+      if (simcfg->platgate.mscm)
+        {
+          regval |= SIM_PLATCGC_CGCMSCM;
+        }
+
+      if (simcfg->platgate.mpu)
+        {
+          regval |= SIM_PLATCGC_CGCMPU;
+        }
+
+      if (simcfg->platgate.dma)
+        {
+          regval |= SIM_PLATCGC_CGCDMA;
+        }
+
+      if (simcfg->platgate.erm)
+        {
+          regval |= SIM_PLATCGC_CGCERM;
+        }
+
+      if (simcfg->platgate.eim)
+        {
+          regval |= SIM_PLATCGC_CGCEIM;
+        }
+
+      putreg32(regval, S32K1XX_SIM_PLATCGC);
+
+#ifdef CONFIG_S32K1XX_HAVE_QSPI
+      regval  = getreg32(S32K1XX_SIM_MISCTRL0);
+      regval &= ~SIM_MISCTRL0_QSPI_CLK_SEL;
+
+      if (simcfg->qspirefclk.refclk)
+        {
+          regval |= SIM_MISCTRL0_QSPI_CLK_SEL;
+        }
+
+      putreg32(regval, S32K1XX_SIM_MISCTRL0);
+#endif
+    }
+
+#if 0 /* REVISIT:  Not currently used */
+  /* TCLK Clock settings. */
+
+  if (simcfg->tclk.initialize)
+    {
+      for (i = 0; i < NUMBER_OF_TCLK_INPUTS; i++)
+        {
+          g_tclkfreq[i] = simcfg->tclk.tclkfreq[i];
+        }
+    }
+#endif
+
+  /* Debug trace Clock settings. */
+
+  if (simcfg->traceclk.initialize)
+    {
+      /* Disable divider. */
+
+      putreg32(0, S32K1XX_SIM_CLKDIV4);
+
+      /* Configure trace source. */
+
+      regval  = getreg32(S32K1XX_SIM_CHIPCTL);
+      regval &= ~SIM_CHIPCTL_TRACECLK_SEL;
+
+      if (simcfg->traceclk.source)
+        {
+          regval |= SIM_CHIPCTL_TRACECLK_SEL;
+        }
+
+      putreg32(regval, S32K1XX_SIM_CHIPCTL);
+
+      if (simcfg->traceclk.enable)
+        {
+          regval = SIM_CLKDIV4_TRACEDIVEN |
+                   SIM_CLKDIV4_TRACEDIV(simcfg->traceclk.divider);
+
+          if (simcfg->traceclk.fraction)
+            {
+              regval |= SIM_CLKDIV4_TRACEFRAC;
+            }
+
+          putreg32(regval, S32K1XX_SIM_CLKDIV4);
+        }
+    }
 }
 
 /****************************************************************************
@@ -1471,7 +1600,7 @@ int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg)
     {
       /* Set PCC configuration */
 
-      s32k1xx_pcc_config(&clkcfg->pcc);
+      s32k1xx_periphclocks(clkcfg->pcc.count, clkcfg->pcc.pclks);
 
       /* Set SIM configuration */
 

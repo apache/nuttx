@@ -66,20 +66,8 @@
 #include "s32k118evb.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Count of peripheral clock user configurations */
-
-#define NUM_OF_PERIPHERAL_CLOCKS_0 10U
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* User peripheral configuration structure 0 */
-
-extern struct peripheral_clock_config_s g_peripheral_clockconfig0[];
 
 /* Each S32K1xx board must provide the following initialized structure.  This is
  * needed to establish the initial board clocking.
@@ -190,15 +178,17 @@ const struct clock_configuration_s g_initial_clkconfig =
     .traceclk           =              /* Debug trace Clock Configuration. */
     {
       .source           = CLOCK_TRACE_SRC_CORE_CLK,  /* TRACECLK_SEL */
-      .divider          = 0,           /* TRACEDIV */
+      .divider          = 1,           /* TRACEDIV, range 1..8 */
       .initialize       = true,        /* Initialize */
       .enable           = true,        /* TRACEDIVEN */
       .fraction         = false,       /* TRACEFRAC */
     },
+#ifdef CONFIG_S32K1XX_HAVE_QSPI
     .qspirefclk         =              /* Quad Spi Internal Reference Clock Gating. */
     {
       .refclk           = false,       /* Qspi reference clock gating */
     },
+#endif
   },
   .pcc                  =
   {

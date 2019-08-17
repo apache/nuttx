@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * Some of the definitions within this file derives from NXP sample code for
+ * Some of the definitions within this file derive from NXP sample code for
  * the S32K1xx MCUs.  That sample code has this licensing information:
  *
  *   Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
@@ -64,12 +64,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_ARCH_CHIP_S32K11X)
-#  include "s32k14x/s32k14x_clocknames.h"
-#elif defined(CONFIG_ARCH_CHIP_S32K14X)
-#  include "s32k14x/s32k14x_clocknames.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -81,24 +75,6 @@
 #define SCG_FIRQ_FREQUENCY0          48000000  /* 48MHz */
 
 #define NUMBER_OF_TCLK_INPUTS        3
-
-/* Values for peripheral_clock_source_t.  An enumeration is not appropriate
- * because some of the values are duplicates.
- */
-
-#define CLK_SRC_OFF                  0  /* Clock is off */
-#define CLK_SRC_SOSC                 1  /* OSCCLK - System Oscillator Bus Clock */
-#define CLK_SRC_SIRC                 2  /* SCGIRCLK - Slow IRC Clock */
-#define CLK_SRC_FIRC                 3  /* SCGFIRCLK - Fast IRC Clock */
-#define CLK_SRC_SPLL                 6  /* SCGPCLK System PLL clock */
-#define CLK_SRC_SOSC_DIV1            1  /* OSCCLK - System Oscillator Bus Clock */
-#define CLK_SRC_SIRC_DIV1            2  /* SCGIRCLK - Slow IRC Clock */
-#define CLK_SRC_FIRC_DIV1            3  /* SCGFIRCLK - Fast IRC Clock */
-#define CLK_SRC_SPLL_DIV1            6  /* SCGPCLK System PLL clock */
-#define CLK_SRC_SOSC_DIV2            1  /* OSCCLK - System Oscillator Bus Clock */
-#define CLK_SRC_SIRC_DIV2            2  /* SCGIRCLK - Slow IRC Clock */
-#define CLK_SRC_FIRC_DIV2            3  /* SCGFIRCLK - Fast IRC Clock */
-#define CLK_SRC_SPLL_DIV2            6  /* SCGPCLK System PLL clock */
 
 /****************************************************************************
  * Public Types
@@ -415,18 +391,20 @@ enum clock_trace_src_e
 struct sim_trace_clock_config_s
 {
   enum clock_trace_src_e  source;       /* Trace clock select */
-  uint8_t divider;                      /* Trace clock divider divisor */
+  uint8_t divider;                      /* Trace clock divider divisor, range 1..8 */
   bool initialize;                      /* true: Initialize the Trace clock */
   bool enable;                          /* true: Enable Trace clock divider */
   bool fraction;                        /* true: EnableTrace clock divider fraction */
 };
 
+#ifdef CONFIG_S32K1XX_HAVE_QSPI
 /* SIM QSPI clock configuration */
 
 struct sim_qspi_ref_clk_gating_s
 {
   bool refclk;                          /* true: Enable QSPI internal reference clock gating */
 };
+#endif
 
 /* Overall SIM clock configuration */
 
@@ -437,48 +415,18 @@ struct sim_clock_config_s
   struct sim_tclk_config_s tclk;               /* Platform Gate Clock configuration */
   struct sim_plat_gate_config_s platgate;      /* Platform Gate Clock configuration */
   struct sim_trace_clock_config_s traceclk;    /* Trace clock configuration */
+#ifdef CONFIG_S32K1XX_HAVE_QSPI
   struct sim_qspi_ref_clk_gating_s qspirefclk; /* Qspi Reference Clock Gating */
+#endif
 };
 
 /* PCC clock configuration */
 
-typedef uint8_t peripheral_clock_source_t;  /* See CLK_SRC_* definitions */
-
-enum peripheral_clock_frac_e
-{
-  MULTIPLY_BY_ONE          = 0,        /* Fractional value is zero */
-  MULTIPLY_BY_TWO          = 1         /* Fractional value is one */
-};
-
-enum peripheral_clock_divider_e
-{
-  DIVIDE_BY_ONE            = 0,        /* Divide by 1 (pass-through, no clock divide) */
-  DIVIDE_BY_TWO            = 1,        /* Divide by 2 */
-  DIVIDE_BY_THREE          = 2,        /* Divide by 3 */
-  DIVIDE_BY_FOUR           = 3,        /* Divide by 4 */
-  DIVIDE_BY_FIVE           = 4,        /* Divide by 5 */
-  DIVIDE_BY_SIX            = 5,        /* Divide by 6 */
-  DIVIDE_BY_SEVEN          = 6,        /* Divide by 7 */
-  DIVIDE_BY_EIGTH          = 7         /* Divide by 8 */
-};
-
-struct peripheral_clock_config_s
-{
-  /* clkname is the name of the peripheral clock.  It must be one of the values
-   * defined in the chip specific xxxxxx_configname.h header file.
-   */
-
-  enum clock_names_e clkname;              /* Peripheral clock name */
-  bool clkgate;                            /* Peripheral clock gate */
-  peripheral_clock_source_t clksrc;        /* Peripheral clock source */
-  enum peripheral_clock_frac_e frac;       /* Peripheral clock fractional value */
-  enum peripheral_clock_divider_e divider; /* Peripheral clock divider value */
-};
-
+struct peripheral_clock_config_s;      /* Forward reference */
 struct pcc_config_s
 {
-  uint32_t count;                          /* Number of peripherals to be configured */
-  struct peripheral_clock_config_s *pclks; /* Pointer to the peripheral clock configurations array */
+  unsigned int count;                  /* Number of peripherals to be configured */
+  const struct peripheral_clock_config_s *pclks; /* The peripheral clock configuration array */
 };
 
 /* PMC clock configuration */

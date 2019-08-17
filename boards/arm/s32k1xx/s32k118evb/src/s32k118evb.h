@@ -42,7 +42,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <stdint.h>
+
+#include "s32k1xx_periphclocks.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,6 +67,10 @@
 /* SPI chip selects */
 
 
+/* Count of peripheral clock user configurations */
+
+#define NUM_OF_PERIPHERAL_CLOCKS_0 10U
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -73,6 +80,10 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* User peripheral configuration structure 0 */
+
+extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
 
 /****************************************************************************
  * Public Functions
