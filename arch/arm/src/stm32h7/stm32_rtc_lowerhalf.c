@@ -137,6 +137,7 @@ static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* STM32 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -248,9 +249,9 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
-   {
-     return ret;
-   }
+    {
+      return ret;
+    }
 
 #if defined(CONFIG_RTC_DATETIME)
   /* This operation depends on the fact that struct rtc_time is cast

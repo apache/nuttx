@@ -62,6 +62,7 @@
 
 #define HAVE_RTC_DRIVER 1
 /* Configuration ********************************************************************/
+
 /* LED
  *
  * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a

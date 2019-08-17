@@ -50,7 +50,7 @@
 
 /* Register Offsets *********************************************************************************/
 
-// TODO: Complete comments
+/* TODO: Complete comments */
 
 #define STM32_RCC_CR_OFFSET             0x0000  /* Clock control register */
 #define STM32_RCC_ICSCR_OFFSET          0x0004  /* */
@@ -493,7 +493,6 @@
 #define RCC_PLL3FRACR_FRACN3_SHIFT      (3ul)
 #define RCC_PLL3FRACR_FRACN3_MASK       (0x1FFFul << RCC_PLL3FRACR_FRACN3_SHIFT) /* 0x0000FFF8 */
 #define RCC_PLL3FRACR_FRACN3             RCC_PLL3FRACR_FRACN3_MASK
-
 
 /* Bit definitions for RCC_D1CCIPR reigster */
 
@@ -1001,7 +1000,6 @@
 #define RCC_AHB1LPENR_OTGHSULPILPEN     (1 << 26)      /* RCC AHB1LPENR: OTGHSULPILPEN */
 #define RCC_AHB1LPENR_OTGFSLPEN         (1 << 27)      /* RCC AHB1LPENR: OTGFSLPEN */
 
-
 /* AHB2 low power mode peripheral clock enable register */
 
 #define RCC_AHB2LPENR_CAMITFLPEN        (1 << 0)       /* RCC AHB2LPENR: CAMITFLPEN */
@@ -1013,7 +1011,7 @@
 #define RCC_AHB2LPENR_SRAM2LPEN         (1 << 30)      /* RCC AHB2LPENR: SRAM2LPEN */
 #define RCC_AHB2LPENR_SRAM3LPEN         (1 << 31)      /* RCC AHB2LPENR: SRAM3LPEN */
 
-/* AHB4 low power mode peripheral clock enable register*/
+/* AHB4 low power mode peripheral clock enable register */
 
 #define RCC_AHB4LPENR_GPIOALPEN         (1 << 0)       /* RCC AHB4LPENR: GPIOALPEN */
 #define RCC_AHB4LPENR_GPIOBLPEN         (1 << 1)       /* RCC AHB4LPENR: GPIOBLPEN */
@@ -1063,7 +1061,6 @@
 #define RCC_APB1LLPENR_DAC1LPEN         (1 << 29)      /* RCC APB1LLPENR: DAC1LPEN */
 #define RCC_APB1LLPENR_UART7LPEN        (1 << 30)      /* RCC APB1LLPENR: UART7LPEN */
 #define RCC_APB1LLPENR_UART8LPEN        (1 << 31)      /* RCC APB1LLPENR: UART8LPEN */
-
 
 /* APB1 H low power mode peripheral clock enable register */
 

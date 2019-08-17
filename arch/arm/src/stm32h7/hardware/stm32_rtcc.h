@@ -396,5 +396,4 @@
 #define RTC_OR_RTC_ALARM_TYPE     (1 << 0)  /* Bit 0:  RTC_ALARM output type on PC13 */
 #define RTC_OR_RTC_OUT_RMP        (1 << 1)  /* Bit 1:  RTC_OUT remap */
 
-
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_RTCC_H */
