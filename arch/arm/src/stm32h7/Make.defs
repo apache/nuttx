@@ -120,12 +120,33 @@ ifeq ($(CONFIG_STM32H7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
+ifeq ($(filter y,$(CONFIG_STM32H7_IWDG) $(CONFIG_STM32H7_RTC_LSICLOCK)),y)
+CHIP_CSRCS += stm32_lsi.c
+endif
+
+ifeq ($(CONFIG_STM32H7_RTC_LSECLOCK),y)
+CHIP_CSRCS += stm32_lse.c
+endif
+
 ifeq ($(CONFIG_STM32H7_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
 
 ifeq ($(CONFIG_STM32H7_PWR),y)
 CHIP_CSRCS += stm32_pwr.c
+endif
+
+ifeq ($(CONFIG_STM32H7_RTC),y)
+CHIP_CSRCS += stm32_rtc.c
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += stm32_exti_alarm.c
+endif
+ifeq ($(CONFIG_RTC_PERIODIC),y)
+CHIP_CSRCS += stm32_exti_wakeup.c
+endif
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += stm32_rtc_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32H7_SPI),y)

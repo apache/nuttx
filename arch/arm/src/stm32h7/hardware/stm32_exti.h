@@ -160,6 +160,10 @@
 
 #define EXIT_EVENT(n)               STM32_EXTI_MASK(n)
 
+#define EXTI_RTC_ALARM              (1 << 17) /* EXTI line 17 = RTC Alarm event */
+#define EXTI_RTC_TAMPER             (1 << 18) /* EXTI line 18 = RTC tamper, RTC timestamp, RCC LSECSS */
+#define EXTI_RTC_WAKEUP             (1 << 19) /* EXTI line 19 = RTC wakeup timer */
+
 /* D3 pending clear selection register low 1-3.
  * D3 pending clear selection register high 1-3
  *

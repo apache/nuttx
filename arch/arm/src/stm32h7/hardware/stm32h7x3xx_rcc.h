@@ -1111,13 +1111,24 @@
 #define RCC_BDCR_LSEON                  (1 << 0)  /* Bit 0: External Low Speed oscillator enable */
 #define RCC_BDCR_LSERDY                 (1 << 1)  /* Bit 1: External Low Speed oscillator Ready */
 #define RCC_BDCR_LSEBYP                 (1 << 2)  /* Bit 2: External Low Speed oscillator Bypass */
+#define RCC_BDCR_LSEDRV_SHIFT           (3)       /* Bits 4:3: LSE oscillator Drive selection */
+#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT)
+#  define RCC_BDCR_LSEDRV_LOW           (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability */
+#  define RCC_BDCR_LSEDRV_HIGH          (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: High driving capability */
+#define RCC_BDCR_LSECSSON               (1 << 5)  /* Bit 5: LSE clock security system enable */
+#define RCC_BDCR_LSECSSD                (1 << 6)  /* Bit 6: LSE clock security system failure detection */
+                                                  /* Bit 7: Reserved */
 #define RCC_BDCR_RTCSEL_SHIFT           (8)       /* Bits 9:8: RTC clock source selection */
 #define RCC_BDCR_RTCSEL_MASK            (3 << RCC_BDCR_RTCSEL_SHIFT)
 #  define RCC_BDCR_RTCSEL_NOCLK         (0 << RCC_BDCR_RTCSEL_SHIFT) /* 00: No clock */
 #  define RCC_BDCR_RTCSEL_LSE           (1 << RCC_BDCR_RTCSEL_SHIFT) /* 01: LSE oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_LSI           (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_HSE           (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
+                                                  /* Bits 10-15: Reserved */
 #define RCC_BDCR_RTCEN                  (1 << 15) /* Bit 15: RTC clock enable */
 #define RCC_BDCR_BDRST                  (1 << 16) /* Bit 16: Backup domain software reset */
+                                                  /* Bits 17-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_RCC_H */

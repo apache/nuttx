@@ -50,6 +50,11 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32_rtc.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -133,6 +138,9 @@ static void stm32_i2ctool(void)
 int stm32_bringup(void)
 {
   int ret = OK;
+#ifdef HAVE_RTC_DRIVER
+  FAR struct rtc_lowerhalf_s *lower;
+#endif
 
   UNUSED(ret);
 
@@ -159,6 +167,32 @@ int stm32_bringup(void)
              ret, errno);
     }
 #endif  /* CONFIG_FS_PROCFS */
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  lower = stm32_rtc_lowerhalf();
+  if (!lower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return -ENOMEM;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
 
 #ifdef CONFIG_BUTTONS
   /* Register the BUTTON driver */

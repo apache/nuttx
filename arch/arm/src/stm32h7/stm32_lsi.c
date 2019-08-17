@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_sdmmc.h
+ * arch/arm/src/stm32h7/stm32_lsi.c
  *
- *   Copyright (C) 2009, 2011, 2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012, 2015-2016, 2019 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,98 +32,58 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdbool.h>
 
-#include "chip.h"
-#include "hardware/stm32_sdmmc.h"
+#include "up_arch.h"
+
+#include "stm32_rcc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Name: stm32_rcc_enablelsi
+ *
+ * Description:
+ *   Enable the Internal Low-Speed (LSI) RC Oscillator.
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+void stm32_rcc_enablelsi(void)
 {
-#else
-#define EXTERN extern
-#endif
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
+   */
 
-/****************************************************************************
- * Name: sdio_initialize
- *
- * Description:
- *   Initialize SDIO for operation.
- *
- * Input Parameters:
- *   slotno - Not used.
- *
- * Returned Values:
- *   A reference to an SDIO interface structure.  NULL is returned on
- *   failures.
- *
- ****************************************************************************/
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
 
-struct sdio_dev_s; /* See include/nuttx/sdio.h */
-FAR struct sdio_dev_s *sdio_initialize(int slotno);
+  /* Wait for the internal RC 40 kHz oscillator to be stable. */
 
-/****************************************************************************
- * Name: sdio_mediachange
- *
- * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
- *   in order to signal to the driver that a card has been inserted or
- *   removed from the slot
- *
- * Input Parameters:
- *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a
- *                card has been removed from the slot.  Only transitions
- *                (inserted->removed or removed->inserted should be reported)
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
-
-/****************************************************************************
- * Name: sdio_wrprotect
- *
- * Description:
- *   Called by board-specific logic to report if the card in the slot is
- *   mechanically write protected.
- *
- * Input Parameters:
- *   dev       - An instance of the SDIO driver device state structure.
- *   wrprotect - true is a card is writeprotected.
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H */
+/****************************************************************************
+ * Name: stm32_rcc_disablelsi
+ *
+ * Description:
+ *   Disable the Internal Low-Speed (LSI) RC Oscillator.
+ *
+ ****************************************************************************/
+
+void stm32_rcc_disablelsi(void)
+{
+  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
+   * bit the RCC CSR register.
+   */
+
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
+
+  /* LSIRDY should go low after 3 LSI clock cycles */
+}
