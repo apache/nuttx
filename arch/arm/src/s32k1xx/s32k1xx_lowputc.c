@@ -47,10 +47,11 @@
 
 #include "hardware/s32k1xx_pinmux.h"
 #include "hardware/s32k1xx_lpuart.h"
+
 #include "s32k1xx_config.h"
-#include "s32k1xx_periphclks.h"
-#include "s32k1xx_gpio.h"
+#include "s32k1xx_pin.h"
 #include "s32k1xx_lowputc.h"
+#include "s32k1xx_periphclocks.h"
 
 #include "up_internal.h"
 
@@ -81,39 +82,13 @@
 #    define S32K1XX_CONSOLE_BITS     CONFIG_LPUART2_BITS
 #    define S32K1XX_CONSOLE_PARITY   CONFIG_LPUART2_PARITY
 #    define S32K1XX_CONSOLE_2STOP    CONFIG_LPUART2_2STOP
+#  endif
 #endif
 
 /* Clocking *****************************************************************/
 
-/* The UART module receives two clocks, a peripheral_clock (ipg_clk) and the
- * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
- * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
- * control input pins. It must always be running when UART is enabled.
- *
- * The default lpuart0 ipg_clk is 66MHz (max 66.5MHz).  ipg_clk is shared
- * among many modules and should not be controlled by the UART logic.
- *
- * The module_clock is for all the state machines, writing RxFIFO, reading
- * TxFIFO, etc.  It must always be running when UART is sending or receiving
- * characters.  This clock is used in order to allow frequency scaling on
- * peripheral_clock without changing configuration of baud rate.
- *
- * The default ipg_perclk is 80MHz (max 80MHz).  ipg_perclk is gated by
- * CCGR5[CG12], lpuart0_clk_enable.  The clock generation sequence is:
- *
- *   pll3_sw_clk (480M) -> CCGR5[CG12] -> 3 bit divider cg podf=6 ->
- *     PLL3_80M (80Mhz) -> CDCDR1: lpuart0_clk_podf ->
- *       6 bit divider default=1 -> LPUART0_CLK_ROOT
- *
- * REVISIT:  This logic assumes that all dividers are at the default value
- * and that the value of the ipg_perclk is 80MHz.
- */
-
-#define IPG_PERCLK_FREQUENCY  80000000
-
-/* The BRM sub-block receives ref_clk (module_clock clock after divider).
- * From this clock, and with integer and non-integer division, BRM generates
- * a 16x baud rate clock.
+/* Functional clocking is provided via the  PCC.  The PCC clocking must
+ * be configured by board-specific logic prior to using the LPUART.
  */
 
 /****************************************************************************
@@ -129,26 +104,6 @@ static const struct uart_config_s g_console_config =
   .stopbits2 = S32K1XX_CONSOLE_2STOP,   /* true: Configure with 2 stop bits instead of 1 */
 };
 #endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-void s32k1xx_lpuart_clock_enable (uint32_t base)
-{
-  if (base == S32K1XX_LPUART0_BASE)
-    {
-      s32k1xx_clockall_lpuart0();
-    }
-  else if (base == S32K1XX_LPUART1_BASE)
-    {
-      s32k1xx_clockall_lpuart1();
-    }
-  else if (base == S32K1XX_LPUART2_BASE)
-    {
-      s32k1xx_clockall_lpuart2();
-    }
-}
 
 /****************************************************************************
  * Public Functions
@@ -176,14 +131,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_config_gpio(GPIO_LPUART0_RX);
-  (void)s32k1xx_config_gpio(GPIO_LPUART0_TX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART0_RX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART0_TX);
 #ifdef CONFIG_LPUART0_OFLOWCONTROL
-  (void)s32k1xx_config_gpio(GPIO_LPUART0_CTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART0_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART0_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART0_IFLOWCONTROL)))
-  (void)s32k1xx_config_gpio(GPIO_LPUART0_RTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART0_RTS);
 #endif
 #endif
 
@@ -193,14 +148,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_config_gpio(GPIO_LPUART1_RX);
-  (void)s32k1xx_config_gpio(GPIO_LPUART1_TX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART1_RX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART1_TX);
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
-  (void)s32k1xx_config_gpio(GPIO_LPUART1_CTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART1_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
-  (void)s32k1xx_config_gpio(GPIO_LPUART1_RTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART1_RTS);
 #endif
 #endif
 
@@ -210,14 +165,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_config_gpio(GPIO_LPUART2_RX);
-  (void)s32k1xx_config_gpio(GPIO_LPUART2_TX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART2_RX);
+  (void)s32k1xx_pinconfig(GPIO_LPUART2_TX);
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
-  (void)s32k1xx_config_gpio(GPIO_LPUART2_CTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART2_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
-  (void)s32k1xx_config_gpio(GPIO_LPUART2_RTS);
+  (void)s32k1xx_pinconfig(GPIO_LPUART2_RTS);
 #endif
 #endif
 
@@ -240,11 +195,9 @@ void s32k1xx_lowsetup(void)
 
 #ifdef HAVE_LPUART_DEVICE
 int s32k1xx_lpuart_configure(uint32_t base,
-                           FAR const struct uart_config_s *config)
+                             FAR const struct uart_config_s *config)
 {
-  uint32_t src_freq = 0;
-  uint32_t pll3_div = 0;
-  uint32_t uart_div = 0;
+  enum clock_names_e clkname;
   uint32_t lpuart_freq = 0;
   uint16_t sbr;
   uint16_t temp_sbr;
@@ -254,28 +207,46 @@ int s32k1xx_lpuart_configure(uint32_t base,
   uint32_t calculated_baud;
   uint32_t baud_diff;
   uint32_t regval;
+  int ret;
 
-  if ((getreg32(S32K1XX_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_SEL) != 0)
+  /* Functional clocking is provided via the  PCC.  The PCC clocking must
+   * be configured by board-specific logic prior to using the LPUART.
+   */
+
+  /* Get the PCC source clock */
+
+#ifdef CONFIG_S32K1XX_LPUART0
+  if (base == S32K1XX_LPUART0_BASE)
     {
-      src_freq = BOARD_XTAL_FREQUENCY;
+      clkname = LPUART0_CLK;
     }
   else
+#endif
+#ifdef CONFIG_S32K1XX_LPUART1
+  if (base == S32K1XX_LPUART1_BASE)
     {
-      if ((getreg32(S32K1XX_CCM_ANALOG_PLL_USB1) &
-           CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0)
-        {
-          pll3_div = 22;
-        }
-      else
-        {
-          pll3_div = 20;
-        }
-
-      src_freq = (BOARD_XTAL_FREQUENCY * pll3_div) / 6;
+      clkname = LPUART2_CLK;
+    }
+  else
+#endif
+#ifdef CONFIG_S32K1XX_LPUART2
+  if (base == S32K1XX_LPUART2_BASE)
+    {
+      clkname = LPUART2_CLK;
+    }
+  else
+#endif
+    {
+      DEBUGPANIC();
+      return -EINVAL;
     }
 
-  uart_div    = (getreg32(S32K1XX_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_PODF_MASK) + 1;
-  lpuart_freq = src_freq / uart_div;
+  ret = s32k1xx_get_pclkfreq(clkname, &lpuart_freq);
+  DEBUGASSERT(ret >= 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* This LPUART instantiation uses a slightly different baud rate
    * calculation.  The idea is to use the best OSR (over-sampling rate)
@@ -332,10 +303,6 @@ int s32k1xx_lpuart_configure(uint32_t base,
 
       return ERROR;
     }
-
-  /* Enable lpuart clock */
-
-  s32k1xx_lpuart_clock_enable(base);
 
   /* Reset all internal logic and registers, except the Global Register */
 

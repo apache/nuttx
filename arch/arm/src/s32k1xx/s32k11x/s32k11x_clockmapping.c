@@ -62,7 +62,7 @@ const uint16_t g_clkname_mapping[] =
   PCC_INVALID_INDEX,                  /* SIRC clock                      4  */
   PCC_INVALID_INDEX,                  /* FIRC clock                      5  */
   PCC_INVALID_INDEX,                  /* SOSC clock                      6  */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 7  */
+  PCC_INVALID_INDEX,                  /* No clock entry                  7  */
   PCC_INVALID_INDEX,                  /* RTC_CLKIN clock                 8  */
   PCC_INVALID_INDEX,                  /* SCG CLK_OUT clock               9  */
   PCC_INVALID_INDEX,                  /* SIRCDIV1 functional clock       10 */
@@ -71,11 +71,11 @@ const uint16_t g_clkname_mapping[] =
   PCC_INVALID_INDEX,                  /* FIRCDIV2 functional clock       13 */
   PCC_INVALID_INDEX,                  /* SOSCDIV1 functional clock       14 */
   PCC_INVALID_INDEX,                  /* SOSCDIV2 functional clock       15 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 16 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 17 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  16 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  17 */
   PCC_INVALID_INDEX,                  /* End of SCG clocks               18 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 19 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 20 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  19 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  20 */
   PCC_INVALID_INDEX,                  /* FTM0 External Clock Pin Select  21 */
   PCC_INVALID_INDEX,                  /* FTM1 External Clock Pin Select  22 */
   PCC_INVALID_INDEX,                  /* CLKOUT Select                   23 */
@@ -89,13 +89,13 @@ const uint16_t g_clkname_mapping[] =
   PCC_INVALID_INDEX,                  /* DMA clock source                31 */
   PCC_INVALID_INDEX,                  /* MPU clock source                32 */
   PCC_INVALID_INDEX,                  /* MSCM clock source               33 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 34 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 35 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 36 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 37 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 38 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 39 */
-  PCC_INVALID_INDEX,                  /* No clock entry in clock_names_t 40 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  34 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  35 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  36 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  37 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  38 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  39 */
+  PCC_INVALID_INDEX,                  /* No clock entry                  40 */
   PCC_CMP0_INDEX,                     /* CMP0 clock source               41 */
   PCC_CRC_INDEX,                      /* CRC clock source                42 */
   PCC_DMAMUX_INDEX,                   /* DMAMUX clock source             43 */

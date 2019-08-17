@@ -55,7 +55,7 @@ endif
 
 # Source file specific to the S32k11x family
 
-CHIP_CSRCS += s32k11x_irq.c s32k11x_clockmapping.c
+CHIP_CSRCS += s32k11x_irq.c s32k11x_clockmapping.c s32k11x_periphfeatures.c
 
 # Configuration-dependent S32k11x files
 

@@ -463,6 +463,7 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
 
   return srcfreq;
 }
+
 /****************************************************************************
  * Name: s32k1xx_set_sysclk_configuration
  *
@@ -632,7 +633,7 @@ s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
         {
           timeout--;
         }
-      while ((s32k1xx_get_scgclk_source() != ((uint32_t)cfg->src)) && (timeout > 0U));
+      while (s32k1xx_get_scgclk_source() != cfg->src && timeout > 0);
 
       if (timeout == 0)
         {
@@ -755,7 +756,7 @@ static int s32k11_firc_clocksource(void)
    * 2. Switch to FIRC.
  */
 
-  if (s32k1xx_get_scgclk_source() != ((uint32_t)SCG_SYSTEM_CLOCK_SRC_FIRC))
+  if (s32k1xx_get_scgclk_source() != SCG_SYSTEM_CLOCK_SRC_FIRC)
     {
       /* If FIRC is not on, then FIRC is configured with the default
        * configuration
@@ -1697,3 +1698,204 @@ uint32_t s32k1xx_get_coreclk(void)
 
   return coreclk / divider;
 }
+
+/****************************************************************************
+ * Name: s32k1xx_get_sysclk
+ *
+ * Description:
+ *   Return the current value of an SCG system clock frequency, these clocks
+ *   are used for core, platform, external and bus clock domains..
+ *
+ * Input Parameters:
+ *   type - Identifies the system clock of interest
+ *
+ * Returned Values:
+ *   The current value of the system clock frequency.  Zero is returned on any
+ *   failure.
+ *
+ *****************************************************************************/
+
+uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type)
+{
+  enum scg_system_clock_src_e clksrc;
+  uint32_t regval;
+  uint32_t divider;
+  uint32_t freq;
+
+  /* Get the SCG current system clock source */
+
+  clksrc  = (enum scg_system_clock_src_e)s32k1xx_get_scgclk_source();
+  freq    = s32k1xx_get_srcfreq(clksrc);
+
+  /* Adjust to count for the code divider */
+
+  regval  = getreg32(S32K1XX_SCG_CSR);
+  divider = ((regval & SCG_CSR_DIVCORE_MASK) >> SCG_CSR_DIVCORE_SHIFT) + 1;
+  freq   /= divider;
+
+  /* Handle additional dividers for the clock type */
+
+  switch (type)
+    {
+      case SCG_SYSTEM_CLOCK_CORE:
+        break;
+
+      case SCG_SYSTEM_CLOCK_BUS:
+        divider = ((regval & SCG_CSR_DIVBUS_MASK) >> SCG_CSR_DIVBUS_SHIFT) + 1;
+        freq   /= divider;
+        break;
+
+      case SCG_SYSTEM_CLOCK_SLOW:
+        divider = ((regval & SCG_CSR_DIVSLOW_MASK) >> SCG_CSR_DIVSLOW_SHIFT) + 1;
+        freq   /= divider;
+        break;
+
+      default:
+        freq = 0;
+        break;
+    }
+
+  return freq;
+}
+
+/****************************************************************************
+ * Name: s32k1xx_get_asnchfreq
+ *
+ * Description:
+ *   Gets SCG asynchronous clock frequency from a clock source.
+ *
+ * Input Parameters:
+ *   clksrc - The requested clock source.
+ *   type   - The requested clock type.
+ *
+ * Returned Value:
+ *   The frequency of the requested asynchronous clock source.
+ *
+ ****************************************************************************/
+
+uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
+                               enum scg_async_clock_type_e type)
+{
+  uint32_t regval;
+  uint32_t freq = 0;
+  uint32_t div  = 0;
+
+  switch (type)
+    {
+      case SCG_ASYNC_CLOCK_DIV1:
+        {
+          switch (clksrc)
+            {
+              case FIRC_CLK:
+                {
+                  freq   = s32k1xx_get_fircfreq();
+                  regval = getreg32(S32K1XX_SCG_FIRCDIV);
+                  div    = (regval & SCG_FIRCDIV_FIRCDIV1_MASK) >> SCG_FIRCDIV_FIRCDIV1_SHIFT;
+                }
+                break;
+
+              case SIRC_CLK:
+                {
+                  freq   = s32k1xx_get_sircfreq();
+                  regval = getreg32(S32K1XX_SCG_SIRCDIV);
+                  div    = (regval & SCG_SIRCDIV_SIRCDIV1_MASK) >> SCG_SIRCDIV_SIRCDIV1_SHIFT;
+                }
+                break;
+
+              case SOSC_CLK:
+                {
+                  freq   = s32k1xx_get_soscfreq();
+                  regval = getreg32(S32K1XX_SCG_SOSCDIV);
+                  div    = (regval & SCG_SOSCDIV_SOSCDIV1_MASK) >> SCG_SOSCDIV_SOSCDIV1_SHIFT;
+                }
+                break;
+
+#ifdef CONFIG_S32K1XX_HAVE_SPLL
+              case SPLL_CLK:
+                {
+                  freq   = s32k1xx_get_spllfreq();
+                  regval = getreg32(S32K1XX_SCG_SPLLDIV);
+                  div    = (regval & SCG_SPLLDIV_SPLLDIV1_MASK) >> SCG_SPLLDIV_SPLLDIV1_SHIFT;
+                }
+                break;
+#endif
+
+              default:
+                {
+                  /* Invalid clock source type */
+
+                  freq = 0;
+                  DEBUGPANIC();
+                }
+                break;
+            }
+        }
+        break;
+
+      case SCG_ASYNC_CLOCK_DIV2:
+        {
+          switch (clksrc)
+            {
+              case FIRC_CLK:
+                {
+                  freq   = s32k1xx_get_fircfreq();
+                  regval = getreg32(S32K1XX_SCG_FIRCDIV);
+                  div    = (regval & SCG_FIRCDIV_FIRCDIV2_MASK) >> SCG_FIRCDIV_FIRCDIV2_SHIFT;
+                }
+                break;
+
+              case SIRC_CLK:
+                {
+                  freq   = s32k1xx_get_sircfreq();
+                  regval = getreg32(S32K1XX_SCG_SIRCDIV);
+                  div    = (regval & SCG_SIRCDIV_SIRCDIV2_MASK) >> SCG_SIRCDIV_SIRCDIV2_SHIFT;
+                }
+                break;
+              case SOSC_CLK:
+                {
+                  freq   = s32k1xx_get_soscfreq();
+                  regval = getreg32(S32K1XX_SCG_SOSCDIV);
+                  div    = (regval & SCG_SOSCDIV_SOSCDIV2_MASK) >> SCG_SOSCDIV_SOSCDIV2_SHIFT;
+                }
+                break;
+#ifdef CONFIG_S32K1XX_HAVE_SPLL
+              case SPLL_CLK:
+                {
+                  freq = s32k1xx_get_spllfreq();
+                  regval = getreg32(S32K1XX_SCG_SPLLDIV);
+                  div    = (regval & SCG_SPLLDIV_SPLLDIV2_MASK) >> SCG_SPLLDIV_SPLLDIV2_SHIFT;
+                }
+                break;
+#endif
+              default:
+                {
+                  /* Invalid clock source type */
+
+                  freq = 0;
+                  DEBUGPANIC();
+                }
+                break;
+            }
+        }
+        break;
+
+      default:
+          /* Invalid async clock source */
+
+          freq = 0;
+          DEBUGPANIC();
+          break;
+    }
+
+  if (div != 0)
+    {
+      freq = (freq >> (div - 1));
+    }
+  else  /* Output disabled. */
+    {
+      freq = 0;
+    }
+
+  return freq;
+}
+

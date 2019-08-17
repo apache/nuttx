@@ -64,6 +64,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(CONFIG_ARCH_CHIP_S32K11X)
+#  include "s32k14x/s32k14x_clocknames.h"
+#elif defined(CONFIG_ARCH_CHIP_S32K14X)
+#  include "s32k14x/s32k14x_clocknames.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -80,10 +86,24 @@
  * Public Types
  ****************************************************************************/
 
-/* Clock Configuration
- *
- * These structure are used to define the clock configuration.
- */
+/* Clock Configuration ******************************************************/
+
+enum scg_system_clock_type_e
+{
+  SCG_SYSTEM_CLOCK_CORE,        /* Core clock  */
+  SCG_SYSTEM_CLOCK_BUS,         /* BUS clock */
+  SCG_SYSTEM_CLOCK_SLOW,        /* System slow clock */
+  SCG_SYSTEM_CLOCK_MAX          /* Max value */
+};
+
+enum scg_async_clock_type_e
+{
+  SCG_ASYNC_CLOCK_DIV1   = 0,   /* Clock divider 1 */
+  SCG_ASYNC_CLOCK_DIV2   = 1,   /* Clock divider 2 */
+  SCG_ASYNC_CLOCK_MAX    = 2,   /* Max value */
+};
+
+/* These structure are used to define the clock configuration. */
 
 /* SCG SIRC clock configuration */
 
@@ -512,6 +532,42 @@ int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
  *****************************************************************************/
 
 uint32_t s32k1xx_get_coreclk(void);
+
+/****************************************************************************
+ * Name: s32k1xx_get_sysclk
+ *
+ * Description:
+ *   Return the current value of an SCG system clock frequency, these clocks
+ *   are used for core, platform, external and bus clock domains..
+ *
+ * Input Parameters:
+ *   type - Identifies the system clock of interest
+ *
+ * Returned Values:
+ *   The current value of the system clock frequency.  Zero is returned on any
+ *   failure.
+ *
+ *****************************************************************************/
+
+uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type);
+
+/****************************************************************************
+ * Name: s32k1xx_get_asnchfreq
+ *
+ * Description:
+ *   Gets SCG asynchronous clock frequency from a clock source.
+ *
+ * Input Parameters:
+ *   clksrc - The requested clock source.
+ *   type   - The requested clock type.
+ *
+ * Returned Value:
+ *   The frequency of the requested asynchronous clock source.
+ *
+ ****************************************************************************/
+
+uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
+                               enum scg_async_clock_type_e type);
 
 #undef EXTERN
 #if defined(__cplusplus)
