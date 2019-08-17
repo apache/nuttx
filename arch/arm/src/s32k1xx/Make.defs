@@ -64,8 +64,9 @@ ifeq ($(CONFIG_S32K1XX_GPIOIRQ),y)
 CHIP_CSRCS += s32k1xx_pinirq.c
 endif
 
-ifeq ($(CONFIG_S32K1XX_DMA),y)
+ifeq ($(CONFIG_S32K1XX_EDMA),y)
 CHIP_CSRCS += s32k1xx_pindma.c
+CHIP_CSRCS += s32k1xx_edma.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)

@@ -1,11 +1,11 @@
 /************************************************************************************
- * arch/arm/src/imxrt/imxrt_dmac.h
+ * arch/arm/src/s32k1xx/s32k1xx_dmac.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Portions of the eDMA logic derive from NXP sample code which has a compatible
- * BSD 3-clause license:
+ * This file was leveraged from the NuttX i.MXRT port.  Portions of that eDMA logic
+ * derived from NXP sample code which has a compatible BSD 3-clause license:
  *
  *   Copyright (c) 2015, Freescale Semiconductor, Inc.
  *   Copyright 2016-2017 NXP
@@ -40,8 +40,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
-#define __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_EDMAC_H
+#define __ARCH_ARM_SRC_S32K1XX_S32K1XX_EDMAC_H
 
 /* General Usage:
  *
@@ -55,7 +55,7 @@
  *
  * 2. Create the transfer configuration:
  *
- *      struct imxrt_edma_xfrconfig_s config;
+ *      struct s32k1xx_edma_xfrconfig_s config;
  *      config.saddr = ..;
  *      config.daddr = ..;
  *      etc.
@@ -63,14 +63,14 @@
  * 3. Setup the transfer in hardware:
  *
  *      int ret;
- *      ret = imxrt_dmach_xfrsetup(handle, &config);
+ *      ret = s32k1xx_dmach_xfrsetup(handle, &config);
  *
- * 4. If you are setting up a scatter gather DMA (with CONFIG_IMXRT_EDMA_NTCD > 0),
+ * 4. If you are setting up a scatter gather DMA (with CONFIG_S32K1XX_EDMA_NTCD > 0),
  *    then repeat steps 2 and 3 for each segment of the transfer.
  *
  * 5. Start the DMA:
  *
- *      ret = imxrt_dmach_start(handle, my_callback_func, priv);
+ *      ret = s32k1xx_dmach_start(handle, my_callback_func, priv);
  *
  *    Where my_callback_func() is called when the DMA completes or an error occurs.
  *    'priv' represents some internal driver state that will be provided with the
@@ -84,13 +84,13 @@
  * 7. The callback will be received when the DMA completes (or an error occurs).
  *    After that, you may free  the DMA channel, or re-use it on subsequent DMAs.
  *
- *      imxrt_dmach_free(handle);
+ *      s32k1xx_dmach_free(handle);
  *
  * Almost non-invasive debug instrumentation is available.  You may call
- * imxrt_dmasample() to save the current state of the eDMA registers at any given
+ * s32k1xx_dmasample() to save the current state of the eDMA registers at any given
  * point in time.  At some later, postmortem analysis, you can dump the content of
- * the buffered registers with imxrt_dmadump().  imxrt_dmasample() is also available
- * for monitoring DMA progress.
+ * the buffered registers with s32k1xx_dmadump().  s32k1xx_dmasample() is also
+ * available for monitoring DMA progress.
  */
 
 /************************************************************************************
@@ -100,7 +100,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include "hardware/imxrt_edma.h"
+#include "hardware/s32k1xx_edma.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -128,40 +128,40 @@ typedef void (*edma_callback_t)(DMACH_HANDLE handle, void *arg, bool done, int r
 
 /* eDMA transfer type */
 
-enum imxrt_edma_xfrtype_e
+enum s32k1xx_edma_xfrtype_e
 {
-  eDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
-  eDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
-  eDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
+  EDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
+  EDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
+  EDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
 };
 
 /* This structure holds the source/destination transfer attribute configuration. */
 
-struct imxrt_edma_xfrconfig_s
+struct s32k1xx_edma_xfrconfig_s
 {
-  uint32_t saddr;      /* Source data address. */
-  uint32_t daddr;      /* Destination data address. */
-  int16_t  soff;       /* Sign-extended offset for current source address. */
-  int16_t  doff;       /* Sign-extended offset for current destination address. */
-  uint16_t iter;       /* Major loop iteration count. */
-  uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
-  uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
-  uint8_t  dsize;      /* Destination data transfer size. */
-  uint8_t  ttype;      /* Transfer type (see enum imxrt_edma_xfrtype_e). */
-#ifdef CONFIG_IMXRT_EDMA_EMLIM
-  uint16_t nbytes;     /* Bytes to transfer in a minor loop */
+    uint32_t saddr;      /* Source data address. */
+    uint32_t daddr;      /* Destination data address. */
+    int16_t  soff;       /* Sign-extended offset for current source address. */
+    int16_t  doff;       /* Sign-extended offset for current destination address. */
+    uint16_t iter;       /* Major loop iteration count. */
+    uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
+    uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
+    uint8_t  dsize;      /* Destination data transfer size. */
+    uint8_t  ttype;      /* Transfer type (see enum s32k1xx_edma_xfrtype_e). */
+#ifdef CONFIG_S32K1XX_EDMA_EMLIM
+    uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else
-  uint32_t nbytes;     /* Bytes to transfer in a minor loop */
+    uint32_t nbytes;     /* Bytes to transfer in a minor loop */
 #endif
-#ifdef CONFIG_IMXRT_EDMA_ELINK
-  DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
+#ifdef CONFIG_S32K1XX_EDMA_ELINK
+    DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
 #endif
 };
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
 #ifdef CONFIG_DEBUG_DMA
-struct imxrt_dmaregs_s
+struct s32k1xx_dmaregs_s
 {
   uint8_t chan;          /* Sampled channel */
 
@@ -223,7 +223,7 @@ extern "C"
  ************************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_dmach_alloc
+ * Name: s32k1xx_dmach_alloc
  *
  *   Allocate a DMA channel.  This function sets aside a DMA channel,
  *   initializes the DMAMUX for the channel, then gives the caller exclusive
@@ -231,7 +231,7 @@ extern "C"
  *
  * Input Parameters:
  *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
- *            bit-field definitions in hardware/imxrt_dmamux.h.  Settings include:
+ *            bit-field definitions in hardware/s32k1xx_dmamux.h.  Settings include:
  *
  *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
  *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
@@ -241,7 +241,7 @@ extern "C"
  *            A value of zero will disable the DMAMUX channel.
  *   dchpri - DCHPRI channel priority configuration.  See DCHPRI channel
  *            configuration register bit-field definitions in
- *            hardware/imxrt_edma.h.  Meaningful settings include:
+ *            hardware/s32k1xx_edma.h.  Meaningful settings include:
  *
  *            EDMA_DCHPRI_CHPRI       Channel Arbitration Priority
  *            DCHPRI_DPA              Disable Preempt Ability
@@ -255,29 +255,29 @@ extern "C"
  *
  ****************************************************************************/
 
-DMACH_HANDLE imxrt_dmach_alloc(uint32_t dmamux, uint8_t dchpri);
+DMACH_HANDLE s32k1xx_dmach_alloc(uint32_t dmamux, uint8_t dchpri);
 
 /************************************************************************************
- * Name: imxrt_dmach_free
+ * Name: s32k1xx_dmach_free
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must NEVER be
- *   used again until imxrt_dmach_alloc() is called again to re-gain a valid handle.
+ *   used again until s32k1xx_dmach_alloc() is called again to re-gain a valid handle.
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
 
-void imxrt_dmach_free(DMACH_HANDLE handle);
+void s32k1xx_dmach_free(DMACH_HANDLE handle);
 
 /************************************************************************************
- * Name: imxrt_dmach_xfrsetup
+ * Name: s32k1xx_dmach_xfrsetup
  *
  * Description:
  *   This function adds the eDMA transfer to the DMA sequence.  The request
  *   is setup according to the content of the transfer configuration
- *   structure.  For "normal" DMA, imxrt_dmach_xfrsetup is called only once.
+ *   structure.  For "normal" DMA, s32k1xx_dmach_xfrsetup is called only once.
  *   Scatter/gather DMA is accomplished by calling this function repeatedly,
  *   once for each transfer in the sequence.  Scatter/gather DMA processing
  *   is enabled automatically when the second transfer configuration is received.
@@ -286,7 +286,7 @@ void imxrt_dmach_free(DMACH_HANDLE handle);
  *   discontinuous transfers (scatter-gather)
  *
  * Input Parameters:
- *   handle - DMA channel handle created by imxrt_dmach_alloc()
+ *   handle - DMA channel handle created by s32k1xx_dmach_alloc()
  *   config - A DMA transfer configuration instance, populated by the
  *            The content of 'config' describes the transfer
  *
@@ -296,15 +296,15 @@ void imxrt_dmach_free(DMACH_HANDLE handle);
  *
  ************************************************************************************/
 
-int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
-                         const struct imxrt_edma_xfrconfig_s *config);
+int s32k1xx_dmach_xfrsetup(DMACH_HANDLE *handle,
+                           const struct s32k1xx_edma_xfrconfig_s *config);
 
 /************************************************************************************
- * Name: imxrt_dmach_start
+ * Name: s32k1xx_dmach_start
  *
  * Description:
  *   Start the DMA transfer by enabling the channel DMA request.  This function
- *   should be called after the final call to imxrt_dmasetup() in order to avoid
+ *   should be called after the final call to s32k1xx_dmasetup() in order to avoid
  *   race conditions.
  *
  *   At the conclusion of each major DMA loop, a callback to the user-provided
@@ -321,7 +321,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
  *   responsibility of the caller.
  *
  * Input Parameters:
- *   handle   - DMA channel handle created by imxrt_dmach_alloc()
+ *   handle   - DMA channel handle created by s32k1xx_dmach_alloc()
  *   callback - The callback to be invoked when the DMA is completes or is aborted.
  *   arg      - An argument that accompanies the callback
  *
@@ -331,28 +331,28 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE *handle,
  *
  ************************************************************************************/
 
-int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg);
+int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg);
 
 /************************************************************************************
- * Name: imxrt_dmach_stop
+ * Name: s32k1xx_dmach_stop
  *
  * Description:
- *   Cancel the DMA.  After imxrt_dmach_stop() is called, the DMA channel is reset,
- *   all TCDs are freed, and imxrt_dmarx/txsetup() must be called before
- *   imxrt_dmach_start() can be called again
+ *   Cancel the DMA.  After s32k1xx_dmach_stop() is called, the DMA channel is reset,
+ *   all TCDs are freed, and s32k1xx_dmarx/txsetup() must be called before
+ *   s32k1xx_dmach_start() can be called again
  *
  * Input Parameters:
- *   handle   - DMA channel handle created by imxrt_dmach_alloc()
+ *   handle   - DMA channel handle created by s32k1xx_dmach_alloc()
  *
  * Returned Value:
  *   None.
  *
  ************************************************************************************/
 
-void imxrt_dmach_stop(DMACH_HANDLE handle);
+void s32k1xx_dmach_stop(DMACH_HANDLE handle);
 
 /************************************************************************************
- * Name: imxrt_dmach_getcount
+ * Name: s32k1xx_dmach_getcount
  *
  * Description:
  *   This function checks the TCD (Task Control Descriptor) status for a
@@ -377,17 +377,17 @@ void imxrt_dmach_stop(DMACH_HANDLE handle);
  *     RemainingBytes = RemainingMajorLoopCount * NBYTES(initially configured)
  *
  * Input Parameters:
- *   handle  - DMA channel handle created by imxrt_dmach_alloc()
+ *   handle  - DMA channel handle created by s32k1xx_dmach_alloc()
  *
  * Returned Value:
  *   Major loop count which has not been transferred yet for the current TCD.
  *
  ************************************************************************************/
 
-unsigned int imxrt_dmach_getcount(DMACH_HANDLE *handle);
+unsigned int s32k1xx_dmach_getcount(DMACH_HANDLE *handle);
 
 /************************************************************************************
- * Name: imxrt_dmasample
+ * Name: s32k1xx_dmasample
  *
  * Description:
  *   Sample DMA register contents
@@ -395,13 +395,13 @@ unsigned int imxrt_dmach_getcount(DMACH_HANDLE *handle);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs);
+void s32k1xx_dmasample(DMACH_HANDLE handle, struct s32k1xx_dmaregs_s *regs);
 #else
-#  define imxrt_dmasample(handle,regs)
+#  define s32k1xx_dmasample(handle,regs)
 #endif
 
 /************************************************************************************
- * Name: imxrt_dmadump
+ * Name: s32k1xx_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
@@ -409,9 +409,9 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
+void s32k1xx_dmadump(const struct s32k1xx_dmaregs_s *regs, const char *msg);
 #else
-#  define imxrt_dmadump(handle,regs,msg)
+#  define s32k1xx_dmadump(handle,regs,msg)
 #endif
 
 #undef EXTERN
@@ -420,4 +420,4 @@ void imxrt_dmadump(const struct imxrt_dmaregs_s *regs, const char *msg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_EDMAC_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32K1XX_EDMAC_H */

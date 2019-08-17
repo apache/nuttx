@@ -568,39 +568,6 @@
 #define IMXRT_EDMA_DCHPRI30                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI30_OFFSET)
 #define IMXRT_EDMA_DCHPRI31                 (IMXRT_EDMA_BASE + IMXRT_EDMA_DCHPRI31_OFFSET)
 
-#define IMXRT_EDMA_DCHPRI3_OFFSET           0x0100  /* Channel 3 Priority */
-#define IMXRT_EDMA_DCHPRI2_OFFSET           0x0101  /* Channel 2 Priority */
-#define IMXRT_EDMA_DCHPRI1_OFFSET           0x0102  /* Channel 1 Priority */
-#define IMXRT_EDMA_DCHPRI0_OFFSET           0x0103  /* Channel 0 Priority */
-#define IMXRT_EDMA_DCHPRI7_OFFSET           0x0104  /* Channel 7 Priority */
-#define IMXRT_EDMA_DCHPRI6_OFFSET           0x0105  /* Channel 6 Priority */
-#define IMXRT_EDMA_DCHPRI5_OFFSET           0x0106  /* Channel 5 Priority */
-#define IMXRT_EDMA_DCHPRI4_OFFSET           0x0107  /* Channel 4 Priority */
-#define IMXRT_EDMA_DCHPRI11_OFFSET          0x0108  /* Channel 11 Priority */
-#define IMXRT_EDMA_DCHPRI10_OFFSET          0x0109  /* Channel 10 Priority */
-#define IMXRT_EDMA_DCHPRI9_OFFSET           0x010a  /* Channel 9 Priority */
-#define IMXRT_EDMA_DCHPRI8_OFFSET           0x010b  /* Channel 8 Priority */
-#define IMXRT_EDMA_DCHPRI15_OFFSET          0x010c  /* Channel 15 Priority */
-#define IMXRT_EDMA_DCHPRI14_OFFSET          0x010d  /* Channel 14 Priority */
-#define IMXRT_EDMA_DCHPRI13_OFFSET          0x010e  /* Channel 13 Priority */
-#define IMXRT_EDMA_DCHPRI12_OFFSET          0x010f  /* Channel 12 Priority */
-#define IMXRT_EDMA_DCHPRI19_OFFSET          0x0110  /* Channel 19 Priority */
-#define IMXRT_EDMA_DCHPRI18_OFFSET          0x0111  /* Channel 18 Priority */
-#define IMXRT_EDMA_DCHPRI17_OFFSET          0x0112  /* Channel 17 Priority */
-#define IMXRT_EDMA_DCHPRI16_OFFSET          0x0113  /* Channel 16 Priority */
-#define IMXRT_EDMA_DCHPRI23_OFFSET          0x0114  /* Channel 23 Priority */
-#define IMXRT_EDMA_DCHPRI22_OFFSET          0x0115  /* Channel 22 Priority */
-#define IMXRT_EDMA_DCHPRI21_OFFSET          0x0116  /* Channel 21 Priority */
-#define IMXRT_EDMA_DCHPRI20_OFFSET          0x0117  /* Channel 20 Priority */
-#define IMXRT_EDMA_DCHPRI27_OFFSET          0x0118  /* Channel 27 Priority */
-#define IMXRT_EDMA_DCHPRI26_OFFSET          0x0119  /* Channel 26 Priority */
-#define IMXRT_EDMA_DCHPRI25_OFFSET          0x011a  /* Channel 25 Priority */
-#define IMXRT_EDMA_DCHPRI24_OFFSET          0x011b  /* Channel 24 Priority */
-#define IMXRT_EDMA_DCHPRI31_OFFSET          0x011c  /* Channel 31 Priority */
-#define IMXRT_EDMA_DCHPRI30_OFFSET          0x011d  /* Channel 30 Priority */
-#define IMXRT_EDMA_DCHPRI29_OFFSET          0x011e  /* Channel 29 Priority */
-#define IMXRT_EDMA_DCHPRI28_OFFSET          0x011f  /* Channel 28 Priority */
-
 /* Transfer Control Descriptor (TCD) */
 
 #define IMXRT_EDMA_TCD_BASE(n)              (IMXRT_EDMA_BASE + IMXRT_EDMA_TCD_OFFSET(n))
@@ -1113,7 +1080,6 @@
 #define EDMA_CERR_NOP                       (1 << 7)  /* Bit 7:  No Op enable */
 
 /* Clear Interrupt Request */
-#define EDMA_CINT_
 
 #define EDMA_CINT_SHIFT                     (0)       /* Bits 0-4: Clear Interrupt Request */
 #define EDMA_CINT_MASK                      (0x1f << EDMA_CINT_SHIFT)
@@ -1287,16 +1253,31 @@
 struct imxrt_edmatcd_s
 {
   uint32_t saddr;         /* Offset: 0x0000  TCD Source Address */
+#ifdef CONFIG_ENDIAN_BIG
+  uint16_t attr;          /* Offset: 0x0004  TCD Transfer Attributes */
+  uint16_t soff;          /* Offset: 0x0006  TCD Signed Source Address Offset */
+#else
   uint16_t soff;          /* Offset: 0x0004  TCD Signed Source Address Offset */
   uint16_t attr;          /* Offset: 0x0006  TCD Transfer Attributes */
+#endif
   uint32_t nbytes;        /* Offset: 0x0008  TCD Signed Minor Loop Offset / Byte Count */
   uint32_t slast;         /* Offset: 0x000c  TCD Last Source Address Adjustment */
   uint32_t daddr;         /* Offset: 0x0010  TCD Destination Address */
+#ifdef CONFIG_ENDIAN_BIG
+  uint16_t citer;         /* Offset: 0x0014  TCD Current Minor Loop Link, Major Loop Count */
+  uint16_t doff;          /* Offset: 0x0016  TCD Signed Destination Address Offset */
+#else
   uint16_t doff;          /* Offset: 0x0014  TCD Signed Destination Address Offset */
   uint16_t citer;         /* Offset: 0x0016  TCD Current Minor Loop Link, Major Loop Count */
+#endif
   uint32_t dlastsga;      /* Offset: 0x0018  TCD Last Destination Address Adjustment/Scatter Gather Address */
+#ifdef CONFIG_ENDIAN_BIG
+  uint16_t biter;         /* Offset: 0x001c  TCD Beginning Minor Loop Link, Major Loop Count */
+  uint16_t csr;           /* Offset: 0x001e  TCD Control and Status */
+#else
   uint16_t csr;           /* Offset: 0x001c  TCD Control and Status */
   uint16_t biter;         /* Offset: 0x001e  TCD Beginning Minor Loop Link, Major Loop Count */
+#endif
 };
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_EDMA_H */

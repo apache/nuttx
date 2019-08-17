@@ -111,6 +111,10 @@ config S32K1XX_LPSPI
 
 menu "S32K1XX Peripheral Selection"
 
+config S32K1XX_EDMA
+	bool "eDMA"
+	default n
+
 config S32K1XX_LPUART0
 	bool "LPUART0"
 	default n
@@ -179,5 +183,86 @@ config S32K1XX_PORTEINTS
 
 endif
 endmenu # S32K1xx GPIO Interrupt Configuration
+
+menu "eDMA Configuration"
+	depends on S32K1XX_EDMA
+
+config S32K1XX_EDMA_NTCD
+	int "Number of transfer descriptors"
+	default 0
+	---help---
+		Number of pre-allocated transfer descriptors.  Needed for scatter-
+		gather DMA.  Make to be set to zero to disable in-memory TCDs in
+		which case only the TCD channel registers will be used and scatter-
+		will not be supported.
+
+config S32K1XX_EDMA_ELINK
+	bool "Channeling Linking"
+	default n
+	---help---
+		This option enables optional minor or major loop channel linking:
+
+		Minor loop channel linking:  As the channel completes the minor
+		loop, this flag enables linking to another channel. The link target
+		channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the specified
+		channel.
+
+		If minor loop channel linking is disabled, this link mechanism is
+		suppressed in favor of the major loop channel linking.
+
+		Major loop channel linking:  As the channel completes the minor
+		loop, this option enables the linking to another channel. The link
+		target channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the linked channel.
+
+config S32K1XX_EDMA_ERCA
+	bool "Round Robin Channel Arbitration"
+	default n
+	---help---
+		Normally, a fixed priority arbitration is used for channel
+		selection.  If this option is selected, round robin arbitration is
+		used for channel selection.
+
+config S32K1XX_EDMA_HOE
+	bool "Halt On Error"
+	default y
+	---help---
+		Any error causes the HALT bit to set. Subsequently, all service
+		requests are ignored until the HALT bit is cleared.
+
+config S32K1XX_EDMA_CLM
+	bool "Continuous Link Mode"
+	default n
+	---help---
+		By default, A minor loop channel link made to itself goes through
+		channel arbitration before being activated again.  If this option is
+		selected, a minor loop channel link made to itself does not go
+		through channel arbitration before being activated again. Upon minor
+		loop completion, the channel activates again if that channel has a
+		minor loop channel link enabled and the link channel is itself. This
+		effectively applies the minor loop offsets and restarts the next
+		minor loop.
+
+config S32K1XX_EDMA_EMLIM
+	bool "Minor Loop Mapping"
+	default n
+	---help---
+		Normally TCD word 2 is a 32-bit NBYTES field.  When this option is
+		enabled, TCD word 2 is redefined to include individual enable fields,
+		an offset field, and the NBYTES field.  The individual enable fields
+		allow the minor loop offset to be applied to the source address, the
+		destination address, or both. The NBYTES field is reduced when either
+		offset is enabled.
+
+config S32K1XX_EDMA_EDBG
+	bool "Enable Debug"
+	default n
+	---help---
+		When in debug mode, the DMA stalls the start of a new channel. Executing
+		channels are allowed to complete. Channel execution resumes when the
+		system exits debug mode or the EDBG bit is cleared
+
+endmenu # eDMA Global Configuration
 
 endif # ARCH_CHIP_S32K1XX
