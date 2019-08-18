@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 
+#include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_periphclocks.h"
 
 /****************************************************************************
@@ -54,15 +55,26 @@
 /* Configuration ************************************************************/
 
 /* S32K118EVB GPIOs *********************************************************/
+
 /* LEDs.  The S32K118EVB has one RGB LED:
  *
  *   RedLED   PTD16 (FTM0CH1)
+ *   GreenLED PTD15 (FTM0CH0)
  *   BlueLED  PTE8  (FTM0CH6)
- *   GreenLED PTD15 (FTM0 CH0)
  */
 
-/* BUTTONS */
+#define GPIO_LED_R     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_G     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
 
+/* Buttons.  The S32K118EVB supports two buttons:
+ *
+ *   SW2  PTD3
+ *   SW3  PTD5
+ */
+
+#define GPIO_SW2       (PIN_PTD3  | PIN_INT_BOTH)
+#define GPIO_SW3       (PIN_PTD5  | PIN_INT_BOTH)
 
 /* SPI chip selects */
 

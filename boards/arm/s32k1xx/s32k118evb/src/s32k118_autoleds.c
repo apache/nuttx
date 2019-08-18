@@ -32,6 +32,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+/* The S32K118EVB has one RGB LED:
+ *
+ *   RedLED   PTD16 (FTM0CH1)
+ *   GreenLED PTD15 (FTM0CH0)
+ *   BlueLED  PTE8  (FTM0CH6)
+ *
+ *
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
+ * the Freedom K66F.  The following definitions describe how NuttX controls
+ * the LEDs:
+ *
+ *   SYMBOL                Meaning                 LED state
+ *                                                 RED   GREEN  BLUE
+ *   -------------------  -----------------------  -----------------
+ *   LED_STARTED          NuttX has been started    OFF  OFF  OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated   OFF  OFF  ON
+ *   LED_IRQSENABLED      Interrupts enabled        OFF  OFF  ON
+ *   LED_STACKCREATED     Idle stack created        OFF  ON   OFF
+ *   LED_INIRQ            In an interrupt          (no change)
+ *   LED_SIGNAL           In a signal handler      (no change)
+ *   LED_ASSERTION        An assertion failed      (no change)
+ *   LED_PANIC            The system has crashed    FLASH OFF OFF
+ *   LED_IDLE             K66 is in sleep mode     (Optional, not used)
+ */
 
 /****************************************************************************
  * Included Files
@@ -46,17 +70,27 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "s32k1xx_pin.h"
 #include "s32k118evb.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Summary of all possible settings */
+
+#define LED_NOCHANGE      0 /* LED_IRQSENABLED, LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
+#define LED_OFF_OFF_OFF   1 /* LED_STARTED */
+#define LED_OFF_OFF_ON    2 /* LED_HEAPALLOCATE */
+#define LED_OFF_ON_OFF    3 /* LED_STACKCREATED */
+#define LED_ON_OFF_OFF    4 /* LED_PANIC */
 
 /****************************************************************************
  * Private Data
@@ -77,6 +111,10 @@
 void board_autoled_initialize(void)
 {
   /* Configure LED GPIOs for output */
+
+  s32k1xx_pinconfig(GPIO_LED_R);
+  s32k1xx_pinconfig(GPIO_LED_G);
+  s32k1xx_pinconfig(GPIO_LED_B);
 }
 
 /****************************************************************************
@@ -85,6 +123,35 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
+  if (led != LED_NOCHANGE)
+    {
+      bool redoff   = true;
+      bool greenoff = true;
+      bool blueoff  = true;
+
+      switch (led)
+        {
+          default:
+          case LED_OFF_OFF_OFF:
+            break;
+
+          case LED_OFF_OFF_ON:
+            blueoff = false;
+            break;
+
+          case LED_OFF_ON_OFF:
+            greenoff = false;
+            break;
+
+          case LED_ON_OFF_OFF:
+            redoff = false;
+            break;
+        }
+
+      s32k1xx_gpiowrite(GPIO_LED_R, redoff);
+      s32k1xx_gpiowrite(GPIO_LED_G, greenoff);
+      s32k1xx_gpiowrite(GPIO_LED_B, blueoff);
+    }
 }
 
 /****************************************************************************
@@ -93,6 +160,12 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
+  if (led == LED_ON_OFF_OFF)
+    {
+      s32k1xx_gpiowrite(GPIO_LED_R, true);
+      s32k1xx_gpiowrite(GPIO_LED_G, true);
+      s32k1xx_gpiowrite(GPIO_LED_B, true);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

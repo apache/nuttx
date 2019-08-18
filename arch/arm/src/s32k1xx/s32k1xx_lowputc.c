@@ -131,14 +131,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_pinconfig(GPIO_LPUART0_RX);
-  (void)s32k1xx_pinconfig(GPIO_LPUART0_TX);
+  (void)s32k1xx_pinconfig(PIN_LPUART0_RX);
+  (void)s32k1xx_pinconfig(PIN_LPUART0_TX);
 #ifdef CONFIG_LPUART0_OFLOWCONTROL
-  (void)s32k1xx_pinconfig(GPIO_LPUART0_CTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART0_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART0_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART0_IFLOWCONTROL)))
-  (void)s32k1xx_pinconfig(GPIO_LPUART0_RTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART0_RTS);
 #endif
 #endif
 
@@ -148,14 +148,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_pinconfig(GPIO_LPUART1_RX);
-  (void)s32k1xx_pinconfig(GPIO_LPUART1_TX);
+  (void)s32k1xx_pinconfig(PIN_LPUART1_RX);
+  (void)s32k1xx_pinconfig(PIN_LPUART1_TX);
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
-  (void)s32k1xx_pinconfig(GPIO_LPUART1_CTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART1_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
-  (void)s32k1xx_pinconfig(GPIO_LPUART1_RTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART1_RTS);
 #endif
 #endif
 
@@ -165,14 +165,14 @@ void s32k1xx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)s32k1xx_pinconfig(GPIO_LPUART2_RX);
-  (void)s32k1xx_pinconfig(GPIO_LPUART2_TX);
+  (void)s32k1xx_pinconfig(PIN_LPUART2_RX);
+  (void)s32k1xx_pinconfig(PIN_LPUART2_TX);
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
-  (void)s32k1xx_pinconfig(GPIO_LPUART2_CTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART2_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
-  (void)s32k1xx_pinconfig(GPIO_LPUART2_RTS);
+  (void)s32k1xx_pinconfig(PIN_LPUART2_RTS);
 #endif
 #endif
 

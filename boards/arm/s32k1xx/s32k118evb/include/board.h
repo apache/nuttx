@@ -77,30 +77,36 @@
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_RED          0
-#define BOARD_BLUE         1
-#define BOARD_GREEN        2
-#define BOARD_NLEDS        3
+#define BOARD_LED_R       0
+#define BOARD_LED_G       1
+#define BOARD_LED_B       2
+#define BOARD_NLEDS       3
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_REDLED_BIT   (1 << BOARD_RED)
-#define BOARD_GREENLED_BIT (1 << BOARD_BLUE)
-#define BOARD_BLUELED_BIT  (1 << BOARD_GREEN)
+#define BOARD_LED_R_BIT   (1 << BOARD_LED_R)
+#define BOARD_LED_G_BIT   (1 << BOARD_LED_G)
+#define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
  * the s32k118evb.  The following definitions describe how NuttX controls the
  * LEDs:
+ *
+ *
+ *   SYMBOL                Meaning                      LED state
+ *                                                      RED   GREEN  BLUE
+ *   -------------------  ----------------------------  -----------------
  */
-                                /* RED      GREEN    BLUE */
-#define LED_STARTED         0   /* OFF      OFF      OFF  */
-#define LED_HEAPALLOCATE    0   /* OFF      OFF      OFF  */
-#define LED_IRQSENABLED     0   /* OFF      OFF      OFF  */
-#define LED_STACKCREATED    1   /* OFF      ON       OFF  */
-#define LED_INIRQ           2   /* OFF      N/C      ON   */
-#define LED_SIGNAL          2   /* OFF      N/C      ON   */
-#define LED_ASSERTION       2   /* OFF      N/C      ON   */
-#define LED_PANIC           3   /* Flashing OFF      N/C  */
+
+#define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
+#define LED_STACKCREATED  3 /* Idle stack created        OFF   ON     OFF */
+#define LED_INIRQ         0 /* In an interrupt          (no change)       */
+#define LED_SIGNAL        0 /* In a signal handler      (no change)       */
+#define LED_ASSERTION     0 /* An assertion failed      (no change)       */
+#define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
+#undef  LED_IDLE            /* S32K118EVN in sleep mode (Not used)        */
 
 /* Button definitions *******************************************************/
 
@@ -119,6 +125,14 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* By default, the serial console will be provided on the OpenSDA VCOM port:
+ *
+ *   OpenSDA UART TX  PTB1(LPUART0_TX)
+ *   OpenSDA UART RX  PTB0(LPUART0_RX)
+ */
+
+#define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
+#define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
 
 /* DMA Channel/Stream Selections ********************************************/
 

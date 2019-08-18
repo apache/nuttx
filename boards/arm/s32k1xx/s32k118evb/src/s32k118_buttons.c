@@ -32,6 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+/* The S32K118EVB supports two buttons:
+ *
+ *   SW2  PTD3
+ *   SW3  PTD5
+ */
 
 /****************************************************************************
  * Included Files
@@ -44,15 +49,13 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
+#include "s32k1xx_pin.h"
 #include "s32k118evb.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Public Functions
@@ -72,6 +75,9 @@
 void board_button_initialize(void)
 {
   /* Configure the GPIO pins as interrupting inputs. */
+
+  s32k1xx_pinconfig(GPIO_SW2);
+  s32k1xx_pinconfig(GPIO_SW3);
 }
 
 /****************************************************************************
@@ -80,7 +86,19 @@ void board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-  return 0;
+  uint32_t ret = 0;
+
+  if (s32k1xx_gpioread(GPIO_SW2))
+    {
+      ret |= BUTTON_SW2_BIT;
+    }
+
+  if (s32k1xx_gpioread(GPIO_SW3))
+    {
+      ret |= BUTTON_SW3_BIT;
+    }
+
+  return ret;
 }
 
 /************************************************************************************
@@ -108,7 +126,39 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  return -ENOSYS;
+  uint32_t pinset;
+  int ret;
+
+  /* Map the button id to the GPIO bit set. */
+
+  if (id == BUTTON_SW2)
+    {
+      pinset = GPIO_SW2;
+    }
+  else if (id == BUTTON_SW3)
+    {
+      pinset = GPIO_SW3;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  /* The button has already been configured as an interrupting input (by
+   * board_button_initialize() above).
+   *
+   * Attach the new button handler.
+   */
+
+  ret = s32k1xx_pinirqattach(pinset, irqhandler, NULL);
+  if (ret >= 0)
+    {
+      /* Then make sure that interrupts are enabled on the pin */
+
+      s32k1xx_pinirqenable(pinset);
+    }
+
+  return ret;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

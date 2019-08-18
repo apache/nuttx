@@ -44,30 +44,16 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "s32k1xx_pin.h"
 #include "s32k118evb.h"
 
+#include <arch/board/board.h>
+
 #ifndef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -79,7 +65,11 @@
 
 void board_userled_initialize(void)
 {
-   /* Configure LED GPIOs for output */
+  /* Configure LED GPIOs for output */
+
+  s32k1xx_pinconfig(GPIO_LED_R);
+  s32k1xx_pinconfig(GPIO_LED_G);
+  s32k1xx_pinconfig(GPIO_LED_B);
 }
 
 /****************************************************************************
@@ -88,6 +78,26 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
+  uint32_t ledcfg;
+
+  if (led == BOARD_LED_R)
+    {
+      ledcfg = GPIO_LED_R;
+    }
+  else if (led == BOARD_LED_G)
+    {
+      ledcfg = GPIO_LED_G;
+    }
+  else if (led == BOARD_LED_B)
+    {
+      ledcfg = GPIO_LED_B;
+    }
+  else
+    {
+      return;
+    }
+
+  s32k1xx_gpiowrite(ledcfg, !ledon); /* Low illuminates */
 }
 
 /****************************************************************************
@@ -96,6 +106,11 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
+  /* Low illuminates */
+
+  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) == 0);
+  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) == 0);
+  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) == 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

@@ -44,11 +44,7 @@
 
 #include "chip.h"
 
-#warning REVISIT
-#if 0 /* Need pin multiplexing files */
-/* This file is just a wrapper around pin muxing header files for the S32K1xx family selected
- * by the logic in chip.h.
- */
+/* This file is just a wrapper around pin muxing header files for the select S32K1xx family. */
 
 #if defined(CONFIG_ARCH_CHIP_S32K116)
 #  include "hardware/s32k116_pinmux.h"
@@ -64,7 +60,6 @@
 #  include "hardware/s32k148_pinmux.h"
 #else
 #  error "No pin multiplexing for this S32K1xx part"
-#endif
 #endif
 
 /********************************************************************************************

@@ -107,7 +107,6 @@ int s32k1xx_pinconfig(uint32_t cfgset)
           regval = (mode << PORT_PCR_MUX_SHIFT);
           if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
             {
-              /* Handle input-only digital options */
               /* Check for pull-up or pull-down */
 
               if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLDOWN)
@@ -121,24 +120,6 @@ int s32k1xx_pinconfig(uint32_t cfgset)
             }
           else
             {
-              /* Handle output-only digital options */
-              /* Check for slow slew rate setting */
-
-#warning REVISIT
-#if 0 /* REVISIT -- bits don't exist in the S32K1xx PCR */
-              if ((cfgset & _PIN_OUTPUT_SLEW_MASK) == _PIN_OUTPUT_SLOW)
-                {
-                  regval |= PORT_PCR_SRE;
-                }
-
-              /* Check for open drain output */
-
-              if ((cfgset & _PIN_OUTPUT_OD_MASK) == _PIN_OUTPUT_OPENDRAIN)
-                {
-                  regval |= PORT_PCR_ODE;
-                }
-#endif
-
               /* Check for high drive output */
 
               if ((cfgset & _PIN_OUTPUT_DRIVE_MASK) == _PIN_OUTPUT_HIGHDRIVE)
@@ -173,7 +154,24 @@ int s32k1xx_pinconfig(uint32_t cfgset)
             {
               regval &= ~(1 << pin);
             }
+
           putreg32(regval, base + S32K1XX_PORT_DFER_OFFSET);
+
+          /* Check if we should disable each general-purpose pin from acting
+           * as an input
+           */
+
+          regval = getreg32(base + S32K1XX_GPIO_PIDR_OFFSET);
+          if ((cfgset & PIN_DISABLE_INPUT) != 0)
+            {
+              regval |= (1 << pin);
+            }
+          else
+            {
+              regval &= ~(1 << pin);
+            }
+
+          putreg32(regval, base + S32K1XX_GPIO_PIDR_OFFSET);
 
           /* Additional configuration for the case of Alternative 1 (GPIO) modes */
 

@@ -50,18 +50,20 @@ LEDs and Buttons
   the s32k118evb.  The following definitions describe how NuttX controls the
   LEDs:
 
-    ======================+========+========+=========
-                           RED      GREEN    BLUE
-    ======================+========+========+=========
-    LED_STARTED            OFF      OFF      OFF
-    LED_HEAPALLOCATE       OFF      OFF      OFF
-    LED_IRQSENABLED        OFF      OFF      OFF
-    LED_STACKCREATED       OFF      ON       OFF
-    LED_INIRQ              OFF      N/C      ON 
-    LED_SIGNAL             OFF      N/C      ON
-    LED_ASSERTION          OFF      N/C      ON 
-    LED_PANIC              Flashing OFF      N/C
-    ======================+========+========+=========
+    ==========================================+========+========+=========
+                                                 RED     GREEN     BLUE
+    ==========================================+========+========+=========
+
+    LED_STARTED      NuttX has been started      OFF      OFF      OFF
+    LED_HEAPALLOCATE Heap has been allocated     OFF      OFF      ON
+    LED_IRQSENABLED  Interrupts enabled          OFF      OFF      ON
+    LED_STACKCREATED Idle stack created          OFF      ON       OFF
+    LED_INIRQ        In an interrupt                   (no change)
+    LED_SIGNAL       In a signal handler               (no change)
+    LED_ASSERTION    An assertion failed               (no change)
+    LED_PANIC        The system has crashed      FLASH    OFF      OFF
+    LED_IDLE         S32K118EVN in sleep mode          (no change)
+    ==========================================+========+========+=========
 
   Buttons
   -------
