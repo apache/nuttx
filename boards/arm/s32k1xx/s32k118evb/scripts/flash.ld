@@ -42,6 +42,7 @@
  *
  *   SRAM_L 1ffffc00 - 1fffffff 1Kb
  *   SRAM_U 20000000 - 200057ff 22Kb
+ */
 
 MEMORY
 {

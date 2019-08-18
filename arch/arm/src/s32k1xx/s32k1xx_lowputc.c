@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <fixedmath.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "up_arch.h"
 
@@ -378,10 +379,9 @@ int s32k1xx_lpuart_configure(uint32_t base,
     }
   else
     {
-      /* Here should be added support of other bit modes. */
+      /* REVISIT: Here should be added support of other bit modes. */
 
-#warning missing logic
-      return ERROR;
+      return -ENOSYS;
     }
 
   regval |= LPUART_CTRL_RE | LPUART_CTRL_TE;

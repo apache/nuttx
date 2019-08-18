@@ -31,6 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ * Some of the definitions within this file derive from NXP sample code for
+ * the S32K1xx MCUs.  That sample code has this licensing information:
+ *
+ *   Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
+ *   Copyright 2016-2018 NXP
+ *   All rights reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ *
  ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_WDOG_H
@@ -96,6 +115,27 @@
 #define WDOG_CNT_CNTLOW_MASK         (0xff << WDOG_CNT_CNTLOW_SHIFT)
 #define WDOG_CNT_CNTHIGH_SHIFT       (8)       /* Bits 8-15: High byte of the Watchdog Counter */
 #define WDOG_CNT_CNTHIGH_MASK        (0xff << WDOG_CNT_CNTHIGH_SHIFT)
+
+/* The refresh write sequence can be either:
+ *
+ * If WDOG_CS[CMD32EN] is 0:
+ * 1) Two 16-bit writes: 0xa602, 0xb480
+ * 2) Four 8-bit writes: 0xa6, 0x02, 0xb4, 0x80
+ * If WDOG_CS[CMD32EN] is 1:
+ * 3) One 32-bit write (0xb480a602)
+ */
+
+#define WDOG_CNT_REFRESH_HWORD1      0xa602
+#define WDOG_CNT_REFRESH_HWORD2      0xb480
+#define WDOG_CNT_REFRESH_BYTE1       0xa6
+#define WDOG_CNT_REFRESH_BYTE2       0x02
+#define WDOG_CNT_REFRESH_BYTE3       0xb4
+#define WDOG_CNT_REFRESH_BYTE4       0x80
+#define WDOG_CNT_REFRESH_DWORD       0xb480a602
+
+/* Value to unlock the watchdog registers */
+
+#define WDOG_CNT_UNLOCK              0xd928c520
 
 /* Watchdog Timeout Value Register */
 

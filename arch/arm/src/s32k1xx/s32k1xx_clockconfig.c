@@ -620,10 +620,15 @@ s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
   ret = s32k1xx_set_sysclk_configuration(run_mode, cfg);
   if (ret == OK)
     {
-      /* Wait for system clock to transition. */
+      /* Wait for system clock to transition.
+      *
+       * e10777: The SCG_RCCR[SCS] and SCG_HCCR[SCS] may have a corrupted
+       * status during the interval when the system clock is switching.
+       * Workaround: The SCS field should be read twice by the software to
+       * ensure the system clock switch has completed.
+       */
 
-#warning REVISIT
-#ifdef ERRATA_E10777
+#if 1 /* Errata E10777 */
       timeout = 10;
 #else
       timeout = 1;
