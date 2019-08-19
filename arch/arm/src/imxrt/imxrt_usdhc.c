@@ -989,7 +989,7 @@ static void imxrt_receive(struct imxrt_dev_s *priv)
            priv->addr + IMXRT_USDHC_WML_OFFSET);
 
   mcinfo("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n", priv->remaining,
-         getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET);
+         getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET),
          getreg32(priv->addr + IMXRT_USDHC_WML_OFFSET));
 }
 #endif
@@ -1104,9 +1104,11 @@ static void imxrt_endtransfer(struct imxrt_dev_s *priv,
 
   priv->remaining = 0;
 
+#ifdef CONFIG_IMXRT_USDHC_DMA
   /* DMA modified the buffer, so we need to flush its cache lines. */
 
   up_invalidate_dcache((uintptr_t) priv->buffer, (uintptr_t) priv->bufferend);
+#endif
 
   /* Debug instrumentation */
 
@@ -2017,6 +2019,11 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
    * overlap and maximum performance.
    */
 
+  if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & USDHC_RESPERR_INTS) != 0)
+    {
+      putreg32(USDHC_SYSCTL_RSTC, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
+    }
+
   timeout = USDHC_CMDTIMEOUT;
   start   = clock_systimer();
   while ((getreg32(priv->addr + IMXRT_USDHC_PRSSTAT_OFFSET) &
@@ -2324,9 +2331,6 @@ static int imxrt_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
         ret = -EIO;
     }
 
-  /* Clear the response wait status bits */
-
-  putreg32(USDHC_RESPDONE_INTS, priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET);
   return ret;
 }
 
