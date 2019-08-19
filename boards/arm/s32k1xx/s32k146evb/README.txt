@@ -16,9 +16,10 @@ Status
 
   2019-08-148  Configuration created but entirely untested.  This
     configuration is intended, initially, to verify s32k14x architecture
-    support.  This is VERY much a work in progress and you should not
-    use this configuration unless you are interested in assisting with
-    the bring-up.
+    support.  The configuration builds and linkes without error but has
+    not yet been tested.  This is VERY much a work in progress and you
+    should not use this configuration unless you are interested in
+    assisting with the bring-up.
 
 Serial Console
 ==============

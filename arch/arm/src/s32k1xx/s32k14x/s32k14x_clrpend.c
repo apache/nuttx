@@ -68,9 +68,9 @@ void s32k14x_clrpend(int irq)
 {
   /* Check for external interrupt */
 
-  if (irq >= S32K1XX_IRQ_EXTINT)
+  if (irq >= S32K1XX_IRQ_INTERRUPT)
     {
-      irq -= S32K1XX_IRQ_EXTINT;
+      irq -= S32K1XX_IRQ_INTERRUPT;
       if (irq < 32)
         {
           putreg32(1 << irq , NVIC_IRQ0_31_CLRPEND);

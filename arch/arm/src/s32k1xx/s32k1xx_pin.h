@@ -357,7 +357,7 @@ void s32k1xx_gpiowrite(uint32_t pinset, bool value);
 bool s32k1xx_gpioread(uint32_t pinset);
 
 /************************************************************************************
- * Name: s32k1xx_pinirqi_nitialize
+ * Name: s32k1xx_pinirq_initialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
@@ -365,9 +365,9 @@ bool s32k1xx_gpioread(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ
-void s32k1xx_pinirqi_nitialize(void);
+void s32k1xx_pinirq_initialize(void);
 #else
-#  define s32k1xx_pinirqi_nitialize()
+#  define s32k1xx_pinirq_initialize()
 #endif
 
 /************************************************************************************

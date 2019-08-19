@@ -217,7 +217,7 @@ static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k1xx_pinirqinitialize
+ * Name: s32k1xx_pinirq_initialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for
@@ -225,7 +225,7 @@ static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void s32k1xx_pinirqinitialize(void)
+void s32k1xx_pinirq_initialize(void)
 {
 #ifdef CONFIG_S32K1XX_PORTAINTS
   (void)irq_attach(S32K1XX_IRQ_PORTA, s32k1xx_portainterrupt, NULL);

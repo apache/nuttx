@@ -214,6 +214,27 @@ static inline void s32k1xx_fpu_config(void)
 #endif
 
 /****************************************************************************
+ * Name: s32k1xx_cache_config
+ *
+ * Description:
+ *   IInvalidate and enable code cache.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_S32K1XX_HAVE_LMEM
+static inline void s32k1xx_cache_config(void)
+{
+  uint32_t regval;
+
+  /* Invalidate and enable code cache */
+
+  regval = (LMEM_PCCCR_ENCACHE | LMEM_PCCCR_INVW0 | LMEM_PCCCR_INVW1 |
+            LMEM_PCCCR_GO);
+  putreg32(regval, S32K1XX_LMEM_PCCCR);
+}
+#endif
+
+/****************************************************************************
  * Name: s32k1xx_mpu_config
  *
  * Description:

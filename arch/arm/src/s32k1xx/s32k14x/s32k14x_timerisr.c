@@ -111,7 +111,6 @@ void arm_timer_initialize(void)
 {
   uint32_t coreclk;
   uint32_t reload;
-  uint32_t regval;
 
   /* Make sure that the SYSTICK clock source is set to use the SysTick
    * function clock (CLKSOURCE==1).

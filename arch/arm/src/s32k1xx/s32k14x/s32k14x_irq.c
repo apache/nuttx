@@ -53,7 +53,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "s32k14x_gpio.h"
+#include "s32k1xx_pin.h"
 #include "s32k14x/s32k14x_irq.h"
 
 /****************************************************************************
@@ -265,9 +265,9 @@ static int s32k14x_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   /* Check for external interrupt */
 
-  if (irq >= S32K1XX_IRQ_EXTINT)
+  if (irq >= S32K1XX_IRQ_INTERRUPT)
     {
-      n        = irq - S32K1XX_IRQ_EXTINT;
+      n        = irq - S32K1XX_IRQ_INTERRUPT;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
       *bit     = (uint32_t)1 << (n & 0x1f);
     }
@@ -435,9 +435,9 @@ void up_irqinitialize(void)
 #endif
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ
-  /* Initialize GPIO interrupts */
+  /* Initialize GPIO PIN interrupts */
 
-  s32k14x_gpio_irqinitialize();
+  s32k1xx_pinirq_initialize();
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -469,7 +469,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= S32K1XX_IRQ_EXTINT)
+      if (irq >= S32K1XX_IRQ_INTERRUPT)
         {
           putreg32(bit, regaddr);
         }
@@ -506,7 +506,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= S32K1XX_IRQ_EXTINT)
+      if (irq >= S32K1XX_IRQ_INTERRUPT)
         {
           putreg32(bit, regaddr);
         }
@@ -555,7 +555,7 @@ int up_prioritize_irq(int irq, int priority)
   DEBUGASSERT(irq >= S32K1XX_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < S32K1XX_IRQ_EXTINT)
+  if (irq < S32K1XX_IRQ_INTERRUPT)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -568,7 +568,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= S32K1XX_IRQ_EXTINT;
+      irq    -= S32K1XX_IRQ_INTERRUPT;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

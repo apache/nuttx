@@ -390,7 +390,6 @@ static uint32_t s32k1xx_get_spllfreq(void)
   uint32_t regval;
   uint32_t prediv;
   uint32_t mult;
-  uint32_t ret;
 
   /* Check if the SPLL is valid */
 
@@ -548,8 +547,8 @@ static int s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
 
 #ifdef CONFIG_S32K1XX_HAVE_HSRUN
         case SCG_SYSTEM_CLOCK_MODE_HSRUN:     /*!< High Speed Run mode.     */
-          DEVBUGASSERT(SCG_SYSTEM_CLOCK_SRC_FIRC == config->src ||
-                       SCG_SYSTEM_CLOCK_SRC_SYS_PLL == config->src);
+          DEBUGASSERT(SCG_SYSTEM_CLOCK_SRC_FIRC == config->src ||
+                      SCG_SYSTEM_CLOCK_SRC_SYS_PLL == config->src);
 
           /* Verify the frequencies of sys, bus and slow clocks. */
 
@@ -566,10 +565,11 @@ static int s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
             }
           else
             {
-              SCG_SetHsrunClockControl((uint32_t)config->src,
-                                       (uint32_t)config->divcore,
-                                       (uint32_t)config->divbus,
-                                      (uint32_t)config->divslow);
+              regval = (((uint32_t)config->src << SCG_HCCR_SCS_SHIFT) |
+                        SCG_HCCR_DIVCORE(config->divcore) |
+                        SCG_HCCR_DIVBUS(config->divbus)  |
+                        SCG_HCCR_DIVSLOW(config->divslow));
+              putreg32(regval, S32K1XX_SCG_HCCR);
             }
           break;
 #endif
@@ -1022,7 +1022,7 @@ static int s32k1xx_spll_config(bool enable,
   uint32_t timeout;
   int ret = OK;
 
-  DEBUASSERT(spllcfg != NULL);
+  DEBUGASSERT(spllcfg != NULL);
 
   /* If clock is used by system, return error. */
 
@@ -1074,9 +1074,9 @@ static int s32k1xx_spll_config(bool enable,
 
       /* Step 3. Enable clock, configure monitor, lock register. */
 
-      regval = SCG_SPLLCSR_SPLLEN | sosccfg->locked ? SCG_SOSCCSR_LK : 0;
+      regval = SCG_SPLLCSR_SPLLEN | spllcfg->locked ? SCG_SPLLCSR_LK : 0;
 
-      switch (spllcfg->monitorMode)
+      switch (spllcfg->mode)
         {
           case SCG_SPLL_MONITOR_DISABLE:
             {
@@ -1686,7 +1686,7 @@ uint32_t s32k1xx_get_coreclk(void)
         break;
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
-      case 0x6SCG_CSR_SPLL_FIRC:  /* System PLL */
+      case SCG_CSR_SPLL_FIRC:  /* System PLL */
         /* Coreclock = Fxtal * mult / (2 * prediv) */
 
         regval  = getreg32(S32K1XX_SCG_SPLLCFG);

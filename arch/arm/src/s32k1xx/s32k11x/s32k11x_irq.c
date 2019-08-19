@@ -50,6 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "s32k1xx_pin.h"
 #include "s32k11x/s32k11x_irq.h"
 
 /****************************************************************************
@@ -201,8 +202,13 @@ void up_irqinitialize(void)
 
   s32k11x_dumpnvic("initial", NR_IRQS);
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_S32K1XX_GPIOIRQ
+  /* Initialize GPIO PIN interrupts */
 
+  s32k1xx_pinirq_initialize();
+#endif
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
   up_irq_enable();

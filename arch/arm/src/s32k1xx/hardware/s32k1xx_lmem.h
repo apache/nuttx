@@ -86,14 +86,14 @@
 #  define LMEM_PCCLCR_CACHEADDR(n)  ((uint32_t)(n) << LMEM_PCCLCR_CACHEADDR_SHIFT)
 #define LMEM_PCCLCR_WSEL            (1 << 14) /* Bit 14: Way select */
 #  define LMEM_PCCLCR_WSEL_WAY0     (0)       /*         Way0 */
-#  define LMEM_PCCLCR_WSEL_WAY0     (1 << 14) /*         Way1 */
+#  define LMEM_PCCLCR_WSEL_WAY1     (1 << 14) /*         Way1 */
 #define LMEM_PCCLCR_TDSEL           (1 << 16) /* Bit 16: Tag/Data Select */
 #  define LMEM_PCCLCR_TDSEL_DATA    (0)       /*         Data */
 #  define LMEM_PCCLCR_TDSEL_TAG     (1 << 16) /*         Tag */
 #define LMEM_PCCLCR_LCIVB           (1 << 20) /* Bit 20: Line Command Initial Valid Bit */
 #define LMEM_PCCLCR_LCWAY           (1 << 22) /* Bit 22: Line Command Way */
 #  define LMEM_PCCLCR_LCWAY_WAY0    (0)       /*         Way0 */
-#  define LMEM_PCCLCR_LCWAY_WAY     (1 << 22) /*         Way1 */
+#  define LMEM_PCCLCR_LCWAY_WAY1    (1 << 22) /*         Way1 */
 #define LMEM_PCCLCR_LCMD_SHIFT      (24)      /* Bits  24-25: Line Command */
 #define LMEM_PCCLCR_LCMD_MASK       (3 << LMEM_PCCLCR_LCMD_SHIFT)
 #  define LMEM_PCCLCR_LCMD_SEARCH   (0 << LMEM_PCCLCR_LCMD_SHIFT) /* Search and read or write */
