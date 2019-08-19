@@ -126,17 +126,17 @@ const struct clock_configuration_s g_initial_clkconfig =
     {
       .rccr             =              /* RCCR - Run Clock Control Register */
       {
-        .divslow        = SCG_SYSTEM_CLOCK_DIV_BY_2,  /* DIVSLOW */
-        .divbus         = SCG_SYSTEM_CLOCK_DIV_BY_2,  /* DIVBUS */
-        .divcore        = SCG_SYSTEM_CLOCK_DIV_BY_1,  /* DIVCORE */
-        .src            = SCG_SYSTEM_CLOCK_SRC_FIRC   /* SCS */
+        .src            = SCG_SYSTEM_CLOCK_SRC_FIRC,  /* SCS */
+        .divslow        = 2,           /* DIVSLOW, range 1..16 */
+        .divbus         = 2,           /* DIVBUS, range 1..16 */
+        .divcore        = 1            /* DIVCORE, range 1..16 */
       },
       .vccr             =              /* VCCR - VLPR Clock Control Register */
       {
-        .divslow        = SCG_SYSTEM_CLOCK_DIV_BY_4,  /* DIVSLOW */
-        .divbus         = SCG_SYSTEM_CLOCK_DIV_BY_1,  /* DIVBUS */
-        .divcore        = SCG_SYSTEM_CLOCK_DIV_BY_2,  /* DIVCORE */
-        .src            = SCG_SYSTEM_CLOCK_SRC_SIRC   /* SCS */
+        .src            = SCG_SYSTEM_CLOCK_SRC_SIRC,  /* SCS */
+        .divslow        = 4,           /* DIVSLOW, range 1..16 */
+        .divbus         = 1,           /* DIVBUS, range 1..16 */
+        .divcore        = 2            /* DIVCORE, range 1..16 */
        },
       /* .altclk */
       .initialize       = true,        /* Initialize */
@@ -147,7 +147,7 @@ const struct clock_configuration_s g_initial_clkconfig =
     .clockout           =              /* Clock Out configuration. */
     {
       .source           = SIM_CLKOUT_SEL_SYSTEM_SCG_CLKOUT,  /* CLKOUTSEL */
-      .divider          = SIM_CLKOUT_DIV_BY_1,               /* CLKOUTDIV */
+      .divider          = 1,           /* CLKOUTDIV, range 1..8 */
       .initialize       = true,        /* Initialize */
       .enable           = false,       /* CLKOUTEN */
     },

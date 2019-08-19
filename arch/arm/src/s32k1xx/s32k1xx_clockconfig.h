@@ -90,17 +90,17 @@
 
 enum scg_system_clock_type_e
 {
-  SCG_SYSTEM_CLOCK_CORE,        /* Core clock  */
-  SCG_SYSTEM_CLOCK_BUS,         /* BUS clock */
-  SCG_SYSTEM_CLOCK_SLOW,        /* System slow clock */
-  SCG_SYSTEM_CLOCK_MAX          /* Max value */
+  SCG_SYSTEM_CLOCK_CORE,               /* Core clock  */
+  SCG_SYSTEM_CLOCK_BUS,                /* BUS clock */
+  SCG_SYSTEM_CLOCK_SLOW,               /* System slow clock */
+  SCG_SYSTEM_CLOCK_MAX                 /* Max value */
 };
 
 enum scg_async_clock_type_e
 {
-  SCG_ASYNC_CLOCK_DIV1   = 0,   /* Clock divider 1 */
-  SCG_ASYNC_CLOCK_DIV2   = 1,   /* Clock divider 2 */
-  SCG_ASYNC_CLOCK_MAX    = 2,   /* Max value */
+  SCG_ASYNC_CLOCK_DIV1 = 0,            /* Clock divider 1 */
+  SCG_ASYNC_CLOCK_DIV2 = 1,            /* Clock divider 2 */
+  SCG_ASYNC_CLOCK_MAX  = 2,            /* Max value */
 };
 
 /* These structure are used to define the clock configuration. */
@@ -109,19 +109,19 @@ enum scg_async_clock_type_e
 
 enum scg_sirc_range_e
 {
-  SCG_SIRC_RANGE_HIGH = 1,              /* Slow IRC high range clock (8 MHz). */
+  SCG_SIRC_RANGE_HIGH = 1,             /* Slow IRC high range clock (8 MHz). */
 };
 
 enum scg_async_clock_div_e
 {
-  SCG_ASYNC_CLOCK_DISABLE   = 0,        /* Clock output is disabled */
-  SCG_ASYNC_CLOCK_DIV_BY_1  = 1,        /* Divided by 1 */
-  SCG_ASYNC_CLOCK_DIV_BY_2  = 2,        /* Divided by 2 */
-  SCG_ASYNC_CLOCK_DIV_BY_4  = 3,        /* Divided by 4 */
-  SCG_ASYNC_CLOCK_DIV_BY_8  = 4,        /* Divided by 8 */
-  SCG_ASYNC_CLOCK_DIV_BY_16 = 5,        /* Divided by 16 */
-  SCG_ASYNC_CLOCK_DIV_BY_32 = 6,        /* Divided by 32 */
-  SCG_ASYNC_CLOCK_DIV_BY_64 = 7         /* Divided by 64 */
+  SCG_ASYNC_CLOCK_DISABLE   = 0,       /* Clock output is disabled */
+  SCG_ASYNC_CLOCK_DIV_BY_1  = 1,       /* Divided by 1 */
+  SCG_ASYNC_CLOCK_DIV_BY_2  = 2,       /* Divided by 2 */
+  SCG_ASYNC_CLOCK_DIV_BY_4  = 3,       /* Divided by 4 */
+  SCG_ASYNC_CLOCK_DIV_BY_8  = 4,       /* Divided by 8 */
+  SCG_ASYNC_CLOCK_DIV_BY_16 = 5,       /* Divided by 16 */
+  SCG_ASYNC_CLOCK_DIV_BY_32 = 6,       /* Divided by 32 */
+  SCG_ASYNC_CLOCK_DIV_BY_64 = 7        /* Divided by 64 */
 };
 
 struct scg_sirc_config_s
@@ -247,26 +247,6 @@ struct scg_clockout_config_s
 
 /* SCG Clock Mode Configuration */
 
-enum scg_system_clock_div_e
-{
-  SCG_SYSTEM_CLOCK_DIV_BY_1   = 0,     /* Divided by 1 */
-  SCG_SYSTEM_CLOCK_DIV_BY_2   = 1,     /* Divided by 2 */
-  SCG_SYSTEM_CLOCK_DIV_BY_3   = 2,     /* Divided by 3 */
-  SCG_SYSTEM_CLOCK_DIV_BY_4   = 3,     /* Divided by 4 */
-  SCG_SYSTEM_CLOCK_DIV_BY_5   = 4,     /* Divided by 5 */
-  SCG_SYSTEM_CLOCK_DIV_BY_6   = 5,     /* Divided by 6 */
-  SCG_SYSTEM_CLOCK_DIV_BY_7   = 6,     /* Divided by 7 */
-  SCG_SYSTEM_CLOCK_DIV_BY_8   = 7,     /* Divided by 8 */
-  SCG_SYSTEM_CLOCK_DIV_BY_9   = 8,     /* Divided by 9 */
-  SCG_SYSTEM_CLOCK_DIV_BY_10  = 9,     /* Divided by 10 */
-  SCG_SYSTEM_CLOCK_DIV_BY_11  = 10,    /* Divided by 11 */
-  SCG_SYSTEM_CLOCK_DIV_BY_12  = 11,    /* Divided by 12 */
-  SCG_SYSTEM_CLOCK_DIV_BY_13  = 12,    /* Divided by 13 */
-  SCG_SYSTEM_CLOCK_DIV_BY_14  = 13,    /* Divided by 14 */
-  SCG_SYSTEM_CLOCK_DIV_BY_15  = 14,    /* Divided by 15 */
-  SCG_SYSTEM_CLOCK_DIV_BY_16  = 15,    /* Divided by 16 */
-};
-
 enum scg_system_clock_src_e
 {
   SCG_SYSTEM_CLOCK_SRC_SYS_OSC  = 1,   /* System OSC */
@@ -280,10 +260,10 @@ enum scg_system_clock_src_e
 
 struct scg_system_clock_config_s
 {
-  enum scg_system_clock_div_e divslow; /* Slow clock divider */
-  enum scg_system_clock_div_e divbus;  /* BUS clock divider */
-  enum scg_system_clock_div_e divcore; /* Core clock divider */
   enum scg_system_clock_src_e src;     /* System clock source */
+  uint8_t divslow;                     /* Slow clock divider, range=1..16 */
+  uint8_t divbus;                      /* BUS clock divider, range=1..16 */
+  uint8_t divcore;                     /* Core clock divider, range=1..16 */
 };
 
 struct scg_clock_mode_config_s
@@ -334,22 +314,10 @@ enum sim_clkout_src_e
 #endif
 };
 
-enum sim_clkout_div_e
-{
-  SIM_CLKOUT_DIV_BY_1      = 0,        /* Divided by 1 */
-  SIM_CLKOUT_DIV_BY_2      = 1,        /* Divided by 2 */
-  SIM_CLKOUT_DIV_BY_3      = 2,        /* Divided by 3 */
-  SIM_CLKOUT_DIV_BY_4      = 3,        /* Divided by 4 */
-  SIM_CLKOUT_DIV_BY_5      = 4,        /* Divided by 5 */
-  SIM_CLKOUT_DIV_BY_6      = 5,        /* Divided by 6 */
-  SIM_CLKOUT_DIV_BY_7      = 6,        /* Divided by 7 */
-  SIM_CLKOUT_DIV_BY_8      = 7,        /* Divided by 8 */
-};
-
-struct sim_clock_out_config_e
+struct sim_clock_out_config_s
 {
   enum sim_clkout_src_e source;        /* SIM ClockOut source select */
-  enum sim_clkout_div_e divider;       /* SIM ClockOut divide ratio */
+  uint8_t divider;                     /* SIM ClockOut divide ratio, range 1..8 */
   bool initialize;                     /* true: Initialize the ClockOut clock */
   bool enable;                         /* true: Enable the ClockOut clock */
 };
@@ -430,7 +398,7 @@ struct sim_qspi_ref_clk_gating_s
 
 struct sim_clock_config_s
 {
-  struct sim_clock_out_config_e clockout;      /* Clock Out configuration */
+  struct sim_clock_out_config_s clockout;      /* Clock Out configuration */
   struct sim_lpo_clock_config_s lpoclk;        /* Low Power Clock configuration */
   struct sim_tclk_config_s tclk;               /* Platform Gate Clock configuration */
   struct sim_plat_gate_config_s platgate;      /* Platform Gate Clock configuration */

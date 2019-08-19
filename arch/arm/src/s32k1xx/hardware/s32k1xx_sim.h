@@ -112,7 +112,7 @@
 #  define SIM_CHIPCTL_CLKOUTSEL_QSPI_2xSFIF_CLK (15 << SIM_CHIPCTL_CLKOUTSEL_SHIFT) /* S32K148) */
 #define SIM_CHIPCTL_CLKOUTDIV_SHIFT             (8)       /* Bits 8-10:  CLKOUT Divide Ratio */
 #define SIM_CHIPCTL_CLKOUTDIV_MASK              (7 << SIM_CHIPCTL_CLKOUTDIV_SHIFT)
-#  define SIM_CHIPCTL_CLKOUTDIV(n)              ((uint32_t)(n) << SIM_CHIPCTL_CLKOUTDIV_SHIFT) /* n=1..8 */
+#  define SIM_CHIPCTL_CLKOUTDIV(n)              ((uint32_t)((n) - 1) << SIM_CHIPCTL_CLKOUTDIV_SHIFT) /* n=1..8 */
 #define SIM_CHIPCTL_CLKOUTEN                    (1 << 11) /* Bit 11: CLKOUT enable */
 #define SIM_CHIPCTL_TRACECLK_SEL                (1 << 12) /* Bit 12: Debug trace clock select */
 #define SIM_CHIPCTL_PDB_BB_SEL                  (1 << 13) /* Bit 13: PDB back-to-back select */

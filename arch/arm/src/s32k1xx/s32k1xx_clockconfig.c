@@ -137,28 +137,27 @@ enum scg_system_clock_mode_e
  * Private Data
  ****************************************************************************/
 
-static const enum scg_system_clock_div_e
-  g_tmp_sysclk[TMP_SYS_CLK_NO][TMP_SYS_DIV_NO] =
+static const uint8_t g_tmp_sysclk[TMP_SYS_CLK_NO][TMP_SYS_DIV_NO] =
 {
   {
-    SCG_SYSTEM_CLOCK_DIV_BY_1,  /* SIRC SYS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_1,  /* SIRC BUS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2   /* SIRC SLOW_CLK divider */
+    1,                                      /* SIRC SYS_CLK divider, range 1..16 */
+    1,                                      /* SIRC BUS_CLK divider, range 1..16 */
+    2                                       /* SIRC SLOW_CLK divider, range 1..16 */
   },
   {
-    SCG_SYSTEM_CLOCK_DIV_BY_1,  /* FIRC SYS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2,  /* FIRC BUS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_4   /* FIRC SLOW_CLK divider */
+    1,                                      /* FIRC SYS_CLK divider, range 1..16 */
+    2,                                      /* FIRC BUS_CLK divider, range 1..16 */
+    4                                       /* FIRC SLOW_CLK divider, range 1..16 */
   },
   {
-    SCG_SYSTEM_CLOCK_DIV_BY_1,  /* SOSC SYS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2,  /* SOSC BUS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2   /* SOSC SLOW_CLK divider */
+    1,                                      /* SOSC SYS_CLK divider, range 1..16 */
+    2,                                      /* SOSC BUS_CLK divider, range 1..16 */
+    2                                       /* SOSC SLOW_CLK divider, range 1..16 */
   },
   {
-    SCG_SYSTEM_CLOCK_DIV_BY_3,  /* SPLL SYS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2,  /* SPLL BUS_CLK divider */
-    SCG_SYSTEM_CLOCK_DIV_BY_2   /* SPLL SLOW_CLK divider */
+    3,                                      /* SPLL SYS_CLK divider, range 1..16 */
+    2,                                      /* SPLL BUS_CLK divider, range 1..16 */
+    2                                       /* SPLL SLOW_CLK divider, range 1..16 */
   }
 };
 
@@ -482,9 +481,9 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
 static int s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
                                             const struct scg_system_clock_config_s *config)
 {
-  uint32_t srcfreq = 0;
-  uint32_t sysfreq_mul = ((uint32_t)config->divcore) + 1;
-  uint32_t busfreq_mul = (((uint32_t)config->divcore) + 1) * (((uint32_t)config->divbus) + 1);
+  uint32_t srcfreq      = 0;
+  uint32_t sysfreq_mul  = ((uint32_t)config->divcore) + 1;
+  uint32_t busfreq_mul  = (((uint32_t)config->divcore) + 1) * (((uint32_t)config->divbus) + 1);
   uint32_t slowfreq_mul = (((uint32_t)config->divcore) + 1) * (((uint32_t)config->divslow) + 1);
   uint32_t regval;
   int ret = OK;
