@@ -1141,6 +1141,16 @@ config ARCH_BOARD_S32K118EVB
 		This options selects support for NuttX on the NXP S32K118EVB board
 		featuring the S32K118 Cortex-M0+.
 
+config ARCH_BOARD_S32K146EVB
+	bool "NXP S32K146EVB"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP S32K146EVB board
+		featuring the S32K146 Cortex-M4F.
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -1972,6 +1982,7 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
+	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -2101,6 +2112,9 @@ source "boards/arm/efm32/olimex-efm32g880f128-stk/Kconfig"
 endif
 if ARCH_BOARD_S32K118EVB
 source "boards/arm/s32k1xx/s32k118evb/Kconfig"
+endif
+if ARCH_BOARD_S32K146EVB
+source "boards/arm/s32k1xx/s32k146evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"

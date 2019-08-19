@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k118evb/include/board.h
+ * boards/arm/s32k1xx/s32k146evb/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,19 +53,19 @@
 
 /* Clocking *****************************************************************/
 
-/* The S32K118EVB is fitted with a 40MHz Crystal */
+/* The S32K146EVB is fitted with a 8MHz Crystal */
 
-#define BOARD_XTAL_FREQUENCY 40000000
+#define BOARD_XTAL_FREQUENCY 8000000
 
-/* The S32K118 will run at 48MHz */
+/* The S32K146 will run at 112MHz */
 
 /* LED definitions **********************************************************/
 
-/* The S32K118EVB has one RGB LED:
+/* The S32K146EVB has one RGB LED:
  *
- *   RedLED   PTD16 (FTM0 CH1)
- *   GreenLED PTD15 (FTM0 CH0)
- *   BlueLED  PTE8  (FTM0 CH6)
+ *   RedLED   PTD15 (FTM0 CH0)
+ *   GreenLED PTD16 (FTM0 CH1)
+ *   BlueLED  PTD0  (FTM0 CH2)
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual RGB
@@ -89,7 +89,7 @@
 #define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
- * the s32k118evb.  The following definitions describe how NuttX controls the
+ * the s32k146evb.  The following definitions describe how NuttX controls the
  * LEDs:
  *
  *
@@ -106,14 +106,14 @@
 #define LED_SIGNAL        0 /* In a signal handler      (no change)       */
 #define LED_ASSERTION     0 /* An assertion failed      (no change)       */
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
-#undef  LED_IDLE            /* S32K118EVN in sleep mode (Not used)        */
+#undef  LED_IDLE            /* S32K146EVN in sleep mode (Not used)        */
 
 /* Button definitions *******************************************************/
 
-/* The S32K118EVB supports two buttons:
+/* The S32K146EVB supports two buttons:
  *
- *   SW2  PTD3
- *   SW3  PTD5
+ *   SW2  PTC12
+ *   SW3  PTC13
  */
 
 #define BUTTON_SW2         0
@@ -127,12 +127,12 @@
 
 /* By default, the serial console will be provided on the OpenSDA VCOM port:
  *
- *   OpenSDA UART TX  PTB1(LPUART0_TX)
- *   OpenSDA UART RX  PTB0(LPUART0_RX)
+ *   OpenSDA UART TX  PTC7 (LPUART1_TX)
+ *   OpenSDA UART RX  PTC6 (LPUART1_RX)
  */
 
-#define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
-#define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
+#define PIN_LPUART1_RX    PIN_LPUART1_RX_1  /* PTC6 */
+#define PIN_LPUART1_TX    PIN_LPUART1_TX_1  /* PTC7 */
 
 /* DMA Channel/Stream Selections ********************************************/
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k118evb/src/s32k118evb.h
+ * boards/arm/s32k1xx/s32k146evb/src/s32k146_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,102 +33,69 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H
-#define __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
+#include <debug.h>
 
-#include "hardware/s32k1xx_pinmux.h"
-#include "s32k1xx_periphclocks.h"
+#include <nuttx/board.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-/* S32K118EVB GPIOs *********************************************************/
-
-/* LEDs.  The S32K118EVB has one RGB LED:
- *
- *   RedLED   PTD16 (FTM0CH1)
- *   GreenLED PTD15 (FTM0CH0)
- *   BlueLED  PTE8  (FTM0CH6)
- */
-
-#define GPIO_LED_R     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_G     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-
-/* Buttons.  The S32K118EVB supports two buttons:
- *
- *   SW2  PTD3
- *   SW3  PTD5
- */
-
-#define GPIO_SW2       (PIN_PTD3  | PIN_INT_BOTH)
-#define GPIO_SW3       (PIN_PTD5  | PIN_INT_BOTH)
-
-/* SPI chip selects */
-
-
-/* Count of peripheral clock user configurations */
-
-#define NUM_OF_PERIPHERAL_CLOCKS_0 10
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/* User peripheral configuration structure 0 */
-
-extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
+#include "s32k146evb.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k118_bringup
+ * Name: s32k1xx_board_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   All S32K1XX architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-int s32k118_bringup(void);
-
-/****************************************************************************
- * Name: s32k118_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the s32k118evb
- *   board.
- *
- ****************************************************************************/
-
+void s32k1xx_board_initialize(void)
+{
 #ifdef CONFIG_S32K1XX_SPI
-void s32k118_spidev_initialize(void);
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function s32k146_spidev_initialize() has been brought into the link.
+   */
+
+  s32k146_spidev_initialize();
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H */
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
+#endif
+}
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  (void)s32k146_bringup();
+}
+#endif

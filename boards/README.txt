@@ -619,6 +619,10 @@ boards/arm/s32k1xx/s32k118evb
   This directory holds the port of NuttX to the NXP S32K118EVB board
   featuring the S32K118 Cortex-M0+.
 
+boards/arm/s32k1xx/s32k146evb
+  This directory holds the port of NuttX to the NXP S32K146EVB board
+  featuring the S32K146 Cortex-M4F.
+
 boards/arm/imx6/sabre-6quad
   This directory holds a port of NuttX to the NXP/Freescale Sabre board
   featuring the iMX 6Quad CPU.

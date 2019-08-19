@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k118evb/src/s32k118evb.h
+ * boards/arm/s32k1xx/s32k146evb/src/s32k146evb.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H
-#define __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H
+#ifndef __BOARDS_ARM_S32K1XX_S32K146EVB_SRC_S32K146EVB_H
+#define __BOARDS_ARM_S32K1XX_S32K146EVB_SRC_S32K146EVB_H
 
 /****************************************************************************
  * Included Files
@@ -54,34 +54,34 @@
 
 /* Configuration ************************************************************/
 
-/* S32K118EVB GPIOs *********************************************************/
+/* S32K146EVB GPIOs *********************************************************/
 
-/* LEDs.  The S32K118EVB has one RGB LED:
+/* LEDs.  The S32K146EVB has one RGB LED:
  *
- *   RedLED   PTD16 (FTM0CH1)
- *   GreenLED PTD15 (FTM0CH0)
- *   BlueLED  PTE8  (FTM0CH6)
+ *   RedLED   PTD15 (FTM0 CH0)
+ *   GreenLED PTD16 (FTM0 CH1)
+ *   BlueLED  PTD0  (FTM0 CH2)
  */
 
-#define GPIO_LED_R     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_G     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
 #define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
 
-/* Buttons.  The S32K118EVB supports two buttons:
+/* Buttons.  The S32K146EVB supports two buttons:
  *
- *   SW2  PTD3
- *   SW3  PTD5
+ *   SW2  PTC12
+ *   SW3  PTC13
  */
 
-#define GPIO_SW2       (PIN_PTD3  | PIN_INT_BOTH)
-#define GPIO_SW3       (PIN_PTD5  | PIN_INT_BOTH)
+#define GPIO_SW2       (PIN_PTC12 | PIN_INT_BOTH)
+#define GPIO_SW3       (PIN_PTC13 | PIN_INT_BOTH)
 
 /* SPI chip selects */
 
 
 /* Count of peripheral clock user configurations */
 
-#define NUM_OF_PERIPHERAL_CLOCKS_0 10
+#define NUM_OF_PERIPHERAL_CLOCKS_0 11
 
 /****************************************************************************
  * Public Types
@@ -102,7 +102,7 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k118_bringup
+ * Name: s32k146_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -115,20 +115,20 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
  *
  ****************************************************************************/
 
-int s32k118_bringup(void);
+int s32k146_bringup(void);
 
 /****************************************************************************
- * Name: s32k118_spidev_initialize
+ * Name: s32k146_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the s32k118evb
+ *   Called to configure SPI chip select GPIO pins for the s32k146evb
  *   board.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_SPI
-void s32k118_spidev_initialize(void);
+void s32k146_spidev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_S32K1XX_S32K118EVB_SRC_S32K118EVB_H */
+#endif /* __BOARDS_ARM_S32K1XX_S32K146EVB_SRC_S32K146EVB_H */

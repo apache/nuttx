@@ -1886,7 +1886,9 @@ nuttx/
  |   |   |   `- nutiny-nuc120/
  |   |   |       `- README.txt
  |   |   |- s32k1xx/
- |   |   |   `- s32k118evb/
+ |   |   |   |- s32k118evb/
+ |   |   |   |   `- README.txt
+ |   |   |   `- s32k146evb/
  |   |   |       `- README.txt
  |   |   |- sam34/
  |   |   |   |- arduino-due/
