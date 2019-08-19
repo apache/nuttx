@@ -47,13 +47,13 @@ configure.c, cfgparser.c, and cfgparser.h
   configure.exe is not available, then configure.bat will attempt to build it
   first.
 
-  In order two build configure.exe from configure.c in the Windows native
+  In order to build configure.exe from configure.c in the Windows native
   environment, two assumptions are made:
 
   1) You have installed the MinGW GCC toolchain.  This toolchain can be
-     downloaded from http://www.mingw.org/.  Tt is recommended the you not
+     downloaded from http://www.mingw.org/.  It is recommended that you not
      install the optional MSYS components as there may be conflicts.
-  2) That path to bin bin/ directory containing mingw-gcc.exe must be
+  2) That path to the bin/ directory containing mingw-gcc.exe must be
      included in the PATH variable.
 
 convert-comments.c
@@ -97,19 +97,19 @@ gencromfs.c
 initialconfig.c
 ---------------
 
-  This is a C file that can be used create an initial configuration.
+  This is a C file that can be used to create an initial configuration.
   This permits creating a new configuration from scratch, without
   relying on any existing board configuration in place.  This utility
   will create a barebones .config file sufficient only for
-  instantiating the symbolic links necesary to do a real configuration.
+  instantiating the symbolic links necessary to do a real configuration.
 
 kconfig2html.c
 --------------
 
-  This is a C file that can be used build a utility for converting the
+  This is a C file that can be used to build a utility for converting the
   NuttX configuration in the Kconfig files to an HTML document.  This
   auto-generated documentation will, eventually, replace the manually
-  updated configuration documentation that is fallling woefully behind.
+  updated configuration documentation that is falling woefully behind.
 
   $ tools/kconfig2html.exe -h
   USAGE: tools/kconfig2html [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]
@@ -117,7 +117,7 @@ kconfig2html.c
 
   Where:
 
-    -a : Select relative path to the apps/ directory. Theis path is relative
+    -a : Select relative path to the apps/ directory. This path is relative
          to the <Kconfig directory>.  Default: ../apps
     -o : Send output to <out file>.  Default: Output goes to stdout
     -d : Enable debug output
@@ -125,7 +125,7 @@ kconfig2html.c
     <Kconfig root> is the directory containing the root Kconfig file.
          Default <Kconfig directory>: .
 
-  NOTE: In order to use this tool, some configuration must be in-place will
+  NOTE: In order to use this tool, some configuration must be in-place with
   all necessary symbolic links.  You can establish the configured symbolic
   links with:
 
@@ -163,7 +163,7 @@ Makefile.[unix|win]
 mkconfig.c, cfgdefine.c, and cfgdefine.h
 ----------------------------------------
 
-  These are Cs file that are used to build mkconfig program.  The mkconfig
+  These are C files that are used to build mkconfig program.  The mkconfig
   program is used during the initial NuttX build.
 
   When you configure NuttX, you will copy a configuration file called .config
@@ -208,7 +208,7 @@ mkexport.sh and Makefile.export
 
   USAGE: tools/mkexport.sh [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l "lib1 [lib2 [lib3 ...]]"
 
-  Thais script also depends on the environment variable MAKE which is set
+  This script also depends on the environment variable MAKE which is set
   in the top-level Makefile before starting mkexport.sh.  If MAKE is not
   defined, the script will set it to `which make`.
 
@@ -231,7 +231,7 @@ mkversion.c, cfgdefine.c, and cfgdefine.h
 
   When you build NuttX there should be a version file called .version in
   the top level NuttX directory (See Documentation/NuttxPortingGuide.html).
-  The first time you make NuttX, the top-level makefile will build th
+  The first time you make NuttX, the top-level makefile will build the
   mkversion executable from mkversion.c (using Makefile.host).  The top-
   level Makefile will then execute the mkversion program to convert the
   .version file in the top level directory into include/nuttx/version.h.
@@ -263,7 +263,7 @@ mksyscall.c, cvsparser.c, and cvsparser.h
 mksymtab.c, cvsparser.c, and cvsparser.h
 ----------------------------------------
 
-  This is a C file that is used to build symbol tables from common-separated
+  This is a C file that is used to build symbol tables from comma separated
   value (CSV) files.  This tool is not used during the NuttX build, but
   can be used as needed to generate files.
 
@@ -290,7 +290,7 @@ mkctags.sh
 nxstyle.c
 ---------
 
-  I am embarassed that this is here.  This program is a complete hack
+  I am embarrassed that this is here.  This program is a complete hack
   but, unfortunately, it has become so useful to me that I need to keep
   it here.
 
@@ -322,7 +322,7 @@ bdf-convert.c
 -------------
 
   This C file is used to build the bdf-converter program.  The bdf-converter
-  program be used to convert fonts in Bitmap Distribution Format (BDF)
+  program can be used to convert fonts in Bitmap Distribution Format (BDF)
   into fonts that can be used in the NX graphics system.
 
   Below are general instructions for creating and installing a new font
@@ -346,7 +346,7 @@ bdf-convert.c
   enabled by CONFIG_NXFONT_SANS23X27 is defined and add an ID for your
   new font in a similar fashion:
 
-    4. include/nuttx/nx/nxfonts.h. Add you new font as a possible system
+    4. include/nuttx/nx/nxfonts.h. Add your new font as a possible system
        default font:
 
        #if defined(CONFIG_NXFONT_SANS23X27)
@@ -369,8 +369,8 @@ bdf-convert.c
        #endif
        ...
 
-  New Add the font to the NX build system.  There are several files that
-  you have to modify to to this.  Look how the build system uses the
+  Now add the font to the NX build system.  There are several files that
+  you have to modify to do this.  Look how the build system uses the
   font CONFIG_NXFONT_SANS23X27 for examples:
 
     5. nuttx/graphics/Makefile.  This file needs logic to auto-generate
@@ -458,7 +458,7 @@ Makefile.host
 -------------
 
   This is the makefile that is used to make the mkconfig program from
-  the mkconfig.c C file, the cmpconfig program from cmpconfig.c C file
+  the mkconfig.c C file, the cmpconfig program from cmpconfig.c C file,
   the mkversion program from the mkconfig.c C file, or the mksyscall
   program from the mksyscall.c file.  Usage:
 
@@ -468,8 +468,8 @@ Makefile.host
 mkromfsimg.sh
 -------------
 
-  This script may be used to automate the generate of a ROMFS file system
-  image.  It accepts an rcS script "template" and generates and image that
+  This script may be used to automate the generation of a ROMFS file system
+  image.  It accepts an rcS script "template" and generates an image that
   may be mounted under /etc in the NuttX pseudo file system.
 
   TIP: Edit the resulting header file and mark the generated data values
@@ -478,8 +478,8 @@ mkromfsimg.sh
 mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 -------------------------------------------------------
 
-  NuttX uses the GCC compilers capabilities to create Makefile dependencies.
-  The program  mkdeps is used to run GCC in order to create the dependencies.
+  NuttX uses the GCC compiler's capabilities to create Makefile dependencies.
+  The program mkdeps is used to run GCC in order to create the dependencies.
   If a NuttX configuration uses the GCC toolchain, its Make.defs file (see
   boards/README.txt) will include a line like:
 
@@ -496,11 +496,11 @@ mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
   native toolchain.  That generates Windows native paths in the dependency
   file.  But the mkwindeps.sh uses cnvwindeps.c to convert the Windows
   paths to POSIX paths.  This adds some time to the Windows dependency
-  generation but is generally th best option available for that mixed
+  generation but is generally the best option available for that mixed
   environment of Cygwin with a native Windows GCC toolchain.
 
   mkdeps.c generates mkdeps (on Linux) or mkdeps.exe (on Windows).
-  However, this verison is still under-development.  It works well in
+  However, this version is still under-development.  It works well in
   the all POSIX environment or in the all Windows environment but also
   does not work well in mixed POSIX environment with a Windows toolchain.
   In that case, there are still issues with the conversion of things like
@@ -513,7 +513,7 @@ define.sh and define.bat
 
   Different compilers have different conventions for specifying pre-
   processor definitions on the compiler command line.  This bash
-  script allows the build system to create create command line definitions
+  script allows the build system to create command line definitions
   without concern for the particular compiler in use.
 
   The define.bat script is a counterpart for use in the native Windows
@@ -606,14 +606,14 @@ ide_exporter.py
             - Select the MCU for main and lib project
             - Correct the path to ld script if needed
         2) iar:
-            - Check if the arch supportes IAR (only armv7-m is support IAR
+            - Check if the arch supports IAR (only armv7-m is support IAR
               now)
             - Select the MCU for main and lib project
             - Add new ld script file for IAR
 
     NOTE:  Due to bit rot, the template files for the stm3220g-eval and for
     the stm32f429-disco have been removed from the NuttX repository.  For
-    reference, they be found in the Obsoleted repository at
+    reference, they can be found in the Obsoleted repository at
     Obsoleted/stm32f429i_disco/ltcd/template and at
     Obsoleted/stm3220g-eval/template.
 
@@ -641,7 +641,7 @@ kconfig.bat
   You can, with some effort, run the Cygwin kconfig-mconf tool directly
   in the CMD.exe shell.  In this case, you do not have to modify the
   .config file, but there are other complexities:  You need to
-  temporarily set the Cgywin directories in the PATH variable and
+  temporarily set the Cygwin directories in the PATH variable and
   then run kconfig-mconf outside of the Make system.
 
   kconfig.bat is a Windows batch file at tools/kconfig.bat that automates
@@ -649,7 +649,7 @@ kconfig.bat
 
     tools/kconfig menuconfig
 
-  NOTE: There is an currently an issue with accessing DOS environment
+  NOTE: There is currently an issue with accessing DOS environment
   variables from the Cygwin kconfig-mconf running in the CMD.exe shell.
   The following change to the top-level Kconfig file seems to work around
   these problems:
@@ -662,9 +662,9 @@ kconfig.bat
 link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
 ---------------------------------------------------------------------
 
-  Different file system have different capabilities for symbolic links.
-  Some windows file systems have no native support for symbolic links.
-  Cygwin running under windows has special links built in that work with
+  Different file systems have different capabilities for symbolic links.
+  Some Windows file systems have no native support for symbolic links.
+  Cygwin running under Windows has special links built in that work with
   all cygwin tools.  However, they do not work when Windows native tools
   are used with cygwin.  In that case something different must be done.
 
@@ -694,7 +694,7 @@ link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
     DIRLINK = $(TOPDIR)/tools/copydir.bat
     DIRUNLINK = (TOPDIR)/tools/unlink.bat
 
-  Note that this will copy directories.  ;ink.bat might also be used in
+  Note that this will copy directories.  link.bat might also be used in
   this case.  link.bat will attempt to create a symbolic link using the
   NTFS mklink.exe command instead of copying files.  That logic, however,
   has not been verified as of this writing.
@@ -747,13 +747,13 @@ indent.sh
     2. I usually align things vertically (like '=' in assignments),
     3. indent.sh puts a bogus blank line at the top of the file,
     4. I don't like the way it handles nested conditional compilation
-       intermixed with code.  I prefer the preprocessor conditiona tests
+       intermixed with code.  I prefer the preprocessor conditional tests
        be all right justified in that case.
     5. I also indent brackets differently on structures than does this script.
     6. I normally use no spaces in casts.  indent.sh adds spaces in casts like
       "(FAR void *)&foo" becomes "(FAR void *) & foo".
     7. When used with header files, the initial idempotence conditional test
-       causes all preprecessor directives to be indented in the file.  So for
+       causes all preprocessor directives to be indented in the file.  So for
        header files, you will need to substitute "^#  " with "#" in the
        converted header file.
 
@@ -773,7 +773,7 @@ refresh.sh
   [NOTE: This script with --silent is really obsolete.  refresh with the
    silent option really adds default values.  However, as of 217-07-09,
    defconfig files are retained in a compressed format, i.e., with default
-   vaues removed.  So the --silent option will accomplish nothing.
+   values removed.  So the --silent option will accomplish nothing.
    Without --silent, you will have the opportunity over override the default
    value from the command line and, in that case, the script may still have
    some minimal value.]
@@ -781,7 +781,7 @@ refresh.sh
   This is a bash script that automatics refreshing of board default
   configuration (defconfig) files.  It does not do anything special
   that you cannot do manually, but is useful for me when I have to
-  update dozens of confuration files.
+  update dozens of configuration files.
 
   Configuration files have to be updated because over time, the
   configuration settings change:  New configurations are added and
@@ -836,7 +836,7 @@ refresh.sh
   5. Finally, the refreshed defconfig file is copied back in
      place where it can be committed with the next set of
      difference to the command line.  If you select the --silent
-     option, this file copy will occur autiomatically.  Otherwise,
+     option, this file copy will occur automatically.  Otherwise,
      refresh.sh will prompt you first to avoid overwriting the
      defconfig file with changes that you may not want.
 
@@ -1011,7 +1011,7 @@ uncrustify.cfg
     https://github.com/uncrustify/uncrustify
 
   Binary packages are available for Linux via command line installers.
-  Binaries fro both Windows and Linux are avaialbe at:
+  Binaries for both Windows and Linux are available at:
 
     https://sourceforge.net/projects/uncrustify/files/
 
@@ -1024,10 +1024,10 @@ zipme.sh
   release on Bitbucket.org.  It is handy because it also does the
   kind of clean that you need to do to make a clean code release.
 
-flash_writter.py
-----------------
+flash_writer.py
+---------------
 
-  This flash writter is using the xmodem for firmware transfer on
+  This flash writer is using the xmodem for firmware transfer on
   boards based on cxd56 chip (Ex. Spresense)
 
   for flashing the .spk image to the board please use:
