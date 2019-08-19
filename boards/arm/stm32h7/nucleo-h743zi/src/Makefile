@@ -60,6 +60,10 @@ ifeq ($(CONFIG_STM32H7_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += stm32_uid.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
 CSRCS += stm32_lsm6dsl.c
 endif
