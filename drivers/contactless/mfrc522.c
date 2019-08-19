@@ -60,19 +60,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CL_MFRC522_DEBUG
-#  define mfrc522err    _err
-#  define mfrc522info   _info
-#else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define mfrc522err(x...)
-#    define mfrc522info(x...)
-#  else
-#    define mfrc522err  (void)
-#    define mfrc522info (void)
-#  endif
-#endif
-
 #ifdef CONFIG_CL_MFRC522_DEBUG_TX
 #  define tracetx errdumpbuffer
 #else
@@ -209,7 +196,7 @@ uint8_t mfrc522_readu8(FAR struct mfrc522_dev_s *dev, uint8_t regaddr)
   mfrc522_deselect(dev);
   mfrc522_unlock(dev->spi);
 
-  tracerx("read", regval, 1);
+  tracerx("read", &regval, 1);
   return regval;
 }
 
@@ -301,7 +288,7 @@ void mfrc522_readblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
   mfrc522_deselect(dev);
   mfrc522_unlock(dev->spi);
 
-  tracerx("readblk", regval, size);
+  tracerx("readblk", regval, length);
 }
 
 /****************************************************************************
@@ -335,7 +322,7 @@ void mfrc522_writeblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
   mfrc522_deselect(dev);
   mfrc522_unlock(dev->spi);
 
-  tracerx("writeblk", regval, size);
+  tracerx("writeblk", regval, length);
 }
 
 /****************************************************************************
@@ -693,7 +680,7 @@ int mfrc522_picc_reqa_wupa(FAR struct mfrc522_dev_s *dev, uint8_t command,
       return -EAGAIN;
     }
 
-  mfrc522info("buffer[0]=0x%02X | buffer[1]=0x%02X\n", buffer[0], buffer[1]);
+  ctlsinfo("buffer[0]=0x%02X | buffer[1]=0x%02X\n", buffer[0], buffer[1]);
   return OK;
 }
 
@@ -1402,7 +1389,7 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
 
   mfrc522_writeu8(dev, MFRC522_AUTOTEST_REG, 0x00);
 
-  mfrc522info("Self Test Result:\n");
+  ctlsinfo("Self Test Result:\n");
 
   for (i = 0; i < 64; i += 8)
     {
@@ -1411,10 +1398,10 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
           (void)sprintf(&outbuf[k], " %02x", result[i + j]);
         }
 
-      mfrc522info("  %02x:%s\n", i, outbuf);
+      ctlsinfo("  %02x:%s\n", i, outbuf);
     }
 
-  mfrc522info("Done!\n");
+  ctlsinfo("Done!\n");
   return OK;
 }
 
@@ -1499,7 +1486,7 @@ static ssize_t mfrc522_read(FAR struct file *filep, FAR char *buffer,
 
   if (!mfrc522_picc_detect(dev))
     {
-      mfrc522err("Card is not present!\n");
+      ctlserr("Card is not present!\n");
       return -EAGAIN;
     }
 
@@ -1608,7 +1595,7 @@ static int mfrc522_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          mfrc522err("ERROR: Unrecognized cmd: %d\n", cmd);
+          ctlserr("ERROR: Unrecognized cmd: %d\n", cmd);
           ret = -ENOTTY;
           break;
         }
@@ -1651,7 +1638,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   dev = (FAR struct mfrc522_dev_s *)kmm_malloc(sizeof(struct mfrc522_dev_s));
   if (!dev)
     {
-      mfrc522err("ERROR: Failed to allocate instance\n");
+      ctlserr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1679,13 +1666,13 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   fwver = mfrc522_getfwversion(dev);
 
-  mfrc522info("MFRC522 Firmware Version: 0x%02X!\n", fwver);
+  ctlsinfo("MFRC522 Firmware Version: 0x%02X!\n", fwver);
 
   /* If returned firmware version is unknown don't register the device */
 
   if (fwver != 0x90 && fwver != 0x91 && fwver != 0x92 && fwver != 0x88)
     {
-      mfrc522err("None supported device detected!\n");
+      ctlserr("None supported device detected!\n");
       goto firmware_error;
     }
 
@@ -1694,7 +1681,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   ret = register_driver(devpath, &g_mfrc522fops, 0666, dev);
   if (ret < 0)
     {
-      mfrc522err("ERROR: Failed to register driver: %d\n", ret);
+      ctlserr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(dev);
     }
 

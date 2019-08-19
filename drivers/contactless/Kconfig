@@ -19,20 +19,15 @@ config MFRC522_SPI_FREQ
 	default 1000000
 	depends on CL_MFRC522
 
-config CL_MFRC522_DEBUG
-	bool "Enable MFRC522 debug"
-	default n
-	depends on CL_MFRC522
-
 config CL_MFRC522_DEBUG_TX
 	bool "trace TX frames"
 	default n
-	depends on MFRC522_DEBUG
+	depends on DEBUG_CONTACTLESS
 
 config CL_MFRC522_DEBUG_RX
 	bool "trace RX frames"
 	default n
-	depends on MFRC522_DEBUG
+	depends on DEBUG_CONTACTLESS
 
 endif # CL_MFRC522
 
@@ -50,20 +45,15 @@ config PN532_SPI_FREQ
 	default 1000000
 	depends on CL_PN532
 
-config CL_PN532_DEBUG
-	bool "Enable PN532 debug"
-	default n
-	depends on CL_PN532
-
 config CL_PN532_DEBUG_TX
 	bool "trace TX frames"
 	default n
-	depends on CL_PN532_DEBUG
+	depends on DEBUG_CONTACTLESS
 
 config CL_PN532_DEBUG_RX
 	bool "trace RX frames"
 	default n
-	depends on CL_PN532_DEBUG
+	depends on DEBUG_CONTACTLESS
 
 endif # CL_PN532
 endif # DRIVERS_CONTACTLESS

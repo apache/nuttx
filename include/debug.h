@@ -287,6 +287,24 @@
 #  define finfo(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_CONTACTLESS_ERROR
+#  define ctlserr(format, ...)  _err(format, ##__VA_ARGS__)
+#else
+#  define ctlserr(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CONTACTLESS_WARN
+#  define ctlswarn(format, ...) _warn(format, ##__VA_ARGS__)
+#else
+#  define ctlswarn(x...)
+#endif
+
+#ifdef CONFIG_DEBUG_CONTACTLESS_INFO
+#  define ctlsinfo(format, ...) _info(format, ##__VA_ARGS__)
+#else
+#  define ctlsinfo(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
 #  define crypterr(format, ...)     _err(format, ##__VA_ARGS__)
 #else
@@ -867,6 +885,24 @@
 #  define finfo       (void)
 #endif
 
+#ifdef CONFIG_DEBUG_CONTACTLESS_ERROR
+#  define ctlserr     _err
+#else
+#  define ctlserr     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CONTACTLESS_WARN
+#  define ctlswarn    _warn
+#else
+#  define ctlswarn    (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CONTACTLESS_INFO
+#  define ctlsinfo    _info
+#else
+#  define ctlsinfo    (void)
+#endif
+
 #ifdef CONFIG_DEBUG_CRYPTO_ERROR
 #  define crypterr     _err
 #else
@@ -1361,6 +1397,14 @@
 #else
 #  define ferrdumpbuffer(m,b,n)
 #  define finfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_CONTACTLESS
+#  define ctlserrdumpbuffer(m,b,n) errdumpbuffer(m,b,n)
+#  define ctlinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define ctlserrferrdumpbuffer(m,b,n)
+#  define ctlinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT
