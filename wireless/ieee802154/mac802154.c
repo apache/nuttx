@@ -878,9 +878,9 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Schedule work with the work queue to process the completion further */
 
-  if (work_available(&priv->tx_work))
+  if (work_available(&priv->txdone_work))
     {
-      work_queue(HPWORK, &priv->tx_work, mac802154_txdone_worker,
+      work_queue(HPWORK, &priv->txdone_work, mac802154_txdone_worker,
                  (FAR void *)priv, 0);
     }
 }

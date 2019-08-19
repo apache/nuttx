@@ -147,6 +147,7 @@ struct ieee802154_privmac_s
   enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
   FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
   uint8_t                        nrxusers;
+  struct work_s                  macop_work;
 
   /******************* Fields related to SCAN operation ***********************/
 
@@ -223,7 +224,7 @@ struct ieee802154_privmac_s
 
   /* Work structures for offloading aynchronous work */
 
-  struct work_s tx_work;
+  struct work_s txdone_work;
   struct work_s rx_work;
   struct work_s purge_work;
   struct work_s timer_work;
