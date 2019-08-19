@@ -100,7 +100,7 @@ Configurations
        115,200 8N1.  This corresponds to the OpenSDA VCOM port.
 
   Configuration Sub-directories
-  -------------------------
+  -----------------------------
 
     nsh:
     ---

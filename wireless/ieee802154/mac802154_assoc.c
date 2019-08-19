@@ -457,7 +457,6 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
                                FAR struct ieee802154_txdesc_s *txdesc)
 {
   enum ieee802154_status_e status;
-  FAR struct ieee802154_txdesc_s *respdesc;
   FAR struct ieee802154_primitive_s *primitive =
     (FAR struct ieee802154_primitive_s *)txdesc->conf;
 

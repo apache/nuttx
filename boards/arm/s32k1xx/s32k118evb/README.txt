@@ -108,3 +108,6 @@ Configurations
       Configures the NuttShell (nsh) located at apps/examples/nsh.  Support
       for builtin applications is enabled, but in the base configuration no
       builtin applications are selected.
+
+      NOTE:  This is a very minimal NSH configuration in order to recude
+      memory usage.  Most of the NSH niceties are not available.

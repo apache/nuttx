@@ -55,6 +55,7 @@
 #include "imxrt_clockconfig.h"
 #include "imxrt_mpuinit.h"
 #include "imxrt_userspace.h"
+#include "imxrt_serial.h"
 #include "imxrt_start.h"
 #include "imxrt_gpio.h"
 
