@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-144/src/stm32_appinitialize.c
+ * boards/arm/stm32l4/nucleo-l496zg/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -173,6 +173,7 @@ int board_app_initialize(uintptr_t arg)
 
 #if defined(CONFIG_MMCSD)
   /* Configure SDIO */
+
   /* Initialize the SDIO block driver */
 
   ret = stm32l4_sdio_initialize();

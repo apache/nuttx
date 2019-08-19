@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm3220g_eval/src/stm32_appinit.c
+ * boards/arm/stm32/stm3220g-eval/src/stm32_appinit.c
  *
  *   Copyright (C) 2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

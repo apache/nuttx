@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimexino-stm32/src/stm32_composite.c
+/****************************************************************************
+ * boards/arm/stm32/olimexino-stm32/src/stm32_composite.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f4x1re/scripts/Make.defs
+# boards/arm/stm32/nucleo-f4x1re/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

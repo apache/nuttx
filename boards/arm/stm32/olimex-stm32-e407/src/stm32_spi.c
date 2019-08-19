@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-e407/src/stm32_spi.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_spi.c
  *
  *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l476vg-disco/include/stm32l476vg-disco-clocking.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l476vg-disco/include/stm32l476vg-disco-clocking.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
@@ -31,29 +31,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
-#define __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
+#define __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
-/* The stm32l476vg-disco supports both HSE and LSE crystals.  As shipped, the HSE
- * crystal is not populated.  Therefore the stm32l476vg-disco will need to run off the
- * 16MHz HSI clock, or the 32khz-synced MSI, unless you install the HSE xtal.
+/* The stm32l476vg-disco supports both HSE and LSE crystals.
+ * As shipped, the HSE crystal is not populated.
+ * Therefore the stm32l476vg-disco will need to run off the 16MHz HSI clock,
+ * or the 32khz-synced MSI, unless you install the HSE xtal.
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -370,9 +371,9 @@
 #define BOARD_LPTIM1_FREQUENCY  STM32L4_HCLK_FREQUENCY
 #define BOARD_LPTIM2_FREQUENCY  STM32L4_HCLK_FREQUENCY
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -385,9 +386,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -395,4 +396,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H */
+#endif  /* __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H */

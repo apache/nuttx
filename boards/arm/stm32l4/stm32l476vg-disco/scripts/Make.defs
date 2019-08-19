@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32l476vg-disco/scripts/Make.defs
+# boards/arm/stm32l4/stm32l476vg-disco/scripts/Make.defs
 #
 #   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
 #   Author: dev@ziggurat29.com

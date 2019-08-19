@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/scripts/f722-flash.ld
+ * boards/arm/stm32f7/nucleo-144/scripts/f722-flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * Change Log:
- * bf20171114 Created from boards/nucleo-144/scripts/f746-flash.ld
+ * bf20171114 Created from boards/arm/stm32f7/nucleo-144/scripts/f746-flash.ld
  ****************************************************************************/
 
 /* The STM32F722ZE has 512 KiB of main FLASH memory.  This FLASH memory

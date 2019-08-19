@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-144/include/board.h
+/****************************************************************************
+ * boards/arm/stm32f7/nucleo-144/include/board.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,14 +34,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_144_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_144_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -56,11 +56,11 @@
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* The Nucleo-144  board provides the following clock sources:
  *
@@ -253,10 +253,10 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channl/Stream Selections *********************************************/
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDMMC DMA is on DMA2
  *
@@ -287,13 +287,14 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
-/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
- * LED and LD3 a Red LED, that can be controlled by software. The following
- * definitions assume the default Solder Bridges are installed.
+/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software.
+ * The following definitions assume the default Solder Bridges are installed.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -339,17 +340,18 @@
  * has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User", is
- * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+/* The STM32F7 Discovery supports one button:  Pushbutton B1, labeled "User",
+ * is connected to GPIO PI11.
+ * A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* TIM */
 
@@ -359,6 +361,7 @@
 #define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_1
 
 #if defined(CONFIG_NUCLEO_CONSOLE_ARDUINO)
+
 /* USART6:
  *
  * These configurations assume that you are using a standard Arduio RS-232 shield
@@ -387,6 +390,7 @@
 #endif
 
 #if defined(CONFIG_NUCLEO_CONSOLE_MORPHO_UART4)
+
 /* UART4:
  *
  * This configuration assumes that you disabled Ethernet MII clocking
@@ -510,5 +514,4 @@
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
 
-#endif  /* __BOARDS_ARM_NUCLEO_144_INCLUDE_BOARD_H */
-
+#endif  /* __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H */

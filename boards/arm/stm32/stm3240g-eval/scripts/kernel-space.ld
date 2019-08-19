@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3240g-eval/scripts/kernel-space.ld
+ * boards/arm/stm32/stm3240g-eval/scripts/kernel-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476-mdk/src/stm32_buttons.c
+ * boards/arm/stm32l4/stm32l476-mdk/src/stm32_buttons.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com

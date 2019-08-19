@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f3x1re/src/stm32_ajoystick.c
+ * boards/arm/stm32/nucleo-f3x1re/src/stm32_ajoystick.c
  *
  *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

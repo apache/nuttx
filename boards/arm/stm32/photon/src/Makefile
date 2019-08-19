@@ -1,5 +1,5 @@
 ############################################################################
-# boards/photon/src/Makefile
+# boards/arm/stm32/photon/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hymini-stm32v/scripts/ld.script
+ * boards/arm/stm32/hymini-stm32v/scripts/ld.script
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

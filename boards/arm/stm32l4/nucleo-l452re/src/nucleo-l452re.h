@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l452re/src/nucleo-l452re.h
+ * boards/arm/stm32l4/nucleo-l452re/src/nucleo-l452re.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H
-#define __BOARDS_ARM_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H
 
 /****************************************************************************
  * Included Files
@@ -91,6 +91,7 @@
 #endif
 
 /* Nucleo-L452RE GPIOs ******************************************************/
+
 /* LED.  User LD2: the green LED is a user LED connected to Arduino signal
  * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
  * the STM32 target.
@@ -104,8 +105,9 @@
 
 
 /* Button definitions *******************************************************/
-/*   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
+
+/* B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ * microcontroller.
  */
 
 #define MIN_IRQBUTTON   BUTTON_USER
@@ -129,33 +131,33 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_adc_setup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_adc_measure_voltages
  *
  * Description:
  *   Read internal reference voltage, internal VBAT and one external voltage.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_dac_setup
  *
  * Description:
  *   Initialize DAC and register the DAC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32l4_dac_setup(void);
 
@@ -176,4 +178,4 @@ int stm32l4_dac_setup(void);
 int stm32_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H */
+#endif /* __BOARDS_ARM_STM32L4_NUCLEO_L452RE_SRC_NUCLEO_L452RE_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p107/src/stm32_encx24j600.c
+ * boards/arm/stm32/olimex-stm32-p107/src/stm32_encx24j600.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

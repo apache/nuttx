@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f103-minimum/src/stm32_ssd1306.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_ssd1306.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

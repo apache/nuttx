@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_ostest.c
+ * boards/arm/stm32/omnibusf4/src/stm32_ostest.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

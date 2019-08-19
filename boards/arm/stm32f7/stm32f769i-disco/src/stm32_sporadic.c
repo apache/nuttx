@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f769i-disco/src/stm32_sporadic.c
+ * boards/arm/stm32f7/stm32f769i-disco/src/stm32_sporadic.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

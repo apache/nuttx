@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-144/l496-nsh/Make.defs
+# boards/arm/stm32l4/nucleo-144/l496-nsh/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

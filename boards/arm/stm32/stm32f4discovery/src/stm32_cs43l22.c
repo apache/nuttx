@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f4discovery/src/stm32_cs43l22.c
+/****************************************************************************
+ * boards/arm/stm32/stm32f4discovery/src/stm32_cs43l22.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Taras Drozdovskiy <t.drozdovskiy@gmail.com>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files

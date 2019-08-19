@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-h407/src/stm32_buttons.c
+ * boards/arm/stm32/olimex-stm32-h407/src/stm32_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

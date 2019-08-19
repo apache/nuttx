@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/b-l475e-iot01a/include/b-l475e-iot01a_clock.h
+/****************************************************************************
+ * boards/arm/stm32l4/b-l475e-iot01a/include/b-l475e-iot01a_clock.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -30,23 +30,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK_H
-#define __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK_H
+#ifndef __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK_H
+#define __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -277,6 +277,7 @@
 /* Timers driven from APB1 will be twice PCLK1, when
  * NOT define STM32L4_RCC_CFGR_PPRE1 as RCC_CFGR_PPRE1_HCLK.
  */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB1_TIM2_CLKIN   STM32L4_PCLK1_FREQUENCY
@@ -294,6 +295,7 @@
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY / 1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   STM32L4_PCLK2_FREQUENCY
@@ -306,6 +308,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
+
 /* REVISIT : this can be configured */
 
 /* TODO SDMMC */
@@ -490,9 +493,9 @@
 #define BOARD_LPTIM1_FREQUENCY  STM32L4_APB1_LPTIM1_CLKIN
 #define BOARD_LPTIM2_FREQUENCY  STM32L4_APB1_LPTIM2_CLKIN
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -505,9 +508,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -515,4 +518,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK */
+#endif  /* __BOARDS_ARMSTM32L4__B_L475E_IOT01A_INCLUDE_B_L475E_IOT01A_CLOCK */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l073rz/include/board.h
+ * boards/arm/stm32f0l0g0/nucleo-l073rz/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L073RZ_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_L073RZ_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -110,6 +110,7 @@
 /* TODO: timers */
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo LO73RZ board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -163,6 +164,7 @@
 #define LED_PANIC        1
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo LO73RZ supports two buttons; only one button is controllable
  * by software:
  *
@@ -206,8 +208,9 @@
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
 
 /* DMA channels *************************************************************/
+
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
 
-#endif /* __BOARDS_ARM_NUCLEO_LO73RZ_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_LO73RZ_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/shenzhou/src/stm32_ili93xx.c
+/****************************************************************************
+ * boards/arm/stm32/shenzhou/src/stm32_ili93xx.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 /* TFT LCD
  *
  * -- ---- -------------- -----------------------------------------------------------
@@ -106,9 +106,9 @@
  * 31 /TP_CS         To Touch IC CS
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -130,9 +130,9 @@
 #include "stm32.h"
 #include "shenzhou.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 /* Configuration **********************************************************************/
 /* CONFIG_STM32_ILI1505_DISABLE may be defined to disable the LCD_ILI1505
  * CONFIG_STM32_ILI9300_DISABLE may be defined to disable the LCD_ILI9300
@@ -353,9 +353,9 @@
 #define ILI9331_ID            0x9331
 #define ILI9919_ID            0x9919
 
-/************************************************************************************
+/****************************************************************************
  * Private Type Definition
- ************************************************************************************/
+ ****************************************************************************/
 
 /* LCD type */
 
@@ -395,9 +395,9 @@ struct stm32_dev_s
   bool     output;      /* True: Configured for output */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- ************************************************************************************/
+ ****************************************************************************/
 /* Low Level LCD access */
 
 #ifdef CONFIG_LCD_REGDEBUG
@@ -468,9 +468,9 @@ static inline void stm32_lcd1505init(FAR struct stm32_dev_s *priv);
 #endif
 static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 /* LCD GPIO configurations */
 
 #ifndef CONFIG_LCD_FASTCONFIG
@@ -554,17 +554,17 @@ static struct stm32_dev_s g_lcddev =
   },
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_lcdshow
  *
  * Description:
  *   Show the state of the interface
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
 static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
@@ -585,13 +585,13 @@ static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_writereg
  *
  * Description:
  *   Write to an LCD register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_writereg(FAR struct stm32_dev_s *priv, uint8_t regaddr, uint16_t regval)
 {
@@ -616,13 +616,13 @@ static void stm32_writereg(FAR struct stm32_dev_s *priv, uint8_t regaddr, uint16
   putreg32(1, LCD_CS_SET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_readreg
  *
  * Description:
  *   Read from an LCD register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv, uint8_t regaddr)
 {
@@ -655,13 +655,13 @@ static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv, uint8_t regaddr)
   return regval;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_gramselect
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_gramselect(FAR struct stm32_dev_s *priv)
 {
@@ -679,13 +679,13 @@ static void stm32_gramselect(FAR struct stm32_dev_s *priv)
   putreg32(1, LCD_CS_SET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_writegram
  *
  * Description:
  *   Write one pixel to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_writegram(FAR struct stm32_dev_s *priv, uint16_t rgbval)
 {
@@ -703,13 +703,13 @@ static inline void stm32_writegram(FAR struct stm32_dev_s *priv, uint16_t rgbval
   putreg32(1, LCD_CS_SET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_readgram
  *
  * Description:
  *   Read one 16-bit pixel to the GRAM memory
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
 {
@@ -731,7 +731,7 @@ static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
   return regval;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_readnosetup
  *
  * Description:
@@ -741,7 +741,7 @@ static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
  *
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
 {
@@ -750,7 +750,7 @@ static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
   *accum  = stm32_readgram(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_readnoshift
  *
  * Description:
@@ -759,7 +759,7 @@ static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
  *
  *   - ILI932x: Unknown -- assuming colors are in the color order
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
 {
@@ -768,14 +768,14 @@ static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv, FAR uint16_t *ac
   return stm32_readgram(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_setcursor
  *
  * Description:
  *   Set the cursor position.  In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t row)
 {
@@ -791,7 +791,7 @@ static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_dumprun
  *
  * Description:
@@ -800,7 +800,7 @@ static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
 static void stm32_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
@@ -822,7 +822,7 @@ static void stm32_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_putrun
  *
  * Description:
@@ -834,7 +834,7 @@ static void stm32_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
@@ -928,7 +928,7 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_getrun
  *
  * Description:
@@ -940,7 +940,7 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
@@ -1069,13 +1069,13 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
@@ -1087,13 +1087,13 @@ static int stm32_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
@@ -1104,14 +1104,14 @@ static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_getpower(struct lcd_dev_s *dev)
 {
@@ -1121,14 +1121,14 @@ static int stm32_getpower(struct lcd_dev_s *dev)
   return priv->power;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_poweroff
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_poweroff(FAR struct stm32_dev_s *priv)
 {
@@ -1142,14 +1142,14 @@ static int stm32_poweroff(FAR struct stm32_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -1245,13 +1245,13 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_getcontrast(struct lcd_dev_s *dev)
 {
@@ -1259,13 +1259,13 @@ static int stm32_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int stm32_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -1273,13 +1273,13 @@ static int stm32_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcdinput
  *
  * Description:
  *   Config data lines for input operations.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_lcdinput(FAR struct stm32_dev_s *priv)
 {
@@ -1308,13 +1308,13 @@ static void stm32_lcdinput(FAR struct stm32_dev_s *priv)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcdoutput
  *
  * Description:
  *   Config data lines for input operations.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void stm32_lcdoutput(FAR struct stm32_dev_s *priv)
 {
@@ -1343,13 +1343,13 @@ static void stm32_lcdoutput(FAR struct stm32_dev_s *priv)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcd9300init
  *
  * Description:
  *   Initialize the ILI9300/9220/9321 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_STM32_ILI9300_DISABLE) || !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9321_DISABLE)
 static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype)
@@ -1408,13 +1408,13 @@ static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdt
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcd9331init
  *
  * Description:
  *   Initialize the ILI9331 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STM32_ILI9331_DISABLE
 static void stm32_lcd9331init(FAR struct stm32_dev_s *priv)
@@ -1489,13 +1489,13 @@ static void stm32_lcd9331init(FAR struct stm32_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcd9325init
  *
  * Description:
  *   Initialize the ILI9325/9228 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_STM32_ILI9325_DISABLE) || !defined(CONFIG_STM32_ILI9328_DISABLE)
 static void stm32_lcd9325init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype)
@@ -1588,13 +1588,13 @@ static void stm32_lcd9325init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdt
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcd9919init
  *
  * Description:
  *   Initialize the ILI9919 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STM32_ILI9919_DISABLE
 static inline void stm32_lcd9919init(FAR struct stm32_dev_s *priv)
@@ -1642,13 +1642,13 @@ static inline void stm32_lcd9919init(FAR struct stm32_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcd1505init
  *
  * Description:
  *   Initialize the ILI1505 LCD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STM32_ILI1505_DISABLE
 static inline void stm32_lcd1505init(FAR struct stm32_dev_s *priv)
@@ -1736,13 +1736,13 @@ static inline void stm32_lcd1505init(FAR struct stm32_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcdinitialize
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
 {
@@ -1835,11 +1835,11 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
@@ -1847,7 +1847,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
  *   initialized, display memory cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -1888,14 +1888,14 @@ int board_lcd_initialize(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
  *   for multiple LCD devices.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -1903,13 +1903,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return &g_lcddev.dev;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -1924,7 +1924,7 @@ void board_lcd_uninitialize(void)
   putreg32(1, LCD_CS_SET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_lcdclear
  *
  * Description:
@@ -1933,7 +1933,7 @@ void board_lcd_uninitialize(void)
  *   sequences of runs that covers the entire display can be very slow.  Here the
  *   display is cleared by simply setting all GRAM memory to the specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_lcdclear(uint16_t color)
 {

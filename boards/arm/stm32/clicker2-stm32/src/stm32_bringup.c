@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/clicker2-stm32/src/stm32_bringup.c
+ * boards/arm/stm32/clicker2-stm32/src/stm32_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

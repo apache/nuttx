@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/b-l475e-iot01a/src/stm32_bringup.c
+ * boards/arm/stm32l4/b-l475e-iot01a/src/stm32_bringup.c
  *
  *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>

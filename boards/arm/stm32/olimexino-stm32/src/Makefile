@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimexino-stm32/src/Makefile
+# boards/arm/stm32/olimexino-stm32/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

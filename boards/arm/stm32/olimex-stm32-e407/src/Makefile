@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-stm32-e407/src/Makefile
+# boards/arm/stm32/olimex-stm32-e407/src/Makefile
 #
 #   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

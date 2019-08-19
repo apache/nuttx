@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_sdio.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_sdio.c
  *
  *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

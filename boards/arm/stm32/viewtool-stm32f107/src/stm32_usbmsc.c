@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/viewtool-stm32f107/src/stm32_usbmsc.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

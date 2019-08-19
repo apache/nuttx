@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/axoloti/scripts/user-space.ld
+ * boards/arm/stm32/axoloti/scripts/user-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

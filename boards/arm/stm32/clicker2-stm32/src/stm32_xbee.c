@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/src/stm32_xbee.c
+ * boards/arm/stm32/clicker2-stm32/src/stm32_xbee.c
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author:  Anthony Merlino <anthony@vergeaero.com>

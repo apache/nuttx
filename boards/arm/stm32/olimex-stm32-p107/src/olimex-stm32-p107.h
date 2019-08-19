@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p107/src/olimex-stm32-p107.h
+ * boards/arm/stm32/olimex-stm32-p107/src/olimex-stm32-p107.h
  *
  *   Copyright (C) 2013 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_P107_SRC_H
-#define __BOARDS_ARM_OLIMEX_STM32_P107_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -71,17 +71,17 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the M3 Wildfire board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
 
@@ -98,4 +98,4 @@ int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OLIMEX_STM32_P107_SRC_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H */

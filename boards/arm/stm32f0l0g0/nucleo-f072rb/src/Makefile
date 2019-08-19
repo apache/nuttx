@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f072rb/src/Makefile
+# boards/arm/stm32f0l0g0/nucleo-f072rb/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

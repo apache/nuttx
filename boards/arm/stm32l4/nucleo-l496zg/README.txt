@@ -36,7 +36,7 @@ LQFP144 package.  Variants with a STM32L4 MCU include:
   ------------- ------------------
 
 This directory supports only the STM32L4 variants of Nucleo-144. For others,
-see boards/nucleo-144 configuration.
+see boards/arm/stm32l4/nucleo-l496zg configuration.
 
 Please read the User Manual UM2179: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the

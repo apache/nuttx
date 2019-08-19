@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-stm32-p407/kernel/Makefile
+# boards/arm/stm32/olimex-stm32-p407/kernel/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/fire-stm32v2/scripts/fire-stm32v2.ld
+ * boards/arm/stm32/fire-stm32v2/scripts/fire-stm32v2.ld
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

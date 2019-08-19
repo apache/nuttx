@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l476-mdk/include/board.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l476-mdk/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Motorola Mobility, LLC.
@@ -31,34 +31,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L476_MDK_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32L476_MDK_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L_STM32L476_MDK_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L_STM32L476_MDK_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #include <arch/board/stm32l476-mdk-clocking.h>
 
-/* DMA Channel/Stream Selections ****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future is we set aside more DMA channels/streams.
  */
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *   RXD: PB7
@@ -107,10 +108,12 @@
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2       /* PB13 */
 #define GPIO_SPI2_NSS    GPIO_SPI2_NSS_2       /* PB12 */
 
-/* LED definitions ******************************************************************/
-/* The Reference Moto Mod contains three LEDs.  Two LEDs, are by convention, used to
- * indicate the Reference Moto Mod battery state of charge, and the other is
- * available for you to use in your applications.
+/* LED definitions **********************************************************/
+
+/* The Reference Moto Mod contains three LEDs.
+ * Two LEDs, are by convention, used to indicate the Reference Moto Mod
+ * battery state of charge, and the other is available for you to use in your
+ * applications.
  *
  *   1. The red LED on PD7.  Part of the (rear-firing) red/green LED.
  *   2. The green LED on PE7.  Part of the (rear-firing) red/green LED.
@@ -166,16 +169,17 @@
  * then a fatal error has been detected and the system has halted.
  */
 
-/* Buttons **************************************************************************/
+/* Buttons ******************************************************************/
+
 /* The board only has one button */
 
 #define BUTTON_POWER       0
 #define NUM_BUTTONS        1
 #define BUTTON_POWER_BIT   (1 << BUTTON_POWER)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -188,10 +192,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
@@ -199,7 +204,7 @@ extern "C"
  *   point is called early in the initialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_board_initialize(void);
 
@@ -209,4 +214,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L476_MDK_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32L_STM32L476_MDK_INCLUDE_BOARD_H */

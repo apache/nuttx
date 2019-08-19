@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_boot.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_boot.c
  *
  *   Copyright (C) 2011-2012, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

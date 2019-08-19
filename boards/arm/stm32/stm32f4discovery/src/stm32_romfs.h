@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_romfs.h
+ * boards/arm/stm32/stm32f4discovery/src/stm32_romfs.h
  *
  *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
  *   Author: Tomasz Wozniak <t.wozniak@samsung.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
-#define __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
+#ifndef __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
+#define __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32_ROMFS_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int stm32_romfs_initialize(void);
 
 #endif /* CONFIG_STM32_ROMFS */
 
-#endif /* __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32_ROMFS_H */
+#endif /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32_ROMFS_H */

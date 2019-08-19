@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303ze/src/stm32_adc.c
+ * boards/arm/stm32/nucleo-f303ze/src/stm32_adc.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

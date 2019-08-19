@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/src/stm32_gpio.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_gpio.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.

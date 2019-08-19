@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/photon/src/stm32_appinit.c
+ * boards/arm/stm32/photon/src/stm32_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

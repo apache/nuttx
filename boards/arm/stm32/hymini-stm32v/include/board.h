@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/hymini-stm32v/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/hymini-stm32v/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Laurent Latil. All rights reserved.
@@ -38,20 +38,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_HYMINI_STM32V_INCLUDE_BOARD_H
-#define __BOARDS_ARM_HYMINI_STM32V_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_HYMINI_STM32V_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_HYMINI_STM32V_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -175,4 +175,4 @@
 #define BUTTON_KEYA_BIT  (1 << BUTTON_KEYA)
 #define BUTTON_KEYB_BIT  (1 << BUTTON_KEYB)
 
-#endif  /* __BOARDS_ARM_HYMINI_STM32V_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_HYMINI_STM32V_INCLUDE_BOARD_H */

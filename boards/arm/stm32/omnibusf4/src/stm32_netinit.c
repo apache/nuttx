@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_netinit.c
+ * boards/arm/stm32/omnibusf4/src/stm32_netinit.c
  *
  *   Copyright (C) 2017 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32-p407/src/stm32_bringup.c
+ * boards/arm/stm32/olimex-stm32-p407/src/stm32_bringup.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

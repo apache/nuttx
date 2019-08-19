@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/maple/scripts/ld.script
+ * boards/arm/stm32/maple/scripts/ld.script
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

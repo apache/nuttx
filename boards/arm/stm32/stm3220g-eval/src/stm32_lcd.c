@@ -1,5 +1,5 @@
-/**************************************************************************************
- * boards/stm3220g-eval/src/stm32_lcd.c
+/****************************************************************************
+ * boards/arm/stm32/stm3220g-eval/src/stm32_lcd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,7 +32,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This driver supports the following LCDs on the STM324xG_EVAL board:
  *
@@ -40,9 +40,9 @@
  *   AM-240320D5TOQW01H (LCD_ILI9325)
  */
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -66,9 +66,9 @@
 
 #if !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9325_DISABLE)
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 /* Configuration **********************************************************************/
 /* CONFIG_STM32_ILI9320_DISABLE may be defined to disabled the AM-240320L8TNQW00H
  *  (LCD_ILI9320 or LCD_ILI9321)
@@ -249,9 +249,9 @@
 #define ILI9321_ID            0x9321
 #define ILI9325_ID            0x9325
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* LCD type */
 
@@ -284,9 +284,9 @@ struct stm3220g_dev_s
   uint8_t  power;       /* Current power setting */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 /* Low Level LCD access */
 
 static void stm3220g_writereg(uint8_t regaddr, uint16_t regval);
@@ -334,9 +334,9 @@ static int stm3220g_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 static inline void stm3220g_lcdinitialize(void);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -394,17 +394,17 @@ static struct stm3220g_dev_s g_lcddev =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_writereg
  *
  * Description:
  *   Write to an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void stm3220g_writereg(uint8_t regaddr, uint16_t regval)
 {
@@ -414,13 +414,13 @@ static void stm3220g_writereg(uint8_t regaddr, uint16_t regval)
   LCD->value   = regval;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_readreg
  *
  * Description:
  *   Read from an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm3220g_readreg(uint8_t regaddr)
 {
@@ -430,26 +430,26 @@ static uint16_t stm3220g_readreg(uint8_t regaddr)
   return LCD->value;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_gramselect
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3220g_gramselect(void)
 {
   LCD->address = LCD_REG_34;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_writegram
  *
  * Description:
  *   Write one pixel to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3220g_writegram(uint16_t rgbval)
 {
@@ -458,7 +458,7 @@ static inline void stm3220g_writegram(uint16_t rgbval)
   LCD->value = rgbval;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_readnosetup
  *
  * Description:
@@ -468,7 +468,7 @@ static inline void stm3220g_writegram(uint16_t rgbval)
  *
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void stm3220g_readnosetup(FAR uint16_t *accum)
 {
@@ -477,7 +477,7 @@ static void stm3220g_readnosetup(FAR uint16_t *accum)
   *accum  = LCD->value;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_readnoshift
  *
  * Description:
@@ -486,7 +486,7 @@ static void stm3220g_readnosetup(FAR uint16_t *accum)
  *
  *   - ILI932x: Unknown -- assuming colors are in the color order
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm3220g_readnoshift(FAR uint16_t *accum)
 {
@@ -495,14 +495,14 @@ static uint16_t stm3220g_readnoshift(FAR uint16_t *accum)
   return LCD->value;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_setcursor
  *
  * Description:
  *   Set the cursor position.  In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void stm3220g_setcursor(uint16_t col, uint16_t row)
 {
@@ -510,7 +510,7 @@ static void stm3220g_setcursor(uint16_t col, uint16_t row)
   stm3220g_writereg(LCD_REG_33, col); /* GRAM vertical address */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_dumprun
  *
  * Description:
@@ -519,7 +519,7 @@ static void stm3220g_setcursor(uint16_t col, uint16_t row)
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
 static void stm3220g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
@@ -541,7 +541,7 @@ static void stm3220g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_putrun
  *
  * Description:
@@ -553,7 +553,7 @@ static void stm3220g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
@@ -656,7 +656,7 @@ static int stm3220g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_getrun
  *
  * Description:
@@ -668,7 +668,7 @@ static int stm3220g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
@@ -795,13 +795,13 @@ static int stm3220g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_getvideoinfo(FAR struct lcd_dev_s *dev,
                                  FAR struct fb_videoinfo_s *vinfo)
@@ -813,13 +813,13 @@ static int stm3220g_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
@@ -830,14 +830,14 @@ static int stm3220g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_getpower(struct lcd_dev_s *dev)
 {
@@ -845,14 +845,14 @@ static int stm3220g_getpower(struct lcd_dev_s *dev)
   return g_lcddev.power;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_poweroff
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_poweroff(void)
 {
@@ -866,14 +866,14 @@ static int stm3220g_poweroff(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -901,13 +901,13 @@ static int stm3220g_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_getcontrast(struct lcd_dev_s *dev)
 {
@@ -915,13 +915,13 @@ static int stm3220g_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3220g_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -929,13 +929,13 @@ static int stm3220g_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_lcdinitialize
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3220g_lcdinitialize(void)
 {
@@ -1095,11 +1095,11 @@ static inline void stm3220g_lcdinitialize(void)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
@@ -1107,7 +1107,7 @@ static inline void stm3220g_lcdinitialize(void)
  *   initialized, display memory cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -1132,14 +1132,14 @@ int board_lcd_initialize(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
  *   for multiple LCD devices.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -1147,13 +1147,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return &g_lcddev.dev;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -1161,7 +1161,7 @@ void board_lcd_uninitialize(void)
   stm32_deselectlcd();
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3220g_lcdclear
  *
  * Description:
@@ -1170,7 +1170,7 @@ void board_lcd_uninitialize(void)
  *   sequences of runs that covers the entire display can be very slow.  Here the
  *   display is cleared by simply setting all GRAM memory to the specified color.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void stm3220g_lcdclear(uint16_t color)
 {

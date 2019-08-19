@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f207zg/src/stm32_bringup.c
+ * boards/arm/stm32/nucleo-f207zg/src/stm32_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

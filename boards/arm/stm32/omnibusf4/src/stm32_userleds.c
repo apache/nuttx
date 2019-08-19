@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_userleds.c
+ * boards/arm/stm32/omnibusf4/src/stm32_userleds.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.

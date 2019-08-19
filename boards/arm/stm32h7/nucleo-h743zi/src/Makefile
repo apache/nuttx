@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-h743zi/src/Makefile
+# boards/arm/stm32h7/nucleo-h743zi/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

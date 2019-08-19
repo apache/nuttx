@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f103-minimum/scripts/ld.script.dfu
+ * boards/arm/stm32/stm32f103-minimum/scripts/ld.script.dfu
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

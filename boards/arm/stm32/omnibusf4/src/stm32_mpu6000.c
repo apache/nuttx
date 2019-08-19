@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_mpu6000.c
+ * boards/arm/stm32/omnibusf4/src/stm32_mpu6000.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/src/stm32f429i-disco.h
+ * boards/arm/stm32/stm32f429i-disco/src/stm32f429i-disco.h
  *
  *   Copyright (C) 2011-2012, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
-#define __BOARDS_ARM_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
+#ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
+#define __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
 
 /****************************************************************************
  * Included Files
@@ -274,13 +274,13 @@ int stm32_usbhost_initialize(void);
 int stm32_tsc_setup(int minor);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_sdram_initialize
  *
  * Description:
  *   Called from stm32_bringup to initialize external SDRAM access.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_FMC
 void stm32_sdram_initialize(void);
@@ -402,4 +402,4 @@ int stm32_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
+#endif /* __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */

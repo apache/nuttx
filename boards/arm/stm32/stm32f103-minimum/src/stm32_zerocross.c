@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_zerocross.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_zerocross.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

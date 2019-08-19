@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l476rg/src/stm32_cc1101.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_cc1101.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: lihaichen <li8303@163.com>

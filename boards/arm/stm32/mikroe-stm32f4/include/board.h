@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/mikroe-stm32f4/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/mikroe-stm32f4/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_MIKROE_STM32F4_INCLUDE_BOARD_H
-#define __BOARDS_ARM_MIKROE_STM32F4_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_MIKROE_STM32F4_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_MIKROE_STM32F4_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,9 +51,9 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /* The Mikroe STM32F4 Mikromedia board features a single 32kHz crystal.  The main
@@ -257,4 +257,4 @@
 #define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
-#endif  /* __BOARDS_ARM_MIKROE_STM32F4_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_MIKROE_STM32F4_INCLUDE_BOARD_H */

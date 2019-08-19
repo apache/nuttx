@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f411e-disco/scripts/f411ve.ld
+ * boards/arm/stm32/stm32f411e-disco/scripts/f411ve.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

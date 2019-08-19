@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/src/stm32_ili93414ws.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_ili93414ws.c
  *
  * Driver for the ILI9341 Single Chip LCD driver connected
  * via 4 wire serial (spi) mcu interface

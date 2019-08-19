@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32ldiscovery/src/stm32_bringup.c
+ * boards/arm/stm32/stm32ldiscovery/src/stm32_bringup.c
  *
  *   Copyright (C) 2013, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

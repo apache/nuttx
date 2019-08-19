@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-144/src/stm32_sdio.c
+ * boards/arm/stm32f7/nucleo-144/src/stm32_sdio.c
  *
  *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

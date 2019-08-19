@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/scripts/gnu-elf.ld
+ * boards/arm/stm32/clicker2-stm32/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

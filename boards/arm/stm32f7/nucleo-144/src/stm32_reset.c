@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/src/stm32_reset.c
+ * boards/arm/stm32f7/nucleo-144/src/stm32_reset.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

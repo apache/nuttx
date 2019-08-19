@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p407/src/olimex-stm32-p407.h
+ * boards/arm/stm32/olimex-stm32-p407/src/olimex-stm32-p407.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_P407_SRC_H
-#define __BOARDS_ARM_OLIMEX_STM32_P407_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -194,11 +194,11 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -210,11 +210,11 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_stram_configure
  *
  * Description:
@@ -238,26 +238,26 @@ int stm32_bringup(void);
  *        word and uses the needed byte only). The NBL[1:0] are always kept low
  *        during read transactions.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_FSMC
 void stm32_stram_configure(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usb_configure
  *
  * Description:
  *   Called from stm32_boardinitialize very early in inialization to setup USB-related
  *   GPIO pins for the Olimex STM32 P407 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGFS
 void weak_function stm32_usb_configure(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_setup
  *
  * Description:
@@ -265,19 +265,19 @@ void weak_function stm32_usb_configure(void);
  *   This function will start a thread that will monitor for device connection/
  *   disconnection events.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -295,17 +295,17 @@ int stm32_adc_setup(void);
 int stm32_can_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_dhtxx_initialize
  *
  * Description:
  *   Called to initialize the DHTxx sensor
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_DHTXX
 int stm32_dhtxx_initialize(FAR const char *devpath);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OLIMEX_STM32_P407_SRC_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H */

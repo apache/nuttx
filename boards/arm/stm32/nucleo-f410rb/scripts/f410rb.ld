@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f410rb/scripts/f410rb.ld
+ * boards/arm/stm32/nucleo-f410rb/scripts/f410rb.ld
  *
  *   Copyright (C) 2017 Gwenhael Goavec-Merou. All rights reserved.
  *   Author: Gwenhael Goavec-Merou <gwenhael.goavec-merou@trabucayre.com>

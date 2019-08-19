@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-h407/src/olimex-stm32-h407.h
+ * boards/arm/stm32/olimex-stm32-h407/src/olimex-stm32-h407.h
  *
  *   Copyright (C) 2014 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_H407_SRC_H
-#define __BOARDS_ARM_OLIMEX_STM32_H407_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_H407_SRC_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_H407_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -241,13 +241,13 @@ int stm32_sdio_initialize(void);
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -266,4 +266,4 @@ int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OLIMEX_STM32_H407_SRC_INTERNAL_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_H407_SRC_INTERNAL_H */

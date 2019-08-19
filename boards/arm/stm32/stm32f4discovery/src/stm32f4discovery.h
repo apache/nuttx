@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32f4discovery.h
+ * boards/arm/stm32/stm32f4discovery/src/stm32f4discovery.h
  *
  *   Copyright (C) 2011-2012, 2015-2016, 2018 Gregory Nutt. All rights
  *     reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
-#define __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
+#ifndef __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
+#define __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
 
 /****************************************************************************
  * Included Files
@@ -633,13 +633,13 @@ void stm32_pm_buttons(void);
 int stm32_sdio_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_netinitialize
  *
  * Description:
  *   Configure board resources to support networking.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_NETMONITOR
 void weak_function stm32_netinitialize(void);
@@ -690,14 +690,14 @@ int stm32_max31855initialize(FAR const char *devpath, int bus,
                              uint16_t devid);
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_mlx90614init
  *
  * Description:
  *   Called to configure an I2C and to register MLX90614 for the stm32f103-minimum
  *   board.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_MLX90614
 int stm32_mlx90614init(FAR const char *devpath);
@@ -841,4 +841,4 @@ int hciuart_dev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */
+#endif /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */

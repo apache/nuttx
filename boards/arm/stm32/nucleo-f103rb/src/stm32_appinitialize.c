@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f103rb/src/stm32_appinitialize.c
+ * boards/arm/stm32/nucleo-f103rb/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>

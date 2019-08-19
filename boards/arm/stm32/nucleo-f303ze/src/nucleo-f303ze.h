@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303ze/src/nucleo-f303ze.h
+ * boards/arm/stm32/nucleo-f303ze/src/nucleo-f303ze.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H
-#define __BOARDS_ARM_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H
+#define __BOARDS_ARM_STM32_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H
 
 /****************************************************************************
  * Included Files
@@ -98,16 +98,16 @@
 
 int stm32_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F303ZE_SRC_NUCLEO_F303ZE_H */

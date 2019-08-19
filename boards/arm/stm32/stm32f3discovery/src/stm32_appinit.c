@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f3discovery/src/stm32_appinit.c
+ * boards/arm/stm32/stm32f3discovery/src/stm32_appinit.c
  *
  *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

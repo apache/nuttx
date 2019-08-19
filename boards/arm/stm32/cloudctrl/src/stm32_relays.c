@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/cloudctrl/src/stm32_relays.c
+ * boards/arm/stm32/cloudctrl/src/stm32_relays.c
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

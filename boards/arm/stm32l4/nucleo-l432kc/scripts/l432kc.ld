@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/scripts/l432kc.ld
+ * boards/arm/stm32l4/nucleo-l432kc/scripts/l432kc.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

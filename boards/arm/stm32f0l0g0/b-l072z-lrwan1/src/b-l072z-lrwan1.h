@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l072z-lrwan1/src/b-l072z-lrwan1.h
+ * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/b-l072z-lrwan1.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H
-#define __BOARDS_ARM_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H
+#define __BOARDS_ARM_STM32F0L0G0_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo L073RZ board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -76,6 +77,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo L073RZ supports two buttons; only one button is controllable
  * by software:
  *
@@ -126,7 +128,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -138,17 +140,17 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F0L0G0_SPI
 void stm32_spidev_initialize(void);
@@ -165,16 +167,16 @@ void stm32_spidev_initialize(void);
 int stm32_lpwaninitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H */

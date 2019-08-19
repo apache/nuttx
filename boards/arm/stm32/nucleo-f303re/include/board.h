@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/include/board.h
+ * boards/arm/stm32/nucleo-f303re/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F3DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F3DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F3DISCOVERY_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F3DISCOVERY_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -247,4 +247,4 @@
 #define ADC3_DMA_CHAN DMACHAN_ADC3
 #define ADC4_DMA_CHAN DMACHAN_ADC4_1
 
-#endif /* __BOARDS_ARM_NUCLEO_F303RE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F303RE_INCLUDE_BOARD_H */

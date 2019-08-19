@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/stm32butterfly2/src/stm32_butterfly2.h
+ * boards/arm/stm32/stm32butterfly2/src/stm32_butterfly2.h
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
-#define __BOARDS_ARM_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
+#ifndef __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
+#define __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
 
 /*****************************************************************************
  * Included Files
@@ -127,13 +127,13 @@ int stm32_usbhost_initialize(void);
 static inline int stm32_usbhost_initialize(void) { return 0; }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_ADC
 int stm32_adc_setup(void);
@@ -141,5 +141,5 @@ int stm32_adc_setup(void);
 static inline int stm32_adc_setup(void) { return 0; }
 #endif
 
-#endif /* __BOARDS_ARM_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */
+#endif /* __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */
 

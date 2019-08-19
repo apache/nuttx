@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-l496zg/include/board.h
+/****************************************************************************
+ * boards/arm/stm32l4/nucleo-l496zg/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L496ZG_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_L496ZG_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,11 +55,12 @@
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Nucleo-144  board provides the following clock sources:
  *
  *   MCO: 8 MHz from MCO output of ST-LINK is used as input clock
@@ -159,6 +160,7 @@
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
@@ -174,6 +176,7 @@
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
@@ -186,6 +189,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
+
 /* REVISIT : this can be configured */
 
 #elif defined(HSE_CLOCK_CONFIG)
@@ -266,6 +270,7 @@
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
@@ -281,6 +286,7 @@
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
@@ -293,6 +299,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
+
 /* REVISIT : this can be configured */
 
 #elif defined(MSI_CLOCK_CONFIG)
@@ -374,6 +381,7 @@
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
@@ -389,6 +397,7 @@
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
@@ -401,6 +410,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
+
 /* REVISIT : this can be configured */
 
 #endif
@@ -461,9 +471,10 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channel/Stream Selections *****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDMMC DMA is on DMA2
  *
@@ -494,12 +505,14 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* LED definitions ******************************************************************/
-/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
- * LED and LD3 a Red LED, that can be controlled by software. The following
- * definitions assume the default Solder Bridges are installed.
+/* LED definitions **********************************************************/
+
+/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software.
+ * The following definitions assume the default Solder Bridges are installed.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -545,16 +558,18 @@
  * has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Nucleo-L496ZG supports one button:  Pushbutton B1, labeled "User", is
- * connected to GPIO PC13.  A high value will be sensed when the button is depressed.
+ * connected to GPIO PC13.
+ * A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 #define GPIO_USART2_TX        GPIO_USART2_TX_2
 #define GPIO_USART2_RX        GPIO_USART2_RX_2
@@ -582,16 +597,20 @@
 
 /* USART3:
  * Use  USART3 and the USB virtual COM port
-*/
+ */
 
 #if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
 /* LPUART1 is connector to Virtual COM port PG6 and PG7, but there is no lpserial. */
-//#define GPIO_USART2_TX        GPIO_LPUART1_TX_3
-//#define GPIO_USART2_RX        GPIO_LPUART1_RX_3
+
+/* #define GPIO_USART2_TX        GPIO_LPUART1_TX_3 */
+
+/* #define GPIO_USART2_RX        GPIO_LPUART1_RX_3 */
+
 #  error "No Nucleo virtual console before lpserial is unimplemented"
 #endif
 
 /* DMA channels *************************************************************/
+
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1_1
@@ -652,9 +671,9 @@
 #define GPIO_I2C4_SCL GPIO_I2C4_SCL_1
 #define GPIO_I2C4_SDA GPIO_I2C4_SDA_1
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -666,11 +685,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
@@ -678,7 +697,7 @@ extern "C"
  *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_board_initialize(void);
 
@@ -688,4 +707,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_NUCLEO_L496ZG_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_INCLUDE_BOARD_H */

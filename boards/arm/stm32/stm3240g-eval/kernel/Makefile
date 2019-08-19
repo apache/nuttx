@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm3240g-eval/kernel/Makefile
+# boards/arm/stm32/stm3240g-eval/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f4discovery/kernel/Makefile
+# boards/arm/stm32/stm32f4discovery/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

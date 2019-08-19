@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32ldiscovery/src/stm32_autoleds.c
+ * boards/arm/stm32/stm32ldiscovery/src/stm32_autoleds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

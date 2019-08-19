@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3210e-eval/src/stm32_composite.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_composite.c
  *
  *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

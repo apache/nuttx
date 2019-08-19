@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/stm32f103-minimum/src/stm32_mmcsd.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2017 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

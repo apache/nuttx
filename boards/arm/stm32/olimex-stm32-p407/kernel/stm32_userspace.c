@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p407/kernel/stm32_userspace.c
+ * boards/arm/stm32/olimex-stm32-p407/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

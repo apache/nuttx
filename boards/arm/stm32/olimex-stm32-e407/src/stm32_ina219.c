@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-e407/src/stm32_ina219.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_ina219.c
  *
  *   Copyright (C) 2018 Erle Robotics (Juan Flores Muñoz). All rights reserved.
  *   Author: Erle Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>

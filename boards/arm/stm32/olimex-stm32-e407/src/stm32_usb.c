@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_usb.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-g071rb/src/nucleo-g071rb.h
+ * boards/arm/stm32f0l0g0/nucleo-g071rb/src/nucleo-g071rb.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H
-#define __BOARDS_ARM_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H
+#define __BOARDS_ARM_STM32F0L0G0_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo G071RB board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -70,6 +71,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo G071RB supports two buttons; only one button is controllable
  * by software:
  *
@@ -107,8 +109,8 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
-#endif /* __BOARDS_ARM_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_G071RB_SRC_NUCLEO_G071RB_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32l476vg-disco/src/Makefile
+# boards/arm/stm32l4/stm32l476vg-disco/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: dev@ziggurat29.com

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-f410rb/src/stm32_appinit.c
+ * boards/arm/stm32/nucleo-f410rb/src/stm32_appinit.c
  *
  *   Copyright (C) 2017 Gwenhael Goavec-Merou. All rights reserved.
  *   Author: Gwenhael Goavec-Merou <gwenhael.goavec-merou@trabucayre.com>

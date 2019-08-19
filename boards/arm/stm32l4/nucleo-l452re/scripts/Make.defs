@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-l452re/scripts/Make.defs
+# boards/arm/stm32l4/nucleo-l452re/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

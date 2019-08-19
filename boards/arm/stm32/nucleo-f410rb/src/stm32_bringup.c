@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f410rb/src/stm32_bringup.c
+ * boards/arm/stm32/nucleo-f410rb/src/stm32_bringup.c
  *
  *   Copyright (C) 2017 Gwenhael Goavec-Merou. All rights reserved.
  *   Author: Gwenhael Goavec-Merou <gwenhael.goavec@trabucayre.com>

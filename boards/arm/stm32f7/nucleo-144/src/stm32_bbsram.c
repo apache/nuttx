@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/src/stm32_bbsram.c
+ * boards/arm/stm32f7/nucleo-144/src/stm32_bbsram.c
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: David Sidrane <david_s5@nscdg.com>

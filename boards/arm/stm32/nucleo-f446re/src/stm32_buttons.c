@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f446re/src/stm32_buttons.c
+ * boards/arm/stm32/nucleo-f446re/src/stm32_buttons.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

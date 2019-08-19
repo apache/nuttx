@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l476rg/src/stm32_ajoystick.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_ajoystick.c
  *
  *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,6 +56,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Check for pre-requisites and pin conflicts */
 
 #ifdef CONFIG_AJOYSTICK
@@ -126,6 +127,7 @@ static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each Itead joystick button.  Index using AJOY_*
  * button definitions in include/nuttx/input/ajoystick.h.
  */
@@ -454,6 +456,7 @@ int board_ajoy_initialize(void)
   iinfo("Initialize ADC driver: /dev/adc0\n");
 
   /* NOTE: The ADC driver was initialized earlier in the bring-up sequence. */
+
   /* Open the ADC driver for reading. */
 
   ret = file_open(&g_adcfile, "/dev/adc0", O_RDONLY);

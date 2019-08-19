@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/src/stm32_romfs.h
+ * boards/arm/stm32f7/nucleo-144/src/stm32_romfs.h
  *
  *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
  *   Author: Tomasz Wozniak <t.wozniak@samsung.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO144_SRC_STM32_ROMFS_H
-#define __BOARDS_ARM_NUCLEO144_SRC_STM32_ROMFS_H
+#ifndef __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H
+#define __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int stm32_romfs_initialize(void);
 
 #endif /* CONFIG_STM32_ROMFS */
 
-#endif /* __BOARDS_ARM_NUCLEO144_SRC_STM32_ROMFS_H */
+#endif /* __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H */

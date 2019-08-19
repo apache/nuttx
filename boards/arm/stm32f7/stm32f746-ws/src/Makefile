@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f746-ws/src/Makefile
+# boards/arm/stm32f7/stm32f746-ws/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

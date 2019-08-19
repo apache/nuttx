@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/src/stm32_autoleds.c
+ * boards/arm/stm32l4/nucleo-l496zg/src/stm32_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

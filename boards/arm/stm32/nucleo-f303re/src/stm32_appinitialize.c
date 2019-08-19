@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/src/stm32_appinitialize.c
+ * boards/arm/stm32/nucleo-f303re/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.

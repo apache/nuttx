@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32vldiscovery/src/stm32vldiscovery.h
+ * boards/arm/stm32/stm32vldiscovery/src/stm32vldiscovery.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
-#define __BOARDS_ARM_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
+#ifndef __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
+#define __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,4 +63,4 @@
 void stm32_led_initialize(void);
 #endif
 
-#endif /* __BOARDS_ARM_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H */
+#endif /* __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H */

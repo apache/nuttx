@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f103-minimum/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32f103-minimum/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,23 +32,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F103_MINIMUM_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F103_MINIMUM_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F103_MINIMUM_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F103_MINIMUM_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -194,4 +194,4 @@
 #define RGBLED_BPWMTIMER   4
 #define RGBLED_BPWMCHANNEL 4
 
-#endif  /* __BOARDS_ARM_STM32F103_MINIMUM_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_STM32F103_MINIMUM_INCLUDE_BOARD_H */

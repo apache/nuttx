@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f103-minimum/src/stm32_autoleds.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Laurent Latil <laurent@latil.nom.fr>

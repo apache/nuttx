@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/src/stm32_buttons.c
+ * boards/arm/stm32/nucleo-f303re/src/stm32_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.

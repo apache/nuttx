@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3210e-eval/scripts/ld.script.dfu
+ * boards/arm/stm32/stm3210e-eval/scripts/ld.script.dfu
  *
  *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

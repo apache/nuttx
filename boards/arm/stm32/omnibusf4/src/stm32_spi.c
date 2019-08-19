@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_spi.c
+ * boards/arm/stm32/omnibusf4/src/stm32_spi.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.

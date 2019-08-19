@@ -1,5 +1,5 @@
 ############################################################################
-# boards/viewtool-stm32f107/src/Makefile
+# boards/arm/stm32/viewtool-stm32f107/src/Makefile
 #
 #   Copyright (C) 2013, 2017-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

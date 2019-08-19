@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm3220g-eval/src/Makefile
+# boards/arm/stm32/stm3220g-eval/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-stm32-h405/src/Makefile
+# boards/arm/stm32/olimex-stm32-h405/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

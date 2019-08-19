@@ -1,5 +1,5 @@
 ############################################################################
-# boards/maple/src/Makefile
+# boards/arm/stm32/maple/src/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

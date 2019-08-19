@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/omnibusf4/src/stm32_mmcsd.c
+ * boards/arm/stm32/omnibusf4/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2017 Greg Nutt. All rights reserved.

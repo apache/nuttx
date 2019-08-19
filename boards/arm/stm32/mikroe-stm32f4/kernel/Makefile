@@ -1,5 +1,5 @@
 ############################################################################
-# boards/mikroe-stm32f4/kernel/Makefile
+# boards/arm/stm32/mikroe-stm32f4/kernel/Makefile
 #
 #   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

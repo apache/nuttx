@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32l1discovery/nsh/Make.defs
+# boards/arm/stm32/stm32l1discovery/nsh/Make.defs
 #
 #   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

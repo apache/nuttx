@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_ug2864hsweg01.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_ug2864hsweg01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

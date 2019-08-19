@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476-mdk/scripts/stm32l476-mdk.ld
+ * boards/arm/stm32l4/stm32l476-mdk/scripts/stm32l476-mdk.ld
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

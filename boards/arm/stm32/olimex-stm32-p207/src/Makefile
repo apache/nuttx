@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-stm32-p207/src/Makefile
+# boards/arm/stm32/olimex-stm32-p207/src/Makefile
 #
 #   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

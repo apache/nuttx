@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/stm32butterfly2/src/stm32_mmcsd.c
+ * boards/arm/stm32/stm32butterfly2/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2016-2017 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>

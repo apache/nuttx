@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/mikroe_stm32f4/src/stm32_appinit.c
+ * boards/arm/stm32/mikroe_stm32f4/src/stm32_appinit.c
  *
  *   Copyright (C) 2012-2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

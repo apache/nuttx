@@ -51,7 +51,7 @@ Development Environment
 The Development environments for the STM32F429I-DISCO board are identical
 to the environments for other STM32F boards.  For full details on the
 environment options and setup, see the README.txt file in the
-config/stm32f4discovery directory.
+boards/arm/stm32/stm32f4discovery directory.
 
 Setup and Programming Flash
 ===========================
@@ -295,7 +295,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to boards/stm32f429i-disco/nsh2
+Below are all of the configuration changes that I had to make to boards/arm/stm32/stm32f429i-disco/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support

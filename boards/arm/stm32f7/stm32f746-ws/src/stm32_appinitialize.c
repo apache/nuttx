@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f746-ws/src/stm32_appinitilaize.c
+ * boards/arm/stm32f7/stm32f746-ws/src/stm32_appinitilaize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

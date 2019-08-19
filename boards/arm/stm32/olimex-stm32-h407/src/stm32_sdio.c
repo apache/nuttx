@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32_h407/src/stm32_sdio.c
+ * boards/arm/stm32/olimex-stm32_h407/src/stm32_sdio.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

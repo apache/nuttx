@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_nunchuck.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_nunchuck.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-h743zi/src/stm32_autoleds.c
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

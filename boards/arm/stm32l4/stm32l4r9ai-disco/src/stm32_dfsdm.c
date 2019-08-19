@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l4r9ai-disco/src/stm32_dfsdm.c
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32_dfsdm.c
  *
  *   Copyright (C) 2019 Haltian Ltd. All rights reserved.
  *   Authors: Juha Niskanen <juha.niskanen@haltian.com>

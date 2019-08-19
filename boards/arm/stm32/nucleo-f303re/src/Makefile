@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f303re/src/Makefile
+# boards/arm/stm32/nucleo-f303re/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.

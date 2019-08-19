@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/photon/src/stm32_autoleds.c
+ * boards/arm/stm32/photon/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

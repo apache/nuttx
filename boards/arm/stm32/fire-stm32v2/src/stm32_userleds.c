@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/fire-stm32v2/src/stm32_userleds.c
+ * boards/arm/stm32/fire-stm32v2/src/stm32_userleds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-h405/src/olimex-stm32-h405.h
+ * boards/arm/stm32/olimex-stm32-h405/src/olimex-stm32-h405.h
  *
  *   Copyright (C) 2014 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_H405_SRC_H
-#define __BOARDS_ARM_OLIMEX_STM32_H405_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_H405_SRC_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_H405_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -71,30 +71,30 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
  *   Called from stm32_usbinitialize very early in initialization to setup USB-related
  *   GPIO pins for the Olimex-STM32-H405 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGFS
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -113,4 +113,4 @@ int stm32_can_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OLIMEX_STM32_H405_SRC_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_H405_SRC_H */

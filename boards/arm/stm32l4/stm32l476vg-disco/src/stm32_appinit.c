@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476vg-disco/src/stm32_appinit.c
+ * boards/arm/stm32l4/stm32l476vg-disco/src/stm32_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

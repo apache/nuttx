@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l4r9ai-disco/kernel/stm32l4_userspace.c
+ * boards/arm/stm32l4/stm32l4r9ai-disco/kernel/stm32l4_userspace.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

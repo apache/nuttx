@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l476-mdk/include/stm32l476-mdk-clocking.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l476-mdk/include/stm32l476-mdk-clocking.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Motorola Mobility, LLC. All rights reserved.
@@ -32,25 +32,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H
-#define __BOARDS_ARM_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H
+#define __BOARDS_ARM_STM32L4_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC
@@ -152,6 +152,7 @@
 #define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
@@ -167,6 +168,7 @@
 #define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
@@ -274,9 +276,9 @@
 #define BOARD_LPTIM1_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
 #define BOARD_LPTIM2_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -289,9 +291,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -299,4 +301,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H */
+#endif  /* __BOARDS_ARM_STM32L4_STM32L476_MDK_INCLUDE_STM32L476_MDK_CLOCKING_H */

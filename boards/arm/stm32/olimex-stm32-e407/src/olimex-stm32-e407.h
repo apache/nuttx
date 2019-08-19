@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-e407/src/olimex-stm32-e407.h
+ * boards/arm/stm32/olimex-stm32-e407/src/olimex-stm32-e407.h
  *
  *   Copyright (C) 2014 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_E407_SRC_H
-#define __BOARDS_ARM_OLIMEX_STM32_E407_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -381,4 +381,4 @@ int stm32_mrf24j40_initialize(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OLIMEX_STM32_E407_SRC_INTERNAL_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_INTERNAL_H */

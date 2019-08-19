@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-f207zg/src/stm32_appinitialize.c
+ * boards/arm/stm32/nucleo-f207zg/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

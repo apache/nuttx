@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f103rb/src/nucleo-f103rb.h
+ * boards/arm/stm32/nucleo-f103rb/src/nucleo-f103rb.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H
-#define __BOARDS_ARM_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H
+#define __BOARDS_ARM_STM32_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H
 
 /****************************************************************************
  * Included Files
@@ -94,28 +94,28 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F103RB_SRC_NUCLEO_F103RB_H */

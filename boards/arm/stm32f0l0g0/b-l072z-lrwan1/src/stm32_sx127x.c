@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l072z-lrwan1/src/stm32_boot.c
+ * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -287,4 +287,3 @@ int stm32_lpwaninitialize(void)
 errout:
   return ret;
 }
-

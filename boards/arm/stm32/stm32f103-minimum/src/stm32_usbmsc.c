@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f103-minimum/src/stm32_usbmsc.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

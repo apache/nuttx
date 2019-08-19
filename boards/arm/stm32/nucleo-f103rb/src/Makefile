@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f103rb/src/Makefile
+# boards/arm/stm32/nucleo-f103rb/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

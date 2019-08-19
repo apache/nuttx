@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-l432kc/include/nucleo-l432kc.h
+/****************************************************************************
+ * boards/arm/stm32l4/nucleo-l432kc/include/nucleo-l432kc.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H
-#define __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 1
 #  define HSI_CLOCK_CONFIG          /* HSI-16 clock configuration */
@@ -59,7 +59,7 @@
 #  define MSI_CLOCK_CONFIG          /* MSI @ 4 MHz autotrimmed via LSE */
 #endif
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #if defined(HSI_CLOCK_CONFIG)
 /* The NUCLEOL432KC supports both HSE and LSE crystals (X2 and X3).  However, as
@@ -497,9 +497,9 @@
 #define BOARD_LPTIM1_FREQUENCY  STM32L4_HCLK_FREQUENCY
 #define BOARD_LPTIM2_FREQUENCY  STM32L4_HCLK_FREQUENCY
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -512,9 +512,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -522,4 +522,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H */
+#endif  /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_NUCLEO_L432KC_H */

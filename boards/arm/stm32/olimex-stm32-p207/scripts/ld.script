@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p207/scripts/ld.script
+ * boards/arm/stm32/olimex-stm32-p207/scripts/ld.script
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l4r9ai-disco/src/stm32_clockconfig.c
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32_clockconfig.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *
@@ -30,11 +30,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,11 +46,11 @@
 #include "up_arch.h"
 #include "stm32l4r9ai-disco.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_board_clockconfig
  *
  * Description:
@@ -61,7 +61,7 @@
  *  end for certain project configurations which have specialized clock configurations
  *  that aren't appropriate to expose in the 'arch' default code.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
 void stm32l4_board_clockconfig(void)
@@ -162,6 +162,7 @@ void stm32l4_board_clockconfig(void)
   regval  = getreg32(STM32L4_RCC_PLLSAI2CFG);
 
   /* Enable the SAI2 PLL */
+
   /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
   regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |

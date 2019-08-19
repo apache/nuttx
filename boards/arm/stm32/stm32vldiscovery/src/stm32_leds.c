@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32vldiscovery/src/stm32_leds.c
+ * boards/arm/stm32/stm32vldiscovery/src/stm32_leds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

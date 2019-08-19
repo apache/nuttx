@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hymini-stm32v/src/stm32_leds.c
+ * boards/arm/stm32/hymini-stm32v/src/stm32_leds.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

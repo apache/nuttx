@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mikroe-stm32f4/scripts/ld.script
+ * boards/arm/stm32/mikroe-stm32f4/scripts/ld.script
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

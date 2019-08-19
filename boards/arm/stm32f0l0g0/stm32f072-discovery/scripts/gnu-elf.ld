@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f072-discovery/scripts/gnu-elf.ld
+ * boards/arm/stm32f0l0g0/stm32f072-discovery/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

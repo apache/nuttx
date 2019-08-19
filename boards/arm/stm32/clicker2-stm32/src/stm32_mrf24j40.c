@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/src/stm32_mrf24j40.c
+ * boards/arm/stm32/clicker2-stm32/src/stm32_mrf24j40.c
  *
  *   Copyright (C) 2017 Gregory Nutt, All rights reserver
  *   Author: Gregory Nutt <gnutt@nuttx.org>

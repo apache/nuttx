@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f769i-disco/src/Makefile
+# boards/arm/stm32f7/stm32f769i-disco/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

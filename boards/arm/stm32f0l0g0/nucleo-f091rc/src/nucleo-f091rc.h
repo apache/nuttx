@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f091rc/src/nucleo-f091rc.h
+ * boards/arm/stm32f0l0g0/nucleo-f091rc/src/nucleo-f091rc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H
-#define __BOARDS_ARM_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H
+#define __BOARDS_ARM_STM32F0L0G0_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H
 
 /****************************************************************************
  * Included Files
@@ -52,6 +52,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -66,6 +67,7 @@
 #endif
 
 /* Nucleo-F091RC GPIOs ******************************************************/
+
 /* LED.  User LD2: the green LED is a user LED connected to Arduino signal
  * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
  * the STM32 target.
@@ -78,6 +80,7 @@
                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 
 /* Button definitions *******************************************************/
+
 /*   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
  *   microcontroller.
  */
@@ -155,4 +158,4 @@ int stm32_lpwaninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H */

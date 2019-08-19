@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-f410rb/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/nucleo-f410rb/include/board.h
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F410RB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_F410RB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F410RB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEO_F410RB_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -49,9 +49,9 @@
 #  include "stm32.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /* The NUCLEO410RB supports both HSE and LSE crystals (X2 and X3).  However, as
@@ -308,4 +308,4 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-#endif  /* __BOARDS_ARM_NUCLEO_F410RB_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_NUCLEO_F410RB_INCLUDE_BOARD_H */

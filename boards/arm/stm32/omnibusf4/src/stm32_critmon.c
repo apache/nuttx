@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/omnibusf4/src/stm32_netinit.c
+ * boards/arm/stm32/omnibusf4/src/stm32_netinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f746-ws/scripts/kernel-space.ld
+ * boards/arm/stm32f7/stm32f746-ws/scripts/kernel-space.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303ze/include/board.h
+ * boards/arm/stm32/nucleo-f303ze/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEOF303ZE_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEOF303ZE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEOF303ZE_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEOF303ZE_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -215,4 +215,4 @@
 #define ADC1_DMA_CHAN DMACHAN_ADC1
 #define ADC3_DMA_CHAN DMACHAN_ADC3
 
-#endif /* __BOARDS_ARM_NUCLEO_F303ZE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F303ZE_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/hymini-stm32v/src/stm32_usbmsc.c
+ * boards/arm/stm32/hymini-stm32v/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

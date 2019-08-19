@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/nucleo-h743zi/src/stm32_lsm9ds1.c
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_lsm9ds1.c
  *
  *   Copyright (C) 2019 Greg Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

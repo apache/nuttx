@@ -1,5 +1,5 @@
 /*******************************************************************************
- * boards/nucleo-l432kc/src/stm32_dac7571.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_dac7571.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

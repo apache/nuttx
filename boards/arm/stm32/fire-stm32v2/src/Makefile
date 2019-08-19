@@ -1,5 +1,5 @@
 ############################################################################
-# boards/fire-stm32v2/src/Makefile
+# boards/arm/stm32/fire-stm32v2/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimexino-stm32/src/stm32_usbmsc.c
+/****************************************************************************
+ * boards/arm/stm32/olimexino-stm32/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

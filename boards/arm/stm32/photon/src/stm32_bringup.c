@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/photon/src/stm32_bringup.c
+ * boards/arm/stm32/photon/src/stm32_bringup.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>

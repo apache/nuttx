@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f411e-disco/src/Makefile
+# boards/arm/stm32/stm32f411e-disco/src/Makefile
 #
 #   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

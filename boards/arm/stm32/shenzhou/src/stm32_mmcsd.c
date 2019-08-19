@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/shenzhou/src/stm32_mmcsd.c
+ * boards/arm/stm32/shenzhou/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

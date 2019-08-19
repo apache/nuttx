@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/viewtool-stm32f107/src/up_mmcsd.c
+ * boards/arm/stm32/viewtool-stm32f107/src/up_mmcsd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

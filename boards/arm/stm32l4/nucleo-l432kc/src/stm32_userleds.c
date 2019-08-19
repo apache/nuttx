@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/src/stm32_userleds.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_userleds.c
  *
  *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

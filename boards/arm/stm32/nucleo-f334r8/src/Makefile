@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f334r8/src/Makefile
+# boards/arm/stm32/nucleo-f334r8/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

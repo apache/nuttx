@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-h743zi/src/stm32_appinitialize.c
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

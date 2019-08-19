@@ -1,5 +1,5 @@
 ############################################################################
-# boards/b-l475e-iot01a/src/Makefile
+# boards/arm/stm32l4/b-l475e-iot01a/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #

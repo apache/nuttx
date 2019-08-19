@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_idle.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_idle.c
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -220,13 +220,13 @@ errout:
 #  define stm32_idlepm()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_alarmcb
  *
  * Description:
  *    RTC alarm service routine
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Not used */
 static void up_alarmcb(void)

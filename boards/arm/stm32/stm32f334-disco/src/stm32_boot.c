@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f334-disco/src/stm32_boot.c
+ * boards/arm/stm32/stm32f334-disco/src/stm32_boot.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>

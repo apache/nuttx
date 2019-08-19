@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-l152re/src/Makefile
+# boards/arm/stm32/nucleo-l152re/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

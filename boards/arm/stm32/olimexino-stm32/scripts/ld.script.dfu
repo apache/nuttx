@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimexino-stm32/scripts/ld.script.dfu
+ * boards/arm/stm32/olimexino-stm32/scripts/ld.script.dfu
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

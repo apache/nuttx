@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32_tiny/src/stm32_appinit.c
+ * boards/arm/stm32/stm32_tiny/src/stm32_appinit.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

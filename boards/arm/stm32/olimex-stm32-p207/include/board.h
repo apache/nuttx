@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-stm32-p207/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/olimex-stm32-p207/include/board.h
  *
  *   Copyright (C) 2009, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_P207_INCLUDE_BOARD_H
-#define __BOARDS_ARM_OLIMEX_STM32_P207_INCLUDE_BOARD_H 1
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H 1
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,9 +48,9 @@
 #include "stm32_rcc.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -245,4 +245,4 @@
 #define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
 
-#endif /* __BOARDS_ARM_OLIMEX_STM32_P207_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H */

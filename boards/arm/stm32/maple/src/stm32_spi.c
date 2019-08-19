@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/maple/src/stm32_spi.c
+ * boards/arm/stm32/maple/src/stm32_spi.c
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/src/stm32_mmcsd.c
+ * boards/arm/stm32/clicker2-stm32/src/stm32_mmcsd.c
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author:  Anthony Merlino <anthony@vergeaero.com>

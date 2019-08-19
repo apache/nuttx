@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/src/stm32_autoleds.c
+ * boards/arm/stm32/clicker2-stm32/src/stm32_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
  * board the Clicker2 for STM32.  The following definitions describe how
  * NuttX controls the LEDs:

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/axoloti/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/axoloti/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_AXOLOTI_INCLUDE_BOARD_H
-#define __BOARDS_ARM_AXOLOTI_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_AXOLOTI_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_AXOLOTI_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +47,11 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Clocking
  * The Axoloti board has an external 8MHz crystal.
  * The SoC can run at 180MHz, but the required USB clock of 48MHz cannot be
@@ -127,7 +127,7 @@
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2   /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/************************************************************************************
+/****************************************************************************
  * LED Definitions
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
@@ -146,7 +146,7 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 
-/************************************************************************************
+/****************************************************************************
  * Button Definitions
  * There are two buttons on the axoloti, one of them is GPIO connected. The other
  * is a reset button and is not under software control.
@@ -156,7 +156,7 @@
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/************************************************************************************
+/****************************************************************************
  * UARTs
  * The MIDI in/out ports of the axoloti are connected on USART6.
  * It maybe convenient to run a serial port connected to the header pins,
@@ -176,7 +176,7 @@
 #define GPIO_USART6_TX (GPIO_ALT|GPIO_AF8|GPIO_PORTG|GPIO_PIN14| \
                         GPIO_FLOAT|GPIO_SPEED_2MHz|GPIO_OPENDRAIN)
 
-/************************************************************************************
+/****************************************************************************
  * I2C Bus
  * Turn on the internal pullups since there are no external pullups.
  */
@@ -197,7 +197,7 @@
 #define GPIO_I2C3_SDA (GPIO_ALT|GPIO_AF4|GPIO_PORTH|GPIO_PIN8| \
                        GPIO_SPEED_2MHz|GPIO_OPENDRAIN|GPIO_PULLUP)
 
-/************************************************************************************
+/****************************************************************************
  * SAI Bus
  * Used with the ADAU1961 CODEC
  * PE3_SAI1_SD_B (GPIO_SAI1_SD_B_1)
@@ -226,7 +226,7 @@
  */
 #define DMACHAN_SAI1_B DMAMAP_SAI1_B_2
 
-/************************************************************************************
+/****************************************************************************
  * SDIO
  * Used for the SD card interface.
  * d0 (AF12, PC8)
@@ -272,4 +272,4 @@
 
 #define DMAMAP_SDIO DMAMAP_SDIO_2
 
-#endif /* __BOARDS_ARM_AXOLOTI_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_AXOLOTI_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/viewtool-stm32f107/src/stm32_leds.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_leds.c
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -229,7 +229,7 @@ void board_autoled_off(int led)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  board_userled_initialize, board_userled, and board_userled_all
  *
  * Description:
@@ -242,7 +242,7 @@ void board_autoled_off(int led)
  *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
  *   use.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void board_userled_initialize(void)
 {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/src/stm32_spi.c
+ * boards/arm/stm32/nucleo-f303re/src/stm32_spi.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l4r9ai-disco/include/board.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l4r9ai-disco/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *
@@ -30,14 +30,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -46,17 +46,18 @@
 
 #include <stm32l4.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #include <arch/board/stm32l4r9ai-disco-clocking.h>
 
-/* DMA Channel/Stream Selections ****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future is we set aside more DMA channels/streams.
  */
 
 /* Values defined in arch/arm/src/stm32l4/hardware/stm32l4x6xx_dma.h */
@@ -86,7 +87,7 @@
 #define ADC1_MEASURE_CHANNEL     12
 #define GPIO_MEASURE_ADC         (GPIO_ADC1_IN12)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1:
  *   RXD: PB7
@@ -264,9 +265,9 @@
 #define BUTTON_RIGHT_BIT   (1 << BUTTON_RIGHT)
 #define BUTTON_UP_BIT      (1 << BUTTON_UP)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -279,18 +280,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_board_initialize(void);
 

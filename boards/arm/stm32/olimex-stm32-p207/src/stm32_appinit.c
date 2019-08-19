@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32-p207/src/stm32_appinit.c
+ * boards/arm/stm32/olimex-stm32-p207/src/stm32_appinit.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

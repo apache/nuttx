@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/cloudctrl/src/stm32_buttons.c
+ * boards/arm/stm32/cloudctrl/src/stm32_buttons.c
  *
  *   Copyright (C) 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/nucleo-l476rg/src/stm32_spimmcsd.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_spimmcsd.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -128,4 +128,3 @@ int stm32l4_mmcsd_initialize(int minor)
   spiinfo("INFO: mmcsd card has been initialized successfully\n");
   return OK;
 }
-

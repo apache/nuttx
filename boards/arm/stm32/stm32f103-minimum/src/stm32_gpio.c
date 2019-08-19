@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f103-minimum/src/stm32_gpio.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_gpio.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.

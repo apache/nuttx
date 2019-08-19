@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/kernel/stm32_userspace.c
+ * boards/arm/stm32/omnibusf4/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.

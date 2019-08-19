@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/scripts/memory.ld
+ * boards/arm/stm32/mikroe-stm32f4/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

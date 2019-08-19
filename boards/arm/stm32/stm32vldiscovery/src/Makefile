@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32vldiscovery/src/Makefile
+# boards/arm/stm32/stm32vldiscovery/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

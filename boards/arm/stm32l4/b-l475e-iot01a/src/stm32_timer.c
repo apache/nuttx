@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/b-l475e-iot01a/src/stm32_timer.c
+ * boards/arm/stm32l4/b-l475e-iot01a/src/stm32_timer.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Goden Freemans <godenfreemans@gmail.com>

@@ -1,5 +1,5 @@
-/****************************************************************************************************
- * boards/stm32f746-ws/src/stm32f746-ws.h
+/****************************************************************************
+ * boards/arm/stm32f7/stm32f746-ws/src/stm32f746-ws.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,22 +32,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32F746_WS_SRC_STM32F746_WS_H
 #define __BOARDS_ARM_STM32F746_WS_SRC_STM32F746_WS_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -58,13 +59,16 @@
 #  endif
 #endif
 
-/* STM32F736G Discovery GPIOs ***********************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the reset button, that
- * can be controlled by software (LD2 is a power indicator, LD3-6 indicate USB status, LD7 is
- * controlled by the ST-Link).
+/* STM32F736G Discovery GPIOs ***********************************************/
+
+/* The STM32F746G-DISCO board has numerous LEDs but only one,
+ * LD1 located near the reset button, that can be controlled by software
+ * (LD2 is a power indicator, LD3-6 indicate USB status, LD7 is controlled by
+ * the ST-Link).
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface. One end of LD1 is
- * grounded so a high output on PI1 will illuminate the LED.
+ * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+ * interface. One end of LD1 is  grounded so a high output on PI1 will
+ * illuminate the LED.
  */
 
 #define GPIO_LD1           (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
@@ -76,8 +80,9 @@
 
 #define LED_DRIVER_PATH "/dev/userleds"
 
-/* Pushbutton B1, labelled "User", is connected to GPIO PC13.  A high value will be sensed when the
- * button is depressed. Note that the EXTI interrupt is configured.
+/* Pushbutton B1, labelled "User", is connected to GPIO PC13.
+ * A high value will be sensed when the button is depressed.
+ * Note that the EXTI interrupt is configured.
  */
 
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
@@ -88,23 +93,24 @@
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
 
-/****************************************************************************************************
+/****************************************************************************
  * Public data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Functions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f746g-disco
+ *   board.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 void weak_function stm32_spidev_initialize(void);
 
@@ -120,7 +126,7 @@ void weak_function stm32_spidev_initialize(void);
 int stm32_sdio_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_dma_alloc_init
  *
  * Description:
@@ -129,7 +135,7 @@ int stm32_sdio_initialize(void);
  * Returned Value:
  *   0 on success or -ENOMEM
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined (CONFIG_FAT_DMAMEMORY)
 int stm32_dma_alloc_init(void);

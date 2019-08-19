@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/src/stm32_idle.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_idle.c
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -223,13 +223,13 @@ errout:
 #  define stm32_idlepm()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_alarmcb
  *
  * Description:
  *    RTC alarm service routine
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static void stm32_alarmcb(void)

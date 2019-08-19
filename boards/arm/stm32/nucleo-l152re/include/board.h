@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l152re/include/board.h
+ * boards/arm/stm32/nucleo-l152re/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEOL152RE_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEOL152RE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEOL152RE_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEOL152RE_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -225,4 +225,4 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
 
-#endif /* __BOARDS_ARM_NUCLEO_L152RE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_INCLUDE_BOARD_H */

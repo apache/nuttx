@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/clicker2-stm32/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/clicker2-stm32/include/board.h
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author: Anthony Merlino <anthony@vergeaero.com>
@@ -36,14 +36,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CLICKER2_STM32_INCLUDE_BOARD_H
-#define __BOARDS_ARM_CLICKER2_STM32_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_CLICKER2_STM32_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_CLICKER2_STM32_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,11 +58,12 @@
 #  include "stm32.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Clicker 2 for STM32 board features a 25Hz crystal and 32.768kHz RTC crystal.
  *
  * This is the canonical configuration:
@@ -246,7 +247,8 @@
 #define LED_ASSERTION            3
 #define LED_PANIC                4
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Mikroe Clicker2 STM32 has two buttons available to software:
  *
  *   T2 - PE0, Low sensed when pressed
@@ -260,7 +262,8 @@
 #define BUTTON_T2_BIT    (1 << BUTTON_T2)
 #define BUTTON_T3_BIT    (1 << BUTTON_T3)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
+
 /* U[S]ARTs
  *
  *   USART2 - mikroBUS1
@@ -316,7 +319,8 @@
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
 #define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_2 /* PD12 */
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channl/Stream Selections *********************************************/
+
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *
@@ -327,4 +331,4 @@
 
 #define DMAMAP_SDIO      DMAMAP_SDIO_1
 
-#endif  /* __BOARDS_ARM_CLICKER2_STM32_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_CLICKER2_STM32_INCLUDE_BOARD_H */

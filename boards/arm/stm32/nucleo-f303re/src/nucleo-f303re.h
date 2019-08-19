@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/src/nucleo-f303re.h
+ * boards/arm/stm32/nucleo-f303re/src/nucleo-f303re.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H
-#define __BOARDS_ARM_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H
+#define __BOARDS_ARM_STM32_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H
 
 /****************************************************************************
  * Included Files
@@ -167,25 +167,25 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 int stm32_dac_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -203,4 +203,4 @@ int stm32_adc_setup(void);
 int stm32_can_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F303RE_SRC_NUCLEO_F303RE_H */

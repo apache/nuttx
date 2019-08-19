@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f4x1re/scripts/f401re.ld
+ * boards/arm/stm32/nucleo-f4x1re/scripts/f401re.ld
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/src/stm32_l3gd20.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_l3gd20.c
  *
  *   Copyright (C) 2017 Gregory Nutt.  All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

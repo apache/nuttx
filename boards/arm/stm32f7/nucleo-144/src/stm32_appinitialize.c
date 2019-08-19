@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-144/src/stm32_appinitialize.c
+ * boards/arm/stm32f7/nucleo-144/src/stm32_appinitialize.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

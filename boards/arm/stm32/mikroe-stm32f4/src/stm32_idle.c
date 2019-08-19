@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mikroe_stm32f4/src/stm32_idle.c
+ * boards/arm/stm32/mikroe_stm32f4/src/stm32_idle.c
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -223,13 +223,13 @@ errout:
 #  define up_idlepm()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_alarmcb
  *
  * Description:
  *    RTC alarm service routine
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static void up_alarmcb(void)

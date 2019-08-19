@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l4r9ai-disco/scripts/stm32l4r9ai-disco.ld
+ * boards/arm/stm32l4/stm32l4r9ai-disco/scripts/stm32l4r9ai-disco.ld
  *
  *   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/cloudctrl/scripts/cloudctrl.ld
+ * boards/arm/stm32/cloudctrl/scripts/cloudctrl.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

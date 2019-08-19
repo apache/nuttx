@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/scripts/user-space.ld
+ * boards/arm/stm32l4/stm32f4discovery/scripts/user-space.ld
  *
  *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

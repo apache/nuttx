@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-l496zg/src/nucleo-144.h
+/****************************************************************************
+ * boards/arm/stm32l4/nucleo-l496zg/src/nucleo-144.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,24 +33,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L496ZG_SRC_NUCLEO_144_H
-#define __BOARDS_ARM_NUCLEO_L496ZG_SRC_NUCLEO_144_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_SRC_NUCLEO_144_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_SRC_NUCLEO_144_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* procfs File System */
 
@@ -62,12 +62,13 @@
 #  endif
 #endif
 
-/* Nucleo-144 GPIO Pin Definitions **************************************************/
+/* Nucleo-144 GPIO Pin Definitions ******************************************/
+
 /* LED
  *
- * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a
- * Blue LED and LD3 a Red LED, that can be controlled by software. The following definitions assume
- * the default Solder Bridges are installed.
+ * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software.
+ * The following definitions assume the default Solder Bridges are installed.
  */
 
 #define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
@@ -95,7 +96,7 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
-/* SPI ***************************************************************************/
+/* SPI **********************************************************************/
 
 #define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET)
@@ -178,42 +179,42 @@
                            GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN5)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-144 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SPI)
 void stm32_spidev_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_bus_test
  *
  * Description:
  *   Called to create the defined SPI buses and test them by initializing them
  *   and sending the NUCLEO_SPI_TEST (no chip select).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_NUCLEO_SPI_TEST)
 int stm32_spidev_bus_test(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_dma_alloc_init
  *
  * Description:
@@ -222,7 +223,7 @@ int stm32_spidev_bus_test(void);
  * Returned Value:
  *   0 on success or -ENOMEM
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_dma_alloc_init(void);
 
@@ -242,54 +243,54 @@ int stm32_dma_alloc_init(void);
 int stm32_sdio_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
  *   Called from stm32_usbinitialize very early in inialization to setup USB-related
  *   GPIO pins for the nucleo-144 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_OTGFS
 void stm32_usbinitialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_dac_setup
  *
  * Description:
  *   Initialize DAC and register the DAC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DAC
 int stm32_dac_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_dfsdm_setup
  *
  * Description:
  *   Initialize DFSDM and register the ADC drivers for DFSDM filters.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_ADC) && defined(CONFIG_STM32L4_DFSDM)
 int stm32_dfsdm_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_NUCLEO_L496ZG_SRC_NUCLEO_144_H */
+#endif /* __BOARDS_ARM_STM32L4_NUCLEO_L496ZG_SRC_NUCLEO_144_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/omnibusf4/src/stm32_bringup.c
+ * boards/arm/stm32/omnibusf4/src/stm32_bringup.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2012, 2014-2018 Gregory Nutt. All rights reserved.

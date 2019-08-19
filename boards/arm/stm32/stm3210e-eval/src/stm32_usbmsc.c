@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3210e-eval/src/stm32_usbmsc.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

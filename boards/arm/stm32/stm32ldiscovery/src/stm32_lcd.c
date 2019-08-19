@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32ldiscovery/src/stm32_lcd.c
+ * boards/arm/stm32/stm32ldiscovery/src/stm32_lcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

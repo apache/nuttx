@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-h743zi/src/stm32_pca9635.c
+/****************************************************************************
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_pca9635.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files

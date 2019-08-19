@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f334-disco/src/stm32_adc.c
+ * boards/arm/stm32f7/stm32f334-disco/src/stm32_adc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-144/src/Makefile
+# boards/arm/stm32f7/nucleo-144/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

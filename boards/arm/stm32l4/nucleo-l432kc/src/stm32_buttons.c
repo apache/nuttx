@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/src/stm32_buttons.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_buttons.c
  *
  *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

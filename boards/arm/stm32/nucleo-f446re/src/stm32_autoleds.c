@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f446re/src/stm32_autoleds.c
+ * boards/arm/stm32/nucleo-f446re/src/stm32_autoleds.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f091rc/scripts/flash.ld
+ * boards/arm/stm32f0l0g0/nucleo-f091rc/scripts/flash.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

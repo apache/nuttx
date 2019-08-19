@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f746g-disco/include/board.h
+/****************************************************************************
+ * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F746G_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F746G_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,11 +46,12 @@
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The STM32F7 Discovery board provides the following clock sources:
  *
  *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
@@ -252,10 +253,11 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* LED definitions ******************************************************************/
-/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located near the
- * reset button, that can be controlled by software (LD2 is a power indicator, LD3-6
- * indicate USB status, LD7 is controlled by the ST-Link).
+/* LED definitions **********************************************************/
+
+/* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located
+ * near the reset button, that can be controlled by software (LD2 is a power
+ * indicator, LD3-6 indicate USB status, LD7 is controlled by the ST-Link).
  *
  * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
  * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
@@ -304,21 +306,23 @@
 #define LED_ASSERTION                2 /* LD1=no change */
 #define LED_PANIC                    3 /* LD1=flashing */
 
-/* Button definitions ***************************************************************/
-/* The STM32F7 Discovery supports one button:  Pushbutton B1, labelled "User", is
- * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+/* Button definitions *******************************************************/
+
+/* The STM32F7 Discovery supports one button:
+ * Pushbutton B1, labelled "User", is connected to GPIO PI11.
+ * A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -390,7 +394,7 @@
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
 
-/* LCD definitions ******************************************************************/
+/* LCD definitions **********************************************************/
 
 #define BOARD_LTDC_WIDTH                480
 #define BOARD_LTDC_HEIGHT               272
@@ -451,4 +455,4 @@
 #define GPIO_LTDC_DE                    GPIO_LTDC_DE_3
 #define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_3
 
-#endif  /* __BOARDS_ARM_STM32F746G_DISCO_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */

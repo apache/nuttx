@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/stm32l476rg/src/stm32_lsm303agr.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_lsm303agr.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -80,10 +80,12 @@ int stm32l4_lsm303agr_initialize(char *devpath)
       return -ENODEV;
     }
 
-  ret = lsm303agr_sensor_register("/dev/lsm303mag0", i2c, LSM303AGRMAGNETO_ADDR);
+  ret = lsm303agr_sensor_register("/dev/lsm303mag0", i2c,
+                                  LSM303AGRMAGNETO_ADDR);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS303AGR magneto driver %s\n", devpath);
+      snerr("ERROR: Failed to initialize LMS303AGR magneto driver %s\n",
+            devpath);
       return -ENODEV;
     }
 

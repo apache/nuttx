@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32_tiny/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32_tiny/include/board.h
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __BOARD_ARM_STM32_STM32_TINY_INCLUDE_BOARD_H
+#define __BOARD_ARM_STM32_STM32_TINY_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -49,11 +49,11 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* On-board crystal frequency is 8MHz (HSE) */
 
@@ -149,7 +149,7 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 /* The board has only one controllable LED */
 #define LED_STARTED       0  /* No LEDs */
@@ -161,4 +161,4 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __ARCH_ARM_STM32_STM32_TINY_INCLUDE_BOARD_H */

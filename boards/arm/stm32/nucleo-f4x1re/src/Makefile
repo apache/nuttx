@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f4x1re/src/Makefile
+# boards/arm/stm32/nucleo-f4x1re/src/Makefile
 #
 #   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

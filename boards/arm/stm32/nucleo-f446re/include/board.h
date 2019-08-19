@@ -1,5 +1,5 @@
-/*******************************************************************************
- * boards/nucleo-f446re/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/nucleo-f446re/include/board.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F446RE_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_F446RE_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F446RE_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEO_F446RE_INCLUDE_BOARD_H
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -47,9 +47,9 @@
 
 #include <stm32.h>
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *******************************************************************/
 
@@ -220,4 +220,4 @@
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
 
-#endif  /* __BOARDS_ARM_NUCLEO_F446RE_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_NUCLEO_F446RE_INCLUDE_BOARD_H */

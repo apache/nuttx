@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32l4r9ai-disco/kernel/Makefile
+# boards/arm/stm32l4/stm32l4r9ai-disco/kernel/Makefile
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

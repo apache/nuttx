@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/omnibusf4.h
+ * boards/arm/stm32/omnibusf4/src/omnibusf4.h
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2011-2012, 2015-2016, 2018 Gregory Nutt. All rights
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OMNIBUSF4_SRC_OMNIBUSF4_H
-#define __BOARDS_ARM_OMNIBUSF4_SRC_OMNIBUSF4_H
+#ifndef __BOARDS_ARM_STM32_OMNIBUSF4_SRC_OMNIBUSF4_H
+#define __BOARDS_ARM_STM32_OMNIBUSF4_SRC_OMNIBUSF4_H
 
 /****************************************************************************
  * Included Files
@@ -211,4 +211,4 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_OMNIBUSF4_SRC_OMNIBUSF4_H */
+#endif /* __BOARDS_ARM_STM32_OMNIBUSF4_SRC_OMNIBUSF4_H */

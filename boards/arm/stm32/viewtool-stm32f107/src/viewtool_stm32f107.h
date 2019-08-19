@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/viewtool-stm32f107/src/viewtool_stm32f107.h
+ * boards/arm/stm32/viewtool-stm32f107/src/viewtool_stm32f107.h
  *
  *   Copyright (C) 2013-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_VIEWTOOL_STM32F107_SRC_H
-#define __BOARDS_ARM_VIEWTOOL_STM32F107_SRC_H
+#ifndef __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_SRC_H
+#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_SRC_H
 
 /****************************************************************************
  * Included Files
@@ -512,4 +512,4 @@ int stm32_max3421e_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_VIEWTOOL_STM32F107_SRC_H */
+#endif /* __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_SRC_H */

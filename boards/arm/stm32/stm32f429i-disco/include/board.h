@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f429i-disco/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32f429i-disco/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F429I_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F429I_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,9 +51,9 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
@@ -464,4 +464,4 @@
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1
 
-#endif  /* __BOARDS_ARM_STM32F429I_DISCO_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H */

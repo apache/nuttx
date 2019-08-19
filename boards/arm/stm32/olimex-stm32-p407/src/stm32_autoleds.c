@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p407/src/stm32_autoleds.c
+ * boards/arm/stm32/olimex-stm32-p407/src/stm32_autoleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

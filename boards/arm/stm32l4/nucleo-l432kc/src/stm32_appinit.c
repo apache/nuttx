@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/src/stm32l4_appinit.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32l4_appinit.c
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -400,4 +400,3 @@ int board_uniqueid(uint8_t *uniqueid)
   return OK;
 }
 #endif
-

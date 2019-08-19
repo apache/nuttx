@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l476rg/src/stm32l4_appinit.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32l4_appinit.c
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

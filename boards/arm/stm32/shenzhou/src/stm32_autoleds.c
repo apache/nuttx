@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/shenzhou/src/stm32_autoleds.c
+ * boards/arm/stm32/shenzhou/src/stm32_autoleds.c
  *
  *   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -119,9 +119,9 @@
 #define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
 #define LED_PANIC_OFF_CLRBITS        ((SHENZHOU_LED4) << OFF_CLRBITS_SHIFT)
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* LED State Controls */
 

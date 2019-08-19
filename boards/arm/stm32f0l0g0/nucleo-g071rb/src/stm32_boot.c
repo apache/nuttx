@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-g071rb/src/stm32_boot.c
+ * boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -74,7 +74,7 @@ void stm32_boardinitialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_late_initialize
  *
  * Description:
@@ -85,7 +85,7 @@ void stm32_boardinitialize(void)
  *   This additional initialization phase may be used, for example, to initialize
  *   board-specific device drivers.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)

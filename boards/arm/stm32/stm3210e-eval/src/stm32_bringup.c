@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm3210e_eval/src/stm32_bringup.c
+ * boards/arm/stm32/stm3210e_eval/src/stm32_bringup.c
  *
  *   Copyright (C) 2009, 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

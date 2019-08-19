@@ -1,5 +1,5 @@
 ############################################################################
-# boards/clicker2-stm32/src/Makefile
+# boards/arm/stm32/clicker2-stm32/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

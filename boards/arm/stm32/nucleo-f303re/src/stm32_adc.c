@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f303re/src/stm32_adc.c
+ * boards/arm/stm32/nucleo-f303re/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015-2016 Omni Hoverboards Inc. All rights reserved.
@@ -310,13 +310,13 @@ static const uint32_t g_pinlist2[1] =
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_adc_setup(void)
 {

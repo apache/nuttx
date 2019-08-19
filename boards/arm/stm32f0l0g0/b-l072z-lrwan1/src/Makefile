@@ -1,5 +1,5 @@
 ############################################################################
-# boards/b-l072z-lrwan1/src/Makefile
+# boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

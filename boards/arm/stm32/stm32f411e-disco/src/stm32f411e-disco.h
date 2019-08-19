@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f411e-disco/src/stm32f411e-disco.h
+ * boards/arm/stm32/stm32f411e-disco/src/stm32f411e-disco.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
-#define __BOARDS_ARM_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
+#ifndef __BOARDS_ARM_STM32_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
+#define __BOARDS_ARM_STM32_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H
 
 /****************************************************************************
  * Included Files
@@ -187,4 +187,4 @@ int stm32_usbhost_initialize(void);
 
 int stm32_bringup(void);
 
-#endif /* __BOARDS_ARM_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H */
+#endif /* __BOARDS_ARM_STM32_STM32F411E_DISCO_SRC_STM32F411E_DISCO_H */

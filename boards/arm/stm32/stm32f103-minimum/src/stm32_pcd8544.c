@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f103-minimum/src/stm32_pcd8544.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_pcd8544.c
  *
  *   Copyright (C) 2011, 2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

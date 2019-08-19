@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-e407/src/stm32_mrf24j40.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_mrf24j40.c
  *
  *   Copyright (C) 2017, 2019 Gregory Nutt, All rights reserver
  *   Author: Gregory Nutt <gnutt@nuttx.org>

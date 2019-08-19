@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32_tiny/scripts/ld.script
+ * boards/arm/stm32/stm32_tiny/scripts/ld.script
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

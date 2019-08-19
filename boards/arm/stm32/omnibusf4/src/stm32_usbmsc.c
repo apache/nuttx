@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_usbmsc.c
+ * boards/arm/stm32/omnibusf4/src/stm32_usbmsc.c
  *
  *   Copyright (C) 2012, 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

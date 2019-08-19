@@ -55,7 +55,7 @@ Development Environment
   The Development environments for the STM32F746G-DISCO board are identical
   to the environments for other STM32F boards.  For full details on the
   environment options and setup, see the README.txt file in the
-  config/stm32f746g-disco directory.
+  boards/stm32f746g-disco directory.
 
 LEDs and Buttons
 ================

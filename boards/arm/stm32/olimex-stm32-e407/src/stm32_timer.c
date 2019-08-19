@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/olimex-stm32-e407/src/stm32_timer.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_timer.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

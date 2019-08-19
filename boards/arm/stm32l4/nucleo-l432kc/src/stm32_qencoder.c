@@ -1,5 +1,5 @@
 /*******************************************************************************
- * boards/nucleo-l432kc/src/stm32_qencoder.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_qencoder.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

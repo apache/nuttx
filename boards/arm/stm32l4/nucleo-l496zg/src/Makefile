@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-l496zg/src/Makefile
+# boards/arm/stm32l4/nucleo-l496zg/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

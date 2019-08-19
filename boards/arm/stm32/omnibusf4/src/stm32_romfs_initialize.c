@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/omnibusf4/src/stm32_romfs_initialize.c
+ * boards/arm/stm32/omnibusf4/src/stm32_romfs_initialize.c
  * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
  *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3210e-eval/src/stm32_pmbuttons.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_pmbuttons.c
  *
  *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

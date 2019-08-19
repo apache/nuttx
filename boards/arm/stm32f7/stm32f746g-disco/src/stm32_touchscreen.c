@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f746g-disco/src/stm32_touchscreen.c
+/****************************************************************************
+ * boards/arm/stm32f7/stm32f746g-disco/src/stm32_touchscreen.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files

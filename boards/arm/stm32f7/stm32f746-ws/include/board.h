@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f746-ws/include/board.h
+/****************************************************************************
+ * boards/arm/stm32f7/stm32f746-ws/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F746_WS_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F746_WS_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F7_STM32F746_WS_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F7_STM32F746_WS_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -54,11 +54,12 @@
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The STM32F7 Discovery board provides the following clock sources:
  *
  *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
@@ -225,12 +226,12 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -293,4 +294,4 @@
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
 
-#endif  /* __BOARDS_ARM_STM32F746_WS_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32F7_STM32F746_WS_INCLUDE_BOARD_H */

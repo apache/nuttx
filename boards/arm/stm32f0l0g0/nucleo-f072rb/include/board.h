@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-f072rb/include/board.h
+/****************************************************************************
+ * boards/arm/stm32f0l0g0/nucleo-f072rb/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F072RB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_F072RB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_NUCLEO_F072RB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F0L0G0_NUCLEO_F072RB_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +47,12 @@
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
+
 /* Four different clock sources can be used to drive the system clock (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
@@ -165,6 +166,7 @@
 #define STM32_APB1_TIM17_CLKIN   (STM32_PCLK1_FREQUENCY)
 
 /* LED definitions ******************************************************************/
+
 /* LEDs
  *
  * The Nucleo-64 board has one user controllable LED, User LD2.  This green
@@ -216,6 +218,7 @@
 #define LED_PANIC        1
 
 /* Button definitions ***************************************************************/
+
 /* Buttons
  *
  * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
@@ -228,6 +231,7 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
+
 /* USART 1 */
 
 #define GPIO_USART1_TX           GPIO_USART1_TX_2 /* PA9  CN10 pin 21 */
@@ -245,4 +249,4 @@
 
 /* I2C2 */
 
-#endif  /* __BOARDS_ARM_NUCLEO_F072RB_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_F072RB_INCLUDE_BOARD_H */

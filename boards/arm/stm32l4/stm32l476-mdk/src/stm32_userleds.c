@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476-mdk/src/sam_userleds.c
+ * boards/arm/stm32l4/stm32l476-mdk/src/sam_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

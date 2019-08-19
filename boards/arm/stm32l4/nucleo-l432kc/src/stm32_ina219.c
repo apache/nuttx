@@ -1,5 +1,5 @@
 /*******************************************************************************
- * boards/nucleo-l432kc/src/stm32_ina219.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_ina219.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

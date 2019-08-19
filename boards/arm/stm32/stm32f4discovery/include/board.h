@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f4discovery/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32f4discovery/include/board.h
  *
  *   Copyright (C) 2012, 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,9 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
@@ -400,4 +400,4 @@
 
 #define DMAMAP_SDIO DMAMAP_SDIO_1
 
-#endif  /* __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H */

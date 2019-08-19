@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3210e-eval/src/stm32_djoystick.c
+ * boards/arm/stm32/stm3210e-eval/src/stm32_djoystick.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

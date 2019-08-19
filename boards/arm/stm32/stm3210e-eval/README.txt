@@ -91,13 +91,13 @@ OpenOCD
 =======
 
 I have also used OpenOCD with the STM3210E-EVAL.  In this case, I used
-the Olimex USB ARM OCD.  See the script in boards/stm3210e-eval/tools/oocd.sh
+the Olimex USB ARM OCD.  See the script in boards/arm/stm32/stm3210e-eval/tools/oocd.sh
 for more information.  Using the script:
 
 1) Start the OpenOCD GDB server
 
    cd <nuttx-build-directory>
-   boards/stm3210e-eval/tools/oocd.sh $PWD
+   boards/arm/stm32/stm3210e-eval/tools/oocd.sh $PWD
 
 2) Load Nuttx
 
@@ -170,7 +170,7 @@ Temperature Sensor
   IOCTL commands enumerated in include/nuttx/sensors/lm75.h.  Also read the
   descriptions of the stm32_lm75initialize() and stm32_lm75attach()
   interfaces in the arch/board/board.h file (sames as
-  boards/stm3210e-eval/include/board.h).
+  boards/arm/stm32/stm3210e-eval/include/board.h).
 
   NSH Command Line Application
   ----------------------------
@@ -810,7 +810,7 @@ Where <subdir> is one of the following:
          CONFIG_ARCH_CUSTOM_PMINIT=y
 
        CONFIG_ARCH_CUSTOM_PMINIT moves the PM initialization from
-       arch/arm/src/stm32/stm32_pminitialiaze.c to boards/stm3210-eval/src/stm32_pm.c.
+       arch/arm/src/stm32/stm32_pminitialiaze.c to boards/arm/stm32/stm3210-eval/src/stm32_pm.c.
        This allows us to support board-specific PM initialization.
 
          CONFIG_ARCH_IDLE_CUSTOM=y
@@ -823,7 +823,7 @@ Where <subdir> is one of the following:
 
        The configuration CONFIG_ARCH_IDLE_CUSTOM allows us to "steal" the
        normal STM32 IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace
-       this with our own custom IDLE loop (at boards/stm3210-eval/src/up_idle.c).
+       this with our own custom IDLE loop (at boards/arm/stm32/stm3210-eval/src/up_idle.c).
 
     4. Here are some additional things to note in the configuration:
 

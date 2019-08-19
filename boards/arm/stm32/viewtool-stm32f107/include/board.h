@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/viewtool-stm32f107/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/viewtool-stm32f107/include/board.h
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
-#define __BOARDS_ARM_VIEWTOOL_STM32F107_INCLUDE_BOARD_H 1
+#ifndef __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H 1
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,9 +50,9 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -130,4 +130,4 @@
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 #define BUTTON_SW4_BIT    (1 << BUTTON_SW4)
 
-#endif /* __BOARDS_ARM_VIEWTOOL_STM32F107_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H */

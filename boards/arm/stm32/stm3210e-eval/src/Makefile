@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm3210e-eval/src/Makefile
+# boards/arm/stm32/stm3210e-eval/src/Makefile
 #
 #   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

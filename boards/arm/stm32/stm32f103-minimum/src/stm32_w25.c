@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f103-minimum/src/stm32_w25.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_w25.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

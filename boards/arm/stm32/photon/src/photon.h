@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/photon/src/photon.h
+ * boards/arm/stm32/photon/src/photon.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PHOTON_SRC_PHOTON_H
-#define __BOARDS_ARM_PHOTON_SRC_PHOTON_H
+#ifndef __BOARDS_ARM_STM32_PHOTON_SRC_PHOTON_H
+#define __BOARDS_ARM_STM32_PHOTON_SRC_PHOTON_H
 
 /****************************************************************************
  * Included Files
@@ -184,4 +184,4 @@ void weak_function stm32_usbinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_PHOTON_SRC_PHOTON_H */
+#endif /* __BOARDS_ARM_STM32_PHOTON_SRC_PHOTON_H */

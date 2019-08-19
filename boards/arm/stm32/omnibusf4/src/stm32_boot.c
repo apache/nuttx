@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_boot.c
+ * boards/arm/stm32/omnibusf4/src/stm32_boot.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2011-2012, 2015, 2018 Gregory Nutt. All rights reserved.

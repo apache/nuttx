@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/maple/src/stm32_appinit.c
+ * boards/arm/stm32/maple/src/stm32_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

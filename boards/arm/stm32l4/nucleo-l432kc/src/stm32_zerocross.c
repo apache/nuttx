@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l432kc/src/stm32_zerocross.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_zerocross.c
  *
  *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -191,4 +191,3 @@ int stm32_zerocross_initialize(void)
 }
 
 #endif /* CONFIG_SENSORS_ZEROCROSS */
-

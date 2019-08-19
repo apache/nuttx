@@ -1,5 +1,5 @@
-/****************************************************************************************************
- * boards/stm32f051-discovery/src/stm32f051-discovery.h
+/****************************************************************************
+ * boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32f051-discovery.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
-#define __BOARDS_ARM_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
+#ifndef __BOARDS_ARM_STM32F0G0L0_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
+#define __BOARDS_ARM_STM32F0G0L0_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -47,11 +47,12 @@
 
 #include "stm32_gpio.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ************************************************************************************/
+/* Configuration ************************************************************/
+
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -65,12 +66,15 @@
 #  undef CONFIG_STM32F0L0G0_SPI3
 #endif
 
-/* STM32F0Discovery GPIOs ***************************************************************************/
-/* The STM32F0Discovery board has four LEDs.  Two of these are controlled by logic on the board and
+/* STM32F0Discovery GPIOs ***************************************************/
+
+/* The STM32F0Discovery board has four LEDs.
+ * Two of these are controlled by logic on the board and
  * are not available for software control:
  *
- * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that communications are in
- *            progress between the PC and the ST-LINK/V2.
+ * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate
+ *            that communications are in  progress between the PC and
+ *            the ST-LINK/V2.
  * LD2 PWR:   Red LED indicates that the board is powered.
  *
  * And two LEDs can be controlled by software:
@@ -86,8 +90,10 @@
 #define GPIO_LED2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN8)
 
-/* Button definitions *******************************************************************************/
-/* The STM32F0Discovery supports two buttons; only one button is controllable by software:
+/* Button definitions *******************************************************/
+
+/* The STM32F0Discovery supports two buttons; only one button is controllable
+ * by software:
  *
  *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
  *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.
@@ -101,19 +107,19 @@
 
 #define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public data
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Functions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_bringup
@@ -132,4 +138,4 @@
 int stm32_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H */
+#endif /* __BOARDS_ARM_STM32F0G0L0_STM32F051_DISCOVERY_SRC_STM32F051_DISCOVERY_H */

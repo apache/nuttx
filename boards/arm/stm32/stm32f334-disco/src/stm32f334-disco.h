@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f334-disco/src/stm32f334-disco.h
+ * boards/arm/stm32/stm32f334-disco/src/stm32f334-disco.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F334_DISCO_SRC_STM32F334_DISCO_H
-#define __BOARDS_ARM_STM32F334_DISCO_SRC_STM32F334_DISCO_H
+#ifndef __BOARDS_ARM_STM32_STM32F334_DISCO_SRC_STM32F334_DISCO_H
+#define __BOARDS_ARM_STM32_STM32F334_DISCO_SRC_STM32F334_DISCO_H
 
 /****************************************************************************
  * Included Files
@@ -135,25 +135,25 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 int stm32_dac_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -219,4 +219,4 @@ int stm32_powerled_setup(void);
 int stm32_smps_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_STM32F334_DISCO_SRC_STM32F334_DISCO_H */
+#endif /* __BOARDS_ARM_STM32_STM32F334_DISCO_SRC_STM32F334_DISCO_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/photon/src/dfu_signature.c
+ * boards/arm/stm32/photon/src/dfu_signature.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>

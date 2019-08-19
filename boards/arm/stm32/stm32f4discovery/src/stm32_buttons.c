@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_buttons.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_buttons.c
  *
  *   Copyright (C) 2011-2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -122,7 +122,7 @@ uint32_t board_buttons(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
@@ -142,7 +142,7 @@ uint32_t board_buttons(void)
  *   BUTTON_* definitions in board.h for the meaning of enumeration
  *   value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f429i-disco/src/Makefile
+# boards/arm/stm32/stm32f429i-disco/src/Makefile
 #
 #   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

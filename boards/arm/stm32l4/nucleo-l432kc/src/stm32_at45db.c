@@ -1,5 +1,5 @@
 /*******************************************************************************
- * config/nucleo-l432kc/src/stm32_at45.c
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_at45.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f3discovery/src/Makefile
+# boards/arm/stm32/stm32f3discovery/src/Makefile
 #
 #   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f091rc/src/stm32_sx127x.c
+ * boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_sx127x.c
  * This logic is specific for RFM98 modules (433MHz)
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.

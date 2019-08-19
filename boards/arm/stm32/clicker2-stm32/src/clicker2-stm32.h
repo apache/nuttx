@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/clicker2-stm32/src/clicker2-stm32.h
+ * boards/arm/stm32/clicker2-stm32/src/clicker2-stm32.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CLICKER2_STM32_SRC_CLICKER2_H
-#define __BOARDS_ARM_CLICKER2_STM32_SRC_CLICKER2_H
+#ifndef __BOARDS_ARM_STM32_CLICKER2_STM32_SRC_CLICKER2_H
+#define __BOARDS_ARM_STM32_CLICKER2_STM32_SRC_CLICKER2_H
 
 /****************************************************************************
  * Included Files
@@ -58,6 +58,7 @@
 #define HAVE_AUTOMOUNTER  1
 
 /* MMCSD */
+
 /* Only support uSD click board */
 
 #if !defined(CONFIG_CLICKER2_STM32_MB1_MMCSD) && \
@@ -182,6 +183,7 @@
  */
 
 /* USB device */
+
 /* USB device */
 
 #define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN9)
@@ -192,6 +194,7 @@
 #define GPIO_PWR_BATSTAT (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTD|GPIO_PIN4)
 
 /* mikroBUS *************************************************************************/
+
 /* U[S]ARTs
  *
  *   USART2 - mikroBUS1
@@ -252,9 +255,9 @@
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
@@ -267,7 +270,7 @@
 
 void weak_function stm32_spidev_initialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -279,30 +282,30 @@ void weak_function stm32_spidev_initialize(void);
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_usb_configure
  *
  * Description:
  *   Called from stm32_boardinitialize very early in inialization to setup USB-related
  *   GPIO pins for the Mikroe Clicker2 STM32 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGFS
 void stm32_usb_configure(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -383,7 +386,7 @@ int stm32_mmcsd_initialize(void);
 bool stm32_cardinserted(int slotno);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  stm32_automount_initialize
  *
  * Description:
@@ -395,13 +398,13 @@ bool stm32_cardinserted(int slotno);
  *  Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 int stm32_automount_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_automount_event
  *
  * Description:
@@ -420,11 +423,11 @@ int stm32_automount_initialize(void);
  *  Assumptions:
  *    Interrupts are disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_AUTOMOUNTER
 void stm32_automount_event(int slotno, bool inserted);
 #endif
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CLICKER2_STM32_SRC_CLICKER2_H */
+#endif /* __BOARDS_ARM_STM32_CLICKER2_STM32_SRC_CLICKER2_H */

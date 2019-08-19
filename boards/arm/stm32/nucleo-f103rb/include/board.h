@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f103rb/include/board.h
+ * boards/arm/stm32/nucleo-f103rb/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEOF103RB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEOF103RB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEOF103RB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEOF103RB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -185,4 +185,4 @@
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
 
-#endif /* __BOARDS_ARM_NUCLEO_F103RB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F103RB_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/hymini-stm32v/src/Makefile
+# boards/arm/stm32/hymini-stm32v/src/Makefile
 #
 #   Copyright (C) 2009-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

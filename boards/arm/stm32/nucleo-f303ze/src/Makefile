@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-f303ze/src/Makefile
+# boards/arm/stm32/nucleo-f303ze/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Authors: Mateusz Szafoni <raiden00@railab.me>

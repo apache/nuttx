@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/src/stm32_reset.c
+ * boards/arm/stm32/omnibusf4/src/stm32_reset.c
  *
  *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
  *   Copyright (C) 2011-2012, 2019 Gregory Nutt. All rights reserved.

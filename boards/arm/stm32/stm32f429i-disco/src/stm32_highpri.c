@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/src/stm32_highpri.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_highpri.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

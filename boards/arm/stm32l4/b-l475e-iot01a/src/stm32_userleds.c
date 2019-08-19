@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l475e-iot01a/src/stm32_userleds.c
+ * boards/arm/stm32l4/b-l475e-iot01a/src/stm32_userleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>

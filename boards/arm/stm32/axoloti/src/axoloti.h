@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/axoloti/src/axoloti.h
+ * boards/arm/stm32/axoloti/src/axoloti.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_AXOLOTI_SRC_AXOLOTI_H
-#define __BOARDS_ARM_AXOLOTI_SRC_AXOLOTI_H
+#ifndef __BOARDS_ARM_STM32_AXOLOTI_SRC_AXOLOTI_H
+#define __BOARDS_ARM_STM32_AXOLOTI_SRC_AXOLOTI_H
 
 /****************************************************************************
  * Included Files
@@ -248,4 +248,4 @@ int stm32_sdram_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_AXOLOTI_SRC_AXOLOTI_H */
+#endif /* __BOARDS_ARM_STM32_AXOLOTI_SRC_AXOLOTI_H */

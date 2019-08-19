@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/axoloti/src/stm32_adau1961.c
+ * boards/arm/stm32/axoloti/src/stm32_adau1961.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l073rz/src/stm32_bringup.c
+ * boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -66,6 +66,7 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_bringup
  *

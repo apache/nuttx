@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f429i-disco/src/stm32_bringup.c
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_bringup.c
  *
  *   Copyright (C) 2012, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

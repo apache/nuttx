@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l4r9ai-disco/include/stm32l4r9ai-disco-clocking.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l4r9ai-disco/include/stm32l4r9ai-disco-clocking.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Juha Niskanen <juha.niskanen@haltian.com>
@@ -31,25 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
-#define __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
+#define __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* The stm32l4r9ai-disco supports both HSE and LSE crystals.  As shipped, the HSE
  * is a 16 MHz crystal X2. Therefore the stm32l4r9ai-disco can run off the 16MHz
@@ -414,9 +414,9 @@
 #define BOARD_LPTIM1_FREQUENCY  STM32L4_HCLK_FREQUENCY
 #define BOARD_LPTIM2_FREQUENCY  STM32L4_HCLK_FREQUENCY
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -429,9 +429,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -439,4 +439,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H */
+#endif  /* __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H */

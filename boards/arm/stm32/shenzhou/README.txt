@@ -515,7 +515,7 @@ Where <subdir> is one of the following:
          ADC_IN8 (PB0) CON5 CN14 Pin2
          ADC_IN9 (PB1) CON5 CN14 Pin1
 
-       The signal selection is hard-coded in boards/shenzhou/src/up_adc.c:  The
+       The signal selection is hard-coded in boards/arm/stm32/shenzhou/src/up_adc.c:  The
        potentiometer input (only) is selected.
 
        These selections will enable sampling the potentiometer input at 100Hz using

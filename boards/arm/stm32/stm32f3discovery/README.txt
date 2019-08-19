@@ -127,7 +127,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
+Below are all of the configuration changes that I had to make to boards/arm/stm32/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support

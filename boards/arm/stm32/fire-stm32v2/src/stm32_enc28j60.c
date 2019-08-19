@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/fire-stm32v2/src/stm32_enc28j60.c
+ * boards/arm/stm32/fire-stm32v2/src/stm32_enc28j60.c
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

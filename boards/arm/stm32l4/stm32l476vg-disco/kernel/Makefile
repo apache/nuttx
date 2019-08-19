@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32l476vg_disco/kernel/Makefile
+# boards/arm/stm32l4/stm32l476vg_disco/kernel/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

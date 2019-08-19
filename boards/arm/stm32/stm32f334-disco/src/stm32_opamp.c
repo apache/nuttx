@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f334-disco/src/stm32_opamp.c
+ * boards/arm/stm32/stm32f334-disco/src/stm32_opamp.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/shenzhou/src/Makefile
+# boards/arm/stm32/shenzhou/src/Makefile
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm3240g_eval/src/stm32_bringup.c
+ * boards/arm/stm32/stm3240g-eval/src/stm32_bringup.c
  *
  *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

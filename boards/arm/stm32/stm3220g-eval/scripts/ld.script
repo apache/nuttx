@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3220g-eval/scripts/ld.script
+ * boards/arm/stm32/stm3220g-eval/scripts/ld.script
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

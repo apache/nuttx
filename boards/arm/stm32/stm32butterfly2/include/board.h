@@ -1,5 +1,5 @@
-/*******************************************************************************
- * boards/stm32butterfly2/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32butterfly2/include/board.h
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_BUTTERFLY2_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_BUTTERFLY2_INCLUDE_BOARD_H 1
+#ifndef __BOARDS_ARM_STM32_STM32_BUTTERFLY2_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32_BUTTERFLY2_INCLUDE_BOARD_H 1
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,11 +48,11 @@
 
 #include "stm32_rcc.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *******************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
@@ -105,7 +105,8 @@
 #define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 
-/* LED definitions ************************************************************/
+/* LED definitions **********************************************************/
+
 /* There are four LEDs on stm32butterfly2 board that can be controlled by
  * software. All pulled high and van be illuminated by driving the output low.
  *
@@ -136,7 +137,9 @@
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                       LED1 LED2 LED3 LED4
- *      ----------------- ---   -----------------------  ---- ---- ---- ----  */
+ *      ----------------- ---   -----------------------  ---- ---- ---- ----
+ */
+
 #define LED_STARTED       0  /* NuttX has been started   ON   OFF  OFF  OFF   */
 #define LED_HEAPALLOCATE  1  /* Heap has been allocated  OFF  ON   OFF  OFF   */
 #define LED_IRQSENABLED   2  /* Interrupts enabled       OFF  OFF  ON   OFF   */
@@ -164,4 +167,4 @@
 #  error "CONFIG_STM32_SPI2 is not supported"
 #endif
 
-#endif /* __BOARDS_ARM_STM32_BUTTERFLY2_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM32_BUTTERFLY2_INCLUDE_BOARD_H */

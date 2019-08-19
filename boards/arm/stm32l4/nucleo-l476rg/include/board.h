@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-l476rg/include/board.h
+/****************************************************************************
+ * boards/arm/stm32l4/nucleo-l476rg/include/board.h
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L476RG_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_L476RG_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L476RG_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L476RG_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -47,17 +47,18 @@
 
 #include <stm32l4.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L476RG)
 #  include <arch/board/nucleo-l476rg.h>
 #endif
 
-/* DMA Channel/Stream Selections ****************************************************/
+/* DMA Channel/Stream Selections ********************************************/
+
 /* Stream selections are arbitrary for now but might become important in the future
  * is we set aside more DMA channels/streams.
  */
@@ -79,7 +80,7 @@
 #define ADC2_DMA_CHAN DMACHAN_ADC2_2
 #define ADC3_DMA_CHAN DMACHAN_ADC3_2
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* CAN1: (added 31-03 -- Ben vd Veen (DisruptiveNL)
  *   RXD: PA11
@@ -260,9 +261,9 @@
 #define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1
 #define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_1
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -275,9 +276,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -285,4 +286,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_NUCLEO_F476RG_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32L4_NUCLEO_F476RG_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-f303ze/src/stm32_ssd1306.c
+ * boards/arm/stm32/nucleo-f303ze/src/stm32_ssd1306.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l072z-lrwan1/src/stm32_bringup.c
+ * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_bringup.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>

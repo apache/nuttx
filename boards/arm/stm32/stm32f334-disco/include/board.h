@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f334-disco/include/board.h
+ * boards/arm/stm32/stm32f334-disco/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F334_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F334_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F334_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F334_DISCO_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -316,4 +316,4 @@
 
 #endif  /* CONFIG_EXAMPLES_SMPS */
 
-#endif /* __BOARDS_ARM_STM32F334_DISCO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM32F334_DISCO_INCLUDE_BOARD_H */

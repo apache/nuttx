@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f769i-disco/kernel/stm32_userspace.c
+ * boards/arm/stm32f7/stm32f769i-disco/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE

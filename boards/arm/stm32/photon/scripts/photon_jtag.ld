@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/photon/scripts/photon_jtag.ld
+ * boards/arm/stm32/photon/scripts/photon_jtag.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *

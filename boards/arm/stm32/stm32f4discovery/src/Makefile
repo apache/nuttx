@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f4discovery/src/Makefile
+# boards/arm/stm32/stm32f4discovery/src/Makefile
 #
 #   Copyright (C) 2011-2013, 2015-2016, 2018-2019 Gregory Nutt. All rights
 #     reserved.

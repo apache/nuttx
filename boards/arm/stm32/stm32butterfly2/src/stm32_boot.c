@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/stm32butterfly2/src/boot.c
+ * boards/arm/stm32/stm32butterfly2/src/boot.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
  *   Author: Michał Łyszczek <michal.lyszczek@gmail.com>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l152re/src/stm32_autoleds.c
+ * boards/arm/stm32/nucleo-l152re/src/stm32_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>

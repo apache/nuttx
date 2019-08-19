@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-h743zi/src/stm32_bringup.c
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

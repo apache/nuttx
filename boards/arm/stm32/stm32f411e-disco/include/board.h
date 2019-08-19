@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f411e-disco/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32f411e-disco/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Konstantin Berezenko <kpberezenko@gmail.com>
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F411E_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F411E_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F411E_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F411E_DISCO_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
@@ -49,9 +49,9 @@
 
 #include <stm32.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /*
@@ -327,4 +327,4 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-#endif  /* __BOARDS_ARM_STM32F411E_DISCO_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_STM32F411E_DISCO_INCLUDE_BOARD_H */

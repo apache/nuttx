@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-l476rg/src/stm32_pcd8544.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_pcd8544.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/nucleo-h743zi/include/board.h
+/****************************************************************************
+ * boards/arm/stm32h7/nucleo-h743zi/include/board.h
  *
  *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_H743ZI_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_H743ZI_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,11 +48,12 @@
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Nucleo-144  board provides the following clock sources:
  *
  *   MCO: 8 MHz from MCO output of ST-LINK is used as input clock (default)
@@ -278,7 +279,7 @@
 
 #define BOARD_FLASH_WAITSTATES 4
 
-/* SDMMC definitions ****************************************************************/
+/* SDMMC definitions ********************************************************/
 
 /* Init 400kHz, PLL1Q/(2*250) */
 
@@ -291,13 +292,14 @@
 
 #define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
 
-/* Ethernet definitions ****************************************************************/
+/* Ethernet definitions *****************************************************/
 
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2    /* PG13 */
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1    /* PB 13 */
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
  * LED and LD3 a Red LED, that can be controlled by software. The following
  * definitions assume the default Solder Bridges are installed.
@@ -348,16 +350,19 @@
  * has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The NUCLEO board supports one button:  Pushbutton B1, labeled "User", is
- * connected to GPIO PI11.  A high value will be sensed when the button is depressed.
+ * connected to GPIO PI11.
+ * A high value will be sensed when the button is depressed.
  */
 
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
+
 /* USART3 (Nucleo Virtual Console) */
 
 #define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
@@ -396,14 +401,14 @@
 #define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_3 /* PE12 - D39 */
 #define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PE14 - D38 */
 
-/* DMA ******************************************************************************/
+/* DMA **********************************************************************/
 
 #define DMAMAP_SPI3_RX DMAMAP_DMA12_SPI3RX_0 /* DMA1 */
 #define DMAMAP_SPI3_TX DMAMAP_DMA12_SPI3TX_0 /* DMA1 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -416,9 +421,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -426,4 +431,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_NUCLEO_H743ZI_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_INCLUDE_BOARD_H */

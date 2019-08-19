@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f302r8/src/stm32_userleds.c
+ * boards/arm/stm32/nucleo-f302r8/src/stm32_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
  #############################################################################
- # boards/stm32f429-disco/tools/fbcalc.sh
+ # boards/arm/stm32/stm32f429-disco/tools/fbcalc.sh
  #
  #   Copyright (C) 2018 Marco Krahl. All rights reserved.
  #   Author: Marco Krahl <ocram.lhark@gmail.com>

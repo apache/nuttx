@@ -1,5 +1,5 @@
 ############################################################################
-# boards/omnibusf4/src/Makefile
+# boards/arm/stm32/omnibusf4/src/Makefile
 #
 #   Copyright (C) 2019 Bill Gatliff. All rights reserved.
 #   Copyright (C) 2011-2013, 2015-2016, 2018 Gregory Nutt. All rights

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/photon/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/photon/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PHOTON_INCLUDE_BOARD_H
-#define __BOARDS_ARM_PHOTON_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_PHOTON_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_PHOTON_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,9 +49,9 @@
 #include "stm32_rcc.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 /* The Particle photon board features a single 26MHz crystal.
@@ -294,4 +294,4 @@
 
 #define DMAMAP_SDIO DMAMAP_SDIO_1
 
-#endif  /* __BOARDS_ARM_PHOTON_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_PHOTON_INCLUDE_BOARD_H */

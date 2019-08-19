@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l475e-iot01a/src/b-l475e-iot01a.h
+ * boards/arm/stm32l4/b-l475e-iot01a/src/b-l475e-iot01a.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
-#define __BOARDS_ARM_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
+#ifndef __BOARDS_ARM_STM32L4_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
+#define __BOARDS_ARM_STM32L4_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H
 
 /****************************************************************************
  * Included Files
@@ -93,6 +93,7 @@
 #endif
 
 /* GPIO Definitions *********************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
@@ -206,4 +207,4 @@ int stm32l4_spirit_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H */
+#endif /* __BOARDS_ARM_STM32L4_B_L475E_IOT01A_SRC_B_L475E_IOT01A_H */

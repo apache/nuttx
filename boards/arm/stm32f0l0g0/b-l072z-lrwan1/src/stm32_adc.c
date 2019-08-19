@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/b-l072z-lrwan1/src/stm32_adc.c
+ * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_adc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

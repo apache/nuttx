@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f302r8/src/nucleo-f302r8.h
+ * boards/arm/stm32/nucleo-f302r8/src/nucleo-f302r8.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H
-#define __BOARDS_ARM_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H
+#define __BOARDS_ARM_STM32_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H
 
 /****************************************************************************
  * Included Files
@@ -112,4 +112,4 @@
 int stm32_pwm_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H */

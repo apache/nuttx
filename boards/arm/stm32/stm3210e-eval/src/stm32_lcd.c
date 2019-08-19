@@ -1,5 +1,5 @@
-/**************************************************************************************
- * boards/stm3210e-eval/src/stm32_lcd.c
+/****************************************************************************
+ * boards/arm/stm32/stm3210e-eval/src/stm32_lcd.c
  *
  *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,7 +35,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This driver supports the following LCDs:
  *
@@ -54,9 +54,9 @@
  * any of the above to "y" will disable support for the corresponding LCD.
  */
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -79,9 +79,9 @@
 #include "stm32.h"
 #include "stm3210e-eval.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Configuration **********************************************************************/
 /* Check contrast selection */
@@ -297,9 +297,9 @@
 #define SPFD5408B_ID          0x5408
 #define R61580_ID             0x1580
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* LCD type */
 
@@ -337,9 +337,9 @@ struct stm3210e_dev_s
   uint8_t  power;       /* Current power setting */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 /* Low Level LCD access */
 
 static void stm3210e_writereg(uint8_t regaddr, uint16_t regval);
@@ -405,9 +405,9 @@ static void stm3210e_backlight(void);
 #  define stm3210e_backlight()
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -474,17 +474,17 @@ static struct pm_callback_s g_lcdcb =
 #endif
 
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_writereg
  *
  * Description:
  *   Write to an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void stm3210e_writereg(uint8_t regaddr, uint16_t regval)
 {
@@ -494,13 +494,13 @@ static void stm3210e_writereg(uint8_t regaddr, uint16_t regval)
   LCD->value   = regval;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_readreg
  *
  * Description:
  *   Read from an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t stm3210e_readreg(uint8_t regaddr)
 {
@@ -510,26 +510,26 @@ static uint16_t stm3210e_readreg(uint8_t regaddr)
   return LCD->value;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_gramselect
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3210e_gramselect(void)
 {
   LCD->address = LCD_REG_34;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_writegram
  *
  * Description:
  *   Write one pixel to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3210e_writegram(uint16_t rgbval)
 {
@@ -538,7 +538,7 @@ static inline void stm3210e_writegram(uint16_t rgbval)
   LCD->value = rgbval;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_readsetup / stm3210e_readnosetup
  *
  * Description:
@@ -550,7 +550,7 @@ static inline void stm3210e_writegram(uint16_t rgbval)
  *   - R61580:     There is a 16-bit (1 pixel) shift in the returned data.
  *   - AM240320:   Unknown -- assuming no shift in the return data
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Used for SPFD5408B and R61580 */
 
@@ -571,7 +571,7 @@ static void stm3210e_readnosetup(FAR uint16_t *accum)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_readshift / stm3210e_readnoshift
  *
  * Description:
@@ -584,7 +584,7 @@ static void stm3210e_readnosetup(FAR uint16_t *accum)
  *                 All colors in the normal order
  *   - AM240320:   Unknown -- assuming colors are in the color order
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This version is used only for the SPFD5408B.  It shifts the data by 5-bits and swaps
  * red and green
@@ -654,14 +654,14 @@ static uint16_t stm3210e_readnoshift(FAR uint16_t *accum)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_setcursor
  *
  * Description:
  *   Set the cursor position.  In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void stm3210e_setcursor(uint16_t col, uint16_t row)
 {
@@ -669,7 +669,7 @@ static void stm3210e_setcursor(uint16_t col, uint16_t row)
   stm3210e_writereg(LCD_REG_33, col); /* GRAM vertical address */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_dumprun
  *
  * Description:
@@ -678,7 +678,7 @@ static void stm3210e_setcursor(uint16_t col, uint16_t row)
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
 static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
@@ -700,7 +700,7 @@ static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_putrun
  *
  * Description:
@@ -712,7 +712,7 @@ static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
                        size_t npixels)
@@ -790,7 +790,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_getrun
  *
  * Description:
@@ -802,7 +802,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
@@ -920,13 +920,13 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
@@ -938,13 +938,13 @@ static int stm3210e_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
@@ -955,14 +955,14 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_getpower(struct lcd_dev_s *dev)
 {
@@ -970,14 +970,14 @@ static int stm3210e_getpower(struct lcd_dev_s *dev)
   return g_lcddev.power;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_poweroff
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_poweroff(void)
 {
@@ -1007,14 +1007,14 @@ static int stm3210e_poweroff(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -1084,13 +1084,13 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_getcontrast(struct lcd_dev_s *dev)
 {
@@ -1098,13 +1098,13 @@ static int stm3210e_getcontrast(struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -1284,13 +1284,13 @@ static int stm3210e_pm_prepare(struct pm_callback_s *cb, int domain,
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_lcdinitialize
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm3210e_lcdinitialize(void)
 {
@@ -1580,7 +1580,7 @@ static inline void stm3210e_lcdinitialize(void)
   }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_backlight
  *
  * Description:
@@ -1588,7 +1588,7 @@ static inline void stm3210e_lcdinitialize(void)
  *   CH1.  TIM1 must then be configured to output a clock on PA8; the duty
  *   of the clock determineds the backlight level.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM3210E_LCD_BACKLIGHT
 static void stm3210e_backlight(void)
@@ -1746,11 +1746,11 @@ static void stm3210e_backlight(void)
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_initialize
  *
  * Description:
@@ -1758,7 +1758,7 @@ static void stm3210e_backlight(void)
  *   initialized, display memory cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
@@ -1797,14 +1797,14 @@ int board_lcd_initialize(void)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_getdev
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows support
  *   for multiple LCD devices.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
@@ -1812,13 +1812,13 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   return &g_lcddev.dev;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  board_lcd_uninitialize
  *
  * Description:
  *   Unitialize the LCD support
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void board_lcd_uninitialize(void)
 {
@@ -1826,7 +1826,7 @@ void board_lcd_uninitialize(void)
   stm32_deselectlcd();
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  stm3210e_lcdclear
  *
  * Description:
@@ -1835,7 +1835,7 @@ void board_lcd_uninitialize(void)
  *   sequences of runs that covers the entire display can be very slow.  Here the
  *   dispaly is cleared by simply setting all GRAM memory to the specified color.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void stm3210e_lcdclear(uint16_t color)
 {

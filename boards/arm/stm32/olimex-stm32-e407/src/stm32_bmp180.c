@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-e407/src/stm32_bmp180.c
+ * boards/arm/stm32/olimex-stm32-e407/src/stm32_bmp180.c
  *
  *   Copyright (C) 2019 Acutronics Robotics. All rights reserved.
  *   Author: Acutronics Robotics (Juan Flores) <juan@erlerobotics.com>

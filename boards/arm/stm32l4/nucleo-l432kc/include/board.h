@@ -1,5 +1,5 @@
 /*******************************************************************************
- * boards/nucleo-l432kc/include/board.h
+ * boards/arm/stm32l4/nucleo-l432kc/include/board.h
  *
  *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H
 
 /*******************************************************************************
  * Included File
@@ -267,4 +267,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_NUCLEO_L432KC_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H */

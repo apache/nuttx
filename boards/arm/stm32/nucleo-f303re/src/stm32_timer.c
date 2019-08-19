@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-f303re/src/stm32_timer.c
+ * boards/arm/stm32/nucleo-f303re/src/stm32_timer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

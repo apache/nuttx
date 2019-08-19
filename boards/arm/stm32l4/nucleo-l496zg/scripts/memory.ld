@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/scripts/memory.ld
+ * boards/arm/stm32l4/nucleo-144/scripts/memory.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

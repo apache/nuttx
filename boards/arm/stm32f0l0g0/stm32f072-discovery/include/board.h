@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f072-discovery/include/board.h
+/****************************************************************************
+ * boards/arm/stm32f0l0g0/stm32f072-discovery/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F072_DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F072_DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_STM32F072_DISCOVERY_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32F0L0G0_STM32F072_DISCOVERY_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +47,12 @@
 # include <stdint.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* Four different clock sources can be used to drive the system clock (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
@@ -164,7 +165,8 @@
 #define STM32_APB1_TIM16_CLKIN   (STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM17_CLKIN   (STM32_PCLK1_FREQUENCY)
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* The STM32F0-Discovery board has four LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -224,7 +226,8 @@
 #define LED_ASSERTION            2
 #define LED_PANIC                3
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The STM32F0-Discovery supports two buttons; only one button is controllable by
  * software:
  *
@@ -238,6 +241,7 @@
 #define BUTTON_USER_BIT          (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
+
 /* USART 1 */
 
 #define GPIO_USART1_TX           GPIO_USART1_TX_1
@@ -248,4 +252,4 @@
 #define GPIO_I2C1_SCL            GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA            GPIO_I2C1_SDA_1
 
-#endif  /* __BOARDS_ARM_STM32F072_DISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32F0L0G0_STM32F072_DISCOVERY_INCLUDE_BOARD_H */

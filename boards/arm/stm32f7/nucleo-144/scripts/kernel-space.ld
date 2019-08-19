@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-144/scripts/kernel-space.ld
+ * boards/arm/stm32f7/nucleo-144/scripts/kernel-space.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

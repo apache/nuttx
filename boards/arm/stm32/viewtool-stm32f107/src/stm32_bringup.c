@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/viewtool-stm32f107/src/stm32_bringup.c
+ * boards/arm/stm32/viewtool-stm32f107/src/stm32_bringup.c
  *
  *   Copyright (C) 2013, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

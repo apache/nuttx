@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mikroe-stm32f4/src/stm32_vs1053.c
+ * boards/arm/stm32/mikroe-stm32f4/src/stm32_vs1053.c
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>

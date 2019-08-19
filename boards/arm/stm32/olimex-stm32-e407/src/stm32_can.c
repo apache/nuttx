@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-405/src/stm32_can.c
+ * boards/arm/stm32/olimex-stm32-405/src/stm32_can.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

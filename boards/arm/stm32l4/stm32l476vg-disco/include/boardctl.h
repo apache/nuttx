@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32l476vg-disco/include/boardctl.h
+/****************************************************************************
+ * boards/arm/stm32l4/stm32l476vg-disco/include/boardctl.h
  *
  *   Copyright (C) 2016 dev@ziggurat29.com. All rights reserved.
  *   Author: dev@ziggurat29.com
@@ -31,10 +31,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H
-#define __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H
+#define __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H
 
 /****************************************************************************
  * Included Files
@@ -49,4 +49,4 @@
 #define BIOC_ENTER_MEMMAP   BOARDIOC_USER+1
 #define BIOC_EXIT_MEMMAP    BOARDIOC_USER+2
 
-#endif  /* __BOARDS_ARM_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H */
+#endif  /* __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_INCLUDE_BOARDCTL_H */

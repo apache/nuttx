@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l4r9ai-disco/src/stm32_autoleds.c
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32_autoleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l073rz/src/stm32_sx127x.c
+ * boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_sx127x.c
  * This logic is specific for the RFM98 modules (433MHz)
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -222,4 +222,3 @@ int stm32_lpwaninitialize(void)
 errout:
   return ret;
 }
-

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/hymini-stm32v/src/stm32_appinit.c
+ * boards/arm/stm32/hymini-stm32v/src/stm32_appinit.c
  *
  *   Copyright (C) 2009, 2011, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

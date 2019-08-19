@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f334r8/src/nucleo-f334r8.h
+ * boards/arm/stm32/nucleo-f334r8/src/nucleo-f334r8.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H
-#define __BOARDS_ARM_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H
+#define __BOARDS_ARM_STM32_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H
 
 /****************************************************************************
  * Included Files
@@ -154,25 +154,25 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 int stm32_dac_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
@@ -226,4 +226,4 @@ int stm32_opamp_setup(void);
 int stm32_hrtim_setup(void);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_F334R8_SRC_NUCLEO_F334R8_H */

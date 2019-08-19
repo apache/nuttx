@@ -1,5 +1,5 @@
 ############################################################################
-# boards/axoloti/src/Makefile
+# boards/arm/stm32/axoloti/src/Makefile
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Jason T. Harris <sirmanlypowers@gmail.com>

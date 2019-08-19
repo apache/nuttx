@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476-mdk/src/sam_autoleds.c
+ * boards/arm/stm32l4/stm32l476-mdk/src/sam_autoleds.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

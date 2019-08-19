@@ -45,7 +45,7 @@ fi
 
 # Local search directory and configurations
 
-OPENOCD_SEARCHDIR="${TOPDIR}/boards/stm3210e-eval/tools"
+OPENOCD_SEARCHDIR="${TOPDIR}/boards/arm/stm32/stm3210e-eval/tools"
 OPENOCD_WSEARCHDIR="`cygpath -w ${OPENOCD_SEARCHDIR}`"
 
 OPENOCD_PATH="/cygdrive/c/Program Files (x86)/OpenOCD/0.4.0/bin"

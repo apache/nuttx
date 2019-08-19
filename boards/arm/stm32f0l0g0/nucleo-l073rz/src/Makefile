@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-l073rz/src/Makefile
+# boards/arm/stm32f0l0g0/nucleo-l073rz/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

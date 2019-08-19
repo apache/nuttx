@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l073rz/src/nucleo-l073rz.h
+ * boards/arm/stm32f0l0g0/nucleo-l073rz/src/nucleo-l073rz.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H
-#define __BOARDS_ARM_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H
+#ifndef __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H
+#define __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo L073RZ board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -70,6 +71,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo L073RZ supports two buttons; only one button is controllable
  * by software:
  *
@@ -141,7 +143,7 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_bringup(void);
 
@@ -191,4 +193,4 @@ int stm32_lpwaninitialize(void);
 int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
-#endif /* __BOARDS_ARM_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

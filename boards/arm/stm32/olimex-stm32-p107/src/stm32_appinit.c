@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p107/src/stm32_appinit.c
+ * boards/arm/stm32/olimex-stm32-p107/src/stm32_appinit.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

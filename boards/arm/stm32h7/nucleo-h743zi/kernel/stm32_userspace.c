@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-h743zi/kernel/stm32_userspace.c
+ * boards/arm/stm32h7/nucleo-h743zi/kernel/stm32_userspace.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NUTTX_USERSPACE

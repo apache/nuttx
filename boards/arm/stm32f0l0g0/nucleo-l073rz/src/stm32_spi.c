@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l073rz/src/stm32_spi.c
+ * boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_spi.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -76,13 +76,13 @@
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-144 board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_spidev_initialize(void)
 {

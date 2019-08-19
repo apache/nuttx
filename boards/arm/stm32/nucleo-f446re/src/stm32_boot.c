@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f446re/src/stm32_boot.c
+ * boards/arm/stm32/nucleo-f446re/src/stm32_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,7 +64,7 @@
  *   has been configured and mapped but before any devices have been
  *   initialized.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void stm32_boardinitialize(void)
 {

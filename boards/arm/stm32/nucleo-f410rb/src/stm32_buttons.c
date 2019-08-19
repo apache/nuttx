@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f410rb/src/stm32_buttons.c
+ * boards/arm/stm32/nucleo-f410rb/src/stm32_buttons.c
  *
  *   Copyright (C) 2017 Gwenhael Goavec-Merou. All rights reserved.
  *   Author: Gwenhael Goavec-Merou <gwenhael.goavec@trabucayre.com>
@@ -88,7 +88,7 @@ uint32_t board_buttons(void)
   return !released;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
@@ -108,7 +108,7 @@ uint32_t board_buttons(void)
  *   BUTTON_* definitions in board.h for the meaning of enumeration
  *   value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)

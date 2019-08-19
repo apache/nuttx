@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-f4x1re/src/stm32_bringup.c
+ * boards/arm/stm32/nucleo-f4x1re/src/stm32_bringup.c
  *
  *   Copyright (C) 2014, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

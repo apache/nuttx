@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/olimex-stm32-p407/scripts/user-space.ld
+ * boards/arm/stm32/olimex-stm32-p407/scripts/user-space.ld
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

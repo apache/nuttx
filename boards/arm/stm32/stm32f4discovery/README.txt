@@ -348,7 +348,7 @@ the following lines in each Make.defs file:
 Configuration Changes
 ---------------------
 
-Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
+Below are all of the configuration changes that I had to make to boards/arm/stm32/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n              : Enable FPU support
@@ -497,7 +497,7 @@ MAPPING TO STM32 F4:
    4 Also the reset pin for the CS43L22 audio Codec.
 
 NOTE:  The configuration to test this LCD configuration is available at
-boards/stm32f4discovery/nxlines.  As of this writing, I have not seen the
+boards/arm/stm32/stm32f4discovery/nxlines.  As of this writing, I have not seen the
 LCD working so I probably have some things wrong.
 
 I might need to use a bit-banging interface.  Below is the pin configuration
@@ -593,7 +593,7 @@ that I am using:
 
 Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuration.  I have little technical information about
-the UG-2864HSWEG01 interface (see boards/stm32f4discovery/src/up_ug2864hsweg01.c).
+the UG-2864HSWEG01 interface (see boards/arm/stm32/stm32f4discovery/src/up_ug2864hsweg01.c).
 
 HCI UART
 ========
@@ -1402,7 +1402,7 @@ Configuration Sub-directories
        The HCI UART selection can be changed by re-configuring and assigning
        the different U[S]ART to the HCI.  The U[S]ART pin selections can be
        changed by modifying the disambiguation definitions in
-       boards/stm32f4discovery/include/board.h
+       boards/arm/stm32/stm32f4discovery/include/board.h
 
        I have been testing with the DVK_BT960_SA board via J10 as follows:
 
@@ -2120,7 +2120,7 @@ Configuration Sub-directories
          CONFIG_ARCH_CUSTOM_PMINIT=y
 
        CONFIG_ARCH_CUSTOM_PMINIT moves the PM initialization from
-       arch/arm/src/stm32/stm32_pminitialiaze.c to boards/stm3210-eval/src/stm32_pm.c.
+       arch/arm/src/stm32/stm32_pminitialiaze.c to boards/arm/stm32/stm3210-eval/src/stm32_pm.c.
        This allows us to support board-specific PM initialization.
 
          CONFIG_ARCH_IDLE_CUSTOM=y
@@ -2133,7 +2133,7 @@ Configuration Sub-directories
 
        The configuration CONFIG_ARCH_IDLE_CUSTOM allows us to "steal" the
        normal STM32 IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace
-       this with our own custom IDLE loop (at boards/stm3210-eval/src/up_idle.c).
+       this with our own custom IDLE loop (at boards/arm/stm32/stm3210-eval/src/up_idle.c).
 
     3. Here are some additional things to note in the configuration:
 

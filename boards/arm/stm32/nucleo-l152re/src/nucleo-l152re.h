@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l152re/src/nucleo-l152re.h
+ * boards/arm/stm32/nucleo-l152re/src/nucleo-l152re.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H
-#define __BOARDS_ARM_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H
+#define __BOARDS_ARM_STM32_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H
 
 /****************************************************************************
  * Included Files
@@ -88,4 +88,4 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
-#endif /* __BOARDS_ARM_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H */
+#endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H */

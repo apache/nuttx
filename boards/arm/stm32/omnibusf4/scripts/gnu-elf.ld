@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/omnibusf4/scripts/gnu-elf.ld
+ * boards/arm/stm32/omnibusf4/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -75,7 +75,7 @@ Using JTAG
 
   The Clicker2 comes with the mikroBootloader installed.  That bootloader
   has not been used and is possibly incompatible with the Clicker2-STM32
-  linker script at boards/clicker2-stm32/scripts/flash.ld.  Often code must
+  linker script at boards/arm/stm32/clicker2-stm32/scripts/flash.ld.  Often code must
   be built to execute at an offset in to FLASH when a bootloader is used.
   Certainly that is the case for the ST-Micro DFU bootloader but I am not
   aware of the requirements for use with the mikroBootloader.

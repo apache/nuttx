@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-l432kc/src/Makefile
+# boards/arm/stm32l4/nucleo-l432kc/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f3discovery/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/stm32f3discovery/include/board.h
  *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F3DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F3DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_STM32F3DISCOVERY_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_STM32F3DISCOVERY_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,9 +49,9 @@
 #include "stm32_rcc.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -272,4 +272,4 @@
 #define GPIO_I2C2_SDA  GPIO_I2C2_SDA_1
 #endif
 
-#endif  /* __BOARDS_ARM_STM32F3DISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32_STM32F3DISCOVERY_INCLUDE_BOARD_H */

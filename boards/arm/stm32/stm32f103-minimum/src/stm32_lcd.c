@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f103-minimum/src/stm32_lcd.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_lcd.c
  *
  *   Copyright (C) 2016 Uniquix Tecnologia. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>

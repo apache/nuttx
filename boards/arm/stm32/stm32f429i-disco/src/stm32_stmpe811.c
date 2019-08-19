@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/stm32f429i-disco/src/stm32_stmpe811.c
+/****************************************************************************
+ * boards/arm/stm32/stm32f429i-disco/src/stm32_stmpe811.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files

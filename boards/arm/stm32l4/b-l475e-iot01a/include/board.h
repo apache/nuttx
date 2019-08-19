@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/b-l475e-iot01a/include/board.h
+/****************************************************************************
+ * boards/arm/stm32l4/b-l475e-iot01a/include/board.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_BOARD_H
-#define __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_BOARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,15 +46,16 @@
 #  include <stdbool.h>
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 #include <arch/board/b-l475e-iot01a_clock.h>
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
+
 /* LEDs
  *
  * Two user LEDs are available on pins PA5 and PB14.
@@ -95,13 +96,14 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* SPSGRF-915 Spirit1 library definitions ***********************************(*******/
+/* SPSGRF-915 Spirit1 library definitions ***********************************/
 
 /* The TX_WAIT_PCKT_PERIOD should equal the max packet tx time. */
 
 #define SPIRIT_TX_WAIT_PCKT_PERIOD    50
 
-/* The RX_WAIT_ACK_PERIOD is the period within which the ACK packet must be received.
+/* The RX_WAIT_ACK_PERIOD is the period within which the ACK packet must be
+ * received.
  * ca PACKET_LENGTH / DATA_RATE + ELABORATION_TIME + SPI_OPERATIONS_USED.
  */
 
@@ -131,7 +133,7 @@
 
 #define SPIRIT_VERSION                SPIRIT_VERSION_3_0
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1: Connected to STLink Debug via PB6, PB7 */
 
@@ -173,9 +175,9 @@
 #define GPIO_QSPI_IO3 (GPIO_QSPI_BK1_IO3_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 #define GPIO_QSPI_SCK (GPIO_QSPI_CLK_2     | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -188,9 +190,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -198,4 +200,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_B_L475E_IOT01A_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_BOARD_H */

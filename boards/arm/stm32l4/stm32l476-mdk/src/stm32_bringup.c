@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l476-mdk/src/stm32_bringup.c
+ * boards/arm/stm32l4/stm32l476-mdk/src/stm32_bringup.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f746-ws/src/stm32_sdmmc.c
+ * boards/arm/stm32f7/stm32f746-ws/src/stm32_sdmmc.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Card detections requires card support and a card detection GPIO */
@@ -131,6 +132,7 @@ int stm32_sdio_initialize(void)
 #endif
 
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);

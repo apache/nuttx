@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32fldiscovery/scripts/stm32l152rb.ld
+ * boards/arm/stm32/stm32fldiscovery/scripts/stm32l152rb.ld
  *
  *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm3240g_eval/src/stm32_autoleds.c
+ * boards/arm/stm32/stm3240g-eval/src/stm32_autoleds.c
  *
  *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-f072rb/src/stm32_appinit.c
+ * boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_appinit.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

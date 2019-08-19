@@ -1,5 +1,5 @@
-/************************************************************************************
- * boards/olimex-stm32-p107/include/board.h
+/****************************************************************************
+ * boards/arm/stm32/olimex-stm32-p107/include/board.h
  *
  *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __BOARDS_ARM_OLIMEX_STM32_P107_INCLUDE_BOARD_H
-#define __BOARDS_ARM_OLIMEX_STM32_P107_INCLUDE_BOARD_H 1
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P107_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P107_INCLUDE_BOARD_H 1
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,9 +49,9 @@
 #include "stm32_sdio.h"
 #include "stm32.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Clocking *************************************************************************/
 
@@ -117,4 +117,4 @@
 #  define STM32_PLL_PLL3MUL     RCC_CFGR2_PLL3MULx10  /* MCO 5MHz * 10 = 50MHz */
 #endif
 
-#endif /* __BOARDS_ARM_OLIMEX_STM32_P107_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P107_INCLUDE_BOARD_H */

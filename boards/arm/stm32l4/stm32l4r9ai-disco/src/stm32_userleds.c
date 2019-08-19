@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32l4r9ai-disco/src/stm32_userleds.c
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32_userleds.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -102,8 +102,9 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
         {
           /* Restore normal LEDs operation */
 
-          //stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0);
-          //stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0);
+          /* stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0); */
+
+          /* stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0); */
         }
         break;
 

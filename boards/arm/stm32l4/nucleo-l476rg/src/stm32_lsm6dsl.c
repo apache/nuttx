@@ -1,5 +1,5 @@
 /*****************************************************************************
- * boards/nucleo-l476rg/src/stm32_lsm6dsl.c
+ * boards/arm/stm32l4/nucleo-l476rg/src/stm32_lsm6dsl.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -89,7 +89,8 @@ int stm32l4_lsm6dsl_initialize(char *devpath)
   ret = lsm6dsl_sensor_register("/dev/lsm6dsl0", i2c, LSM6DSLACCEL_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);
+      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n",
+            devpath);
       return -ENODEV;
     }
 

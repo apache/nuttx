@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f429i-disco/scripts/kernel-space.ld
+ * boards/arm/stm32/stm32f429i-disco/scripts/kernel-space.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

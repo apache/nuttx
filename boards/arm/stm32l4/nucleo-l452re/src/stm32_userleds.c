@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/nucleo-l452re/src/stm32_userleds.c
+ * boards/arm/stm32l4/nucleo-l452re/src/stm32_userleds.c
  *
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

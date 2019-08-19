@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/stm32f4discovery/src/stm32_st7567.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_st7567.c
  *
  *   Copyright (C) 2016 Uniquix Tecnologia. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
