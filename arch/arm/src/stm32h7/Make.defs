@@ -108,6 +108,13 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif
 
+ifeq ($(CONFIG_ARMV7M_DTCM),y)
+CHIP_CSRCS += stm32_dtcm.c
+ifeq ($(CONFIG_STM32H7_DTCM_PROCFS),y)
+CHIP_CSRCS += stm32_procfs_dtcm.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32H7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
