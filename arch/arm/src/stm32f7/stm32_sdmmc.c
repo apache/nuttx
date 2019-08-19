@@ -1,9 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_sdmmc.c
  *
- *   Copyright (C) 2009, 2011-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2018,2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *            Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,6 +108,17 @@
  *      Module) then enable this option to activate the internal pull-up
  *      resistors.
  */
+
+/* If there are 2 SDMMC enabled, then Slot 0 is SDMMC1, and Slot 1 is SDMMC2
+ * If there is only 1 SDMMC, then Slot 0 is assigned to the defined SDMMC
+ * hence, if only SDMMC2 is defined it will be slot 0.
+ */
+
+#if !defined(CONFIG_STM32F7_SDMMC1)
+#  define SDMMC2_SLOT  0
+#else
+#  define SDMMC2_SLOT  1
+#endif
 
 #ifndef CONFIG_STM32F7_SDMMC_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
@@ -2956,6 +2967,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
+#ifdef CONFIG_STM32F7_DMACAPABLE
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2967,6 +2979,7 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
     {
       return -EFAULT;
     }
+#endif
 
   return 0;
 }
@@ -3336,15 +3349,15 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
       priv = &g_sdmmcdev1;
 
-#ifdef CONFIG_STM32F7_SDMMC_DMA
+#  ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC1_DMACHAN;
-#endif
+#  endif
 
-#ifdef CONFIG_SDMMC1_WIDTH_D1_ONLY
+#  ifdef CONFIG_SDMMC1_WIDTH_D1_ONLY
       priv->onebit = true;
-#else
+#  else
       priv->onebit = false;
-#endif
+#  endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
        * 8-bit wide bus operation but D4-D7 are not configured).
@@ -3353,35 +3366,35 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        * in the scope of the board support package.
        */
 
-#ifndef CONFIG_SDIO_MUXBUS
+#  ifndef CONFIG_SDIO_MUXBUS
       stm32_configgpio(GPIO_SDMMC1_D0 | priv->pullup);
-#ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
+#  ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
       stm32_configgpio(GPIO_SDMMC1_D1 | priv->pullup);
       stm32_configgpio(GPIO_SDMMC1_D2 | priv->pullup);
       stm32_configgpio(GPIO_SDMMC1_D3 | priv->pullup);
-#endif
+#  endif
       stm32_configgpio(GPIO_SDMMC1_CK);
       stm32_configgpio(GPIO_SDMMC1_CMD | priv->pullup);
-#endif
+#  endif
     }
   else
 #endif
 #ifdef CONFIG_STM32F7_SDMMC2
-  if (slotno == 1)
+  if (slotno == SDMMC2_SLOT)
     {
       /* Select SDMMC 2 */
 
       priv = &g_sdmmcdev2;
 
-#ifdef CONFIG_STM32F7_SDMMC_DMA
+#  ifdef CONFIG_STM32F7_SDMMC_DMA
       dmachan = SDMMC2_DMACHAN;
-#endif
+#  endif
 
-#ifdef CONFIG_SDMMC2_WIDTH_D1_ONLY
+#  ifdef CONFIG_SDMMC2_WIDTH_D1_ONLY
       priv->onebit = true;
-#else
+#  else
       priv->onebit = false;
-#endif
+#  endif
 
       /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
        * 8-bit wide bus operation but D4-D7 are not configured).
@@ -3390,16 +3403,16 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        * in the scope of the board support package.
        */
 
-#ifndef CONFIG_SDIO_MUXBUS
+#  ifndef CONFIG_SDIO_MUXBUS
       stm32_configgpio(GPIO_SDMMC2_D0 | priv->pullup);
-#ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
+#  ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
       stm32_configgpio(GPIO_SDMMC2_D1 | priv->pullup);
       stm32_configgpio(GPIO_SDMMC2_D2 | priv->pullup);
       stm32_configgpio(GPIO_SDMMC2_D3 | priv->pullup);
-#endif
+#  endif
       stm32_configgpio(GPIO_SDMMC2_CK);
       stm32_configgpio(GPIO_SDMMC2_CMD | priv->pullup);
-#endif
+#  endif
     }
   else
 #endif

@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/nuttx/sched.h
  *
- *   Copyright (C) 2007-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,9 @@
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
+
 /* Configuration ****************************************************************/
+
 /* Task groups currently only supported for retention of child status */
 
 #undef HAVE_GROUP_MEMBERS
@@ -89,6 +91,7 @@
 #endif
 
 /* Task Management Definitions **************************************************/
+
 /* Special task IDS.  Any negative PID is invalid. */
 
 #define NULL_TASK_PROCESS_ID       (pid_t)0
@@ -188,6 +191,7 @@
 #ifndef __ASSEMBLY__
 
 /* General Task Management Types ************************************************/
+
 /* This is the type of the task_state field of the TCB. NOTE: the order and
  * content of this enumeration is critical since there are some OS tables indexed
  * by these values.  The range of values is assumed to fit into a uint8_t in
@@ -313,6 +317,7 @@ struct sporadic_s
 #endif /* CONFIG_SCHED_SPORADIC */
 
 /* struct child_status_s *********************************************************/
+
 /* This structure is used to maintain information about child tasks.  pthreads
  * work differently, they have join information.  This is only for child tasks.
  */
@@ -329,17 +334,19 @@ struct child_status_s
 #endif
 
 /* struct pthread_cleanup_s ******************************************************/
+
 /* This structure describes one element of the pthread cleanup stack */
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 struct pthread_cleanup_s
 {
-   pthread_cleanup_t pc_cleaner;    /* Cleanup callback address */
-   FAR void *pc_arg;                /* Argument that accompanies the callback */
+  pthread_cleanup_t pc_cleaner;     /* Cleanup callback address */
+  FAR void *pc_arg;                 /* Argument that accompanies the callback */
 };
 #endif
 
 /* type pthread_keyset_t *********************************************************/
+
 /* Smallest addressable type that can hold the entire configured number of keys */
 
 #if defined(CONFIG_NPTHREAD_KEYS) && CONFIG_NPTHREAD_KEYS > 0
@@ -354,7 +361,14 @@ struct pthread_cleanup_s
 #  endif
 #endif
 
+/* type grpid_t ******************************************************************/
+
+/* The task group ID */
+
+typedef int16_t grpid_t;
+
 /* struct dspace_s ***************************************************************/
+
 /* This structure describes a reference counted D-Space region.  This must be a
  * separately allocated "break-away" structure that can be owned by a task and
  * any pthreads created by the task.
@@ -381,6 +395,7 @@ struct dspace_s
 #endif
 
 /* struct task_group_s ***********************************************************/
+
 /* All threads created by pthread_create belong in the same task group (along with
  * the thread of the original task).  struct task_group_s is a shared structure
  * referenced by the TCB of each thread that is a member of the task group.
@@ -416,15 +431,22 @@ struct task_group_s
 {
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   struct task_group_s *flink;       /* Supports a singly linked list            */
-  gid_t tg_gid;                     /* The ID of this task group                */
+  grpid_t tg_grpid;                 /* The ID of this task group                */
 #endif
 #ifdef HAVE_GROUP_MEMBERS
-  gid_t tg_pgid;                    /* The ID of the parent task group          */
+  grpid_t tg_pgrpid;                /* The ID of the parent task group          */
 #endif
 #if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
   pid_t tg_task;                    /* The ID of the task within the group      */
 #endif
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
+
+  /* User identity **************************************************************/
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  uid_t   tg_uid;                   /* User identity                            */
+  gid_t   tg_gid;                   /* User group identity                      */
+#endif
 
   /* Group membership ***********************************************************/
 
@@ -470,7 +492,7 @@ struct task_group_s
 #endif
 
 #ifndef HAVE_GROUP_MEMBERS
-  /* REVISIT: What if parent thread exits?  Should use tg_pgid. */
+  /* REVISIT: What if parent thread exits?  Should use tg_pgrpid. */
 
   pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
 #ifndef CONFIG_SCHED_CHILD_STATUS
@@ -481,6 +503,7 @@ struct task_group_s
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* waitpid support ************************************************************/
+
   /* Simple mechanism used only when there is no support for SIGCHLD            */
 
   uint8_t tg_nwaiters;              /* Number of waiters                        */
@@ -491,6 +514,7 @@ struct task_group_s
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Pthreads *******************************************************************/
+
                                     /* Pthread join Info:                       */
   sem_t tg_joinsem;                 /*   Mutually exclusive access to join data */
   FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
@@ -516,6 +540,7 @@ struct task_group_s
 #endif
 
   /* PIC data space and address environments ************************************/
+
   /* Logically the PIC data space belongs here (see struct dspace_s).  The
    * current logic needs review:  There are differences in the away that the
    * life of the PIC data is managed.
@@ -527,6 +552,7 @@ struct task_group_s
 
 #if CONFIG_NFILE_STREAMS > 0
   /* FILE streams ***************************************************************/
+
   /* In a flat, single-heap build.  The stream list is allocated with this
    * structure.  But kernel mode with a kernel allocator, it must be separately
    * allocated using a user-space allocator.
@@ -566,6 +592,7 @@ struct task_group_s
 };
 
 /* struct tcb_s ******************************************************************/
+
 /* This is the common part of the task control block (TCB).  The TCB is the heart
  * of the NuttX task-control logic.  Each task or thread is represented by a TCB
  * that includes these common definitions.
@@ -681,11 +708,12 @@ struct tcb_s
   struct xcptcontext xcp;                /* Interrupt register save area        */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  char name[CONFIG_TASK_NAME_SIZE+1];    /* Task name (with NUL terminator)     */
+  char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator)     */
 #endif
 };
 
 /* struct task_tcb_s *************************************************************/
+
 /* This is the particular form of the task control block (TCB) structure used by
  * tasks (and kernel threads).  There are two TCB forms:  one for pthreads and
  * one for tasks.  Both share the common TCB fields (which must appear at the
@@ -714,6 +742,7 @@ struct task_tcb_s
 };
 
 /* struct pthread_tcb_s **********************************************************/
+
 /* This is the particular form of the task control block (TCB) structure used by
  * pthreads.  There are two TCB forms:  one for pthreads and one for tasks.  Both
  * share the common TCB fields (which must appear at the top of the structure)
@@ -791,6 +820,7 @@ EXTERN uint32_t g_crit_max[1];
  ********************************************************************************/
 
 /* TCB helpers ******************************************************************/
+
 /* sched_self() returns the TCB of the currently running task (i.e., the
  * caller)
  */
@@ -809,6 +839,7 @@ void sched_foreach(sched_foreach_t handler, FAR void *arg);
 FAR struct tcb_s *sched_gettcb(pid_t pid);
 
 /* File system helpers **********************************************************/
+
 /* These functions all extract lists from the group structure assocated with the
  * currently executing task.
  */

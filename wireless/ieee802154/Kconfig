@@ -49,12 +49,6 @@ config IEEE802154_PRIMITIVE_IRQRESERVE
 		because there are no interrupt level allocations performed by the
 		current IEEE 802.15.4 MAC code.
 
-config IEEE802154_DEFAULT_EADDR
-	hex "IEEE 802.15.4 Default Extended Address"
-	default 0x00fade00deadbeef
-	---help---
-		Set the default extended address to be used by MAC networks on init
-
 config IEEE802154_MAC
 	bool "Software MAC layer"
 	default n
@@ -163,6 +157,30 @@ config IEEE802154_NETDEV_RECVRPRIO
 		MAC layer will call the next highest priority receiver, in this case,
 		the MAC character driver (which should always be lowest priority since
 		it is a "catch-all" type receiver).
+
+config IEEE802154_NETDEV_DEFAULT_PREFIX_0
+	hex "IPv6 Prefix 0"
+	default 0xfe80
+	---help---
+		First section of IPv6 Prefix
+
+config IEEE802154_NETDEV_DEFAULT_PREFIX_1
+	hex "IPv6 Prefix 1"
+	default 0x0000
+	---help---
+		Second section of IPv6 Prefix
+
+config IEEE802154_NETDEV_DEFAULT_PREFIX_2
+	hex "IPv6 Prefix 2"
+	default 0x0000
+	---help---
+		Third section of IPv6 Prefix
+
+config IEEE802154_NETDEV_DEFAULT_PREFIX_3
+	hex "IPv6 Prefix 3"
+	default 0x0000
+	---help---
+		Fourth section of IPv6 Prefix
 
 endif # IEEE802154_NETDEV
 endif # IEEE802154_MACDEV

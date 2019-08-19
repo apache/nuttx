@@ -14,7 +14,7 @@ menuconfig LCD
 		drivers support interfaces as defined in include/nuttx/lcd/lcd.h
 
 		This selection is necessary to enable support for LCD drivers in
-		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		drivers/lcd as well as for board-specific LCD drivers in the boards/
 		subdirectories.
 
 if LCD
@@ -1288,7 +1288,7 @@ menuconfig SLCD
 		amd slcd_codec.h
 
 		This selection is necessary to enable support for SLCD drivers in
-		drivers/lcd as well as for board-specific LCD drivers in the configs/
+		drivers/lcd as well as for board-specific LCD drivers in the boards/
 		subdirectories.
 
 if SLCD
@@ -1312,8 +1312,7 @@ config LCD_LCD1602
 		HD44780U LCD controller.  See also include/nuttx/lcd/hd4478ou.h.
 
 		NOTE:  There is no common implementation of the LCD1602 driver.
-		Rather, there are board-by-board implementations.  See, for example,
-		configs/pcblogic-pic32mx/src/up_lcd1602.c.
+		Rather, there are board-by-board implementations.
 
 config LCD_BACKPACK
 	bool "PCF8574 LCD Backpack"

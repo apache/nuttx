@@ -118,12 +118,12 @@
 #  define TIVA_CONSOLE_BITS     CONFIG_UART7_BITS
 #  define TIVA_CONSOLE_PARITY   CONFIG_UART7_PARITY
 #  define TIVA_CONSOLE_2STOP    CONFIG_UART7_2STOP
-#elif !defined(CONFIG_NO_SERIAL_CONSOLE)
+#elif defined(HAVE_SERIAL_CONSOLE)
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Get LCRH settings */
-#ifndef CONFIG_NO_SERIAL_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
 
 #  if TIVA_CONSOLE_BITS == 5
 #    define UART_LCRH_NBITS UART_LCRH_WLEN_5BITS
@@ -155,7 +155,7 @@
 
 #  define UART_LCRH_VALUE (UART_LCRH_NBITS|UART_LCRH_PARITY|UART_LCRH_NSTOP|UART_LCRH_FEN)
 
-#endif /* !CONFIG_NO_SERIAL_CONSOLE */
+#endif /* HAVE_SERIAL_CONSOLE */
 
 /* Calculate BAUD rate from the SYS clock:
  *
@@ -248,7 +248,7 @@ void up_lowputc(char ch)
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
+ *   console.  Its purpose is to get the console output available as soon
  *   as possible.
  *
  ****************************************************************************/

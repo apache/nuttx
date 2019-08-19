@@ -36,6 +36,10 @@ config WL_GS2200M_SPI_FREQUENCY
 	default 4000000
 	range 4000000 10000000
 
+config WL_GS2200M_DISABLE_DHCPC
+	bool "Disable the internal dhcp client"
+	default n
+
 endif
 
 source drivers/wireless/spirit/Kconfig

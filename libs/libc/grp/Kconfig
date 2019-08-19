@@ -1,0 +1,43 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_GROUP_FILE
+	bool "Have group file"
+	default n
+	depends on FS_READABLE
+	---help---
+		Have a group file.  The format of the group file is:
+
+		    group:x:gid:users
+
+		  Where:
+		    group:  The group name
+		    x:      Group password
+		    gid:    Group ID
+		    users:  A comma separated list of members of the group
+
+if LIBC_GROUP_FILE
+
+config LIBC_GROUP_FILEPATH
+	string "Path to group file"
+	default "/etc/group"
+	---help---
+		Provides the location of the group file.  The default is /etc/group
+
+config LIBC_GROUP_NUSERS
+	int "Maximum group members"
+	default 8
+	---help---
+		The maximum length number of user names that can be reported for a
+		group.
+
+config LIBC_GROUP_LINESIZE
+	int "Maximum line size"
+	default 80
+	---help---
+		The maximum length of one line in the group file.  This determines
+		the size of the I/O buffer used to access the group file.
+
+endif # LIBC_GROUP_FILE

@@ -209,9 +209,9 @@
 #  define SD_ACMDIDX49    49  /* CHANGE_SECURE_AREA: */
 #  define SD_ACMDIDX51    51  /* SEND_SCR: Reads the SD Configuration Register (SCR)
                                * Addressed data transfer command, R1 response */
-#  define SDIO_ACMDIDX52  52  /* IO_RW_DIRECT: (SDIO only)
+#  define SD_ACMDIDX52    52  /* IO_RW_DIRECT: (SDIO only)
                                * -R5 response, 23:16=status 15:8=data */
-#  define SDIO_ACMDIDX53  53  /* IO_RW_EXTENDED: (SDIO only)
+#  define SD_ACMDIDX53    53  /* IO_RW_EXTENDED: (SDIO only)
                                * -R5 response, 23:16=status */
 
 /* Response Encodings:
@@ -222,9 +222,10 @@
  * C - Bits 0-5:   Command index
  * R - Bits 6-9:   Response type
  * X - Bits 10-12: Data transfer type
- * M - Bit 13:     Multiple block transfer
+ * M - Bit 13:     MMC Multiblock transfer
  * S - Bit 14:     Stop data transfer
  * O - Bit 15:     Open drain
+ * D - But 16:     SDIO Multiblock transfer
  */
 
 #define MMCSD_RESPONSE_SHIFT (6)
@@ -259,6 +260,7 @@
 /* Other options */
 
 #define MMCSD_OPENDRAIN     (1 << 15)
+#define SDIO_MULTIBLOCK     (1 << 16)
 
 /* Fully decorated MMC, SD, SDIO commands */
 
@@ -325,8 +327,9 @@
 #define SD_ACMD48       (SD_ACMDIDX48  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define SD_ACMD49       (SD_ACMDIDX49  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define SD_ACMD51       (SD_ACMDIDX51  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
-#define SDIO_ACMD52     (SDIO_ACMDIDX52|MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
-#define SDIO_ACMD53     (SDIO_ACMDIDX53|MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
+#define SD_ACMD52       (SD_ACMDIDX52  |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
+#define SD_ACMD52ABRT   (SD_ACMDIDX52  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR|MMCSD_STOPXFR)
+#define SD_ACMD53       (SD_ACMDIDX53  |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
 
 /* SDIO Card Common Control Registers definitions
  * see https://www.sdcard.org/developers/overview/sdio/
@@ -421,6 +424,8 @@
 #define SDIO_CAPS_1BIT_ONLY       0x01 /* Bit 0=1: Supports only 1-bit operation */
 #define SDIO_CAPS_DMASUPPORTED    0x02 /* Bit 1=1: Supports DMA data transfers */
 #define SDIO_CAPS_DMABEFOREWRITE  0x04 /* Bit 2=1: Executes DMA before write command */
+#define SDIO_CAPS_4BIT            0x08 /* Bit 3=1: Supports 4 bit operation */
+#define SDIO_CAPS_8BIT            0x10 /* Bit 4=1: Supports 8 bit operation */
 
 /****************************************************************************
  * Name: SDIO_STATUS

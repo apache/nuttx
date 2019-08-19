@@ -4,6 +4,7 @@
 /math.h
 /float.h
 /stdarg.h
+/setjmp.h
 /features.h
 /uClibc++
 /libcxx

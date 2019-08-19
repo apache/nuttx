@@ -114,13 +114,13 @@
 #  undef CONFIG_TIVA_GPIOQ_IRQS
 #endif
 #if TIVA_NPORTS < 16
-#  undef CONFIG_TIVA_GPIOQ_IRQS
+#  undef CONFIG_TIVA_GPIOR_IRQS
 #endif
 #if TIVA_NPORTS < 17
-#  undef CONFIG_TIVA_GPIOQ_IRQS
+#  undef CONFIG_TIVA_GPIOS_IRQS
 #endif
 #if TIVA_NPORTS < 18
-#  undef CONFIG_TIVA_GPIOQ_IRQS
+#  undef CONFIG_TIVA_GPIOT_IRQS
 #endif
 
 /* Bit-encoded input to tiva_configgpio() ***********************************/

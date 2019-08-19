@@ -39,7 +39,7 @@
 /* This header file contains function prototypes for the interfaces between
  * (1) the nuttx core-code, (2) the microprocessor specific logic that
  * resides under the arch/ sub-directory, and (3) the board-specific logic
- * that resides under configs/
+ * that resides under boards/
  *
  * Naming conventions:
  *
@@ -78,12 +78,12 @@
  *
  * 4. Board-Specific Interfaces.
  *
- *    Any interface which is unique to a board should be prefixed with
+ *    Any interface that is unique to a board should be prefixed with
  *    the board name, for example stm32f4discovery_. Sometimes the board
- *    name is too long so stm32_ would be okay too. These should be
- *    prototyped in configs/<board>/src/<board>.h and should not be used
- *    outside of that board directory since board-specific definitions
- *    have no meaning outside of the board directory.
+ *    name is too long so stm32_ would be okay too.  These should be
+ *    prototyped in boards/<arch>/<chip><board>/src/<board>.h and should
+ *    not be used outside of that board directory since board-specific
+ *    definitions have no meaning outside of the board directory.
  */
 
 /****************************************************************************
@@ -226,7 +226,7 @@ void up_idle(void);
  *   has been created. This function is called to initialize
  *   the processor specific portions of the new TCB.
  *
- *   This function must setup the intial architecture registers
+ *   This function must setup the initial architecture registers
  *   and/or  stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
@@ -1418,8 +1418,8 @@ int up_prioritize_irq(int irq, int priority);
  * following custom functions.
  *
  *   Architecture specific timer initialiation logic initializes the timer
- *     facilities.  This happens early in the intialization sequence (via
- *     up_intialize()).
+ *     facilities.  This happens early in the initialization sequence (via
+ *     up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *

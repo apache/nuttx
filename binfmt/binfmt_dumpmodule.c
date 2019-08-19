@@ -70,21 +70,21 @@ int dump_module(FAR const struct binary_s *bin)
 {
   if (bin)
     {
-      berr("Module:\n");
-      berr("  filename:  %s\n", bin->filename);
-      berr("  argv:      %p\n", bin->argv);
-      berr("  entrypt:   %p\n", bin->entrypt);
-      berr("  mapped:    %p size=%d\n", bin->mapped, bin->mapsize);
-      berr("  alloc:     %p %p %p\n", bin->alloc[0], bin->alloc[1], bin->alloc[2]);
+      binfo("Module:\n");
+      binfo("  filename:  %s\n", bin->filename);
+      binfo("  argv:      %p\n", bin->argv);
+      binfo("  entrypt:   %p\n", bin->entrypt);
+      binfo("  mapped:    %p size=%d\n", bin->mapped, bin->mapsize);
+      binfo("  alloc:     %p %p %p\n", bin->alloc[0], bin->alloc[1], bin->alloc[2]);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-      berr("  ctors:     %p nctors=%d\n", bin->ctors, bin->nctors);
-      berr("  dtors:     %p ndtors=%d\n", bin->dtors, bin->ndtors);
+      binfo("  ctors:     %p nctors=%d\n", bin->ctors, bin->nctors);
+      binfo("  dtors:     %p ndtors=%d\n", bin->dtors, bin->ndtors);
 #endif
 #ifdef CONFIG_ARCH_ADDRENV
-      berr("  addrenv:   %p\n", bin->addrenv);
+      binfo("  addrenv:   %p\n", bin->addrenv);
 #endif
-      berr("  stacksize: %d\n", bin->stacksize);
-      berr("  unload:    %p\n", bin->unload);
+      binfo("  stacksize: %d\n", bin->stacksize);
+      binfo("  unload:    %p\n", bin->unload);
     }
 
   return OK;

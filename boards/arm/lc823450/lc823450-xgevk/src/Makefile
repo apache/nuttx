@@ -1,0 +1,90 @@
+############################################################################
+# boards/arm/lc823450/lc823450-xgevk/src/Makefile
+#
+#  Copyright 2017 Sony Video & Sound Products Inc.
+#  Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+-include $(TOPDIR)/Make.defs
+
+ASRCS =
+CSRCS = lc823450_boot.c lc823450_mux.c
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += lc823450_appinit.c lc823450_bringup.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += lc823450_reset.c
+endif
+else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+CSRCS += lc823450_bringup.c
+endif
+
+ifeq ($(CONFIG_LC823450_SDIF),y)
+CSRCS += lc823450_sdif.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CSRCS += lc823450_adc.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += lc823450_usbmsc.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += lc823450_spi.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7565),y)
+CSRCS += lc823450_st7565.c
+endif
+
+ifeq ($(CONFIG_BMA250),y)
+CSRCS += lc823450_bma250.c
+endif
+
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += lc823450_netinit.c
+endif
+
+ifeq ($(CONFIG_AUDIO_WM8776),y)
+CSRCS += lc823450_wm8776.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += lc823450_autoleds.c
+endif
+
+ifeq ($(CONFIG_LC823450_XGEVK_BTPOWER),y)
+CSRCS += lc823450_bt.c
+endif
+
+include $(TOPDIR)/boards/Board.mk

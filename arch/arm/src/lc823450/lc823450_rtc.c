@@ -282,7 +282,7 @@ static int rtc_interrupt(int irq, void *context, FAR void *arg)
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
  *   It is used to replace the system timer.  It is only used by the RTOS during
- *   intialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
  *   are selected (and CONFIG_RTC_HIRES is not).
  *
  *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That

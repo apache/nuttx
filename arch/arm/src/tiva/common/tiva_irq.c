@@ -135,8 +135,13 @@ static void tiva_dumpnvic(const char *msg, int irq)
   irqinfo("  IRQ ENABLE: %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
           getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE));
+#elif TIVA_IRQ_NEXTINT < 160
+  irqinfo("  IRQ ENABLE: %08x %08x %08x %08x %08x\n",
+          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ64_95_ENABLE), getreg32(NVIC_IRQ96_127_ENABLE),
+          getreg32(NVIC_IRQ128_159_ENABLE));
 #endif
-#if TIVA_IRQ_NEXTINT > 127
+#if TIVA_IRQ_NEXTINT > 159
 #  warning Missing output
 #endif
 
@@ -178,6 +183,16 @@ static void tiva_dumpnvic(const char *msg, int irq)
         getreg32(NVIC_IRQ120_123_PRIORITY), getreg32(NVIC_IRQ124_127_PRIORITY));
 #endif
 #if TIVA_IRQ_NEXTINT > 127
+  irqinfo("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ128_131_PRIORITY), getreg32(NVIC_IRQ132_135_PRIORITY),
+        getreg32(NVIC_IRQ136_139_PRIORITY), getreg32(NVIC_IRQ140_143_PRIORITY));
+#endif
+#if TIVA_IRQ_NEXTINT > 143
+  irqinfo("              %08x %08x %08x %08x\n",
+        getreg32(NVIC_IRQ144_147_PRIORITY), getreg32(NVIC_IRQ148_151_PRIORITY),
+        getreg32(NVIC_IRQ152_155_PRIORITY), getreg32(NVIC_IRQ156_159_PRIORITY));
+#endif
+#if TIVA_IRQ_NEXTINT > 159
 #  warning Missing output
 #endif
   leave_critical_section(flags);
@@ -316,10 +331,17 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 96);
         }
 #if TIVA_IRQ_NEXTINT > 127
+      else if (irq < TIVA_IRQ_INTERRUPTS + 160)
+        {
+           *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
+           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 128);
+        }
+#if TIVA_IRQ_NEXTINT > 159
 #  warning Missing logic
-#endif
-#endif
-#endif
+#endif /* TIVA_IRQ_NEXTINT > 159 */
+#endif /* TIVA_IRQ_NEXTINT > 127 */
+#endif /* TIVA_IRQ_NEXTINT > 95 */
+#endif /* TIVA_IRQ_NEXTINT > 63 */
       else
         {
           return ERROR; /* Internal confusion */

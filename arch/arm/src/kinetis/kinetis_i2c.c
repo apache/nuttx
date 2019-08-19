@@ -1134,6 +1134,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
   int msg_n;
+  int rv;
 
   i2cinfo("msgs=%p count=%d\n", msgs, count);
   DEBUGASSERT(dev != NULL && msgs != NULL && (unsigned)count <= UINT16_MAX);
@@ -1220,11 +1221,15 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 timeout:
   kinetis_i2c_putreg(priv, I2C_C1_IICEN, KINETIS_I2C_C1_OFFSET);
 
+  /* Get the result before releasing the bus  */
+
+  rv  = (priv->state != STATE_OK) ? -EIO : 0;
+
   /* Release access to I2C bus */
 
   kinetis_i2c_sem_post(priv);
 
-  return (priv->state != STATE_OK) ? -EIO : 0;
+  return rv;
 }
 
 /****************************************************************************

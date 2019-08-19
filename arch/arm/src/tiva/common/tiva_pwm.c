@@ -435,7 +435,7 @@ static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   pwminfo("setup PWM for channel %d\n", chan->channel_id);
 
   /* Enable GPIO port, GPIO pin type and GPIO alternate function (refer to
-   * TM4C1294NC 23.4.2-4)
+   * TM4C1294NCPDT 23.4.2-4)
    */
 
   int ret = tiva_configgpio(g_pwm_pinset[chan->channel_id]);
@@ -587,7 +587,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
   pwminfo("> frequency = %d\n", frequency);
   pwminfo("> duty = %d\n", duty);
 
-  /* Configure PWM countdown mode (refer to TM4C1294NC 23.4.6) */
+  /* Configure PWM countdown mode (refer to TM4C1294NCPDT 23.4.6) */
 
   tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, 0);
   if (chan->channel_id % 2 == 0)
@@ -603,7 +603,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
                       GENx_HIGH << TIVA_PWMn_GENx_ACTLOAD);
     }
 
-  /* Set the PWM period (refer to TM4C1294NC 23.4.7) */
+  /* Set the PWM period (refer to TM4C1294NCPDT 23.4.7) */
 
   uint32_t pwm_min_freq = (uint32_t)(g_pwm_freq / g_pwm_counter) + 1;
   uint32_t pwm_max_freq = g_pwm_freq;
@@ -620,7 +620,7 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
 
   tiva_pwm_putreg(chan, TIVA_PWMn_LOAD_OFFSET, load - 1);
 
-  /* Configure PWM duty (refer to TM4C1294NC 23.4.8-9)
+  /* Configure PWM duty (refer to TM4C1294NCPDT 23.4.8-9)
    *
    * Workaround:
    *   When comp equals to load, the signal is never pulled down,
@@ -640,11 +640,11 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
       tiva_pwm_putreg(chan, TIVA_PWMn_CMPB_OFFSET, comp - 1);
     }
 
-  /* Enable the PWM generator (refer to TM4C1294NC 23.4.10) */
+  /* Enable the PWM generator (refer to TM4C1294NCPDT 23.4.10) */
 
   tiva_pwm_putreg(chan, TIVA_PWMn_CTL_OFFSET, CTL_ENABLE << TIVA_PWMn_CTL_ENABLE);
 
-  /* Enable PWM channel (refer to TM4C1294NC 23.4.11) */
+  /* Enable PWM channel (refer to TM4C1294NCPDT 23.4.11) */
 
   uint32_t enable = getreg32(chan->controller_base + TIVA_PWM_ENABLE_OFFSET);
   enable |= (1 << chan->channel_id);
@@ -803,15 +803,15 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
   pwminfo("> generator_id = %d\n", chan->generator_id);
   pwminfo("> generator_base = %08x\n", chan->generator_base);
 
-  /* Enable PWM controller (refer to TM4C1294NC 23.4.1) */
+  /* Enable PWM controller (refer to TM4C1294NCPDT 23.4.1) */
 
   assert(chan->controller_id == 0);
   tiva_pwm_enablepwr(chan->controller_id);
   tiva_pwm_enableclk(chan->controller_id);
 
-  /* Configure PWM Clock Configuration (refer to TM4C1294NC 23.4.5)
+  /* Configure PWM Clock Configuration (refer to TM4C1294NCPDT 23.4.5)
    *
-   * On TM4C1294NC, configure the PWM clock source as 1.875MHz (the system
+   * On TM4C1294NCPDT, configure the PWM clock source as 1.875MHz (the system
    * clock 120MHz divided by 64)
    *
    * TODO: need an algorithm to choose the best divider and load value combo.

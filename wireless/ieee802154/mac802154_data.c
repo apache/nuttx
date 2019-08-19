@@ -82,7 +82,7 @@ int mac802154_req_data(MACHANDLE mac,
   uint8_t mhr_len = 3;
   int ret;
 
-  wlinfo("Received frame io_len=%u io_offset=%u\n",
+  wlinfo("Accepting outbound frame io_len=%u io_offset=%u\n",
          frame->io_len, frame->io_offset);
 
   /* Check the required frame size */
@@ -110,7 +110,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   if ((frame->io_len - frame->io_offset) > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
-      *frame_ctrl |= IEEE802154_FRAMECTRL_VERSION;
+      *frame_ctrl |= (1 << IEEE802154_FRAMECTRL_SHIFT_VERSION);
     }
 
   /* If the TXOptions parameter specifies that an acknowledged transmission
@@ -136,8 +136,15 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          IEEE802154_EADDRCOPY(&frame->io_data[mhr_len], meta->destaddr.eaddr);
-          mhr_len += IEEE802154_EADDRSIZE;
+          /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
+           * for * extended address. More research discovers that the extended
+           * address should be sent in reverse-canonical form.
+           */
+
+          for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
+            {
+              frame->io_data[mhr_len++] = meta->destaddr.eaddr[index];
+            }
         }
     }
 
@@ -195,8 +202,15 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->srcmode == IEEE802154_ADDRMODE_EXTENDED)
         {
-          IEEE802154_EADDRCOPY(&frame->io_data[mhr_len], priv->addr.eaddr);
-          mhr_len += IEEE802154_EADDRSIZE;
+          /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
+           * for * extended address. More research discovers that the extended
+           * address should be sent in reverse-canonical form.
+           */
+
+          for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
+            {
+              frame->io_data[mhr_len++] = priv->addr.eaddr[index];
+            }
         }
     }
   else

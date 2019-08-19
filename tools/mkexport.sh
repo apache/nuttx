@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/mkexport.sh
 #
 #   Copyright (C) 2011-2012, 2014, 2016, 2019 Gregory Nutt. All rights reserved.

@@ -1,0 +1,45 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_B_L475E_IOT01A
+
+config B_L475E_IOT01A_MTD_FLASH
+	bool "MTD driver for external 64Mbits flash memory"
+	default n
+	select STM32L4_DMA1
+	select STM32L4_QSPI
+	select MTD
+	select MTD_MX25RXX
+	select MTD_SMART
+	select MTD_SMART_MINIMIZE_RAM
+	select FS_SMARTFS
+	---help---
+		Configures an MTD device for use with the onboard external flash
+		using QuadSPI interface.
+
+if B_L475E_IOT01A_MTD_FLASH
+
+config B_L475E_IOT01A_MTD_FLASH_MINOR
+	int "Minor number for the flash memory /dev/smart entry"
+	default 0
+	---help---
+		Sets the minor number for the flash memory /dev/smart entry
+
+config B_L475E_IOT01A_MTD_PART
+	bool "Enable partition support"
+	default n
+	select MTD_PARTITION
+	---help---
+		Enables creation of partitions on the external flash memory.
+
+config B_L475E_IOT01A_MTD_PART_LIST
+	string "Flash partition size list"
+	default "512,8192,8192,16384"
+	depends on B_L475E_IOT01A_MTD_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+endif # B_L475E_IOT01A_MTD_FLASH
+endif # ARCH_BOARD_B_L475E_IOT01A

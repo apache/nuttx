@@ -59,6 +59,7 @@ include dirent/Make.defs
 include dlfcn/Make.defs
 include endian/Make.defs
 include fixedmath/Make.defs
+include grp/Make.defs
 include hex2bin/Make.defs
 include inttypes/Make.defs
 include libgen/Make.defs
@@ -71,6 +72,7 @@ include modlib/Make.defs
 include net/Make.defs
 include netdb/Make.defs
 include pthread/Make.defs
+include pwd/Make.defs
 include queue/Make.defs
 include sched/Make.defs
 include semaphore/Make.defs

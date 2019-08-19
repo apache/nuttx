@@ -139,22 +139,22 @@ enum imxrt_edma_xfrtype_e
 
 struct imxrt_edma_xfrconfig_s
 {
-    uint32_t saddr;      /* Source data address. */
-    uint32_t daddr;      /* Destination data address. */
-    int16_t  soff;       /* Sign-extended offset for current source address. */
-    int16_t  doff;       /* Sign-extended offset for current destination address. */
-    uint16_t iter;       /* Major loop iteration count. */
-    uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
-    uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
-    uint8_t  dsize;      /* Destination data transfer size. */
-    uint8_t  ttype;      /* Transfer type (see enum imxrt_edma_xfrtype_e). */
+  uint32_t saddr;      /* Source data address. */
+  uint32_t daddr;      /* Destination data address. */
+  int16_t  soff;       /* Sign-extended offset for current source address. */
+  int16_t  doff;       /* Sign-extended offset for current destination address. */
+  uint16_t iter;       /* Major loop iteration count. */
+  uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
+  uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
+  uint8_t  dsize;      /* Destination data transfer size. */
+  uint8_t  ttype;      /* Transfer type (see enum imxrt_edma_xfrtype_e). */
 #ifdef CONFIG_IMXRT_EDMA_EMLIM
-    uint16_t nbytes;     /* Bytes to transfer in a minor loop */
+  uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else
-    uint32_t nbytes;     /* Bytes to transfer in a minor loop */
+  uint32_t nbytes;     /* Bytes to transfer in a minor loop */
 #endif
 #ifdef CONFIG_IMXRT_EDMA_ELINK
-    DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
+  DMACH_HANDLE linkch; /* Link channel (With EDMA_CONFIG_LINKTYPE_* flags) */
 #endif
 };
 

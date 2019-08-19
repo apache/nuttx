@@ -60,6 +60,9 @@
 #include "hardware/tiva_pinmap.h"
 #include "hardware/tiva_memorymap.h"
 
+#include <arch/board/board.h>
+
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -94,7 +97,9 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
 static int tiva_qe_direction(struct tiva_qe_s *qe, unsigned long *dir);
 static int tiva_qe_velocity(struct tiva_qe_s *qe, unsigned long *vel);
-static int tiva_qe_ppr(struct tiva_qe_s *qe, unsigned long ppr);
+static int tiva_qe_resetatppr(struct tiva_qe_s *qe, unsigned long ppr);
+static int tiva_qe_resetatmaxpos(FAR struct tiva_qe_s *qe, unsigned long offs);
+static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe);
 
 /************************************************************************************
  * Private Data
@@ -216,22 +221,50 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
       return -1;
     }
 
-  /* Set reset mode (default as INDEX_PULSE) */
+  /* Get initial value of register */
 
-  ctlreg = RESMODE_BY_INDEX_PULSE << TIVA_QEI_CTL_RESMODE;
-  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
+  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
+
+  /* Turn off the bits we're about to control */
+
+  ctlreg &= ~(uint32_t)((1 << TIVA_QEI_CTL_RESMODE) |
+                        (1 << TIVA_QEI_CTL_CAPMODE) |
+                        (1 << TIVA_QEI_CTL_VELEN) |
+                        (1 << TIVA_QEI_CTL_SIGMODE) |
+                        (1 << TIVA_QEI_CTL_SWAP));
+
+  /* Set reset mode (default as MAXPOS) */
+
+  ctlreg |= RESMODE_BY_MAXPOS << TIVA_QEI_CTL_RESMODE;
 
   /* Set capture mode (default as PHA_AND_PHB) */
 
-  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
   ctlreg |= CAPMODE_PHA_AND_PHB << TIVA_QEI_CTL_CAPMODE;
-  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
   /* Enable velocity capture */
 
-  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
   ctlreg |= VELEN_ENABLE << TIVA_QEI_CTL_VELEN;
+
+  /* Set signal mode (default as quadrature) */
+
+  ctlreg |= SIGMODE_QUADRATURE << TIVA_QEI_CTL_SIGMODE;
+
+  /* Set swap mode (default as no swap) */
+
+  ctlreg |= SWAP_NO_SWAP << TIVA_QEI_CTL_SWAP;
+
+  /* Program the register */
+
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
+
+  /* Set default maxpos value to entire uint32_t range */
+
+  qe->maxpos = UINT32_MAX;
+  tiva_qe_putreg(qe, TIVA_QEI_MAXPOS_OFFSET, qe->maxpos);
+
+  /* Reset the position */
+
+  tiva_qe_putreg(qe, TIVA_QEI_POS_OFFSET, 0);
 
   /* Set prediv (1) */
 
@@ -239,7 +272,7 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
   ctlreg |= VELDIV_1 << TIVA_QEI_CTL_VELDIV;
   tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
-  /* Set period load (10ms for TM4C1294NC) */
+  /* Set period load (10ms for TM4C1294NCPDT) */
 
   tiva_qe_putreg(qe, TIVA_QEI_LOAD_OFFSET, 1200000);
 
@@ -365,8 +398,16 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
       tiva_qe_velocity(qe, (unsigned long *)arg);
       break;
 
-    case QEIOC_PPR:
-      tiva_qe_ppr(qe, arg);
+    case QEIOC_RESETATPPR:
+      tiva_qe_resetatppr(qe, arg);
+      break;
+
+    case QEIOC_RESETATMAXPOS:
+      tiva_qe_resetatmaxpos(qe, arg);
+      break;
+
+    case QEIOC_RESETATINDEX:
+      tiva_qe_resetatindex(qe);
       break;
 
     default:
@@ -432,10 +473,13 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
 }
 
 /****************************************************************************
- * Name: tiva_qe_ppr
+ * Name: tiva_qe_resetatppr
  *
  * Description:
- *   Set reset mode as MAXPOS and also set maxpos value
+ *   Set reset mode as MAXPOS and set maxpos value to number of pulses
+ *   per round of encoder. Note that this function multiplies the given
+ *   ppr by 4 because capture mode is PHA_AND_PHB, meaning we count 4
+ *   edges per "pulse."
  *
  * Input Parameters:
  *   qe - A reference to the TIVA QEI structure
@@ -446,7 +490,30 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
  *
  ****************************************************************************/
 
-static int tiva_qe_ppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
+static int tiva_qe_resetatppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
+{
+  /* maxpos is 4 times of ppr since we set capture mode as PHA_AND_PHB */
+
+  return tiva_qe_resetatmaxpos(qe, ppr * 4);
+}
+
+/****************************************************************************
+ * Name: tiva_qe_resetatmaxpos
+ *
+ * Description:
+ *   Set reset mode as MAXPOS and set maxpos value as given.
+ *
+ * Input Parameters:
+ *   qe - A reference to the TIVA QEI structure
+ *   maxpos - Maximum position count at which QEI resets. To get the full
+ *            range, give UINT32_MAX.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int tiva_qe_resetatmaxpos(FAR struct tiva_qe_s *qe, unsigned long maxpos)
 {
   sninfo("set maxpos reset mode and maxpos value of QEI %d\n", qe->id);
 
@@ -458,9 +525,7 @@ static int tiva_qe_ppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
   lower = (FAR struct qe_lowerhalf_s *)qe;
   tiva_qe_shutdown(lower);
 
-  /* maxpos is 4 times of ppr since we set capture mode as PHA_AND_PHB */
-
-  qe->maxpos = ppr * 4;
+  qe->maxpos = maxpos;
 
   /* Set reset mode as MAXPOS */
 
@@ -472,6 +537,48 @@ static int tiva_qe_ppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
   /* Set maxpos value */
 
   tiva_qe_putreg(qe, TIVA_QEI_MAXPOS_OFFSET, qe->maxpos);
+
+  /* Enable the QEI */
+
+  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
+  ctlreg |= QEI_ENABLE << TIVA_QEI_CTL_ENABLE;
+  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tiva_qe_resetatindex
+ *
+ * Description:
+ *   Set reset mode as INDEX
+ *
+ * Input Parameters:
+ *   qe - A reference to the TIVA QEI structure
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe)
+{
+  sninfo("set index reset mode of QEI %d\n", qe->id);
+
+  FAR struct qe_lowerhalf_s *lower;
+  uint32_t ctlreg = 0;
+
+  /* Disable the QEI */
+
+  lower = (FAR struct qe_lowerhalf_s *)qe;
+  tiva_qe_shutdown(lower);
+
+  /* Set reset mode as INDEX */
+
+  ctlreg = tiva_qe_getreg(qe, TIVA_QEI_CTL_OFFSET);
+  ctlreg &= ~(uint32_t)(1 << TIVA_QEI_CTL_RESMODE);
+  ctlreg |= RESMODE_BY_INDEX_PULSE << TIVA_QEI_CTL_RESMODE;
+  tiva_qe_putreg(qe, TIVA_QEI_CTL_OFFSET, ctlreg);
 
   /* Enable the QEI */
 

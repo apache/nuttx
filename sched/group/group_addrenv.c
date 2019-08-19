@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_addrenv.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  * This must only be accessed with interrupts disabled.
  */
 
-gid_t g_gid_current;
+grpid_t g_grpid_current;
 
 /****************************************************************************
  * Public Functions
@@ -98,7 +98,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group;
   FAR struct task_group_s *oldgroup;
   irqstate_t flags;
-  gid_t gid;
+  grpid_t grpid;
   int ret;
 
   /* NULL for the tcb means to use the TCB of the task at the head of the
@@ -126,21 +126,21 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
   /* Get the ID of the group that needs the address environment */
 
-  gid = group->tg_gid;
-  DEBUGASSERT(gid != 0);
+  grpid = group->tg_grpid;
+  DEBUGASSERT(grpid != 0);
 
   /* Are we going to change address environments? */
 
   flags = enter_critical_section();
-  if (gid != g_gid_current)
+  if (grpid != g_grpid_current)
     {
       /* Yes.. Is there a current address environment in place? */
 
-      if (g_gid_current != 0)
+      if (g_grpid_current != 0)
         {
           /* Find the old group with this ID. */
 
-          oldgroup = group_findbygid(g_gid_current);
+          oldgroup = group_findby_grpid(g_grpid_current);
           DEBUGASSERT(oldgroup &&
                       (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
 
@@ -168,7 +168,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
       /* Save the new, current group */
 
-      g_gid_current = gid;
+      g_grpid_current = grpid;
     }
 
   leave_critical_section(flags);

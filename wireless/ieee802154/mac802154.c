@@ -88,6 +88,9 @@ static void mac802154_rxframe(FAR const struct ieee802154_radiocb_s *radiocb,
                               FAR struct ieee802154_data_ind_s *ind);
 static void mac802154_rxframe_worker(FAR void *arg);
 
+static void mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
+                               uint8_t edval);
+
 static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
                               enum ieee802154_sfevent_e sfevent);
 
@@ -203,7 +206,7 @@ int mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
       ret = mac802154_lock(priv, allow_interrupt);
       if (ret < 0)
         {
-          wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+          wlwarn("WARNING: mac802154_lock failed: %d\n", ret);
 
           mac802154_givesem(&priv->txdesc_sem);
           return -EINTR;
@@ -259,7 +262,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false);
+  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -339,6 +342,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
+  txdesc->ackreq = true;
 
   /* Save a copy of the destination addressing information into the tx
    * descriptor.  We only do this for commands to help with handling their
@@ -433,7 +437,8 @@ static void mac802154_notify_worker(FAR void *arg)
 
           if (dispose)
             {
-              iob_free(primitive->u.dataind.frame);
+              iob_free(primitive->u.dataind.frame,
+                       IOBUSER_WIRELESS_MAC802154);
               ieee802154_primitive_free(primitive);
             }
         }
@@ -764,7 +769,7 @@ static void mac802154_purge_worker(FAR void *arg)
 
           /* Free the IOB, the notification, and the tx descriptor */
 
-          iob_free(txdesc->frame);
+          iob_free(txdesc->frame, IOBUSER_WIRELESS_MAC802154);
           ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
                                     txdesc->conf);
           mac802154_txdesc_free(priv, txdesc);
@@ -873,9 +878,9 @@ static void mac802154_txdone(FAR const struct ieee802154_radiocb_s *radiocb,
 
   /* Schedule work with the work queue to process the completion further */
 
-  if (work_available(&priv->tx_work))
+  if (work_available(&priv->txdone_work))
     {
-      work_queue(HPWORK, &priv->tx_work, mac802154_txdone_worker,
+      work_queue(HPWORK, &priv->txdone_work, mac802154_txdone_worker,
                  (FAR void *)priv, 0);
     }
 }
@@ -1005,7 +1010,7 @@ static void mac802154_txdone_worker(FAR void *arg)
 
       /* Free the IOB and the tx descriptor */
 
-      iob_free(txdesc->frame);
+      iob_free(txdesc->frame, IOBUSER_WIRELESS_MAC802154);
       mac802154_txdesc_free(priv, txdesc);
     }
 
@@ -1543,7 +1548,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false);
+  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -1629,10 +1634,50 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
   txdesc->frame = iob;
   txdesc->frametype = IEEE802154_FRAME_DATA;
+  txdesc->ackreq = false;
 
   mac802154_unlock(priv)
 
   priv->radio->txdelayed(priv->radio, txdesc, 0);
+}
+
+/****************************************************************************
+ * Name: mac802154_edresult
+ *
+ * Description:
+ *   Called from the radio driver through the callback struct.  This
+ *   function is called when the radio has finished an energy detect operation.
+ *   This is triggered by a SCAN.request primitive with ScanType set to Energy
+ *   Detect (ED)
+ *
+ ****************************************************************************/
+
+static void mac802154_edresult(FAR const struct ieee802154_radiocb_s *radiocb,
+                               uint8_t edval)
+{
+  FAR struct mac802154_radiocb_s *cb =
+    (FAR struct mac802154_radiocb_s *)radiocb;
+  FAR struct ieee802154_privmac_s *priv;
+
+  DEBUGASSERT(cb != NULL && cb->priv != NULL);
+  priv = cb->priv;
+
+  /* Get exclusive access to the driver structure.  We don't care about any
+   * signals so if we see one, just go back to trying to get access again.
+   */
+
+  mac802154_lock(priv, false);
+
+  /* If we are actively performing a scan operation, notify the scan handler */
+
+  if (priv->curr_op == MAC802154_OP_SCAN)
+    {
+      mac802154_edscan_onresult(priv, edval);
+    }
+
+  /* Relinquish control of the private structure */
+
+  mac802154_unlock(priv);
 }
 
 static void mac802154_sfevent(FAR const struct ieee802154_radiocb_s *radiocb,
@@ -2090,8 +2135,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
 {
   FAR struct ieee802154_privmac_s *mac;
   FAR struct ieee802154_radiocb_s *radiocb;
-  uint8_t eaddr[IEEE802154_EADDRSIZE];
-  int i;
 
   /* Allocate object */
 
@@ -2125,6 +2168,7 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   radiocb->txdone    = mac802154_txdone;
   radiocb->rxframe   = mac802154_rxframe;
   radiocb->sfevent   = mac802154_sfevent;
+  radiocb->edresult  = mac802154_edresult;
 
   /* Bind our callback structure */
 
@@ -2136,15 +2180,6 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev)
   mac802154_resetqueues(mac);
 
   mac802154_req_reset((MACHANDLE)mac, true);
-
-  /* Set the default extended address */
-
-  for (i = 0; i < IEEE802154_EADDRSIZE; i++)
-    {
-      eaddr[i] = (CONFIG_IEEE802154_DEFAULT_EADDR >> (8 * i)) & 0xFF;
-    }
-
-  mac802154_seteaddr(mac, eaddr);
 
   return (MACHANDLE)mac;
 }

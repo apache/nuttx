@@ -1,0 +1,37 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_PASSWD_FILE
+	bool "Have passwd file"
+	default n
+	depends on FS_READABLE
+	---help---
+		Have a passwd file.  The format of the password file is:
+
+		    user:x:uid:gid:home
+
+		  Where:
+		    user:  User name
+		    x:     Encrypted password
+		    uid:   User ID
+		    gid:   Group ID
+		    home:  Login directory
+
+if LIBC_PASSWD_FILE
+
+config LIBC_PASSWD_FILEPATH
+	string "Path to passwd file"
+	default "/etc/passwd"
+	---help---
+		Provides the location of the passwd file.  The default is /etc/passwd
+
+config LIBC_PASSWD_LINESIZE
+	int "Maximum line size"
+	default 80
+	---help---
+		The maximum length of one line in the passwd file.  This determines
+		the size of the I/O buffer used to access the passwd file.
+
+endif # LIBC_PASSWD_FILE

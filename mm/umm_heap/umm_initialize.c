@@ -57,9 +57,9 @@
  *   function will initialize the user heap.
  *
  *   CONFIG_BUILD_FLAT:
- *     There is only kernel mode "blob" containing both containing both
- *     kernel and application code.  There is only one heap that use is
- *     used by both the kernel and application logic.
+ *     There is only kernel mode "blob" containing both kernel and
+ *     application code.  There is only one heap that is used by both the
+ *     kernel and application logic.
  *
  *     In this configuration, this function is called early in nx_start()
  *     to initialize the common heap.
@@ -68,7 +68,7 @@
  *     In this configuration, there are two "blobs", one containing
  *     protected kernel logic and one containing unprotected application
  *     logic.  Depending upon the setting of CONFIG_MM_KERNEL_HEAP there
- *     may be only a signal shared heap, much as with CONFIG_BUILD_FLAT.
+ *     may be only a single shared heap, much as with CONFIG_BUILD_FLAT.
  *     Or there may be separate protected/kernel and unprotected/user
  *     heaps.
  *

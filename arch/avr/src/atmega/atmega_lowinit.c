@@ -115,7 +115,7 @@ static inline void up_wdtinit(void)
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
+ *   console.  Its purpose is to get the console output available as soon
  *   as possible.
  *
  ****************************************************************************/

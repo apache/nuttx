@@ -195,7 +195,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
 
       /* Free both the IOB and the container */
 
-      iob_free(iob);
+      iob_free(iob, IOBUSER_NET_SOCK_IEEE802154);
       ieee802154_container_free(container);
     }
 

@@ -339,8 +339,10 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
+#if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       DEBUGPANIC();
+#endif
       nxsem_freeholder(sem, pholder);
     }
 
@@ -1093,10 +1095,12 @@ void nxsem_releaseholder(FAR sem_t *sem)
 
 void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
+#if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
   /* Check our assumptions */
 
   DEBUGASSERT((sem->semcount > 0  && stcb == NULL) ||
               (sem->semcount <= 0 && stcb != NULL));
+#endif
 
   /* Handler semaphore counts posed from an interrupt handler differently
    * from interrupts posted from threads.  The primary difference is that

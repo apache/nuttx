@@ -382,7 +382,7 @@
 
 #define ADC_SQR1_L_SHIFT             (0)         /* Bits 0-3:   Regular channel sequence length */
 #define ADC_SQR1_L_MASK              (0x0f << ADC_SQR1_L_SHIFT)
-#define ADC_SQR1_SQ1_SHIFT           (6)         /* Bits 6-10:  13th conversion in regular sequence */
+#define ADC_SQR1_SQ1_SHIFT           (6)         /* Bits 6-10:  1st conversion in regular sequence */
 #define ADC_SQR1_SQ1_MASK            (0x1f << ADC_SQR1_SQ1_SHIFT)
 #define ADC_SQR1_SQ2_SHIFT           (12)        /* Bits 12-16: 2nd conversion in regular sequence */
 #define ADC_SQR1_SQ2_MASK            (0x1f << ADC_SQR1_SQ2_SHIFT)

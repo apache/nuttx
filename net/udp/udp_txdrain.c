@@ -47,6 +47,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "udp/udp.h"
@@ -64,7 +65,7 @@
  *   Called with the write buffers have all been sent.
  *
  * Input Parameters:
- *   arg     - The semaphore that will wake up udp_txdrain
+ *   arg     - The notifier entry.
  *
  * Returned Value:
  *   None.
@@ -73,8 +74,24 @@
 
 static void txdrain_worker(FAR void *arg)
 {
-  FAR sem_t *waitsem = (FAR sem_t *)arg;
-  DEBUGASSERT(waitsem != NULL);
+  /* The entire notifier entry is passed to us.  That is because we are
+   * responsible for disposing of the entry via kmm_free() when we are
+   * finished with it.
+   */
+
+  FAR struct work_notifier_entry_s *notifier =
+    (FAR struct work_notifier_entry_s *)arg;
+  FAR sem_t *waitsem;
+
+  DEBUGASSERT(notifier != NULL && notifier->info.arg != NULL);
+  waitsem = (FAR sem_t *)notifier->info.arg;
+
+  /* Free the notifier entry */
+
+  kmm_free(notifier);
+
+  /* Then just post the semaphore, waking up tcp_txdrain() */
+
   sem_post(waitsem);
 }
 
@@ -128,7 +145,7 @@ int udp_txdrain(FAR struct socket *psock,
         {
           ret = net_timedwait(&waitsem, abstime);
         }
-      while (ret == EINTR);
+      while (ret == -EINTR);
 
       /* Tear down the notifier (in case we timed out or were canceled) */
 

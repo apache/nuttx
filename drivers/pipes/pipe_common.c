@@ -231,7 +231,7 @@ int pipecommon_open(FAR struct file *filep)
    * is first opened.
    */
 
-  if (dev->d_refs == 0 && dev->d_buffer == NULL)
+  if (inode->i_crefs == 1 && dev->d_buffer == NULL)
     {
       dev->d_buffer = (FAR uint8_t *)kmm_malloc(dev->d_bufsize);
       if (!dev->d_buffer)
@@ -241,9 +241,6 @@ int pipecommon_open(FAR struct file *filep)
         }
     }
 
-  /* Increment the reference count on the pipe instance */
-
-  dev->d_refs++;
 
   /* If opened for writing, increment the count of writers on the pipe instance */
 
@@ -321,7 +318,7 @@ int pipecommon_close(FAR struct file *filep)
   FAR struct pipe_dev_s *dev   = inode->i_private;
   int                    sval;
 
-  DEBUGASSERT(dev && dev->d_refs > 0);
+  DEBUGASSERT(dev && filep->f_inode->i_crefs > 0);
 
   /* Make sure that we have exclusive access to the device structure.
    * NOTE: close() is supposed to return EINTR if interrupted, however
@@ -334,11 +331,11 @@ int pipecommon_close(FAR struct file *filep)
    * still outstanding references to the pipe.
    */
 
-  /* Check if the decremented reference count would go to zero */
+  /* Check if the decremented inode reference count would go to zero */
 
-  if (--dev->d_refs > 0)
+  if (inode->i_crefs > 1)
     {
-      /* No more references.. If opened for writing, decrement the count of
+      /* More references.. If opened for writing, decrement the count of
        * writers on the pipe instance.
        */
 
@@ -396,7 +393,6 @@ int pipecommon_close(FAR struct file *filep)
 
       dev->d_wrndx    = 0;
       dev->d_rdndx    = 0;
-      dev->d_refs     = 0;
       dev->d_nwriters = 0;
       dev->d_nreaders = 0;
 
@@ -896,7 +892,7 @@ int pipecommon_unlink(FAR struct inode *inode)
 
   /* Are the any open references to the driver? */
 
-  if (dev->d_refs == 0)
+  if (inode->i_crefs == 1)
     {
       /* No.. free the buffer (if there is one) */
 

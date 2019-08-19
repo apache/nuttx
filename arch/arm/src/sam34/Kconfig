@@ -365,15 +365,21 @@ config SAM34_EIC
 	default n
 	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
 
+config SAM34_DMAC
+	bool
+	default n
+
 config SAM34_DMAC0
 	bool "DMA controller (DMAC0)"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 	select ARCH_DMA
+	select SAM34_DMAC
 
 config SAM34_DMAC1
 	bool
 	default n
+	select SAM34_DMAC
 
 config SAM34_EMAC
 	bool "Ethernet MAC (EMAC)"

@@ -1182,7 +1182,7 @@ if STM32L4_QSPI
 config STM32L4_QSPI_FLASH_SIZE
 	int "Size of attached serial flash, bytes"
 	default 16777216
-	range 1 2147483648
+	range 1 2147483647
 	---help---
 		The STM32L4 QSPI peripheral requires the size of the Flash be specified
 
@@ -3990,7 +3990,7 @@ config STM32L4_SERIAL_DISABLE_REORDERING
 		can, however, have the side-effect that all port mappings
 		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
 		UART. This is in particular relevant if a project uses the USB console
-		in some configs and a serial console in other configs, but does not
+		in some boards and a serial console in other boards, but does not
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 

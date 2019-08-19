@@ -4309,12 +4309,15 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #ifdef CONFIG_PWM_MULTICHAN
       int i;
 
-      /* REVISIT: */
-
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
-          ret = pwm_duty_update(dev, info->channels[i].channel,
-                                info->channels[i].duty);
+          /* Set output if channel configured */
+
+          if (info->channels[i].channel != 0)
+            {
+              ret = pwm_duty_update(dev, info->channels[i].channel,
+                                    info->channels[i].duty);
+            }
         }
 #else
       ret = pwm_duty_update(dev, priv->channels[0].channel, info->duty);

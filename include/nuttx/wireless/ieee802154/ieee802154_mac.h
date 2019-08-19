@@ -358,7 +358,7 @@ enum ieee802154_attr_e
 {
   /* PHY PIB Attributes */
 
-  IEEE802154_ATTR_PHY_CHAN = 0x00,
+  IEEE802154_ATTR_PHY_CHAN,
   IEEE802154_ATTR_PHY_CHANNELS_SUPPORTED,
   IEEE802154_ATTR_PHY_TX_POWER_TOLERANCE,
   IEEE802154_ATTR_PHY_TX_POWER,
@@ -394,11 +394,16 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_PHY_UWB_RX_RMARKER,
   IEEE802154_ATTR_PHY_RFRAME_PROC_TIME,
   IEEE802154_ATTR_PHY_CCA_DURATION,
-  IEEE802154_ATTR_PHY_SYMBOL_DURATION, /* Non-standard attribute */
+
+  /* Non-standard PHY attributes */
+
+  IEEE802154_ATTR_PHY_SYMBOL_DURATION,
+  IEEE802154_ATTR_PHY_FCS_LEN,
+  IEEE802154_ATTR_PHY_REGDUMP,
 
   /* MAC PIB Attributes */
 
-  IEEE802154_ATTR_MAC_EADDR = 0x40,
+  IEEE802154_ATTR_MAC_EADDR,
   IEEE802154_ATTR_MAC_ACK_WAIT_DUR,
   IEEE802154_ATTR_MAC_ASSOCIATED_PANCOORD,
   IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT,
@@ -435,11 +440,10 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_TX_CTRL_ACTIVE_DUR,
   IEEE802154_ATTR_MAC_TX_CTRL_PAUSE_DUR,
   IEEE802154_ATTR_MAC_TX_TOTAL_DUR,
-  IEEE802154_ATTR_MAC_DEVMODE, /* Non-standard */
 
   /* MAC Security Attributes */
 
-  IEEE802154_ATTR_MAC_KEY_TABLE = 0x70,
+  IEEE802154_ATTR_MAC_KEY_TABLE,
   IEEE802154_ATTR_MAC_DEV_TABLE,
   IEEE802154_ATTR_MAC_SEC_LVL_TABLE,
   IEEE802154_ATTR_MAC_FRAME_COUNTER,
@@ -451,9 +455,9 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_PANCOORD_EXT_ADDR,
   IEEE802154_ATTR_MAC_PANCOORD_SHORT_ADDR,
 
-  /* Special Attributes */
+  /* Non-standard MAC Atrributes*/
 
-  IEEE802154_ATTR_RADIO_REGDUMP = 0xF0,
+  IEEE802154_ATTR_MAC_DEVMODE,
 };
 
 /* Frame Type */
@@ -671,9 +675,10 @@ union ieee802154_macattr_u
 
 union ieee802154_phyattr_u
 {
-  uint8_t chan;
-  int32_t txpwr;
-  uint32_t symdur_picosec;
+  uint8_t   chan;
+  int32_t   txpwr;
+  uint32_t  symdur_picosec;
+  uint8_t   fcslen;
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
@@ -1425,11 +1430,14 @@ struct ieee802154_scan_conf_s
   enum ieee802154_status_e status;
   enum ieee802154_scantype_e type;
   uint8_t chpage;
-  uint8_t unscanned[15];
+
+  uint8_t chlist[15]; /* Used for both scanned channels (ED) and unscanned
+                       * channels (Active/Passive) */
   uint8_t numunscanned;
-  uint8_t numdesc;
+
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
-  uint8_t edlist[MAC802154_NPANDESC];
+  uint8_t edlist[15];
+  uint8_t numresults;
 };
 
 /*****************************************************************************

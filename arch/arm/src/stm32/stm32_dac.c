@@ -984,9 +984,11 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
+#ifdef HAVE_DMA
 static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 {
 }
+#endif
 
 /****************************************************************************
  * Name: dac_send
@@ -1114,6 +1116,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
         }
     }
 
+  UNUSED(chan);
   return ret;
 }
 

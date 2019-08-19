@@ -58,7 +58,8 @@
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen,
+                               enum iob_user_e producerid)
 {
   FAR struct iob_s *entry;
   FAR struct iob_s *penultimate;
@@ -105,7 +106,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Free the last, empty buffer in the list */
 
-              iob_free(last);
+              iob_free(last, producerid);
 
               /* There should be a buffer before this one */
 

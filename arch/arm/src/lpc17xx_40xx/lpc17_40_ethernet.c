@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_ethernet.c
  *
- *   Copyright (C) 2010-2015, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2015, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
  */
@@ -130,6 +132,7 @@
 #define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* Debug Configuration *****************************************************/
+
 /* Register debug -- can only happen of CONFIG_DEBUG_NET_INFO is selected */
 
 #ifndef CONFIG_DEBUG_NET_INFO
@@ -178,6 +181,7 @@
 #define GPIO_NENET_PINS      10
 
 /* PHYs *********************************************************************/
+
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
 #if defined(CONFIG_ETH0_PHY_KS8721)
@@ -279,8 +283,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The lpc17_40_driver_s encapsulates all state information for a single hardware
- * interface
+/* The lpc17_40_driver_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct lpc17_40_driver_s
@@ -330,13 +334,15 @@ static struct lpc17_40_driver_s g_ethdrvr[CONFIG_LPC17_40_NINTERFACES];
  * MDIO on P1[17] or P2[9].  The board.h file will define GPIO_ENET_MDC and
  * PGIO_ENET_MDIO to selec which pin setting to use.
  *
- * On older Rev '-' devices, P1[6] ENET-TX_CLK would also have be to configured.
+ * On older Rev '-' devices, P1[6] ENET-TX_CLK would also have be to
+ * configured.
  */
 
 static const uint16_t g_enetpins[GPIO_NENET_PINS] =
 {
-  GPIO_ENET_TXD0, GPIO_ENET_TXD1, GPIO_ENET_TXEN,   GPIO_ENET_CRS, GPIO_ENET_RXD0,
-  GPIO_ENET_RXD1, GPIO_ENET_RXER, GPIO_ENET_REFCLK, GPIO_ENET_MDC, GPIO_ENET_MDIO
+  GPIO_ENET_TXD0, GPIO_ENET_TXD1, GPIO_ENET_TXEN, GPIO_ENET_CRS,
+  GPIO_ENET_RXD0, GPIO_ENET_RXD1, GPIO_ENET_RXER, GPIO_ENET_REFCLK,
+  GPIO_ENET_MDC, GPIO_ENET_MDIO
 };
 
 /****************************************************************************
@@ -476,8 +482,8 @@ static void lpc17_40_checkreg(uint32_t addr, uint32_t val, bool iswrite)
   static uint32_t count = 0;
   static bool     prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time?  Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -693,8 +699,8 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->lp_txtimeout, LPC17_40_TXTIMEOUT, lpc17_40_txtimeout_expiry,
-                 1, (uint32_t)priv);
+  (void)wd_start(priv->lp_txtimeout, LPC17_40_TXTIMEOUT,
+                 lpc17_40_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -758,14 +764,14 @@ static int lpc17_40_txpoll(struct net_driver_s *dev)
 
       if (!devif_loopback(&priv->lp_dev))
         {
-          /* Send this packet.  In this context, we know that there is space for
-           * at least one more packet in the descriptor list.
+          /* Send this packet.  In this context, we know that there is space
+           * for at least one more packet in the descriptor list.
            */
 
           lpc17_40_transmit(priv);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return any non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet. If
+           * not, return any non-zero value to terminate the poll.
            */
 
           ret = lpc17_40_txdesc(priv);
@@ -783,14 +789,14 @@ static int lpc17_40_txpoll(struct net_driver_s *dev)
  * Function: lpc17_40_response
  *
  * Description:
- *   While processing an RxDone event, higher logic decides to send a packet,
- *   possibly a response to the incoming packet (but probably not, in reality).
- *   However, since the Rx and Tx operations are decoupled, there is no
- *   guarantee that there will be a Tx descriptor available at that time.
- *   This function will perform that check and, if no Tx descriptor is
- *   available, this function will (1) stop incoming Rx processing (bad), and
- *   (2) hold the outgoing packet in a pending state until the next Tx
- *   interrupt occurs.
+ *   While processing an RxDone event, higher logic decides to send a
+ *   packet, possibly a response to the incoming packet (but probably not,
+ *   in reality).  However, since the Rx and Tx operations are decoupled,
+ *   there is no guarantee that there will be a Tx descriptor available at
+ *   that time.  This function will perform that check and, if no Tx
+ *   descriptor is available, this function will (1) stop incoming Rx
+ *   processing (bad), and (2) hold the outgoing packet in a pending state
+ *   until the next Tx interrupt occurs.
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -905,20 +911,23 @@ static void lpc17_40_rxdone_work(FAR void *arg)
 
       /* else */ if (pktlen > CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
         {
-          nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d "
+                "rxstat: %08x\n",
                 considx, prodidx, pktlen, *rxstat);
           NETDEV_RXERRORS(&priv->lp_dev);
         }
       else if ((*rxstat & RXSTAT_INFO_LASTFLAG) == 0)
         {
-          ninfo("Fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          ninfo("Fragment. considx: %08x prodidx: %08x pktlen: %d "
+                "rxstat: %08x\n",
                 considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = true;
         }
       else if (fragment)
         {
-          ninfo("Last fragment. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
+          ninfo("Last fragment. considx: %08x prodidx: %08x pktlen: %d "
+                "rxstat: %08x\n",
                 considx, prodidx, pktlen, *rxstat);
           NETDEV_RXFRAGMENTS(&priv->lp_dev);
           fragment = false;
@@ -1095,7 +1104,6 @@ static void lpc17_40_rxdone_work(FAR void *arg)
   leave_critical_section(flags);
 }
 
-
 /****************************************************************************
  * Function: lpc17_40_txdone_work
  *
@@ -1187,6 +1195,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
       lpc17_40_putreg(status, LPC17_40_ETH_INTCLR);
 
       /* Handle each pending interrupt **************************************/
+
       /* Check for Wake-Up on Lan *******************************************/
 
 #ifdef CONFIG_LPC17_40_ETH_WOL
@@ -1197,6 +1206,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
       else
 #endif
       /* Fatal Errors *******************************************************/
+
       /* RX OVERRUN -- Fatal overrun error in the receive queue. The fatal
        * interrupt should be resolved by a Rx soft-reset. The bit is not
        * set when there is a nonfatal overrun error.
@@ -1228,12 +1238,14 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
       else
         {
           /* Check for receive events ***************************************/
+
           /* RX ERROR -- Triggered on receive errors: AlignmentError,
            * RangeError, LengthError, SymbolError, CRCError or NoDescriptor
-           * or Overrun.  NOTE:  (1) We will still need to call lpc17_40_rxdone_process
-           * on RX errors to bump the considx over the bad packet.  (2) The
-           * DMA engine reports bogus length errors, making this a pretty
-           * useless (as well as annoying) check anyway.
+           * or Overrun.  NOTE:  (1) We will still need to call
+           * lpc17_40_rxdone_process on RX errors to bump the considx over
+           * the bad packet.  (2) The DMA engine reports bogus length
+           * errors, making this a pretty useless (as well as annoying)
+           * check anyway.
            */
 
           if ((status & ETH_INT_RXERR) != 0)
@@ -1256,8 +1268,8 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
 
           if ((status & ETH_INT_RXFIN) != 0 || (status & ETH_INT_RXDONE) != 0)
             {
-              /* We have received at least one new incoming packet. */
-              /* Disable further TX interrupts for now.  TX interrupts will
+              /* We have received at least one new incoming packet.
+               * Disable further TX interrupts for now.  TX interrupts will
                * be re-enabled after the work has been processed.
                */
 
@@ -1268,15 +1280,16 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                * perhaps cancelling any pending RX work.
                */
 
-              work_queue(ETHWORK, &priv->lp_rxwork, (worker_t)lpc17_40_rxdone_work,
-                         priv, 0);
+              work_queue(ETHWORK, &priv->lp_rxwork,
+                         (worker_t)lpc17_40_rxdone_work, priv, 0);
             }
 
           /* Check for Tx events ********************************************/
+
           /* TX ERROR -- Triggered on transmit errors: LateCollision,
            * ExcessiveCollision and ExcessiveDefer, NoDescriptor or Underrun.
-           * NOTE: We will still need to call lpc17_40_txdone_process() in order to
-           * clean up after the failed transmit.
+           * NOTE: We will still need to call lpc17_40_txdone_process() in
+           * order to clean up after the failed transmit.
            */
 
           if ((status & ETH_INT_TXERR) != 0)
@@ -1305,8 +1318,9 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
             {
               NETDEV_TXDONE(&priv->lp_dev);
 
-              /* A packet transmission just completed */
-              /* Cancel the pending Tx timeout */
+              /* A packet transmission just completed.
+               * Cancel the pending Tx timeout
+               */
 
               wd_cancel(priv->lp_txtimeout);
 
@@ -1328,8 +1342,8 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                * perhaps cancelling any pending TX work.
                */
 
-              work_queue(ETHWORK, &priv->lp_txwork, (worker_t)lpc17_40_txdone_work,
-                         priv, 0);
+              work_queue(ETHWORK, &priv->lp_txwork,
+                         (worker_t)lpc17_40_txdone_work, priv, 0);
             }
         }
     }
@@ -1669,10 +1683,10 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
 
   /* Set up RX filter and configure to accept broadcast addresses, multicast
    * addresses, and perfect station address matches.  We should also accept
-   * perfect matches and, most likely, broadcast (for example, for ARP requests).
-   * Other RX filter options will only be enabled if so selected.  NOTE: There
-   * is a selection CONFIG_NET_BROADCAST, but this enables receipt of UDP
-   * broadcast packets inside of the stack.
+   * perfect matches and, most likely, broadcast (for example, for ARP
+   * requests).  Other RX filter options will only be enabled if so
+   * selected.  NOTE: There is a selection CONFIG_NET_BROADCAST, but this
+   * enables receipt of UDP broadcast packets inside of the stack.
    */
 
   regval = ETH_RXFLCTRL_PERFEN | ETH_RXFLCTRL_BCASTEN;
@@ -1852,7 +1866,8 @@ static void lpc17_40_txavail_work(FAR void *arg)
 
 static int lpc17_40_txavail(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)dev->d_private;
+  FAR struct lpc17_40_driver_s *priv =
+    (FAR struct lpc17_40_driver_s *)dev->d_private;
 
   /* Is our single poll work structure available?  It may not be if there
    * are pending polling actions and we will have to ignore the Tx
@@ -1947,7 +1962,7 @@ static uint32_t lpc17_40_calcethcrc(const uint8_t *data, size_t length)
 
           if (((crc >> 31) ^ (byte >> 0)) & 0x00000001)
             {
-              q0 = 0x2608EDB8;
+              q0 = 0x2608edb8;
             }
           else
             {
@@ -2025,8 +2040,8 @@ static int lpc17_40_addmac(struct net_driver_s *dev, const uint8_t *mac)
    *
    *   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass the
    *     imperfect hash filter are accepted.
-   *   AcceptMulticastHashEn When set to ’1’, multicast frames that pass the
-   *     imperfect hash filter are accepted.
+   *   AcceptMulticastHashEn When set to ’1’, multicast frames that pass
+   *     the imperfect hash filter are accepted.
    */
 
   regval = lpc17_40_getreg(LPC17_40_ETH_RXFLCTRL);
@@ -2042,8 +2057,8 @@ static int lpc17_40_addmac(struct net_driver_s *dev, const uint8_t *mac)
  * Function: lpc17_40_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2105,10 +2120,10 @@ static int lpc17_40_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (regval == 0 && lpc17_40_getreg(regaddr2) == 0)
     {
-      /*   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass the
-       *     imperfect hash filter are accepted.
-       *   AcceptMulticastHashEn When set to ’1’, multicast frames that pass the
-       *     imperfect hash filter are accepted.
+      /*   AcceptUnicastHashEn: When set to ’1’, unicast frames that pass
+       *     the imperfect hash filter are accepted.
+       *   AcceptMulticastHashEn When set to ’1’, multicast frames that
+       *     pass the imperfect hash filter are accepted.
        */
 
       regval = lpc17_40_getreg(LPC17_40_ETH_RXFLCTRL);
@@ -2156,9 +2171,11 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+          struct mii_iotcl_notify_s *req =
+            (struct mii_iotcl_notify_s *)((uintptr_t)arg);
 
-          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo,
+                                     req->arg);
           if (ret == OK)
             {
               /* Enable PHY link up/down interrupts */
@@ -2170,7 +2187,9 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
 #endif
       case SIOCGMIIPHY: /* Get MII PHY address */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = priv->lp_phyaddr;
           ret = OK;
         }
@@ -2178,7 +2197,9 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
 
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->val_out = lpc17_40_phyread(priv->lp_phyaddr, req->reg_num);
           ret = OK;
         }
@@ -2186,7 +2207,9 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
 
       case SIOCSMIIREG: /* Set register in MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           lpc17_40_phywrite(priv->lp_phyaddr, req->reg_num, req->val_in);
           ret = OK;
         }
@@ -2313,9 +2336,12 @@ static void lpc17_40_showmii(uint8_t phyaddr, const char *msg)
  ****************************************************************************/
 
 #ifdef LPC17_40_HAVE_PHY
-static void lpc17_40_phywrite(uint8_t phyaddr, uint8_t regaddr, uint16_t phydata)
+static void lpc17_40_phywrite(uint8_t phyaddr, uint8_t regaddr,
+                              uint16_t phydata)
 {
   uint32_t regval;
+
+  lpc17_40_putreg(0, LPC17_40_ETH_MCMD);
 
   /* Set PHY address and PHY register address */
 
@@ -2359,7 +2385,7 @@ static uint16_t lpc17_40_phyread(uint8_t phyaddr, uint8_t regaddr)
 {
   uint32_t regval;
 
-  lpc17_40_putreg(0, LPC17_40_ETH_MCMD);
+  lpc17_40_putreg(1, LPC17_40_ETH_MCMD);
 
   /* Set PHY address and PHY register address */
 
@@ -2373,7 +2399,8 @@ static uint16_t lpc17_40_phyread(uint8_t phyaddr, uint8_t regaddr)
 
   /* Wait for the PHY command to complete */
 
-  while ((lpc17_40_getreg(LPC17_40_ETH_MIND) & (ETH_MIND_BUSY | ETH_MIND_NVALID)) != 0);
+  while ((lpc17_40_getreg(LPC17_40_ETH_MIND) &
+         (ETH_MIND_BUSY | ETH_MIND_NVALID)) != 0);
   lpc17_40_putreg(0, LPC17_40_ETH_MCMD);
 
   /* Return the PHY register data */
@@ -2461,6 +2488,10 @@ static inline int lpc17_40_phyautoneg(uint8_t phyaddr)
 
   for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
     {
+      /* For some motive a large delay is necessary for some PHYs */
+
+      up_udelay(5000);
+
       /* Check if auto-negotiation has completed */
 
       phyreg = lpc17_40_phyread(phyaddr, MII_MSR);
@@ -2532,9 +2563,9 @@ static int lpc17_40_phymode(uint8_t phyaddr, uint8_t mode)
 
   for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
     {
-      /* REVISIT:  This should not depend explicity on the board configuration.
-       * Rather, there should be some additional configuration option to
-       * suppress this DP83848C-specific behavior.
+      /* REVISIT:  This should not depend explicit y on the board
+       * configuration.  Rather, there should be some additional
+       * configuration option to suppress this DP83848C-specific behavior.
        */
 
 #if defined(CONFIG_ETH0_PHY_DP83848C) && !defined(CONFIG_ARCH_BOARD_MBED)
@@ -2666,9 +2697,21 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
       lpc17_40_putreg(regval, LPC17_40_ETH_MCFG);
     }
 
+#if defined(CONFIG_ETH0_PHY_DP83848C)
+  /* Enable the RMII interface for DP83848x PHYs */
+
+  lpc17_40_phywrite(phyaddr, MII_DP83848C_RBR,
+                    MII_RBR_ELAST_2 | MII_RBR_RMIIMODE);
+#endif
+
   /* Are we configured to do auto-negotiation? */
 
 #ifdef CONFIG_LPC17_40_PHY_AUTONEG
+  /* Enable FD mode, Auto-negotiation and 100Mbps speed */
+
+  lpc17_40_phywrite(phyaddr, MII_MCR,
+                    MII_MCR_FULLDPLX | MII_MCR_ANENABLE | MII_MCR_SPEED100);
+
   /* Setup the Auto-negotiation advertisement: 100 or 10, and HD or FD */
 
   lpc17_40_phywrite(phyaddr, MII_ADVERTISE,
@@ -2690,6 +2733,15 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
   if (ret < 0)
     {
       return ret;
+    }
+#endif
+
+#if defined(CONFIG_ETH0_PHY_DP83848C)
+  /* Wait until the link is established */
+
+  while ((lpc17_40_phyread(phyaddr, MII_DP83848C_STS) & 0x0001) == 0)
+    {
+      up_udelay(40000);
     }
 #endif
 
@@ -2794,6 +2846,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
       case 0x0002:
         priv->lp_mode = LPC17_40_10BASET_HD;
+        lpc17_40_putreg(0, LPC17_40_ETH_SUPP);
         break;
 
       case 0x0004:
@@ -2802,6 +2855,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
       case 0x0006:
         priv->lp_mode = LPC17_40_10BASET_FD;
+        lpc17_40_putreg(0, LPC17_40_ETH_SUPP);
         break;
 
       default:
@@ -2861,19 +2915,21 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 #endif
 
   ninfo("%dBase-T %s duplex\n",
-        (priv->lp_mode & LPC17_40_SPEED_MASK) ==  LPC17_40_SPEED_100 ? 100 : 10,
-        (priv->lp_mode & LPC17_40_DUPLEX_MASK) == LPC17_40_DUPLEX_FULL ?"full" : "half");
+        (priv->lp_mode & LPC17_40_SPEED_MASK) ==
+          LPC17_40_SPEED_100 ? 100 : 10,
+        (priv->lp_mode & LPC17_40_DUPLEX_MASK) ==
+          LPC17_40_DUPLEX_FULL ?"full" : "half");
 
   /* Disable auto-configuration.  Set the fixed speed/duplex mode.
    * (probably more than little redundant).
    *
-   * REVISIT: Revisit the following CONFIG_PHY_CEMENT_DISABLE work-around.
-   * It is should not needed if CONFIG_LPC17_40_PHY_AUTONEG is defined and is known
-   * cause a problem for at least one PHY (DP83848I PHY).  It might be
-   * safe just to remove this elided coded for all PHYs.
+   * REVISIT: Revisit the following CONFIG_LPC17_40_PHY_CEMENT_DISABLE work-
+   * around.  It is should not needed if CONFIG_LPC17_40_PHY_AUTONEG is
+   * defined and is known cause a problem for at least one PHY (DP83848I
+   * PHY).  It might be safe just to remove this elided coded for all PHYs.
    */
 
-#ifndef CONFIG_PHY_CEMENT_DISABLE
+#ifndef CONFIG_LPC17_40_PHY_CEMENT_DISABLE
   ret = lpc17_40_phymode(phyaddr, priv->lp_mode);
 #endif
   lpc17_40_showmii(phyaddr, "After final configuration");
@@ -2916,7 +2972,7 @@ static inline void lpc17_40_txdescinit(struct lpc17_40_driver_s *priv)
 
   lpc17_40_putreg(LPC17_40_TXDESC_BASE, LPC17_40_ETH_TXDESC);
   lpc17_40_putreg(LPC17_40_TXSTAT_BASE, LPC17_40_ETH_TXSTAT);
-  lpc17_40_putreg(CONFIG_LPC17_40_ETH_NTXDESC-1, LPC17_40_ETH_TXDESCRNO);
+  lpc17_40_putreg(CONFIG_LPC17_40_ETH_NTXDESC - 1, LPC17_40_ETH_TXDESCRNO);
 
   /* Initialize Tx descriptors and link to packet buffers */
 
@@ -2972,7 +3028,7 @@ static inline void lpc17_40_rxdescinit(struct lpc17_40_driver_s *priv)
 
   lpc17_40_putreg(LPC17_40_RXDESC_BASE, LPC17_40_ETH_RXDESC);
   lpc17_40_putreg(LPC17_40_RXSTAT_BASE, LPC17_40_ETH_RXSTAT);
-  lpc17_40_putreg(CONFIG_LPC17_40_ETH_NRXDESC-1, LPC17_40_ETH_RXDESCNO);
+  lpc17_40_putreg(CONFIG_LPC17_40_ETH_NRXDESC - 1, LPC17_40_ETH_RXDESCNO);
 
   /* Initialize Rx descriptors and link to packet buffers */
 
@@ -3134,8 +3190,8 @@ static void lpc17_40_ethreset(struct lpc17_40_driver_s *priv)
   lpc17_40_putreg(0, LPC17_40_ETH_TEST);
 
   lpc17_40_putreg(18, LPC17_40_ETH_IPGR);
-  lpc17_40_putreg(((15 << ETH_CLRT_RMAX_SHIFT) | (55 << ETH_CLRT_COLWIN_SHIFT)),
-               LPC17_40_ETH_CLRT);
+  lpc17_40_putreg(((15 << ETH_CLRT_RMAX_SHIFT) |
+                   (55 << ETH_CLRT_COLWIN_SHIFT)), LPC17_40_ETH_CLRT);
 
   /* Set the Maximum Frame size register. "This field resets to the value
    * 0x0600, which represents a maximum receive frame of 1536 octets. An

@@ -98,7 +98,8 @@ enum pkt_state_e
   PKT_START = 0,
   PKT_EVENT,
   PKT_ESC_START,
-  PKT_BULK_DATA
+  PKT_BULK_DATA_TCP,
+  PKT_BULK_DATA_UDP,
 };
 
 enum spi_status_e
@@ -115,11 +116,12 @@ enum pkt_type_e
   TYPE_DISCONNECT = 2,
   TYPE_CONNECT = 3,
   TYPE_BOOT_MSG = 4,
-  TYPE_BULK_DATA = 5,
-  TYPE_FAIL = 6,
-  TYPE_TIMEOUT = 7,
-  TYPE_SPI_ERROR = 8,
-  TYPE_UNMATCH = 9,
+  TYPE_BULK_DATA_TCP = 5,
+  TYPE_BULK_DATA_UDP = 6,
+  TYPE_FAIL = 7,
+  TYPE_TIMEOUT = 8,
+  TYPE_SPI_ERROR = 9,
+  TYPE_UNMATCH = 10,
 };
 
 struct evt_code_s
@@ -130,14 +132,15 @@ struct evt_code_s
 
 struct pkt_dat_s
 {
-  struct dq_entry_s dq;
-  enum pkt_type_e   type;
-  char              cid;
-  uint8_t           n;
-  FAR char          *msg[NRESPMSG];
-  uint16_t          remain; /* bulk data length to be read */
-  uint16_t          len;    /* bulk data length */
-  FAR uint8_t       *data;  /* bulk data */
+  struct dq_entry_s  dq;
+  enum pkt_type_e    type;
+  struct sockaddr_in addr;
+  char               cid;
+  uint8_t            n;
+  FAR char           *msg[NRESPMSG];
+  uint16_t           remain; /* bulk data length to be read */
+  uint16_t           len;    /* bulk data length */
+  FAR uint8_t        *data;  /* bulk data */
 };
 
 struct pkt_ctx_s
@@ -642,6 +645,18 @@ static bool _copy_data_from_pkt(FAR struct gs2200m_dev_s *dev,
     }
 
 errout:
+
+  if (!msg->is_tcp)
+    {
+      /* Copy the source address and port */
+
+      memcpy(&msg->addr, &pkt_dat->addr, sizeof(pkt_dat->addr));
+
+      /* In udp case, treat the packet separately */
+
+      ret = false;
+    }
+
   return ret;
 }
 
@@ -1172,7 +1187,15 @@ static void _parse_pkt_in_s2(FAR struct pkt_ctx_s *pkt_ctx,
 
       /* NOTE: See 7.5.3.2 Bulk Data Handling */
 
-      pkt_ctx->state = PKT_BULK_DATA;
+      pkt_ctx->state = PKT_BULK_DATA_TCP;
+    }
+  else if ('y' == c)
+    {
+      wlinfo("** <ESC>y \n");
+
+      /* NOTE: See 7.5.3.2 Bulk Data Handling */
+
+      pkt_ctx->state = PKT_BULK_DATA_UDP;
     }
   else if ('F' == c)
     {
@@ -1191,7 +1214,7 @@ static void _parse_pkt_in_s2(FAR struct pkt_ctx_s *pkt_ctx,
 }
 
 /****************************************************************************
- * Name: _parse_pkt_in_s3 (BULK data)
+ * Name: _parse_pkt_in_s3 (BULK data for TCP)
  ****************************************************************************/
 
 static void _parse_pkt_in_s3(FAR struct pkt_ctx_s *pkt_ctx,
@@ -1217,6 +1240,8 @@ static void _parse_pkt_in_s3(FAR struct pkt_ctx_s *pkt_ctx,
       pkt_ctx->dlen = _to_uint16((char *)pkt_ctx->ptr);
       pkt_ctx->ptr += 3;
 
+      wlinfo("dlen=%d \n", pkt_ctx->dlen);
+
       /* Allocate memory for the packet */
 
       pkt_dat->data = kmm_calloc(pkt_ctx->dlen, 1);
@@ -1231,7 +1256,74 @@ static void _parse_pkt_in_s3(FAR struct pkt_ctx_s *pkt_ctx,
       if (0 == pkt_ctx->dlen)
         {
           pkt_ctx->state = PKT_START;
-          pkt_ctx->type  = TYPE_BULK_DATA;
+          pkt_ctx->type  = TYPE_BULK_DATA_TCP;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: _parse_pkt_in_s4 (BULK data for UDP: see Table 217)
+ ****************************************************************************/
+
+static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
+                             FAR struct pkt_dat_s *pkt_dat)
+{
+  char addr[17];
+  char port[6];
+  int n;
+
+  ASSERT(pkt_dat);
+
+  if ('z' == pkt_ctx->cid)
+    {
+      /* <CID><address><sp><port><tab><Data Length xxxx 4 ascii char> */
+
+      /* Read CID */
+
+      pkt_ctx->cid = (char)*(pkt_ctx->ptr);
+      pkt_ctx->ptr++;
+
+      pkt_dat->cid = pkt_ctx->cid;
+
+      /* Read address and port */
+
+      memset(addr, 0, sizeof(addr));
+      memset(port, 0, sizeof(port));
+      n = sscanf((char *)pkt_ctx->ptr, "%s %s\t", addr, port);
+      ASSERT(2 == n);
+
+      wlinfo("from (%s:%s) \n", addr, port);
+
+      inet_aton(addr, &pkt_dat->addr.sin_addr);
+      pkt_dat->addr.sin_port = htons((uint16_t)atoi(port));
+
+      /* Skip until data length */
+
+      for (; '\t' != (char)*(pkt_ctx->ptr); pkt_ctx->ptr++);
+      pkt_ctx->ptr++;
+
+      /* Read data length */
+
+      pkt_ctx->dlen = _to_uint16((char *)pkt_ctx->ptr);
+      pkt_ctx->ptr += 3;
+
+      wlinfo("dlen=%d \n", pkt_ctx->dlen);
+
+      /* Allocate memory for the packet */
+
+      pkt_dat->data = kmm_calloc(pkt_ctx->dlen, 1);
+      ASSERT(pkt_dat->data);
+    }
+  else
+    {
+      _push_data_to_pkt(pkt_dat, *(pkt_ctx->ptr));
+
+      pkt_ctx->dlen--;
+
+      if (0 == pkt_ctx->dlen)
+        {
+          pkt_ctx->state = PKT_START;
+          pkt_ctx->type  = TYPE_BULK_DATA_UDP;
         }
     }
 }
@@ -1269,8 +1361,12 @@ static enum pkt_type_e _parse_pkt(FAR uint8_t *p, uint16_t len,
           _parse_pkt_in_s2(&pkt_ctx, pkt_dat);
           break;
 
-        case PKT_BULK_DATA:
+        case PKT_BULK_DATA_TCP:
           _parse_pkt_in_s3(&pkt_ctx, pkt_dat);
+          break;
+
+        case PKT_BULK_DATA_UDP:
+          _parse_pkt_in_s4(&pkt_ctx, pkt_dat);
           break;
 
         default:
@@ -1662,12 +1758,13 @@ errout:
 }
 
 /****************************************************************************
- * Name: gs2200m_start_tcps
- * NOTE: See 7.5.1.3 Start TCP Server
+ * Name: gs2200m_start_server
+ * NOTE: See 7.5.1.3 Start TCP Server, 7.5.1.4 Start UDP Server
  ****************************************************************************/
 
-static enum pkt_type_e gs2200m_start_tcps(FAR struct gs2200m_dev_s *dev,
-                                          FAR char *port, FAR char *cid)
+static enum pkt_type_e gs2200m_start_server(FAR struct gs2200m_dev_s *dev,
+                                            FAR char *port, bool is_tcp,
+                                            FAR char *cid)
 {
   enum pkt_type_e   r;
   struct pkt_dat_s pkt_dat;
@@ -1677,7 +1774,14 @@ static enum pkt_type_e gs2200m_start_tcps(FAR struct gs2200m_dev_s *dev,
 
   /* Prepare cmd */
 
-  snprintf(cmd, sizeof(cmd), "AT+NSTCP=%s\r\n", port);
+  if (is_tcp)
+    {
+      snprintf(cmd, sizeof(cmd), "AT+NSTCP=%s\r\n", port);
+    }
+  else
+    {
+      snprintf(cmd, sizeof(cmd), "AT+NSUDP=%s\r\n", port);
+    }
 
   /* Initialize pkt_dat and send  */
 
@@ -1714,36 +1818,53 @@ errout:
  ****************************************************************************/
 
 static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
-                                         char cid, FAR const void *txdata,
-                                         uint16_t len)
+                                         FAR struct gs2200m_send_msg *msg)
 {
   enum pkt_type_e   r;
-  const int  bulk_hdr_size = 7;
   enum spi_status_e s;
+  int  bulk_hdr_size;
   char digits[5];
-  char cmd[10];
+  char cmd[32];
 
   memset(cmd, 0, sizeof(cmd));
 
   /* Convert the data length to 4 ascii char */
 
-  _to_ascii_char(len, digits);
+  _to_ascii_char(msg->len, digits);
 
-  wlinfo("** cid=%c len=%d digits=%s \n", cid, len, digits);
+  wlinfo("** cid=%c len=%d digits=%s \n", msg->cid, msg->len, digits);
 
-  /* NOTE: See 7.5.3.2 Bulk Data Handling
-   * <ESC>Z<CID><Data Length xxxx 4 ascii char><data>
-   */
+  if (msg->is_tcp)
+    {
+      /* NOTE: See 7.5.3.2 Bulk Data Handling for TCP
+       * <ESC>Z<CID><Data Length xxxx 4 ascii char><data>
+       */
 
-  snprintf(cmd, sizeof(cmd), "%cZ%c%s", ASCII_ESC, cid, digits);
+      snprintf(cmd, sizeof(cmd), "%cZ%c%s", ASCII_ESC, msg->cid, digits);
+    }
+  else
+    {
+      wlinfo("** addr=%s port=%d \n", inet_ntoa(msg->addr.sin_addr),
+             ntohs(msg->addr.sin_port));
 
+      /* NOTE: See 7.5.3.2 Bulk Data Handling for UDP
+       * <ESC>Y<CID><IP address>:<port>:<Data Length xxxx 4 ascii char><data>
+       */
+
+      snprintf(cmd, sizeof(cmd), "%cY%c%s:%d:%s",
+               ASCII_ESC, msg->cid,
+               inet_ntoa(msg->addr.sin_addr), ntohs(msg->addr.sin_port),
+               digits);
+    }
+
+  bulk_hdr_size = strlen(cmd);
   memset(dev->tx_buff, 0, sizeof(dev->tx_buff));
   memcpy(dev->tx_buff, cmd, bulk_hdr_size);
-  memcpy(dev->tx_buff + bulk_hdr_size, txdata, len);
+  memcpy(dev->tx_buff + bulk_hdr_size, msg->buf, msg->len);
 
   /* Send the bulk data */
 
-  s = gs2200m_hal_write(dev, (char *)dev->tx_buff, len + bulk_hdr_size);
+  s = gs2200m_hal_write(dev, (char *)dev->tx_buff, msg->len + bulk_hdr_size);
   r = _spi_err_to_pkt_type(s);
 
   return r;
@@ -1847,6 +1968,44 @@ static enum pkt_type_e gs2200m_get_version(FAR struct gs2200m_dev_s *dev)
 #endif
 
 /****************************************************************************
+ * Name: gs2200m_ioctl_bind
+ ****************************************************************************/
+
+static int gs2200m_ioctl_bind(FAR struct gs2200m_dev_s *dev,
+                              FAR struct gs2200m_bind_msg *msg)
+{
+  enum pkt_type_e type = TYPE_OK;
+  char cid = 'z';
+  int ret = OK;
+
+  wlinfo("+++ start: (cid=%c, port=%s) \n", msg->cid, msg->port);
+
+  /* Start TCP/UDP server and retrieve cid */
+
+  type = gs2200m_start_server(dev, msg->port, msg->is_tcp, &cid);
+
+  if (type != TYPE_OK)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Enable the cid for server socket and if the pkt_q is empty */
+
+  _enable_cid(&dev->valid_cid_bits, cid, true);
+  _check_pkt_q_empty(dev, cid);
+
+errout:
+
+  msg->type = type;
+  msg->cid  = cid;
+
+  wlinfo("+++ end: type=%d (cid=%c) \n", type, cid);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: gs2200m_ioctl_connect
  ****************************************************************************/
 
@@ -1912,7 +2071,10 @@ static int gs2200m_ioctl_connect(FAR struct gs2200m_dev_s *dev,
 static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
                               FAR struct gs2200m_send_msg *msg)
 {
+  FAR struct gs2200m_bind_msg bmsg;
   enum pkt_type_e type;
+  bool assigned = false;
+  uint16_t s_port;
   int ret = OK;
 
   wlinfo("+++ start: (cid=%c) \n", msg->cid);
@@ -1921,6 +2083,28 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
   gs2200m_set_gpio(dev, LED_GPIO, 1);
 #endif
 
+  /* If the msg is udp having unassgined cid */
+
+  if (!msg->is_tcp && 'z' == msg->cid)
+    {
+      memset(&bmsg, 0, sizeof(bmsg));
+
+      for (s_port = 50000; s_port < 60000; s_port++)
+        {
+          snprintf(bmsg.port, sizeof(bmsg.port), "%d", s_port);
+
+          if (0 == gs2200m_ioctl_bind(dev, &bmsg))
+            {
+              assigned = true;
+              break;
+            }
+        }
+
+      ASSERT(assigned);
+      wlinfo("+++ cid is assigned for udp (cid=%c) \n", bmsg.cid);
+      msg->cid = bmsg.cid;
+    }
+
   if (!_cid_is_set(&dev->valid_cid_bits, msg->cid))
     {
       wlinfo("+++ already closed \n");
@@ -1928,7 +2112,7 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  type = gs2200m_send_bulk(dev, msg->cid, msg->buf, msg->len);
+  type = gs2200m_send_bulk(dev, msg);
 
   msg->type = type;
 
@@ -2053,41 +2237,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: gs2200m_ioctl_bind
- ****************************************************************************/
-
-static int gs2200m_ioctl_bind(FAR struct gs2200m_dev_s *dev,
-                              FAR struct gs2200m_bind_msg *msg)
-{
-  enum pkt_type_e type = TYPE_OK;
-  char cid = 'z';
-  int ret = OK;
-
-  wlinfo("+++ start: (cid=%c, port=%s) \n", msg->cid, msg->port);
-
-  /* Start TCP server and retrieve cid */
-
-  type = gs2200m_start_tcps(dev, msg->port, &cid);
-
-  /* Enable the cid for server socket and if the pkt_q is empty */
-
-  _enable_cid(&dev->valid_cid_bits, cid, true);
-  _check_pkt_q_empty(dev, cid);
-
-  msg->type = type;
-  msg->cid  = cid;
-
-  if (type != TYPE_OK)
-    {
-      ret = -EINVAL;
-    }
-
-  wlinfo("+++ end: type=%d (cid=%c) \n", type, cid);
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: gs2200m_ioctl_accept
  ****************************************************************************/
 
@@ -2145,24 +2294,40 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
 {
   enum pkt_type_e t;
 
-  /* Set to STA mode */
-
-  t = gs2200m_set_opmode(dev, 0);
-  ASSERT(TYPE_OK == t);
-
-  /* Get mac address info */
-
-  t = gs2200m_get_mac(dev);
-  ASSERT(TYPE_OK == t);
-
   /* Disassociate */
 
   t = gs2200m_disassociate(dev);
   ASSERT(TYPE_OK == t);
 
+  /* Set to STA mode */
+
+  t = gs2200m_set_opmode(dev, 0);
+  ASSERT(TYPE_OK == t);
+
+#ifdef CONFIG_WL_GS2200M_DISABLE_DHCPC
+  /* Disable DHCP Client */
+
+  t = gs2200m_enable_dhcpc(dev, 0);
+  ASSERT(TYPE_OK == t);
+
+
+  /* Set static address */
+  t = gs2200m_set_addresses(dev,
+                            "10.0.0.2",
+                            "255.255.255.0",
+                            "10.0.0.1"
+                            );
+  ASSERT(TYPE_OK == t);
+#else
   /* Enable DHCP Client */
 
   t = gs2200m_enable_dhcpc(dev, 1);
+  ASSERT(TYPE_OK == t);
+#endif
+
+  /* Get mac address info */
+
+  t = gs2200m_get_mac(dev);
   ASSERT(TYPE_OK == t);
 
   /* Set WPA2 Passphrase */
@@ -2250,6 +2415,67 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: gs2200m_ifreq_ifreq
+ ****************************************************************************/
+
+static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
+                               FAR struct gs2200m_ifreq_msg *msg)
+{
+  FAR struct sockaddr_in *inaddr;
+  struct in_addr in[3];
+  char addr[3][17];
+  int ret = OK;
+
+  wlinfo("+++ start: cmd=%x \n", msg->cmd);
+
+  inaddr = (FAR struct sockaddr_in *)&msg->ifr.ifr_addr;
+
+  switch (msg->cmd)
+    {
+      case SIOCSIFADDR:
+        memcpy(&dev->net_dev.d_ipaddr,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      case SIOCSIFDSTADDR:
+        memcpy(&dev->net_dev.d_draddr,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      case SIOCSIFNETMASK:
+        memcpy(&dev->net_dev.d_netmask,
+               &inaddr->sin_addr, sizeof(inaddr->sin_addr)
+               );
+        break;
+
+      default:
+        ret = -EINVAL;
+        break;
+    }
+
+  if (OK == ret)
+    {
+      memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
+      memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
+      memcpy(&in[2], &dev->net_dev.d_draddr, sizeof(in[2]));
+      strncpy(addr[0], inet_ntoa(in[0]), sizeof(addr[0]));
+      strncpy(addr[1], inet_ntoa(in[1]), sizeof(addr[1]));
+      strncpy(addr[2], inet_ntoa(in[2]), sizeof(addr[2]));
+
+      (void)gs2200m_set_addresses(dev,
+                                  addr[0],
+                                  addr[1],
+                                  addr[2]
+                                  );
+    }
+
+  wlinfo("+++ end: \n");
+  return ret;
 }
 
 /****************************************************************************
@@ -2346,6 +2572,15 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = gs2200m_ioctl_assoc_ap(dev, msg);
             }
+          break;
+        }
+
+      case GS2200M_IOC_IFREQ:
+        {
+          struct gs2200m_ifreq_msg *msg =
+            (struct gs2200m_ifreq_msg *)arg;
+
+          ret = gs2200m_ioctl_ifreq(dev, msg);
           break;
         }
 
@@ -2670,7 +2905,7 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
       dq_init(&dev->pkt_q[i]);
     }
 
-  /* Intialize SPI driver. */
+  /* Initialize SPI driver. */
 
   ret = gs2200m_spi_init(dev);
 

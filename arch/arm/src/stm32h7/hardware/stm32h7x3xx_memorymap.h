@@ -80,7 +80,7 @@
 #define STM32_SRAM3_BASE     0x3004c000     /* 0x30040000-0x30047fff: System SRAM3 */
 #define STM32_SRAM123_BASE   0x30000000     /* 0x30000000-0x30047fff: System SRAM123 */
 #define STM32_SRAM4_BASE     0x38000000     /* 0x38000000-0x3800ffff: System SRAM4 */
-#define STM32_BBRAM_BASE     0x38800000     /* 0x38800000-0x38800fff: System BBRAM */
+#define STM32_BBSRAM_BASE    0x38800000     /* 0x38800000-0x38800fff: System Backup SRAM */
 
 /* Peripheral Base Addresses ********************************************************/
 

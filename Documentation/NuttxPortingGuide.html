@@ -30,9 +30,9 @@
     </ul>
     <a href="#DirStructBinFmt">2.3 nuttx/binfmt/</a><br>
     <a href="#DirStructAudio">2.4 nuttx/audio/</a><br>
-    <a href="#DirStructConfigs">2.5 nuttx/configs/</a>
+    <a href="#DirStructConfigs">2.5 nuttx/boards/</a>
     <ul>
-      <a href="#configsdirectorystructure">2.5.1 Subdirectory Structure</a><br>
+      <a href="#boardsdirectorystructure">2.5.1 Subdirectory Structure</a><br>
       <a href="#summaryofconfigfiles">2.5.2 Summary of Files</a>
       <ul>
         <a href="#boardlogic">2.5.2.1 Board Specific Logic</a><br>
@@ -240,7 +240,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 25, 2019</p>
+      <p>Last Updated: August 8, 2019</p>
     </td>
   </tr>
 </table>
@@ -260,7 +260,7 @@
   into the build.
 </p>
 <p>
-  See also <code>arch/README.txt</code> and <code>configs/README.txt</code>.
+  See also <code>arch/README.txt</code> and <code>boards/README.txt</code>.
 </p>
 
 <table width ="100%">
@@ -309,16 +309,21 @@
 |   |   |-- <i>(binfmt-specific sub-directories)</i>/
 |   |   |   `-- <i>(binfmt-specific source files)</i>
 |   |   `-- <i>(common binfmt source files)</i>
-|   |-- <a href="#DirStructConfigs">configs</a>/
-|   |   |-- <i>&lt;board-name&gt;</i>/
-|   |   |   |-- include/
-|   |   |   |   `-- <i>(other board-specific header files)</i>
-|   |   |   |-- src/
-|   |   |   |   `-- <i>(board-specific source files)</i>
-|   |   |   |---<i>&lt;config-name&gt;</i>/
-|   |   |   |   `-- <i>(board configuration-specific source files)</i>
-|   |   |   `---<i>(other configuration sub-directories for this board)</i>/
-|   |   `-- <i>&lt;(other board directories)&gt;</i>/
+|   |-- <a href="#DirStructConfigs">boards</a>/
+|   |   |-- <i>&lt;architecture-name&gt;</i>/
+|   |   |   |-- <i>&lt;chip-name&gt;</i>/
+|   |   |   |   |-- <i>&lt;board-name&gt;</i>/
+|   |   |   |   |   |-- include/
+|   |   |   |   |   |   `-- <i>(other board-specific header files)</i>
+|   |   |   |   |   |-- src/
+|   |   |   |   |   |   `-- <i>(board-specific source files)</i>
+|   |   |   |   |   `- configs/
+|   |   |   |   |         |---<i>&lt;config-name&gt;</i>/
+|   |   |   |   |         |   `-- <i>(board configuration-specific source files)</i>
+|   |   |   |   |         `---<i>(other configuration sub-directories for this board)</i>/
+|   |   |   |   `-- <i>&lt;(other board directories)&gt;</i>/
+|   |   |   `-- <i>&lt;(other chip directories)&gt;</i>/
+|   |   `-- <i>&lt;(other architecture directories)&gt;</i>/
 |   |-- crypto
 |   |   |-- Makefile
 |   |   |-- Kconfig
@@ -526,11 +531,11 @@
     </p>
     <p>
       These board-specific configuration files can be found in the
-      <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
-      in a paragraph <a href="#configsdirectorystructure">below</a>.
+      <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directories and are discussed
+      in a paragraph <a href="#boardsdirectorystructure">below</a>.
     </p>
     <p>
-      The directory <code>configs/stm32f4disovery/</code>, as an example, holds board-specific logic for the STM32F4 Discovery board and is selected via the <code>CONFIG_ARCH_BOARD=&quot;stm32f4discovery&quot;</code> configuration setting.
+      The directory <code>boards/arm/stm32/stm32f4disovery/</code>, as an example, holds board-specific logic for the STM32F4 Discovery board and is selected via the <code>CONFIG_ARCH_BOARD=&quot;stm32f4discovery&quot;</code> configuration setting.
     </p>
   </li>
 </ul>
@@ -791,17 +796,16 @@
   The <code>audio/</code> subdirectory contains the NuttX audio sub-system.
 </p>
 
-<h2>2.5 <a name="DirStructConfigs">nuttx/configs</a></h2>
+<h2>2.5 <a name="DirStructConfigs">nuttx/boards</a></h2>
 <p>
-  The <code>configs/</code> subdirectory contains configuration data for each board.
-  These board-specific configurations plus the architecture-specific configurations in
-  the <code>arch/</code> subdirectory complete define a customized port of NuttX.
+  The <code>boards/</code> subdirectory contains custom logic and board configuration data for each board.
+  These board-specific configurations plus the architecture-specific configurations in the <code>arch/</code> subdirectory complete define a customized port of NuttX.
 </p>
 
-<h3><a name="configsdirectorystructure">2.5.1 Subdirectory Structure</a></h3>
+<h3><a name="boardsdirectorystructure">2.5.1 Subdirectory Structure</a></h3>
 <p>
-  The configs directory contains board specific configuration files.  Each board must
-  provide a subdirectory &lt;board-name&gt; under <code>configs/</code> with the following characteristics:
+  The <code>boards/</code> directory contains board specific configuration files.  Each board must
+  provide a sub-directory &lt;board-name&gt; under <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code>><i>&lt;chip-name&gt;</i><code>/</code> with the following characteristics:
 </p>
 <ul><pre>
 <i>&lt;board-name&gt;</i>
@@ -812,12 +816,13 @@
 |-- src/
 |   |-- Makefile
 |   `-- <i>(board-specific source files)</i>
-|-- <i>&lt;config1-dir&gt;</i>
-|   |-- Make.defs
-|   `-- defconfig
-|-- <i>&lt;config2-dir&gt;</i>
-|   |-- Make.defs
-|   `-- defconfig
+|-- configs/
+|   |-- <i>&lt;config1-dir&gt;</i>
+|   |   |-- Make.defs (optional)
+|   |   `-- defconfig
+|   |-- <i>&lt;config2-dir&gt;</i>
+|   |   |-- Make.defs
+|   |   `-- defconfig
 |   ...
 |-- scripts/
 |   |-- <i>(linker script files)</i>
@@ -850,7 +855,7 @@
 </ul>
 <h4><a name="boardconfigsubdirs">2.5.2.2 Board Specific Configuration Sub-Directories</a></h4>
 <p>
-  The <code>configs/</code><i>&lt;board-name&gt;</i><code>/</code> sub-directory holds all of the
+  The <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
   Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
@@ -920,7 +925,7 @@
 
 <h3><a name="supportedboards">2.5.3 Supported Boards</a></h3>
 <p>
-  All of the specific boards supported by NuttX are identified in the  <a href="https://bitbucket.org/nuttx/nuttx/configs/src/master/README.txt" target="_blank">README.txt</a> file.
+  All of the specific boards supported by NuttX are identified in the  <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/README.txt" target="_blank">README.txt</a> file.
 </p>
 <h3><a name="newboardconfig">2.5.4 Adding a New Board Configuration</a></h3>
 <p>
@@ -928,14 +933,14 @@
   Now, how do you hook this board into the configuration system so that you can select with <code>make menuconfig</code>?
 </p>
 <p>
-  You will need modify the file <code>configs/Kconfig</code>.
+  You will need modify the file <code>boards/Kconfig</code>.
   Let's look at the STM32F4-Discovery configuration in the <code>Kconfig</code> file and see how we would add a new board directory to the configuration.
-  For this configuration let's say that you new board resides in the directory <code>configs/myboard</code>;
+  For this configuration let's say that you new board resides in the directory <code>boards/myarch/mychip/myboard</code>;
   It uses an MCU selected with <code>CONFIG_ARCH_CHIP_MYMCU</code>; and you want the board to be selected with <code>CONFIG_ARCH_BOARD_MYBOARD</code>.
-  Then here is how you can clone the STM32F4-Discovery configuration in <code>configs/Kconfig</code> to support your new board configuration.
+  Then here is how you can clone the STM32F4-Discovery configuration in <code>boards/Kconfig</code> to support your new board configuration.
 </p>
 <p>
-  In <code>configs/Kconfig</code> for the stm32f4-discovery, you will see a configuration definition like this:
+  In <code>boards/Kconfig</code> for the stm32f4-discovery, you will see a configuration definition like this:
 <p>
 <ul><pre>
 config ARCH_BOARD_STM32F4_DISCOVERY
@@ -966,7 +971,7 @@ config ARCH_BOARD_MYBOARD
         based on the MYMCU processor.
 </pre></ul>
 <p>
-  Later in the <code>configs/Kconfig</code> file, you will see a long, long string configuration with lots of defaults like this:
+  Later in the <code>boards/Kconfig</code> file, you will see a long, long string configuration with lots of defaults like this:
 </p>
 <ul><pre>
 config ARCH_BOARD
@@ -980,7 +985,7 @@ config ARCH_BOARD
 </pre></ul>
 <p>
   This logic will assign string value to a configuration variable called <code>CONFIG_ARCH_BOARD</code> that will name the directory where the board-specific files reside.
-  In our case, these files reside in <code>configs/myboard</code> and we add the following to the long list of defaults (again in alphabetical order):
+  In our case, these files reside in <code>boards/myarch/mychip/myboard</code> and we add the following to the long list of defaults (again in alphabetical order):
 </p>
 <ul><pre>
     default "myboard"             if ARCH_BOARD_MYBOARD
@@ -989,15 +994,15 @@ config ARCH_BOARD
   Now the build system knows where to find your board configuration!
 </p>
 <p>
-  And finally, add something like this near the bottom of <code>configs/myboard</code>:
+  And finally, add something like this near the bottom of <code>boards/myarch/mychip/myboard</code>:
 </p>
 <ul><pre>
 if ARCH_BOARD_MYBOARD
-source "configs/myboard/Kconfig"
+source "boards/myarch/mychip/myboard/Kconfig"
 endif
 </pre></ul>
 <p>
-  This includes additional, board-specific configuration variable definitions in <code>configs/myboard/Kconfig</code>.
+  This includes additional, board-specific configuration variable definitions in <code>boards/myarch/mychip/myboard/Kconfig</code>.
 </p>
 
 <h2>2.6 <a name="DirStructCrypto">nuttx/crypto</a></h2>
@@ -1486,7 +1491,7 @@ tools/
 |-- cfgparser.h
 |-- cmpconfig.c
 |-- cnvwindeps.c
-|-- configure.sh / configure.bat
+|-- configure.sh / configure.bat / configure.c
 |-- copydir.sh / copydir.bat
 |-- define.sh / define.bat
 |-- discovery.py
@@ -1555,17 +1560,20 @@ tools/
   This could be done manually as follows:
 </p>
 <ul>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code>,<li>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
+  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code> (see NOTE below),</li>
+  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 
 <p>
   Where <i>&lt;board-name&gt;</i> is the name of one of the sub-directories of the
-  NuttX <a href="#DirStructConfigs"><code>configs/</code></a> directory.
+  NuttX <a href="#DirStructConfigs"><code>boards/</code></a> directory.
   This sub-directory name corresponds to one of the supported boards
   identified <a href="#supportedboards">above</a>.
   &lt;config-dir&gt; is the optional, specific configuration directory for the board.
   And &lt;app-dir&gt; is the location of the optional application directory.
+</p>
+<p>
+  NOTE:  Recall that the <code>Make.defs</code> file may reside in either the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i></code> directory or in the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>scripts</code>.
 </p>
 <p>
   <b>Automated Configuration</b>.
@@ -1573,15 +1581,22 @@ tools/
   accomplish the same configuration:
 </p>
 <ul><pre>
-  tools/configure.sh [OPTIONS] <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh [OPTIONS] <i>&lt;board-name&gt;</i>[:<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
   There is an alternative Windows batch file, <code>configure.bat</code>,  that can be used instead of <code>configure.sh</code> in the windows native environment like:
 </p>
 <ul><pre>
-  tools\configure.bat <i>&lt;board-name&gt;</i>[\<i>&lt;config-dir&gt;</i>]
+  tools\configure.bat <i>&lt;board-name&gt;</i>:<i>&lt;config-dir&gt;</i>
 </pre></ul>
+<p>
+  And, to make sure that other platforms are supported, there is also a C program at <code>tools/configure.c</code> that can be compiled to establish the board configuration on all platforms.
+</p>
+<p><blockquote><small>
+  NOTE (2019-08-6):  As of this writing, changes to the boards/ directly have made <code>configure.bat</code> unusable.
+  For the native Windows environment, <code>configure.c</code> is recommended until that batch file can be repaired.
+</small></blockquote></p>
 <p>
   See <code>tools/README.txt</code> for more information about these scripts.
   Or use the -h option with <code>configure.sh></code>
@@ -1589,7 +1604,7 @@ tools/
 <ul><pre>
 $ tools/configure.sh -h
 
-USAGE: tools/configure.sh [-d] [-l|m|c|u|g|n] [-a &lt;app-dir&gt;] &lt;board-name&gt;/&lt;config-name&gt;
+USAGE: tools/configure.sh [-d] [-l|m|c|u|g|n] [-a &lt;app-dir&gt;] &lt;board-name&gt;[:&lt;config-name&gt;]
 
 Where:
   -l selects the Linux (l) host environment.
@@ -1600,7 +1615,7 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
-  &lt;board-name&gt; is the name of the board in the configs directory
+  &lt;board-name&gt; is the name of the board in the <code>boards/</code> directory
   &lt;config-name&gt; is the name of the board configuration sub-directory
   &lt;app-dir&gt; is the path to the apps/ directory, relative to the nuttx
      directory
@@ -1611,7 +1626,7 @@ Where:
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
-  tools/configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i>[:<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
@@ -1705,8 +1720,8 @@ The specific environmental definitions are unique for each board but should incl
   <li>Auto-generating the file  <code>${TOPDIR}/.version</code> with version 0.0 if one does not exist.</li>
   <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>${TOPDIR}/.version</code> file.</li>
   <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.</li>
-  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.</li>
-  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code></li>
+  <li>Creating a link to <code>${TOPDIR}/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.</li>
+  <li>Creating a link to <code>${TOPDIR}/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code></li>
   <li>Creating a link to <code>${APPDIR}/include</code> at <code>${TOPDIR}/include/apps</code></li>
   <li>Creating make dependencies.
 </ul>
@@ -1762,7 +1777,7 @@ The specific environmental definitions are unique for each board but should incl
       <b>Board-Specific Interfaces</b>.
       Any interface which is unique to a board should be prefixed with the board name, for example <code>stm32f4discovery_</code>.
       Sometimes the board name is too long so <code>stm32_</code> would be okay too.
-      These should be prototyped in <code>configs/&lt;board&gt;/src/&lt;board&gt;.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
+      These should be prototyped in <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/src/&lt;board&gt;.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
   </li>
   <li>
     <p>
@@ -1787,7 +1802,7 @@ The specific environmental definitions are unique for each board but should incl
       Keeping in the spirit of the layered architecture, these publicly visible header files must <i>not</i> export platform-specific definitions; Only platform-specific realizations of standardized declarations should be visible.
       Those <i>standardized declarations</i> should appear in common header files such as those provided by <code>include/nuttx/arch.h</code> and <code>include/nuttx/board.h</code>.
       Similarly, these publicly visible header file must <i>not</i> include files that reside in the inaccessible platform-specific source directories.
-      For example, the board-specific <code>configs/&lt;board&gt;/include/board.h</code> header file must never include microcontroller-specific header files that reside in <code>arch/&lt;arch&gt;/src/&lt;mcu&gt;</code>.
+      For example, the board-specific <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include/board.h</code> header file must never include microcontroller-specific header files that reside in <code>arch/&lt;arch&gt;/src/&lt;mcu&gt;</code>.
       That practice will cause inclusion failures when the publicly visible file is included in common logic outside of the platform-specific source directories.
     </p>
   </li>
@@ -5204,7 +5219,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     The controller-specific, &quot;upper half&quot; touchscreen drivers reside in the directory <code>drivers/input</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific touchscreen drivers reside in either: (1) The <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the processor architectures that have build in touchscreen controllers or (2) the <code>configs/</code><i>&lt;board&gt;</i><code>/src/</code> directory for boards that use an external touchscreen controller chip.
+    Platform-specific touchscreen drivers reside in either: (1) The <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the processor architectures that have build in touchscreen controllers or (2) the <code>boards/</code><i>&lt;arch&gt;</i><code>/</code><i>&lt;chip&gt;</i><code>/</code><i>&lt;board&gt;</i><code>/src/</code> directory for boards that use an external touchscreen controller chip.
   </li>
 </ul>
 
@@ -6074,7 +6089,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
   <li>
     <p>
       <b>Examples</b>:
-      <code>drivers/lcd/p14201.c</code>, <code>configs/sam3u-ek/src/up_lcd.c.</code>
+      <code>drivers/lcd/p14201.c</code>, <code>boards/arm/sam34/sam3u-ek/src/up_lcd.c.</code>
       See also the usage of the LCD driver in the <code>graphics/</code> directory.
     </p>
   </li>
@@ -6366,7 +6381,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
           </p>
           <p>
             <b>Examples</b>:
-            The function <code>nsh_waiter()</code> in the file <code>configs/olimex-lpc1766stk/src/lpc17_40_appinit.c</code>.
+            The function <code>nsh_waiter()</code> in the file <code>boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_appinit.c</code>.
           </p>
         </li>
         <li>

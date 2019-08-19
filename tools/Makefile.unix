@@ -78,7 +78,7 @@ else
 BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 endif
 else
-BOARD_DIR = $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)
+BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
 endif
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
@@ -240,6 +240,18 @@ else
 include/stdarg.h:
 endif
 
+# Target used to copy include/nuttx/lib/setjmp.h.  If CONFIG_ARCH_SETJMP_H is
+# defined, then there is an architecture specific setjmp.h header file
+# that will be included indirectly from include/lib/setjmp.h.  But first, we
+# have to copy setjmp.h from include/nuttx/. to include/.
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+include/setjmp.h: include/nuttx/lib/setjmp.h
+	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
+else
+include/setjmp.h:
+endif
+
 # Targets used to build include/nuttx/version.h.  Creation of version.h is
 # part of the overall NuttX configuration sequence. Notice that the
 # tools/mkversion tool is built and used to create include/nuttx/version.h
@@ -302,13 +314,13 @@ include/arch: .config
 	@echo "LN: include/arch to $(ARCH_DIR)/include"
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
-# Link the configs/<board-name>/include directory to include/arch/board
+# Link the boards/<arch>/<chip><board>/include directory to include/arch/board
 
 include/arch/board: include/arch
 	@echo "LN: include/arch/board to $(BOARD_DIR)/include"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/include include/arch/board
 
-# Link the configs/<board-name>/src dir to arch/<arch-name>/src/board
+# Link the boards/<arch>/<chip><board>/src dir to arch/<arch-name>/src/board
 
 $(ARCH_SRC)/board: .config
 	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/src"
@@ -331,7 +343,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 endif
 
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
-	$(Q) $(MAKE) -C configs dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
 
 # context
@@ -341,7 +353,7 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 # the config.h and version.h header files in the include/nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context staging include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h dirlinks
+context: check_context staging include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h include/setjmp.h dirlinks
 	$(Q) for dir in $(CONTEXTDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
 	done
@@ -352,12 +364,13 @@ context: check_context staging include/nuttx/config.h include/nuttx/version.h in
 # and symbolic links created by the context target.
 
 clean_context:
-	$(Q) $(MAKE) -C configs TOPDIR="$(TOPDIR)" clean_context
+	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" clean_context
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" clean_context
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
+	$(call DELFILE, include/setjmp.h)
 	$(Q) $(DIRUNLINK) include/arch/board
 	$(Q) $(DIRUNLINK) include/arch/chip
 	$(Q) $(DIRUNLINK) include/arch
@@ -545,6 +558,7 @@ savedefconfig: do_savedefconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
+	$(Q) grep "^CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_BOARD=" .config && grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
 	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config && grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config && grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp; true

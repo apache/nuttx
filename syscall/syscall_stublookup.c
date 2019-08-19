@@ -78,6 +78,13 @@ uintptr_t STUB_sched_yield(int nbr);
 uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
 uintptr_t STUB_uname(int nbr, uintptr_t parm1);
 
+/* User identity */
+
+uintptr_t STUB_setuid(int nbr, uintptr_t parm1);
+uintptr_t STUB_getuid(int nbr);
+uintptr_t STUB_setgid(int nbr, uintptr_t parm1);
+uintptr_t STUB_getgid(int nbr);
+
 /* Semaphores */
 
 uintptr_t STUB_sem_close(int nbr, uintptr_t parm1);

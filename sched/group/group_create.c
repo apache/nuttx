@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_create.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,16 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/sched.h>
 
 #include "environ/environ.h"
+#include "sched/sched.h"
 #include "group/group.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Is this worth making a configuration option? */
 
 #define GROUP_INITIAL_MEMBERS 4
@@ -61,10 +64,11 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is counter that is used to generate unique task group IDs */
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static gid_t g_gidcounter;
+static grpid_t g_grpid_counter;
 #endif
 
 /****************************************************************************
@@ -82,7 +86,7 @@ FAR struct task_group_s *g_grouphead;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_assigngid
+ * Name: group_assign_grpid
  *
  * Description:
  *   Create a unique group ID.
@@ -100,12 +104,12 @@ FAR struct task_group_s *g_grouphead;
  ****************************************************************************/
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static void group_assigngid(FAR struct task_group_s *group)
+static void group_assign_grpid(FAR struct task_group_s *group)
 {
   irqstate_t flags;
-  gid_t gid;
+  grpid_t grpid;
 
-  /* Pre-emption should already be enabled, but lets be paranoid careful */
+  /* Pre-emption should already be disabled, but let's be paranoid careful */
 
   sched_lock();
 
@@ -116,13 +120,13 @@ static void group_assigngid(FAR struct task_group_s *group)
       /* Increment the ID counter.  This is global data so be extra paranoid. */
 
       flags = enter_critical_section();
-      gid = ++g_gidcounter;
+      grpid = ++g_grpid_counter;
 
       /* Check for overflow */
 
-      if (gid <= 0)
+      if (grpid <= 0)
         {
-          g_gidcounter = 1;
+          g_grpid_counter = 1;            /* One is the IDLE group */
           leave_critical_section(flags);
         }
       else
@@ -130,11 +134,11 @@ static void group_assigngid(FAR struct task_group_s *group)
           /* Does a task group with this ID already exist? */
 
           leave_critical_section(flags);
-          if (group_findbygid(gid) == NULL)
+          if (group_findby_grpid(grpid) == NULL)
             {
-              /* Now assign this ID to the group and return */
+              /* No.. Assign this ID to the new group and return */
 
-              group->tg_gid = gid;
+              group->tg_grpid = grpid;
               sched_unlock();
               return;
             }
@@ -142,6 +146,40 @@ static void group_assigngid(FAR struct task_group_s *group)
     }
 }
 #endif /* HAVE_GROUP_MEMBERS */
+
+/****************************************************************************
+ * Name: group_inherit_identity
+ *
+ * Description:
+ *   All inherit the user identity from the parent task group.
+ *
+ * Input Parameters:
+ *   group - The new task group.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The parent of the new task is the task at the head of the assigned task
+ *   list for the current CPU.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+static inline void group_inherit_identity(FAR struct task_group_s *group)
+{
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
+
+  /* Inherit the user identity from the parent task group. */
+
+  DEBUGASSERT(group != NULL);
+  group->tg_uid = rgroup->tg_uid;
+  group->tg_gid = rgroup->tg_gid;
+}
+#else
+#  define group_inherit_identity(group)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -222,12 +260,16 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   tcb->cmn.group = group;
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-  /* Assign the group a unique ID.  If g_gidcounter were to wrap before we
+  /* Assign the group a unique ID.  If g_grpid_counter were to wrap before we
    * finish with task creation, that would be a problem.
    */
 
-  group_assigngid(group);
+  group_assign_grpid(group);
 #endif
+
+  /* Inherit the user identity from the parent task group */
+
+  group_inherit_identity(group);
 
   /* Duplicate the parent tasks environment */
 

@@ -105,7 +105,7 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr, FAR s
    */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (addr == NULL || addrlen <= 0)
+  if (addr == NULL || *addrlen <= 0)
     {
       return -EINVAL;
     }

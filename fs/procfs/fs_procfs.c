@@ -81,6 +81,7 @@ extern const struct procfs_operations irq_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations critmon_operations;
 extern const struct procfs_operations meminfo_operations;
+extern const struct procfs_operations iobinfo_operations;
 extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations version_operations;
@@ -137,6 +138,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMINFO
   { "meminfo",       &meminfo_operations,         PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_MM_IOB) && !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
+  { "iobinfo",       &iobinfo_operations,         PROCFS_FILE_TYPE   },
 #endif
 
 #if defined(CONFIG_MODULE) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)

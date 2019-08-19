@@ -747,7 +747,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #endif
 
   /* Because g_free_tcp_connections is accessed from user level and event
-   * processing logic, it is necessary to keep the newtork locked during this
+   * processing logic, it is necessary to keep the network locked during this
    * operation.
    */
 
@@ -778,7 +778,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Release any read-ahead buffers attached to the connection */
 
-  iob_free_queue(&conn->readahead);
+  iob_free_queue(&conn->readahead, IOBUSER_NET_TCP_READAHEAD);
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

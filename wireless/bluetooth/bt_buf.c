@@ -348,7 +348,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
        * available buffers.
        */
 
-      buf->frame = iob_alloc(false);
+      buf->frame = iob_alloc(false, IOBUSER_WIRELESS_BLUETOOTH);
       if (!buf->frame)
         {
           wlerr("ERROR:  Failed to allocate an IOB\n");
@@ -407,7 +407,7 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
 
   if (buf->frame != NULL)
     {
-      iob_free(buf->frame);
+      iob_free(buf->frame, IOBUSER_WIRELESS_BLUETOOTH);
       buf->frame = NULL;
     }
 

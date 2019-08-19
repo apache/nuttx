@@ -182,7 +182,7 @@ SYSLOG Channels
       bucket until the SYSLOG channel device has been initialized.
 
   The syslog channel device is initialized when the bring-up logic calls
-  syslog_intialize():
+  syslog_initialize():
 
   syslog_initialize()
   -------------------

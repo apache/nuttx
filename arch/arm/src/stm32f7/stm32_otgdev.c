@@ -5282,7 +5282,13 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
 #  ifdef CONFIG_STM32F7_OTGFSHS
 
-#    ifndef CONFIG_STM32F7_NO_ULPI
+#    ifdef CONFIG_STM32F7_NO_ULPI
+
+  regval = stm32_getreg(STM32_OTG_GUSBCFG);
+  regval |= OTG_GUSBCFG_PHYSEL;
+  stm32_putreg(regval, STM32_OTG_GUSBCFG);
+
+#    else /* CONFIG_STM32F7_NO_ULPI */
 
   /* Switch off FS tranceiver */
 
@@ -5351,14 +5357,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   up_udelay(2000);
 
 #      endif  /* CONFIG_STM32F7_INTERNAL_ULPI */
-#    endif    /* ifndef CONFIG_STM32F7_NO_ULPI */
-
-#  else       /* CONFIG_STM32F7_OTGFSHS */
-
-  regval = stm32_getreg(STM32_OTG_GUSBCFG);
-  regval |= OTG_GUSBCFG_PHYSEL;
-  stm32_putreg(regval, STM32_OTG_GUSBCFG);
-
+#    endif    /* CONFIG_STM32F7_NO_ULPI */
 #  endif      /* CONFIG_STM32F7_OTGFSHS */
 
   /* Common USB OTG core initialization */

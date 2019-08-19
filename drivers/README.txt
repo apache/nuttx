@@ -20,11 +20,11 @@ dev_null.c and dev_zero.c
 
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
-  a block driver that can be mounted as a files system.  See
+  a block driver that can be mounted as a file system.  See
   include/nuttx/drivers/ramdisk.h.
 
 rwbuffer.c
-  A facility that can be use by any block driver in-order to add
+  A facility that can be used by any block driver in-order to add
   writing buffering and read-ahead buffering.
 
 Subdirectories of this directory:
@@ -136,8 +136,8 @@ pwm/
 
 sensors/
   Drivers for various sensors.  A sensor driver differs little from
-  other types of drivers other than they are use to provide measuresments
-  of things in envionment like temperatore, orientation, acceleration,
+  other types of drivers other than they are use to provide measurements
+  of things in environment like temperature, orientation, acceleration,
   altitude, direction, position, etc.
 
   DACs might fit this definition of a sensor driver as well since they
@@ -173,7 +173,7 @@ usbhost/
   USB host drivers.  See also include/nuttx/usb/usbhost.h
 
 video/
-  Video-related drivers.  See inlude/nuttx/video/.
+  Video-related drivers.  See include/nuttx/video/.
 
 wireless/
   Drivers for various wireless devices.
@@ -181,7 +181,7 @@ wireless/
 Skeleton Files
 ^^^^^^^^^^^^^^
 
-Skeleton files a "empty" frameworks for NuttX drivers.  They are provided to
+Skeleton files are "empty" frameworks for NuttX drivers.  They are provided to
 give you a good starting point if you want to create a new NuttX driver.
 The following skeleton files are available:
 

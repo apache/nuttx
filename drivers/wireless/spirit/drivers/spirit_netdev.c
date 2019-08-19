@@ -715,7 +715,7 @@ static void spirit_free_txhead(FAR struct spirit_driver_s *priv)
 
    /* Free the IOB contained in the metadata container */
 
-   iob_free(pktmeta->pm_iob);
+   iob_free(pktmeta->pm_iob, IOBUSER_WIRELESS_PACKETRADIO);
 
    /* Then free the meta data container itself */
 
@@ -1175,7 +1175,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer != NULL)
         {
-          iob_free(priv->rxbuffer);
+          iob_free(priv->rxbuffer, IOBUSER_WIRELESS_PACKETRADIO);
           priv->rxbuffer = NULL;
         }
 #endif
@@ -1329,7 +1329,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer == NULL)
         {
-          priv->rxbuffer = iob_alloc(0);
+          priv->rxbuffer = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
         }
 
       if (priv->rxbuffer != NULL)
@@ -1404,7 +1404,7 @@ static void spirit_interrupt_work(FAR void *arg)
             {
               /* Allocate an I/O buffer to hold the received packet. */
 
-              iob = iob_alloc(0);
+              iob = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
             }
 
           if (iob == NULL)
@@ -1444,7 +1444,7 @@ static void spirit_interrupt_work(FAR void *arg)
                  {
                    wlerr("ERROR: Failed to allocate metadata... dropping\n");
                    NETDEV_RXDROPPED(&priv->radio.r_dev);
-                   iob_free(iob);
+                   iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
                  }
                else
                  {
@@ -1525,7 +1525,7 @@ static void spirit_interrupt_work(FAR void *arg)
         {
           /* If not, then allocate one now. */
 
-          priv->rxbuffer = iob_alloc(0);
+          priv->rxbuffer = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
           iob            = priv->rxbuffer;
           offset         = 0;
         }
@@ -1553,7 +1553,7 @@ static void spirit_interrupt_work(FAR void *arg)
               /* Free the IOB */
 
               priv->rxbuffer = NULL;
-              iob_free(iob);
+              iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
             }
           else
             {
@@ -1614,7 +1614,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer != NULL)
         {
-          iob_free(priv->rxbuffer);
+          iob_free(priv->rxbuffer, IOBUSER_WIRELESS_PACKETRADIO);
           priv->rxbuffer = NULL;
         }
 #endif
@@ -2357,7 +2357,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
          {
            wlerr("ERROR: Failed to allocate metadata... dropping\n");
            NETDEV_RXDROPPED(&priv->radio.r_dev);
-           iob_free(iob);
+           iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
            continue;
          }
 
@@ -2856,6 +2856,15 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
       wlerr("ERROR: spirit_hw_initialize failed: %d\n", ret);
       goto errout_with_attach;
     }
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached. We must do this before
+   * registering the device since, once the device is registered, a packet may
+   * be attempted to be forwarded and require the buffer.
+   */
+
+  priv->radio.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
 
   /* Register the device with the OS so that socket IOCTLs can be performed. */
 

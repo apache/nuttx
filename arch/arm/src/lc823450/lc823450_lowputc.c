@@ -179,7 +179,7 @@ void up_lowputc(char ch)
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
+ *   console.  Its purpose is to get the console output available as soon
  *   as possible.
  *
  **************************************************************************/

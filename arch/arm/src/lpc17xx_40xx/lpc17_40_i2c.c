@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_i2c.c
  *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
@@ -97,7 +97,6 @@
 #  define CONFIG_LPC17_40_I2C2_FREQUENCY 100000
 #endif
 
-#define I2C_TIMEOUT  (20 * 1000/CONFIG_USEC_PER_TICK) /* 20 mS */
 #define LPC17_40_I2C1_FREQUENCY 400000
 
 /****************************************************************************
@@ -211,11 +210,35 @@ static void lpc17_40_i2c_setfrequency(struct lpc17_40_i2cdev_s *priv,
 
 static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
 {
+  uint32_t total_len = 0;
+  uint32_t freq = 1000000;
+  uint32_t timeout;
+  int i;
+
   putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC,
            priv->base + LPC17_40_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC17_40_I2C_CONSET_OFFSET);
 
-  (void)wd_start(priv->timeout, I2C_TIMEOUT, lpc17_40_i2c_timeout, 1,
+  /* Get the total transaction length and the minimum frequency */
+
+  for(i = 0; i < priv->nmsg; i++)
+    {
+      total_len += priv->msgs[i].length;
+      if (priv->msgs[i].frequency < freq)
+        {
+          freq = priv->msgs[i].frequency;
+        }
+    }
+
+  /* Calculate the approximate timeout */
+
+  timeout = ((total_len * (8000000 / CONFIG_USEC_PER_TICK)) / freq) + 1;
+
+  /* Initializes the I2C state machine to a known value */
+
+  priv->state = 0x00;
+
+  (void)wd_start(priv->timeout, timeout, lpc17_40_i2c_timeout, 1,
                  (uint32_t)priv);
   nxsem_wait(&priv->wait);
 
@@ -275,7 +298,7 @@ static int lpc17_40_i2c_transfer(FAR struct i2c_master_s *dev,
   struct lpc17_40_i2cdev_s *priv = (struct lpc17_40_i2cdev_s *)dev;
   int ret;
 
-   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
+  DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
 
   /* Get exclusive access to the I2C bus */
 
@@ -348,11 +371,20 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
   state = getreg32(priv->base + LPC17_40_I2C_STAT_OFFSET);
   msg  = priv->msgs;
 
-  priv->state = state;
-  state &= 0xf8;  /* state mask, only 0xX8 is possible */
+  /* Checks if a timeout occurred */
+
+  if (priv->state == 0xff)
+    {
+      state = 0xff;
+    }
+  else
+    {
+      priv->state = state;
+      state &= 0xf8;  /* state mask, only 0xX8 is possible */
+    }
+
   switch (state)
     {
-
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
       /* Set address */
@@ -402,7 +434,8 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
-      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt - 1] =
+        getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
 
       if (priv->rdcnt >= (msg->length - 1))
         {
@@ -411,7 +444,8 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
       break;
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
-      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt] =
+        getreg32(priv->base + LPC17_40_I2C_BUFR_OFFSET);
       lpc17_40_stopnext(priv);
       break;
 
@@ -425,7 +459,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_i2c_reset
  *
  * Description:
@@ -437,7 +471,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int lpc17_40_i2c_reset(FAR struct i2c_master_s * dev)

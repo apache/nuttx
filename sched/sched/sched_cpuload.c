@@ -52,6 +52,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Are we using the system timer, or an external clock?  Get the rate
  * of the sampling in ticks per second for the selected timer.
  */
@@ -66,7 +67,7 @@
 #endif
 
 /* When g_cpuload_total exceeds the following time constant, the load and
- * the counds will be scaled back by two.  In the CONFIG_SMP, g_cpuload_total
+ * the counts will be scaled back by two.  In the CONFIG_SMP, g_cpuload_total
  * will be incremented multiple times per tick.
  */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nuttx/spi/spi_bitbang.c
+ * include/nuttx/spi/spi_bitbang.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

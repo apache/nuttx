@@ -683,6 +683,34 @@ config SHT21_DEBUG
 
 endif # SENSORS_SHT21
 
+config SENSORS_SHT3X
+	bool "Sensirion SHT3x temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SHT3x temperature
+		and humidity sensors.
+
+if SENSORS_SHT3X
+
+config SHT3X_I2C_FREQUENCY
+	int "SHT3x I2C frequency"
+	default 400000
+	range 1 400000
+
+config SHT3X_I2C_ADDR
+	hex "SHT3x I2C addr"
+	default 0x44
+	range 0x44 0x45
+
+config SHT3X_DEBUG
+	bool "Debug support for the SHT3x"
+	default n
+	---help---
+		Enables debug features for the SHT3x
+
+endif # SENSORS_SHT3X
+
 config SENSORS_SPS30
 	bool "Sensirion SPS30 particulate matter sensor"
 	default n

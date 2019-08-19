@@ -3,5 +3,5 @@ architectures.  The 'common' subdirectory contains source files shared by
 all Renesas architectures; Source files unique to a specific Renesas chip
 architecture are contained in a subdirectory named after the chip.  At
 configuration time, additional directories will be linked here:  'board'
-will be a link to the configs/*/src directory; 'chip' will be a link to
-the SH chip sub-directory.
+will be a link to the boards/renesas/<chip>/<board>/src directory; 'chip'
+will be a link to the SH chip sub-directory.

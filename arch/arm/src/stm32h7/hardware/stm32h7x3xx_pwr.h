@@ -107,6 +107,18 @@
 
 /* Power control register 2 (CR2) */
 
+#define PWR_CR2_BREN              (1 << 0)  /* Bit 0: Backup regulator enable */
+                                            /* Bits 1-3: Reserved */
+#define PWR_CR2_MONEN             (1 << 4)  /* Bit 4: VBAT and temperature monitoring enable */
+                                            /* Bits 5-15: Reserved */
+#define PWR_CR2_BRRDY             (1 << 16) /* Bit 16: Backup regulator ready */
+                                            /* Bits 17-19: Reserved */
+#define PWR_CR2_VBATL             (1 << 20) /* Bit 20: VBAT level monitoring versus low threshold */
+#define PWR_CR2_VBATH             (1 << 21) /* Bit 21: VBAT level monitoring versus high threshold */
+#define PWR_CR2_TEMPL             (1 << 22) /* Bit 22: Temperature level monitoring versus low threshold */
+#define PWR_CR2_TEMPH             (1 << 23) /* Bit 23: Temperature level monitoring versus high threshold */
+                                            /* Bits 24-31: Reserved */
+
 /* Power control register 3 (CR3) */
 
 #define STM32_PWR_CR3_BYPASS       (1 << 0)  /* Bit 0: Power management unit bypass */

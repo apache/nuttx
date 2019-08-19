@@ -138,7 +138,7 @@
                              (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP19_SHIFT))
 
 /* The channels not in this range are internal channels for reading
- * Vbat ADC3:17, VSence (temperature) ADC3:18 and Vrefint ADC3:19
+ * Vbat ADC3:17, VSense (temperature) ADC3:18 and Vrefint ADC3:19
  *
  * N.B. DAC channels on ADC2 are not supported
  */
@@ -1505,11 +1505,11 @@ static bool adc_internal(FAR struct stm32_dev_s * priv, uint32_t *adc_ccr)
               switch (priv->chanlist[i])
                 {
                   case 17:
-                    *adc_ccr |= ADC_CCR_VSENSEEN;
+                    *adc_ccr |= ADC_CCR_VBATEN;
                     break;
 
                   case 18:
-                    *adc_ccr |= ADC_CCR_VBATEN;
+                    *adc_ccr |= ADC_CCR_VSENSEEN;
                     break;
 
                   case 19:

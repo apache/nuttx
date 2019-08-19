@@ -32,7 +32,7 @@ o Board specific files.  In order to be usable, the chip must be
   peripheral LEDs, external peripherals (such as network, USB, etc.).
 
   These board-specific configuration files can be found in the
-  configs/<board-name>/ sub-directories.
+  boards/<arch>/<chip>/<board> sub-directories.
 
 This README will address the processor architecture specific files
 that are contained in the arch/<arch-name>/ directory. The file

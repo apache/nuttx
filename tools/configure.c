@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/configure.c
  *
- *   Copyright (C) 2012, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,6 +74,39 @@
 #define WINDOWS_MSYS   4
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void show_usage(const char *progname, int exitcode);
+static void debug(const char *fmt, ...);
+static int  find_archname(const char *boardname, const char *configname);
+static void parse_args(int argc, char **argv);
+static bool check_directory(const char *directory);
+static void verify_directory(const char *directory);
+static bool verify_optiondir(const char *directory);
+static bool verify_file(const char *path);
+static void find_topdir(void);
+static void config_search(const char *boarddir);
+static void enumerate_configs(void);
+static void check_configdir(void);
+static void check_configured(void);
+static void read_configfile(void);
+static void read_versionfile(void);
+static void get_verstring(void);
+static bool verify_appdir(const char *appdir);
+static void check_appdir(void);
+static void check_configuration(void);
+static void copy_file(const char *srcpath, const char *destpath, mode_t mode);
+static void substitute(char *str, int ch1, int ch2);
+static char *double_appdir_backslashes(char *old_appdir);
+static void copy_optional(void);
+static void enable_feature(const char *destconfig, const char *varname);
+static void disable_feature(const char *destconfig, const char *varname);
+static void set_host(const char *destconfig);
+static void configure(void);
+static void refresh(void);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -86,7 +119,9 @@ static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
 
-static const char *g_appdir        = NULL;  /* Relative path to the applicatin directory */
+static const char *g_appdir        = NULL;  /* Relative path to the application directory */
+static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
+static const char *g_chipdir       = NULL;  /* Name of chip subdirectory */
 static const char *g_boarddir      = NULL;  /* Name of board subdirectory */
 static char       *g_configdir     = NULL;  /* Name of configuration subdirectory */
 
@@ -112,6 +147,89 @@ static char        g_buffer[BUFFER_SIZE];   /* Scratch buffer for forming full p
 static struct variable_s *g_configvars = NULL;
 static struct variable_s *g_versionvars = NULL;
 
+/* Recognized architectures */
+
+static const char *g_archnames[] =
+{
+  "arm",
+  "avr",
+  "hc",
+  "mips",
+  "misoc",
+  "or1k",
+  "renesas",
+  "risc-v",
+  "sim",
+  "x86",
+  "xtensa",
+  "z16",
+  "z80",
+  NULL
+};
+
+/* Recognized chip names */
+
+static const char *g_chipnames[] =
+{
+  "a1x",
+  "am335x",
+  "c5471",
+  "cxd56xx",
+  "dm320",
+  "efm32",
+  "imx6",
+  "imxrt",
+  "kinetis",
+  "kl",
+  "lc823450",
+  "lpc17xx_40xx",
+  "lpc214x",
+  "lpc2378",
+  "lpc31xx",
+  "lpc43xx",
+  "lpc54xx",
+  "max326xx",
+  "moxart",
+  "nrf52",
+  "nuc1xx",
+  "s32k1xx",
+  "sam34",
+  "sama5",
+  "samd2l2",
+  "samd5e5",
+  "samv7",
+  "stm32",
+  "stm32f0l0g0",
+  "stm32f7",
+  "stm32h7",
+  "stm32l4",
+  "str71x",
+  "tiva",
+  "tms570",
+  "xmc4",
+  "at32uc3",
+  "at90usb",
+  "atmega",
+  "mcs92s12ne64",
+  "pic32mx",
+  "pic32mz",
+  "lm32",
+  "mor1kx",
+  "m32262f8",
+  "sh7032",
+  "gap8",
+  "nr5m100",
+  "sim",
+  "qemu",
+  "esp32",
+  "z16f2811",
+  "ez80",
+  "z180",
+  "z8",
+  "z80",
+  NULL
+};
+
 /* Optional configuration files */
 
 static const char *g_optfiles[] =
@@ -129,8 +247,8 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>[%c<config-name>]\n", progname, g_delim);
-  fprintf(stderr, "\nUSAGE: %s  [-h]\n\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
@@ -171,11 +289,12 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    ..%capps-xx.yy where xx.yy is the NuttX version number.\n", g_delim);
   fprintf(stderr, "  <board-name>:\n");
   fprintf(stderr, "    Identifies the board.  This must correspond to a board directory\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c.\n", g_delim, g_delim);
+  fprintf(stderr, "    under nuttx%cboards%c.\n", g_delim, g_delim);
   fprintf(stderr, "  <config-name>:\n");
   fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
   fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
-  fprintf(stderr, "    under nuttx%cconfigs%c<board-name>%c.\n", g_delim, g_delim, g_delim);
+  fprintf(stderr, "    under nuttx%cboards%c<board-name>%cconfigs%c.\n",
+          g_delim, g_delim, g_delim, g_delim);
   fprintf(stderr, "  -h:\n");
   fprintf(stderr, "    Prints this message and exits.\n");
   exit(exitcode);
@@ -193,10 +312,49 @@ static void debug(const char *fmt, ...)
     }
 }
 
+static int find_archname(const char *boardname, const char *configname)
+{
+  const char **archname;
+  const char **chipname;
+  struct stat statbuf;
+  int ret;
+
+  /* Try each combination of board and chip names */
+
+  for (archname = g_archnames; *archname != NULL; archname++)
+    {
+      for (chipname = g_chipnames; *chipname != NULL; chipname++)
+        {
+          /* Get the architecture directory under boards.  Path format:
+           * board/<arch-name>/<chip-name>/<board-name>/configs/<config-name>
+           */
+
+          snprintf(g_buffer, BUFFER_SIZE, "boards%c%s%c%s%c%s%cconfigs%c%s",
+                   g_delim, *archname, g_delim, *chipname, g_delim, boardname,
+                   g_delim, g_delim, configname);
+
+          /* Check if there is a directory at this path */
+
+          ret = stat(g_buffer, &statbuf);
+          if (ret == 0 && S_ISDIR(statbuf.st_mode))
+            {
+              g_archdir = *archname;
+              g_chipdir = *chipname;
+              return 0;
+            }
+        }
+    }
+
+  g_archdir = "unknown";
+  g_chipdir = "unknown";
+  return -1;
+}
+
 static void parse_args(int argc, char **argv)
 {
   char *ptr;
   int ch;
+  int ret;
 
   /* Parse command line options */
 
@@ -278,22 +436,26 @@ static void parse_args(int argc, char **argv)
     }
 
   /* The required option should be the board directory name and the
-   * configuration directory name separated by '/' or '\'.  Either is
+   * configuration directory name separated by ':', '/' or '\'.  Any are
    * acceptable in this context.
    */
 
   g_boarddir = argv[optind];
   optind++;
 
-  ptr = strchr(g_boarddir, '/');
-  if (!ptr)
+  ptr = strchr(g_boarddir, ':');
+  if (ptr == NULL)
     {
-      ptr = strchr(g_boarddir, '\\');
+      ptr = strchr(g_boarddir, '/');
+      if (!ptr)
+        {
+          ptr = strchr(g_boarddir, '\\');
+        }
     }
 
-  if (!ptr)
+  if (ptr == NULL)
     {
-      fprintf(stderr, "ERROR: Invalid <board-name>%c<config-name>\n", g_delim);
+      fprintf(stderr, "ERROR: Invalid <board-name>:<config-name>\n");
       show_usage(argv[0], EXIT_FAILURE);
     }
 
@@ -302,8 +464,15 @@ static void parse_args(int argc, char **argv)
 
   if (optind < argc)
     {
-      fprintf(stderr, "Unexpected garbage at the end of the line\n");
+      fprintf(stderr, "ERROR: Unexpected garbage at the end of the line\n");
       show_usage(argv[0], EXIT_FAILURE);
+    }
+
+  ret = find_archname(g_boarddir, g_configdir);
+  if (ret != 0)
+    {
+      fprintf(stderr, "ERROR: Architecture for board %s not found\n",
+              g_boarddir);
     }
 }
 
@@ -486,7 +655,7 @@ static void config_search(const char *boarddir)
 
   parent = strdup(g_buffer);
 
-  /* Vist each entry in the directory */
+  /* Visit each entry in the directory */
 
   while ((dp = readdir (dir)) != NULL)
     {
@@ -498,7 +667,8 @@ static void config_search(const char *boarddir)
         }
 
       /* Get a properly terminated copy of d_name (if d_name is long it may
-       * not include a NUL terminator.\ */
+       * not include a NUL terminator.
+       */
 
       child = strndup(dp->d_name, NAME_MAX);
 
@@ -513,7 +683,7 @@ static void config_search(const char *boarddir)
           continue;
         }
 
-      /* If it is a directory, the recurse */
+      /* If it is a directory, then recurse */
 
       if (S_ISDIR(buf.st_mode))
         {
@@ -532,7 +702,67 @@ static void config_search(const char *boarddir)
 
       else if (S_ISREG(buf.st_mode) && strcmp("defconfig", child) == 0)
         {
-          fprintf(stderr, "  %s\n", boarddir);
+          char *boardname;
+          char *configname;
+          char *delim;
+          char *tmp;
+
+          /* Get the board directory near the beginning of the 'boarddir' path:
+           * <archdir>/<chipdir>/<boarddir>/configs/<configdir>
+           */
+
+          /* Make a modifiable copy */
+
+          strncpy(g_buffer, boarddir, BUFFER_SIZE);
+
+          /* Skip over <archdir> */
+
+          delim = strchr(g_buffer, g_delim);
+          if (delim == NULL)
+            {
+              debug("ERROR: delimiter not found in path: %s\n", boarddir);
+            }
+          else
+            {
+              /* Skip over <chipdir> */
+
+              tmp   = delim + 1;
+              delim = strchr(tmp, g_delim);
+              if (delim == NULL)
+                {
+                  debug("ERROR: delimiter not found in path: %s\n", tmp);
+                }
+              else
+                {
+                  /* Save the <boardir> */
+
+                  *delim    = '\0';
+                  boardname = delim + 1;
+
+                  delim = strchr(boardname, g_delim);
+                  if (delim == NULL)
+                    {
+                      debug("ERROR: delimiter not found in path: %s\n", boardname);
+                    }
+                  else
+                    {
+                      /* Save the <configdir>  */
+
+                      *delim = '\0';
+                      delim  = strrchr(delim + 1, g_delim);
+                      if (delim == NULL)
+                        {
+                          debug("ERROR: Configuration directory not found in path: %s\n",
+                                boardname);
+                        }
+                      else
+                        {
+                          configname = delim + 1;
+                          fprintf(stderr, "  %s:%s\n", boardname, configname);
+                        }
+                    }
+                }
+            }
         }
 
       free(child);
@@ -544,24 +774,27 @@ static void config_search(const char *boarddir)
 
 static void enumerate_configs(void)
 {
-  fprintf(stderr, "Options for <board-name>[%c<config-name>] include:\n\n", g_delim);
+  fprintf(stderr, "Options for <board-name>:<config-name> include:\n\n");
   config_search("");
 }
 
 static void check_configdir(void)
 {
-  /* Get the path to the top level configuration directory */
+  /* Get the path to the top level configuration directory: boards/ */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs", g_topdir, g_delim);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards", g_topdir, g_delim);
   debug("check_configdir: Checking configtop=%s\n", g_buffer);
 
   verify_directory(g_buffer);
   g_configtop = strdup(g_buffer);
 
-  /* Get and verify the path to the selected configuration */
+  /* Get and verify the path to the selected configuration:
+   * boards/<archdir>/<chipdir>/<boarddir>/configs/<configdir>
+   */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs%c%s%c%s",
-           g_topdir, g_delim, g_delim, g_boarddir, g_delim, g_configdir);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s%c%s%cconfigs%c%s",
+           g_topdir, g_delim, g_delim, g_archdir, g_delim, g_chipdir,
+           g_delim, g_boarddir, g_delim, g_delim, g_configdir);
   debug("check_configdir: Checking configpath=%s\n", g_buffer);
 
   if (!verify_optiondir(g_buffer))
@@ -573,8 +806,13 @@ static void check_configdir(void)
 
   g_configpath = strdup(g_buffer);
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cconfigs%c%s%cscripts",
-           g_topdir, g_delim, g_delim, g_boarddir, g_delim);
+  /* Get and verify the path to the scripts directory:
+   * boards/<archdir>/<chipdir>/<boarddir>/scripts
+   */
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s%c%s%cscripts",
+           g_topdir, g_delim, g_delim, g_archdir, g_delim,
+           g_chipdir, g_delim, g_boarddir, g_delim);
   debug("check_configdir: Checking scriptspath=%s\n", g_buffer);
 
   g_scriptspath = NULL;

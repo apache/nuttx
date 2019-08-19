@@ -384,11 +384,16 @@
 #  define CONFIG_PIC32MZ_UPLLFSEL DEVCFG2_UPLLFSEL_24MHZ
 #endif
 
-/* Not yet configurable settings (REVISIT) */
+/* System PLL Input Clock Select bit */
 
-                                           /* System PLL Input Clock Select bit */
-#define CONFIG_PIC32MZ_FPLLICLK   0        /* POSC is selected as input to the System PLL */
-                                           /* USB PLL Input Frequency Select bit */
+#undef CONFIG_PIC32MZ_FPLLICLK
+#if defined(BOARD_FPLLICLK_FRC)
+#  define CONFIG_PIC32MZ_FPLLICLK DEVCFG2_FPLLICLK
+#else
+#  define CONFIG_PIC32MZ_FPLLICLK 0        /* POSC is selected as input to the System PLL */
+#endif
+
+/* USB PLL Input Frequency Select bit */
 
 /* DEVCFG1 */
 /* Configurable settings */

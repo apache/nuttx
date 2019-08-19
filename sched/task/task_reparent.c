@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_reparent.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/sched.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -78,9 +79,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
   FAR struct task_group_s *chgrp;
   FAR struct task_group_s *ogrp;
   FAR struct task_group_s *pgrp;
-  struct tcb_s *tcb;
-  gid_t ogid;
-  gid_t pgid;
+  FAR struct tcb_s *tcb;
+  grpid_t ogrpid;
+  grpid_t pgrpid;
   irqstate_t flags;
   int ret;
 
@@ -102,13 +103,13 @@ int task_reparent(pid_t ppid, pid_t chpid)
   DEBUGASSERT(tcb->group);
   chgrp = tcb->group;
 
-  /* Get the GID of the old parent task's task group (ogid) */
+  /* Get the GID of the old parent task's task group (ogrpid) */
 
-  ogid = chgrp->tg_pgid;
+  ogrpid = chgrp->tg_pgrpid;
 
   /* Get the old parent task's task group (ogrp) */
 
-  ogrp = group_findbygid(ogid);
+  ogrp = group_findby_grpid(ogrpid);
   if (!ogrp)
     {
       ret = -ESRCH;
@@ -124,8 +125,8 @@ int task_reparent(pid_t ppid, pid_t chpid)
     {
       /* Get the grandparent task's task group (pgrp) */
 
-      pgid = ogrp->tg_pgid;
-      pgrp = group_findbygid(pgid);
+      pgrpid = ogrp->tg_pgrpid;
+      pgrp = group_findby_grpid(pgrpid);
     }
   else
     {
@@ -139,7 +140,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
         }
 
       pgrp = tcb->group;
-      pgid = pgrp->tg_gid;
+      pgrpid = pgrp->tg_grpid;
     }
 
   if (!pgrp)
@@ -153,7 +154,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
    * all members of the child's task group.
    */
 
-  chgrp->tg_pgid = pgid;
+  chgrp->tg_pgrpid = pgrpid;
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent task group */
@@ -210,9 +211,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
 #endif
-  struct tcb_s *ptcb;
-  struct tcb_s *chtcb;
-  struct tcb_s *otcb;
+  FAR struct tcb_s *ptcb;
+  FAR struct tcb_s *chtcb;
+  FAR struct tcb_s *otcb;
   pid_t opid;
   irqstate_t flags;
   int ret;

@@ -21,6 +21,10 @@ config HOST_ARM
 
 endchoice # Host CPU Type
 
+config ARCH_CHIP
+	string
+	default "sim" if ARCH_SIM
+
 config SIM_M32
 	bool "Build 32-bit simulation on 64-bit machine"
 	default n
@@ -123,15 +127,15 @@ config SIM_NET_HOST_ROUTE
 	---help---
 		Add a host route for the simulation that points to the created tap device.  The
 		simulation will not be able to access the public network unless iptables is
-		configured to masquerade for it.  See configs/sim/NETWORK-LINUX.txt for more
-		information.
+		configured to masquerade for it.  See boards/sim/sim sim/NETWORK-LINUX.txt
+		for more information.
 
 config SIM_NET_BRIDGE
 	bool "Attach to Linux bridge"
 	 ---help---
 		Add the created tap device to the specified bridge.  You will need to manually
 		configure the bridge IP address (if any) and routes that point to the bridge.
-		See configs/sim/NETWORK-LINUX.txt for more information.
+		See boards/sim/sim/sim/NETWORK-LINUX.txt for more information.
 
 endchoice
 endif

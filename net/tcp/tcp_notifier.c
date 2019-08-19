@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
@@ -188,8 +189,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
  * Returned Value:
  *   > 0   - The notification is in place.  The returned value is a key that
  *           may be used later in a call to tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No notification
- *           will be provided.
+ *   == 0  - No connection has been established.
  *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.

@@ -82,20 +82,33 @@
 #define SYS_sched_yield                (CONFIG_SYS_RESERVED + 12)
 #define SYS_set_errno                  (CONFIG_SYS_RESERVED + 13)
 #define SYS_uname                      (CONFIG_SYS_RESERVED + 14)
+#define __SYS_uid                      (CONFIG_SYS_RESERVED + 15)
+
+/* User identity */
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+#  define SYS_setuid                   (__SYS_uid + 0)
+#  define SYS_getuid                   (__SYS_uid + 1)
+#  define SYS_setgid                   (__SYS_uid + 2)
+#  define SYS_getgid                   (__SYS_uid + 3)
+#  define __SYS_sem                    (__SYS_uid + 4)
+#else
+#  define __SYS_sem                     __SYS_uid
+#endif
 
 /* Semaphores */
 
-#define SYS_sem_destroy                (CONFIG_SYS_RESERVED + 15)
-#define SYS_sem_post                   (CONFIG_SYS_RESERVED + 16)
-#define SYS_sem_timedwait              (CONFIG_SYS_RESERVED + 17)
-#define SYS_sem_trywait                (CONFIG_SYS_RESERVED + 18)
-#define SYS_sem_wait                   (CONFIG_SYS_RESERVED + 19)
+#define SYS_sem_destroy                (__SYS_sem + 0)
+#define SYS_sem_post                   (__SYS_sem + 1)
+#define SYS_sem_timedwait              (__SYS_sem + 2)
+#define SYS_sem_trywait                (__SYS_sem + 3)
+#define SYS_sem_wait                   (__SYS_sem + 4)
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  define SYS_sem_setprotocol          (CONFIG_SYS_RESERVED + 20)
-#  define __SYS_named_sem              (CONFIG_SYS_RESERVED + 21)
+#  define SYS_sem_setprotocol          (__SYS_sem + 5)
+#  define __SYS_named_sem              (__SYS_sem + 6)
 #else
-#  define __SYS_named_sem              (CONFIG_SYS_RESERVED + 20)
+#  define __SYS_named_sem              (__SYS_sem + 5)
 #endif
 
 /* Named semaphores */
@@ -462,8 +475,8 @@
 #  define __SYS_pthread_cleanup        (__SYS_pthread_signals + 3)
 
 #  ifdef CONFIG_PTHREAD_CLEANUP
-#    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup + 0)
-#    define __SYS_pthread_cleanup_pop  (__SYS_pthread_cleanup + 1)
+#    define SYS_pthread_cleanup_push   (__SYS_pthread_cleanup + 0)
+#    define SYS_pthread_cleanup_pop    (__SYS_pthread_cleanup + 1)
 #    define __SYS_mqueue               (__SYS_pthread_cleanup + 2)
 #  else
 #    define __SYS_mqueue               __SYS_pthread_cleanup

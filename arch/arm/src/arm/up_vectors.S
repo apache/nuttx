@@ -82,7 +82,7 @@ g_aborttmp:
  * Name: up_vectorirq
  *
  * Description:
- *   Interrupt excetpion. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
+ *   Interrupt exception. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
  *
  ************************************************************************************/
 
@@ -211,7 +211,7 @@ up_vectorswi:
  *   is entered in ABORT mode with spsr = SVC CPSR, lr = SVC PC
  *
  ************************************************************************************/
-	
+
 	.globl	up_vectordata
 	.type	up_vectordata, %function
 up_vectordata:
@@ -285,7 +285,7 @@ up_vectordata:
  *   handler.  This function is entered in ABT mode with spsr = SVC CPSR, lr = SVC PC.
  *
  ************************************************************************************/
-	
+
 	.globl	up_vectorprefetch
 	.type	up_vectorprefetch, %function
 up_vectorprefetch:
@@ -353,7 +353,7 @@ up_vectorprefetch:
  *   lr = SVC PC
  *
  ************************************************************************************/
-	
+
 	.globl	up_vectorundefinsn
 	.type	up_vectorundefinsn, %function
 up_vectorundefinsn:

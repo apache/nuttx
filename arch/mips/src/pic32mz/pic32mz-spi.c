@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz-spi.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* All SPI peripherals are clocked by PBCLK2 */
 
 #define BOARD_PBCLOCK BOARD_PBCLK2
@@ -70,6 +71,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure describes the fixed (ROM-able) configuration of the SPI
  * peripheral.
  */
@@ -110,6 +112,7 @@ struct pic32mz_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Low-level register access */
 
 #ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
@@ -137,7 +140,8 @@ static void     spi_exchange8(FAR struct pic32mz_dev_s *priv,
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                   uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
@@ -195,13 +199,16 @@ static const struct pic32mz_config_s g_spi1config =
 #endif
   .sdipps            = BOARD_SDI1_PPS,
   .sdopps            = PPS_OUTPUT_REGVAL(BOARD_SDO1_PPS),
-  .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO1_PPS),
+  .sdoreg            = PPS_OUTPUT_REGADDR(BOARD_SDO1_PPS)
 };
 
 static struct pic32mz_dev_s g_spi1dev =
 {
-  .spidev            = { &g_spi1ops },
-  .config            = &g_spi1config,
+  .spidev            =
+  {
+    &g_spi1ops
+  },
+  .config            = &g_spi1config
 };
 #endif
 
@@ -246,7 +253,10 @@ static const struct pic32mz_config_s g_spi2config =
 
 static struct pic32mz_dev_s g_spi2dev =
 {
-  .spidev            = { &g_spi2ops },
+  .spidev            =
+  {
+    &g_spi2ops
+  },
   .config            = &g_spi2config,
 };
 #endif
@@ -292,7 +302,10 @@ static const struct pic32mz_config_s g_spi3config =
 
 static struct pic32mz_dev_s g_spi3dev =
 {
-  .spidev            = { &g_spi3ops },
+  .spidev            =
+  {
+    &g_spi3ops
+  },
   .config            = &g_spi3config,
 };
 #endif
@@ -338,7 +351,10 @@ static const struct pic32mz_config_s g_spi4config =
 
 static struct pic32mz_dev_s g_spi4dev =
 {
-  .spidev            = { &g_spi4ops },
+  .spidev            =
+  {
+    &g_spi4ops
+  },
   .config            = &g_spi4config,
 };
 #endif
@@ -384,7 +400,10 @@ static const struct pic32mz_config_s g_spi5config =
 
 static struct pic32mz_dev_s g_spi5dev =
 {
-  .spidev            = { &g_spi5ops },
+  .spidev            =
+  {
+    &g_spi5ops
+  },
   .config            = &g_spi5config,
 };
 #endif
@@ -430,7 +449,10 @@ static const struct pic32mz_config_s g_spi6config =
 
 static struct pic32mz_dev_s g_spi6dev =
 {
-  .spidev            = { &g_spi6ops },
+  .spidev            =
+  {
+    &g_spi6ops
+  },
   .config            = &g_spi6config,
 };
 #endif
@@ -482,7 +504,7 @@ static bool spi_checkreg(struct pic32mz_dev_s *priv, uintptr_t regaddr,
         {
           /* Yes... show how many times we did it */
 
-          _info("...[Repeats %d times]...\n", priv->ntimes);
+          spiinfo("...[Repeats %d times]...\n", priv->ntimes);
         }
 
       /* Save information about the new access */
@@ -532,8 +554,8 @@ static uint32_t spi_getreg(FAR struct pic32mz_dev_s *priv,
     {
       /* Yes.. */
 
-      _info("%08lx->%08lx\n",
-           (unsigned long)regaddr, (unsigned long)regval);
+      spiinfo("%08lx->%08lx\n",
+             (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Return the value read */
@@ -574,8 +596,8 @@ static void spi_putaddr(FAR struct pic32mz_dev_s *priv, uintptr_t regaddr,
     {
       /* Yes.. */
 
-      _info("%08lx<-%08lx\n",
-           (unsigned long)regaddr, (unsigned long)regval);
+      spiinfo("%08lx<-%08lx\n",
+              (unsigned long)regaddr, (unsigned long)regval);
     }
 
   /* Write the value to the register */
@@ -641,7 +663,7 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
   spiinfo("nbytes: %d\n", nbytes);
   while (nbytes)
     {
-      /* Write the data to transmitted to the SPI Data Register */
+      /* Write the data to be transmitted to the SPI Data Register */
 
       if (txbuffer)
         {
@@ -660,28 +682,29 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
        * receive buffer is not empty.
        */
 
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
 #else
       /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
+       * normal mode, the SPIRBF bit will be set when receive data is
+       * available.
        */
 
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
 #endif
 
-     /* Read from the buffer register to clear the status bit */
+      /* Read from the buffer register to clear the status bit */
 
-     regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
-     if (rxbuffer)
-       {
-         *rxbuffer++ = (uint8_t)regval;
-       }
-     else
-       {
-         UNUSED(regval);
-       }
+      regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+      if (rxbuffer)
+        {
+          *rxbuffer++ = (uint8_t)regval;
+        }
+      else
+        {
+          UNUSED(regval);
+        }
 
-     nbytes--;
+      nbytes--;
     }
 }
 
@@ -731,28 +754,28 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
        * receive buffer is not empty.
        */
 
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
 #else
       /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
        * normal mode, the SPIRBF bit will be set when receive data is available.
        */
 
-     while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
 #endif
 
-     /* Read from the buffer register to clear the status bit */
+      /* Read from the buffer register to clear the status bit */
 
-     regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
-     if (rxbuffer)
-       {
-         *rxbuffer++ = (uint16_t)regval;
-       }
-     else
-       {
-         UNUSED(regval);
-       }
+      regval = spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+      if (rxbuffer)
+        {
+          *rxbuffer++ = (uint16_t)regval;
+        }
+      else
+        {
+          UNUSED(regval);
+        }
 
-     nwords--;
+      nwords--;
     }
 }
 
@@ -822,7 +845,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
   uint32_t divisor;
@@ -901,7 +925,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
-  uint32_t regval;
 
   spiinfo("Old mode: %d New mode: %d\n", priv->mode, mode);
 
@@ -920,7 +943,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        *     3     1     1
        *
        *   CPOL=0: The inactive value of the clock is zero
-       *    CPOL=1: The inactive value of the clock is one
+       *   CPOL=1: The inactive value of the clock is one
        *   CPHA=0: Data is captured on the clock's inactive-to-active edge and
        *           data is propagated on a active-to-inactive edge.
        *   CPHA=1: Data is captured on the clock's active-to-inactive edge and
@@ -928,7 +951,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        *
        * CON Register mapping:
        *   CPOL=0 corresponds to CON:CKP=0; CPOL=1 corresponds to CON:CKP=1
-       *   CPHA=0 corresponds to CON:CKE=1; CPHA=1 corresponds to CON:CKE=1
+       *   CPHA=0 corresponds to CON:CKE=1; CPHA=1 corresponds to CON:CKE=0
        *
        * In addition, the CON register supports SMP: SPI Data Input Sample
        * Phase bit:
@@ -939,24 +962,26 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        * Which is hardcoded to 1.
        */
 
-      regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
-      regval &= ~(SPI_CON_CKP | SPI_CON_CKE);
-
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 => CKP=0; CKE=1 */
+          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
+          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
           break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          regval |= SPI_CON_CKE;
+        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 => CKP=0; CKE=0 */
+          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKP);
+          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
           break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          regval |= SPI_CON_CKP;
+        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 => CKP=1; CKE=1 */
+          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
+          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKE);
           break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_CON_CKP | SPI_CON_CKE);
+        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 => CKP=1; CKE=0 */
+          spi_putreg(priv, PIC32MZ_SPI_CONSET_OFFSET, SPI_CON_CKP);
+          spi_putreg(priv, PIC32MZ_SPI_CONCLR_OFFSET, SPI_CON_CKE);
           break;
 
         default:
@@ -964,10 +989,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-      spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-      spiinfo("CON: %08x\n", regval);
+      spiinfo("CON: %08x\n", spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET));
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }
@@ -1009,11 +1033,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
         }
       else if (nbits == 16)
         {
-          setting = SPI_CON_MODE_8BIT;
+          setting = SPI_CON_MODE_16BIT;
         }
       else if (nbits == 32)
         {
-          setting = SPI_CON_MODE_8BIT;
+          setting = SPI_CON_MODE_32BIT;
         }
       else
         {
@@ -1021,10 +1045,10 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
           return;
         }
 
-      regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
+      regval  = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
       regval &= ~SPI_CON_MODE_MASK;
       regval |= setting;
-      regval = spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET);
+      spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
       spiinfo("CON: %08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be
@@ -1095,8 +1119,8 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to the buffer in which to recieve data
- *   nwords   - the length of data that to be exchanged in units of words.
+ *   rxbuffer - A pointer to the buffer in which to receive data
+ *   nwords   - The length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
  *              packed into uint8_t's; if nbits >8, the data is packed into
@@ -1167,7 +1191,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *
  * Input Parameters:
  *   dev   -  Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in
  *            number of words.  The wordsize is determined by the number of
  *            bits-per-word selected for the SPI interface.  If nbits <= 8,
@@ -1200,10 +1224,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   Initialize the selected SPI port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -1229,7 +1253,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI2
   if (port == 2)
     {
-      priv = &g_spi2dev;
+      priv    = &g_spi2dev;
       regaddr = PIC32MZ_SDI2R;
     }
   else
@@ -1237,7 +1261,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI3
   if (port == 3)
     {
-      priv = &g_spi3dev;
+      priv    = &g_spi3dev;
       regaddr = PIC32MZ_SDI3R;
     }
   else
@@ -1245,7 +1269,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI4
   if (port == 4)
     {
-      priv = &g_spi4dev;
+      priv    = &g_spi4dev;
       regaddr = PIC32MZ_SDI4R;
     }
   else
@@ -1253,7 +1277,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI5
   if (port == 5)
     {
-      priv = &g_spi5dev;
+      priv    = &g_spi5dev;
       regaddr = PIC32MZ_SDI5R;
     }
   else
@@ -1261,15 +1285,15 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 #ifdef CONFIG_PIC32MZ_SPI6
   if (port == 6)
     {
-      priv = &g_spi6dev;
+      priv    = &g_spi6dev;
       regaddr = PIC32MZ_SDI6R;
     }
   else
 #endif
-   {
-     spierr("ERROR: Unsuppport port: %d\n", port);
-     return NULL;
-   }
+    {
+      spierr("ERROR: Unsuppport port: %d\n", port);
+      return NULL;
+    }
 
   /* Disable SPI interrupts */
 
@@ -1338,7 +1362,8 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
    * board-specific pic32mz_spiNselect() interface.
    */
 
-  regval = (SPI_CON_MSTEN | SPI_CON_SMP | SPI_CON_MODE_8BIT | SPI_CON_ON);
+  regval = (SPI_CON_MSTEN | SPI_CON_SMP | SPI_CON_MODE_8BIT |
+            SPI_CON_CKE | SPI_CON_ON);
 
   /* Set the ENHBUF bit if using Enhanced Buffer mode. */
 

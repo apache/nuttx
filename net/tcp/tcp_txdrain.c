@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 
@@ -64,7 +65,7 @@
  *   Called with the write buffers have all been sent.
  *
  * Input Parameters:
- *   arg     - The semaphore that will wake up tcp_txdrain
+ *   arg     - The notifier entry.
  *
  * Returned Value:
  *   None.
@@ -73,8 +74,24 @@
 
 static void txdrain_worker(FAR void *arg)
 {
-  FAR sem_t *waitsem = (FAR sem_t *)arg;
-  DEBUGASSERT(waitsem != NULL);
+  /* The entire notifier entry is passed to us.  That is because we are
+   * responsible for disposing of the entry via kmm_free() when we are
+   * finished with it.
+   */
+
+  FAR struct work_notifier_entry_s *notifier =
+    (FAR struct work_notifier_entry_s *)arg;
+  FAR sem_t *waitsem;
+
+  DEBUGASSERT(notifier != NULL && notifier->info.arg != NULL);
+  waitsem = (FAR sem_t *)notifier->info.arg;
+
+  /* Free the notifier entry */
+
+  kmm_free(notifier);
+
+  /* Then just post the semaphore, waking up tcp_txdrain() */
+
   sem_post(waitsem);
 }
 
@@ -106,7 +123,7 @@ int tcp_txdrain(FAR struct socket *psock,
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_crefs > 0 && psock->s_conn != NULL);
-  DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+  DEBUGASSERT(psock->s_type == SOCK_STREAM);
 
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
@@ -117,25 +134,60 @@ int tcp_txdrain(FAR struct socket *psock,
   /* The following needs to be done with the network stable */
 
   net_lock();
+
+  /* Get a notification when the write buffers are drained */
+
   ret = tcp_writebuffer_notifier_setup(txdrain_worker, conn, &waitsem);
+
+  /* The special return value of 0 means that there is no Tx data to be
+   * drained.  Otherwise it is a special 'key' that can be used to teardown
+   * the notification later
+   */
+
   if (ret > 0)
     {
-      int key = ret;
+      /* Save the drain key */
 
-      /* There is pending write data.. wait for it to drain. */
+      int drain_key = ret;
 
-      do
-        {
-          ret = net_timedwait(&waitsem, abstime);
+      /* Also get a notification if we lose the connection.
+       * REVISIT:  This really should not be necessary.  tcp_send() should
+       * detect the disconnection event and signal the txdrain but I do not
+       * see that TCP disconnection event.  This assures that the txdrain
+       * operation will not wait for the full timeout in that case.
+       */
+
+      ret = tcp_disconnect_notifier_setup(txdrain_worker, conn, &waitsem);
+
+       /* Zero is a special value that means that no connection has been
+        * established.  Otherwise it is a special 'key' that can be used
+        * to teardown the notification later
+        */
+
+       if (ret > 0)
+         {
+           /* Save the disconnect key */
+
+           int disconn_key = ret;
+
+           /* There is pending write data and the socket is connected..
+            * wait for it to drain or be be disconnected.
+            */
+
+          do
+            {
+              ret = net_timedwait(&waitsem, abstime);
+            }
+          while (ret == -EINTR);
+
+          /* Tear down the disconnect notifier */
+
+          tcp_notifier_teardown(disconn_key);
         }
-      while (ret == EINTR);
 
-      /* Tear down the notifier (in case we timed out or were canceled) */
+      /* Tear down the disconnect notifier */
 
-      if (ret < 0)
-        {
-          tcp_notifier_teardown(key);
-        }
+      tcp_notifier_teardown(drain_key);
     }
 
   net_unlock();

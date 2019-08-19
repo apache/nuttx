@@ -104,7 +104,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 11, 2019</p>
+      <p>Last Updated: August 9, 2019</p>
     </td>
   </tr>
 </table>
@@ -1467,11 +1467,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.30.
-  NuttX 7.30 is the 130<sup>th</sup> release of NuttX.
-  It was released on May 19, 2019, and is available for download from the
+  The current release is NuttX 7.31.
+  NuttX 7.31 is the 131<sup>st</sup> release of NuttX.
+  It was released on July 21, 2019, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.30.tar.gz</code> and <code>apps-7.30.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.31.tar.gz</code> and <code>apps-7.31.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1480,7 +1480,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.30 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.31 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1488,7 +1488,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.30 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.31 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1546,7 +1546,7 @@
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (2)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (39)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (56)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (57)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (14)</li>
     </ul>
   <li>Atmel AVR
@@ -1740,6 +1740,7 @@
       <li><a href="#nxplpc315x">NXP LPC315x</a> <small>(ARM9E6JS)</small></li>
       <li><a href="#nxplpc176x">NXP LPC176x</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#nxplpc178x">NXP LPC178x</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#nxplpc40xx">NXP LPC40xx</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#nxplpc43xx">NXP LPC43xx</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#nxplpc54xx">NXP LPC54xx</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
@@ -1783,15 +1784,15 @@
       <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f302x">STMicro STM32F302x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f303x">STMicro STM32F303x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f334x">STMicro STM32F334</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#stm32f4x1">STMicro STM32F4x1</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>STMicroelectronics (Continued)
     <ul>
+      <li><a href="#stm32f334x">STMicro STM32F334</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f4x1">STMicro STM32F4x1</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f410">STMicro STM32F410</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F405x/407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
@@ -1873,7 +1874,7 @@
       <p>
         <b>STATUS:</b>
         Does not support interrupts but is otherwise fully functional.
-        Refer to the NuttX <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sim/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/sim/sim/sim/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
    </td>
@@ -1898,7 +1899,7 @@
       <p>
         <b>STATUS:</b>
         This port is complete, verified, and included in the initial NuttX release.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/c5471evm/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/c5471/c5471evm/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
    </td>
@@ -1925,7 +1926,7 @@
         timer interrupts, serial console, USB driver, and SPI-based MMC/SD card
         support.  A verified NuttShell (<a href="NuttShell.html">NSH</a>)
         configuration is also available.
-        Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/mcu123-lpc214x/README.txt" target="_blank">mcu123.com</a> and for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/zp214xpa/README.txt" target="_blank">ZPA213X/4XPA</a> boards for further information.
+        Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc214x/mcu123-lpc214x/README.txt" target="_blank">mcu123.com</a> and for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc214x/zp214xpa/README.txt" target="_blank">ZPA213X/4XPA</a> boards for further information.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -1960,7 +1961,7 @@
         The port is complete and verified.
         As of NuttX 5.3, the port included only basic timer interrupts and serial console support.
         In NuttX 7.1, Lizhuoyi contributed additional I2C and SPI drivers.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-lpc2378/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc2378/olimex-lpc2378/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>Development Environments:</b> (Same as for the NXP LPC214x).
@@ -1993,7 +1994,7 @@
         SD cards).
         An SPI-based ENC28J60 Ethernet driver for add-on hardware is available and
         but has not been fully verified on the Olimex board (due to issues powering the ENC28J60 add-on board).
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-strp711/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/str71x/olimex-strp711/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -2025,7 +2026,7 @@
         <b>STATUS:</b>
           This port has stalled due to development tool issues.
           Coding is complete on the basic port (timer, serial console, SPI).
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/configs/mx1ads/" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/boards/mx1ads/" target="_blank">README</a> file for further information.
       </p>
       <p>
           NOTE: This port has been obsoleted.
@@ -2058,7 +2059,7 @@
           The basic port (timer interrupts, serial ports, network, framebuffer, etc.) is complete.
           All implemented features have been verified with the exception of the USB device-side
           driver; that implementation is complete but untested.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ntosd-dm320/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/dm320/ntosd-dm320/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -2094,7 +2095,7 @@
             However, as of this writing, I have not had the opportunity to verify this new feature.
           </p>
           <p>
-            Refer to the Embedded Artists EA3131 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ea3131/README.txt" target="_blank">README</a> file for further information.
+            Refer to the Embedded Artists EA3131 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc31xx/ea3131/README.txt" target="_blank">README</a> file for further information.
           </p>
         </ul>
       </li>
@@ -2110,7 +2111,7 @@
             NOTE: That driver should work on the EA3131 as well.  However, the EA3131 uses a PCA9532 PWM part to controller the port power so the it would not quite be a simple drop-in.
           </p>
           <p>
-            Refer to the Olimex LPC-H3131 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-lpc-h3131/README.txt" target="_blank">README</a> file for further information.
+            Refer to the Olimex LPC-H3131 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc31xx/olimex-lpc-h3131/README.txt" target="_blank">README</a> file for further information.
           </p>
         </ul>
       </li>
@@ -2138,7 +2139,7 @@
           At this point, verification of the EA3152 port has been overcome by events and
           may never happen.
           However, the port is available for anyone who may want to use it.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ea3152/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc31xx/ea3152/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -2175,7 +2176,7 @@
       <a name="pizero"><b>Raspberry Pi Zero</b><a/>.
       This support was provided for the Raspberry Pi Zero which is based on the BCM2835.
       Basic logic is in place but the port is incomplete and completely untested as of the NuttX-7.23 released.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/configs/pizero/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/boards/pizero/README.txt" target="_blank">README</a> file for further information.
     </p>
     <p>
       <b>Obsoleted:</b>:  Support for the Raspberry Pi Zero was never completed.
@@ -2354,7 +2355,7 @@
           NuttX-7.4 added support for the on-board WM8904 CODEC chip and for <i>Tickless</i> operation.
         </p>
         <p>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sama5d3x-ek/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d3x-ek/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
       <li>
@@ -2375,7 +2376,7 @@
           The SAMA5D3 Xplained board does not have NOR FLASH and, as a consequence NuttX must boot into SDRAM with the help of U-Boot.
         </p>
         <p>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sama5d3-xplained/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d3-xplained/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
     </ul>
@@ -2406,7 +2407,7 @@
         The TM7000 LCDC with the maXTouch multi-touch controller are also fully support in a special NxWM configuration for that larger display.
         Support for a graphics media player is included (although there were issues with the WM8904 audio CODEC on my board).
         An SRAM bootloader was also included.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sama5d4-ek/README.txt" target="_blank">README</a> file for current status.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d4-ek/README.txt" target="_blank">README</a> file for current status.
       <p></li>
     </ul>
   </td>
@@ -2449,7 +2450,7 @@
           This port was developed on the v1 board, but the others may be compatible:
         </p>
         <p>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pcduino-a10/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/a1x/pcduino-a10/README.txt" target="_blank">README</a> file for further information.
         </p>
         <p>
           <b>STATUS</b>.
@@ -2482,14 +2483,20 @@
           This port was contributed by Petro Karashchenko.
           This board is based on the TI/Sitara AM3358 Cortex-A8 CPU running 1GHz.
         </p>
-        <p>
-          <b>STATUS</b>.
+        <ul>
+        <li>
+          <b>NuttX-7.28</b>.
           This initial port in NuttX-7.28 is very sparse.
           While not ready for prodcution use, the Beaglebone Black port is functional and will be the basis for a more extensive development.
           Additional work in progress to extend this port and more capable is anticipated in NuttX-7.29.
-        </p>
+        </li>
+        <li>
+          <b>NuttX-7.31</b>.
+          An LCD driver was added in NuttX-7.31.
+        </li>
+        </ul>
         <p>
-          Refer to the Beaglebone Black board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/beaglebone-black/README.txt" target="_blank">README</a> file for further, up-to-date information.
+          Refer to the Beaglebone Black board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/am335x/beaglebone-black/README.txt" target="_blank">README</a> file for further, up-to-date information.
         </p>
       </li>
     </ul>
@@ -2514,7 +2521,7 @@
         <p>
           <b>Sabre-6Quad</b>.
           This is a port to the NXP/Freescale Sabre-6Quad board.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sabre-6quad/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/imx6/sabre-6quad/README.txt" target="_blank">README</a> file for further information.
         </p>
         <p>
           <b>STATUS:</b>
@@ -2524,7 +2531,7 @@
         </p>
         <p>
           Basic support of NuttX running in SMP mode on the i.MX6Q was also accomplished in NuttX-7.16.
-          However, there are still known issues with SMP support on this platform as described in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sabre-6quad/README.txt" target="_blank">README</a> file for the board.
+          However, there are still known issues with SMP support on this platform as described in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/imx6/sabre-6quad/README.txt" target="_blank">README</a> file for the board.
         </p>
       </li>
     </ul>
@@ -2548,14 +2555,14 @@
       <p>
         <b>STATUS</b>.
         My porting efforts were stalled due to tool-related issues.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/launchxl-tms57004/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tms570/launchxl-tms57004/README.txt" target="_blank">README</a> file for further information.
         However, my understanding is that other people have successfully completed the port and submitted changes to the NuttX repository.
       </p>
       <p>
         <b>Toolchain:</b>
         The TMS570 is a big-endian ARM platform and requires a big-endian ARM toolchain.
         All testing has been performed using a big-endian NuttX buildroot toolchain.
-        Instructions for building this toolchain are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/launchxl-tms57004/README.txt" target="_blank">README</a> file.
+        Instructions for building this toolchain are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tms570/launchxl-tms57004/README.txt" target="_blank">README</a> file.
       </p>
     </ul>
   </td>
@@ -2572,7 +2579,7 @@
     <ul>
       <p>
         <b>STATUS</b>.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/tms570ls31x-usb-kit/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm570/tms570ls31x-usb-kit/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>Toolchain:</b>
@@ -2602,7 +2609,7 @@
         This initial support is very minimal:
         There is a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
         As of this writing, more device drivers are needed to make this a more complete port.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nutiny-nuc120/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/nuc1xx/nutiny-nuc120/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>Memory Usage</b>.
@@ -2666,7 +2673,7 @@ nsh>
           As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support USB OTG.
           A TSI and a SPI driver were added in NuttX-6.29.
           Alan contributed a PWM driver in NuttX-6.32.
-          Refer to the Freedom KL25Z board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-kl25z/README.txt" target="_blank">README</a> file for further information.
+          Refer to the Freedom KL25Z board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kl/freedom-kl25z/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
       <p>
@@ -2680,7 +2687,7 @@ nsh>
           <b>STATUS</b>.
           This is the work of Michael Hope.
           Verified, initial support for the Teensy-LC first appeared in NuttX-7.10.
-          Refer to the Teensy-LC board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/teensy-lc/README.txt" target="_blank">README</a> file for further information.
+          Refer to the Teensy-LC board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kl/teensy-lc/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
     </ul>
@@ -2704,7 +2711,7 @@ nsh>
         This work was contributed in NuttX 7.8 by Derek B. Noonburg.
         The board support is very similar to the Freedom-KL25Z.
         It was decided to support this a a separate board, however, due to some small board-level differences.
-        Refer to the Freedom KL26Z board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-kl26z/README.txt" target="_blank">README</a> file for further information.
+        Refer to the Freedom KL26Z board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kl/freedom-kl26z/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -2727,7 +2734,7 @@ nsh>
         The initial SAMD20 Xplained Pro release (NuttX 7.1) included a functional NuttShell (NSH) configuration.
         An SPI driver was also included to support the OLED1 and I/O1 modules.
         That SPI driver, however, was not completely verified due to higher priority tasks that came up (I hope to get back to this later).
-        Refer to the SAMD20 Explained Pro board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/samd20-xplained/README.txt" target="_blank">README</a> file for further information.
+        Refer to the SAMD20 Explained Pro board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samd2l2/samd20-xplained/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         The fully verified SPI driver appeared in the NuttX-7.22 release.
@@ -2753,7 +2760,7 @@ nsh>
         Initial support for the SAML21 Xplained Pro was release in the NuttX 7.10.
         This initial support included a basic configuration for the NuttShell (NSH)
         (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
-        Refer to the SAML21 Explained Pro board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/saml21-xplained/README.txt" target="_blank">README</a> file for further information.
+        Refer to the SAML21 Explained Pro board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samd2l2/saml21-xplained/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         The fully verified SPI driver appeared in the NuttX-7.22 release along with an I2C and USB device driver.
@@ -2778,7 +2785,7 @@ nsh>
       <p>
         <b>STATUS:</b>
         The first released version was provided in NuttX 7.10.
-        Refer to the board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/configs/lpcxpresso-lpc1115/README.txt" target="_blank">README.txt</a> file for further information.
+        Refer to the board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/nuttx/boards/lpcxpresso-lpc1115/README.txt" target="_blank">README.txt</a> file for further information.
       </p>
       <p>
         <b>Obsoleted:</b>
@@ -2826,7 +2833,7 @@ nsh>
       <p>
         <b>STATUS:</b>
           This port was was released in NuttX 6.14.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lm3s6432-s2e/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/lm3s6432-s2e/README.txt" target="_blank">README</a> file for further information.
       </p>
      </ul>
   </td>
@@ -2850,7 +2857,7 @@ nsh>
           The current port includes timer, serial console, Ethernet, SSI, and microSD support.
           There are working configurations to run the <a href="NuttShell.html">NuttShell
           (NSH)</a>, the NuttX networking test, and the uIP web server.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/eagle100/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/eagle100/README.txt" target="_blank">README</a> file for further information.
       </p>
      </ul>
     <p>
@@ -2890,7 +2897,7 @@ nsh>
         <b>NOTE</b>: As it is configured now, you MUST have a network connected.
         Otherwise, the NSH prompt will not come up because the Ethernet
         driver is waiting for the network to come up.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lm3s6965-ek/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/lm3s6965-ek/README.txt" target="_blank">README</a> file for further information.
       </small></p>
      </ul>
     <p>
@@ -2916,7 +2923,7 @@ nsh>
         <b>STATUS:</b>
           This port was released in NuttX 5.10.
           Features are the same as with the Eagle-100 LM3S6918 described above.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lm3s8962-ek/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/lm3s8962-ek/README.txt" target="_blank">README</a> file for further information.
       </p>
      </ul>
    </td>
@@ -2946,7 +2953,7 @@ nsh>
       Header file support was contributed by Tiago Maluta for this part.
       Jose Pablo Rojas V. is used those header file changes to port NuttX to the TI/Stellaris EKK-LM3S9B96.
       That port was available in the NuttX-6.20 release.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ekk-lm3s9b96/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/ekk-lm3s9b96/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -3003,7 +3010,7 @@ nsh>
           DMA and USART-based SPI supported are included, but not fully tested.
         </p>
         <p>
-           Refer to the EFM32 Gecko Starter Kit <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/efm32-g8xx-stk/README.txt" target="_blank"><i>README.txt</i></a> file for further information.
+           Refer to the EFM32 Gecko Starter Kit <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/efm32/efm32-g8xx-stk/README.txt" target="_blank"><i>README.txt</i></a> file for further information.
         </p>
       </li>
       <li>
@@ -3027,7 +3034,7 @@ nsh>
           The board suppport is complete but untested because of tool-related issues.  An OpenOCD compatible, SWD debugger would be required to make further progress in testing.
         </p>
         <p>
-           Refer to the Olimex EFM32G880F120-STK <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-efm32g880f129-stk/README.txt" target="_blank"><i>README.txt</i></a> for further information.
+           Refer to the Olimex EFM32G880F120-STK <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/efm32/olimex-efm32g880f129-stk/README.txt" target="_blank"><i>README.txt</i></a> for further information.
         </p>
       </li>
     </ol>
@@ -3137,7 +3144,7 @@ nsh>
     <p>
       That initial STM32L-Discovery support included a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
       A driver for the on-board segment LCD is included as well as an option to drive the segment LCD from an NSH &quot;built-in&quot; command.
-      Refer to the STM32L-Discovery board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32ldiscovery/README.txt" target="_blank">README</a> file for further information.
+      Refer to the STM32L-Discovery board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32ldiscovery/README.txt" target="_blank">README</a> file for further information.
     </p>
     <p>
       <b>Memory Usage</b>.
@@ -3290,7 +3297,7 @@ nsh>
             <b>STM32VL-Discovery</b>.
             In NuttX-6.33, support for the STMicro STM32VL-Discovery board was contributed by Alan Carvalho de Assis.
             The STM32VL-Discovery board features an STM32F100RB MCU.
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32vldiscovery/README.txt" target="_blank">README</a> file for further information.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32vldiscovery/README.txt" target="_blank">README</a> file for further information.
           </p>
        </li>
     </ul>
@@ -3347,7 +3354,7 @@ nsh>
     <ul>
         The basic STM32F103C8 port was released in NuttX version 6.28.
         This work was contributed by Laurent Latil.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32_tiny/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32_tiny/README.txt" target="_blank">README</a> file for further information.
       </p>
      </ul>
   </td>
@@ -3372,21 +3379,21 @@ nsh>
            <b>STM3210E-EVAL</b>.
            A port for the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
            features the STM32F103ZET6 MCU.
-           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm3210e-eval/README.txt" target="_blank">README</a> file for further information.
+           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm3210e-eval/README.txt" target="_blank">README</a> file for further information.
          </p>
       </li>
       <li>
          <p>
            <b>HY-Mini STM32v board</b>.
            This board is based on the STM32F103VCT chip.  Port contributed by Laurent Latil.
-           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/hymini-stm32v/README.txt" target="_blank">README</a> file.
+           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/hymini-stm32v/README.txt" target="_blank">README</a> file.
          </p>
       </li>
       <li>
          <p>
             <b>The M3 Wildfire development board (STM32F103VET6), version 2</b>.
             See <a href="http://firestm32.taobao.com">http://firestm32.taobao.com</a> (the current board is version 3).
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/fire-stm32v2/README.txt" target="_blank">README</a> file for further information.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/fire-stm32v2/README.txt" target="_blank">README</a> file for further information.
          </p>
       </li>
       <li>
@@ -3394,7 +3401,7 @@ nsh>
             <b>LeafLab's Maple and Maple Mini boards</b>.
             These boards are based on the STM32F103RBT6 chip for the standard version and on the STM32F103CBT6 for the mini version.
             See the <a href="http://leaflabs.com/docs/hardware/maple.html">LeafLabs</a> web site for hardware information;
-            see the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/maple/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+            see the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/maple/README.txt" target="_blank">README</a> file for further information about the NuttX port.
          </p>
       </li>
       <li>
@@ -3532,7 +3539,7 @@ nsh>
         (1) Basic Cortex-M3 port,
         (2) Ethernet,
         (3) On-board LEDs.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/shenzhou/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/shenzhou/README.txt" target="_blank">README</a> file for further information.
       </p>
     </li>
     <li>
@@ -3559,7 +3566,7 @@ nsh>
         <b>STATUS:</b>
         Networking and touchscreen support are well test.
         But, at present, neither USB nor LCD functionality have been verified.
-        Refer to the Viewtool STM32F103/F107 <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/viewtool-stm32f107/README.txt" target="_blank">README</a> file for further information.
+        Refer to the Viewtool STM32F103/F107 <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/viewtool-stm32f107/README.txt" target="_blank">README</a> file for further information.
       </p>
     </li>
     <li>
@@ -3594,7 +3601,7 @@ nsh>
     </p>
     <ul>
       <b>STATUS:</b>
-      In addition to the above-mention WiFI support, the Photon board support includes buttons, LEDS, IWDG, USB OTG HS, and procfs support.  Configurations available for nsh, usbnsh, and wlan configurations. See the Photon <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/photon/README.txt" target="_blank">README</a> file for additional information.
+      In addition to the above-mention WiFI support, the Photon board support includes buttons, LEDS, IWDG, USB OTG HS, and procfs support.  Configurations available for nsh, usbnsh, and wlan configurations. See the Photon <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/photon/README.txt" target="_blank">README</a> file for additional information.
    </td>
 </tr>
 <tr>
@@ -3624,7 +3631,7 @@ nsh>
         <b>STATUS:</b>
         The peripherals of the STM32 F2 family are compatible with the STM32 F4 family.
         See discussion of the STM3240G-EVAL board below for further information.
-        Refer also to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm3220g-eval/README.txt" target="_blank">README</a> file for further information.
+        Refer also to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm3220g-eval/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         Support for both the IAR and uVision GCC IDEs added for the STM3220G-EVAL board in NuttX 7.16.
@@ -3662,7 +3669,7 @@ nsh>
       <p>
         Subsequent NuttX releases will extend this port and add support for the SDIO-based SD cards and
         USB device.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam3u-ek/README.txt" target="_blank">README</a> file for further information about this port.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam3u-ek/README.txt" target="_blank">README</a> file for further information about this port.
       </p>
      </ul>
      <p>
@@ -3701,7 +3708,7 @@ nsh>
         <b>STATUS:</b>
         As of this writing, the basic Arduino Due port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional Arduino Due port was released in NuttX-6.29.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/arduino-due/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/arduino-due/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         Support for the Flip&amp;Click SAM3X was added in NuttX-7.24.
@@ -3750,6 +3757,9 @@ nsh>
         <li>
           Support for the Keil MCB1700 was contributed by Alan Carvalho de Assis in NuttX-7.23.
         </li>
+        <li>
+          Support for the NXP Semiconductors' PN5180 NFC Frontend Development Kit was contributed by Michael Jung in NuttX-7.1.  This board is based on the NXP LPC1769 MCU.
+        </li>
       </ul>
     </p>
     <p>
@@ -3791,7 +3801,7 @@ nsh>
         Support for the Nucleus2G board was terminated on 2016-04-12.
         There has not been any activity with the commercial board in a few years and it no longer appears to be available from the 2g-eng.com website.
         Since the board is commercial and no longer publically available, it no longer qualifies for inclusion in the open source repositories.
-        A snapshot of the code is still available in the <a href="https://bitbucket.org/nuttx/obsoleted/src/master/configs/nucleus2g">Obsoleted repository</a> and can easily be <i>reconstitued</i> if needed.
+        A snapshot of the code is still available in the <a href="https://bitbucket.org/nuttx/obsoleted/src/master/boards/nucleus2g">Obsoleted repository</a> and can easily be <i>reconstitued</i> if needed.
       </p>
       </li>
       <li>
@@ -3799,7 +3809,7 @@ nsh>
         <ul>
           <li>
             Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/mbed/README.txt" target="_blank">README</a> file for further information.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/mbed/README.txt" target="_blank">README</a> file for further information.
           </li>
         </ul>
       </p>
@@ -3823,7 +3833,7 @@ nsh>
             The NuttX-5.17 released added support for low-speed USB devices, interrupt endpoints, and a <i>USB host HID keyboard class driver</i>.
           </li>
           <li>
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-lpc1766stk/README.txt" target="_blank">README</a> file for further information.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/olimex-lpc1766stk/README.txt" target="_blank">README</a> file for further information.
           </li>
         </ul>
       </p>
@@ -3842,7 +3852,7 @@ nsh>
            An fully verified board configuration is included in NuttX-6.2.
            The Code Red toolchain is supported under either Linux or Windows.
            Verified configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), THTTPD, and USB mass storage device.
-           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpcxpresso-lpc1768/README.txt" target="_blank">README</a> file for further information.
+           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
       <li>
@@ -3853,7 +3863,7 @@ nsh>
           The initial release was included NuttX-6.26.
           The Nuttx Buildroot toolchain is used by default.
           Verifed configurations include the &quot;Hello, World!&quot; example application and a THTTPD demonstration.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/zkit-arm-1769/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/zkit-arm-1769/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
       <li>
@@ -3861,7 +3871,7 @@ nsh>
         <p>
            This board configuration was contributed and made available in NuttX-6.20.
            As contributed board support, I am unsure of what all has been verfied and what has not.
-           See the Microment website <a href="http://micromint.com/Products/lincoln60.html">Lincoln60</a> board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lincoln60/README.txt" target="_blank">README</a> file for further information about the Lincoln board.
+           See the Microment website <a href="http://micromint.com/Products/lincoln60.html">Lincoln60</a> board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/lincoln60/README.txt" target="_blank">README</a> file for further information about the Lincoln board.
         </p>
       </li>
       <li>
@@ -3869,13 +3879,19 @@ nsh>
         <p>
            This board configuration was contributed by Vladimir Komendantskiy and made available in NuttX-7.15.
            This is a variant of the LPCXpresso LPC1768 board support with special provisions for the U-Blox Model Evaluation board.
-           See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/u-blox-c027/README.txt" target="_blank">README</a> file for further information about this port.
+           See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/u-blox-c027/README.txt" target="_blank">README</a> file for further information about this port.
         </p>
       </li>
       <li>
         <p><b>Keil MCB1700 (LPC1768)</b></p>
         <p>
            This board configuration was contributed by Alan Carvalho de Assis in NuttX-7.23.
+        </p>
+      </li>
+      <li>
+        <p><b>PN5180 NFC Frontend Development Kit</b></p>
+        <p>
+           This board configuration was contributed by Michael Jung in NuttX-7.31.
         </p>
       </li>
       </ol>
@@ -3911,7 +3927,7 @@ nsh>
         The NSH configuration includes verified support for a DMA-based SD card interface.
         The frame-buffer LCD driver is functional and uses the SDRAM for frame-buffer memory.
         A touchscreen interface has been developed but there appears to be a hardware issue with the WaveShare implementation of the XPT2046 touchscreen controller.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/open1788/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc17xx_40xx/open1788/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>NuttX-7.29</b>
@@ -3936,7 +3952,7 @@ nsh>
     </blockquote>
     <p>
        Further information about the LC823450XGEVK is available on from the the <a href="http://www.onsemi.com/PowerSolutions/evalBoard.do?id=LC823450XGEVK">ON Semiconductor</a> website as are LC823450 <a href="http://www.onsemi.com/PowerSolutions/supportDoc.do?type=AppNotes&rpn=LC823450">related technical documents</a>.
-       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lc823450-xgevk/README.txt" target="_blank">README</a> file for details of the NuttX port.
+       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lc823450/lc823450-xgevk/README.txt" target="_blank">README</a> file for details of the NuttX port.
     </p>
     <p>
       This port is intended to test LC823450 features including SMP. Supported peripherals include UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
@@ -3976,7 +3992,7 @@ nsh>
       </p>
       <p>
         <b>README File</b>.
-        Refer to the MAX32660-EVSYS <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ max32660-evsys/README.txt" target="_blank">README</a> file for further information.
+        Refer to the MAX32660-EVSYS <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/max326xx/ max32660-evsys/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4000,7 +4016,7 @@ nsh>
     </p>
     <p>
       This initial porting effort uses the Infineon XMC4500 Relax v1 board as described on the manufacturer's <a href="http://www.infineon.com/cms/en/product/evaluation-boards/KIT_XMC45_RELAX_V1/productType.html?productType=db3a304437849205013813b23ac17763">website</a>.
-      The current status of the board is available in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/xmc4500-relax/README.txt" target="_blank">README</a> file
+      The current status of the board is available in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/xmc4/xmc4500-relax/README.txt" target="_blank">README</a> file
     </p>
   </td>
 </tr>
@@ -4037,7 +4053,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        Refer to the generic NRF52 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nrf52-generic/README.txt" target="_blank">README</a> file for further information.
+        Refer to the generic NRF52 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/nrf52/nrf52-generic/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4059,7 +4075,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        Refer to the Teensy-3.1 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/teensy-3.x/README.txt" target="_blank">README</a> file for further information.
+        Refer to the Teensy-3.1 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/teensy-3.x/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4076,12 +4092,12 @@ nsh>
       <a name="kinetisk28"><b>NXP/FreeScale Kinetis K28F/Freedom-K28F</b>.</a>
       Architecture support for the Kinetis K28F along with board support for the Freedom-K28F was added in NuttX-7.15.
       The Freedom-K28F board is based on the Kinetis MK28FN2M0VMI15 MCU (ARM Cortex-M4 at150 MHz, 1 MB SRAM, 2 MB flash, HS and FS USB, 169 MAPBGA package).
-      More information is avaialable from the <a href="https://www.nxp.com/support/developer-resources/hardware-development-tools/freedom-development-boards/mcu-boards/nxp-freedom-development-board-for-kinetis-k27-and-k28-mcus:FRDM-K28F">NXP website</a>.
+      More information is available from the <a href="https://www.nxp.com/support/developer-resources/hardware-development-tools/freedom-development-boards/mcu-boards/nxp-freedom-development-board-for-kinetis-k27-and-k28-mcus:FRDM-K28F">NXP website</a>.
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        Refer to the Freedom-K28F board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-k28f/README.txt" target="_blank">README</a> file for further information.
+        Refer to the Freedom-K28F board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/freedom-k28f/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4110,7 +4126,7 @@ nsh>
         (2) bring up the NuttShell NSH, (3) develop support for the SDHC-based SD card,
         (4) develop support for USB host and device, and (2) develop an LCD driver.
         NOTE: Some of these remaining tasks are shared with the K60 work described below.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/kwikstik-k40/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/kwikstik-k40/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -4135,7 +4151,7 @@ nsh>
         An additional, validated configuration exists for the NuttShell (NSH, see the
         <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
         This basic TWR-K60N512 first appeared in NuttX-6.8.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/twr-k60n512/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/twr-k60n512/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
     <p>
@@ -4156,7 +4172,7 @@ nsh>
       Support for the Kinetis K64 family and specifically for the <b>NXP/Freescale Freedom K64F</b> board was added in NuttX 7.17.
       Initial release includes two NSH configurations with support for on-board LEDs, buttons, and Ethernet with the on-board KSZ8081 PHY.
       SDHC supported has been integrated, but not verified.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-k64f/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/freedom-k64f/README.txt" target="_blank">README</a> file for further information.
     </p>
     <p>
       <b>MK64FN1M0VMD12</b>.
@@ -4166,7 +4182,7 @@ nsh>
       <b>NXP/Freescale Kinetis TWR-K64F120M</b>.
       Support for the Freescale Kinetis TWR-K64F120M was contributed in NuttX-7.20 by Maciej Skrzypek.  Refer to the <a href="http://www.nxp.com/products/sensors/accelerometers/3-axis-accelerometers/kinetis-k64-mcu-tower-system-module:TWR-K64F120M">Freescale web site</a> for further information about this board.
       The board may be complemented by <a href="http://www.nxp.com/pages/serial-usb-ethernet-can-rs232-485-tower-system-module:TWR-SER">TWR-SER</a> which includes (among other things), an RS232 and Ethernet connections.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/twr-k64f120m/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/twr-k64f120m/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -4205,7 +4221,7 @@ nsh>
     <p>
       <a name="kinetisk66"><b>NXP/FreeScale Kinetis K66</b>.</a>
       Support for the Kinetis K64 family and specifically for the <b>NXP/Freescale Freedom K66F</b> board was contributed by David Sidrane in NuttX 7.20.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/freedom-k66f/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/freedom-k66f/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 <tr>
@@ -4245,14 +4261,30 @@ nsh>
     </p>
     <p>
       <b>Sony Spresence</b>.</a>
-      Basic support for the Sony Spresense board was include in the contribution of Nobuto Kobayashi in NuttX-7.30.  <i>NOTE</i>:  This is a bare bone basic Spresense port sufficient for running a NuttShell (NSH) and should not be confused with the full Spresence SDK offered from Sony.
+      Spresense is a compact development board based on Sony’s power-efficient multicore microcontroller CXD5602.
+      Basic support for the Sony Spresense board was included in the contribution of Nobuto Kobayashi in NuttX-7.30.  <i>NOTE</i>:  That was an initial, bare bones basic Spresense port sufficient for running a NuttShell (NSH) and should not be confused with the full Spresence SDK offered from Sony.
+      Since then there has been much development of the NuttX CXD56xx port.
     </p>
-      Spresense is a compact development board based on Sony’s power-efficient multicore microcontroller CXD5602.  Features:
+      <b>Features:</b>
     </p>
     <ul>
       <li>Integrated GPS:  Embedded GNSS with support for GPS, QZSS.</li>
       <li>Hi-res audio output and multi mic inputs"  Advanced 192kHz/24 bit audio codec and amplifier for audio output, and support for up to 8 mic input channels.</li>
       <li>Multicore microcontroller:  Spresense is powered by Sony's CXD5602 microcontroller (ARM® Cortex®-M4F × 6 cores), with a clock speed of 156 MHz.</li>
+    </ul>
+    </p>
+      <b>Driver Status:</b>
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>NuttX-3.31</b>.
+          In this release, many new architectural features, peripheral drivers, and board configurations were contributed primarily through the work of Alin Jerpelea.
+          These new architectural features include:  Inter-core communications, power management, and clock management.
+          New drivers include:  GPIO, PMIC, USB, SDHC, SPI, I2C, DMA, RTC, PWM, Timers, Watchdog Timer, UID, SCU, ADC, eMMC, Camera CISIF, GNSS, and others.
+        </p>
+      </li>
+    <ul>
     </ul>
   </td>
 </tr>
@@ -4269,7 +4301,7 @@ nsh>
     </p>
     <p>
       Support for the Nucleo-F302R8 board was added by raiden00pl in NuttX-7.27.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f302r8/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f302r8/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -4295,7 +4327,7 @@ nsh>
         The basic port for the STM32F3-Discover was first released in NuttX-6.26.
         Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this platform as well.
         New drivers will be required for ADC and I2C which are very different on this platform.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32f3discovery/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32f3discovery/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
     </li>
@@ -4303,12 +4335,12 @@ nsh>
     <li><p>
       <b>STMicro ST Nucleo F303RE board</b>.
       The basic port for the Nucleo F303RE was contributed by Paul Alexander Patience and first released in NuttX-7.12.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f303re/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f303re/README.txt" target="_blank">README</a> file for further information.
     </p></li>
     <li><p>
       <b>STMicro ST Nucleo F303ZE board</b>.
       Support for the Nucleo-F303ZE board was added by Mateusz Szafoni in NuttX-7.27.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f303ze/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f303ze/README.txt" target="_blank">README</a> file for further information.
     </p></li>
     </ul>
   </td>
@@ -4380,7 +4412,7 @@ nsh>
           Architecture support (only) for STMicro STM32F401xB and STM32F401xC pars was added.
         </li>
         <li>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-f4x1re/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f4x1re/README.txt" target="_blank">README</a> file for further information.
         </li>
       </ul>
     </p>
@@ -4468,7 +4500,7 @@ nsh>
       </ul>
     </p>
     <p>
-      Refer to the STM3240G-EVAL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm3240g-eval/README.txt" target="_blank">README</a> file for further information.
+      Refer to the STM3240G-EVAL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm3240g-eval/README.txt" target="_blank">README</a> file for further information.
     </p>
     <p>
       <b>STMicro STM32F4-Discovery</b>.
@@ -4497,7 +4529,7 @@ nsh>
         <b>STATUS:</b>
         The basic port for the STM32F4-Discovery was contributed by Mike Smith and was first released in NuttX-6.14.
         All drivers listed for the STM3240G-EVAL are usable on this platform as well.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32f4discovery/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32f4discovery/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
     <p>
@@ -4514,7 +4546,7 @@ nsh>
       <li>Battery connect and batter charger circuit.</li>
     </ul>
     <p>
-      See the <a href="http://www.mikroe.com/mikromedia/stm32-m4/">Mikroelektronika</a> website for more information about this board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/mikroe-stm32f4/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the <a href="http://www.mikroe.com/mikromedia/stm32-m4/">Mikroelektronika</a> website for more information about this board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/mikroe-stm32f4/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <ul>
       <p>
@@ -4526,30 +4558,30 @@ nsh>
     <p>
       <b>Olimex STM32 H405</b>.
       Support for the Olimex STM32 H405 development board was contributed by Martin Lederhilger and appeared in NuttX-7.3.
-      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-h405/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/olimex-stm32-h405/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <p>
       <b>Olimex STM32 H407</b>.
       Support for the Olimex STM32 H407 development board was contributed by Neil Hancock and appeared in NuttX-7.14.
-      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-h407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/olimex-stm32-h407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <p>
       <b>Olimex STM32 E407</b>.
       Support for the Olimex STM32 E407 development board was contributed by Mateusz Szafoni and appeared in NuttX-7.17.
       Networking configurations were added in NuttX-7.18.
-      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-e407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/olimex-stm32-e407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <p>
       <b>Olimex STM32 P407</b>.
       Support for the Olimex STM32 P407 development board appeared in NuttX-7.19.
-      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/olimex-stm32-p407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/olimex-stm32-p407/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <p>
       <b>MikroElektronika Clicker2 for STM32</b>.
       This is yet another board supported by NuttX that uses the same STM32F407VGT6 MCU as does the STM32F4-Discovery board.
       This board has been used primarily with the MRF24J40 Click board for the development of IEEE 802.15.4 MAC and 6LoWPAN support.
     <p>
-      See the <a href="https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4">Mikroelektronika</a> website for more information about this board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/clicker2-stm32/README.txt" target="_blank">README</a> file for further information about the NuttX port.
+      See the <a href="https://shop.mikroe.com/development-boards/starter/clicker-2/stm32f4">Mikroelektronika</a> website for more information about this board and the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/clicker2-stm32/README.txt" target="_blank">README</a> file for further information about the NuttX port.
     </p>
     <ul>
       <p>
@@ -4588,6 +4620,48 @@ nsh>
     <p>
       The F427/437 port adds (1) additional SPI ports, (2) additional UART ports, (3) analog and digital noise filters on the I2C ports, (4) up to 2MB of flash, (5) an additional lower-power mode for the internal voltage regulator, (6) a new prescaling option for timer clock, (7) a larger FSMSC write FIFO, and (8) additional crypto modes (F437 only).
     </p>
+    <p>
+      <b>Axlotoi</b>.
+      In NuttX-7.31, Jason Harris contributed support for the Axloti board.
+      That is the board for the Axoloti open source synthesizer board featuring the STM32F427IGH6 MCU
+      The STM32F427IGH6 has a 180MHz Cortex-M4 core with 1MiB Flash memory and 256KiB of SRAM
+      The Axloti board features:
+    </p>
+    <ul>
+      <li>
+        ADAU1961 24-bit 96 kHz stereo CODEC
+      </li>
+      <li>
+        1/4&quot; in/out jacks for analog audio signals
+      </li>
+      <li>
+        3.5 mm jack for analog audio signals
+      </li>
+      <li>
+        8 MiB of SDRAM (Alliance Memory AS4C4M16SA)
+      </li>
+      <li>
+        Serial MIDI in/out ports
+      </li>
+      <li>
+        SD Card slot
+      </li>
+      <li>
+        Two user LEDs and one (GPIO) push-button
+      </li>
+      <li>
+        USB OTG FS with Micro-AB connector (USB device mode operation)
+      </li>
+      <li>
+        USB OTG HS with Type-A connector (USB host mode operation)
+      </li>
+      <li>
+        Easy access to most IO pins
+      </li>
+    </ul>
+    <p>
+      Refer to <a href="http://www.axoloti.com/">Axloti</a> website for further information about this board.
+    </p>
   </td>
 </tr>
 <tr>
@@ -4625,7 +4699,7 @@ nsh>
       </li>
     </ul>
     <p>
-      Refer to the STM32F429I-Discovery board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32f429i-disco/README.txt" target="_blank">README</a> file for further information.
+      Refer to the STM32F429I-Discovery board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32f429i-disco/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -4690,7 +4764,7 @@ nsh>
       <li>
         <p>
           <b>B-L475E-IOT01A Discovery Kit</b>.
-          Board support for the STMicro B-L475E-IOT01A board from ST Micro was contributed by Simon Piriou in NuttX-7.22.  See the <a href="http://www.st.com/en/evaluation-tools/b-l475e-iot01a.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/b-l475e-iot01a/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro B-L475E-IOT01A board from ST Micro was contributed by Simon Piriou in NuttX-7.22.  See the <a href="http://www.st.com/en/evaluation-tools/b-l475e-iot01a.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/b-l475e-iot01a/README.txt" target="_blank">README</a> file for further information.
         </p>
         <p>
           This board STMicro is powered by STM32L475VG Cortex-M4 and targets IoT nodes with a choice of connectivity options including WiFi, Bluetooth LE, NFC, and sub-GHZ RF at 868 or 915 MHz, as well as a long list of various environmental sensors.
@@ -4732,13 +4806,13 @@ nsh>
       <li>
         <p>
           <b>Nucleo-L476RG</b>.
-          Board support for the STMicro NucleoL476RG board from ST Micro was contributed by Sebastien Lorquet in NuttX-7.15.  See the <a href="http://www.st.com/nucleo-l476rg" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l476rg/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro NucleoL476RG board from ST Micro was contributed by Sebastien Lorquet in NuttX-7.15.  See the <a href="http://www.st.com/nucleo-l476rg" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/nucleo-l476rg/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
       <li>
         <p>
           <b>STM32L476VG Discovery</b>.
-          Board support for the STMicro STM32L476VG Discovery board from ST Micro was contributed by Dave in NuttX-7.15.  See the <a href="http://www.st.com/stm32l476g-disco" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32l476vg-disco/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro STM32L476VG Discovery board from ST Micro was contributed by Dave in NuttX-7.15.  See the <a href="http://www.st.com/stm32l476g-disco" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/stm32l476vg-disco/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
       <li>
@@ -4746,7 +4820,7 @@ nsh>
           <b>STM32L476 MDK</b>.
           Very basic support for NuttX on the Motorola Moto Z MDK was contributed by Jim Wylder in NuttX 7.18.
           A simple NSH configuration is available for the STM32L476 chip.
-          See the <a href="http://developer.motorola.com/buy/" target="_blank">Moto Mods Development Kit</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32l476-mdk/README.txt" target="_blank">README</a> file for further information.
+          See the <a href="http://developer.motorola.com/buy/" target="_blank">Moto Mods Development Kit</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/stm32l476-mdk/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
     </ul>
@@ -4834,13 +4908,13 @@ nsh>
       <li>
         <p>
           <b>Nucleo-L432KC</b>.
-          Board support for the STMicro Nucleo-L432KC board from ST Micro was contributed by JSebastien Lorquet in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l432kc.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l432kc/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro Nucleo-L432KC board from ST Micro was contributed by JSebastien Lorquet in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l432kc.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/nucleo-l432kc/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
       <li>
         <p>
           <b>Nucleo-L452RE</b>.
-          Board support for the STMicro Nucleo-L452RE board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l452re.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l452re/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro Nucleo-L452RE board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l452re.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/nucleo-l452re/README.txt" target="_blank">README</a> file for further information.
         </p>
       </li>
     </ul>
@@ -4865,7 +4939,7 @@ nsh>
       <li>
         <p>
           <b>Nucleo-L496ZG</b>.
-          Board support for the STMicro Nucleo-L496ZG board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l496zg.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-l496zg/README.txt" target="_blank">README</a> file for further information.
+          Board support for the STMicro Nucleo-L496ZG board from ST Micro was contributed by Juha Niskanen in NuttX-7.21.  See the <a href="http://www.st.com/en/evaluation-tools/nucleo-l496zg.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/nucleo-l496zg/README.txt" target="_blank">README</a> file for further information.
           See also the status above for the STM32 L476 most of which also applies to this part.
         </p>
       </li>
@@ -4890,10 +4964,46 @@ nsh>
           <b>STM32L4R9I-Discovery</b>.
           Board support for the STMicro STM32L4R9I-Discovery board from ST Micro was contributed by Juha Niskanen in NuttX-7.26.
           That development board uses the STM32L4R9AI part.
-          See the <a href="https://www.st.com/en/evaluation-tools/32l4r9idiscovery.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32l4r9ai-disco/README.txt" target="_blank">README</a> file for further information.
+          See the <a href="https://www.st.com/en/evaluation-tools/32l4r9idiscovery.html" target="_blank">STMicro website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32l4/stm32l4r9ai-disco/README.txt" target="_blank">README</a> file for further information.
           See also the status above for the opther STM32 L4 parts, most of which also applies to this part.
         </p>
       </li>
+    </ul>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="nxplpc40xx"><b>NCP LPC40xx</b>.</a>
+      The LPC40xx family is very similar to the LPC17xx family except that it features a Cortex-M4F versus the LPC17xx's Cortex-M3.
+      Architectural support for the LPC40xx family was built on top of the existing LPC17xx by jjlange in NuttX-7.31.
+      With that architectural support came support for two boards also contributed by jjlange:
+    </p>
+    <ul>
+      <p>
+        <b>Embedded Artists LPC4088 Developer's kit</b>.
+        See the <a href=" https://www.embeddedartists.com/products/lpc4088-developers-kit/">Embedded Artists</a> website for further information about this board.
+      </p>
+      <p>
+        <b>Embedded Artists LPC4088 Developer's kit</b>.
+        See the <a href=" https://www.embeddedartists.com/products/lpc4088-quickstart-board/">Embedded Artists</a> website for further information about this board.
+      </p>
+    </ul>
+    <p>
+      <b>Driver Status.</b>
+    </p>
+    <ul>
+      <b>NuttX-7.31</b>.
+      No new unique drivers for the LPC40xx family are needed.
+      Most (if not all) LPC17xx drivers should be simply used with the LPC40xx.
+      That is an unverified assertion, however.
+      Not a proven fact.
     </ul>
   </td>
 </tr>
@@ -4918,7 +5028,7 @@ nsh>
       <ul>
         <li>
           <p><b>STATUS:</b>
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpc4330-xplorer/README.txt" target="_blank">README</a> file for more detailed information about this port.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc43xx/lpc4330-xplorer/README.txt" target="_blank">README</a> file for more detailed information about this port.
           </p>
         </li>
         <li>
@@ -4938,7 +5048,7 @@ nsh>
       <ul>
       <li>
         <p><b>STATUS:</b>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpc4357-evb/README.txt" target="_blank">README</a> file for more detailed information about this port.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc43xx/lpc4357-evb/README.txt" target="_blank">README</a> file for more detailed information about this port.
         </p>
       </li>
       <li>
@@ -4958,7 +5068,7 @@ nsh>
       <ul>
         <li>
           <p><b>STATUS:</b>
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpc4370-link2/README.txt" target="_blank">README</a> file for more detailed information about this port.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc43xx/lpc4370-link2/README.txt" target="_blank">README</a> file for more detailed information about this port.
           </p>
         </li>
         <li>
@@ -4975,7 +5085,7 @@ nsh>
       <ul>
         <li>
           <p><b>STATUS:</b>
-            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpc4337-ws/README.txt" target="_blank">README</a> file for more detailed information about this port.
+            Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc43xx/lpc4337-ws/README.txt" target="_blank">README</a> file for more detailed information about this port.
           </p>
         </li>
         <li>
@@ -5081,7 +5191,7 @@ nsh>
       </li>
     </ul>
     <p>
-      Refer to the LPCXpresso-LPC54628 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/lpcxpresso-lpc54628/README.txt" target="_blank">README</a> file for more detailed information about this port.
+      Refer to the LPCXpresso-LPC54628 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc54xx/lpcxpresso-lpc54628/README.txt" target="_blank">README</a> file for more detailed information about this port.
     </p>
   </td>
 </tr>
@@ -5135,7 +5245,7 @@ nsh>
            </li>
         </ul>
       </p>
-        Refer to the EK-TM4C123GXL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/tm4c123g-launchpad/README.txt" target="_blank">README</a> file for more detailed information about this port.
+        Refer to the EK-TM4C123GXL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/tm4c123g-launchpad/README.txt" target="_blank">README</a> file for more detailed information about this port.
       </p>
     </ul>
   </td>
@@ -5165,7 +5275,7 @@ nsh>
            </li>
         </ul>
       </p>
-        Refer to the EK-TM4C1294XL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/tm4c1294-launchpad/README.txt" target="_blank">README</a> file for more detailed information about this port.
+        Refer to the EK-TM4C1294XL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/tm4c1294-launchpad/README.txt" target="_blank">README</a> file for more detailed information about this port.
       </p>
     </ul>
   </td>
@@ -5195,14 +5305,14 @@ nsh>
           <li>
             This board supports included two configurations for the NuttShell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
             Both are networked enabled:  One configured to support IPv4 and one configured to supported IPv6.
-            Instructions are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/dk-tm4c129x/README.txt" target="_blank">README</a> file for configuring both IPv4 and IPv6 simultaneously.
+            Instructions are included in the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/dk-tm4c129x/README.txt" target="_blank">README</a> file for configuring both IPv4 and IPv6 simultaneously.
           </li>
           <li>
             Tiva PWM and Quadrature Encoder drivers were contributed to NuttX in 7.18 by Young.
           </li>
         </ul>
       </p>
-        Refer to the DK-TM4C129X board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/dk-tm4c129x/README.txt" target="_blank">README</a> file for more detailed information about this port.
+        Refer to the DK-TM4C129X board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/dk-tm4c129x/README.txt" target="_blank">README</a> file for more detailed information about this port.
       </p>
     </ul>
   </td>
@@ -5233,7 +5343,7 @@ nsh>
         The basic port is nearly code complete but unverified in NuttX-7.28;  The NSH configuration was fully functional in NuttX-7.29.
         This effort is stalled on further radio development.
         The plan was to integrate the IEEE 802.15.4 radio provided by the co-resident Cortex-M0.  The Cortex-M0 interface, however, is not available with an open license that would permit redistribution.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/launchxl-cc1312r1/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/launchxl-cc1312r1/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -5269,7 +5379,7 @@ nsh>
         </li>
       </ul>
       </p>
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4l-xplained/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4l-xplained/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
         <b>Memory Usage</b>.
@@ -5327,7 +5437,7 @@ Mem:         29232       5920      23312      23312
       Support for the SAM4CMP-DB board was contributed to NuttX by  Masayuki Ishikawa in NuttX-7.19.
       The SAM4CM is a dual-CPU part and SMP was included for the ARMv7-M and SAM3/4 families.
       The SAM4CMP-DB board support includes an NSH configuration that operates in an SMP configuration.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4cmp-db/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4cmp-db/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -5357,7 +5467,7 @@ Mem:         29232       5920      23312      23312
       A DMA-base SPI driver is supported and has been verified with the AT25 Serial FLASH.
       Touchscreen and LCD support was added in NuttX-7.3, but has not been fully integrated as of this writing.
       The SAM4E-EK should be compatible with most of the other SAM3/4 drivers (like HSMCI, DMAC, etc.) but those have not be verified on the SAM4E-EK as of this writing.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4e-ek/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4e-ek/README.txt" target="_blank">README</a> file for further information.
     </ul>
   </td>
 </tr>
@@ -5386,7 +5496,7 @@ Mem:         29232       5920      23312      23312
           Support for the on-board 1MB SRAM was added in NuttX-6.29.
           An RTT driver was Bob Doiron in NuttX-7.3.
           Bob also added an high resolution RTC emulation using the RTT for the sub-second counter.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4s-xplained/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4s-xplained/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
      </li>
@@ -5401,7 +5511,7 @@ Mem:         29232       5920      23312      23312
           As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
           The first fully functional SAM4S Xplained Pro port was released in NuttX-7.2.
           This supported also added HSMCI, RTC, and watchdog and verified support for USB device.
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4s-xplained-pro/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4s-xplained-pro/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
      </li>
@@ -5434,7 +5544,7 @@ Mem:         29232       5920      23312      23312
       A new Ethernet MAC driver has been developed and is functional in the NSH configuration.
       A DMA-base SPI driver is supported and has been verified with the AT25 Serial FLASH.
       The SAM4E-EK should be compatible with most of the other SAM3/4 drivers (like HSMCI, DMAC, etc.) but those have not be verified on the SAM4E-EK as of this writing.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sam4e-ek/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4e-ek/README.txt" target="_blank">README</a> file for further information.
     </ul>
   </td>
 </tr>
@@ -5520,7 +5630,7 @@ Mem:         29232       5920      23312      23312
         <li>RSWDT driver.</li>
       </ul>
       </p>
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/samv71-xult/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/samv71-xult/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -5538,7 +5648,7 @@ Mem:         29232       5920      23312      23312
       This port uses Atmel SAM E70 Xplained Evaluation Kit (ATSAME70-XPLD).
       This board is essentially a lower cost version of the SAMV71-XULT board featuring the ATSAME70Q21 Cortex-M7 microcontroller.
       See the <a href="#at91samv71">Atmel SAMV71</a> for supported features.
-      Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/same70-xplained/README.txt" target="_blank">README</a> file for further information.
+      Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/same70-xplained/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -5564,7 +5674,7 @@ Mem:         29232       5920      23312      23312
       Because of the similarity in peripherals, several drivers were brought in from the SAML21 port.
       Most have not been verified as of the NuttX-7.26 release.
       These unverfied drivers include:  SPI, I2C, DMA, USB.
-      Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/metro-m4/README.txt" target="_blank">README</a> file for further information about the current state of the port.
+      Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samd5e5/metro-m4/README.txt" target="_blank">README</a> file for further information about the current state of the port.
     </p>
   </td>
 </tr>
@@ -5586,7 +5696,7 @@ Mem:         29232       5920      23312      23312
         <b>Nucleo F722ZE</b>.
         This is a member of the common board support for the common Nucleo-144 boards, this one featuring the STM32F722ZE.
         This port was also provided by Bob Feretich in NuttX-7.23.
-        See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
+        See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/nucleo-144/README.txt">README.txt</a> file for further information.
       </p>
     </ul>
     <p><b>STATUS</b>:
@@ -5625,7 +5735,7 @@ Mem:         29232       5920      23312      23312
     <ul>
       <p>
         <b>STATUS:</b>
-          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32f746g-disco/README.txt" target="_blank">README</a> file for further information.
+          Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/stm32f746g-disco/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
     <p>
@@ -5634,7 +5744,7 @@ Mem:         29232       5920      23312      23312
     <ul>
       <li>
         <p><b>NuttX-7.11</b>.
-          Serial driver and Ethernet driver support, along with DMA support, were available availabe in this initial release.
+          Serial driver and Ethernet driver support, along with DMA support, were available in this initial release.
           The STM32 F7 peripherals are very similar to some members of the STM32 F4 and additional drivers can easily be ported the F7 as discussed in this Wiki page: <a href="http://www.nuttx.org/doku.php?id=wiki:howtos:port-drivers_stm32f7">Porting Drivers to the STM32 F7</a>
         </p>
       </li>
@@ -5697,7 +5807,7 @@ Mem:         29232       5920      23312      23312
           <b>Nucleo-F767ZI</b>.
           This is a member of the Nucleo-144 board family.
           Support for this board was also contributed by David Sidrane in NuttX-7.17.
-          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
+          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/nucleo-144/README.txt">README.txt</a> file for further information.
         </p>
       </li>
       <li>
@@ -5724,7 +5834,7 @@ Mem:         29232       5920      23312      23312
         </ul>
         <p>
           Refer to the http://www.st.com website for further information about this board (search keyword: stm32f769i-disco).
-          See also the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-144/README.txt">README.txt</a> file for further information.
+          See also the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/nucleo-144/README.txt">README.txt</a> file for further information.
         </p>
       </li>
     </ul>
@@ -5752,7 +5862,7 @@ Mem:         29232       5920      23312      23312
           <b>Nucleo-H743ZI</b>.
           This is a member of the Nucleo-144 board family.
           Support for this board was also added NuttX-7.26.
-          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-h743zi/README.txt">README.txt</a> file for further information.
+          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/nucleo-h743zi/README.txt">README.txt</a> file for further information.
         </p>
         <p>
           The basic NSH configuration is fully, thanks to the bring-up efforts of Mateusz Szafoni.
@@ -5801,11 +5911,11 @@ Mem:         29232       5920      23312      23312
     <ul>
       <li><p>
         The basic IMXRT1050-EVK port is complete and verified configurations are available.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/imxrt1050-evk/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/imxrt/imxrt1050-evk/README.txt" target="_blank">README</a> file for further information.
       </p></li>
       <li><p>
         The basic IMXRT1060-EVK port was complete but un-verified as of NuttX-7.27 but has been fully verified since NuttX-7.27
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/imxrt1060-evk/README.txt" target="_blank">README</a> file for more current status information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/imxrt/imxrt1060-evk/README.txt" target="_blank">README</a> file for more current status information.
       </p></li>
       <li><p>
         Architecture-only support for the IMXRT1020 family was contributed in NuttX-7.30 by Dave Marples.
@@ -5838,6 +5948,11 @@ Mem:         29232       5920      23312      23312
         <p><b>NuttX-7.29</b>.
         XBAR and OCOTP support was added in NuttX-7.28 by David Sidrane.
         LCD Framebuffer suport was added by Johannes.
+        </p>
+      </li>
+      <li>
+        <p><b>NuttX-7.31</b>.
+        USB EHCI Host and USDHC drivers were added in NuttX-7.31 by Dave Marples.
         </p>
       </li>
     </ul>
@@ -5881,14 +5996,14 @@ Mem:         29232       5920      23312      23312
         <p>
          <b>STATUS:</b>
            Work on this port has stalled due to toolchain issues.  Complete, but untested code for this port appears in the NuttX 6.5 release.
-           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/amber/README.txt" target="_blank">README</a> file for further information.
+           Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/atmega/amber/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
       <p>
         <a name="avratmega1284p"><b>LowPowerLab MoteinoMEGA</b>.</a>
         This port of NuttX to the MoteinoMEGA from <a href="http://www.lowpowerlab.com">LowPowerLab</a>.
         The MoteinoMEGA is based on an Atmel ATMega1284P.
-        See the LowPowerlab <a href="https://lowpowerlab.com/shop/index.php?_route_=Moteino/moteinomega">website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/moteio-mega/README.txt" target="_blank">README</a> file for further information.
+        See the LowPowerlab <a href="https://lowpowerlab.com/shop/index.php?_route_=Moteino/moteinomega">website</a> and the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/atmega/moteino-mega/README.txt" target="_blank">README</a> file for further information.
       </p>
       <ul>
         <p>
@@ -5905,7 +6020,7 @@ Mem:         29232       5920      23312      23312
          <b>STATUS:</b>
          The basic port was released in NuttX-7.14 including a simple &quot;Hello, World!&quot; and OS test configurations.
          Extensive effort was made to the use the special capabilities of the Atmel Studio AVR compiler to retain strings in FLASH memory and so keep the SRAM memory usage to a minimum.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/arduino-mega2560/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/atmega/arduino-mega2560/README.txt" target="_blank">README</a> file for further information.
         </p>
       </ul>
     </ul>
@@ -5935,7 +6050,7 @@ Mem:         29232       5920      23312      23312
          The basic port was released in NuttX-6.5.  This basic port consists only of
          a &quot;Hello, World!!&quot; example that demonstrates initialization of the OS,
          creation of a simple task, and serial console output.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/micropendous3/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/at90usb/micropendous3/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
     <p>
@@ -5957,7 +6072,7 @@ Mem:         29232       5920      23312      23312
          An SPI driver and a USB device driver exist for the AT90USB as well
          as a USB mass storage configuration.  However, this configuration is not
          fully debugged as of the NuttX-6.5 release.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/teensy-2.0/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/at90usb/teensy-2.0/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
 </tr>
@@ -6050,7 +6165,7 @@ Mem:         29232       5920      23312      23312
         The basic, port was be released in NuttX-5.13.
         A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
         time permitting.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/avr32dev1/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/at32uc3/avr32dev1/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6127,7 +6242,7 @@ Mem:         29232       5920      23312      23312
          However, testing has not yet begun due to issues with BDMs, Code Warrior, and
          the paging in the build process.
          Progress is slow, but I hope to see a fully verified MC9S12NE64 port in the near future.
-         Refer to the NuttX board README files for <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/demo9s12ne64/README.txt" target="_blank">DEMO9S12NE64</a> and for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ne64badge/README.txt" target="_blank">NE64 /PoE Badge</a> for further information.
+         Refer to the NuttX board README files for <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/hc/mcs92s12ne64/demo9s12ne64/README.txt" target="_blank">DEMO9S12NE64</a> and for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/hc/mcs92s12ne64/ne64badge/README.txt" target="_blank">NE64 /PoE Badge</a> for further information.
       </p>
     </ul>
   </td>
@@ -6154,7 +6269,7 @@ Mem:         29232       5920      23312      23312
          The port is reported to be functional on the <a href="http://bifferos.bizhat.com">Bifferboard</a> as well.
          In NuttX 7.1, Lizhuoyi contributed additional keyboard and VGA drivers.
          This is a great, stable starting point for anyone interest in fleshing out the x86 port!
-         Refer to the NuttX <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/qemu-i486/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/x86/qemu/qemu-i486/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6185,7 +6300,7 @@ Mem:         29232       5920      23312      23312
         The PGA117, however, is not yet fully integrated to support ADC sampling.
         See the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a> for further information about NSH.
         The first verified port to the Mirtoo module was available with the NuttX 6.20 release.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/mirtoo/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mx/mirtoo/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6219,7 +6334,7 @@ Mem:         29232       5920      23312      23312
        An untested USB device-side driver is available in the source tree.
        A more complete port would include support of the USB OTG port and of the LCD display on this board.
        Those drivers are not yet available as of this writing.
-       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/sure-pic32mx/README.txt" target="_blank">README</a> file for further information.
+       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mx/sure-pic32mx/README.txt" target="_blank">README</a> file for further information.
        </p>
     </ul>
    <p>
@@ -6235,7 +6350,7 @@ Mem:         29232       5920      23312      23312
       <b>STATUS:</b>
       The basic port is code complete and fully verified in NuttX 6.13.
       Available configurations include the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pcblogic-pic32mx/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/configs/pcblogic-pic32mx/README.txt" target="_blank">README</a> file for further information.
     </p>
     <li><b>UBW32 Board from Sparkfun</b>
       This is the port to the Sparkfun UBW32 board.
@@ -6248,7 +6363,7 @@ Mem:         29232       5920      23312      23312
       The basic port is code complete and fully verified in NuttX 6.18.
       Available configurations include the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       USB has not yet been fully tested but on first pass appears to be functional.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ubw32/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mx/ubw32/README.txt" target="_blank">README</a> file for further information.
     </p>
     </ul>
     </ul>
@@ -6279,7 +6394,7 @@ Mem:         29232       5920      23312      23312
          A verified configuration is available for the NuttShel (NSH) appeared in NuttX-6.16.
          Board support includes a verified USB (device-side) driver.
          Also included are a a verified Ethernet driver, a partially verified USB device controller driver, and an unverifed SPI driver.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pic32mx-starterkit/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mx/pic32mx-starterkit/README.txt" target="_blank">README</a> file for further information.
       </p>
      <li><b>Mikroelektronika PIC32MX7 Mulitmedia Board (MMB)</b>.
         A port has been completed for the  Mikroelektronika PIC32MX7 Multimedia Board (MMB).
@@ -6302,7 +6417,7 @@ Mem:         29232       5920      23312      23312
          However, additional verification and tuning of this driver is required.
          Further display/touchscreen verification would require C++ support (for NxWidgets and NxWM).
          Since I there is no PIC32 C++ is the free version of the MPLAB C32 toolchain, further graphics development is stalled.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pic32mx7mmb/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mx/pic32mx7mmb/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6385,9 +6500,13 @@ Mem:         29232       5920      23312      23312
         <b>NuttX-7.29</b>.
         Abdelatif Guettouche contributed additional timer support including:  Timer lower half driver, free-running, and one-shot timers.
       </p>
+      <p>
+        <b>NuttX-7.31</b>.
+        Abdelatif Guettouche contributed DMA support.
+      </p>
     </ul>
     </p>
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/pic32mz-starterkit/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mz/pic32mz-starterkit/README.txt" target="_blank">README</a> file for further information.
     </p>
   </td>
 <tr>
@@ -6432,7 +6551,7 @@ Mem:         29232       5920      23312      23312
         (which has very limit SH-1 support to begin with), or perhaps with the CMON debugger.
         At any rate, I have exhausted all of the energy that I am willing to put into this cool
         old processor for the time being.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/us7032evb1/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/renesas/sh7032/us7032evb1/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6469,7 +6588,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
 </pre></ul>
       <p>
         No workaround is known at this time.  This is a show stopper for M16C.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/skp16c26/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/renesas/m32262f8/skp16c26/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -6526,7 +6645,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       There is little yet in the way of device driver support.
       Outstanding issues include missing clock configuration logic, missing partition tables to support correct configuration from FLASH, and some serial driver pin configuration issues.
       The configuration is usable despite these limitations.
-      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/esp32-core/README.txt" target="_blank">README</a> file for further information.
+      Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/xtensa/esp32/esp32-core/README.txt" target="_blank">README</a> file for further information.
   </td>
 </tr>
 
@@ -6552,7 +6671,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
         The initial release of support for the z16f was made available in NuttX version 0.3.7.
         A working NuttShell (NSH) configuration as added in NuttX-6.33 (although a patch is required to work around an issue with a ZDS-II 5.0.1 tool problem).
         An ESPI driver was added in NuttX-7.2.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/z16f2800100zcog/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/z16/z16f2811/z16f2800100zcog/README.txt" target="_blank">README</a> file for further information.
       </p>
     </li>
   </ul>
@@ -6569,25 +6688,41 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
   <td>
     <p>
       <b>Zilog eZ80Acclaim! Microcontroller</b>.
-      There are two eZ80Acclaim! ports:
+      There are three eZ80Acclaim! ports:
     </p>
     <ul>
-      <li>One uses the ZiLOG ez80f0910200kitg development kit, and
-      <li>The other uses the ZiLOG ez80f0910200zcog-d development kit.
+      <li>The ZiLOG ez80f0910200kitg development kit.
+      <li>The ZiLOG ez80f0910200zcog-d development kit.
+      <li>The MakerLisp CPU board.
     </ul>
     <p>
-      Both boards are based on the eZ80F091 part and both use the Zilog ZDS-II
+      All three boards are based on the eZ80F091 part and all use the Zilog ZDS-II
       Windows command line tools.
-      The development environment is either Windows native or Cygwin under Windows.
+      The development environment is either Windows native or Cygwin or MSYS2 under Windows.
     </p>
     <ul>
       <p>
-        <b>STATUS:</b>
-        Integration and testing of NuttX on the  ZiLOG ez80f0910200zcog-d is complete.
+        <b>NuttX-0.4.x:</b>
+        Integration and testing of NuttX on the  ZiLOG ez80f0910200zcog-d was completed.
         The first integrated version was released in NuttX version 0.4.2 (with important early bugfixes
         in 0.4.3 and 0.4.4).
         As of this writing, that port provides basic board support with a serial console, SPI, and eZ80F91 EMAC driver.
-        Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ez80f910200kitg/README.txt" target="_blank">ez80f0910200kitg</a> and <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ez80f910200zco/README.txt" target="_blank">ez80f910200zco</a>file for further information.
+        Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/z80/ez80/ez80f910200kitg/README.txt" target="_blank">ez80f0910200kitg</a> and <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/z80/ez80/ez80f910200zco/README.txt" target="_blank">ez80f910200zco</a>file for further information.
+      </p>
+      <p>
+        <b>NuttX-7.31:</b>
+        Support for the MakerLisp board as well as an RTC driver and an improved SPI driver were included.
+        The MakerLisp machine is a portable, modular computer system, designed to recapture the feel of classic computing, with modern hardware.
+      </p>
+      <p>
+        The machine centers on a 2&quot; x 3.5&quot; business card-sized CPU, which can be used stand-alone, or plugged in to a 2&quot; x 8&quot; main board, for expansion into a full computer system.
+        A laser-cut wood enclosure holds a small keyboard, an LCD monitor, the circuit boards, and a prototyping area with a breadboard for electronics experimentation and development.
+      </p>
+      <p>
+        The eZ80 running at 50 MHz, with up to 16 Mb of zero-wait state RAM.
+        A VGA display adapter provides an IBM PC-like color text-mode display;
+        A USB keyboard adapter provides for standard keyboard input.
+        Data storage and interchange is accomplished by a SPI-based micro-SD card.
       </p>
     </ul>
   </td>
@@ -6618,7 +6753,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
          <b>STATUS:</b>
          This release has been verified only on the ZiLOG ZDS-II Z8Encore! chip simulation
          as of nuttx-0.3.9.
-         Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/z8encore000zco/README.txt" target="_blank">z8encore000zco</a> and for the<a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/z8f64200100kit/README.txt" target="_blank">z8f64200100kit</a> for further information.
+         Refer to the NuttX board README files for the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/ez80/z8/z8encore000zco/README.txt" target="_blank">z8encore000zco</a> and for the<a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/ez80/z8/z8f64200100kit/README.txt" target="_blank">z8f64200100kit</a> for further information.
        </p>
      <ul>
   </td>
@@ -6647,7 +6782,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
        Most of the NuttX is in port for both the Z80182 and for the P112 board.
        Boards from Kickstarter project will not be available, however, until the third quarter of 2013.
        So it will be some time before this port is verified on hardware.
-       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/p112/README.txt" target="_blank">README</a> file for further information.
+       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/z80/z180/p112/README.txt" target="_blank">README</a> file for further information.
       </p>
     <ul>
   </td>
@@ -6672,7 +6807,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
        <b>STATUS:</b>
         This port is complete and stable to the extent that it can be tested
         using an instruction set simulator.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/z80sim/README.txt" target="_blank">README</a> file for further information.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/z80/z80/z80sim/README.txt" target="_blank">README</a> file for further information.
       </p>
     <ul>
   </td>
@@ -6696,7 +6831,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
        <b>STATUS:</b>
          Basically the same as for the Z80 instruction set simulator.
          This port was contributed by Jacques Pelletier.
-         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/xtrs/README.txt" target="_blank">README</a> file for further information.
+         Refer to the NuttX board <a href="https://bitbucket.org/nuttx/obsoleted/src/master/configs/xtrs/README.txt" target="_blank">README</a> file for further information.
       </p>
       <p>
          <b>NOTE:</b>

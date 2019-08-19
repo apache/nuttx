@@ -42,7 +42,7 @@
  * following custom functions.
  *
  *   void arm_timer_initialize(void): Initializes the timer facilities.
- *     Called early in the initialization sequence (by up_intialize()).
+ *     Called early in the initialization sequence (by up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
@@ -389,7 +389,7 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
  *
  * Description:
  *   Initializes all platform-specific timer facilities.  This function is
- *   called early in the initialization sequence by up_intialize().
+ *   called early in the initialization sequence by up_initialize().
  *   On return, the current up-time should be available from
  *   up_timer_gettime() and the interval timer is ready for use (but not
  *   actively timing.

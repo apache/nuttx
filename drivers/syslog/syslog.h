@@ -82,7 +82,7 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
  *
  *   One power up, the SYSLOG facility is non-existent or limited to very
  *   low-level output.  This function may be called later in the
- *   intialization sequence after full driver support has been initialized.
+ *   initialization sequence after full driver support has been initialized.
  *   (via syslog_initialize())  It installs the configured SYSLOG drivers
  *   and enables full SYSLOGing capability.
  *

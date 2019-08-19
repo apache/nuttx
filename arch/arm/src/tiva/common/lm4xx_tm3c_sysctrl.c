@@ -295,7 +295,7 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
 
       if ((newrcc & SYSCON_RCC_BYPASS) == 0)
         {
-          /* Yes, wait until l the PLL is locked */
+          /* Yes, wait until the PLL is locked */
 
           tiva_pll_lock();
 

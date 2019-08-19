@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_sdmmc.c
+ * arch/arm/src/stm32h7/stm32_sdmmc.c
  *
  *   Copyright (C) 2009, 2011-2017, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -733,28 +733,28 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
-  {
-    /* Do not use this in STM32_SDMMC_MASK register */
+    {
+      /* Do not use this in STM32_SDMMC_MASK register */
 
-    waitmask &= !SDIOWAIT_WRCOMPLETE;
+      waitmask &= !SDIOWAIT_WRCOMPLETE;
 
-    pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-    pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
+      pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK);
+      pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
 
-    /* Arm the SDMMC_D Ready and install Isr */
+      /* Arm the SDMMC_D Ready and install Isr */
 
-    (void)stm32_gpiosetevent(pinset, true, false, false,
-                             stm32_sdmmc_rdyinterrupt, priv);
-  }
+      (void)stm32_gpiosetevent(pinset, true, false, false,
+                               stm32_sdmmc_rdyinterrupt, priv);
+    }
 
   /* Disarm SDMMC_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
-  {
-    (void)stm32_gpiosetevent(priv->d0_gpio, false, false, false,
-                             NULL, NULL);
-    stm32_configgpio(priv->d0_gpio);
-  }
+    {
+      (void)stm32_gpiosetevent(priv->d0_gpio, false, false, false,
+                               NULL, NULL);
+      stm32_configgpio(priv->d0_gpio);
+    }
 #endif
 
   priv->waitevents = waitevents;
@@ -943,10 +943,10 @@ static uint8_t stm32_log2(uint16_t value)
 
   DEBUGASSERT(value > 0);
   while (value != 1)
-  {
-    value >>= 1;
-    log2++;
-  }
+    {
+      value >>= 1;
+      log2++;
+    }
 
   return log2;
 }
@@ -1040,40 +1040,40 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
   while (priv->remaining > 0 &&
          (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
           STM32_SDMMC_STA_TXFIFOF) == 0)
-  {
-    /* Is there a full word remaining in the user buffer? */
-
-    if (priv->remaining >= sizeof(uint32_t))
     {
-      /* Yes, transfer the word to the TX FIFO */
+      /* Is there a full word remaining in the user buffer? */
 
-      data.w           = *priv->buffer++;
-      priv->remaining -= sizeof(uint32_t);
+      if (priv->remaining >= sizeof(uint32_t))
+        {
+          /* Yes, transfer the word to the TX FIFO */
+
+          data.w           = *priv->buffer++;
+          priv->remaining -= sizeof(uint32_t);
+        }
+      else
+        {
+          /* No.. transfer just the bytes remaining in the user buffer,
+           * padding with zero as necessary to extend to a full word.
+           */
+
+          uint8_t *ptr = (uint8_t *)priv->remaining;
+          int i;
+
+          data.w = 0;
+          for (i = 0; i < (int)priv->remaining; i++)
+            {
+              data.b[i] = *ptr++;
+            }
+
+          /* Now the transfer is finished */
+
+          priv->remaining = 0;
+        }
+
+      /* Put the word in the FIFO */
+
+      sdmmc_putreg32(priv, data.w, STM32_SDMMC_FIFO_OFFSET);
     }
-    else
-    {
-      /* No.. transfer just the bytes remaining in the user buffer,
-       * padding with zero as necessary to extend to a full word.
-       */
-
-      uint8_t *ptr = (uint8_t *)priv->remaining;
-      int i;
-
-      data.w = 0;
-      for (i = 0; i < (int)priv->remaining; i++)
-      {
-        data.b[i] = *ptr++;
-      }
-
-      /* Now the transfer is finished */
-
-      priv->remaining = 0;
-    }
-
-    /* Put the word in the FIFO */
-
-    sdmmc_putreg32(priv, data.w, STM32_SDMMC_FIFO_OFFSET);
-  }
 }
 
 /****************************************************************************
@@ -1105,34 +1105,34 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
   while (priv->remaining > 0 &&
          (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
           STM32_SDMMC_STA_RXFIFOE) == 0)
-  {
-    /* Read the next word from the RX FIFO */
-
-    data.w = sdmmc_getreg32(priv, STM32_SDMMC_FIFO_OFFSET);
-    if (priv->remaining >= sizeof(uint32_t))
     {
-      /* Transfer the whole word to the user buffer */
+      /* Read the next word from the RX FIFO */
 
-      *priv->buffer++  = data.w;
-      priv->remaining -= sizeof(uint32_t);
+      data.w = sdmmc_getreg32(priv, STM32_SDMMC_FIFO_OFFSET);
+      if (priv->remaining >= sizeof(uint32_t))
+        {
+          /* Transfer the whole word to the user buffer */
+
+          *priv->buffer++  = data.w;
+          priv->remaining -= sizeof(uint32_t);
+        }
+      else
+        {
+          /* Transfer any trailing fractional word */
+
+          uint8_t *ptr = (uint8_t *)priv->buffer;
+          int i;
+
+          for (i = 0; i < (int)priv->remaining; i++)
+            {
+              *ptr++ = data.b[i];
+            }
+
+          /* Now the transfer is finished */
+
+          priv->remaining = 0;
+        }
     }
-    else
-    {
-      /* Transfer any trailing fractional word */
-
-      uint8_t *ptr = (uint8_t *)priv->buffer;
-      int i;
-
-      for (i = 0; i < (int)priv->remaining; i++)
-      {
-        *ptr++ = data.b[i];
-      }
-
-      /* Now the transfer is finished */
-
-      priv->remaining = 0;
-    }
-  }
 }
 #endif
 
@@ -1172,12 +1172,12 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
   /* Is a data transfer complete event expected? */
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
-  {
-    /* Yes.. wake up any waiting threads */
+    {
+      /* Yes.. wake up any waiting threads */
 
-    stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-    mcerr("Timeout: remaining: %d\n", priv->remaining);
-  }
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+      mcerr("Timeout: remaining: %d\n", priv->remaining);
+    }
 }
 
 /****************************************************************************
@@ -1479,10 +1479,10 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
               /* Yes.. Is their a thread waiting for response done? */
 
               if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
-               {
-                 /* Yes.. wake the thread up */
+                {
+                  /* Yes.. wake the thread up */
 
-                  stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
+                   stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
 
@@ -2875,6 +2875,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
     }
 
   /* Initialize the SDIO slot structure */
+
   /* Initialize semaphores */
 
   nxsem_init(&priv->waitsem, 0, 0);

@@ -1,7 +1,7 @@
 ############################################################################
 # tools/KernelLibs.mk
 #
-#   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016, 2018-2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
 # Add libraries for board support
 
-NUTTXLIBS += staging$(DELIM)libconfigs$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)
 
 # Add libraries for syscall support.  The C library will be needed by
 # both the kernel- and user-space builds.  For now, the memory manager (mm)
@@ -134,6 +134,12 @@ endif
 
 ifeq ($(CONFIG_LIBDSP),y)
 NUTTXLIBS += staging$(DELIM)libdsp$(LIBEXT)
+endif
+
+# Add symbol table library
+
+ifeq ($(CONFIG_EXECFUNCS_GENERATE_SYSTEM_SYMTAB),y)
+NUTTXLIBS += staging$(DELIM)libsymtab$(LIBEXT)
 endif
 
 # Export only the user libraries

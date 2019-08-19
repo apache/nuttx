@@ -36,9 +36,10 @@
 
 -include $(TOPDIR)/Make.defs
 
-CPPFLAGS += -I$(TOPDIR)/sched $(EXTRADEFINES)
-CFLAGS += -I$(TOPDIR)/sched $(EXTRADEFINES)
-CXXFLAGS += -I$(TOPDIR)/sched $(EXTRADEFINES)
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CPPFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
+CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
+CXXFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
 
 ASRCS =
 
@@ -61,6 +62,8 @@ CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
 CSRCS += up_allocateheap.c up_devconsole.c up_qspiflash.c
+
+VPATH = sim
 
 HOSTSRCS = up_hostusleep.c
 

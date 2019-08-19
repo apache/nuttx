@@ -134,6 +134,15 @@ config STM32H7_TIM
 	bool
 	default n
 
+config STM32H7_RTC
+	bool "RTC"
+	default n
+	select RTC
+
+config STM32H7_PWR
+	bool "PWR"
+	default n
+
 config STM32H7_PWM
 	bool
 	default n
@@ -157,6 +166,11 @@ config STM32H7_ADC3
 	bool "ADC3"
 	default n
 	select STM32H7_ADC
+
+config STM32H7_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	select STM32H7_PWR
+	default n
 
 config STM32H7_DMA1
 	bool "DMA1"
@@ -828,7 +842,7 @@ config STM32H7_SERIAL_DISABLE_REORDERING
 		can, however, have the side-effect that all port mappings
 		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
 		UART. This is in particular relevant if a project uses the USB console
-		in some configs and a serial console in other configs, but does not
+		in some boards and a serial console in other boards, but does not
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 
@@ -974,6 +988,101 @@ config SDMMC2_SDIO_PULLUP
 
 endmenu # "SDMMC2 Configuration"
 endmenu # "SD/MMC Configuration"
+
+if STM32H7_BKPSRAM
+
+config STM32H7_BBSRAM
+	bool "BBSRAM File Support"
+	default n
+
+config STM32H7_BBSRAM_FILES
+	int "Max Files to support in BBSRAM"
+	default 4
+	depends on STM32H7_BBSRAM
+
+config STM32H7_SAVE_CRASHDUMP
+	bool "Enable Saving Panic to BBSRAM"
+	default n
+	depends on STM32H7_BBSRAM
+
+endif # STM32H7_BKPSRAM
+
+config STM32H7_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default y
+
+menu "RTC Configuration"
+	depends on STM32H7_RTC
+
+config STM32H7_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 31
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config STM32H7_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config STM32H7_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
+choice
+	prompt "RTC clock source"
+	default STM32H7_RTC_LSECLOCK
+
+config STM32H7_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+config STM32H7_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32H7_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+endchoice #"RTC clock source"
+
+if STM32H7_RTC_LSECLOCK
+
+config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
+	int "LSE oscillator drive capability level at LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium high drive capability
+		2 = Medium low drive capability
+		3 = High drive capability
+
+config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+	int "LSE oscillator drive capability level after LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium high drive capability
+		2 = Medium low drive capability
+		3 = High drive capability
+
+endif # STM32H7_RTC_LSECLOCK
+
+endmenu # RTC Configuration
+
 config STM32H7_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n

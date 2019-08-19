@@ -35,7 +35,7 @@
 /* This header file contains function prototypes for the interfaces between
  * (1) the nuttx core-code, (2) the microprocessor specific logic that
  * resides under the arch/ sub-directory, and (3) the board-specific logic
- * that resides under configs/
+ * that resides under boards/
  *
  * Naming conventions:
  *
@@ -75,21 +75,21 @@
  *
  *    Board related declarations are retained in this header file.
  *
- *    There is also a configs/<board>/include/board.h header file that
- *    can be used to communicate other board-specific information between
- *    the architecture logic and even application logic.  Any definitions
- *    which are common between a single architecture and several boards
- *    should go in this board.h header file; this file is reserved for
- *    board-related definitions common to all architectures.
+ *    There is also a boards/<arch>/<chip>/<board>/include/board.h header
+ *    file that can be used to communicate other board-specific information
+ *    between the architecture logic and even application logic.  Any
+ *    definitions that are common between a single architecture and several
+ *    boards should go in this board.h header file; this file is reserved
+ *    for board-related definitions common to all architectures.
  *
  * 4. Board-Specific Interfaces.
  *
- *    Any interface which is unique to a board should be prefixed with
+ *    Any interface that is unique to a board should be prefixed with
  *    the board name, for example stm32f4discovery_. Sometimes the board
  *    name is too long so stm32_ would be okay too. These should be
- *    prototyped in configs/<board>/src/<board>.h and should not be used
- *    outside of that board directory since board-specific definitions
- *    have no meaning outside of the board directory.
+ *    prototyped in boards/<arch>/<chip>/<board>/src/<board>.h and should
+ *    not be used outside of that board directory since board-specific
+ *    definitions have no meaning outside of the board directory.
  */
 
 #ifndef __INCLUDE_NUTTX_BOARD_H

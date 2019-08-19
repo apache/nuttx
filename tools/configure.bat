@@ -99,10 +99,10 @@ if errorlevel 1 echo configure.exe failed
 goto End
 
 :NoConfig
-echo Missing ^<board-name^>/^<config-name^> argument
+echo Missing ^<board-name^>\configs\^<config-name^> argument
 
 :ShowUsage
-echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>\^<config-name^>
+echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>\configs\^<config-name^>
 echo        %0 [-h]
 echo\nWhere:
 echo  -d:
@@ -127,11 +127,11 @@ echo    places to try to locate the application directory:  ../apps or
 echo    ../apps-xx.yy where xx.yy is the NuttX version number.
 echo  ^<board-name^>:
 echo    Identifies the board.  This must correspond to a board directory
-echo    under nuttx/configs/.
+echo    under nuttx/boards/.
 echo  ^<config-name^>:
 echo    Identifies the specific configuratin for the selected ^<board-name^>.
 echo    This must correspond to a sub-directory under the board directory at
-echo    under nuttx/configs/^<board-name^>/.
+echo    under nuttx/boards/^<board-name^>/configs/.
 echo  -h:
 echo    Prints this message and exits.
 

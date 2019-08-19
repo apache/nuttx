@@ -1,0 +1,12 @@
+/Make.dep
+/.depend
+/*.src
+/*.obj
+/*.asm
+/*.rel
+/*.lst
+/*.sym
+/*.adb
+/*.lib
+/symtab.c
+/tmp.csv

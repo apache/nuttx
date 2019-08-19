@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/mtd/mx25rxx.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 201, 2019 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
 
  *   Derived from QuadSPI-based N25QxxxA driver (drivers/mtd/n25qxxx.c)
@@ -45,6 +45,11 @@
 #include <debug.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+#  include <stdlib.h>
+#  include <string.h>
+#endif
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -121,7 +126,7 @@
 
 #define MX25R6435F_SECTOR_SIZE      (4*1024)
 #define MX25R6435F_SECTOR_SHIFT     (12)
-#define MX25R6435F_SECTOR_COUNT     (16384)
+#define MX25R6435F_SECTOR_COUNT     (2048)
 #define MX25R6435F_PAGE_SIZE        (256)
 #define MX25R6435F_PAGE_SHIFT       (8)
 
@@ -140,6 +145,30 @@
 #define MX25R_CR_TB                 (1 << 3)  /* Bit 3: Top/bottom selected */
 #define MX25R_CR_DC                 (1 << 6)  /* Bit 6: Dummy cycle */
 
+/* Cache flags **********************************************************************/
+
+#define MX25RXX_CACHE_VALID         (1 << 0)  /* 1=Cache has valid data */
+#define MX25RXX_CACHE_DIRTY         (1 << 1)  /* 1=Cache is dirty */
+#define MX25RXX_CACHE_ERASED        (1 << 2)  /* 1=Backing FLASH is erased */
+
+#define IS_VALID(p)                 ((((p)->flags) & MX25RXX_CACHE_VALID) != 0)
+#define IS_DIRTY(p)                 ((((p)->flags) & MX25RXX_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)                ((((p)->flags) & MX25RXX_CACHE_ERASED) != 0)
+
+#define SET_VALID(p)                do { (p)->flags |= MX25RXX_CACHE_VALID; } while (0)
+#define SET_DIRTY(p)                do { (p)->flags |= MX25RXX_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)               do { (p)->flags |= MX25RXX_CACHE_ERASED; } while (0)
+
+#define CLR_VALID(p)                do { (p)->flags &= ~MX25RXX_CACHE_VALID; } while (0)
+#define CLR_DIRTY(p)                do { (p)->flags &= ~MX25RXX_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)               do { (p)->flags &= ~MX25RXX_CACHE_ERASED; } while (0)
+
+/* 512 byte sector support **********************************************************/
+
+#define MX25RXX_SECTOR512_SHIFT     9
+#define MX25RXX_SECTOR512_SIZE      (1 << 9)
+#define MX25RXX_ERASED_STATE        0xff
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -153,9 +182,15 @@ struct mx25rxx_dev_s
 
   FAR uint8_t           *cmdbuf;      /* Allocated command buffer */
 
-  uint8_t                sectorshift; /* 16 or 18 */
-  uint8_t                pageshift;   /* 8 */
-  uint16_t               nsectors;    /* 128 or 64 */
+  uint8_t                sectorshift; /* Log2 of sector size */
+  uint8_t                pageshift;   /* Log2 of page size */
+  uint16_t               nsectors;    /* Number of erase sectors */
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+  uint8_t                flags;       /* Buffered sector flags */
+  uint16_t               esectno;     /* Erase sector number in the cache */
+  FAR uint8_t           *sector;      /* Allocated sector data */
+#endif
 };
 
 /******************************************************************************
@@ -198,8 +233,18 @@ static void mx25rxx_write_enable(FAR struct mx25rxx_dev_s *dev, bool enable);
 static int mx25rxx_write_page(struct mx25rxx_dev_s *priv,
                        FAR const uint8_t *buffer, off_t address, size_t buflen);
 static int mx25rxx_erase_sector(struct mx25rxx_dev_s *priv, off_t sector);
+#if 0 /* FIXME:  Not used */
 static int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block);
+#endif
 static int mx25rxx_erase_chip(struct mx25rxx_dev_s *priv);
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+static int  mx25rxx_flush_cache(struct mx25rxx_dev_s *priv);
+static FAR uint8_t *mx25rxx_read_cache(struct mx25rxx_dev_s *priv, off_t sector);
+static void mx25rxx_erase_cache(struct mx25rxx_dev_s *priv, off_t sector);
+static int  mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
+              FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
+#endif
 
 /******************************************************************************
  * Private Functions
@@ -258,7 +303,7 @@ int mx25rxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
   struct qspi_cmdinfo_s cmdinfo;
 
   finfo("CMD: %02x buflen: %lu 0x%x\n",
-        cmd, (unsigned long)buflen, *(uint32_t*)buffer);
+        cmd, (unsigned long)buflen, *(FAR uint32_t *)buffer);
 
   cmdinfo.flags   = QSPICMD_WRITEDATA;
   cmdinfo.addrlen = 0;
@@ -376,6 +421,15 @@ int mx25rxx_write_page(struct mx25rxx_dev_s *priv, FAR const uint8_t *buffer,
       address += pagesize;
     }
 
+  /* Wait for write operation to finish */
+
+  do
+    {
+      mx25rxx_read_status(priv);
+      ret = priv->cmdbuf[0];
+    }
+  while ((ret & MX25R_SR_WIP) != 0);
+
   return OK;
 }
 
@@ -399,7 +453,7 @@ int mx25rxx_erase_sector(struct mx25rxx_dev_s *priv, off_t sector)
 
   do
     {
-      nxsig_usleep(50*1000);
+      nxsig_usleep(50 * 1000);
       mx25rxx_read_status(priv);
       status = priv->cmdbuf[0];
     }
@@ -408,6 +462,7 @@ int mx25rxx_erase_sector(struct mx25rxx_dev_s *priv, off_t sector)
   return OK;
 }
 
+#if 0 /* FIXME:  Not used */
 int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block)
 {
   uint8_t status;
@@ -423,7 +478,7 @@ int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block)
 
   do
     {
-      nxsig_usleep(300*1000);
+      nxsig_usleep(300 * 1000);
       mx25rxx_read_status(priv);
       status = priv->cmdbuf[0];
     }
@@ -431,6 +486,7 @@ int mx25rxx_erase_block(struct mx25rxx_dev_s *priv, off_t block)
 
   return OK;
 }
+#endif
 
 int mx25rxx_erase_chip(struct mx25rxx_dev_s *priv)
 {
@@ -500,7 +556,9 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 {
   FAR struct mx25rxx_dev_s *priv = (FAR struct mx25rxx_dev_s *)dev;
   size_t blocksleft = nblocks;
-  unsigned int sectorsPerBlock = (64*1024)>>priv->sectorshift;
+#ifdef CONFIG_MX25RXX_SECTOR512
+  int ret;
+#endif
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -508,18 +566,46 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 
   mx25rxx_lock(priv->qspi, false);
 
+  while (blocksleft-- > 0)
+    {
+      /* Erase each sector */
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+      mx25rxx_erase_cache(priv, startblock);
+#else
+      mx25rxx_erase_sector(priv, startblock);
+#endif
+      startblock++;
+    }
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+  /* Flush the last erase block left in the cache */
+
+  ret = mx25rxx_flush_cache(priv);
+  if (ret < 0)
+    {
+      nblocks = ret;
+    }
+#endif
+
+#if 0
+  /* FIXME: use mx25rxx_erase_block in case CONFIG_MX25RXX_SECTOR512 is not configured
+   * to speed up block erase.
+   */
+
+  unsigned int sectorsperblock = (64 * 1024) >> priv->sectorshift;
   while (blocksleft > 0)
     {
       /* Check if current block is aligned on 64k block to speed up erase */
 
-      if (((startblock & (sectorsPerBlock-1)) == 0) &&
-          (blocksleft >= sectorsPerBlock))
+      if (((startblock & (sectorsperblock - 1)) == 0) &&
+          (blocksleft >= sectorsperblock))
         {
           /* Erase 64k block */
 
-          mx25rxx_erase_block(priv, startblock>>(16-priv->sectorshift));
-          startblock += sectorsPerBlock;
-          blocksleft -= sectorsPerBlock;
+          mx25rxx_erase_block(priv, startblock >> (16 - priv->sectorshift));
+          startblock += sectorsperblock;
+          blocksleft -= sectorsperblock;
         }
       else
         {
@@ -530,6 +616,7 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
           blocksleft --;
         }
     }
+#endif
 
   mx25rxx_unlock(priv->qspi);
 
@@ -539,17 +626,30 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 ssize_t mx25rxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks, FAR uint8_t *buf)
 {
-  FAR struct mx25rxx_dev_s *mx_dev = (FAR struct mx25rxx_dev_s*)dev;
+#ifndef CONFIG_MX25RXX_SECTOR512
+  FAR struct mx25rxx_dev_s *priv = (FAR struct mx25rxx_dev_s *)dev;
+#endif
   ssize_t nbytes;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  nbytes = mx25rxx_read(dev, startblock << mx_dev->pageshift,
-                        nblocks << mx_dev->pageshift, buf);
+  /* On this device, we can handle the block read just like the byte-oriented read */
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+  nbytes = mx25rxx_read(dev, startblock << MX25RXX_SECTOR512_SHIFT,
+                       nblocks << MX25RXX_SECTOR512_SHIFT, buf);
   if (nbytes > 0)
     {
-      nbytes >>= mx_dev->pageshift;
+      nbytes >>= MX25RXX_SECTOR512_SHIFT;
     }
+#else
+  nbytes = mx25rxx_read(dev, startblock << priv->pageshift,
+                       nblocks << priv->pageshift, buf);
+  if (nbytes > 0)
+    {
+      nbytes >>= priv->pageshift;
+    }
+#endif
 
   return nbytes;
 }
@@ -558,7 +658,7 @@ ssize_t mx25rxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks, FAR const uint8_t *buf)
 {
   FAR struct mx25rxx_dev_s *priv = (FAR struct mx25rxx_dev_s *)dev;
-  int ret = (int)nblocks;
+  int ret;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -566,12 +666,21 @@ ssize_t mx25rxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   mx25rxx_lock(priv->qspi, false);
 
+#if defined(CONFIG_MX25RXX_SECTOR512)
+  ret = mx25rxx_write_cache(priv, buf, startblock, nblocks);
+  if (ret < 0)
+    {
+      ferr("ERROR: mx25rxx_write_cache failed: %d\n", ret);
+    }
+
+#else
   ret = mx25rxx_write_page(priv, buf, startblock << priv->pageshift,
                           nblocks << priv->pageshift);
   if (ret < 0)
     {
       ferr("ERROR: mx25rxx_write_page failed: %d\n", ret);
     }
+#endif
 
   mx25rxx_unlock(priv->qspi);
 
@@ -627,9 +736,16 @@ int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * appear so.
                */
 
+#ifdef CONFIG_MX25RXX_SECTOR512
+              geo->blocksize    = (1 << MX25RXX_SECTOR512_SHIFT);
+              geo->erasesize    = (1 << MX25RXX_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors <<
+                                  (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);
+#else
               geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
+#endif
               ret               = OK;
 
               finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
@@ -702,11 +818,215 @@ int mx25rxx_readid(struct mx25rxx_dev_s *dev)
   return OK;
 }
 
-/******************************************************************************
- * Public Functions
- ******************************************************************************/
+/************************************************************************************
+ * Name: mx25rxx_flush_cache
+ ************************************************************************************/
 
-/******************************************************************************
+#ifdef CONFIG_MX25RXX_SECTOR512
+static int mx25rxx_flush_cache(struct mx25rxx_dev_s *priv)
+{
+  int ret = OK;
+
+  /* If the cache is dirty (meaning that it no longer matches the old FLASH contents)
+   * or was erased (with the cache containing the correct FLASH contents), then write
+   * the cached erase block to FLASH.
+   */
+
+  if (IS_DIRTY(priv) || IS_ERASED(priv))
+    {
+      off_t address;
+
+      /* Convert the erase sector number into a FLASH address */
+
+      address = (off_t)priv->esectno << priv->sectorshift;
+
+      /* Write entire erase block to FLASH */
+
+      ret = mx25rxx_write_page(priv, priv->sector, address, 1 << priv->sectorshift);
+      if (ret < 0)
+        {
+          ferr("ERROR: mx25rxx_write_page failed: %d\n", ret);
+        }
+
+      /* The cache is no long dirty and the FLASH is no longer erased */
+
+      CLR_DIRTY(priv);
+      CLR_ERASED(priv);
+    }
+
+  return ret;
+}
+#endif /* CONFIG_MX25RXX_SECTOR512 */
+
+/************************************************************************************
+ * Name: mx25rxx_read_cache
+ ************************************************************************************/
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+static FAR uint8_t *mx25rxx_read_cache(struct mx25rxx_dev_s *priv, off_t sector)
+{
+  off_t esectno;
+  int   shift;
+  int   index;
+  int   ret;
+
+  /* Convert from the 512 byte sector to the erase sector size of the device.  For
+   * example, if the actual erase sector size is 4Kb (1 << 12), then we first
+   * shift to the right by 3 to get the sector number in 4096 increments.
+   */
+
+  shift    = priv->sectorshift - MX25RXX_SECTOR512_SHIFT;
+  esectno  = sector >> shift;
+  finfo("sector: %ld esectno: %d (%d) shift=%d\n",
+        sector, esectno, priv->esectno, shift);
+
+  /* Check if the requested erase block is already in the cache */
+
+  if (!IS_VALID(priv) || esectno != priv->esectno)
+    {
+      /* No.. Flush any dirty erase block currently in the cache */
+
+      ret = mx25rxx_flush_cache(priv);
+      if (ret < 0)
+        {
+          ferr("ERROR: mx25rxx_flush_cache failed: %d\n", ret);
+          return NULL;
+        }
+
+      /* Read the erase block into the cache */
+
+      ret = mx25rxx_read_byte(priv, priv->sector,
+                             (esectno << priv->sectorshift),
+                             (1 << priv->sectorshift));
+      if (ret < 0)
+        {
+          ferr("ERROR: mx25rxx_read_byte failed: %d\n", ret);
+          return NULL;
+        }
+
+      /* Mark the sector as cached */
+
+      priv->esectno = esectno;
+
+      SET_VALID(priv);          /* The data in the cache is valid */
+      CLR_DIRTY(priv);          /* It should match the FLASH contents */
+      CLR_ERASED(priv);         /* The underlying FLASH has not been erased */
+    }
+
+  /* Get the index to the 512 sector in the erase block that holds the argument */
+
+  index = sector & ((1 << shift) - 1);
+
+  /* Return the address in the cache that holds this sector */
+
+  return &priv->sector[index << MX25RXX_SECTOR512_SHIFT];
+}
+#endif /* CONFIG_MX25RXX_SECTOR512 */
+
+/************************************************************************************
+ * Name: mx25rxx_erase_cache
+ ************************************************************************************/
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+static void mx25rxx_erase_cache(struct mx25rxx_dev_s *priv, off_t sector)
+{
+  FAR uint8_t *dest;
+
+  /* First, make sure that the erase block containing the 512 byte sector is in
+   * the cache.
+   */
+
+  dest = mx25rxx_read_cache(priv, sector);
+
+  /* Erase the block containing this sector if it is not already erased.
+   * The erased indicated will be cleared when the data from the erase sector
+   * is read into the cache and set here when we erase the block.
+   */
+
+  if (!IS_ERASED(priv))
+    {
+      off_t esectno  = sector >> (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);
+      finfo("sector: %ld esectno: %d\n", sector, esectno);
+
+      DEBUGVERIFY(mx25rxx_erase_sector(priv, esectno));
+      SET_ERASED(priv);
+    }
+
+  /* Put the cached sector data into the erase state and mark the cache as dirty
+   * (but don't update the FLASH yet.  The caller will do that at a more optimal
+   * time).
+   */
+
+  memset(dest, MX25RXX_ERASED_STATE, MX25RXX_SECTOR512_SIZE);
+  SET_DIRTY(priv);
+}
+#endif /* CONFIG_MX25RXX_SECTOR512 */
+
+/************************************************************************************
+ * Name: mx25rxx_write_cache
+ ************************************************************************************/
+
+#ifdef CONFIG_MX25RXX_SECTOR512
+static int mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
+                              FAR const uint8_t *buffer, off_t sector,
+                              size_t nsectors)
+{
+  FAR uint8_t *dest;
+  int ret;
+
+  for (; nsectors > 0; nsectors--)
+    {
+      /* First, make sure that the erase block containing 512 byte sector is in
+       * memory.
+       */
+
+      dest = mx25rxx_read_cache(priv, sector);
+
+      /* Erase the block containing this sector if it is not already erased.
+       * The erased indicated will be cleared when the data from the erase sector
+       * is read into the cache and set here when we erase the sector.
+       */
+
+      if (!IS_ERASED(priv))
+        {
+          off_t esectno  = sector >> (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);
+          finfo("sector: %ld esectno: %d\n", sector, esectno);
+
+          ret = mx25rxx_erase_sector(priv, esectno);
+          if (ret < 0)
+            {
+              ferr("ERROR: mx25rxx_erase_sector failed: %d\n", ret);
+              return ret;
+            }
+
+          SET_ERASED(priv);
+        }
+
+      /* Copy the new sector data into cached erase block */
+
+      memcpy(dest, buffer, MX25RXX_SECTOR512_SIZE);
+      SET_DIRTY(priv);
+
+      /* Set up for the next 512 byte sector */
+
+      finfo("address: %08x nbytes: %d 0x%04x\n",
+            sector << MX25RXX_SECTOR512_SHIFT, MX25RXX_SECTOR512_SIZE,
+            *(FAR uint32_t *)buffer);
+      buffer += MX25RXX_SECTOR512_SIZE;
+      sector++;
+    }
+
+  /* Flush the last erase block left in the cache */
+
+  return mx25rxx_flush_cache(priv);
+}
+#endif /* CONFIG_MX25RXX_SECTOR512 */
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
  * Name: mx25rxx_initialize
  *
  * Description:
@@ -716,7 +1036,7 @@ int mx25rxx_readid(struct mx25rxx_dev_s *dev)
  *   instances that can be bound to other functions (such as a block or
  *   character driver front end).
  *
- ******************************************************************************/
+ ************************************************************************************/
 
 FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi, bool unprotect)
 {
@@ -770,6 +1090,19 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
       goto exit_free_cmdbuf;
     }
 
+#ifdef CONFIG_MX25RXX_SECTOR512  /* Simulate a 512 byte sector */
+  /* Allocate a buffer for the erase block cache */
+
+  dev->sector = (FAR uint8_t *)QSPI_ALLOC(qspi, 1 << dev->sectorshift);
+  if (dev->sector == NULL)
+    {
+      /* Allocation failed! Discard all of that work we just did and return NULL */
+
+      ferr("ERROR: Sector allocation failed\n");
+      goto exit_free_cmdbuf;
+    }
+#endif
+
   mx25rxx_lock(dev->qspi, false);
 
   /* Set MTD device in low power mode, with minimum dummy cycles */
@@ -779,11 +1112,12 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
   mx25rxx_read_status(dev);
   status = dev->cmdbuf[0];
   mx25rxx_read_configuration(dev);
-  config = *(uint16_t*)(dev->cmdbuf);
+  config = *(FAR uint16_t *)(dev->cmdbuf);
 
-  /* FIXME avoid compiler warnings in case info logs are disabled */
-  (void)status;
-  (void)config;
+  /* Avoid compiler warnings in case info logs are disabled */
+
+  UNUSED(status);
+  UNUSED(config);
 
   finfo("device ready 0x%02x 0x%04x\n", status, config);
 

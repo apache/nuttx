@@ -628,7 +628,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  February 11, 2019</p>
+      <p>Last Updated:  August 8, 2019</p>
     </td>
   </tr>
 </table>
@@ -1164,8 +1164,8 @@ mount -t vfat /dev/ram1 /tmp
 <p>
   <b>NOTE</b>:
   <code>apps/nshlib/rcS.template</code> generates the standard, default <code>nsh_romfsimg.h</code> file.
-  If <code>CONFIG_NSH_ARCHROMFS</code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
-  NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>configs/&lt;board&gt;/include</code>.
+  If <code>CONFIG_NSH_ARCHROMFS</code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in the <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include</code> directory will be used.
+  NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include</code>.
 </p>
 <p>
   All of the startup-behavior is contained in <code>rcS.template</code>.  The
@@ -4022,7 +4022,7 @@ nsh&gt;
 
 <p>
   The behavior of NSH can be modified with the following settings in
-  the <code>configs/&lt;board-name&gt;/defconfig</code> file:
+  the <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/defconfig</code> file:
 </p>
 
 <center><table width="100%">
@@ -4545,7 +4545,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_ARCHROMFS</code></b></td>
     <td>
-      May be defined to specify an alternative ROMFS image that can be found at <code>configs/&lt;board&gt;/include/nsh_romfsimg.h</code>.
+      May be defined to specify an alternative ROMFS image that can be found at <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include/nsh_romfsimg.h</code>.
     </td>
   </tr>
   <tr>
@@ -4652,7 +4652,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   <li>
     <p>
       If you have C++ static initializers, it will call your implementation of <code>up_cxxinitialize()</code> which will, in turn, call those static initializers.
-      For the case of the STM3240G-EVAL board, the implementation of <code>up_cxxinitialize()</code> can be found at <code>nuttx/configs/stm3240g-eval/src/up_cxxinitialize.c</code>.
+      For the case of the STM3240G-EVAL board, the implementation of <code>up_cxxinitialize()</code> can be found at <code>nuttx/boards/arm/stm32/stm3240g-eval/src/up_cxxinitialize.c</code>.
     </p>
   <li>
     <p>
@@ -4758,7 +4758,7 @@ mount -t vfat /dev/ram1 /tmp
     <p>
       <code>board_app_initialize()</code>:
       Next any architecture-specific NSH initialization will be performed (if any).
-      For the STM3240G-EVAL, this architecture specific initialization can be found at <code>configs/stm3240g-eval/src/stm32_appinit.c</code>.
+      For the STM3240G-EVAL, this architecture specific initialization can be found at <code>boards/arm/stm32/stm3240g-eval/src/stm32_appinit.c</code>.
       This it does things like:  (1) Initialize SPI devices, (2) Initialize SDIO, and (3) mount any SD cards that may be inserted.
     </p>
   <li>
@@ -5156,7 +5156,7 @@ CONFIG_SCHED_WAITPID=y
 <ol>
   <li>
     <p>
-      You can extend the initialization logic in <code>configs/stm3240g-eval/src/stm32_appinit.c</code>.
+      You can extend the initialization logic in <code>boards/arm/stm32/stm3240g-eval/src/stm32_appinit.c</code>.
       The logic there is called each time that NSH is started and is good place in particular for any device-related initialization.
     </p>
   <li>
@@ -5273,13 +5273,13 @@ mount -t vfat /dev/ram1 /tmp
   They might provide useful examples:
 </p>
 <ul>
-  <code>configs/hymini-stm32v/nsh2<br>
-  configs/ntosd-dm320/nsh<br>
-  configs/sim/nsh<br>
-  configs/sim/nsh2<br>
-  configs/sim/nx<br>
-  configs/sim/nx11<br>
-  configs/sim/touchscreen<br>
+  <li><code>boards/arm/stm32/hymini-stm32v/nsh2</code></li>
+  <li><code>boards/arm/dm320/ntosd-dm320/nsh</code></li>
+  <li><code>boards/sim/sim/sim/nsh</code></li>
+  <li><code>boards/sim/sim/sim/nsh2</code></li>
+  <li><code>boards/sim/sim/sim/nx</code></li>
+  <li><code>boards/sim/sim/sim/nx11</code></li>
+  <li><code>boards/sim/sim/sim/touchscreen</code></li>
 </ul>
 <p>
   In most of these cases, the configuration sets up the <i>default</i> <code>/etc/init.d/rcS</code> script.
@@ -5338,7 +5338,7 @@ mount -t vfat /dev/ram1 /tmp
     </p>
     <p>
        To generate a custom <code>rcS</code> file a copy of <code>rcS.template</code> needs to be placed at <code>tools/</code> and changed according to the desired start-up behaviour.
-       Running <code>tools/mkromfsimg.h</code> creates <code>nsh_romfsimg.h</code> which needs to be copied to <code>apps/nshlib</code> OR if <code>CONFIG_NSH_ARCHROMFS</code> is defined to <code>configs/&lt;board&gt;/include</code>.
+       Running <code>tools/mkromfsimg.h</code> creates <code>nsh_romfsimg.h</code> which needs to be copied to <code>apps/nshlib</code> OR if <code>CONFIG_NSH_ARCHROMFS</code> is defined to <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include</code>.
     </p>
 </ol>
 
@@ -5348,8 +5348,8 @@ mount -t vfat /dev/ram1 /tmp
 </p>
 
 <p>
-  If <code>CONFIG_NSH_ARCHROMFS</code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code>will be used.
-  NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>configs/&lt;board&gt;/include</code>.
+  If <code>CONFIG_NSH_ARCHROMFS</code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include</code>will be used.
+  NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>boards/&lt;arch&gt;/&lt;chip&gt;/&lt;board&gt;/include</code>.
 </p>
 
 <p>
@@ -5693,7 +5693,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   </li>
 </ol>
 <p>
-  There is a good example of how to do this in the NSH simulation configuration at <a href="https://bitbucket.org/nuttx/nuttx/configs/src/master/sim/nsh/">configs/sim/nsh</a>.  The ROMFS support files are provided at <a href="https://bitbucket.org/nuttx/nuttx/configs/src/master/sim/include/">configs/sim/include</a> and the <a href="https://bitbucket.org/nuttx/nuttx/configs/src/master/sim/include/README.txt">README.txt</a> file at the location provides detailed information about creating and modifying the ROMFS file system.
+  There is a good example of how to do this in the NSH simulation configuration at <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/sim/sim/sim/configs/nsh/">boards/sim/sim/sim/configs/nsh</a>.  The ROMFS support files are provided at <a href="https://bitbucket.org/nuttx/nuttx/boards/src/master/sim/sim/sim/include/">boards/sim/include</a> and the <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/sim/sim/sim/include/README.txt">README.txt</a> file at the location provides detailed information about creating and modifying the ROMFS file system.
 </p>
 
 <table width ="100%">

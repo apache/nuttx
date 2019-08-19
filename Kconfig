@@ -425,11 +425,11 @@ config ARCH_STDARG_H
 	bool "stdarg.h"
 	default n
 	---help---
-		There is also a redirecting version of stdarg.h in the source tree
-		as well. It also resides out-of-the-way at include/nuttx/lib/stdarg.h.
-		This is because you should normally use your toolchain's stdarg.h
-		file. But sometimes, your toolchain's stdarg.h file may have other
-		header file dependencies and so may not be usable in the NuttX build
+		There is a redirecting version of stdarg.h in the source tree. It
+		resides out-of-the-way at include/nuttx/lib/stdarg.h.  This is
+		because you should normally use your toolchain's stdarg.h file. But
+		sometimes, your toolchain's stdarg.h file may have other header
+		file dependencies and so may not be usable in the NuttX build
 		environment. In those cases, you may have to create a architecture-
 		specific stdarg.h header file at nuttx/arch/<architecture>/include/stdarg.h
 
@@ -439,6 +439,30 @@ config ARCH_STDARG_H
 		toolchain's stdarg.h file, they can use this alternative by defining
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
 		the stdarg.h header file will stay out-of-the-way in include/nuttx/.
+
+config ARCH_HAVE_SETJMP
+	bool
+	default n
+
+config ARCH_SETJMP_H
+	bool "setjmp.h"
+	default n
+	depends on ARCH_HAVE_SETJMP
+	---help---
+		There is a redirecting version of setjmp.h in the source tree. It
+		resides out-of-the-way at include/nuttx/lib/setjmp.h.  This is
+		because you should normally use your toolchain's setjmp.h file. But
+		sometimes, your toolchain's setjmp.h file may have other header
+		file dependencies and so may not be usable in the NuttX build
+		environment. In those cases, you may have to create a architecture-
+		specific setjmp.h header file at nuttx/arch/<architecture>/include/setjmp.h
+
+		If ARCH_SETJMP_H=y is defined, the top-level makefile will copy the
+		re-directing setjmp.h header file from include/nuttx/lib/setjmp.h to
+		include/setjmp.h. So for the architectures that cannot use their
+		toolchain's setjmp.h file, they can use this alternative by defining
+		ARCH_SETJMP_H=y and providing. If ARCH_SETJMP_H, is not defined, then
+		the setjmp.h header file will stay out-of-the-way in include/nuttx/.
 
 config ARCH_DEBUG_H
 	bool "debug.h"
@@ -573,6 +597,41 @@ config DEBUG_BINFMT_INFO
 		Enable binary loader informational output to SYSLOG.
 
 endif # DEBUG_BINFMT
+
+config DEBUG_CONTACTLESS
+	bool "Contactless Debug Features"
+	default n
+	depends on DRIVERS_CONTACTLESS
+	---help---
+		Enable debug features for contactless (aka RFID) subsystem.
+
+if DEBUG_CONTACTLESS
+
+config DEBUG_CONTACTLESS_ERROR
+	bool "Contactless Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable contactless (aka RFID) subsystem error output to
+		SYSLOG.
+
+config DEBUG_CONTACTLESS_WARN
+	bool "Contactless Warnings Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable contactless (aka RFID) subsystem warning output to
+		SYSLOG.
+
+config DEBUG_CONTACTLESS_INFO
+	bool "Contactless Informational Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable contactless (aka RFID) subsystem informational output
+		to SYSLOG.
+
+endif # DEBUG_CONTACTLESS
 
 config DEBUG_CRYPTO
 	bool "Crypto Debug Features"
@@ -1654,7 +1713,7 @@ source "arch/Kconfig"
 endmenu
 
 menu "Board Selection"
-source "configs/Kconfig"
+source "boards/Kconfig"
 endmenu
 
 menu "RTOS Features"

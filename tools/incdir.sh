@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/incdir.sh
 #
 #   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_IMX_SERIAL_H
-#define __ARCH_ARM_SRC_IMXRT_IMX_SERIAL_H
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_SERIAL_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_SERIAL_H
 
 /****************************************************************************
  * Included Files
@@ -90,37 +90,10 @@ extern "C"
 void imxrt_earlyserialinit(void);
 #endif
 
-/****************************************************************************
- * Name: uart_earlyserialinit
- *
- * Description:
- *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
- *
- ****************************************************************************/
-
-#if defined(USE_EARLYSERIALINIT) && defined(IMXRT_HAVE_LPUART)
-void uart_earlyserialinit(void);
-#endif
-
-/****************************************************************************
- * Name: uart_serialinit
- *
- * Description:
- *   Register the UART serial console and serial ports.  This assumes that
- *   uart_earlyserialinit was called previously.
- *
- ****************************************************************************/
-
-#ifdef IMXRT_HAVE_LPUART
-void uart_serialinit(void);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_IMXRT_IMX_SERIAL_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_SERIAL_H */

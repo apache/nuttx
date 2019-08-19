@@ -228,7 +228,7 @@ static inline void nxtask_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
        * child's task group.
        */
 
-      tcb->group->tg_pgid = rtcb->group->tg_gid;
+      tcb->group->tg_pgrpid = rtcb->group->tg_grpid;
 
 #else
       /* Save the parent task's ID in the child task's group. */

@@ -88,12 +88,15 @@
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n) \
-     (iob_copyin((wrb)->wb_iob,src,(n),0,false))
+     (iob_copyin((wrb)->wb_iob,src,(n),0,false,\
+                 IOBUSER_NET_TCP_WRITEBUFFER))
 #  define TCP_WBTRYCOPYIN(wrb,src,n) \
-     (iob_trycopyin((wrb)->wb_iob,src,(n),0,false))
+     (iob_trycopyin((wrb)->wb_iob,src,(n),0,false,\
+                    IOBUSER_NET_TCP_WRITEBUFFER))
 
 #  define TCP_WBTRIM(wrb,n) \
-     do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
+     do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n),\
+                            IOBUSER_NET_TCP_WRITEBUFFER); } while (0)
 
 #ifdef CONFIG_DEBUG_FEATURES
 #  define TCP_WBDUMP(msg,wrb,len,offset) \
@@ -1631,8 +1634,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
  *   > 0   - The signal notification is in place.  The returned value is a
  *           key that may be used later in a call to
  *           tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
+ *   == 0  - No connection has been established.
  *   < 0   - An unexpected error occurred and no signal will be sent.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.

@@ -114,6 +114,11 @@
 #  define MACNET_FRAMELEN IEEE802154_MAX_PHY_PACKET_SIZE
 #endif
 
+#if (CONFIG_MAC802154_NTXDESC < CONFIG_IOB_NBUFFERS)
+#  warning "CONFIG_MAC802154_NTXDESC should probably be equal to" \
+           "CONFIG_IOB_NBUFFERS to avoid waiting on req_data"
+#endif
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define TXPOLL_WDDELAY   (1*CLK_TCK)
@@ -165,6 +170,10 @@ struct macnet_driver_s
   pid_t   md_notify_pid;
   struct sigevent md_notify_event;
   struct sigwork_s md_notify_work;
+
+#ifdef CONFIG_NET_6LOWPAN
+  struct sixlowpan_reassbuf_s md_iobuffer;
+#endif
 };
 
 /****************************************************************************
@@ -173,7 +182,7 @@ struct macnet_driver_s
 
 /* Utility functions ********************************************************/
 
-static int macnet_advertise(FAR struct net_driver_s *dev);
+static int macnet_update_nvaddr(FAR struct net_driver_s *dev);
 static inline void macnet_netmask(FAR struct net_driver_s *dev);
 
 /* IEE802.15.4 MAC callback functions ***************************************/
@@ -231,41 +240,29 @@ static int macnet_properties(FAR struct radio_driver_s *netdev,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_NET_6LOWPAN
-static struct sixlowpan_reassbuf_s g_iobuffer;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: macnet_advertise
+ * Name: macnet_update_nvaddr
  *
  * Description:
  *   Advertise the MAC and IPv6 address for this node.
  *
- *   Creates a MAC-based IP address from the IEEE 802.15.14 short or extended
- *   address assigned to the node.
- *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  ****************************************************************************/
 
-static int macnet_advertise(FAR struct net_driver_s *dev)
+static int macnet_update_nvaddr(FAR struct net_driver_s *dev)
 {
   FAR struct macnet_driver_s *priv;
   union ieee802154_macarg_u arg;
   int ret;
 
-#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  uint8_t *eaddr;
-
   DEBUGASSERT(dev != NULL && dev->d_private != NULL);
   priv = (FAR struct macnet_driver_s *)dev->d_private;
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
 
   /* Get the eaddr from the MAC */
 
@@ -279,45 +276,13 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
     }
   else
     {
-      /* Set the MAC address as the eaddr */
-
-      eaddr = arg.getreq.attrval.mac.eaddr;
-
-      /* Network layers expect address in Network Order (Big Endian) */
-
-      dev->d_mac.radio.nv_addr[0] = eaddr[7];
-      dev->d_mac.radio.nv_addr[1] = eaddr[6];
-      dev->d_mac.radio.nv_addr[2] = eaddr[5];
-      dev->d_mac.radio.nv_addr[3] = eaddr[4];
-      dev->d_mac.radio.nv_addr[4] = eaddr[3];
-      dev->d_mac.radio.nv_addr[5] = eaddr[2];
-      dev->d_mac.radio.nv_addr[6] = eaddr[1];
-      dev->d_mac.radio.nv_addr[7] = eaddr[0];
-
+      IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, arg.getreq.attrval.mac.eaddr);
       dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
-
-      /* Set the IP address based on the eaddr */
-
-      dev->d_ipv6addr[0]  = HTONS(0xfe80);
-      dev->d_ipv6addr[1]  = 0;
-      dev->d_ipv6addr[2]  = 0;
-      dev->d_ipv6addr[3]  = 0;
-      dev->d_ipv6addr[4]  = HTONS((uint16_t)eaddr[7] << 8 | (uint16_t)eaddr[6]);
-      dev->d_ipv6addr[5]  = HTONS((uint16_t)eaddr[5] << 8 | (uint16_t)eaddr[4]);
-      dev->d_ipv6addr[6]  = HTONS((uint16_t)eaddr[3] << 8 | (uint16_t)eaddr[2]);
-      dev->d_ipv6addr[7]  = HTONS((uint16_t)eaddr[1] << 8 | (uint16_t)eaddr[0]);
-
-      /* Invert the U/L bit */
-
-      dev->d_ipv6addr[4] ^= HTONS(0x0200);
       return OK;
     }
 
 #else
   uint8_t *saddr;
-
-  DEBUGASSERT(dev != NULL && dev->d_private != NULL);
-  priv = (FAR struct macnet_driver_s *)dev->d_private;
 
   /* Get the saddr from the MAC */
 
@@ -341,17 +306,6 @@ static int macnet_advertise(FAR struct net_driver_s *dev)
       dev->d_mac.radio.nv_addr[1] = saddr[0];
 
       dev->d_mac.radio.nv_addrlen = IEEE802154_SADDRSIZE;
-
-      /* Set the IP address based on the saddr */
-
-      dev->d_ipv6addr[0]  = HTONS(0xfe80);
-      dev->d_ipv6addr[1]  = 0;
-      dev->d_ipv6addr[2]  = 0;
-      dev->d_ipv6addr[3]  = 0;
-      dev->d_ipv6addr[4]  = 0;
-      dev->d_ipv6addr[5]  = HTONS(0x00ff);
-      dev->d_ipv6addr[6]  = HTONS(0xfe00);
-      dev->d_ipv6addr[7]  = HTONS((uint16_t)saddr[1] << 8 |  (uint16_t)saddr[0]);
       return OK;
     }
 #endif
@@ -525,7 +479,7 @@ static int macnet_rxframe(FAR struct macnet_driver_s *priv,
         {
           /* Make sure the our single packet buffer is attached */
 
-          priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+          priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 
           /* And give the packet to 6LoWPAN */
 
@@ -620,7 +574,7 @@ static void macnet_txpoll_work(FAR void *arg)
 #ifdef CONFIG_NET_6LOWPAN
   /* Make sure the our single packet buffer is attached */
 
-  priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+  priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 #endif
 
   /* Then perform the poll */
@@ -739,8 +693,13 @@ static int macnet_coord_saddr(FAR struct radio_driver_s *radio,
  * Name: macnet_ifup
  *
  * Description:
- *   NuttX Callback: Bring up the IEEE 802.15.4 interface when an IP address
- *   is provided
+ *   Creates a MAC-based IP address from the IEEE 802.15.14 short or extended
+ *   address assigned to the node.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
  *
  * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
@@ -758,11 +717,35 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
     (FAR struct macnet_driver_s *)dev->d_private;
   int ret;
 
-  /* Set the IP address based on the addressing assigned to the node */
-
-  ret = macnet_advertise(dev);
-  if (ret >= 0)
+  ret = macnet_update_nvaddr(dev);
+  if (ret == OK)
     {
+      uint8_t *nvaddr = dev->d_mac.radio.nv_addr;
+
+      /* Set the IP address based on the addressing assigned to the node */
+
+      dev->d_ipv6addr[0]  = HTONS(CONFIG_IEEE802154_NETDEV_DEFAULT_PREFIX_0);
+      dev->d_ipv6addr[1]  = HTONS(CONFIG_IEEE802154_NETDEV_DEFAULT_PREFIX_1);
+      dev->d_ipv6addr[2]  = HTONS(CONFIG_IEEE802154_NETDEV_DEFAULT_PREFIX_2);
+      dev->d_ipv6addr[3]  = HTONS(CONFIG_IEEE802154_NETDEV_DEFAULT_PREFIX_3);
+
+#ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
+      dev->d_ipv6addr[4]  = HTONS((uint16_t)nvaddr[0] << 8 | (uint16_t)nvaddr[1]);
+      dev->d_ipv6addr[5]  = HTONS((uint16_t)nvaddr[2] << 8 | (uint16_t)nvaddr[3]);
+      dev->d_ipv6addr[6]  = HTONS((uint16_t)nvaddr[4] << 8 | (uint16_t)nvaddr[5]);
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[6] << 8 | (uint16_t)nvaddr[7]);
+
+      /* Invert the U/L bit */
+
+      dev->d_ipv6addr[4] ^= HTONS(0x0200);
+#else
+
+      dev->d_ipv6addr[4]  = 0;
+      dev->d_ipv6addr[5]  = HTONS(0x00ff);
+      dev->d_ipv6addr[6]  = HTONS(0xfe00);
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)nvaddr[0] << 8 |  (uint16_t)nvaddr[1]);
+#endif
+
       wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
              dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
              dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
@@ -784,12 +767,12 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
       (void)wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry,
                      1, (wdparm_t)priv);
 
-      /* The interface is now up */
-
-      priv->md_bifup = true;
       ret = OK;
     }
 
+  /* The interface is now up */
+
+  priv->md_bifup = true;
   return ret;
 }
 
@@ -872,7 +855,7 @@ static void macnet_txavail_work(FAR void *arg)
 #ifdef CONFIG_NET_6LOWPAN
       /* Make sure the our single packet buffer is attached */
 
-      priv->md_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+      priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
 #endif
 
       /* Then poll the network for new XMIT data */
@@ -1231,13 +1214,13 @@ static int macnet_req_data(FAR struct radio_driver_s *netdev,
         {
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
 
-          iob_free(iob);
+          iob_free(iob, IOBUSER_WIRELESS_MAC802154_NETDEV);
           for (iob = framelist; iob != NULL; iob = framelist)
             {
               /* Remove the IOB from the queue and free */
 
               framelist = iob->io_flink;
-              iob_free(iob);
+              iob_free(iob, IOBUSER_WIRELESS_MAC802154_NETDEV);
             }
 
           NETDEV_TXERRORS(&priv->md_dev.r_dev);
@@ -1426,25 +1409,43 @@ int mac802154netdev_register(MACHANDLE mac)
   if (ret < 0)
     {
       nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
-
-      /* Release wdog timers */
-
-      wd_delete(priv->md_txpoll);
-
-      /* Free memory and return the error */
-
-      kmm_free(priv);
-      return ret;
+      goto errout;
     }
 
-  /* Put the interface in the down state. */
+  ret = macnet_update_nvaddr(&priv->md_dev.r_dev);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed updating nvaddr: %d\n", ret);
+      goto errout;
+    }
 
-  macnet_ifdown(dev);
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached. We must do this before
+   * registering the device since, once the device is registered, a packet may
+   * be attempted to be forwarded and require the buffer.
+   */
+
+  priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
+#endif
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   (void)netdev_register(&priv->md_dev.r_dev, NET_LL_IEEE802154);
-  return OK;
+
+  /* Put the network in the DOWN state, let the user decide when to bring it up */
+
+  dev->d_flags = IFF_DOWN;
+  return macnet_ifdown(&priv->md_dev.r_dev);
+
+errout:
+  /* Release wdog timers */
+
+  wd_delete(priv->md_txpoll);
+
+  /* Free memory and return the error */
+
+  kmm_free(priv);
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_skeleton */

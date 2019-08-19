@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # tools/mknulldeps.sh
 #
 #   Copyright (C) 2008 Gregory Nutt. All rights reserved.

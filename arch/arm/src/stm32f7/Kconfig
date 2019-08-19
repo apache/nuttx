@@ -1734,7 +1734,7 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on STM32F7_USART1 && STM32F7_DMA1
+	depends on STM32F7_USART1 && STM32F7_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -1935,7 +1935,7 @@ config STM32F7_SERIAL_DISABLE_REORDERING
 		can, however, have the side-effect that all port mappings
 		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
 		UART. This is in particular relevant if a project uses the USB console
-		in some configs and a serial console in other configs, but does not
+		in some boards and a serial console in other boards, but does not
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 
@@ -2368,10 +2368,12 @@ config STM32F7_BBSRAM
 config STM32F7_BBSRAM_FILES
 	int "Max Files to support in BBSRAM"
 	default 4
+	depends on STM32F7_BBSRAM
 
 config STM32F7_SAVE_CRASHDUMP
 	bool "Enable Saving Panic to BBSRAM"
 	default n
+	depends on STM32F7_BBSRAM
 
 endif # STM32F7_BKPSRAM
 

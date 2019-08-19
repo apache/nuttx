@@ -149,7 +149,7 @@ static int pipe_close(FAR struct file *filep)
   /* Perform common close operations */
 
   ret = pipecommon_close(filep);
-  if (ret == 0 && dev->d_refs == 0)
+  if (ret == 0 && inode->i_crefs == 1)
     {
       /* Release the pipe when there are no further open references to it. */
 

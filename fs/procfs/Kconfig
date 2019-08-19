@@ -96,6 +96,11 @@ config FS_PROCFS_INCLUDE_PROGMEM
 	default n
 	depends on ARCH_HAVE_PROGMEM && !FS_PROCFS_EXCLUDE_MEMINFO
 
+config FS_PROCFS_EXCLUDE_IOBINFO
+	bool "Exclude iobinfo"
+	depends on MM_IOB
+	default n
+
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
 	default n

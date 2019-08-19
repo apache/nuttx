@@ -1,5 +1,5 @@
 ############################################################################
-# configs/lpc4330-xplorer/src/Makefile
+# arch/arm/src/lpc43xx/spfi/src/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

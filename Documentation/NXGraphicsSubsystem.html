@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: May 16, 2019</p>
+      <p>Last Updated:  August 8, 2019</p>
     </td>
   </tr>
 </table>
@@ -960,7 +960,7 @@ struct nx_callback_s
   <li>
     <p>
       The NX server may be started in your board startup logic by simply calling the function <code> nxmu_start()</code>.
-      The board startup logic usually resides the the <code>configs/<i>board</i>/src</code> directory.
+      The board startup logic usually resides the the <code>boards/<i>arch</i>/<i>chip</i>/<i>board</i>/src</code> directory.
       The board startup logic can run automatically during the early system if <code>CONFIG_BOARD_LATE_INITIALIZE</code> is defined in the configuration.
       Or, the board startup logic can execute under control of the application by calling the <code>boardctl(BOARDIOC_INIT, arg)</code> OS interface.
     </p>
@@ -4203,28 +4203,26 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 <p><b>Building <code>apps/examples/nx</code></b>.
   NX testing was performed using <code>apps/examples/nx</code> with the
   Linux/Cygwin-based NuttX simulator.
-  Configuration files for building this test can be found in <code>configs/sim/nx</code>
-  and <code>configs/sim/nx11</code>.
+  Configuration files for building this test can be found in <code>boards/sim/sim/sim/configs/nx</code>
+  and <code>boards/sim/sim/sim/configs/nx11</code>.
   There are two alternative configurations for building the simulation:
 </p>
 <ol>
   <li>
-    The configuration using the configuration file at <code>configs/sim/nx/defconfig</code>.
+    The configuration using the configuration file at <code>boards/sim/sim/sim/configs/nx/defconfig</code>.
     This default configuration exercises the NX logic a 8 BPP but provides no visual feedback.
     In this configuration, a very simple, simulated framebuffer driver is used that is
     based upon a simple region of memory posing as video memory.
     That default configuration can be built as follows:
 <ul><pre>
-cd &lt;NuttX-Directory&gt;/tools
-./configure sim/nx
-cd  &lt;NuttX-Directory&gt;
+tools/configure.sh sim:nx
 make
 ./nuttx
 </pre></ul>
   </li>
   <li>
     <p>
-      The preferred configuration is at <code>configs/sim/nx11/defconfig</code>.
+      The preferred configuration is at <code>boards/sim/sim/sim/configs/nx11/defconfig</code>.
       This configuration extends the test with a simulated framebuffer driver
       that uses an X window as a framebuffer.
       This is a superior test configuration because the X window appears at your desktop
@@ -4232,9 +4230,7 @@ make
       This preferred configuration can be built as follows:
     </p>
 <ul><pre>
-cd &lt;NuttX-Directory&gt;/tools
-./configure sim/nx11
-cd  &lt;NuttX-Directory&gt;
+tools/configure sim:nx11
 make
 ./nuttx
 </pre></ul>
@@ -4270,7 +4266,7 @@ sudo ln -s libXext.so.6.4.0 libXext.so
         </li>
         <li><p>
           Refer to the readme file in sim configuration
-          <a href="https://bitbucket.org/nuttx/nuttx/configs/src/master/sim/README.txt" target="_blank">README.txt</a> file for additional information.
+          <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/sim/sim/sim/README.txt" target="_blank">README.txt</a> file for additional information.
         </p></li>
       </ul>
     </p>

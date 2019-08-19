@@ -135,7 +135,7 @@ config ARCH_HAVEHEAD
 	default n
 	---help---
 		Use a board-specific version of the "head" file in the
-		configs/<board-name>/src directory
+		boards/z80/z180/<board>/src directory
 
 menu "Z180 Peripheral Support"
 

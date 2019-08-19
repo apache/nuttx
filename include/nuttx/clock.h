@@ -270,9 +270,41 @@ EXTERN volatile clock_t g_system_timer;
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name:  clock_timespec_add
+ *
+ * Description:
+ *   Add timespec ts1 to to2 and return the result in ts3
+ *
+ * Input Parameters:
+ *   ts1 and ts2: The two timespecs to be added
+ *   t23: The location to return the result (may be ts1 or ts2)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void clock_timespec_add(FAR const struct timespec *ts1,
                         FAR const struct timespec *ts2,
                         FAR struct timespec *ts3);
+
+/****************************************************************************
+ * Name:  clock_timespec_subtract
+ *
+ * Description:
+ *   Subtract timespec ts2 from to1 and return the result in ts3.
+ *   Zero is returned if the time difference is negative.
+ *
+ * Input Parameters:
+ *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
+ *   t23: The location to return the result (may be ts1 or ts2)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void clock_timespec_subtract(FAR const struct timespec *ts1,
                              FAR const struct timespec *ts2,
                              FAR struct timespec *ts3);

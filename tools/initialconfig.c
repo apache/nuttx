@@ -74,7 +74,7 @@ static char        g_delim       = '/';       /* Delimiter to use when forming p
 #endif
 
 static const char  g_archdir[]   = "arch";    /* Architecture directory */
-static const char  g_configdir[] = "configs"; /* Board configuration directory */
+static const char  g_configdir[] = "boards";  /* Board configuration directory */
 
 static char       *g_arch[MAX_ARCHITECTURES]; /* List of architecture names */
 static int         g_narch;                   /* Number of architecture names */

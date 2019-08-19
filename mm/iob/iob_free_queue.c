@@ -67,7 +67,8 @@
  *
  ****************************************************************************/
 
-void iob_free_queue(FAR struct iob_queue_s *qhead)
+void iob_free_queue(FAR struct iob_queue_s *qhead,
+                    enum iob_user_e producerid)
 {
   FAR struct iob_qentry_s *iobq;
   FAR struct iob_qentry_s *nextq;
@@ -99,7 +100,7 @@ void iob_free_queue(FAR struct iob_queue_s *qhead)
 
       /* Free the I/O chain */
 
-      iob_free_chain(iob);
+      iob_free_chain(iob, producerid);
     }
 }
 

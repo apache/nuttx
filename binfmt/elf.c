@@ -112,58 +112,58 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
 {
   int i;
 
-  berr("LOAD_INFO:\n");
-  berr("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
-  berr("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
-  berr("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  berr("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  berr("  filelen:      %ld\n",   (long)loadinfo->filelen);
+  binfo("LOAD_INFO:\n");
+  binfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  binfo("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
+  binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-  berr("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
-  berr("  ctors:        %08lx\n", (long)loadinfo->ctors);
-  berr("  nctors:       %d\n",    loadinfo->nctors);
-  berr("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
-  berr("  dtors:        %08lx\n", (long)loadinfo->dtors);
-  berr("  ndtors:       %d\n",    loadinfo->ndtors);
+  binfo("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
+  binfo("  ctors:        %08lx\n", (long)loadinfo->ctors);
+  binfo("  nctors:       %d\n",    loadinfo->nctors);
+  binfo("  dtoralloc:    %08lx\n", (long)loadinfo->dtoralloc);
+  binfo("  dtors:        %08lx\n", (long)loadinfo->dtors);
+  binfo("  ndtors:       %d\n",    loadinfo->ndtors);
 #endif
-  berr("  filfd:        %d\n",    loadinfo->filfd);
-  berr("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  berr("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  binfo("  filfd:        %d\n",    loadinfo->filfd);
+  binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
+  binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
 
-  berr("ELF Header:\n");
-  berr("  e_ident:      %02x %02x %02x %02x\n",
+  binfo("ELF Header:\n");
+  binfo("  e_ident:      %02x %02x %02x %02x\n",
     loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
     loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  berr("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  berr("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  berr("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
-  berr("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  berr("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  berr("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  berr("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
-  berr("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  berr("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  berr("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  berr("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  berr("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  berr("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
+  binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
+  binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
+  binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
+  binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  binfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
+  binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
+  binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
+  binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
+  binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
+  binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
+  binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
           FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
-          berr("Sections %d:\n", i);
-          berr("  sh_name:      %08x\n", shdr->sh_name);
-          berr("  sh_type:      %08x\n", shdr->sh_type);
-          berr("  sh_flags:     %08x\n", shdr->sh_flags);
-          berr("  sh_addr:      %08x\n", shdr->sh_addr);
-          berr("  sh_offset:    %d\n",   shdr->sh_offset);
-          berr("  sh_size:      %d\n",   shdr->sh_size);
-          berr("  sh_link:      %d\n",   shdr->sh_link);
-          berr("  sh_info:      %d\n",   shdr->sh_info);
-          berr("  sh_addralign: %d\n",   shdr->sh_addralign);
-          berr("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          binfo("Sections %d:\n", i);
+          binfo("  sh_name:      %08x\n", shdr->sh_name);
+          binfo("  sh_type:      %08x\n", shdr->sh_type);
+          binfo("  sh_flags:     %08x\n", shdr->sh_flags);
+          binfo("  sh_addr:      %08x\n", shdr->sh_addr);
+          binfo("  sh_offset:    %d\n",   shdr->sh_offset);
+          binfo("  sh_size:      %d\n",   shdr->sh_size);
+          binfo("  sh_link:      %d\n",   shdr->sh_link);
+          binfo("  sh_info:      %d\n",   shdr->sh_info);
+          binfo("  sh_addralign: %d\n",   shdr->sh_addralign);
+          binfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
         }
     }
 }

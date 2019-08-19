@@ -84,7 +84,7 @@ CSRCS += usbhost_trace.c
 endif
 endif
 
-# Include add-on USB host driver logic if present and selected (availabel in
+# Include add-on USB host driver logic if present and selected (available in
 # the NuttX drivers GIT repository)
 
 ifeq ($(CONFIG_USBHOST_RTL8187),y)

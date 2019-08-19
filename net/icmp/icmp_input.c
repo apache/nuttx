@@ -112,7 +112,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
    * packet.
    */
 
-  iob = iob_tryalloc(true);
+  iob = iob_tryalloc(true, IOBUSER_NET_SOCK_ICMP);
   if (iob == NULL)
     {
       nerr("ERROR: Failed to create new I/O buffer chain\n");
@@ -135,7 +135,8 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
    */
 
   addrsize = sizeof(struct sockaddr_in);
-  ret      = iob_trycopyin(iob, &addrsize, sizeof(uint8_t), 0, true);
+  ret      = iob_trycopyin(iob, &addrsize, sizeof(uint8_t), 0, true,
+                           IOBUSER_NET_SOCK_ICMP);
   if (ret < 0)
     {
       /* On a failure, iob_trycopyin return a negated error value but does
@@ -149,7 +150,8 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   offset = sizeof(uint8_t);
 
   ret = iob_trycopyin(iob, (FAR const uint8_t *)&inaddr,
-                      sizeof(struct sockaddr_in), offset, true);
+                      sizeof(struct sockaddr_in), offset, true,
+                      IOBUSER_NET_SOCK_ICMP);
   if (ret < 0)
     {
       /* On a failure, iob_trycopyin return a negated error value but does
@@ -165,7 +167,8 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   /* Copy the new ICMP reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPSIZE;
-  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF, buflen, offset, true);
+  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF, buflen, offset, true,
+                      IOBUSER_NET_SOCK_ICMP);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -192,7 +195,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   return buflen;
 
 drop_with_chain:
-  (void)iob_free_chain(iob);
+  (void)iob_free_chain(iob, IOBUSER_NET_SOCK_ICMP);
 
 drop:
   dev->d_len = 0;

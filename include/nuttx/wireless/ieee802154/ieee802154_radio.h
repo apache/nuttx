@@ -118,6 +118,8 @@ struct ieee802154_radiocb_s
              FAR struct ieee802154_data_ind_s *ind);
   CODE void (*sfevent) (FAR const struct ieee802154_radiocb_s *radiocb,
              enum ieee802154_sfevent_e sfevent);
+  CODE void (*edresult) (FAR const struct ieee802154_radiocb_s *radiocb,
+             uint8_t edval);
 };
 
 struct ieee802154_radio_s
@@ -136,6 +138,8 @@ struct ieee802154_radio_s
              FAR struct ieee802154_txdesc_s *txdesc,
              uint32_t symboldelay);
   CODE int (*rxenable) (FAR struct ieee802154_radio_s *radio, bool enable);
+  CODE int (*energydetect) (FAR struct ieee802154_radio_s *radio,
+                            uint32_t symboldelay);
   CODE int (*beaconstart)(FAR struct ieee802154_radio_s *radio,
              FAR const struct ieee802154_superframespec_s *sfspec,
              FAR struct ieee802154_beaconframe_s *beacon);

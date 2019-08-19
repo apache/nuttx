@@ -290,7 +290,7 @@ static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev, FAR void *conn,
 
       if (fwd->f_iob != NULL)
         {
-          iob_free_chain(fwd->f_iob);
+          iob_free_chain(fwd->f_iob, IOBUSER_NET_IPFORWARD);
         }
 
       /* And release the forwarding state structure */

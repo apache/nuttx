@@ -50,7 +50,7 @@
 
 /* Register Offsets *********************************************************************************/
 
-// TODO: Complete comments
+/* TODO: Complete comments */
 
 #define STM32_RCC_CR_OFFSET             0x0000  /* Clock control register */
 #define STM32_RCC_ICSCR_OFFSET          0x0004  /* */
@@ -494,7 +494,6 @@
 #define RCC_PLL3FRACR_FRACN3_MASK       (0x1FFFul << RCC_PLL3FRACR_FRACN3_SHIFT) /* 0x0000FFF8 */
 #define RCC_PLL3FRACR_FRACN3             RCC_PLL3FRACR_FRACN3_MASK
 
-
 /* Bit definitions for RCC_D1CCIPR reigster */
 
 #define RCC_D1CCIPR_FMCSEL_SHIFT        (0) /* Bits 0-1: */
@@ -504,20 +503,20 @@
 #  define RCC_D1CCIPR_FMCSEL_PLL2       (2 << RCC_D1CCIPR_FMCSEL_SHIFT) /* 10: */
 #  define RCC_D1CCIPR_FMCSEL_PER        (3 << RCC_D1CCIPR_FMCSEL_SHIFT) /* 11: */
                                             /* Bits 2-3: Reserved */
-#define RCC_D1CCIPR_QSPISEL_SHIFT       (0) /* Bits 4-5: */
+#define RCC_D1CCIPR_QSPISEL_SHIFT       (4) /* Bits 4-5: */
 #define RCC_D1CCIPR_QSPISEL_MASK        (3 << RCC_D1CCIPR_QSPISEL_SHIFT)
 #  define RCC_D1CCIPR_QSPISEL_HCLK      (0 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 00: */
 #  define RCC_D1CCIPR_QSPISEL_PLL1      (1 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 01: */
 #  define RCC_D1CCIPR_QSPISEL_PLL2      (2 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 10: */
 #  define RCC_D1CCIPR_QSPISEL_PER       (3 << RCC_D1CCIPR_QSPISEL_SHIFT) /* 11: */
                                             /* Bits 6-15: Reserved */
-#define RCC_D1CCIPR_SDMMC_SHIFT         (16) /* Bit 15: */
+#define RCC_D1CCIPR_SDMMC_SHIFT         (16) /* Bit 16: */
 #define RCC_D1CCIPR_SDMMC_MASK          (1 << RCC_D1CCIPR_SDMMC_SHIFT)
 #  define RCC_D1CCIPR_SDMMC_PLL1        (0 << RCC_D1CCIPR_SDMMC_SHIFT) /* 0: */
 #  define RCC_D1CCIPR_SDMMC_PLL2        (1 << RCC_D1CCIPR_SDMMC_SHIFT) /* 1: */
                                             /* Bits 17-27: Reserved */
                                             /* Bits 17-27: Reserved */
-#define RCC_D1CCIPR_CKPERSEL_SHIFT      (0) /* Bits 28-29: */
+#define RCC_D1CCIPR_CKPERSEL_SHIFT      (28) /* Bits 28-29: */
 #define RCC_D1CCIPR_CKPERSEL_MASK       (3 << RCC_D1CCIPR_CKPERSEL_SHIFT)
 #  define RCC_D1CCIPR_CKPERSEL_HSI      (0 << RCC_D1CCIPR_CKPERSEL_SHIFT) /* 00: */
 #  define RCC_D1CCIPR_CKPERSEL_CSI      (1 << RCC_D1CCIPR_CKPERSEL_SHIFT) /* 01: */
@@ -583,28 +582,23 @@
 #  define RCC_D2CCIP1R_SWPSEL_PCLK      (0 << RCC_D2CCIP1R_SWPSEL_SHIFT) /* 0 */
 #  define RCC_D2CCIP1R_SWPSEL_HSI       (1 << RCC_D2CCIP1R_SWPSEL_SHIFT) /* 1 */
 
-/* Bit definitions for RCC_D2CCIP2R reigster */
+/* Bit definitions for RCC_D2CCIP2R register */
 
 #define RCC_D2CCIP2R_USART234578SEL_SHIFT  (0) /* Bits 0-2 */
 #  define RCC_D2CCIP2R_USART234578SEL_MASK (7 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
 #define RCC_D2CCIP2R_USART16SEL_SHIFT      (3) /* Bits 3-5 */
 #  define RCC_D2CCIP2R_USART16SEL_MASK     (7 << RCC_D2CCIP2R_USART16SEL_SHIFT)
-#define RCC_D2CCIP2R_RNGSEL_SHIFT          (3) /* Bits 8-9 */
+                                               /* Bits 6-7: Reserved */
+#define RCC_D2CCIP2R_RNGSEL_SHIFT          (8) /* Bits 8-9 */
 #  define RCC_D2CCIP2R_RNGSEL_MASK         (3 << RCC_D2CCIP2R_RNGSEL_SHIFT)
+                                               /* Bits 10-11: Reserved */
 #define RCC_D2CCIP2R_I2C123SEL_SHIFT       (12) /* Bits 12-13 */
 #define RCC_D2CCIP2R_I2C123SEL_MASK        (3 << RCC_D2CCIP2R_I2C123SEL_SHIFT)
 #   define RCC_D2CCIP2R_I2C123SEL_PCLK1    (0 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 00 */
 #   define RCC_D2CCIP2R_I2C123SEL_PLL3     (1 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 01 */
 #   define RCC_D2CCIP2R_I2C123SEL_HSI      (2 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 10 */
 #   define RCC_D2CCIP2R_I2C123SEL_CSI      (3 << RCC_D2CCIP2R_I2C123SEL_SHIFT) /* 11 */
-
-#define RCC_D2CCIP2R_I2C4SEL_SHIFT         (8) /* Bits 8-9 */
-#define RCC_D2CCIP2R_I2C4SEL_MASK          (3 << RCC_D2CCIP2R_I2C4SEL_SHIFT)
-#   define RCC_D2CCIP2R_I2C4SEL_PCLK1      (0 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 00 */
-#   define RCC_D2CCIP2R_I2C4SEL_PLL3       (1 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 01 */
-#   define RCC_D2CCIP2R_I2C4SEL_HSI        (2 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 10 */
-#   define RCC_D2CCIP2R_I2C4SEL_CSI        (3 << RCC_D2CCIP2R_I2C4SEL_SHIFT) /* 11 */
-
+                                               /* Bits 14-19: Reserved */
 #define RCC_D2CCIP2R_USBSEL_SHIFT          (20) /* Bits 20-21 */
 #  define RCC_D2CCIP2R_USBSEL_MASK         (3 << RCC_D2CCIP2R_USBSEL_SHIFT)
 #  define RCC_D2CCIP2R_USBSEL_DISABLE      (0 << RCC_D2CCIP2R_USBSEL_SHIFT)
@@ -613,10 +607,12 @@
 #  define RCC_D2CCIP2R_USBSEL_HSI48        (3 << RCC_D2CCIP2R_USBSEL_SHIFT)
 #define RCC_D2CCIP2R_CECSEL_SHIFT          (22) /* Bits 22-23 */
 #  define RCC_D2CCIP2R_CECSEL_MASK         (3 << RCC_D2CCIP2R_CECSEL_SHIFT)
+                                               /* Bits 24-27: Reserved */
 #define RCC_D2CCIP2R_LPTIM1SEL_SHIFT       (28) /* Bits 28-30 */
 #  define RCC_D2CCIP2R_LPTIM1SEL_MASK      (3 << RCC_D2CCIP2R_LPTIM1SEL_SHIFT)
+                                               /* Bit 31: Reserved */
 
-/* TODO: Bit definitions for RCC_D3CCIPR reigster */
+/* Bit definitions for RCC_D3CCIPR register */
 
 #define RCC_D3CCIPR_LPUART1SEL_SHIFT     (0)  /* Bits 0-2: LPUART1 kernel clock source selection */
 #define RCC_D3CCIPR_LPUART1SEL_MASK      (7 << RCC_D3CCIPR_LPUART1SEL_SHIFT)
@@ -779,8 +775,8 @@
 #define RCC_APB1LRSTR_HDMICECRST        (1 << 27)   /* RCC APB1LRSTR: HDMICECRST */
                                                     /* Bit 28: Reserved */
 #define RCC_APB1LRSTR_DAC1RST           (1 << 29)   /* RCC APB1LRSTR: DAC1RST */
-#define RCC_APB1LRSTR_USART7RST         (1 << 30)   /* RCC APB1LRSTR: USART7RST */
-#define RCC_APB1LRSTR_USART8RST         (1 << 31)   /* RCC APB1LRSTR: USART8RST */
+#define RCC_APB1LRSTR_UART7RST          (1 << 30)   /* RCC APB1LRSTR: UART7RST */
+#define RCC_APB1LRSTR_UART8RST          (1 << 31)   /* RCC APB1LRSTR: UART8RST */
 
 /* APB1 H peripheral reset register */
 
@@ -916,8 +912,8 @@
 #define RCC_APB1LENR_HDMICECEN          (1 << 27) /* RCC APB1LENR: HDMICECEN */
                                                   /* Bit 28: Reserved */
 #define RCC_APB1LENR_DAC1EN             (1 << 29) /* RCC APB1LENR: DAC1EN */
-#define RCC_APB1LENR_UART7EN            (1 << 30) /* RCC APB1LENR: USART7EN */
-#define RCC_APB1LENR_UART8EN            (1 << 31) /* RCC APB1LENR: USART8EN */
+#define RCC_APB1LENR_UART7EN            (1 << 30) /* RCC APB1LENR: UART7EN */
+#define RCC_APB1LENR_UART8EN            (1 << 31) /* RCC APB1LENR: UART8EN */
 
 /* APB1 H Peripheral Clock enable register */
 
@@ -1004,7 +1000,6 @@
 #define RCC_AHB1LPENR_OTGHSULPILPEN     (1 << 26)      /* RCC AHB1LPENR: OTGHSULPILPEN */
 #define RCC_AHB1LPENR_OTGFSLPEN         (1 << 27)      /* RCC AHB1LPENR: OTGFSLPEN */
 
-
 /* AHB2 low power mode peripheral clock enable register */
 
 #define RCC_AHB2LPENR_CAMITFLPEN        (1 << 0)       /* RCC AHB2LPENR: CAMITFLPEN */
@@ -1016,7 +1011,7 @@
 #define RCC_AHB2LPENR_SRAM2LPEN         (1 << 30)      /* RCC AHB2LPENR: SRAM2LPEN */
 #define RCC_AHB2LPENR_SRAM3LPEN         (1 << 31)      /* RCC AHB2LPENR: SRAM3LPEN */
 
-/* AHB4 low power mode peripheral clock enable register*/
+/* AHB4 low power mode peripheral clock enable register */
 
 #define RCC_AHB4LPENR_GPIOALPEN         (1 << 0)       /* RCC AHB4LPENR: GPIOALPEN */
 #define RCC_AHB4LPENR_GPIOBLPEN         (1 << 1)       /* RCC AHB4LPENR: GPIOBLPEN */
@@ -1064,9 +1059,8 @@
 #define RCC_APB1LLPENR_I2C3LPEN         (1 << 23)      /* RCC APB1LLPENR: I2C3LPEN */
 #define RCC_APB1LLPENR_HDMICECLPEN      (1 << 27)      /* RCC APB1LLPENR: HDMICECLPEN */
 #define RCC_APB1LLPENR_DAC1LPEN         (1 << 29)      /* RCC APB1LLPENR: DAC1LPEN */
-#define RCC_APB1LLPENR_USART7LPEN       (1 << 30)      /* RCC APB1LLPENR: USART7LPEN */
-#define RCC_APB1LLPENR_USART8LPEN       (1 << 31)      /* RCC APB1LLPENR: USART8LPEN */
-
+#define RCC_APB1LLPENR_UART7LPEN        (1 << 30)      /* RCC APB1LLPENR: UART7LPEN */
+#define RCC_APB1LLPENR_UART8LPEN        (1 << 31)      /* RCC APB1LLPENR: UART8LPEN */
 
 /* APB1 H low power mode peripheral clock enable register */
 
@@ -1114,13 +1108,24 @@
 #define RCC_BDCR_LSEON                  (1 << 0)  /* Bit 0: External Low Speed oscillator enable */
 #define RCC_BDCR_LSERDY                 (1 << 1)  /* Bit 1: External Low Speed oscillator Ready */
 #define RCC_BDCR_LSEBYP                 (1 << 2)  /* Bit 2: External Low Speed oscillator Bypass */
+#define RCC_BDCR_LSEDRV_SHIFT           (3)       /* Bits 4:3: LSE oscillator Drive selection */
+#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT)
+#  define RCC_BDCR_LSEDRV_LOW           (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability */
+#  define RCC_BDCR_LSEDRV_HIGH          (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: High driving capability */
+#define RCC_BDCR_LSECSSON               (1 << 5)  /* Bit 5: LSE clock security system enable */
+#define RCC_BDCR_LSECSSD                (1 << 6)  /* Bit 6: LSE clock security system failure detection */
+                                                  /* Bit 7: Reserved */
 #define RCC_BDCR_RTCSEL_SHIFT           (8)       /* Bits 9:8: RTC clock source selection */
 #define RCC_BDCR_RTCSEL_MASK            (3 << RCC_BDCR_RTCSEL_SHIFT)
 #  define RCC_BDCR_RTCSEL_NOCLK         (0 << RCC_BDCR_RTCSEL_SHIFT) /* 00: No clock */
 #  define RCC_BDCR_RTCSEL_LSE           (1 << RCC_BDCR_RTCSEL_SHIFT) /* 01: LSE oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_LSI           (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
 #  define RCC_BDCR_RTCSEL_HSE           (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
+                                                  /* Bits 10-15: Reserved */
 #define RCC_BDCR_RTCEN                  (1 << 15) /* Bit 15: RTC clock enable */
 #define RCC_BDCR_BDRST                  (1 << 16) /* Bit 16: Backup domain software reset */
+                                                  /* Bits 17-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_RCC_H */

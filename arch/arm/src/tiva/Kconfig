@@ -82,6 +82,24 @@ config ARCH_CHIP_LM4F120
 	select ARCH_CHIP_LM4F
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_TM4C123AH6PM
+	bool "TM4C123AH6PM"
+	depends on ARCH_CHIP_TIVA
+	select ARCH_CHIP_TM4C
+	select ARCH_CHIP_TM4C123
+	select TIVA_HAVE_GPIOA_IRQS
+	select TIVA_HAVE_GPIOB_IRQS
+	select TIVA_HAVE_GPIOC_IRQS
+	select TIVA_HAVE_GPIOD_IRQS
+	select TIVA_HAVE_GPIOE_IRQS
+	select TIVA_HAVE_GPIOF_IRQS
+	select TIVA_HAVE_GPIOG_IRQS
+	select TIVA_HAVE_EEPROM
+	select TIVA_HAVE_I2C4
+	select TIVA_HAVE_I2C5
+	select TIVA_HAVE_QEI0
+	select TIVA_HAVE_QEI1
+
 config ARCH_CHIP_TM4C123GH6ZRB
 	bool "TM4C123GH6ZRB"
 	depends on ARCH_CHIP_TIVA
@@ -91,9 +109,11 @@ config ARCH_CHIP_TM4C123GH6ZRB
 	select TIVA_HAVE_GPIOQ_IRQS
 	select TIVA_HAVE_I2C4
 	select TIVA_HAVE_I2C5
+	select TIVA_HAVE_QEI0
+	select TIVA_HAVE_QEI1
 
-config ARCH_CHIP_TM4C123GH6PMI
-	bool "TM4C123GH6PMI"
+config ARCH_CHIP_TM4C123GH6PM
+	bool "TM4C123GH6PM"
 	depends on ARCH_CHIP_TIVA
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C123
@@ -105,9 +125,11 @@ config ARCH_CHIP_TM4C123GH6PMI
 	select TIVA_HAVE_GPIOF_IRQS
 	select TIVA_HAVE_ADC0
 	select TIVA_HAVE_ADC1
+	select TIVA_HAVE_QEI0
+	select TIVA_HAVE_QEI1
 
-config ARCH_CHIP_TM4C1294NC
-	bool "TM4C1294NC"
+config ARCH_CHIP_TM4C1294NCPDT
+	bool "TM4C1294NCPDT"
 	depends on ARCH_CHIP_TIVA
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C129
@@ -122,6 +144,7 @@ config ARCH_CHIP_TM4C1294NC
 	select TIVA_HAVE_GPION_IRQS
 	select TIVA_HAVE_GPIOP_IRQS
 	select TIVA_HAVE_GPIOQ_IRQS
+	select TIVA_HAVE_QEI0
 
 config ARCH_CHIP_TM4C129XNC
 	bool "TM4C129XNC"
@@ -141,6 +164,7 @@ config ARCH_CHIP_TM4C129XNC
 	select TIVA_HAVE_GPIOR_IRQS
 	select TIVA_HAVE_GPIOS_IRQS
 	select TIVA_HAVE_GPIOT_IRQS
+	select TIVA_HAVE_QEI0
 
 config ARCH_CHIP_CC1310
 	bool "CC1310 SimpleLink"
@@ -315,6 +339,18 @@ config TIVA_HAVE_ADC1
 	bool
 	default n
 
+config TIVA_QEI
+	bool
+	default n
+
+config TIVA_HAVE_QEI0
+	bool
+	default n
+
+config TIVA_HAVE_QEI1
+	bool
+	default n
+
 config TIVA_I2C
 	bool
 	default n
@@ -461,6 +497,18 @@ config TIVA_ADC1
 	default n
 	depends on TIVA_HAVE_ADC0
 	select TIVA_ADC
+
+config TIVA_QEI0
+	bool "QEI0"
+	default n
+	depends on TIVA_HAVE_QEI0
+	select TIVA_QEI
+
+config TIVA_QEI1
+	bool "QEI1"
+	default n
+	depends on TIVA_HAVE_QEI1
+	select TIVA_QEI
 
 config TIVA_I2C0
 	bool "I2C0"
@@ -1297,7 +1345,11 @@ config TIVA_TIMER16_TIMECAP
 config TIVA_TIMER16_PWM
 	bool "16-bit PWM output support"
 	default n
-	depends on EXPERIMENTAL
+	---help---
+		Enables 24-bit PWM mode using a 16-bit half-timer of a
+		Tiva 16/32-bit General Purpose Timer Module (GPTM) block.
+		The 24-bit resolution is achieved by using the prescaler
+		as the high 8 bits.
 
 endif # TIVA_TIMER_16BIT
 

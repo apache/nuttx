@@ -58,6 +58,10 @@
 
 #define XBEE_RESPONSE_TIMEOUT MSEC2TICK(200)
 
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+#define XBEE_LOCKUP_SENDATTEMPTS 20
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -146,9 +150,12 @@ static void xbee_assocworker(FAR void *arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
-  xbee_send_atquery(priv, "AI");
+  if (priv->associating)
+    {
+      xbee_send_atquery(priv, "AI");
 
-  (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
+      (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
+    }
 }
 
 /****************************************************************************
@@ -303,6 +310,9 @@ int xbee_req_data(XBEEHANDLE xbee,
 #ifdef CONFIG_DEBUG_ASSERTIONS
   int prevoffs = frame->io_offset;
 #endif
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  int retries = XBEE_LOCKUP_SENDATTEMPTS;
+#endif
 
   /* Support one pending transmit at a time */
 
@@ -380,11 +390,33 @@ int xbee_req_data(XBEEHANDLE xbee,
       /* Wait for a transmit status to be received. Does not necessarily mean success */
 
       while (nxsem_wait(&priv->txdone_sem) < 0);
+
+      /* If the transmit timeout has occured, and there are no IOBs available,
+       * we may be blocking the context needed to free the IOBs. We cannot receive
+       * the Tx status because it requires an IOB. Therefore, if we have hit the
+       * timeout, and there are no IOBs, let's move on assuming the transmit was
+       * a success
+       */
+
+      if (!priv->txdone && iob_navail(false) <= 0)
+        {
+          wlwarn("Couldn't confirm TX. No IOBs\n");
+          break;
+        }
+
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+      if (--retries == 0 && !priv->txdone)
+        {
+          wlerr("XBee not responding. Resetting.\n");
+          priv->lower->reset(priv->lower);
+          retries = XBEE_LOCKUP_SENDATTEMPTS;
+        }
+#endif
     }
   while (!priv->txdone);
 
   nxsem_post(&priv->tx_sem);
-  iob_free(frame);
+  iob_free(frame, IOBUSER_WIRELESS_MAC802154);
   return OK;
 }
 
@@ -468,7 +500,14 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
         }
         break;
 
-      case IEEE802154_ATTR_RADIO_REGDUMP:
+      case IEEE802154_ATTR_PHY_FCS_LEN:
+        {
+          attrval->phy.fcslen = 2;
+          ret = IEEE802154_STATUS_SUCCESS;
+        }
+        break;
+
+      case IEEE802154_ATTR_PHY_REGDUMP:
         {
           xbee_regdump(priv);
         }
@@ -638,6 +677,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
   xbee_set_chan(priv, req->chan);
 
   xbee_set_epassocflags(priv, XBEE_EPASSOCFLAGS_AUTOASSOC);
+
+  priv->associating = true;
 
   /* In order to track the association status, we must poll the device for
    * an update.

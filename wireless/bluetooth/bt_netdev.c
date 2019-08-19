@@ -420,7 +420,7 @@ drop:
 
   if (ret < 0)
     {
-      iob_free(frame);
+      iob_free(frame, IOBUSER_WIRELESS_BLUETOOTH);
 
       /* Increment statistics */
 
@@ -1109,6 +1109,15 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   /* Put the interface in the down state. */
 
   btnet_ifdown(netdev);
+
+#ifdef CONFIG_NET_6LOWPAN
+  /* Make sure the our single packet buffer is attached. We must do this before
+   * registering the device since, once the device is registered, a packet may
+   * be attempted to be forwarded and require the buffer.
+   */
+
+  priv->bd_dev.r_dev.d_buf = g_iobuffer.rb_buf;
+#endif
 
   /* Register the network device with the OS so that socket IOCTLs can be
    * performed

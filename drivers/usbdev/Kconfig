@@ -736,6 +736,12 @@ menuconfig RNDIS
 
 if RNDIS
 
+config RNDIS_NWRREQS
+	int "The number of write requests that can be in flight"
+	default 2
+	---help---
+		The number of write/read requests that can be in flight
+
 config RNDIS_COMPOSITE
 	bool "RNDIS composite support"
 	default n

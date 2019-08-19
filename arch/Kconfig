@@ -837,7 +837,7 @@ config ARCH_HIPRI_INTERRUPT
 	---help---
 		NOTE: This description is currently unique to the Cortex-M family
 		which is the only family that currently supports this feature.  The
-		general feature is not conceptually unique to the Cortex-M but it
+		general feature is not conceptually unique to the Cortex-M but if it
 		is extended to any other family, then this discussion will have to
 		be generalized.
 
@@ -897,44 +897,6 @@ config ARCH_HIPRI_INTERRUPT
 		use the MSP of the last privileged thread to run or, in the case of
 		the nested interrupt, the interrupt stack if no privileged task has
 		run
-
-config ARCH_INT_DISABLEALL
-	bool "Disable high priority interrupts"
-	default y
-	depends on ARCH_HIPRI_INTERRUPT && EXPERIMENTAL
-	---help---
-		If ARCH_HIPRI_INTERRUPT is defined, then special high priority
-		interrupts are supported.  These are not "nested" in the normal
-		sense of the word.  These high priority interrupts can interrupt
-		normal processing but execute outside of OS (although they can "get
-		back into the game" via a PendSV interrupt).
-
-		In the normal course of things, interrupts must occasionally be
-		disabled using the up_irq_save() inline function to prevent contention
-		in use of resources that may be shared between interrupt level and
-		non-interrupt level logic.  Now the question arises, if
-		ARCH_HIPRI_INTERRUPT, do we disable all interrupts (except SVCall),
-		or do we only disable the "normal" interrupts.  Since the high
-		priority interrupts cannot interact with the OS, you may want to
-		permit the high priority interrupts even if interrupts are
-		disabled.  The setting ARCH_INT_DISABLEALL can be used to select
-		either behavior:
-
-		----------------------------+--------------+----------------------------
-		CONFIG_ARCH_HIPRI_INTERRUPT |      NO      |             YES
-		----------------------------+--------------+--------------+-------------
-		CONFIG_ARCH_INT_DISABLEALL  |     N/A      |     YES      |      NO
-		----------------------------+--------------+--------------+-------------
-		                            |              |              |    SVCall
-		                            |    SVCall    |    SVCall    |    HIGH
-		Disable here and below --------> MAXNORMAL ---> HIGH --------> MAXNORMAL
-		                            |              |    MAXNORMAL |
-		----------------------------+--------------+--------------+-------------
-
-		NOTE: This does not work now because interrupts get disabled in the
-		standard interrupt handling, prohibiting nesting.  Fix is simple:  Need
-		to used more priority levels so that we can make a cleaner distinction
-		with the standard interrupt handler.
 
 comment "Boot options"
 

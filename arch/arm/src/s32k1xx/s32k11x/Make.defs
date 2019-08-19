@@ -1,0 +1,68 @@
+############################################################################
+# arch/arm/src/s32k1xx/x32k11x/Make.defs
+#
+#   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Source files specific to the Cortex-M0+
+
+CMN_ASRCS += up_exception.S up_saveusercontext.S up_fullcontextrestore.S
+CMN_ASRCS += up_switchcontext.S vfork.S
+
+CMN_CSRCS += up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
+CMN_CSRCS += up_initialstate.c up_releasepending.c up_reprioritizertr.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_systemreset.c
+CMN_CSRCS += up_unblocktask.c up_doirq.c up_hardfault.c up_svcall.c
+CMN_CSRCS += up_vectors.c
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+endif
+
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
+CMN_CSRCS += up_dumpnvic.c
+endif
+
+# Source file specific to the S32k11x family
+
+CHIP_CSRCS += s32k11x_irq.c s32k11x_clockmapping.c s32k11x_periphfeatures.c
+
+# Configuration-dependent S32k11x files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += s32k11x_timerisr.c
+endif
+
+# Make sure that this directory in included in the VPATH
+
+VPATH += chip/s32k11x

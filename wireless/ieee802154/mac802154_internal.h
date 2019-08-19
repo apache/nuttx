@@ -147,12 +147,12 @@ struct ieee802154_privmac_s
   enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
   FAR struct ieee802154_txdesc_s *cmd_desc; /* TX descriptor for current cmd */
   uint8_t                        nrxusers;
+  struct work_s                  macop_work;
 
   /******************* Fields related to SCAN operation ***********************/
 
-  /* List of PAN descriptors to track during scan procedures */
-
   uint8_t scanindex;
+  uint8_t edlist[15];
   uint8_t npandesc;
   struct ieee802154_pandesc_s pandescs[MAC802154_NPANDESC];
   uint8_t panidbeforescan[IEEE802154_PANIDSIZE];
@@ -224,7 +224,7 @@ struct ieee802154_privmac_s
 
   /* Work structures for offloading aynchronous work */
 
-  struct work_s tx_work;
+  struct work_s txdone_work;
   struct work_s rx_work;
   struct work_s purge_work;
   struct work_s timer_work;
@@ -366,11 +366,18 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
     } \
   while(0)
 
+/* The IEEE 802.15.4 Standard is confusing with regards to byte-order for
+ * extended address. More research discovers that the extended address should
+ * be sent in reverse-canonical form.
+ */
+
 #define mac802154_puteaddr(iob, eaddr) \
   do \
     { \
-      IEEE802154_EADDRCOPY(&iob->io_data[iob->io_len], eaddr); \
-      iob->io_len += IEEE802154_EADDRSIZE; \
+      for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--) \
+        { \
+          iob->io_data[iob->io_len++] = eaddr[index]; \
+        } \
     } \
   while(0)
 
@@ -390,11 +397,18 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
     } \
   while(0)
 
+/* The IEEE 802.15.4 Standard is confusing with regards to byte-order for
+ * extended address. More research discovers that the extended address should
+ * be sent in reverse-canonical form.
+ */
+
 #define mac802154_takeeaddr(iob, eaddr) \
   do \
     { \
-      IEEE802154_EADDRCOPY(eaddr, &iob->io_data[iob->io_offset]); \
-      iob->io_offset += IEEE802154_EADDRSIZE; \
+      for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--) \
+        { \
+          eaddr[index] = iob->io_data[iob->io_offset++]; \
+        } \
     } \
   while(0)
 
@@ -734,14 +748,6 @@ static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
   IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
-}
-
-static inline void mac802154_seteaddr(FAR struct ieee802154_privmac_s *priv,
-                                      const uint8_t *eaddr)
-{
-  IEEE802154_EADDRCOPY(priv->addr.eaddr, eaddr);
-  priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_EADDR,
-                        (FAR const union ieee802154_attr_u *)eaddr);
 }
 
 static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv,

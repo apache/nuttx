@@ -61,9 +61,7 @@ NOTE:  The full TZ database is quite large.  To create a reasonable sized
 ROMFS image, I had to trim some of the files like this:
 
   cd nuttx
-  cd tools
-  ./configure.sh sim/nsh
-  cd ..
+  tools/configure.sh sim:nsh
   make menuconfig
 
 Select the above localtime() and nuttx/zoneinfo configuration settings.
@@ -83,7 +81,7 @@ force rebuilding of the ROMFS filesystem be removing some files:
   make
 
 If you have problems building the simulator on your platform, check out
-nuttx/configs/sim/README.txt.  You might find some help there.
+nuttx/boards/sim/sim/sim/README.txt.  You might find some help there.
 
 Here is a sample run.  I have not seen any errors in single stepping through
 the logic but neither am I certain that everything is working properly:

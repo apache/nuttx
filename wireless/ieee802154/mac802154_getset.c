@@ -131,6 +131,18 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
         }
         break;
 
+      case IEEE802154_ATTR_MAC_MAX_FRAME_RETRIES:
+        {
+          attrval->mac.max_retries = priv->maxretries;
+        }
+        break;
+
+      case IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE:
+        {
+          attrval->mac.rxonidle = priv->rxonidle;
+        }
+        break;
+
       default:
         {
           /* The attribute may be handled soley in the radio driver, so pass
@@ -181,7 +193,9 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         break;
       case IEEE802154_ATTR_MAC_EADDR:
         {
-          mac802154_seteaddr(priv, attrval->mac.eaddr);
+          /* macExtendedAddress is a read-only attribute */
+
+          ret = IEEE802154_STATUS_DENIED;
         }
         break;
       case IEEE802154_ATTR_MAC_COORD_SADDR:
@@ -217,6 +231,11 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
             {
               priv->promisc = attrval->mac.promisc_mode;
             }
+        }
+        break;
+      case IEEE802154_ATTR_MAC_MAX_FRAME_RETRIES:
+        {
+          priv->maxretries = attrval->mac.max_retries;
         }
         break;
       default:

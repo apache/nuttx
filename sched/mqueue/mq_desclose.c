@@ -83,20 +83,50 @@
  *   group - Group that has the open descriptor.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   and failure.
  *
  * Assumptions:
  * - Called only from mq_close() with the scheduler locked.
  *
  ****************************************************************************/
 
-void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
+int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
 {
   FAR struct mqueue_inode_s *msgq;
+#ifdef CONFIG_DEBUG_FEATURES
+  mqd_t mq_ptr;
+#endif
 
   DEBUGASSERT(mqdes != NULL && group != NULL);
 
-  /* Remove the message descriptor from the current task's list of message
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Check that msgq is valid for closing.  It must be owned by the current
+   * group.  NOTE the call to sq_rem() below would corrupt the descriptor
+   * list if mqdes did not lie in the list.
+   */
+
+  mq_ptr = (mqd_t)sq_peek(&group->tg_msgdesq);
+  while (mq_ptr)
+    {
+      if (mq_ptr == mqdes)
+        {
+           break;
+        }
+
+      mq_ptr = (mqd_t)sq_next(mq_ptr);
+    }
+
+  DEBUGASSERT(mq_ptr != NULL);
+  if (mq_ptr == NULL)
+    {
+      /* 'mqdes' does not lie in the group's list of message descriptors. */
+
+      return -EPERM;
+    }
+#endif
+
+  /* Remove the message descriptor from the current group's list of message
    * descriptors.
    */
 
@@ -121,4 +151,5 @@ void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
   /* Deallocate the message descriptor */
 
   mq_desfree(mqdes);
+  return OK;
 }

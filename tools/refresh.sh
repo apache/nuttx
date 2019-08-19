@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # refresh.sh
 #
-#   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2016-2017, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-USAGE="USAGE: $0 [options] <board>/<config>"
+USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
@@ -75,9 +75,9 @@ while [ ! -z "$1" ]; do
         echo "  --help"
         echo "     Show this help message and exit"
         echo "  <board>"
-        echo "     The board directory under nuttx/configs"
+        echo "     The board directory under nuttx/boards"
         echo "  <config>"
-        echo "     The board configuration directory under nuttx/configs/<board>"
+        echo "     The board configuration directory under nuttx/boards/<board>/configs"
         exit 0
         ;;
     * )
@@ -90,15 +90,60 @@ done
 
 # Get the board configuration
 
-if [ -z "$1" ]; then
-    echo "ERROR: No configuration provided"
+if [ -z "${CONFIG}" ]; then
+  echo "ERROR: No configuration provided"
+  echo $USAGE
+  echo $ADVICE
+  exit 1
+fi
+
+CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d':' -f2`
+if [ -z "${CONFIGSUBDIR}" ]; then
+  CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d'/' -f2`
+  if [ -z "${CONFIGSUBDIR}" ]; then
+    echo "ERROR: Malformed configuration: ${CONFIG}"
     echo $USAGE
     echo $ADVICE
     exit 1
+  else
+    BOARDSUBDIR=`echo ${CONFIG} | cut -d'/' -f1`
+  fi
+else
+  BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
 fi
 
-BOARDSUBDIR=`echo $1 | cut -d'/' -f1`
-CONFIGSUBDIR=`echo $1 | cut -d'/' -f2`
+# Detect the architecture of this board.
+
+ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
+CHIPLIST="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
+  lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
+  nuc1xx s32k1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
+  stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
+  pic32mz lm32 mor1kx m32262f8 sh7032 gap8 nr5m100 sim qemu esp32 z16f2811
+  ez80 z180 z8 z80"
+
+for arch in ${ARCHLIST}; do
+  for chip in ${CHIPLIST}; do
+    if [ -f ${TOPDIR}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
+      ARCHSUBDIR=${arch}
+      CHIPSUBDIR=${chip}
+      echo "  Detected ${ARCHSUBDIR} Architecture"
+      echo "  Detected ${CHIPSUBDIR} Chip"
+    fi
+  done
+done
+
+for arch in ${ARCHLIST}; do
+  if [ -f boards/${arch}/${BOARDSUBDIR}/Kconfig ]; then
+    ARCHSUBDIR=${arch}
+  fi
+done
+
+if [ -z "${ARCHSUBDIR}" ]; then
+  echo "ERROR:  Architecture of ${BOARDSUBDIR} not found"
+  exit 1
+fi
 
 # Where are we
 
@@ -117,11 +162,11 @@ fi
 
 WD=${PWD}
 
-BOARDDIR=configs/$BOARDSUBDIR
+BOARDDIR=boards/$ARCHSUBDIR/$CHIPSUBDIR/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts
 MAKEDEFS1=$SCRIPTSDIR/Make.defs
 
-CONFIGDIR=$BOARDDIR/$CONFIGSUBDIR
+CONFIGDIR=$BOARDDIR/configs/$CONFIGSUBDIR
 DEFCONFIG=$CONFIGDIR/defconfig
 MAKEDEFS2=$CONFIGDIR/Make.defs
 

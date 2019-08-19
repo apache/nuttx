@@ -168,7 +168,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
           psock->s_sndcb->event = NULL;
           wrb = NULL;
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_UDP_NOTIFIER
           /* Notify any waiters that the write buffers have been drained. */
 
           udp_writebuffer_signal(conn);
@@ -827,11 +827,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       if (_SS_ISNONBLOCK(psock->s_flags))
         {
-          ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false);
+          ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
+                              IOBUSER_NET_SOCK_UDP);
         }
       else
         {
-          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false);
+          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
+                           IOBUSER_NET_SOCK_UDP);
         }
 
       if (ret < 0)

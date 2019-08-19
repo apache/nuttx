@@ -135,7 +135,6 @@ struct pipe_dev_s
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */
   pipe_ndx_t d_rdndx;       /* Index in d_buffer to return the next byte read */
   pipe_ndx_t d_bufsize;     /* allocated size of d_buffer in bytes */
-  uint8_t    d_refs;        /* References counts on pipe (limited to 255) */
   uint8_t    d_nwriters;    /* Number of reference counts for write access */
   uint8_t    d_nreaders;    /* Number of reference counts for read access */
   uint8_t    d_pipeno;      /* Pipe minor number */

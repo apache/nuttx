@@ -1,10 +1,10 @@
-NuttX TODO List (Last updated July 1, 2019)
+NuttX TODO List (Last updated August 18, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
 standards, things that could be improved, and ideas for enhancements.  This
 TODO list does not include issues associated with individual board ports. See
-also the individual README.txt files in the configs/ sub-directories for
+also the individual README.txt files in the boards/ sub-directories for
 issues related to each board port.
 
 nuttx/:
@@ -16,7 +16,7 @@ nuttx/:
   (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
-  (9)  Kernel/Protected Build
+ (10)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
@@ -81,9 +81,9 @@ o Task/Scheduler (sched/)
                As of this writing, the basic feature implementation is
                complete and much of the logic has been verified.  The test
                harness for the feature exists only for the NXP LPC3131 (see
-               configs/ea3131/pgnsh and locked directories).  There are
-               some limitations of this testing so I still cannot say that
-               the feature is fully functional.
+               boards/arm/lpc31xx/ea3131/configs/pgnsh and locked
+               directories).  There are some limitations of this testing so
+               I still cannot say that the feature is fully functional.
   Status:      Open.  This has been put on the shelf for some time.
   Priority:    Medium-Low
 
@@ -283,7 +283,7 @@ o Task/Scheduler (sched/)
                  and sched_setaffinity(),
                2018-09-15:  This change has been completed for the case of
                  open() used within the OS.  There are places under libs/ and
-                 configs/ that have not been converted.  I also note cases
+                 boards/ that have not been converted.  I also note cases
                  where fopen() is called under libs/libc/netdb/.
 
   Status:      Open
@@ -987,7 +987,7 @@ o Kernel/Protected Build
                 by simply reading this variable.
 
                "This one would be easy: Just a change to include/nuttx/userspace.h,
-                configs/*/kernel/up_userspace.c, libs/libc/,
+                boards/<arch>/<chip>/<board>/kernel/up_userspace.c, libs/libc/,
                 sched/sched_addreadytorun.c, and sched/sched_removereadytorun.c.
                 That would eliminate 59% of the syscalls."
 
@@ -1120,6 +1120,50 @@ o Kernel/Protected Build
   Priority:    Medium-ish if are attempting to make a secure environment that
                may host malicious code.  Very low for the typical FLAT build,
                however.
+
+  Title:       NSH BUILTIN TASKS DO NOT WORK IN PROTECTED MODE
+  Description: In the PROTECTED build mode, NSH built-in commands do not
+               work.  The current NSH builtin implementation violates the
+               POSIX interface layer, it calls directly into the
+               nuttx/binfmt logic which is not possible in the protected
+               mode.
+
+               Currently, support for CONFIG_BUILTIN is is disabled for
+               PROTECTED mode  in in nuttx/binfmt/Kconfig:
+
+                  config BUILTIN
+                          bool "Support Builtin Applications"
+                          default n
+                          depends on (!BUILD_PROTECTED && !BUILD_KERNEL) || EXPERIMENTAL
+
+               And that disables section of the option apps/nshlib/Kconfig:
+
+                  config NSH_BUILTIN_APPS
+                          bool "Enable built-in applications"
+                         default n
+                          depends on BUILTIN
+
+               So if CONFIG_BUILD_PROTECTED is set, then CONFIG_BUILTIN
+               cannot be set.  And if CONFIG_BUILTIN is not set, then
+               builtin applications will not be supported.
+
+               The solution appears woulld seem to be:  (1) Move the problem
+               code out of nuttx/binfmt and into libs/binfmt so that it is
+               available both to the kernel code and to the application
+               code.  And to remove the dependency on !BUILD_PROTECTED from
+               binfmt/Kconfig.
+
+               NOTE:  NSH builtins cannot be supported under any condition
+               in the KERNEL build.  In that build, only file-based
+               applications can be supported.  But that is a different story.
+  Status:      Open
+  Priority:    Medium.  Higher if you need builtin application support in
+               protected mode.
+
+This really belongs in the TODO list.
+
+Greg
+
 
 o C++ Support
   ^^^^^^^^^^^
@@ -1788,7 +1832,8 @@ o USB (drivers/usbdev, drivers/usbhost)
   Title:       USB CDC/ACM HOST CLASS DRIVER
   Description: A CDC/ACM host class driver has been added.  This has been
                testing by running the USB CDC/ACM host on an Olimex
-               LPC1766STK and using the configs/stm3210e-eval/usbserial
+               LPC1766STK and using the
+               boards/arm/stm32/stm3210e-eval/configs/usbserial
                configuration (using the CDC/ACM device side driver).  There
                are several unresolved issues that prevent the host driver
                from being usable:
@@ -2230,7 +2275,8 @@ o File system / Generic drivers (fs/, drivers/)
                file being read is smaller than number bytes written to the
                file.  That test does write small files continuously until
                file system is full and even the the error is rare.  The
-               configs/sim/spiffs test can used to demonstrate the error.
+               boards/sim/sim/sim/configs/spiffs test can used to
+               demonstrate the error.
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.
@@ -2705,6 +2751,9 @@ o Network Utilities (apps/netutils/)
 
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Related:  See "NSH BUILTIN TASKS DO NOT WORK IN PROTECTED MODE" under
+  the heading Kernel/Protected Build.
 
   Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
   Description: The ifconfig command will not behave correctly if an interface

@@ -166,7 +166,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
  *
  * Description:
  *   This function must be provided by the board-specific logic in the
- *   directory configs/<board-name>/src/.
+ *   directory boards/x86/<chip>/<board>/src/.
  *
  ****************************************************************************/
 

@@ -641,6 +641,10 @@ config MX25RXX_QSPI_READ_FREQUENCY
 		Clock frequency for read data command.
 		Only Quad read is supported in this driver.
 
+config MX25RXX_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
 endif # MTD_MX25RXX
 
 config MTD_SMART

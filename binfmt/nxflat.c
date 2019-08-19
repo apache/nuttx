@@ -111,31 +111,31 @@ static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
 {
   unsigned long dsize = loadinfo->datasize + loadinfo->bsssize;
 
-  berr("LOAD_INFO:\n");
-  berr("  ISPACE:\n");
-  berr("    ispace:       %08lx\n", loadinfo->ispace);
-  berr("    entryoffs:    %08lx\n", loadinfo->entryoffs);
-  berr("    isize:        %08lx\n", loadinfo->isize);
+  binfo("LOAD_INFO:\n");
+  binfo("  ISPACE:\n");
+  binfo("    ispace:       %08lx\n", loadinfo->ispace);
+  binfo("    entryoffs:    %08lx\n", loadinfo->entryoffs);
+  binfo("    isize:        %08lx\n", loadinfo->isize);
 
-  berr("  DSPACE:\n");
-  berr("    dspace:       %08lx\n", loadinfo->dspace);
+  binfo("  DSPACE:\n");
+  binfo("    dspace:       %08lx\n", loadinfo->dspace);
   if (loadinfo->dspace != NULL)
     {
-      berr("      crefs:      %d\n",    loadinfo->dspace->crefs);
-      berr("      region:     %08lx\n", loadinfo->dspace->region);
+      binfo("      crefs:      %d\n",    loadinfo->dspace->crefs);
+      binfo("      region:     %08lx\n", loadinfo->dspace->region);
     }
-  berr("    datasize:     %08lx\n", loadinfo->datasize);
-  berr("    bsssize:      %08lx\n", loadinfo->bsssize);
-  berr("      (pad):      %08lx\n", loadinfo->dsize - dsize);
-  berr("    stacksize:    %08lx\n", loadinfo->stacksize);
-  berr("    dsize:        %08lx\n", loadinfo->dsize);
+  binfo("    datasize:     %08lx\n", loadinfo->datasize);
+  binfo("    bsssize:      %08lx\n", loadinfo->bsssize);
+  binfo("      (pad):      %08lx\n", loadinfo->dsize - dsize);
+  binfo("    stacksize:    %08lx\n", loadinfo->stacksize);
+  binfo("    dsize:        %08lx\n", loadinfo->dsize);
 
-  berr("  RELOCS:\n");
-  berr("    relocstart:   %08lx\n", loadinfo->relocstart);
-  berr("    reloccount:   %d\n",    loadinfo->reloccount);
+  binfo("  RELOCS:\n");
+  binfo("    relocstart:   %08lx\n", loadinfo->relocstart);
+  binfo("    reloccount:   %d\n",    loadinfo->reloccount);
 
-  berr("  HANDLES:\n");
-  berr("    filfd:        %d\n",    loadinfo->filfd);
+  binfo("  HANDLES:\n");
+  binfo("    filfd:        %d\n",    loadinfo->filfd);
 }
 #else
 # define nxflat_dumploadinfo(i)

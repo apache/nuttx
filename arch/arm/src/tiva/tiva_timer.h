@@ -98,26 +98,34 @@
 /* Flags bit definitions in configuration structures.  NOTE: not all flags
  * apply in all timer modes.  Applicable modes noted with:
  *
- *   a. 32-bit one shot timer
- *   b. 32-bit periodic timer
+ *   a. 16-bit one shot timer
+ *   b. 16-bit periodic timer
  *   c. 32-bit one shot timer
  *   d. 32-bit periodic timer
  *   e. 32-bit RTC timer
+ *   f. 16-bit PWM timer
  */
 
-#define TIMER_FLAG_COUNTUP    (1 << 0) /* Bit 0: Count up (abcd) */
-#define TIMER_FLAG_ADCTIMEOUT (1 << 1) /* Bit 1: Generate ADC trigger on
-                                        * timeout (abcd) */
-#define TIMER_FLAG_ADCRTCM    (1 << 2) /* Bit 2: Generate ADC trigger on
-                                        * RTC match (e) */
-#define TIMER_FLAG_ADCMATCH   (1 << 3) /* Bit 3: Generate ADC trigger on
-                                        * match (abcd) */
-#define TIMER_FLAG_DMATIMEOUT (1 << 4) /* Bit 4: Generate uDMA trigger on
-                                        * timeout (abcd) */
-#define TIMER_FLAG_DMARTCM    (1 << 5) /* Bit 5: Generate uDMA trigger on
-                                        * RTC match (e) */
-#define TIMER_FLAG_DMAMATCH   (1 << 6) /* Bit 6: Generate uDMA trigger on
-                                        * match (abcd) */
+#define TIMER_FLAG_COUNTUP    (1 << 0)  /* Bit 0: Count up (abcd) */
+#define TIMER_FLAG_ADCTIMEOUT (1 << 1)  /* Bit 1: Generate ADC trigger on
+                                         * timeout (abcd) */
+#define TIMER_FLAG_ADCRTCM    (1 << 2)  /* Bit 2: Generate ADC trigger on
+                                         * RTC match (e) */
+#define TIMER_FLAG_ADCMATCH   (1 << 3)  /* Bit 3: Generate ADC trigger on
+                                         * match (abcd) */
+#define TIMER_FLAG_DMATIMEOUT (1 << 4)  /* Bit 4: Generate uDMA trigger on
+                                         * timeout (abcd) */
+#define TIMER_FLAG_DMARTCM    (1 << 5)  /* Bit 5: Generate uDMA trigger on
+                                         * RTC match (e) */
+#define TIMER_FLAG_DMAMATCH   (1 << 6)  /* Bit 6: Generate uDMA trigger on
+                                         * match (abcd) */
+#define TIMER_FLAG_PWMINVERT  (1 << 7)  /* Bit 7: Invert PWM signal (f) */
+#define TIMER_FLAG_PWMINTPOS  (1 << 8)  /* Bit 8: Interrupt on PWM positive
+                                         * edge (f) */
+#define TIMER_FLAG_PWMINTNEG  (1 << 9)  /* Bit 9: Interrupt on PWM negative
+                                         * edge (f) */
+#define TIMER_FLAG_STALL      (1 << 10) /* Bit 10: Stall timer when CPU paused
+                                         * in debug breakpoint (abcdef) */
 
 #define TIMER_ISCOUNTUP(c)    ((((c)->flags) & TIMER_FLAG_COUNTUP) != 0)
 #define TIMER_ISADCTIMEOUT(c) ((((c)->flags) & TIMER_FLAG_ADCTIMEOUT) != 0)
@@ -126,6 +134,12 @@
 #define TIMER_ISDMATIMEOUT(c) ((((c)->flags) & TIMER_FLAG_DMATIMEOUT) != 0)
 #define TIMER_ISDMARTCM(c)    ((((c)->flags) & TIMER_FLAG_DMARTCM) != 0)
 #define TIMER_ISDMAMATCH(c)   ((((c)->flags) & TIMER_FLAG_DMAMATCH) != 0)
+#define TIMER_ISPWMINVERT(c)  ((((c)->flags) & TIMER_FLAG_PWMINVERT) != 0)
+#define TIMER_ISPWMINTPOS(c)  ((((c)->flags) & TIMER_FLAG_PWMINTPOS) != 0)
+#define TIMER_ISPWMINTNEG(c)  ((((c)->flags) & TIMER_FLAG_PWMINTNEG) != 0)
+#define TIMER_ISSTALL         ((((c)->flags) & TIMER_FLAG_STALL) != 0)
+
+#define TIMER_ISPWMINTBOTH(c) (TIMER_ISPWMINTPOS(c) && TIMER_ISPWMINTNEG(c))
 
 /****************************************************************************
  * Public Types
@@ -182,7 +196,7 @@ typedef void (*timer32_handler_t)(TIMER_HANDLE handle, void *arg,
 
 struct tiva_timer32config_s
 {
-  uint8_t flags;                 /* See TIMER_FLAG_* definitions */
+  uint32_t flags;                /* See TIMER_FLAG_* definitions */
   timer32_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
   void *arg;                     /* Argument that accompanies the handler
@@ -213,8 +227,8 @@ typedef void (*timer16_handler_t)(TIMER_HANDLE handle, void *arg,
 
 struct tiva_timer16config_s
 {
-  uint8_t mode;                  /* See enum tiva_timermode_e */
-  uint8_t flags;                 /* See TIMER_FLAG_* definitions */
+  uint8_t mode;                  /* See enum tiva_timer16mode_e */
+  uint32_t flags;                /* See TIMER_FLAG_* definitions */
   timer16_handler_t handler;     /* Non-NULL: Interrupts will be enabled
                                   * and forwarded to this function */
   void *arg;                     /* Argument that accompanies the handler
@@ -247,7 +261,7 @@ struct tiva_gptm32config_s
 #endif
 
 /* This structure is cast compatible with struct tiva_gptmconfig_s and
- * describes usage of both bit-bit timers A/B on a GPTM module.
+ * describes usage of both 16-bit half-timers A/B on a GPTM module.
  */
 
 #ifdef CONFIG_TIVA_TIMER_16BIT
@@ -792,6 +806,56 @@ void tiva_timer16_relmatch(TIMER_HANDLE handle, uint32_t relmatch, int tmndx);
 
 #  define tiva_timer16a_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16A)
 #  define tiva_timer16b_relmatch(h,r) tiva_timer16_relmatch(h,r,TIMER16B)
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer16pwm_setperiodduty
+ *
+ * Description:
+ *   Set the period and initial duty cycle for a 16-bit timer operating in
+ *   PWM mode. Also, enable interrupts if a handler is provided. The timer
+ *   is not started until tiva_timer16_start() is called.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned by tiva_gptm_configure()
+ *   period - The PWM period, a 24-bit value.
+ *   duty   - The initial PWM duty cycle, a 24-bit value.
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER16_PWM
+void tiva_timer16pwm_setperiodduty(TIMER_HANDLE handle, uint32_t period,
+                                   uint32_t duty, int tmndx);
+
+#  define tiva_timer16apwm_setperiodduty(h,p,d) tiva_timer16pwm_setperiodduty(h,p,d,TIMER16A)
+#  define tiva_timer16bpwm_setperiodduty(h,p,d) tiva_timer16pwm_setperiodduty(h,p,d,TIMER16B)
+#endif
+
+/****************************************************************************
+ * Name: tiva_timer16pwm_setduty
+ *
+ * Description:
+ *   Update the duty cycle for a 16-bit timer operating in PWM mode.
+ *
+ * Input Parameters:
+ *   handle - The handle value returned by tiva_gptm_configure()
+ *   duty   - The initial PWM duty cycle, a 24-bit value.
+ *   tmndx  - Either TIMER16A or TIMER16B to select the 16-bit timer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_TIMER16_PWM
+void tiva_timer16pwm_setduty(TIMER_HANDLE handle, uint32_t duty, int tmndx);
+
+#  define tiva_timer16apwm_setduty(h,d) tiva_timer16pwm_setduty(h,d,TIMER16A)
+#  define tiva_timer16bpwm_setduty(h,d) tiva_timer16pwm_setduty(h,d,TIMER16B)
 #endif
 
 /****************************************************************************
