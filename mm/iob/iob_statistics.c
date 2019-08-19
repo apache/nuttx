@@ -44,12 +44,10 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/mm/iob.h>
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
