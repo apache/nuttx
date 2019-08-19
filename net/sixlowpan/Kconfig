@@ -130,7 +130,7 @@ config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_6
 		Prefix 6 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
 
 config NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_0_7
-	hex "Address context 0 Prefix 6"
+	hex "Address context 0 Prefix 7"
 	default 0xaa
 	---help---
 		Prefix 7 for address context 0 (assumes CONFIG_NET_6LOWPAN_MAXADDRCONTEXT >= 0)
