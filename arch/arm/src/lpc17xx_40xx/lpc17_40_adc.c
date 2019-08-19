@@ -213,13 +213,10 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   putreg32(ADC_CR_PDN, LPC17_40_ADC_CR);
 
-/* PCLKSEL0 only exists in LPC176x family parts */
-#ifdef LPC176x
   regval  = getreg32(LPC17_40_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
   regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
   putreg32(regval, LPC17_40_SYSCON_PCLKSEL0);
-#endif
 
 #ifdef CONFIG_LPC17_40_ADC_BURSTMODE
   clkdiv   = LPC17_40_CCLK / 3 / 65 / priv->sps;
