@@ -50,6 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -60,8 +62,12 @@
 #  endif
 #endif
 
+/* Check if we can support the RTC driver */
+
 #define HAVE_RTC_DRIVER 1
-/* Configuration ************************************************************/
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
+#endif
 
 /* LED
  *
