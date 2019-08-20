@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The S32K146 has 1Mb of FLASH beginning at address 0x0000:0000 and
- * 124Kb of SRAM beginning at address 0x1fff:fc00 (plus 4Kb of FlexRAM)
+ * 124Kb of SRAM beginning at address 0x1fff:0000 (plus 4Kb of FlexRAM)
  *
  * The on-chip RAM is split in two regions: SRAM_L and SRAM_U. The RAM is
  * implemented such that the SRAM_L and SRAM_U ranges form a contiguous

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k146evb/scripts/flash.ld
+ * boards/arm/s32k1xx/s32k148evb/scripts/sram.ld
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,21 @@
  *
  ****************************************************************************/
 
-/* The S32K146 has 1Mb of FLASH beginning at address 0x0000:0000 and
- * 124Kb of SRAM beginning at address 0x1fff:0000 (plus 4Kb of FlexRAM)
+/* The S32K148 has 2Mb of FLASH beginning at address 0x0000:0000 and
+ * 252Kb of SRAM beginning at address 0x1ffe:0000 (plus 4Kb of FlexRAM)
  *
  * The on-chip RAM is split in two regions: SRAM_L and SRAM_U. The RAM is
  * implemented such that the SRAM_L and SRAM_U ranges form a contiguous
  * block in the memory map
  *
- *   SRAM_L 1fff0000 - 1fffffff 64Kb
- *   SRAM_U 20000000 - 2000efff 60Kb
+ *   SRAM_L 1ffe0000 - 1fffffff 128Kb
+ *   SRAM_U 20000000 - 2001efff 124Kb
  */
 
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 1M
-  sram  (rwx) : ORIGIN = 0x1fff0000, LENGTH = 124K
+  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 2M
+  sram  (rwx) : ORIGIN = 0x1fff0000, LENGTH = 252K
 }
 
 OUTPUT_ARCH(arm)
@@ -71,7 +71,7 @@ SECTIONS
     *(.gcc_except_table)
     *(.gnu.linkonce.r.*)
     _etext = ABSOLUTE(.);
-  } > flash
+  } > sram
 
   . = ALIGN(4);
   .init_section :
@@ -79,20 +79,20 @@ SECTIONS
     _sinit = ABSOLUTE(.);
     *(.init_array .init_array.*)
     _einit = ABSOLUTE(.);
-  } > flash
+  } > sram
 
   . = ALIGN(4);
   .ARM.extab :
   {
     *(.ARM.extab*)
-  } >flash
+  } >sram
 
   . = ALIGN(4);
   __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
     *(.ARM.exidx*)
-  } >flash
+  } >sram
   __exidx_end = ABSOLUTE(.);
 
   . = ALIGN(4);
@@ -103,18 +103,7 @@ SECTIONS
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
     _edata = ABSOLUTE(.);
-  } > sram AT > flash
-
-  _eronly = LOADADDR(.data);
-
-  .ramfunc ALIGN(4):
-  {
-    _sramfuncs = ABSOLUTE(.);
-    *(.ramfunc  .ramfunc.*)
-    _eramfuncs = ABSOLUTE(.);
-  } > sram AT > flash
-
-  _framfuncs = LOADADDR(.ramfunc);
+  } > sram
 
   .bss :
   {

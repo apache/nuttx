@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k146evb/src/s32k146_periphclks.c
+ * boards/arm/s32k1xx/s32k148evb/src/s32k148_periphclks.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * Most of the settings within this file derives from NXP sample code for
- * the S32K146 MCUs.  That sample code has this licensing information:
+ * the S32K148 MCUs.  That sample code has this licensing information:
  *
  *   Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
  *   Copyright 2016-2018 NXP
@@ -59,7 +59,7 @@
 #include <nuttx/config.h>
 
 #include "s32k1xx_periphclocks.h"
-#include "s32k146evb.h"
+#include "s32k148evb.h"
 
 /****************************************************************************
  * Pre-processor Definitions
