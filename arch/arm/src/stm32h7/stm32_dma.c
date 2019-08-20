@@ -1238,7 +1238,7 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
-  DEBUGASSERT(g_dma_ops[controller].dma_capable(cfg));
+  DEBUGASSERT(stm32_sdma_capable(cfg));
 #endif
 
   /* "If the stream is enabled, disable it by resetting the EN bit in the
