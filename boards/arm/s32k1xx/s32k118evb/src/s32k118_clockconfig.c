@@ -100,7 +100,6 @@ const struct clock_configuration_s g_initial_clkconfig =
     },
     .sosc               =
     {
-      .freq             = 40000000,                  /* Frequency */
       .mode             = SCG_SOSC_MONITOR_DISABLE,  /* SOSCCM */
       .gain             = SCG_SOSC_GAIN_LOW,         /* HGO */
       .range            = SCG_SOSC_RANGE_HIGH,       /* RANGE */

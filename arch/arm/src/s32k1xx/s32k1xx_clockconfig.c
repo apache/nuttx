@@ -478,15 +478,16 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
  *
  *****************************************************************************/
 
-static int s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
-                                            const struct scg_system_clock_config_s *config)
+static int
+s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
+                                 const struct scg_system_clock_config_s *config)
 {
   uint32_t srcfreq      = 0;
-  uint32_t sysfreq_mul  = ((uint32_t)config->divcore) + 1;
-  uint32_t busfreq_mul  = (((uint32_t)config->divcore) + 1) * (((uint32_t)config->divbus) + 1);
-  uint32_t slowfreq_mul = (((uint32_t)config->divcore) + 1) * (((uint32_t)config->divslow) + 1);
+  uint32_t sysfreq_mul  = (uint32_t)config->divcore;
+  uint32_t busfreq_mul  = (uint32_t)config->divcore * (uint32_t)config->divbus;
+  uint32_t slowfreq_mul = (uint32_t)config->divcore * (uint32_t)config->divslow;
   uint32_t regval;
-  int ret = OK;
+  int ret               = OK;
 
   DEBUGASSERT(mode != SCG_SYSTEM_CLOCK_MODE_CURRENT);
 
@@ -708,14 +709,31 @@ static int s32k1xx_firc_config(bool enable,
 
       /* Step 2. Set FIRC configuration. */
 
-      regval = (firccfg->range == 0 ? 0 : SCG_FIRCCFG_48MHZ);
+      if (firccfg->range == 0)
+        {
+          regval = 0;
+        }
+      else
+        {
+          regval = SCG_FIRCCFG_48MHZ; /* REVISIT: Also zero */
+        }
+
       putreg32(regval, S32K1XX_SCG_FIRCCFG);
 
       /* Step 3. Enable clock, config regulator and locking feature. */
 
-      regval = SCG_FIRCCSR_FIRCEN |
-               firccfg->regulator ? 0 : SCG_FIRCCSR_FIRCREGOFF |
-               firccfg->locked ? SCG_FIRCCSR_LK : 0;
+      regval = SCG_FIRCCSR_FIRCEN;
+
+      if (!firccfg->regulator)
+        {
+          regval |= SCG_FIRCCSR_FIRCREGOFF;
+        }
+
+      if (firccfg->locked)
+        {
+          regval |= SCG_FIRCCSR_LK;
+        }
+
       putreg32(regval, S32K1XX_SCG_FIRCCSR);
 
       /* Wait for FIRC to initialize */
@@ -801,10 +819,6 @@ static int s32k11_firc_clocksource(void)
  *
  *****************************************************************************/
 
-/*FUNCTION**********************************************************************
- * Function Name : 
- * Description   : 
- * END**************************************************************************/
 static int s32k1xx_sirc_config(bool enable,
                                const struct scg_sirc_config_s *sirccfg)
 {
@@ -850,18 +864,38 @@ static int s32k1xx_sirc_config(bool enable,
 
       /* Step 2. Set SIRC configuration: frequency range. */
 
-      regval = (sirccfg->range == 0) ? SCG_SIRCCFG_LOWRANGE :
-               SCG_SIRCCFG_HIGHRANGE; 
+      if (sirccfg->range == SCG_SIRC_RANGE_HIGH)
+        {
+          regval = SCG_SIRCCFG_HIGHRANGE;
+        }
+      else
+        {
+          regval = SCG_SIRCCFG_LOWRANGE;
+        }
+
       putreg32(regval, S32K1XX_SCG_SIRCCFG);
 
       /* Step 3. Set SIRC control: enable clock, configure source in STOP
        * and VLP modes, configure lock feature.
        */
 
-      regval = SCG_SIRCCSR_SIRCEN |
-               (sirccfg->stopmode == 0) ? 0 : SCG_SIRCCSR_SIRCSTEN |
-               (sirccfg->lowpower == 0) ? 0 : SCG_SIRCCSR_SIRCLPEN |
-               (sirccfg->locked == 0) ? 0 : SCG_SIRCCSR_LK;
+      regval = SCG_SIRCCSR_SIRCEN;
+
+      if (sirccfg->stopmode)
+        {
+          regval |= SCG_SIRCCSR_SIRCSTEN;
+        }
+
+      if (sirccfg->lowpower)
+        {
+          regval |= SCG_SIRCCSR_SIRCLPEN;
+        }
+
+      if (sirccfg->locked)
+        {
+          regval |= SCG_SIRCCSR_LK;
+        }
+
       putreg32(regval, S32K1XX_SCG_SIRCCSR);
 
       /* Wait for SIRC to initialize */
@@ -941,14 +975,28 @@ static int s32k1xx_sosc_config(bool enable,
 
       /* Step 2. Set OSC configuration. */
 
-      regval = SCG_SOSCCFG_RANGE(sosccfg->range) |
-               (sosccfg->gain == 0) ? 0 : SCG_SOSCCFG_HGO |
-               (sosccfg->extref == 0) ? 0 : SCG_SOSCCFG_EREFS;
+      regval = SCG_SOSCCFG_RANGE(sosccfg->range);
+
+      if (sosccfg->gain == SCG_SOSC_GAIN_HIGH)
+        {
+          regval |= SCG_SOSCCFG_HGO;
+        }
+
+      if (sosccfg->extref == SCG_SOSC_REF_OSC)
+        {
+          regval |= SCG_SOSCCFG_EREFS;
+        }
+
       putreg32(regval, S32K1XX_SCG_SOSCCFG);
 
       /* Step 3. Enable clock, configure monitor, lock register. */
 
-      regval = SCG_SOSCCSR_SOSCEN | sosccfg->locked ? SCG_SOSCCSR_LK : 0;
+      regval = SCG_SOSCCSR_SOSCEN;
+
+      if (sosccfg->locked)
+        {
+          regval |= SCG_SOSCCSR_LK;
+        }
 
       switch (sosccfg->mode)
         {
@@ -1046,7 +1094,7 @@ static int s32k1xx_spll_config(bool enable,
     }
 
   /* Configure SPLL */
- 
+
   if (enable && (ret == OK))
     {
       /* Get clock source frequency. */
@@ -1056,7 +1104,7 @@ static int s32k1xx_spll_config(bool enable,
 
       /* Pre-divider checking. */
 
-      srcfreq /= (((uint32_t)spllcfg->prediv) + 1);
+      srcfreq /= spllcfg->prediv;
       DEBUGASSERT(srcfreq >= SCG_SPLL_REF_MIN && srcfreq <= SCG_SPLL_REF_MAX);
 
       /* Now start to set up PLL clock. */
@@ -1073,7 +1121,12 @@ static int s32k1xx_spll_config(bool enable,
 
       /* Step 3. Enable clock, configure monitor, lock register. */
 
-      regval = SCG_SPLLCSR_SPLLEN | spllcfg->locked ? SCG_SPLLCSR_LK : 0;
+      regval = SCG_SPLLCSR_SPLLEN;
+
+      if (spllcfg->locked)
+        {
+          regval |= SCG_SPLLCSR_LK;
+        }
 
       switch (spllcfg->mode)
         {

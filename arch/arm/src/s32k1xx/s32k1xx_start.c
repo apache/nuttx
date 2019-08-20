@@ -102,7 +102,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) s32k1xx_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -272,34 +272,25 @@ static inline void s32k1xx_mpu_config(void)
 
 void __start(void)
 {
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   const uint32_t *src;
+#endif
   uint32_t *dest;
 
   /* Make sure that interrupts are disabled */
 
   __asm__ __volatile__ ("\tcpsid  i\n");
 
-  /* Configure the clocking and the console uart so that we can get debug
-   * output as soon as possible.  NOTE: That this logic must not assume that
-   * .bss or .data have been initialized.
-   */
-
-  DEBUGVERIFY(s32k1xx_clockconfig(&g_initial_clkconfig));
-  s32k1xx_lowsetup();
-  showprogress('A');
-
 #ifdef CONFIG_S32K1XX_WDT_DISABLE
   /* Disable the watchdog timer */
 
   s32k1xx_wdog_disable();
-  showprogress('B');
 #endif
 
 #ifdef CONFIG_S32K1XX_HAVE_LMEM
   /* Initialize the cache (if supported) */
 
   s32k1xx_cache_config();
-  showprogress('C');
 #endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -311,8 +302,7 @@ void __start(void)
       *dest++ = 0;
     }
 
-  showprogress('D');
-
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the
@@ -323,19 +313,27 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+#endif
 
-  showprogress('E');
+  /* Configure the clocking and the console uart so that we can get debug
+   * output as soon as possible.  NOTE: That this logic must not assume that
+   * .bss or .data have been initialized.
+   */
+
+  DEBUGVERIFY(s32k1xx_clockconfig(&g_initial_clkconfig));
+  s32k1xx_lowsetup();
+  showprogress('B');
 
   /* Initialize the FPU (if configured) */
 
   s32k1xx_fpu_config();
-  showprogress('F');
+  showprogress('C');
 
 #if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K1XX_ENET)
   /* Enable all MPU bus masters */
 
   s32k1xx_mpu_config();
-  showprogress('G');
+  showprogress('D');
 }
 #endif
 
@@ -344,7 +342,7 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   s32k1xx_earlyserialinit();
 #endif
-  showprogress('H');
+  showprogress('E');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -354,13 +352,13 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   s32k1xx_userspace();
-  showprogress('I');
+  showprogress('F');
 #endif
 
-  /* Initialize onboard resources */
+  /* Initialize on-board resources */
 
   s32k1xx_board_initialize();
-  showprogress('J');
+  showprogress('G');
 
   /* Then start NuttX */
 

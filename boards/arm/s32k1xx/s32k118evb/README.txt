@@ -9,6 +9,7 @@ Contents
   o Status
   o Serial Console
   o LEDs and Buttons
+  o OpenSDA Notes
   o Configurations
 
 Status
@@ -21,6 +22,12 @@ Status
     are interested in assisting with the bring-up.
   2019-08-17:  The port is code complete.  It compiles with no errors or
     warnings but is untested.  Still waiting for hardware.
+  2019-08-20:  I have the board and started the debug.  However, the
+    very first image that I wrote to FLASH seems to have "bricked" the
+    board.  I believe that the S32K118 resets into a bad state and
+    cannot interface with the OpenSDA, effectively cutting it off from
+    the world.  I will continuing the bring-up using the S32K146EVB
+    where I can run from SRAM for the initial bring-up.
 
 Serial Console
 ==============
@@ -29,6 +36,9 @@ Serial Console
 
     OpenSDA UART TX  PTB1(LPUART0_TX)
     OpenSDA UART RX  PTB0(LPUART0_RX)
+
+  USB drivers for the PEMIcro CDC Serial port are available here:
+  http://www.pemicro.com/opensda/
 
 LEDs and Buttons
 ================
@@ -73,6 +83,18 @@ LEDs and Buttons
 
     SW2  PTD3
     SW3  PTD5
+
+OpenSDA Notes
+=============
+
+  - USB drivers for the PEMIcro CDC Serial port are available here:
+    http://www.pemicro.com/opensda/
+
+  - The drag'n'drog interface expects files in .srec format.
+
+  - Using Segger J-Link:  Easy... but remember to use the SWD connector J14
+    near the touch electrodes and not the OpenSDA connector near the OpenSDA
+    USB connector J7.
 
 Configurations
 ==============

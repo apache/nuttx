@@ -9,17 +9,21 @@ Contents
   o Status
   o Serial Console
   o LEDs and Buttons
+  o OpenSDA Notes
   o Configurations
 
 Status
 ======
 
-  2019-08-148  Configuration created but entirely untested.  This
+  2019-08-18:  Configuration created but entirely untested.  This
     configuration is intended, initially, to verify s32k14x architecture
-    support.  The configuration builds and linkes without error but has
+    support.  The configuration builds and links without error but has
     not yet been tested.  This is VERY much a work in progress and you
     should not use this configuration unless you are interested in
     assisting with the bring-up.
+  2019-08-20:  Initial testing, I am running out of SRAM to avoid the
+    brickage problems I had with the S32K118EVB (i.e., with
+    CONFIG_BOOT_RUNFROMISRAM=y)
 
 Serial Console
 ==============
@@ -28,6 +32,9 @@ Serial Console
 
     OpenSDA UART TX  PTC7 (LPUART1_TX)
     OpenSDA UART RX  PTC6 (LPUART1_RX)
+
+  USB drivers for the PEMIcro CDC Serial port are available here:
+  http://www.pemicro.com/opensda/
 
 LEDs and Buttons
 ================
@@ -72,6 +79,18 @@ LEDs and Buttons
 
     SW2  PTC12
     SW3  PTC13
+
+OpenSDA Notes
+=============
+
+  - USB drivers for the PEMIcro CDC Serial port are available here:
+    http://www.pemicro.com/opensda/
+
+  - The drag'n'drog interface expects files in .srec format.
+
+  - Using Segger J-Link:  Easy... but remember to use the SWD J14 connector
+    in the center of the board and not the OpenSDA connector closer to the
+    OpenSDA USB connector J7.
 
 Configurations
 ==============

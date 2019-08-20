@@ -93,8 +93,8 @@ static inline void s32k1xx_wdog_disable(void)
    * update enable, watchdog disabled.
    */
 
-  regval = (WDOG_CS_CMD32EN | WDOG_CS_CLK_LPOCLK |WDOG_CS_UPDATE);
-  putreg32(regval, S32K1XX_WDOG_CNT);
+  regval = (WDOG_CS_CMD32EN | WDOG_CS_CLK_LPOCLK | WDOG_CS_UPDATE);
+  putreg32(regval, S32K1XX_WDOG_CS);
 
   /* Configure timeout to the maximum: */
 

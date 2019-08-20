@@ -183,11 +183,10 @@ enum scg_sosc_range_e
 
 struct scg_sosc_config_s
 {
-  uint32_t freq;                       /* System OSC frequency */
   enum scg_sosc_monitor_mode_e mode;   /* System OSC Clock monitor mode */
   enum scg_sosc_ext_ref_e extref;      /* System OSC External Reference Select */
   enum scg_sosc_gain_e gain;           /* System OSC high-gain operation */
-  enum scg_sosc_gain_e range;          /* System OSC frequency range */
+  enum scg_sosc_range_e range;         /* System OSC frequency range */
   enum scg_async_clock_div_e div1;     /* Asynchronous peripheral source */
   enum scg_async_clock_div_e div2;     /* Asynchronous peripheral source */
   bool initialize;                     /* true: Initialize the System OSC module */
