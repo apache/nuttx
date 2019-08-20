@@ -21,9 +21,13 @@ Status
     not yet been tested.  This is VERY much a work in progress and you
     should not use this configuration unless you are interested in
     assisting with the bring-up.
+
   2019-08-20:  Initial testing, I am running out of SRAM to avoid the
     brickage problems I had with the S32K118EVB (i.e., with
-    CONFIG_BOOT_RUNFROMISRAM=y)
+    CONFIG_BOOT_RUNFROMISRAM=y).
+
+    The NSH configuration now appears work correctly.  Only verified when
+    running SRAM at present.
 
 Serial Console
 ==============

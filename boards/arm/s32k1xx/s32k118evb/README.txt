@@ -20,14 +20,20 @@ Status
     to support development of the architecture support.  This is VERY much
     a work in progress and you should not use this configuration unless you
     are interested in assisting with the bring-up.
+
   2019-08-17:  The port is code complete.  It compiles with no errors or
     warnings but is untested.  Still waiting for hardware.
+
   2019-08-20:  I have the board and started the debug.  However, the
     very first image that I wrote to FLASH seems to have "bricked" the
     board.  I believe that the S32K118 resets into a bad state and
     cannot interface with the OpenSDA, effectively cutting it off from
     the world.  I will continuing the bring-up using the S32K146EVB
     where I can run from SRAM for the initial bring-up.
+
+    These bring-up issues were addressed with S32K146EVB.  It is not probably
+    safe to try the S32K118EVB again (if I can figure out how to break into
+    my bricked system).
 
 Serial Console
 ==============
