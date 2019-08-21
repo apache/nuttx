@@ -358,7 +358,7 @@ bool kl_gpioread(uint32_t pinset);
  * Name: kl_gpioirqattach
  *
  * Description:
- *   Attach a pin interrupt handler.  The normal initalization sequence is:
+ *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
  *   1. Call kl_configgpio() to configure the interrupting pin (pin interrupts
  *      will be disabled.

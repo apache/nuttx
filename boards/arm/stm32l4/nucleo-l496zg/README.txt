@@ -281,7 +281,7 @@ SPI
   configuration seams in order. So the board provides a quick test
   that can be selected vi CONFIG_NUCLEO_SPI_TEST that will initalise
   the selected buses (SPI1-SPI3) and send some text on the bus at
-  application initalization time board_app_initialize.
+  application initialization time board_app_initialize.
 
 SDIO
 ----

@@ -342,7 +342,7 @@ int netdriver_ifdown(struct net_driver_s *dev)
 
 int netdriver_init(void)
 {
-  /* Internal initalization */
+  /* Internal initialization */
 
   timer_set(&g_periodic_timer, 500);
   netdev_init();
