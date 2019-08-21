@@ -96,7 +96,8 @@
 #define S32K1XX_IRQ_PMC           (37) /* PMC Interrupt */
 #define S32K1XX_IRQ_WDOG          (38) /* WDOG interrupt request out before wdg reset out */
 #define S32K1XX_IRQ_RCM           (39) /* RCM Asynchronous Interrupt */
-#define S32K1XX_IRQ_LPI2C0        (40) /* LPI2C Master/Slave Interrupt */
+#define S32K1XX_IRQ_LPI2C0M       (40) /* LPI2C Master/Slave Interrupt */
+#define S32K1XX_IRQ_LPI2C0S       (40) /* LPI2C Master/Slave Interrupt */
 #define S32K1XX_IRQ_FLEXIO        (41) /* FlexIO Interrupt */
 #define S32K1XX_IRQ_LPSPI0        (42) /* LPSPI0 Interrupt */
 #define S32K1XX_IRQ_LPSPI1        (43) /* LPSPI1 Interrupt */

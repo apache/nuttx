@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/s32k1xx/hardware/imxrt_lpuart.h
+ * arch/arm/src/s32k1xx/hardware/s32k1xx_lpuart.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
