@@ -411,7 +411,7 @@
                                                             /* -0xaefff: Reserved */
 #  define TIVA_EEPROM_BASE    (TIVA_PERIPH1_BASE + 0xaf000) /* -0xaffff: EEPROM and Key Locker */
                                                             /* -0xb5fff: Reserved */
-#  define TIVA_1WIRE_BASE     (TIVA_PERIPH1_BASE + 0xb6000) /* -0xb6fff: EEPROM and Key Locker */
+#  define TIVA_1WIRE_BASE     (TIVA_PERIPH1_BASE + 0xb6000) /* -0xb6fff: 1-Wire Master Module */
                                                             /* -0xb7fff: Reserved */
 #  define TIVA_I2C8_BASE      (TIVA_PERIPH1_BASE + 0xb8000) /* -0xb8fff: I2C8 */
 #  define TIVA_I2C9_BASE      (TIVA_PERIPH1_BASE + 0xb9000) /* -0xb9fff: I2C9 */

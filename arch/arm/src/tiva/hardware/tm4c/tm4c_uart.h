@@ -637,11 +637,9 @@
 
 /* UART DMA Control (DMACTL) */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  define UART_DMACTL_RXDMAE       (1 << 0)  /* Bit 0:  Receive DMA Enable */
-#  define UART_DMACTL_TXDMAE       (1 << 1)  /* Bit 1:  Transmit DMA Enable */
-#  define UART_DMACTL_DMAERR       (1 << 2)  /* Bit 2:  DMA on Error */
-#endif
+#define UART_DMACTL_RXDMAE         (1 << 0)  /* Bit 0:  Receive DMA Enable */
+#define UART_DMACTL_TXDMAE         (1 << 1)  /* Bit 1:  Transmit DMA Enable */
+#define UART_DMACTL_DMAERR         (1 << 2)  /* Bit 2:  Stop DMA receive if UART error */
 
 /* UART 9-Bit Self Address (9BITADDR) */
 
