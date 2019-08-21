@@ -671,8 +671,10 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
            * read from extended CSD register.
            */
 
+#ifdef CONFIG_DEBUG_FS_INFO
           uint16_t csize        = ((csd[1] & 0x03ff) << 2) | ((csd[2] >> 30) & 3);
           uint8_t  csizemult    = (csd[2] >> 15) & 7;
+#endif
 
           priv->blockshift      = readbllen;
           priv->blocksize       = (1 << readbllen);
@@ -3017,7 +3019,9 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 {
   uint32_t response;
   uint32_t sdcapacity = MMCSD_ACMD41_STDCAPACITY;
+#ifdef CONFIG_MMCSD_MMCSUPPORT
   uint32_t mmccapacity = MMCSD_R3_HIGHCAPACITY;
+#endif
   clock_t start;
   clock_t elapsed;
   int ret;
@@ -3053,9 +3057,8 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   up_udelay(MMCSD_IDLE_DELAY);
 
 #ifdef CONFIG_MMCSD_MMCSUPPORT
-  /* send CMD3 which is supported only by MMC.
-   * if there is valid response then the card
-   * is definetly of MMC type
+  /* Send CMD3 which is supported only by MMC.  if there is valid response
+   * then the card is definitely of MMC type
    */
 
   mmcsd_sendcmdpoll(priv, MMC_CMD1, MMCSD_VDD_33_34 | mmccapacity);
