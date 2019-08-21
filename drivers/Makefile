@@ -83,6 +83,10 @@ include wireless$(DELIM)Make.defs
 include contactless$(DELIM)Make.defs
 include 1wire$(DELIM)Make.defs
 
+ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
+include platform$(DELIM)Make.defs
+endif
+
 CSRCS += dev_null.c dev_zero.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)

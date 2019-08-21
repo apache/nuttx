@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig SCU_SENSORS
+	bool "SCU Sensor Drivers"
+
+if SCU_SENSORS
+
+config SENSORS_AK09912_SCU
+	bool "Asahi AK09911/AK09912 Compass Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for AK09911/AK09912 Compass sensor.
+		NOTE: This sensor is connected to the SCU unit
+
+endif # SCU_SENSORS
