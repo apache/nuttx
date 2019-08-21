@@ -360,4 +360,36 @@ config LPI2C1_FILTSDA
 
 endmenu # LPI2C1 Configuration
 
+menu "Ethernet Configuration"
+	depends on S32K1XX_ENET
+
+config MXRT_ENET_NRXBUFFERS
+	int "Number Rx buffers"
+	default 6
+
+config S32K1XX_ENET_NTXBUFFERS
+	int "Number Tx buffers"
+	default 2
+
+config S32K1XX_ENET_ENHANCEDBD
+	bool # not optional
+	default n
+
+config S32K1XX_ENET_NETHIFS
+	int  # Not optional
+	default 1
+
+config S32K1XX_ENET_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_S32K1XX_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imxrt_phy_boardinitialize();  The i.MXRT ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # S32K1XX_ENET
+
 endif # ARCH_CHIP_S32K1XX
