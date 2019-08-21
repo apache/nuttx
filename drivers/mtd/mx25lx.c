@@ -2,7 +2,7 @@
  * drivers/mtd/mx25lx.c
  * Driver for SPI-based or QSPI-based MX25Lxx33L parts of 32 or 64MBit.
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Aleksandr Vyhovanec <www.desh@gmail.com>
  *
  *   Copied from / based on sst25.c and w25.c drivers written by
@@ -64,6 +64,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* Per the data sheet, MX25L parts can be driven with either SPI mode 0 (CPOL=0 and
  * CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to specify
  * CONFIG_MX25L_SPIMODE to select the best mode for your device.  If
@@ -128,6 +129,7 @@
 #define CLR_ERASED(p)              do { (p)->flags &= ~MX25L_CACHE_ERASED; } while (0)
 
 /* MX25L Instructions *******************************************************************/
+
 /*      Command                    Value      Description                 Addr   Data   */
 /*                                                                           Dummy      */
 #define MX25L_READ                  0x03    /* Read data bytes            3/4 0   >=1   */
@@ -182,6 +184,7 @@
 #define MX25L_NOP                   0x00    /* No Operation             0   0   0       */
 
 /* MX25L Registers ******************************************************************/
+
 /* Read ID (RDID) register values */
 
 #define MX25L_MANUFACTURER          0xc2  /* Macronix manufacturer ID */
@@ -237,7 +240,7 @@ struct mx25l_dev_s
   FAR struct spi_dev_s *dev;         /* Saved SPI interface instance */
   uint8_t               sectorshift;
   uint8_t               pageshift;
-  uint8_t               addressbytes; /*Number of address bytes required */
+  uint8_t               addressbytes; /* Number of address bytes required */
   uint16_t              nsectors;
 #if defined(CONFIG_MX25L_SECTOR512)
   uint8_t               flags;       /* Buffered sector flags */
@@ -366,23 +369,23 @@ static inline int mx25l_readid(FAR struct mx25l_dev_s *priv)
 
       if (capacity == MX25L_JEDEC_MX25L3233F_CAPACITY)
         {
-           /* Save the FLASH geometry */
+          /* Save the FLASH geometry */
 
-           priv->sectorshift  = MX25L_MX25L3233F_SECTOR_SHIFT;
-           priv->nsectors     = MX25L_MX25L3233F_NSECTORS;
-           priv->pageshift    = MX25L_MX25L3233F_PAGE_SHIFT;
-           priv->addressbytes = MX25L_ADDRESSBYTES_3;
-           return OK;
+          priv->sectorshift  = MX25L_MX25L3233F_SECTOR_SHIFT;
+          priv->nsectors     = MX25L_MX25L3233F_NSECTORS;
+          priv->pageshift    = MX25L_MX25L3233F_PAGE_SHIFT;
+          priv->addressbytes = MX25L_ADDRESSBYTES_3;
+          return OK;
         }
       else if (capacity == MX25L_JEDEC_MX25L6433F_CAPACITY)
         {
-           /* Save the FLASH geometry */
+          /* Save the FLASH geometry */
 
-           priv->sectorshift  = MX25L_MX25L6433F_SECTOR_SHIFT;
-           priv->nsectors     = MX25L_MX25L6433F_NSECTORS;
-           priv->pageshift    = MX25L_MX25L6433F_PAGE_SHIFT;
-           priv->addressbytes = MX25L_ADDRESSBYTES_3;
-           return OK;
+          priv->sectorshift  = MX25L_MX25L6433F_SECTOR_SHIFT;
+          priv->nsectors     = MX25L_MX25L6433F_NSECTORS;
+          priv->pageshift    = MX25L_MX25L6433F_PAGE_SHIFT;
+          priv->addressbytes = MX25L_ADDRESSBYTES_3;
+          return OK;
         }
       else if (capacity == MX25L_JEDEC_MX25L25635F_CAPACITY)
         {
@@ -511,6 +514,7 @@ static void mx25l_sectorerase(FAR struct mx25l_dev_s *priv, off_t sector)
    */
 
   /* The command we send varies depending on if we need 3 or 4 address bytes */
+
   if (priv->addressbytes == MX25L_ADDRESSBYTES_4)
     {
       (void)SPI_SEND(priv->dev, MX25L_SE4B);
@@ -682,6 +686,7 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
           (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
           (void)SPI_SEND(priv->dev, address & 0xff);
         }
+
       /* Then send the page of data */
 
       SPI_SNDBLOCK(priv->dev, buffer, 1 << priv->pageshift);
@@ -760,7 +765,8 @@ static FAR uint8_t *mx25l_cacheread(FAR struct mx25l_dev_s *priv, off_t sector)
 
       /* Read the erase block into the cache */
 
-      mx25l_byteread(priv, priv->sector, (esectno << priv->sectorshift), 1 << priv->sectorshift);
+      mx25l_byteread(priv, priv->sector, (esectno << priv->sectorshift),
+                     1 << priv->sectorshift);
 
       /* Mark the sector as cached */
 
@@ -923,8 +929,8 @@ static ssize_t mx25l_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   /* On this device, we can handle the block read just like the byte-oriented read */
 
 #ifdef CONFIG_MX25L_SECTOR512
-  nbytes = mx25l_read(dev, startblock << MX25L_SECTOR512_SHIFT, nblocks << MX25L_SECTOR512_SHIFT,
-                      buffer);
+  nbytes = mx25l_read(dev, startblock << MX25L_SECTOR512_SHIFT,
+                      nblocks << MX25L_SECTOR512_SHIFT, buffer);
   if (nbytes > 0)
     {
       return nbytes >> MX25L_SECTOR512_SHIFT;
@@ -974,7 +980,7 @@ static ssize_t mx25l_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t mx25l_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                           FAR uint8_t *buffer)
 {
-  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev; // TODO:
+  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev;
 
   mxlinfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
@@ -1002,7 +1008,8 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -1017,7 +1024,8 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_MX25L_SECTOR512
               geo->blocksize    = (1 << MX25L_SECTOR512_SHIFT);
               geo->erasesize    = (1 << MX25L_SECTOR512_SHIFT);
-              geo->neraseblocks = priv->nsectors << (priv->sectorshift - MX25L_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors <<
+                                  (priv->sectorshift - MX25L_SECTOR512_SHIFT);
 #else
               geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
