@@ -1,7 +1,7 @@
 /*****************************************************************************
- * arch/arm/src/imxrt/hardware/imxrt_enet.h
+ * arch/arm/src/s32k1xx/hardware/s32k1xx_enet.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,15 @@
  *
  *****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_ENET_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_ENET_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H
+#define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H
 
 /*****************************************************************************
  * Included Files
  *****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include "chip.h"
+#include "hardware/s32k1xx_memorymap.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
@@ -50,111 +49,111 @@
 
 /* Register Offsets **********************************************************/
 
-#define IMXRT_ENET_EIR_OFFSET      0x0004 /* Interrupt Event Register */
-#define IMXRT_ENET_EIMR_OFFSET     0x0008 /* Interrupt Mask Register */
-#define IMXRT_ENET_RDAR_OFFSET     0x0010 /* Receive Descriptor Active Register */
-#define IMXRT_ENET_TDAR_OFFSET     0x0014 /* Transmit Descriptor Active Register */
-#define IMXRT_ENET_ECR_OFFSET      0x0024 /* Ethernet Control Register */
-#define IMXRT_ENET_MMFR_OFFSET     0x0040 /* MII Management Frame Register */
-#define IMXRT_ENET_MSCR_OFFSET     0x0044 /* MII Speed Control Register */
-#define IMXRT_ENET_MIBC_OFFSET     0x0064 /* MIB Control Register */
-#define IMXRT_ENET_RCR_OFFSET      0x0084 /* Receive Control Register */
-#define IMXRT_ENET_TCR_OFFSET      0x00c4 /* Transmit Control Register */
-#define IMXRT_ENET_PALR_OFFSET     0x00e4 /* Physical Address Lower Register */
-#define IMXRT_ENET_PAUR_OFFSET     0x00e8 /* Physical Address Upper Register */
-#define IMXRT_ENET_OPD_OFFSET      0x00ec /* Opcode/Pause Duration Register */
-#define IMXRT_ENET_TXIC_OFFSET     0x00f0 /* Transmit Interrupt Coalescing Register */
-#define IMXRT_ENET_RXIC_OFFSET     0x0100 /* Receive Interrupt Coalescing Register */
-#define IMXRT_ENET_IAUR_OFFSET     0x0118 /* Descriptor Individual Upper Address Register */
-#define IMXRT_ENET_IALR_OFFSET     0x011c /* Descriptor Individual Lower Address Register */
-#define IMXRT_ENET_GAUR_OFFSET     0x0120 /* Descriptor Group Upper Address Register */
-#define IMXRT_ENET_GALR_OFFSET     0x0124 /* Descriptor Group Lower Address Register */
-#define IMXRT_ENET_TFWR_OFFSET     0x0144 /* Transmit FIFO Watermark Register */
-#define IMXRT_ENET_RDSR_OFFSET     0x0180 /* Receive Descriptor Ring Start Register */
-#define IMXRT_ENET_TDSR_OFFSET     0x0184 /* Transmit Buffer Descriptor Ring Start Register */
-#define IMXRT_ENET_MRBR_OFFSET     0x0188 /* Maximum Receive Buffer Size Register */
-#define IMXRT_ENET_RSFL_OFFSET     0x0190 /* Receive FIFO Section Full Threshold */
-#define IMXRT_ENET_RSEM_OFFSET     0x0194 /* Receive FIFO Section Empty Threshold */
-#define IMXRT_ENET_RAEM_OFFSET     0x0198 /* Receive FIFO Almost Empty Threshold */
-#define IMXRT_ENET_RAFL_OFFSET     0x019c /* Receive FIFO Almost Full Threshold */
-#define IMXRT_ENET_TSEM_OFFSET     0x01a0 /* Transmit FIFO Section Empty Threshold */
-#define IMXRT_ENET_TAEM_OFFSET     0x01a4 /* Transmit FIFO Almost Empty Threshold */
-#define IMXRT_ENET_TAFL_OFFSET     0x01a8 /* Transmit FIFO Almost Full Threshold */
-#define IMXRT_ENET_TIPG_OFFSET     0x01ac /* Transmit Inter-Packet Gap */
-#define IMXRT_ENET_FTRL_OFFSET     0x01b0 /* Frame Truncation Length */
-#define IMXRT_ENET_TACC_OFFSET     0x01c0 /* Transmit Accelerator Function Configuration */
-#define IMXRT_ENET_RACC_OFFSET     0x01c4 /* Receive Accelerator Function Configuration */
+#define S32K1XX_ENET_EIR_OFFSET      0x0004 /* Interrupt Event Register */
+#define S32K1XX_ENET_EIMR_OFFSET     0x0008 /* Interrupt Mask Register */
+#define S32K1XX_ENET_RDAR_OFFSET     0x0010 /* Receive Descriptor Active Register */
+#define S32K1XX_ENET_TDAR_OFFSET     0x0014 /* Transmit Descriptor Active Register */
+#define S32K1XX_ENET_ECR_OFFSET      0x0024 /* Ethernet Control Register */
+#define S32K1XX_ENET_MMFR_OFFSET     0x0040 /* MII Management Frame Register */
+#define S32K1XX_ENET_MSCR_OFFSET     0x0044 /* MII Speed Control Register */
+#define S32K1XX_ENET_MIBC_OFFSET     0x0064 /* MIB Control Register */
+#define S32K1XX_ENET_RCR_OFFSET      0x0084 /* Receive Control Register */
+#define S32K1XX_ENET_TCR_OFFSET      0x00c4 /* Transmit Control Register */
+#define S32K1XX_ENET_PALR_OFFSET     0x00e4 /* Physical Address Lower Register */
+#define S32K1XX_ENET_PAUR_OFFSET     0x00e8 /* Physical Address Upper Register */
+#define S32K1XX_ENET_OPD_OFFSET      0x00ec /* Opcode/Pause Duration Register */
+#define S32K1XX_ENET_IAUR_OFFSET     0x0118 /* Descriptor Individual Upper Address Register */
+#define S32K1XX_ENET_IALR_OFFSET     0x011c /* Descriptor Individual Lower Address Register */
+#define S32K1XX_ENET_GAUR_OFFSET     0x0120 /* Descriptor Group Upper Address Register */
+#define S32K1XX_ENET_GALR_OFFSET     0x0124 /* Descriptor Group Lower Address Register */
+#define S32K1XX_ENET_TFWR_OFFSET     0x0144 /* Transmit FIFO Watermark Register */
+#define S32K1XX_ENET_RDSR_OFFSET     0x0180 /* Receive Descriptor Ring Start Register */
+#define S32K1XX_ENET_TDSR_OFFSET     0x0184 /* Transmit Buffer Descriptor Ring Start Register */
+#define S32K1XX_ENET_MRBR_OFFSET     0x0188 /* Maximum Receive Buffer Size Register */
+#define S32K1XX_ENET_RSFL_OFFSET     0x0190 /* Receive FIFO Section Full Threshold */
+#define S32K1XX_ENET_RSEM_OFFSET     0x0194 /* Receive FIFO Section Empty Threshold */
+#define S32K1XX_ENET_RAEM_OFFSET     0x0198 /* Receive FIFO Almost Empty Threshold */
+#define S32K1XX_ENET_RAFL_OFFSET     0x019c /* Receive FIFO Almost Full Threshold */
+#define S32K1XX_ENET_TSEM_OFFSET     0x01a0 /* Transmit FIFO Section Empty Threshold */
+#define S32K1XX_ENET_TAEM_OFFSET     0x01a4 /* Transmit FIFO Almost Empty Threshold */
+#define S32K1XX_ENET_TAFL_OFFSET     0x01a8 /* Transmit FIFO Almost Full Threshold */
+#define S32K1XX_ENET_TIPG_OFFSET     0x01ac /* Transmit Inter-Packet Gap */
+#define S32K1XX_ENET_FTRL_OFFSET     0x01b0 /* Frame Truncation Length */
+#define S32K1XX_ENET_TACC_OFFSET     0x01c0 /* Transmit Accelerator Function Configuration */
+#define S32K1XX_ENET_RACC_OFFSET     0x01c4 /* Receive Accelerator Function Configuration */
 
-#define IMXRT_ENET_ATCR_OFFSET     0x0400 /* Timer Control Register */
-#define IMXRT_ENET_ATVR_OFFSET     0x0404 /* Timer Value Register */
-#define IMXRT_ENET_ATOFF_OFFSET    0x0408 /* Timer Offset Register */
-#define IMXRT_ENET_ATPER_OFFSET    0x040c /* Timer Period Register */
-#define IMXRT_ENET_ATCOR_OFFSET    0x0410 /* Timer Correction Register */
-#define IMXRT_ENET_ATINC_OFFSET    0x0414 /* Time-Stamping Clock Period Register */
-#define IMXRT_ENET_ATSTMP_OFFSET   0x0418 /* Timestamp of Last Transmitted Frame */
+/* REVISIT:  Missing statistics register */
 
-#define IMXRT_ENET_TGSR_OFFSET     0x0604 /* Timer Global Status Register */
-#define IMXRT_ENET_TCSR0_OFFSET    0x0608 /* Timer Control Status Register */
-#define IMXRT_ENET_TCCR0_OFFSET    0x060c /* Timer Compare Capture Register */
-#define IMXRT_ENET_TCSR1_OFFSET    0x0610 /* Timer Control Status Register */
-#define IMXRT_ENET_TCCR1_OFFSET    0x0614 /* Timer Compare Capture Register */
-#define IMXRT_ENET_TCSR2_OFFSET    0x0618 /* Timer Control Status Register */
-#define IMXRT_ENET_TCCR2_OFFSET    0x061c /* Timer Compare Capture Register */
-#define IMXRT_ENET_TCSR3_OFFSET    0x0620 /* Timer Control Status Register */
-#define IMXRT_ENET_TCCR3_OFFSET    0x0624 /* Timer Compare Capture Register */
+#define S32K1XX_ENET_ATCR_OFFSET     0x0400 /* Timer Control Register */
+#define S32K1XX_ENET_ATVR_OFFSET     0x0404 /* Timer Value Register */
+#define S32K1XX_ENET_ATOFF_OFFSET    0x0408 /* Timer Offset Register */
+#define S32K1XX_ENET_ATPER_OFFSET    0x040c /* Timer Period Register */
+#define S32K1XX_ENET_ATCOR_OFFSET    0x0410 /* Timer Correction Register */
+#define S32K1XX_ENET_ATINC_OFFSET    0x0414 /* Time-Stamping Clock Period Register */
+#define S32K1XX_ENET_ATSTMP_OFFSET   0x0418 /* Timestamp of Last Transmitted Frame */
+
+#define S32K1XX_ENET_TGSR_OFFSET     0x0604 /* Timer Global Status Register */
+#define S32K1XX_ENET_TCSR0_OFFSET    0x0608 /* Timer Control Status Register */
+#define S32K1XX_ENET_TCCR0_OFFSET    0x060c /* Timer Compare Capture Register */
+#define S32K1XX_ENET_TCSR1_OFFSET    0x0610 /* Timer Control Status Register */
+#define S32K1XX_ENET_TCCR1_OFFSET    0x0614 /* Timer Compare Capture Register */
+#define S32K1XX_ENET_TCSR2_OFFSET    0x0618 /* Timer Control Status Register */
+#define S32K1XX_ENET_TCCR2_OFFSET    0x061c /* Timer Compare Capture Register */
+#define S32K1XX_ENET_TCSR3_OFFSET    0x0620 /* Timer Control Status Register */
+#define S32K1XX_ENET_TCCR3_OFFSET    0x0624 /* Timer Compare Capture Register */
 
 /* Register Addresses ********************************************************/
 
-#define IMXRT_ENET_EIR             (IMXRT_ENET_BASE+IMXRT_ENET_EIR_OFFSET)
-#define IMXRT_ENET_EIMR            (IMXRT_ENET_BASE+IMXRT_ENET_EIMR_OFFSET)
-#define IMXRT_ENET_RDAR            (IMXRT_ENET_BASE+IMXRT_ENET_RDAR_OFFSET)
-#define IMXRT_ENET_TDAR            (IMXRT_ENET_BASE+IMXRT_ENET_TDAR_OFFSET)
-#define IMXRT_ENET_ECR             (IMXRT_ENET_BASE+IMXRT_ENET_ECR_OFFSET)
-#define IMXRT_ENET_MMFR            (IMXRT_ENET_BASE+IMXRT_ENET_MMFR_OFFSET)
-#define IMXRT_ENET_MSCR            (IMXRT_ENET_BASE+IMXRT_ENET_MSCR_OFFSET)
-#define IMXRT_ENET_MIBC            (IMXRT_ENET_BASE+IMXRT_ENET_MIBC_OFFSET)
-#define IMXRT_ENET_RCR             (IMXRT_ENET_BASE+IMXRT_ENET_RCR_OFFSET)
-#define IMXRT_ENET_TCR             (IMXRT_ENET_BASE+IMXRT_ENET_TCR_OFFSET)
-#define IMXRT_ENET_PALR            (IMXRT_ENET_BASE+IMXRT_ENET_PALR_OFFSET)
-#define IMXRT_ENET_PAUR            (IMXRT_ENET_BASE+IMXRT_ENET_PAUR_OFFSET)
-#define IMXRT_ENET_OPD             (IMXRT_ENET_BASE+IMXRT_ENET_OPD_OFFSET)
-#define IMXRT_ENET_IAUR            (IMXRT_ENET_BASE+IMXRT_ENET_IAUR_OFFSET)
-#define IMXRT_ENET_IALR            (IMXRT_ENET_BASE+IMXRT_ENET_IALR_OFFSET)
-#define IMXRT_ENET_GAUR            (IMXRT_ENET_BASE+IMXRT_ENET_GAUR_OFFSET)
-#define IMXRT_ENET_GALR            (IMXRT_ENET_BASE+IMXRT_ENET_GALR_OFFSET)
-#define IMXRT_ENET_TFWR            (IMXRT_ENET_BASE+IMXRT_ENET_TFWR_OFFSET)
-#define IMXRT_ENET_RDSR            (IMXRT_ENET_BASE+IMXRT_ENET_RDSR_OFFSET)
-#define IMXRT_ENET_TDSR            (IMXRT_ENET_BASE+IMXRT_ENET_TDSR_OFFSET)
-#define IMXRT_ENET_MRBR            (IMXRT_ENET_BASE+IMXRT_ENET_MRBR_OFFSET)
-#define IMXRT_ENET_RSFL            (IMXRT_ENET_BASE+IMXRT_ENET_RSFL_OFFSET)
-#define IMXRT_ENET_RSEM            (IMXRT_ENET_BASE+IMXRT_ENET_RSEM_OFFSET)
-#define IMXRT_ENET_RAEM            (IMXRT_ENET_BASE+IMXRT_ENET_RAEM_OFFSET)
-#define IMXRT_ENET_RAFL            (IMXRT_ENET_BASE+IMXRT_ENET_RAFL_OFFSET)
-#define IMXRT_ENET_TSEM            (IMXRT_ENET_BASE+IMXRT_ENET_TSEM_OFFSET)
-#define IMXRT_ENET_TAEM            (IMXRT_ENET_BASE+IMXRT_ENET_TAEM_OFFSET)
-#define IMXRT_ENET_TAFL            (IMXRT_ENET_BASE+IMXRT_ENET_TAFL_OFFSET)
-#define IMXRT_ENET_TIPG            (IMXRT_ENET_BASE+IMXRT_ENET_TIPG_OFFSET)
-#define IMXRT_ENET_FTRL            (IMXRT_ENET_BASE+IMXRT_ENET_FTRL_OFFSET)
-#define IMXRT_ENET_TACC            (IMXRT_ENET_BASE+IMXRT_ENET_TACC_OFFSET)
-#define IMXRT_ENET_RACC            (IMXRT_ENET_BASE+IMXRT_ENET_RACC_OFFSET)
+#define S32K1XX_ENET_EIR             (S32K1XX_ENET_BASE+S32K1XX_ENET_EIR_OFFSET)
+#define S32K1XX_ENET_EIMR            (S32K1XX_ENET_BASE+S32K1XX_ENET_EIMR_OFFSET)
+#define S32K1XX_ENET_RDAR            (S32K1XX_ENET_BASE+S32K1XX_ENET_RDAR_OFFSET)
+#define S32K1XX_ENET_TDAR            (S32K1XX_ENET_BASE+S32K1XX_ENET_TDAR_OFFSET)
+#define S32K1XX_ENET_ECR             (S32K1XX_ENET_BASE+S32K1XX_ENET_ECR_OFFSET)
+#define S32K1XX_ENET_MMFR            (S32K1XX_ENET_BASE+S32K1XX_ENET_MMFR_OFFSET)
+#define S32K1XX_ENET_MSCR            (S32K1XX_ENET_BASE+S32K1XX_ENET_MSCR_OFFSET)
+#define S32K1XX_ENET_MIBC            (S32K1XX_ENET_BASE+S32K1XX_ENET_MIBC_OFFSET)
+#define S32K1XX_ENET_RCR             (S32K1XX_ENET_BASE+S32K1XX_ENET_RCR_OFFSET)
+#define S32K1XX_ENET_TCR             (S32K1XX_ENET_BASE+S32K1XX_ENET_TCR_OFFSET)
+#define S32K1XX_ENET_PALR            (S32K1XX_ENET_BASE+S32K1XX_ENET_PALR_OFFSET)
+#define S32K1XX_ENET_PAUR            (S32K1XX_ENET_BASE+S32K1XX_ENET_PAUR_OFFSET)
+#define S32K1XX_ENET_OPD             (S32K1XX_ENET_BASE+S32K1XX_ENET_OPD_OFFSET)
+#define S32K1XX_ENET_IAUR            (S32K1XX_ENET_BASE+S32K1XX_ENET_IAUR_OFFSET)
+#define S32K1XX_ENET_IALR            (S32K1XX_ENET_BASE+S32K1XX_ENET_IALR_OFFSET)
+#define S32K1XX_ENET_GAUR            (S32K1XX_ENET_BASE+S32K1XX_ENET_GAUR_OFFSET)
+#define S32K1XX_ENET_GALR            (S32K1XX_ENET_BASE+S32K1XX_ENET_GALR_OFFSET)
+#define S32K1XX_ENET_TFWR            (S32K1XX_ENET_BASE+S32K1XX_ENET_TFWR_OFFSET)
+#define S32K1XX_ENET_RDSR            (S32K1XX_ENET_BASE+S32K1XX_ENET_RDSR_OFFSET)
+#define S32K1XX_ENET_TDSR            (S32K1XX_ENET_BASE+S32K1XX_ENET_TDSR_OFFSET)
+#define S32K1XX_ENET_MRBR            (S32K1XX_ENET_BASE+S32K1XX_ENET_MRBR_OFFSET)
+#define S32K1XX_ENET_RSFL            (S32K1XX_ENET_BASE+S32K1XX_ENET_RSFL_OFFSET)
+#define S32K1XX_ENET_RSEM            (S32K1XX_ENET_BASE+S32K1XX_ENET_RSEM_OFFSET)
+#define S32K1XX_ENET_RAEM            (S32K1XX_ENET_BASE+S32K1XX_ENET_RAEM_OFFSET)
+#define S32K1XX_ENET_RAFL            (S32K1XX_ENET_BASE+S32K1XX_ENET_RAFL_OFFSET)
+#define S32K1XX_ENET_TSEM            (S32K1XX_ENET_BASE+S32K1XX_ENET_TSEM_OFFSET)
+#define S32K1XX_ENET_TAEM            (S32K1XX_ENET_BASE+S32K1XX_ENET_TAEM_OFFSET)
+#define S32K1XX_ENET_TAFL            (S32K1XX_ENET_BASE+S32K1XX_ENET_TAFL_OFFSET)
+#define S32K1XX_ENET_TIPG            (S32K1XX_ENET_BASE+S32K1XX_ENET_TIPG_OFFSET)
+#define S32K1XX_ENET_FTRL            (S32K1XX_ENET_BASE+S32K1XX_ENET_FTRL_OFFSET)
+#define S32K1XX_ENET_TACC            (S32K1XX_ENET_BASE+S32K1XX_ENET_TACC_OFFSET)
+#define S32K1XX_ENET_RACC            (S32K1XX_ENET_BASE+S32K1XX_ENET_RACC_OFFSET)
 
-#define IMXRT_ENET_ATCR            (IMXRT_ENET_BASE+IMXRT_ENET_ATCR_OFFSET)
-#define IMXRT_ENET_ATVR            (IMXRT_ENET_BASE+IMXRT_ENET_ATVR_OFFSET)
-#define IMXRT_ENET_ATOFF           (IMXRT_ENET_BASE+IMXRT_ENET_ATOFF_OFFSET)
-#define IMXRT_ENET_ATPER           (IMXRT_ENET_BASE+IMXRT_ENET_ATPER_OFFSET)
-#define IMXRT_ENET_ATCOR           (IMXRT_ENET_BASE+IMXRT_ENET_ATCOR_OFFSET)
-#define IMXRT_ENET_ATINC           (IMXRT_ENET_BASE+IMXRT_ENET_ATINC_OFFSET)
-#define IMXRT_ENET_ATSTMP          (IMXRT_ENET_BASE+IMXRT_ENET_ATSTMP_OFFSET)
+#define S32K1XX_ENET_ATCR            (S32K1XX_ENET_BASE+S32K1XX_ENET_ATCR_OFFSET)
+#define S32K1XX_ENET_ATVR            (S32K1XX_ENET_BASE+S32K1XX_ENET_ATVR_OFFSET)
+#define S32K1XX_ENET_ATOFF           (S32K1XX_ENET_BASE+S32K1XX_ENET_ATOFF_OFFSET)
+#define S32K1XX_ENET_ATPER           (S32K1XX_ENET_BASE+S32K1XX_ENET_ATPER_OFFSET)
+#define S32K1XX_ENET_ATCOR           (S32K1XX_ENET_BASE+S32K1XX_ENET_ATCOR_OFFSET)
+#define S32K1XX_ENET_ATINC           (S32K1XX_ENET_BASE+S32K1XX_ENET_ATINC_OFFSET)
+#define S32K1XX_ENET_ATSTMP          (S32K1XX_ENET_BASE+S32K1XX_ENET_ATSTMP_OFFSET)
 
-#define IMXRT_ENET_TGSR            (IMXRT_ENET_BASE+IMXRT_ENET_TGSR_OFFSET)
-#define IMXRT_ENET_TCSR0           (IMXRT_ENET_BASE+IMXRT_ENET_TCSR0_OFFSET)
-#define IMXRT_ENET_TCCR0           (IMXRT_ENET_BASE+IMXRT_ENET_TCCR0_OFFSET)
-#define IMXRT_ENET_TCSR1           (IMXRT_ENET_BASE+IMXRT_ENET_TCSR1_OFFSET)
-#define IMXRT_ENET_TCCR1           (IMXRT_ENET_BASE+IMXRT_ENET_TCCR1_OFFSET)
-#define IMXRT_ENET_TCSR2           (IMXRT_ENET_BASE+IMXRT_ENET_TCSR2_OFFSET)
-#define IMXRT_ENET_TCCR2           (IMXRT_ENET_BASE+IMXRT_ENET_TCCR2_OFFSET)
-#define IMXRT_ENET_TCSR3           (IMXRT_ENET_BASE+IMXRT_ENET_TCSR3_OFFSET)
-#define IMXRT_ENET_TCCR3           (IMXRT_ENET_BASE+IMXRT_ENET_TCCR3_OFFSET)
+#define S32K1XX_ENET_TGSR            (S32K1XX_ENET_BASE+S32K1XX_ENET_TGSR_OFFSET)
+#define S32K1XX_ENET_TCSR0           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCSR0_OFFSET)
+#define S32K1XX_ENET_TCCR0           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCCR0_OFFSET)
+#define S32K1XX_ENET_TCSR1           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCSR1_OFFSET)
+#define S32K1XX_ENET_TCCR1           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCCR1_OFFSET)
+#define S32K1XX_ENET_TCSR2           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCSR2_OFFSET)
+#define S32K1XX_ENET_TCCR2           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCCR2_OFFSET)
+#define S32K1XX_ENET_TCSR3           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCSR3_OFFSET)
+#define S32K1XX_ENET_TCCR3           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCCR3_OFFSET)
 
 /* Register Bit Definitions **************************************************/
 
@@ -195,7 +194,7 @@
                                                /* Bit 5: Reserved */
 #define ENET_ECR_DBGEN               (1 << 6)  /* Bit 6:  Debug enable */
 #define ENET_ECR_STOPEN              (1 << 7)  /* Bit 7:  STOPEN Signal Control */
-#ifdef IMXRT_ENET_HAS_DBSWAP
+#ifdef S32K1XX_ENET_HAS_DBSWAP
 #define ENET_ECR_DBSWP               (1 << 8)  /* Bit 8:  Swap bytes */
 #endif
                                                /* Bits 9-31: Reserved */
@@ -232,6 +231,7 @@
 #  define ENET_MSCR_HOLDTIME_3CYCLES (2 << ENET_MSCR_HOLDTIME_SHIFT) /* 3 internal module clock cycles */
 #  define ENET_MSCR_HOLDTIME_8CYCLES (7 << ENET_MSCR_HOLDTIME_SHIFT) /* 8 internal module clock cycles */
                                                /* Bits 11-31: Reserved */
+
 /* MIB Control Register */
                                                /* Bits 0-28: Reserved */
 #define ENET_MIBC_MIB_CLEAR          (1 << 29) /* Bit 29: MIB clear */
@@ -270,8 +270,10 @@
 #define ENET_TCR_ADDSEL_SHIFT        (5)       /* Bits 5-7: Source MAC address select on transmit */
 #define ENET_TCR_ADDSEL_MASK         (7 << ENET_TCR_ADDSEL_SHIFT)
 #  define ENET_TCR_ADDSEL_PADDR12    (0 << ENET_TCR_ADDSEL_SHIFT) /* Node MAC address programmed on PADDR1/2 registers */
+#define ENET_TCT_ADDINS              (1 << 8)  /* Bit 8:  Set MAC Address On Transmit */
 #define ENET_TCR_CRCFWD              (1 << 9)  /* Bit 9:  Forward frame from application with CRC */
                                                /* Bits 10-31: Reserved */
+
 /* Physical Address Lower/Upper Register (32-bits of 48-address) */
 /* Physical Address Upper Register */
 
@@ -317,6 +319,7 @@
 #define ENET_TFWR_TFWR_MASK          (63 << ENET_TFWR_TFWR_SHIFT)
 #define ENET_TFWR_STRFWD             (1 << 8)  /* Bit 8: Store and forward enable */
                                                /* Bits 9-31: Reserved */
+
 /* Receive Descriptor Ring Start Register */
                                                /* Bits 0-2: Reserved */
 #define ENET_RDSR_SHIFT              (3)       /* Bits 3-31: Start of the receive buffer descriptor queue */
@@ -332,51 +335,64 @@
 #define ENET_MRBR_SHIFT              (4)       /* Bits 4-13: Receive buffer size in bytes */
 #define ENET_MRBR_MASK               (0x3ff << ENET_MRBR_SHIFT)
                                                /* Bits 0-3: Reserved */
+
 /* Receive FIFO Section Full Threshold */
-                                               /* Bits 8-31: Reserved */
+
 #define ENET_RSFL_SHIFT              (0)       /* Bits 0-7: Value of receive FIFO section full threshold */
 #define ENET_RSFL_MASK               (0xff << ENET_RSFL_SHIFT)
+                                               /* Bits 8-31: Reserved */
 
 /* Receive FIFO Section Empty Threshold */
 
-#define ENET_RSEM_SHIFT              (0)       /* Bits 0-7: Value of the receive FIFO section empty threshold */
-#define ENET_RSEM_MASK               (0xff << ENET_RSEM_SHIFT)
-                                               /* Bits 8-31: Reserved */
+#define ENET_RSEM_RX_EMPTY_SHIFT     (0)       /* Bits 0-7: Value of the receive FIFO section empty threshold */
+#define ENET_RSEM_RX_EMPTY_MASK      (0xff << ENET_RSEM_RX_EMPTY_SHIFT)
+                                               /* Bits 8-15: Reserved */
+#define ENET_RSEM_STAT_EMPTY_SHIFT   (0)       /* Bits 16-20: RX Status FIFO Section Empty Threshold */
+#define ENET_RSEM_STAT_EMPTY_MASK    (31 << ENET_RSEM_STAT_EMPTY_SHIFT)
+                                               /* Bits 21-31: Reserved */
+
 /* Receive FIFO Almost Empty Threshold */
 
 #define ENET_RAEM_SHIFT              (0)       /* Bits 0-7: Value of the receive FIFO almost empty threshold */
 #define ENET_RAEM_MASK               (0xff << ENET_RAEM_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* Receive FIFO Almost Full Threshold */
 
 #define ENET_RAFL_SHIFT              (0)       /* Bits 0-7: Value of the receive FIFO almost full threshold */
 #define ENET_RAFL_MASK               (0xff << ENET_RAFL_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* Transmit FIFO Section Empty Threshold */
 
 #define ENET_TSEM_SHIFT              (0)       /* Bits 0-7: Value of the transmit FIFO section empty threshold */
 #define ENET_TSEM_MASK               (0xff << ENET_TSEM_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* Transmit FIFO Almost Empty Threshold */
 
 #define ENET_TAEM_SHIFT              (0)       /* Bits 0-7: Value of the transmit FIFO section empty threshold */
 #define ENET_TAEM_MASK               (0xff << ENET_TAEM_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* Transmit FIFO Almost Full Threshold */
 
 #define ENET_TAFL_SHIFT              (0)       /* Bits 0-7: Value of the transmit FIFO section empty threshold */
 #define ENET_TAFL_MASK               (0xff << ENET_TAFL_SHIFT)
+
                                                /* Bits 8-31: Reserved */
 /* Transmit Inter-Packet Gap */
 
 #define ENET_TIPG_SHIFT              (0)       /* Bits 0-4: Value of the transmit FIFO section empty threshold */
 #define ENET_TIPG_MASK               (31 << ENET_TIPG_SHIFT)
                                                /* Bits 5-31: Reserved */
+
 /* Frame Truncation Length */
 
 #define ENET_FTRL_SHIFT              (0)       /* Bits 0-13: Value of the transmit FIFO section empty threshold */
 #define ENET_FTRL_MASK               (0x3fff << ENET_FTRL_SHIFT)
                                                /* Bits 14-31: Reserved */
+
 /* Transmit Accelerator Function Configuration */
 
 #define ENET_TACC_SHIFT16            (1 << 0)  /* Bit 0:  TX FIFO shift-16 */
@@ -384,6 +400,7 @@
 #define ENET_TACC_IPCHK              (1 << 3)  /* Bit 3:  Enables insertion of IP header checksum */
 #define ENET_TACC_PROCHK             (1 << 4)  /* Bit 4:  Enables insertion of protocol checksum */
                                                /* Bits 5-31: Reserved */
+
 /* Receive Accelerator Function Configuration */
 
 #define ENET_RACC_PADREM             (1 << 0)  /* Bit 0: Enable padding removal for short IP frames */
@@ -393,6 +410,7 @@
 #define ENET_RACC_LINEDIS            (1 << 6)  /* Bit 6: Enable discard of frames with MAC layer errors */
 #define ENET_RACC_SHIFT16            (1 << 7)  /* Bit 7: RX FIFO shift-16 */
                                                /* Bits 8-31: Reserved */
+
 /* Timer Control Register */
 
 #define ENET_ATCR_EN                 (1 << 0)  /* Bit 0:  Enable timer */
@@ -409,6 +427,7 @@
                                                /* Bit 12: Reserved */
 #define ENET_ATCR_SLAVE              (1 << 13) /* Bit 13: Enable timer slave mode */
                                                /* Bits 14-31: Reserved */
+
 /* Timer Value Register (32-bit timer value) */
 /* Timer Offset Register (32-bit offset value) */
 /* Timer Period Register (32-bit timer period) */
@@ -425,6 +444,7 @@
 #define ENET_ATINC_INC_CORR_SHIFT    (8)       /* Bits 8-14: Correction increment value */
 #define ENET_ATINC_INC_CORR_MASK     (0x7f << ENET_ATINC_INC_CORR_SHIFT)
                                                /* Bits 15-31: Reserved */
+
 /* Timestamp of Last Transmitted Frame (32-bit timestamp) */
 
 /* Timer Global Status Register */
@@ -434,6 +454,7 @@
 #define ENET_TGSR_TF2                (1 << 2)  /* Bit 2:  Copy of Timer Flag for channel 2 */
 #define ENET_TGSR_TF3                (1 << 3)  /* Bit 3:  Copy of Timer Flag for channel 3 */
                                                /* Bits 14-31: Reserved */
+
 /* Timer Control Status Register n */
 
 #define ENET_TCSR_TDRE               (1 << 0)  /* Bit 0:  Timer DMA Request Enable */
@@ -455,6 +476,7 @@
 #define ENET_TCSR_TIE                (1 << 6)  /* Bit 6:  Timer interrupt enable */
 #define ENET_TCSR_TF                 (1 << 7)  /* Bit 7:  Timer Flag */
                                                /* Bits 8-31: Reserved */
+
 /* Timer Compare Capture Register (32-bit compare value) */
 
 /* Buffer Descriptors ********************************************************/
@@ -479,17 +501,17 @@
  *   the underlying hardware writes the data in big-endian byte order.
  */
 
-#ifdef IMXRT_ENET_HAS_DBSWAP
+#ifdef S32K1XX_ENET_HAS_DBSWAP
 # ifndef CONFIG_ENDIAN_BIG
-#  define IMXRT_USE_DBSWAP
+#  define S32K1XX_USE_DBSWAP
 # endif
 #else
 # ifndef CONFIG_ENDIAN_BIG
-#  define IMXRT_BUFFERS_SWAP
+#  define S32K1XX_BUFFERS_SWAP
 # endif
 #endif
 
-#ifndef IMXRT_BUFFERS_SWAP
+#ifndef S32K1XX_BUFFERS_SWAP
 #  define TXDESC_ABC                 (1 << 9)  /* Legacy */
 #  define TXDESC_TC                  (1 << 10) /* Common */
 #  define TXDESC_L                   (1 << 11) /* Common */
@@ -509,7 +531,7 @@
 
 /* Enhanced (only) TX Buffer Descriptor Bit Definitions */
 
-#ifndef IMXRT_BUFFERS_SWAP
+#ifndef S32K1XX_BUFFERS_SWAP
 #  define TXDESC_TSE                 (1 << 8)
 #  define TXDESC_OE                  (1 << 9)
 #  define TXDESC_LCE                 (1 << 10)
@@ -543,7 +565,7 @@
 
 /* Legacy (and Common) RX Buffer Descriptor Bit Definitions */
 
-#ifndef IMXRT_BUFFERS_SWAP
+#ifndef S32K1XX_BUFFERS_SWAP
 #  define RXDESC_TR                  (1 << 0)
 #  define RXDESC_OV                  (1 << 1)
 #  define RXDESC_CR                  (1 << 2)
@@ -575,7 +597,7 @@
 
 /* Enhanced (only) TX Buffer Descriptor Bit Definitions */
 
-#ifndef IMXRT_BUFFERS_SWAP
+#ifndef S32K1XX_BUFFERS_SWAP
 #  define RXDESC_FRAG                (1 << 0)
 #  define RXDESC_IPV6                (1 << 1)
 #  define RXDESC_VLAN                (1 << 2)
@@ -612,7 +634,7 @@
 /* Legacy Buffer Descriptor */
 
 #ifdef CONFIG_ENET_ENHANCEDBD
-#ifdef IMXRT_USE_DBSWAP
+#ifdef S32K1XX_USE_DBSWAP
 /* When DBSWP is used to swap the bytes in hardware, it is done 32-bits
  * at a time.  Therefore, all 16 bit elements need to be swapped to
  * compensate.
@@ -645,9 +667,9 @@ struct enet_desc_s
   uint32_t reserved1;   /* unused */
   uint32_t reserved2;   /* unused */
 };
-#endif /* IMXRT_USE_DBSWAP */
+#endif /* S32K1XX_USE_DBSWAP */
 #else /* CONFIG_ENET_ENHANCEDBD */
-#ifdef IMXRT_USE_DBSWAP
+#ifdef S32K1XX_USE_DBSWAP
 struct enet_desc_s
 {
   uint16_t length;      /* Data length */
@@ -661,7 +683,7 @@ struct enet_desc_s
   uint16_t length;      /* Data length */
   uint8_t  *data;       /* Buffer address */
 };
-#endif /* IMXRT_USE_DBSWAP */
+#endif /* S32K1XX_USE_DBSWAP */
 #endif /* CONFIG_ENET_ENHANCEDBD */
 
 /*****************************************************************************
@@ -672,4 +694,4 @@ struct enet_desc_s
  * Public Functions
  *****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_ENET_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H */
