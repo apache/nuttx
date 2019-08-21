@@ -3109,8 +3109,8 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
     }
 
   if (!IS_MMC(priv->type))
-    {
 #endif
+    {
       /* Check for SDHC Version 2.x.  Send CMD8 to verify SD card interface
        * operating condition. CMD 8 is reserved on SD version 1.0 and MMC.
        *
