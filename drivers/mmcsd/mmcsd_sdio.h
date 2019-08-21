@@ -1,7 +1,7 @@
 /********************************************************************************************
  * drivers/mmcsd/mmcsd_sdio.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,6 +150,7 @@
 #define MMCSD_VDD_35_36             ((uint32_t)1 << 23)    /* VDD voltage 3.5-3.6 */
 #define MMCSD_R3_HIGHCAPACITY       ((uint32_t)1 << 30)    /* true: Card supports block addressing */
 #define MMCSD_CARD_BUSY             ((uint32_t)1 << 31)    /* Card power-up busy bit */
+#define MMCSD_R3_STDCAPACITY        ((uint32_t)0)
 
 /* R6 Card Status bit definitions */
 
