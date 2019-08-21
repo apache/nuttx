@@ -688,6 +688,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
               priv->blockshift  = 9;
             }
 
+#ifdef CONFIG_DEBUG_FS_INFO
           decoded.u.mmc.csize               = csize;
           decoded.u.mmc.vddrcurrmin         = (csd[2] >> 27) & 7;
           decoded.u.mmc.vddrcurrmax         = (csd[2] >> 24) & 7;
@@ -697,6 +698,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
           decoded.u.mmc.er.mmc22.sectorsize = (csd[2] >> 10) & 0x1f;
           decoded.u.mmc.er.mmc22.ergrpsize  = (csd[2] >> 5) & 0x1f;
           decoded.u.mmc.mmcwpgrpsize        =  csd[2] & 0x1f;
+#endif
         }
       else
 #endif
