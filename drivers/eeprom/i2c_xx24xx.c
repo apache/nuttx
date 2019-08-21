@@ -107,6 +107,8 @@
 #  define CONFIG_EE24XX_FREQUENCY 100000
 #endif
 
+#define UUID_SIZE   16
+
 /****************************************************************************
  * Types
  ****************************************************************************/
@@ -118,7 +120,7 @@ struct ee24xx_geom_s
   uint8_t bytes    : 4; /* Power of two of 128 bytes (0:128 ... 11:262144) */
   uint8_t pagesize : 4; /* Power of two of   8 bytes (0:8 1:16 2:32 3:64 etc) */
   uint8_t addrlen  : 4; /* Nr of bytes in command address field */
-  uint8_t abits    : 3; /* Nr of Address MSBits in the i2c device address LSBs*/
+  uint8_t abits    : 3; /* Nr of Address MSBits in the i2c device address LSBs */
   uint8_t special  : 1; /* Special device: uchip 24xx00 (total 16 bytes)
                          * or 24xx1025 (shifted P bits) */
 };
@@ -291,7 +293,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   /* Write data address */
 
   maddr[0] = memaddr >> 8;
-  maddr[1] = memaddr &  0xFF;
+  maddr[1] = memaddr &  0xff;
 
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
@@ -526,7 +528,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   addr_hi           = (filep->f_pos >> (eedev->addrlen << 3));
 
   addr[0]           = (filep->f_pos) >> 8;
-  addr[1]           = (filep->f_pos) &  0xFF;
+  addr[1]           = (filep->f_pos) &  0xff;
 
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
@@ -559,12 +561,11 @@ done:
   return ret;
 }
 
-#ifdef CONFIG_AT24CS_UUID
 /****************************************************************************
  * Name: at24cs_read_uuid
  ****************************************************************************/
-#define UUID_SIZE   16
 
+#ifdef CONFIG_AT24CS_UUID
 static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
                                 size_t len)
 {
@@ -807,7 +808,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
   if ((devtype < 0) ||
       (devtype >= sizeof(g_ee24xx_devices) / sizeof(g_ee24xx_devices[0])))
     {
-     return -EINVAL;
+      return -EINVAL;
     }
 
   eedev = kmm_zalloc(sizeof(struct ee24xx_dev_s));
