@@ -57,7 +57,18 @@
  ****************************************************************************/
 
 #define DEVID               0xd1
-#define BMI160_I2C_ADDR     0x68 /* If SDO pin is pulled to VDDIO, use 0x69 */
+
+/* I2C  Address
+ *
+ * NOTE: If SDO pin is pulled to VDDIO, use 0x69
+ */
+
+#ifdef CONFIG_BMI160_I2C_ADDR_68
+#define BMI160_I2C_ADDR     0x68
+#else
+#define BMI160_I2C_ADDR     0x69
+#endif
+
 #define BMI160_I2C_FREQ     400000
 
 #define BMI160_CHIP_ID          (0x00) /* Chip ID */

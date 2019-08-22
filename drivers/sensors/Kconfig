@@ -84,6 +84,23 @@ config SENSORS_BMI160_SPI
 		Enables support for the SPI interface
 
 endchoice
+
+choice
+	prompt "I2C Address"
+	default BMI160_I2C_ADDR_68
+
+config BMI160_I2C_ADDR_68
+	bool "0x68"
+	---help---
+		Default address.
+		If SDO pin is pulled to VDDIO, use 0x69
+
+config BMI160_I2C_ADDR_69
+	bool "0x69"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x69
+
+endchoice
 endif
 
 config SENSORS_BMP180

@@ -34,7 +34,47 @@
 ############################################################################
 
 ifeq ($(CONFIG_SENSORS_AK09912_SCU),y)
-CSRCS += ak09912_scu.c
+  CSRCS += ak09912_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_APDS9930_SCU),y)
+  CSRCS += apds9930_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BH1721FVC_SCU),y)
+  CSRCS += bh1721fvc_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BH1745NUC_SCU),y)
+  CSRCS += bh1745nuc_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BM1383GLV_SCU),y)
+  CSRCS += bm1383glv_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BM1422GMV_SCU),y)
+  CSRCS += bm1422gmv_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMI160_SCU),y)
+  CSRCS += bmi160_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280_SCU),y)
+  CSRCS += bmp280_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_KX022_SCU),y)
+  CSRCS += kx022_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LT1PA01_SCU),y)
+  CSRCS += lt1pa01_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_RPR0521RS_SCU),y)
+  CSRCS += rpr0521rs_scu.c
 endif
 
 DEPPATH += --dep-path platform$(DELIM)sensors

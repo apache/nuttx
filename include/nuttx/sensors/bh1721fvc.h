@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/bmp280.h
+ * include/nuttx/sensors/bh1721fvc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,12 +33,12 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_BMP280_H
-#define __INCLUDE_NUTTX_SENSORS_BMP280_H
+#ifndef __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
+#define __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BMP280) || defined(CONFIG_SENSORS_BMP280_SCU))
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1721FVC) || defined(CONFIG_SENORS_BH1721FVC_SCU)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,8 +48,8 @@
 
 /* Prerequisites:
  *
- * CONFIG_BMP280
- *   Enables support for the BMP280 driver
+ * CONFIG_BH1721FVC
+ *   Enables support for the BH1721FVC driver
  */
 
 /****************************************************************************
@@ -70,122 +70,49 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* IOCTL Commands ***********************************************************/
-
-/* Arg: 0: Disable compensated
- *      1: Enable compensated
- */
-
-#define ENABLE_COMPENSATED (1)
-#define DISABLE_COMPENSATED (0)
-
-/* Standby duration */
-
-#define BMP280_STANDBY_1_MS    (0x00) /* 0.5 ms */
-#define BMP280_STANDBY_63_MS   (0x01) /* 62.5 ms */
-#define BMP280_STANDBY_125_MS  (0x02) /* 125 ms */
-#define BMP280_STANDBY_250_MS  (0x03) /* 250 ms */
-#define BMP280_STANDBY_500_MS  (0x04) /* 500 ms */
-#define BMP280_STANDBY_1000_MS (0x05) /* 1000 ms */
-#define BMP280_STANDBY_2000_MS (0x06) /* 2000 ms */
-#define BMP280_STANDBY_4000_MS (0x07) /* 4000 ms */
-
-/* Enable compensate of sensing values (no SCU bus only)
- *
- * Arg: ENABLE_COMPENSATED or DISABLE_COMPENSATED
- */
-
-#define SNIOC_ENABLE_COMPENSATED   _SNIOC(0x0001)
-
-/* Get sensor predefined adjustment values (SCU bus only)
- *
- * Arg: Pointer of struct bmp280_press_adj_s (pressure)
- *      Pointer of struct bmp280_temp_adj_s (temperature)
- */
-
-#define SNIOC_GETADJ               _SNIOC(0x0002)
-
-/* Set sensor standby duration
- *
- * Arg: BMP280_STANDBY_*_MS
- */
-
-#define SNIOC_SETSTB               _SNIOC(0x0003)
-
-struct bmp280_press_adj_s
-{
-  uint16_t  dig_p1; /* calibration P1 data */
-  int16_t   dig_p2; /* calibration P2 data */
-  int16_t   dig_p3; /* calibration P3 data */
-  int16_t   dig_p4; /* calibration P4 data */
-  int16_t   dig_p5; /* calibration P5 data */
-  int16_t   dig_p6; /* calibration P6 data */
-  int16_t   dig_p7; /* calibration P7 data */
-  int16_t   dig_p8; /* calibration P8 data */
-  int16_t   dig_p9; /* calibration P9 data */
-};
-
-struct bmp280_temp_adj_s
-{
-  uint16_t  dig_t1; /* calibration T1 data */
-  int16_t   dig_t2; /* calibration T2 data */
-  int16_t   dig_t3; /* calibration T3 data */
-};
-
-struct bmp280_meas_s
-{
-  uint8_t   msb;    /* meas value MSB */
-  uint8_t   lsb;    /* meas value LSB */
-  uint8_t   xlsb;   /* meas value XLSB */
-};
-
-#ifdef CONFIG_SENSORS_BMP280_SCU
 /****************************************************************************
- * Name: bmp280_init
+ * Name: bh1721fvc_init
  *
  * Description:
- *   Initialize BMP280 pressure device
+ *   Initialize BH1721FVC proximity and ambient light sensor device
  *
  * Input Parameters:
  *   i2c     - An instance of the I2C interface to use to communicate with
- *             BMP280
+ *             BH1721FVC
+ *   port    - I2C port (0 or 1)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int bmp280_init(FAR struct i2c_master_s *i2c, int port);
-#endif
+int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port);
 
 /****************************************************************************
- * Name: bmp280_register
+ * Name: bh1721fvcals_register
  *
  * Description:
- *   Register the BMP280 character device as 'devpath'
+ *   Register the BH1721FVC ambient light sensor character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/press"
+ *   devpath - The full path to the driver to register. E.g., "/dev/light0"
+ *   minor   - minor device number
  *   i2c     - An instance of the I2C interface to use to communicate with
- *             BMP280
+ *             BH1721FVC
+ *   port    - I2C port (0 or 1)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-#ifdef CONFIG_SENSORS_BMP280_SCU
-int bmp280press_register(FAR const char *devpath, int minor,
-                         FAR struct i2c_master_s *i2c, int port);
-int bmp280temp_register(FAR const char *devpath, int minor,
-                        FAR struct i2c_master_s *i2c, int port);
-#else
-int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
-#endif
+
+int bh1721fvc_register(FAR const char *devpath, int minor,
+                       FAR struct i2c_master_s *i2c, int port);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_I2C && CONFIG_SENSORS_BMP280 */
-#endif /* __INCLUDE_NUTTX_BMP280_H */
+#endif /* CONFIG_I2C && CONFIG_BH1721FVC */
+#endif /* __INCLUDE_NUTTX_SENSORS_BH1721FVC_H */
