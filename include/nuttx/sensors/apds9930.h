@@ -38,7 +38,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && (defined(SENSORS_CONFIG_APDS9930) || defined(SENSORS_CONFIG_APDS9930_SCU))
+#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_APDS9930) || defined(CONFIG_SENSORS_APDS9930_SCU))
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_bmi160_i2c.c
+ * boards/arm/cxd56xx/common/src/cxd56_bmi160_i2c.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

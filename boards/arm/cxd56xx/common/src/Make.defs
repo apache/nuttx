@@ -32,6 +32,26 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_SENSORS_AK09912),y)
+CSRCS += cxd56_ak09912_i2c.c
+endif
+
+ifeq ($(CONFIG_SENSORS_AK09912_SCU),y)
+CSRCS += cxd56_ak09912_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_APDS9930_SCU),y)
+CSRCS += cxd56_apds9930_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_APDS9960),y)
+CSRCS += cxd56_apds9960_i2c.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMI160_I2C),y)
+CSRCS += cxd56_bmi160_i2c.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

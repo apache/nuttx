@@ -53,7 +53,7 @@
 #include <nuttx/irq.h>
 #include <arch/chip/scu.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_APDS9930_SKU)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_APDS9930_SCU)
 
 /****************************************************************************
  * Pre-processor Definitions
