@@ -65,7 +65,7 @@
 #include <stdbool.h>
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)
-#  include "s32k14x/s32k14x_clocknames.h"
+#  include "s32k11x/s32k11x_clocknames.h"
 #elif defined(CONFIG_ARCH_CHIP_S32K14X)
 #  include "s32k14x/s32k14x_clocknames.h"
 #endif
