@@ -39,6 +39,8 @@ LEDs and Buttons
     GreenLED PTE22
     BlueLED  PTE23
 
+  An output of '1' illuminates the LED.
+
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
   any way.  The following definitions are used to access individual RGB
   components.

@@ -97,7 +97,7 @@ void board_userled(int led, bool ledon)
       return;
     }
 
-  s32k1xx_gpiowrite(ledcfg, !ledon); /* Low illuminates */
+  s32k1xx_gpiowrite(ledcfg, ledon); /* High illuminates */
 }
 
 /****************************************************************************
@@ -108,9 +108,9 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) == 0);
-  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) == 0);
-  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) == 0);
+  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
+  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
+  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

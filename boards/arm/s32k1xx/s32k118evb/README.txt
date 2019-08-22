@@ -57,6 +57,8 @@ LEDs and Buttons
     GreenLED PTD15 (FTM0 CH0)
     BlueLED  PTE8  (FTM0 CH6)
 
+  An output of '1' illuminates the LED.
+
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
   any way.  The following definitions are used to access individual RGB
   components.

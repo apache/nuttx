@@ -61,11 +61,13 @@
  *   RedLED   PTE21
  *   GreenLED PTE22
  *   BlueLED  PTE23
+ *
+ * An output of '1' illuminates the LED.
  */
 
-#define GPIO_LED_R     (PIN_PTE21 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_G     (PIN_PTE22 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_B     (PIN_PTE23 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_R     (PIN_PTE21 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_G     (PIN_PTE22 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_B     (PIN_PTE23 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
 
 /* Buttons.  The S32K148EVB supports two buttons:
  *

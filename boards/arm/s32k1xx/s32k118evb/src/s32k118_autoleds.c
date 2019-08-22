@@ -38,6 +38,7 @@
  *   GreenLED PTD15 (FTM0CH0)
  *   BlueLED  PTE8  (FTM0CH6)
  *
+ * An output of '1' illuminates the LED.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
  * the Freedom K66F.  The following definitions describe how NuttX controls
@@ -93,14 +94,6 @@
 #define LED_ON_OFF_OFF    4 /* LED_PANIC */
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -125,9 +118,9 @@ void board_autoled_on(int led)
 {
   if (led != LED_NOCHANGE)
     {
-      bool redoff   = true;
-      bool greenoff = true;
-      bool blueoff  = true;
+      bool redon   = false;
+      bool greenon = false;
+      bool blueon  = false;
 
       switch (led)
         {
@@ -136,21 +129,21 @@ void board_autoled_on(int led)
             break;
 
           case LED_OFF_OFF_ON:
-            blueoff = false;
+            blueon = true;
             break;
 
           case LED_OFF_ON_OFF:
-            greenoff = false;
+            greenon = true;
             break;
 
           case LED_ON_OFF_OFF:
-            redoff = false;
+            redon = true;
             break;
         }
 
-      s32k1xx_gpiowrite(GPIO_LED_R, redoff);
-      s32k1xx_gpiowrite(GPIO_LED_G, greenoff);
-      s32k1xx_gpiowrite(GPIO_LED_B, blueoff);
+      s32k1xx_gpiowrite(GPIO_LED_R, redon);
+      s32k1xx_gpiowrite(GPIO_LED_G, greenon);
+      s32k1xx_gpiowrite(GPIO_LED_B, blueon);
     }
 }
 
@@ -163,8 +156,8 @@ void board_autoled_off(int led)
   if (led == LED_ON_OFF_OFF)
     {
       s32k1xx_gpiowrite(GPIO_LED_R, true);
-      s32k1xx_gpiowrite(GPIO_LED_G, true);
-      s32k1xx_gpiowrite(GPIO_LED_B, true);
+      s32k1xx_gpiowrite(GPIO_LED_G, false);
+      s32k1xx_gpiowrite(GPIO_LED_B, false);
     }
 }
 
