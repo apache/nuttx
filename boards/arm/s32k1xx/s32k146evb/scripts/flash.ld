@@ -60,6 +60,7 @@ SECTIONS
   {
     _stext = ABSOLUTE(.);
     *(.vectors)
+    . = 0x0000410;    /* Skip over flash configuration field */
     *(.text .text.*)
     *(.fixup)
     *(.gnu.warning)
@@ -73,7 +74,6 @@ SECTIONS
     _etext = ABSOLUTE(.);
   } > flash
 
-  . = ALIGN(4);
   .init_section :
   {
     _sinit = ABSOLUTE(.);
@@ -81,13 +81,11 @@ SECTIONS
     _einit = ABSOLUTE(.);
   } > flash
 
-  . = ALIGN(4);
   .ARM.extab :
   {
     *(.ARM.extab*)
   } >flash
 
-  . = ALIGN(4);
   __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
@@ -95,7 +93,6 @@ SECTIONS
   } >flash
   __exidx_end = ABSOLUTE(.);
 
-  . = ALIGN(4);
   .data :
   {
     _sdata = ABSOLUTE(.);

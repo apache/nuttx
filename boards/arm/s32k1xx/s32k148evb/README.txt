@@ -116,5 +116,5 @@ Configurations
     nsh:
     ---
       Configures the NuttShell (nsh) located at apps/examples/nsh.  Support
-      for builtin applications is enabled, but in the base configuration no
-      builtin applications are selected.
+      for builtin applications is enabled, but in the base configuration but
+      the builtin applications selected is the "Hello, World!" example.
