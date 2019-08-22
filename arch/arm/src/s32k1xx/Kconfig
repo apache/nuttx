@@ -184,12 +184,6 @@ config S32K1XX_LPUART0
 	select S32K1XX_LPUART
 	select LPUART0_SERIALDRIVER
 
-config S32K1XX_LPUART0
-	bool "LPUART0"
-	default n
-	select S32K1XX_LPUART
-	select LPUART0_SERIALDRIVER
-
 config S32K1XX_LPUART1
 	bool "LPUART1"
 	default n
