@@ -15,19 +15,25 @@ Contents
 Status
 ======
 
-  2019-08-18:  Configuration created but entirely untested.  This
-    configuration is intended, initially, to verify s32k14x architecture
-    support.  The configuration builds and links without error but has
-    not yet been tested.  This is VERY much a work in progress and you
-    should not use this configuration unless you are interested in
-    assisting with the bring-up.
+  2019-08-18:  Configuration created but entirely untested.
 
-  2019-08-20:  Initial testing, I am running out of SRAM to avoid the
+  2019-08-20:  For initial testing, I ran out of SRAM to avoid the
     brickage problems I had with the S32K118EVB (i.e., with
-    CONFIG_BOOT_RUNFROMISRAM=y).
+    CONFIG_BOOT_RUNFROMISRAM=y). In this mode, the NSH configuration
+    appears worked correctly.
 
-    The NSH configuration now appears work correctly.  Only verified when
-    running SRAM at present.
+  2019-18-21:  Writing a relocated version of that same functional binary
+    into FLASH, however, did not work and, in fact, bricked my S32K146EVB.
+    That is because the first version of the FLASH image that I used
+    clobbered the FLASH Configuration bytes at address 0x0400 (I
+    didn't even know about these!).  I have since modified the linker script
+    to skip this are in FLASH.  There is some fragmentary discussion
+    for recovery from this condition at: https://community.nxp.com/thread/505593 .
+    But none of those options are working for me.
+
+    Give the success running of of SRAM and the success of the same fixes
+    on the S32K118, I believe that the NSH configuration should now run out
+    of FLASH.  Unfortunately, I cannot demonstrate that.
 
 Serial Console
 ==============

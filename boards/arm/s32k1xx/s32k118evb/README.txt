@@ -15,25 +15,19 @@ Contents
 Status
 ======
 
-  2019-08-14:  Configuration created but entirely untested.  Support for the
-    S32K1XX family is incomplete.  This configuration is intended, initially,
-    to support development of the architecture support.  This is VERY much
-    a work in progress and you should not use this configuration unless you
-    are interested in assisting with the bring-up.
+  2019-08-14:  Configuration created but entirely untested.
 
   2019-08-17:  The port is code complete.  It compiles with no errors or
     warnings but is untested.  Still waiting for hardware.
 
-  2019-08-20:  I have the board and started the debug.  However, the
-    very first image that I wrote to FLASH seems to have "bricked" the
-    board.  I believe that the S32K118 resets into a bad state and
-    cannot interface with the OpenSDA, effectively cutting it off from
-    the world.  I will continuing the bring-up using the S32K146EVB
-    where I can run from SRAM for the initial bring-up.
+  2019-08-20:  The very first image that I wrote to FLASH seems to
+    have "bricked" the board.  The board is sensitive to (1) resetting
+    into a bad state and (2) incorrect flash configurations.  It is
+    difficult to impossiblel to recover from these start-up errors.
 
-    These bring-up issues were addressed with S32K146EVB.  It is not probably
-    safe to try the S32K118EVB again (if I can figure out how to break into
-    my bricked system).
+  2019-80-22:  My S32K118EVB is still borked, but after some additional
+    changes, Fabio Balzano has verified that the NSH is functional on
+    that board.
 
 Serial Console
 ==============
