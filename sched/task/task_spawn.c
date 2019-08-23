@@ -46,6 +46,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
+#include <nuttx/spawn.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -434,5 +435,37 @@ errout_with_lock:
   spawn_semgive(&g_spawn_parmsem);
   return ret;
 }
+
+/****************************************************************************
+ * Name: nx_task_spawn
+ *
+ * Description:
+ *   This function de-marshals parameters and invokes task_spawn().
+ *
+ *   task_spawn() and posix_spawn() are NuttX OS interfaces.  In PROTECTED
+ *   and KERNEL build modes, then can be reached from applications only via
+ *   a system call.  Currently, the number of parameters in a system call
+ *   is limited to six; these spawn function have seven parameters.  Rather
+ *   than extend the maximum number of parameters across all architectures,
+ *   I opted instead to marshal the seven parameters into a structure.
+ *
+ * Input Parameters:
+ *   parms - The marshaled task_spawn() parameters.
+ *
+ * Returned Value:
+ *   On success, these functions return 0; on failure they return an error
+ *   number from <errno.h> (see the comments associated with task_spawn()).
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_LIB_SYSCALL)
+int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
+{
+  DEBUGASSERT(parms != NULL);
+  return task_spawn(parms->pid, parms->name, parms->entry,
+                    parms->file_actions, parms->attr,
+                    parms->argv, parms->envp);
+}
+#endif
 
 #endif /* CONFIG_BUILD_KERNEL */
