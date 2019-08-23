@@ -323,7 +323,7 @@ include/arch/board: include/arch
 
 ifeq ($(COMMON_DIR),y)
 # Link the boards/<arch>/<chip>/common dir to arch/<arch-name>/src/board
-# Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board
+# Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board/board
 
 $(ARCH_SRC)/board: .config
 	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/common"
@@ -331,7 +331,7 @@ $(ARCH_SRC)/board: .config
 	@echo "LN: $(ARCH_SRC)/board/board to $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src $(ARCH_SRC)/board/board
 else
-# Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/boar
+# Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board
 
 $(ARCH_SRC)/board: .config
 	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src"
