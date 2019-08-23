@@ -60,7 +60,6 @@
 #include <nuttx/fs/unionfs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/binfmt/builtin.h>
 
 #include "inode/inode.h"
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libbuiltin/libbuiltin_getname.c
+ * libs/libc/builtin/lib_builtin_isavail.c
  *
  * Originally by:
  *
@@ -46,31 +46,42 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/binfmt/builtin.h>
+#include <string.h>
+#include <limits.h>
+#include <errno.h>
+
+#include <nuttx/lib/builtin.h>
+
+#ifdef HAVE_BUILTIN_CONTEXT
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: builtin_getname
+ * Name: builtin_isavail
  *
  * Description:
- *   Return the name of the application at index in the table of builtin
- *   applications.
+ *   Return the index into the table of applications for the application with
+ *   the name 'appname'.
  *
  ****************************************************************************/
 
-FAR const char *builtin_getname(int index)
+int builtin_isavail(FAR const char *appname)
 {
-  FAR const struct builtin_s *builtin;
+  FAR const char *name;
+  int i;
 
-  builtin = builtin_for_index(index);
-
-  if (builtin != NULL)
+  for (i = 0; (name = builtin_getname(i)); i++)
     {
-      return builtin->name;
+      if (!strncmp(name, appname, NAME_MAX))
+        {
+          return i;
+        }
     }
 
-  return NULL;
+  set_errno(ENOENT);
+  return ERROR;
 }
+
+#endif /* HAVE_BUILTIN_CONTEXT */

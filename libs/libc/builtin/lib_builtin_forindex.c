@@ -1,8 +1,10 @@
 /****************************************************************************
- * binfmt/binfmt_initialize.c
+ * libs/libc/builtin/lib_builtin_forindex.c
  *
- *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
- *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2011, 2016, 2019 Gregory Nutt. All rights reserved.
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
+ *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,63 +41,22 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/elf.h>
-#include <nuttx/binfmt/pcode.h>
-#include <nuttx/binfmt/nxflat.h>
 #include <nuttx/lib/builtin.h>
 
-#ifndef CONFIG_BINFMT_DISABLE
+#ifdef HAVE_BUILTIN_CONTEXT
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: binfmt_initialize
- *
- * Description:
- *   initialize binfmt subsystem
- *
- ****************************************************************************/
-
-void binfmt_initialize(void)
+FAR const struct builtin_s *builtin_for_index(int index)
 {
-  int ret;
-
-#if defined(CONFIG_FS_BINFS) && defined(HAVE_BUILTIN_CONTEXT)
-  ret = builtin_initialize();
-  if (ret < 0)
+  if (index < g_builtin_count)
     {
-      berr("ERROR: builtin_initialize failed: %d\n", ret);
+      return &g_builtins[index];
     }
-#endif
 
-#ifdef CONFIG_ELF
-  ret = elf_initialize();
-  if (ret < 0)
-    {
-      berr("ERROR: elf_initialize failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_BINFMT_PCODE
-  ret = pcode_initialize();
-  if (ret < 0)
-    {
-      berr("ERROR: pcode_initialize failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_NXFLAT
-  ret = nxflat_initialize();
-  if (ret < 0)
-    {
-      berr("ERROR: nxflat_initialize failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
+  return NULL;
 }
 
-#endif /* CONFIG_BINFMT_DISABLE */
+#endif /* HAVE_BUILTIN_CONTEXT */

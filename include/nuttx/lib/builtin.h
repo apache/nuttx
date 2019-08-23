@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/binfmt/builtin.h
+ * include/nuttx/lib/builtin.h
  *
  * Originally by:
  *
@@ -8,7 +8,7 @@
  *
  * With subsequent updates, modifications, and general maintenance by:
  *
- *   Copyright (C) 2012-2013 Gregory Nutt.  All rights reserved.
+ *   Copyright (C) 2012-2013, 2019 Gregory Nutt.  All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_BINFMT_BUILTIN_H
-#define __INCLUDE_NUTTX_BINFMT_BUILTIN_H
+#ifndef __INCLUDE_NUTTX_LIB_BUILTIN_H
+#define __INCLUDE_NUTTX_LIB_BUILTIN_H
 
 /****************************************************************************
  * Included Files
@@ -49,6 +49,21 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
+#ifdef CONFIG_BUILTIN
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* This logic is not usable in the KERNEL build and, furthermore, it has no
+ * meaning in __KERNEL__ blob of a protected build.
+ */
+
+#if (defined(CONFIG_BUILD_FLAT) || \
+    (defined(CONFIG_BUILD_PROTECTED )&& !__KERNEL__))
+#  define HAVE_BUILTIN_CONTEXT
+#endif
 
 /****************************************************************************
  * Public Types
@@ -74,38 +89,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* These must be provided the application layer */
+
+EXTERN const struct builtin_s g_builtins[];
+EXTERN const int g_builtin_count;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: builtin_initialize
- *
- * Description:
- *   In order to use the builtin binary format, this function must be called
- *   during system initialize to register the builtin binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int builtin_initialize(void);
-
-/****************************************************************************
- * Name: builtin_uninitialize
- *
- * Description:
- *   Unregister the builtin binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void builtin_uninitialize(void);
 
 /****************************************************************************
  * Name: builtin_isavail
@@ -168,4 +159,5 @@ FAR const struct builtin_s *builtin_for_index(int index);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_BINFMT_BUILTIN_H */
+#endif /* CONFIG_BUILTIN */
+#endif /* __INCLUDE_NUTTX_LIB_BUILTIN_H */

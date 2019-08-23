@@ -35,18 +35,13 @@
 
 ifeq ($(CONFIG_BUILTIN),y)
 
-# Builtin application interfaces
+# Builtin library files
 
-BINFMT_CSRCS += builtin.c
+CSRCS += lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c
 
-# Builtin library interfaces
+# Hook the builtin subdirectory into the build
 
-BINFMT_CSRCS += libbuiltin_getname.c libbuiltin_isavail.c
-
-# Hook the libbuiltin subdirectory into the build
-
-VPATH += libbuiltin
-SUBDIRS += libbuiltin
-DEPPATH += --dep-path libbuiltin
+DEPPATH += --dep-path builtin
+VPATH += builtin
 
 endif
