@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 18, 2019)
+NuttX TODO List (Last updated August 23, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/:
   (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
- (10)  Kernel/Protected Build
+  (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
@@ -1120,50 +1120,6 @@ o Kernel/Protected Build
   Priority:    Medium-ish if are attempting to make a secure environment that
                may host malicious code.  Very low for the typical FLAT build,
                however.
-
-  Title:       NSH BUILTIN TASKS DO NOT WORK IN PROTECTED MODE
-  Description: In the PROTECTED build mode, NSH built-in commands do not
-               work.  The current NSH builtin implementation violates the
-               POSIX interface layer, it calls directly into the
-               nuttx/binfmt logic which is not possible in the protected
-               mode.
-
-               Currently, support for CONFIG_BUILTIN is is disabled for
-               PROTECTED mode  in in nuttx/binfmt/Kconfig:
-
-                  config BUILTIN
-                          bool "Support Builtin Applications"
-                          default n
-                          depends on (!BUILD_PROTECTED && !BUILD_KERNEL) || EXPERIMENTAL
-
-               And that disables section of the option apps/nshlib/Kconfig:
-
-                  config NSH_BUILTIN_APPS
-                          bool "Enable built-in applications"
-                         default n
-                          depends on BUILTIN
-
-               So if CONFIG_BUILD_PROTECTED is set, then CONFIG_BUILTIN
-               cannot be set.  And if CONFIG_BUILTIN is not set, then
-               builtin applications will not be supported.
-
-               The solution appears woulld seem to be:  (1) Move the problem
-               code out of nuttx/binfmt and into libs/binfmt so that it is
-               available both to the kernel code and to the application
-               code.  And to remove the dependency on !BUILD_PROTECTED from
-               binfmt/Kconfig.
-
-               NOTE:  NSH builtins cannot be supported under any condition
-               in the KERNEL build.  In that build, only file-based
-               applications can be supported.  But that is a different story.
-  Status:      Open
-  Priority:    Medium.  Higher if you need builtin application support in
-               protected mode.
-
-This really belongs in the TODO list.
-
-Greg
-
 
 o C++ Support
   ^^^^^^^^^^^
@@ -2751,9 +2707,6 @@ o Network Utilities (apps/netutils/)
 
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Related:  See "NSH BUILTIN TASKS DO NOT WORK IN PROTECTED MODE" under
-  the heading Kernel/Protected Build.
 
   Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
   Description: The ifconfig command will not behave correctly if an interface
