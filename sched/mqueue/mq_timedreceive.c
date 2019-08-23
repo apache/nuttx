@@ -129,7 +129,7 @@ static void nxmq_rcvtimeout(int argc, wdparm_t pid)
  *   nxmq_timedreceive() is an internal OS interface.  It is functionally
  *   equivalent to mq_timedreceive() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_timedreceive() for a more complete description of

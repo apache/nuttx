@@ -64,7 +64,7 @@
  *   This is an internal OS interface.  It is functionally equivalent to
  *   the standard nxsig_usleep() application interface except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *   See the description of usleep() for additional information that is not

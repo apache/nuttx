@@ -128,7 +128,7 @@ static void nxmq_sndtimeout(int argc, wdparm_t pid)
  *   nxmq_timedsend() is functionally equivalent to mq_timedsend() except
  *   that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_timedsend() for a more complete description of the

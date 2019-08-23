@@ -62,7 +62,7 @@
  *   This is an internal OS interface.  It is functionally equivalent to
  *   the standard sleep() application interface except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - There is no check that the action of the signal is to invoke a
  *     signal-catching function or to terminate the process.
  *
