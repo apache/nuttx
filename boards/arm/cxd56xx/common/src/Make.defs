@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/cxd56x/spresense/common/Make.defs
+# boards/arm/cxd56xx/common/src/Make.defs
 #
 #   Copyright 2018 Sony Semiconductor Solutions Corporation
 #
@@ -32,6 +32,14 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_CXD56_BACKUPLOG),y)
+CSRCS += cxd56_crashdump.c
+endif
+
+ifeq ($(CONFIG_SENSORS),y)
+CSRCS += cxd56_sensors.c
+endif
+
 ifeq ($(CONFIG_SENSORS_AK09912),y)
 CSRCS += cxd56_ak09912_i2c.c
 endif
@@ -48,8 +56,68 @@ ifeq ($(CONFIG_SENSORS_APDS9960),y)
 CSRCS += cxd56_apds9960_i2c.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BH1721FVC_SCU),y)
+CSRCS += cxd56_bh1721fvc_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BH1745NUC_SCU),y)
+CSRCS += cxd56_bh1745nuc_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BM1383GLV_SCU),y)
+CSRCS += cxd56_bm1383glv_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BM1422GMV_SCU),y)
+CSRCS += cxd56_bm1422gmv_scu.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMI160_I2C),y)
 CSRCS += cxd56_bmi160_i2c.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMI160_SCU),y)
+CSRCS += cxd56_bmi160_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMI160_SPI),y)
+CSRCS += cxd56_bmi160_spi.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280_I2C),y)
+CSRCS += cxd56_bmp280_i2c.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280_SCU),y)
+CSRCS += cxd56_bmp280_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_KX022_SCU),y)
+CSRCS += cxd56_kx022_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LT1PA01_SCU),y)
+CSRCS += cxd56_lt1pa01_scu.c
+endif
+
+ifeq ($(CONFIG_SENSORS_RPR0521RS_SCU),y)
+CSRCS += cxd56_rpr0521rs_scu.c
+endif
+
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += cxd56_netinit.c
+endif
+
+ifeq ($(CONFIG_WL_GS2200M),y)
+CSRCS += cxd56_gs2200m.c
+endif
+
+ifeq ($(CONFIG_LCD_ILI9340),y)
+CSRCS += cxd56_ili9340.c
+endif
+
+ifeq ($(CONFIG_LCD_LPM013M091A),y)
+CSRCS += cxd56_lpm013m091a.c
 endif
 
 DEPPATH += --dep-path src

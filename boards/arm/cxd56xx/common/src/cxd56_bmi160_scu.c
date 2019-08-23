@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_bmi160_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,56 +44,76 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
-
-#include <nuttx/sensors/ak09912.h>
-#include "cxd56_i2c.h"
-
+#include <nuttx/spi/spi.h>
+#include <nuttx/sensors/bmi160.h>
 #include <arch/chip/scu.h>
 
-#ifdef CONFIG_CXD56_DECI_AK09912
-#  define MAG_NR_SEQS 3
+#include "cxd56_spi.h"
+
+#ifdef CONFIG_CXD56_DECI_GYRO
+#  define GYRO_NR_SEQS 3
 #else
-#  define MAG_NR_SEQS 1
+#  define GYRO_NR_SEQS 1
 #endif
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
+#ifdef CONFIG_CXD56_DECI_ACCEL
+#  define ACCEL_NR_SEQS 3
+#else
+#  define ACCEL_NR_SEQS 1
+#endif
 
-int board_ak09912_initialize(FAR const char *devpath, int bus)
+#if defined(CONFIG_SENSORS_BMI160_SCU)
+
+int board_bmi160_initialize(int bus)
 {
-  int i;
   int ret;
-  FAR struct i2c_master_s *i2c;
+  FAR struct spi_dev_s *spi;
 
-  sninfo("Initializing AK09912...\n");
+  sninfo("Initializing BMI160..\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize spi deivce */
 
-  i2c = cxd56_i2cbus_initialize(bus);
-  if (!i2c)
+  spi = cxd56_spibus_initialize(bus);
+  if (!spi)
     {
-      snerr("ERROR: Failed to initialize i2c%d.\n", bus);
+      snerr("ERROR: Failed to initialize spi%d.\n", bus);
       return -ENODEV;
     }
 
-  ret = ak09912_init(i2c, bus);
+  int i;
+
+  ret = bmi160_init(spi);
   if (ret < 0)
     {
-      snerr("Error initialize AK09912.\n");
+      snerr("Error initialize BMI160\n");
       return ret;
     }
 
-  for (i = 0; i < MAG_NR_SEQS; i++)
-    {
-      /* register deivce at I2C bus */
+  /* Create char devices for each FIFOs */
 
-      ret = ak09912_register(devpath, i, i2c, bus);
+  for (i = 0; i < GYRO_NR_SEQS; i++)
+    {
+      ret = bmi160gyro_register("/dev/gyro", i, spi);
       if (ret < 0)
         {
-          snerr("Error registering AK09912.\n");
+          snerr("Error registering gyroscope. %d\n", ret);
+          return ret;
+        }
+    }
+
+  /* Create char devices for each FIFOs */
+
+  for (i = 0; i < ACCEL_NR_SEQS; i++)
+    {
+      ret = bmi160accel_register("/dev/accel", i, spi);
+      if (ret < 0)
+        {
+          snerr("Error registering accelerometer. %d\n", ret);
           return ret;
         }
     }
 
   return ret;
 }
+
 #endif

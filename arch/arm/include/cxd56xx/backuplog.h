@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/bh1721fvc.h
+ * arch/arm/include/cxd56xx/backuplog.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,35 +33,19 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
-#define __INCLUDE_NUTTX_SENSORS_BH1721FVC_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_BACKUPLOG_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_BACKUPLOG_H
+
+/****************************************************************************
+ * Included Files
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1721FVC) || defined(CONFIG_SENSORS_BH1721FVC_SCU)
+#include <sys/types.h>
+#include <stdint.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-/* Prerequisites:
- *
- * CONFIG_BH1721FVC
- *   Enables support for the BH1721FVC driver
- */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct i2c_master_s;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
+#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -71,48 +55,94 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: bh1721fvc_init
- *
- * Description:
- *   Initialize BH1721FVC proximity and ambient light sensor device
- *
- * Input Parameters:
- *   i2c     - An instance of the I2C interface to use to communicate with
- *             BH1721FVC
- *   port    - I2C port (0 or 1)
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
+ * Public Functions
  ****************************************************************************/
-
-int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port);
 
 /****************************************************************************
- * Name: bh1721fvcals_register
+ * Name: up_backuplog_initialize
  *
  * Description:
- *   Register the BH1721FVC ambient light sensor character device as 'devpath'
- *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/light0"
- *   minor   - minor device number
- *   i2c     - An instance of the I2C interface to use to communicate with
- *             BH1721FVC
- *   port    - I2C port (0 or 1)
+ *   Initialize the log header where the address and size of each log area
+ *   are decribed. If the log header has been already configured as a wakeup
+ *   from sleeping or reboot case, then do nothing and return OK.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-int bh1721fvc_register(FAR const char *devpath, int minor,
-                       FAR struct i2c_master_s *i2c, int port);
+int up_backuplog_initialize(void);
+
+/****************************************************************************
+ * Name: up_backuplog_alloc
+ *
+ * Description:
+ *   Allocate the log memory region
+ *
+ * Input Parameters:
+ *   name - The log region name
+ *   size - The size to allocate
+ *
+ * Returned Value:
+ *   The allocated address on success; NULL value on failure.
+ *
+ ****************************************************************************/
+
+void *up_backuplog_alloc(const char *name, size_t size);
+
+/****************************************************************************
+ * Name: up_backuplog_free
+ *
+ * Description:
+ *   De-allocate the log memory region
+ *
+ * Input Parameters:
+ *   name - The log region name
+ *
+ ****************************************************************************/
+
+void up_backuplog_free(const char *name);
+
+/****************************************************************************
+ * Name: up_backuplog_region
+ *
+ * Description:
+ *   Get the address and size of the specified log region name
+ *
+ * Input Parameters:
+ *   name - The log region name
+ *   addr - The returned address
+ *   size - The returned size
+ *
+ * Returned Value:
+ *   The index of log entry on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_backuplog_region(const char *name, void **addr, size_t *size);
+
+/****************************************************************************
+ * Name: up_backuplog_entry
+ *
+ * Description:
+ *   Get the entry name, address and size
+ *
+ * Input Parameters:
+ *   name - The returned entry name
+ *   addr - The returned address
+ *   size - The returned size
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_backuplog_entry(char *name, void **addr, size_t *size);
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
+#endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_I2C && CONFIG_BH1721FVC */
-#endif /* __INCLUDE_NUTTX_SENSORS_BH1721FVC_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_BACKUPLOG_H */

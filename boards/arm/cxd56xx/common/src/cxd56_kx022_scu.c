@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_kx022_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -45,26 +45,25 @@
 
 #include <nuttx/board.h>
 
-#include <nuttx/sensors/ak09912.h>
-#include "cxd56_i2c.h"
-
+#include <nuttx/sensors/kx022.h>
 #include <arch/chip/scu.h>
 
-#ifdef CONFIG_CXD56_DECI_AK09912
-#  define MAG_NR_SEQS 3
+#include "cxd56_i2c.h"
+
+#ifdef CONFIG_CXD56_DECI_KX022
+#  define KX022_FIFO_CNT 3
 #else
-#  define MAG_NR_SEQS 1
+#  define KX022_FIFO_CNT 1
 #endif
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
-
-int board_ak09912_initialize(FAR const char *devpath, int bus)
+#ifdef CONFIG_SENSORS_KX022_SCU
+int board_kx022_initialize(FAR const char *devpath, int bus)
 {
-  int i;
+  int fifoid = 0;
   int ret;
   FAR struct i2c_master_s *i2c;
 
-  sninfo("Initializing AK09912...\n");
+  sninfo("Initializing KX022...\n");
 
   /* Initialize i2c deivce */
 
@@ -75,25 +74,25 @@ int board_ak09912_initialize(FAR const char *devpath, int bus)
       return -ENODEV;
     }
 
-  ret = ak09912_init(i2c, bus);
+  ret = kx022_init(i2c, bus);
   if (ret < 0)
     {
-      snerr("Error initialize AK09912.\n");
+      snerr("Error initialize KX022.\n");
       return ret;
     }
 
-  for (i = 0; i < MAG_NR_SEQS; i++)
-    {
-      /* register deivce at I2C bus */
+  /* Register devices for each FIFOs at I2C bus */
 
-      ret = ak09912_register(devpath, i, i2c, bus);
+  for (fifoid = 0; fifoid < KX022_FIFO_CNT; fifoid++)
+    {
+      ret = kx022_register(devpath, fifoid, i2c, bus);
       if (ret < 0)
         {
-          snerr("Error registering AK09912.\n");
+          snerr("Error registering KX022.\n");
           return ret;
         }
     }
 
   return ret;
 }
-#endif
+#endif /* CONFIG_SENSORS_KX022_SCU */

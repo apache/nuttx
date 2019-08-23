@@ -59,7 +59,16 @@
 #include "cxd56_ak09912.h"
 #include "cxd56_apds9930.h"
 #include "cxd56_apds9960.h"
+#include "cxd56_bh1721fvc.h"
+#include "cxd56_bh1745nuc.h"
+#include "cxd56_bm1383glv.h"
+#include "cxd56_bm1422gmv.h"
 #include "cxd56_bmi160.h"
+#include "cxd56_bmp280.h"
+#include "cxd56_kx022.h"
+#include "cxd56_lt1pa01.h"
+#include "cxd56_rpr0521rs.h"
+#include "cxd56_sensors.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -242,6 +251,11 @@ enum board_power_device
 #define DISPLAY_SPI     4
 
 #endif
+
+/* Sensor device bus definitions *******************************************/
+
+#define SENSOR_I2C      0
+#define SENSOR_SPI      3
 
 /* Set signal id for notify USB device connection status and
  * supply current value.

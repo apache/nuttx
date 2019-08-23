@@ -1,8 +1,7 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_netinit.c
+ * boards/arm/cxd56xx/common/src/cxd56_bh1745nuc_scu.c
  *
- *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,9 +13,10 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
+ *    the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior written
+ *    permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -39,17 +39,50 @@
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
 
-/****************************************************************************
- * Name: up_netinitialize
- ****************************************************************************/
+#include <nuttx/board.h>
 
-#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+#include <nuttx/sensors/bh1745nuc.h>
+#include <arch/chip/scu.h>
+
+#include "cxd56_i2c.h"
+
+#ifdef CONFIG_SENSORS_BH1745NUC_SCU
+int board_bh1745nuc_initialize(FAR const char *devpath, int bus)
 {
-}
-#endif
+  int ret;
+  FAR struct i2c_master_s *i2c;
 
+  sninfo("Initializing BH1745NUC...\n");
+
+  /* Initialize i2c deivce */
+
+  i2c = cxd56_i2cbus_initialize(bus);
+  if (!i2c)
+    {
+      snerr("ERROR: Failed to initialize i2c%d.\n", bus);
+      return -ENODEV;
+    }
+
+  ret = bh1745nuc_init(i2c, bus);
+  if (ret < 0)
+    {
+      snerr("Error initialize BH1745NUC.\n");
+      return ret;
+    }
+
+  /* Register devices for each FIFOs at I2C bus */
+
+  ret = bh1745nuc_register(devpath, 0, i2c, bus);
+  if (ret < 0)
+    {
+      snerr("Error registering BH1745NUC.\n");
+      return ret;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_SENSORS_BH1745NUC_SCU */

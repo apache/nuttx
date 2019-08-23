@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_rpr0521rs_src.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -45,26 +45,18 @@
 
 #include <nuttx/board.h>
 
-#include <nuttx/sensors/ak09912.h>
-#include "cxd56_i2c.h"
-
+#include <nuttx/sensors/rpr0521rs.h>
 #include <arch/chip/scu.h>
 
-#ifdef CONFIG_CXD56_DECI_AK09912
-#  define MAG_NR_SEQS 3
-#else
-#  define MAG_NR_SEQS 1
-#endif
+#include "cxd56_i2c.h"
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
-
-int board_ak09912_initialize(FAR const char *devpath, int bus)
+#ifdef CONFIG_SENSORS_RPR0521RS_SCU
+int board_rpr0521rs_initialize(int bus)
 {
-  int i;
   int ret;
   FAR struct i2c_master_s *i2c;
 
-  sninfo("Initializing AK09912...\n");
+  sninfo("Initializing RPR0521RS...\n");
 
   /* Initialize i2c deivce */
 
@@ -75,25 +67,29 @@ int board_ak09912_initialize(FAR const char *devpath, int bus)
       return -ENODEV;
     }
 
-  ret = ak09912_init(i2c, bus);
+  ret = rpr0521rs_init(i2c, bus);
   if (ret < 0)
     {
-      snerr("Error initialize AK09912.\n");
+      snerr("Error initialize RPR0521RS.\n");
       return ret;
     }
 
-  for (i = 0; i < MAG_NR_SEQS; i++)
-    {
-      /* register deivce at I2C bus */
+  /* Register devices for each FIFOs at I2C bus */
 
-      ret = ak09912_register(devpath, i, i2c, bus);
-      if (ret < 0)
-        {
-          snerr("Error registering AK09912.\n");
-          return ret;
-        }
+  ret = rpr0521rsals_register("/dev/light", 0, i2c, bus);
+  if (ret < 0)
+    {
+      snerr("Error registering RPR0521RS[ALS].\n");
+      return ret;
+    }
+
+  ret = rpr0521rsps_register("/dev/proximity", 0, i2c, bus);
+  if (ret < 0)
+    {
+      snerr("Error registering RPR0521RS[PS].\n");
+      return ret;
     }
 
   return ret;
 }
-#endif
+#endif /* CONFIG_SENSORS_RPR0521RS_SCU */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/spresense/include/cxd56_bh1745nuc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,67 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BH1745NUC_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BH1745NUC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#include <nuttx/board.h>
+#ifndef __ASSEMBLY__
 
-#include <nuttx/sensors/ak09912.h>
-#include "cxd56_i2c.h"
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#include <arch/chip/scu.h>
-
-#ifdef CONFIG_CXD56_DECI_AK09912
-#  define MAG_NR_SEQS 3
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  define MAG_NR_SEQS 1
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-int board_ak09912_initialize(FAR const char *devpath, int bus)
-{
-  int i;
-  int ret;
-  FAR struct i2c_master_s *i2c;
+/****************************************************************************
+ * Name: board_bh1745nuc_initialize
+ *
+ * Description:
+ *   Initialize BH1745NUC i2c driver and register the BH1745NUC device.
+ *
+ ****************************************************************************/
 
-  sninfo("Initializing AK09912...\n");
+#if defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU)
+int board_bh1745nuc_initialize(FAR const char *devpath, int bus);
+#endif
 
-  /* Initialize i2c deivce */
-
-  i2c = cxd56_i2cbus_initialize(bus);
-  if (!i2c)
-    {
-      snerr("ERROR: Failed to initialize i2c%d.\n", bus);
-      return -ENODEV;
-    }
-
-  ret = ak09912_init(i2c, bus);
-  if (ret < 0)
-    {
-      snerr("Error initialize AK09912.\n");
-      return ret;
-    }
-
-  for (i = 0; i < MAG_NR_SEQS; i++)
-    {
-      /* register deivce at I2C bus */
-
-      ret = ak09912_register(devpath, i, i2c, bus);
-      if (ret < 0)
-        {
-          snerr("Error registering AK09912.\n");
-          return ret;
-        }
-    }
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BH1745NUC_H */

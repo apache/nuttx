@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_bmi160_spi.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,56 +44,48 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/sensors/bmi160.h>
 
-#include <nuttx/sensors/ak09912.h>
-#include "cxd56_i2c.h"
+#include "cxd56_spi.h"
 
-#include <arch/chip/scu.h>
-
-#ifdef CONFIG_CXD56_DECI_AK09912
-#  define MAG_NR_SEQS 3
+#ifdef CONFIG_CXD56_DECI_GYRO
+#  define GYRO_NR_SEQS 3
 #else
-#  define MAG_NR_SEQS 1
+#  define GYRO_NR_SEQS 1
 #endif
 
-#ifdef CONFIG_SENSORS_AK09912_SCU
+#ifdef CONFIG_CXD56_DECI_ACCEL
+#  define ACCEL_NR_SEQS 3
+#else
+#  define ACCEL_NR_SEQS 1
+#endif
 
-int board_ak09912_initialize(FAR const char *devpath, int bus)
+#if defined(CONFIG_CXD56_SPI) && defined(CONFIG_SENSORS_BMI160)
+
+int board_bmi160_initialize(int bus)
 {
-  int i;
   int ret;
-  FAR struct i2c_master_s *i2c;
+  FAR struct spi_dev_s *spi;
 
-  sninfo("Initializing AK09912...\n");
+  sninfo("Initializing BMI160..\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize spi deivce */
 
-  i2c = cxd56_i2cbus_initialize(bus);
-  if (!i2c)
+  spi = cxd56_spibus_initialize(bus);
+  if (!spi)
     {
-      snerr("ERROR: Failed to initialize i2c%d.\n", bus);
+      snerr("ERROR: Failed to initialize spi%d.\n", bus);
       return -ENODEV;
     }
 
-  ret = ak09912_init(i2c, bus);
+  ret = bmi160_register("/dev/accel0", spi);
   if (ret < 0)
     {
-      snerr("Error initialize AK09912.\n");
-      return ret;
-    }
-
-  for (i = 0; i < MAG_NR_SEQS; i++)
-    {
-      /* register deivce at I2C bus */
-
-      ret = ak09912_register(devpath, i, i2c, bus);
-      if (ret < 0)
-        {
-          snerr("Error registering AK09912.\n");
-          return ret;
-        }
+      snerr("Error registering BMI160\n");
     }
 
   return ret;
 }
+
 #endif

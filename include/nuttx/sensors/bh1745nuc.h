@@ -38,7 +38,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SRC))
+#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU))
 
 /****************************************************************************
  * Pre-processor Definitions

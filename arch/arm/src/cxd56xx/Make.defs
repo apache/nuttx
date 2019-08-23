@@ -200,3 +200,7 @@ endif
 ifeq ($(CONFIG_CXD56_GEOFENCE),y)
 CHIP_CSRCS += cxd56_geofence.c
 endif
+
+ifeq ($(CONFIG_CXD56_BACKUPLOG),y)
+CHIP_CSRCS += cxd56_backuplog.c
+endif

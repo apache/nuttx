@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_lpm013m091a.c
+ * boards/arm/cxd56xx/common/src/cxd56_lpm013m091a.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

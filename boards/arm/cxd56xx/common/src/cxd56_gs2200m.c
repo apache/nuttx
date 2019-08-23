@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_gs2200m.c
+ * boards/arm/cxd56xx/common/src/cxd56_gs2200m.c
  *
  *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
