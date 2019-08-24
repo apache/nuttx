@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 23, 2019)
+NuttX TODO List (Last updated August 24, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,6 +16,7 @@ nuttx/:
   (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
+  (1)  Work Queues (sched/wqueue)
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
@@ -898,6 +899,28 @@ o pthreads (sched/pthreads libs/libc/pthread)
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+o Work Queues (sched/wqueue)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Title:       WORK QUEUE DELAY INACCURACIES
+  Description: Each queued work may have an optional delay value associated
+               with it.  That delay should be respect to the time that the
+               work is queued.  However, since we do not know the time the
+               work is queue, the actual delay will be respect to the time
+               that the work is processed.  Under certain conditions, the
+               work may sit in the queue for some time before it is
+               processed, leading to an inaccuracy in the delay.
+
+               One solution might involved saving the time when in the work
+               structure when the work is queued.  Then the delay logic can
+               take the difference between the processing time and the
+               queued time to get a more accurate delay.
+  Status:      Open
+  Priority:    In all known use cased, the priority is low.  A problem is
+               would only occur if the work queue is overload or if work in
+               the work queue suspends waiting for a resource (both of which
+               are much bigger problems).
 
 o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^
