@@ -235,9 +235,9 @@
 
 /* The DBGMCU registers are accessible to the debugger via the APB-D bus
  * at base address 0xe00e1000. They are also accessible by the processor 
- * core at base address 0x5e001000. 
+ * core at base address 0x5c001000. 
  */
 
-#define STM32_DEBUGMCU_BASE    0x5e001000
+#define STM32_DEBUGMCU_BASE    0x5c001000
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_MEMORYMAP_H */
