@@ -15,7 +15,12 @@ Contents
 Status
 ======
 
-  2019-08-20:  Configuration created but entirely untested.
+  2019-08-20:  NSH configuration created but entirely untested.
+  2019-08-24:  NSH configuratin verified running from FLASH.
+
+  TODO:  Need calibrate the delay loop.  The current value of
+  CONFIG_BOARD_LOOPSPERMSEC is a bogus value retained from a copy-paste
+  (see apps/examples/calib_udelay).
 
 Serial Console
 ==============

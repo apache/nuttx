@@ -29,6 +29,10 @@ Status
     changes, Fabio Balzano has verified that the NSH is functional on
     that board.
 
+  TODO:  Need calibrate the delay loop.  The current value of
+  CONFIG_BOARD_LOOPSPERMSEC is a bogus value retained from a copy-paste
+  (see apps/examples/calib_udelay).
+
 Serial Console
 ==============
 
