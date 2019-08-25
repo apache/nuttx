@@ -901,7 +901,7 @@ static void stm32_stdclockconfig(void)
                 | STM32_RCC_PLLI2SCFGR_PLLI2SQ
                 | STM32_RCC_PLLI2SCFGR_PLLI2SR);
 
-#  elif defined(CONFIG_STM32_STM32F469)
+#  elif defined(CONFIG_STM32_STM32F469) || defined(CONFIG_STM32_STM32F427)
 
       regval &= ~(RCC_PLLI2SCFGR_PLLI2SN_MASK
                  | RCC_PLLI2SCFGR_PLLI2SQ_MASK
