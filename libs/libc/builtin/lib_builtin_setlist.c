@@ -89,8 +89,8 @@ int g_builtin_count;
 
 void builtin_setlist(FAR struct builtin_s * const *builtins, int count)
 {
-  g_builtins = builtins;
-  g_builtin_count = builtins;
+  g_builtins      = builtins;
+  g_builtin_count = count;
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_FS_BINFS && __KERNEL__ */
