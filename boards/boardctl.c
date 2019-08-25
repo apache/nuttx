@@ -394,6 +394,40 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BUILTIN
+      /* CMD:           BOARDIOC_BUILTINS
+       * DESCRIPTION:   Provide the user-space list of built-in applications for
+       *                use by BINFS in protected mode.  Normally this is small
+       *                set of globals provided by user-space logic.  It provides
+       *                name-value pairs for associating built-in application
+       *                names with user-space entry point addresses.  These
+       *                globals are only needed for use by BINFS which executes
+       *                built-in applications from kernel-space in PROTECTED mode.
+       *                In the FLAT build, the user space globals are readily
+      *                 available.  (BINFS is not supportable in KERNEL mode since
+       *                user-space address have no general meaning that
+       *                configuration).
+       * ARG:           A pointer to an instance of struct boardioc_builtin_s
+       * CONFIGURATION: This BOARDIOC command is always available when
+       *                CONFIG_BUILTIN is enabled, but does nothing unless
+       *                CONFIG_BUILD_KERNEL and CONFIG_FS_BINFS are selected.
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_BUILTINS:
+        {
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS)
+          FAR const struct boardioc_builtin_s *builtin =
+            (FAR const struct boardioc_builtin_s *)arg;
+
+         DEBUGASSERT(builtin != NULL);
+         builtin_setlist(builtin->builtins, builtin->count);
+#endif
+         ret = OK;
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
       /* CMD:           BOARDIOC_USBDEV_CONTROL
        * DESCRIPTION:   Manage USB device classes

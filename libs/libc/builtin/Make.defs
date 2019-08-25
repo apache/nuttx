@@ -38,6 +38,7 @@ ifeq ($(CONFIG_BUILTIN),y)
 # Builtin library files
 
 CSRCS += lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c
+CSRCS += lib_builtin_setlist.c
 
 # Hook the builtin subdirectory into the build
 

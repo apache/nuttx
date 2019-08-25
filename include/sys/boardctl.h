@@ -111,6 +111,25 @@
  * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
  * DEPENDENCIES:  None
  *
+ * CMD:           BOARDIOC_BUILTINS
+ * DESCRIPTION:   Provide the user-space list of built-in applications for
+ *                use by BINFS in protected mode.  Normally this is small
+ *                set of globals provided by user-space logic.  It provides
+ *                name-value pairs for associating built-in application
+ *                names with user-space entry point addresses.  These
+ *                globals are only needed for use by BINFS which executes
+ *                built-in applications from kernel-space in PROTECTED mode.
+ *                In the FLAT build, the user space globals are readily
+ *                available.  (BINFS is not supportable in KERNEL mode since
+ *                user-space address have no general meaning that
+ *                configuration).
+ * ARG:           A pointer to an instance of struct boardioc_builtin_s
+ * CONFIGURATION: This BOARDIOC command is always available when
+ *                CONFIG_BUILTIN is enabled, but does nothing unless
+ *                CONFIG_BUILD_PROTECTED and CONFIG_FS_BINFS are also
+ *                selected.
+ * DEPENDENCIES:  None
+ *
  * CMD:           BOARDIOC_USBDEV_CONTROL
  * DESCRIPTION:   Manage USB device classes
  * ARG:           A pointer to an instance of struct boardioc_usbdev_ctrl_s
@@ -163,12 +182,13 @@
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
 #define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0006)
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0007)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0008)
-#define BOARDIOC_NX_START          _BOARDIOC(0x0009)
-#define BOARDIOC_VNC_START         _BOARDIOC(0x000a)
-#define BOARDIOC_NXTERM            _BOARDIOC(0x000b)
-#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000c)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x000d)
+#define BOARDIOC_BUILTINS          _BOARDIOC(0x0008)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0009)
+#define BOARDIOC_NX_START          _BOARDIOC(0x000a)
+#define BOARDIOC_VNC_START         _BOARDIOC(0x000b)
+#define BOARDIOC_NXTERM            _BOARDIOC(0x000c)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000d)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x000e)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -190,12 +210,23 @@
  * required.
  */
 
-struct symtab_s; /* Forward reference */
+struct symtab_s;  /* Forward reference */
 struct boardioc_symtab_s
 {
   FAR struct symtab_s *symtab;
   int nsymbols;
 };
+
+#ifdef CONFIG_BUILTIN
+/* Arguments passed with the BOARDIOC_BUILTIN command */
+
+struct builtin_s;  /* Forward reference */
+struct boardioc_builtin_s
+{
+  FAR char * const *builtins;
+  int count;
+};
+#endif
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 /* This structure provides the argument BOARDIOC_USBDEV_CONTROL and

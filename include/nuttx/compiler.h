@@ -258,7 +258,7 @@
 #  undef  CONFIG_PTR_IS_NOT_INT
 #endif
 
-/* GCC supports inlined functions for version C99 and above */
+/* GCC supports inlined functions for C++ and for C version C99 and above */
 
 #  if defined(__cplusplus) || !defined(__STDC_VERSION__) || __STDC_VERSION__ >= 199901L
 #    define CONFIG_HAVE_INLINE 1

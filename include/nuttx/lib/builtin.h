@@ -56,12 +56,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This logic is not usable in the KERNEL build and, furthermore, it has no
- * meaning in __KERNEL__ blob of a protected build.
- */
+/* This logic is not usable in the KERNEL build from within the kernel. */
 
-#if (defined(CONFIG_BUILD_FLAT) || \
-    (defined(CONFIG_BUILD_PROTECTED )&& !__KERNEL__))
+#if !defined(CONFIG_BUILD_KERNEL) || !defined(__KERNEL__)
 #  define HAVE_BUILTIN_CONTEXT
 #endif
 
@@ -89,14 +86,64 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* These must be provided the application layer */
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS) && \
+    defined(__KERNEL__)
+/* In the PROTECTED build, the builtin arrays are only needed by BINFS.
+ * in this case, the user-space globals are not accessible and must be
+ * provided to the OS via the boardctl(BOARDIOC_BUILTINS) call.  In this
+ * case, the PROTECTED kernel will keep its own copy of the user-space
+ * array.
+ *
+ * The call to boardctl(BOARDIOC_BUILTINS) must be provided by the
+ * application layer.
+ */
 
-EXTERN const struct builtin_s g_builtins[];
+EXTERN FAR struct builtin_s * const *g_builtins;
+EXTERN int g_builtin_count;
+
+#else
+/* In the FLAT build, the builtin list is just a global global array and
+ * count exported from user space via the backdoor left open by the FLAT
+ * address space.  These globals must be provided the application layer.
+ */
+
+EXTERN FAR const struct builtin_s g_builtins[];
 EXTERN const int g_builtin_count;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: builtin_setlist
+ *
+ * Description:
+ *   Saves the user-space list of built-in applications for use by BINFS in
+ *   protected mode.  Normally this is small set of globals provided by
+ *   user-space logic.  It provides name-value pairs for associating
+ *   built-in application names with user-space entry point addresses.
+ *   These globals are only needed for use by BINFS which executes built-in
+ *   applications from kernel-space in PROTECTED mode.  In the FLAT build,
+ *   the user space globals are readily available.  (BINFS is not
+ *   supportable in KERNEL mode since user-space address have no general
+ *   meaning that configuration).
+ *
+ * Input Parameters:
+ *   builtins - The list of built-in functions.  Each entry is a name-value
+ *              pair that maps a builtin function name to its user-space
+ *              entry point address.
+ *   count    - The number of name-value pairs in the builtin list.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS) && \
+    defined(__KERNEL__)
+void builtin_setlist(FAR struct builtin_s * const *builtins, int count);
+#endif
 
 /****************************************************************************
  * Name: builtin_isavail
