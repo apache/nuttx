@@ -45,6 +45,8 @@
 #include <nuttx/binfmt/nxflat.h>
 #include <nuttx/lib/builtin.h>
 
+#include "binfmt.h"
+
 #ifndef CONFIG_BINFMT_DISABLE
 
 /****************************************************************************

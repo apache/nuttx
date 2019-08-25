@@ -60,7 +60,7 @@ endif
 # Builtin application interfaces
 
 ifeq ($(CONFIG_BUILTIN),y)
-CSRCS += builtin.c
+BINFMT_CSRCS += builtin.c
 endif
 
 # Add configured binary modules
