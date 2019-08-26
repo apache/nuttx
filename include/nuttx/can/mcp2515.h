@@ -63,8 +63,8 @@
 /* Type of the MCP2515 interrupt handling callback */
 
 struct mcp2515_config_s; /* Forward reference */
-typedef void (*mcp2515_handler_t)(FAR struct mcp2515_config_s *config,
-                                  FAR void *arg);
+typedef CODE void (*mcp2515_handler_t)(FAR struct mcp2515_config_s *config,
+                                       FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the MCP2515
  * driver when the driver is instantiated. This structure provides

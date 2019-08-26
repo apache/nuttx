@@ -232,7 +232,7 @@ struct hid_rptinfo_s
  *   structure, false if it should be ignored.
  */
 
-typedef bool (*hid_rptfilter_t)(FAR struct hid_rptitem_s *item);
+typedef CODE bool (*hid_rptfilter_t)(FAR struct hid_rptitem_s *item);
 
 /****************************************************************************
  * Public Function Prototypes

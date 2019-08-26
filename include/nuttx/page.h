@@ -454,7 +454,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage);
 #ifdef CONFIG_PAGING_BLOCKINGFILL
 int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage);
 #else
-typedef void (*up_pgcallback_t)(FAR struct tcb_s *tcb, int result);
+typedef CODE void (*up_pgcallback_t)(FAR struct tcb_s *tcb, int result);
 int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage,
                 up_pgcallback_t pg_callback);
 #endif

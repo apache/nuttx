@@ -254,8 +254,9 @@
  * mode.
  */
 
-typedef void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
-                                   FAR siginfo_t *info, FAR void *ucontext);
+typedef CODE void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
+                                        FAR siginfo_t *info,
+                                        FAR void *ucontext);
 
 /* This structure describes the format of the .bss/.data reserved area */
 

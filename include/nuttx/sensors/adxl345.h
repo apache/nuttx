@@ -279,7 +279,7 @@
  * handler but rather from the context of the worker thread with interrupts enabled.
  */
 
-typedef void (*adxl345_handler_t)(FAR struct adxl345_config_s *config, FAR void *arg);
+typedef CODE void (*adxl345_handler_t)(FAR struct adxl345_config_s *config, FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the ADXL345 driver when the
  * driver is instantiated. This structure provides information about the configuration of the

@@ -262,7 +262,7 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-typedef int (*wait_cc1101_ready)(FAR struct cc1101_dev_s *dev, uint32_t);
+typedef CODE int (*wait_cc1101_ready)(FAR struct cc1101_dev_s *dev, uint32_t);
 struct cc1101_dev_s;
 
 struct cc1101_ops_s

@@ -495,7 +495,7 @@
 
 /* The type of the media change callback function */
 
-typedef void (*spi_mediachange_t)(FAR void *arg);
+typedef CODE void (*spi_mediachange_t)(FAR void *arg);
 
 /* If the board supports multiple SPI devices types, this enumeration
  * identifies which is selected or de-selected.

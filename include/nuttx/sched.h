@@ -224,6 +224,7 @@ enum tstate_e
 
   NUM_TASK_STATES             /* Must be last */
 };
+
 typedef enum tstate_e tstate_t;
 
 /* The following definitions are determined by tstate_t.  Ordering of values
@@ -250,6 +251,7 @@ union entry_u
   pthread_startroutine_t pthread;
   main_t main;
 };
+
 typedef union entry_u entry_t;
 
 /* This is the type of the function called at task startup */
@@ -785,7 +787,7 @@ struct pthread_tcb_s
 
 /* This is the callback type used by sched_foreach() */
 
-typedef void (*sched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
+typedef CODE void (*sched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 #endif /* __ASSEMBLY__ */
 

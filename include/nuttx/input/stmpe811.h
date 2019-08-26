@@ -447,7 +447,7 @@
  * handler but rather from the context of the worker thread with interrupts enabled.
  */
 
-typedef void (*stmpe811_handler_t)(int pin);
+typedef CODE void (*stmpe811_handler_t)(int pin);
 
 /* A reference to a structure of this type must be passed to the STMPE811 driver when the
  * driver is instantiated. This structure provides information about the configuration of the

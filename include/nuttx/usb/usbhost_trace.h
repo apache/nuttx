@@ -85,7 +85,7 @@
 
 /* Enumeration callback function signature */
 
-typedef int (*usbhost_trcallback_t)(FAR uint32_t trace, FAR void *arg);
+typedef CODE int (*usbhost_trcallback_t)(FAR uint32_t trace, FAR void *arg);
 
 /****************************************************************************
  * Public Data

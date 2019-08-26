@@ -404,7 +404,7 @@ struct net_driver_s
   void *d_private;
 };
 
-typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
+typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Public Data
