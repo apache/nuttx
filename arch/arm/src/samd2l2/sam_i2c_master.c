@@ -632,7 +632,7 @@ static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   usec = size * I2C_TIMEOUT_MSPB + ts.tv_nsec / 1000;
-  while (usec > USEC_PER_SEC)
+  while (usec >= USEC_PER_SEC)
     {
       ts.tv_sec += 1;
       usec      -= USEC_PER_SEC;
