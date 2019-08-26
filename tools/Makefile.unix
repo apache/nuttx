@@ -270,11 +270,9 @@ tools/mkversion$(HOSTEXEEXT):
 # created manually and may contain other info
 
 $(TOPDIR)/.version:
-	$(Q) if [ ! -f .version ]; then \
-		$(Q) echo "No .version file found, creating one"
-		$(Q) tools/version.sh -v 0.0 -b 0 .version
-		$(Q) chmod 755 .version
-	fi
+	$(Q) echo "No .version file found, creating one"
+	$(Q) tools/version.sh -v 0.0 -b 0 .version
+	$(Q) chmod 755 .version
 
 # version_info will add git-specific info to the .version file
 # which must already exist.  First strip out any existing CONFIG_GIT_ info
