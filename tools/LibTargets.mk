@@ -200,10 +200,10 @@ syscall$(DELIM)libproxies$(LIBEXT): context
 staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-symtab$(DELIM)libsymtab$(LIBEXT): context
-	$(Q) $(MAKE) -C symtab TOPDIR="$(TOPDIR)" libsymtab$(LIBEXT) KERNEL=n
+libs$(DELIM)symtab$(DELIM)libsymtab$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)symtab TOPDIR="$(TOPDIR)" libsymtab$(LIBEXT) KERNEL=n
 
-staging$(DELIM)libsymtab$(LIBEXT): symtab$(DELIM)libsymtab$(LIBEXT)
+staging$(DELIM)libsymtab$(LIBEXT): libs$(DELIM)symtab$(DELIM)libsymtab$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 # Possible non-kernel builds

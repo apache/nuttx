@@ -138,7 +138,7 @@ endif
 
 # Add symbol table library
 
-ifeq ($(CONFIG_EXECFUNCS_GENERATE_SYSTEM_SYMTAB),y)
+ifeq ($(CONFIG_EXECFUNCS_SYSTEM_SYMTAB),y)
 NUTTXLIBS += staging$(DELIM)libsymtab$(LIBEXT)
 endif
 

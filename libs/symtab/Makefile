@@ -1,5 +1,5 @@
 ############################################################################
-# symtab/Makefile
+# libs/symtab/Makefile
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@ SYMTAB_CSRCS  =
 
 BIN = libsymtab$(LIBEXT)
 
-ifeq ($(CONFIG_EXECFUNCS_GENERATE_SYSTEM_SYMTAB),y)
+ifeq ($(CONFIG_EXECFUNCS_SYSTEM_SYMTAB),y)
 
 all: symtab.c $(BIN)
 .PHONY: all
@@ -104,4 +104,3 @@ distclean: clean
 	$(call DELFILE, tmp.csv)
 
 -include Make.dep
-
