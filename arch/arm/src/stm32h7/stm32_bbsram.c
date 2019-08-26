@@ -334,7 +334,7 @@ static void stm32_bbsram_ecc_workaround(FAR struct bbsramfh_s *pf)
 {
   /* Force the last writes to be a a full 32 bit word */
 
-  pf->unit32 = (volatile uint32_t) pf->unit32;
+  *((volatile uint32_t *) &pf->unit32) = (volatile uint32_t) pf->unit32;
 }
 #else
 #define stm32_bbsram_ecc_workaround()

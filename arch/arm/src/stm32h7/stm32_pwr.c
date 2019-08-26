@@ -47,6 +47,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
+#include "barriers.h"
 #include "up_arch.h"
 #include "stm32_pwr.h"
 
@@ -151,6 +152,7 @@ void stm32_pwr_enablebkp(bool writable)
   bool wait = false;
 
   flags = enter_critical_section();
+  ARM_DSB();
 
   /* Get the current state of the STM32 PWR control register */
 
@@ -186,13 +188,14 @@ void stm32_pwr_enablebkp(bool writable)
       wait = true;
     }
 
+  ARM_DSB();
   leave_critical_section(flags);
 
   if (wait)
     {
       /* Enable does not happen right away */
 
-      up_udelay(4000);
+      up_udelay(4);
     }
 }
 
