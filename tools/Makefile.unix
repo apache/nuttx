@@ -283,7 +283,7 @@ ifeq ($(GIT_DIR),y)
 	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> $<
 endif
 
-include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT) version_info
+include/nuttx/version.h: version_info tools/mkversion$(HOSTEXEEXT)
 	$(Q) tools/mkversion $(TOPDIR) > $@
 
 # Targets used to build include/nuttx/config.h.  Creation of config.h is
