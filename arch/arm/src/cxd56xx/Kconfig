@@ -45,6 +45,10 @@ config CXD56_XOSC_CLOCK
 	int
 	default 26000000
 
+config CXD56_SPH
+	bool
+	default y if ASMP
+
 config CXD56_PMIC
 	bool
 	default y

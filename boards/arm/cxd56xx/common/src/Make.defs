@@ -32,6 +32,12 @@
 #
 ############################################################################
 
+CSRCS += cxd56_boot.c
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += cxd56_uid.c
+endif
+
 ifeq ($(CONFIG_CXD56_BACKUPLOG),y)
 CSRCS += cxd56_crashdump.c
 endif
@@ -118,6 +124,18 @@ endif
 
 ifeq ($(CONFIG_LCD_LPM013M091A),y)
 CSRCS += cxd56_lpm013m091a.c
+endif
+
+ifeq ($(CONFIG_CXD56_SFC),y)
+CSRCS += cxd56_flash.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += cxd56_usbmsc.c
+endif
+
+ifeq ($(CONFIG_CXD56_I2C_DRIVER),y)
+CSRCS += cxd56_i2cdev.c
 endif
 
 DEPPATH += --dep-path src

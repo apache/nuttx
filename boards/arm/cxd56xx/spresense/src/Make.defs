@@ -33,7 +33,6 @@
 ############################################################################
 
 CSRCS += cxd56_main.c
-CSRCS += cxd56_boot.c
 CSRCS += cxd56_clock.c
 CSRCS += cxd56_bringup.c
 
@@ -44,10 +43,6 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += cxd56_ioctl.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
-CSRCS += cxd56_uid.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -74,10 +69,6 @@ ifeq ($(CONFIG_CXD56_PWM),y)
 CSRCS += cxd56_pwm.c
 endif
 
-ifeq ($(CONFIG_CXD56_SFC),y)
-CSRCS += cxd56_flash.c
-endif
-
 ifeq ($(CONFIG_SPI),y)
 CSRCS += cxd56_spi.c
 endif
@@ -94,16 +85,8 @@ ifeq ($(CONFIG_CXD56_CHARGER),y)
 CSRCS += cxd56_charger.c
 endif
 
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += cxd56_usbmsc.c
-endif
-
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += cxd56_composite.c
-endif
-
-ifeq ($(CONFIG_CXD56_I2C_DRIVER),y)
-CSRCS += cxd56_i2cdev.c
 endif
 
 DEPPATH += --dep-path board

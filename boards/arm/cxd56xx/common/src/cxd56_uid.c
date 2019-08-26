@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_uid.c
+ * boards/arm/cxd56xx/common/src/cxd56_uid.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

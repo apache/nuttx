@@ -1,6 +1,8 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/cxd56_flash.c
+ * boards/arm/cxd56xx/common/src/cxd56_usbmsc.c
  *
+ *   Copyright (C) 2009, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,10 +15,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -40,94 +41,37 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <syslog.h>
 #include <errno.h>
-#include <debug.h>
-#include <sys/mount.h>
+
 #include <nuttx/board.h>
-#include <arch/board/board.h>
-#include <nuttx/mtd/mtd.h>
-
-#ifdef CONFIG_FS_NXFFS
-#  include <nuttx/fs/nxffs.h>
-#endif
-
-#include "cxd56_sfc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SFC_DEVNO
-#  define CONFIG_SFC_DEVNO 0
-#endif
+/* Configuration ************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_flash_initialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Initialize the SPI-Flash device and mount the file system.
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
  ****************************************************************************/
 
-int board_flash_initialize(void)
+int board_usbmsc_initialize(int port)
 {
-  int ret;
-  FAR struct mtd_dev_s *mtd;
-
-  mtd = cxd56_sfc_initialize();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to initialize SFC. %d\n ", ret);
-      return -ENODEV;
-    }
-
-  /* use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(CONFIG_SFC_DEVNO, mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: Initializing the FTL layer: %d\n", ret);
-      return ret;
-    }
-
-#if defined(CONFIG_FS_SMARTFS)
-  /* Initialize to provide SMARTFS on the MTD interface */
-
-  ret = smart_initialize(CONFIG_SFC_DEVNO, mtd, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: SmartFS initialization failed: %d\n", ret);
-      return ret;
-    }
-
-  ret = mount("/dev/smart0d1", "/mnt/spif", "smartfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount the SmartFS volume: %d\n", errno);
-      return ret;
-    }
-
-#elif defined(CONFIG_FS_NXFFS)
-  /* Initialize to provide NXFFS on the MTD interface */
-
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: NXFFS initialization failed: %d\n", ret);
-      return ret;
-    }
-
-  ret = mount(NULL, "/mnt/spif", "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-#endif
+  /* If system/usbmsc is built as an NSH command, then SD slot should
+   * already have been initialized in board_app_initialize()
+   * (see stm32_appinit.c).
+   * In this case, there is nothing further to be done here.
+   */
 
   return OK;
 }
