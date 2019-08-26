@@ -49,7 +49,7 @@
  * Public Functions
  ****************************************************************************/
 
-FAR struct builtin_s const *builtin_for_index(int index)
+FAR const struct builtin_s *builtin_for_index(int index)
 {
   if (index < g_builtin_count)
     {

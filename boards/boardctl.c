@@ -68,6 +68,10 @@
 #  include <nuttx/spinlock.h>
 #endif
 
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS)
+#  include <nuttx/lib/builtin.h>
+#endif
+
 #ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************

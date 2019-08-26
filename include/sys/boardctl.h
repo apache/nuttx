@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Common commands
  *
  * CMD:           BOARDIOC_INIT
@@ -223,7 +224,7 @@ struct boardioc_symtab_s
 struct builtin_s;  /* Forward reference */
 struct boardioc_builtin_s
 {
-  FAR char * const *builtins;
+  FAR const struct builtin_s *builtins;
   int count;
 };
 #endif
@@ -235,9 +236,9 @@ struct boardioc_builtin_s
  *
  * enum boardioc_usbdev_identifier_e: Identifies the USB device class.
  *   In the case of multiple instances of the USB device class, the
- *   specific instance is identifed by the 'inst' field of the structure.
+ *   specific instance is identified by the 'inst' field of the structure.
  *
- * enum boardioc_usbdev_action_e: Identifies the action to peform on
+ * enum boardioc_usbdev_action_e: Identifies the action to perform on
  *   the USB device class instance.
  *
  * struct boardioc_usbdev_ctrl_s:
@@ -305,7 +306,7 @@ enum boardioc_termtype_e
 {
   BOARDIOC_XTERM_RAW = 0,         /* Raw NX terminal window */
   BOARDIOC_XTERM_FRAMED,          /* Framed NxTK terminal window */
-  BOARDIOC_XTERM_TOOLBAR          /* Tooolbar of framed NxTK terminal window */
+  BOARDIOC_XTERM_TOOLBAR          /* Toolbar of framed NxTK terminal window */
 };
 
 struct boardioc_nxterm_create_s

@@ -55,7 +55,7 @@
  * Public Functions
  ****************************************************************************/
 
-FAR struct builtin_s * const *g_builtins;
+FAR const struct builtin_s *g_builtins;
 int g_builtin_count;
 
 /****************************************************************************
@@ -87,7 +87,7 @@ int g_builtin_count;
  *
  ****************************************************************************/
 
-void builtin_setlist(FAR struct builtin_s * const *builtins, int count)
+void builtin_setlist(FAR const struct builtin_s *builtins, int count)
 {
   g_builtins      = builtins;
   g_builtin_count = count;

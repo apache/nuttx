@@ -98,7 +98,7 @@ extern "C"
  * application layer.
  */
 
-EXTERN FAR struct builtin_s * const *g_builtins;
+EXTERN FAR const struct builtin_s *g_builtins;
 EXTERN int g_builtin_count;
 
 #else
@@ -142,7 +142,7 @@ EXTERN const int g_builtin_count;
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS) && \
     defined(__KERNEL__)
-void builtin_setlist(FAR struct builtin_s * const *builtins, int count);
+void builtin_setlist(FAR const struct builtin_s *builtins, int count);
 #endif
 
 /****************************************************************************
@@ -199,7 +199,7 @@ FAR const char *builtin_getname(int index);
  *
  ****************************************************************************/
 
-FAR struct builtin_s const *builtin_for_index(int index);
+FAR const struct builtin_s *builtin_for_index(int index);
 
 #undef EXTERN
 #if defined(__cplusplus)
