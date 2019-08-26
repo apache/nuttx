@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsversion.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -226,17 +226,15 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
                           "%s\n",
                           CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD,
                           CONFIG_GIT_REVISION_STR);
-#else
-#  if defined(__DATE__) && defined(__TIME__)
+#elif defined(__DATE__) && defined(__TIME__)
       linesize = snprintf(attr->line, VERSION_LINELEN,
                           "NuttX version %s %s %s %s\n",
                           CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD,
                           __DATE__, __TIME__);
-#  else
+#else
       linesize = snprintf(attr->line, VERSION_LINELEN,
                           "NuttX version %s %s\n",
                           CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD);
-#  endif
 #endif
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */

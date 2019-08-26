@@ -1,7 +1,8 @@
 ############################################################################
 # tools/Makefile.unix
 #
-#   Copyright (C) 2007-2012, 2014-2015, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2012, 2014-2015, 2018-2019 Gregory Nutt. All rights
+#      reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,7 +81,12 @@ endif
 else
 BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
 endif
+
 COMMON_DIR = $(if $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)/common/Makefile),y,)
+
+# GIT directory present
+
+GIT_DIR = $(if $(wildcard $(TOPDIR)$(DELIM).git),y,)
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ../apps.  Ultimately, the application
@@ -182,7 +188,7 @@ endif
 NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)
 
-all: version_info $(BIN)
+all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean version_info
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
@@ -260,18 +266,24 @@ endif
 tools/mkversion$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
 
-# create .version iff it doesn't already exist.  Note: it may have been
+# create .version if it doesn't already exist.  Note: it may have been
 # created manually and may contain other info
+
 $(TOPDIR)/.version:
-	$(Q) echo "No .version file found, creating one"
-	$(Q) tools/version.sh -v 0.0 -b 0 .version
-	$(Q) chmod 755 .version
+	$(Q) if [ ! -f .version ]; then \
+		$(Q) echo "No .version file found, creating one"
+		$(Q) tools/version.sh -v 0.0 -b 0 .version
+		$(Q) chmod 755 .version
+	fi
 
 # version_info will add git-specific info to the .version file
 # which must already exist.  First strip out any existing CONFIG_GIT_ info
+
 version_info: $(TOPDIR)/.version
+ifeq ($(GIT_DIR),y)
 	$(Q) sed -i '/CONFIG_GIT_/d' $<
 	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> $<
+endif
 
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT) version_info
 	$(Q) tools/mkversion $(TOPDIR) > $@

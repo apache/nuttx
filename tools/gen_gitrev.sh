@@ -196,8 +196,5 @@ fi
 #
 #   update .version file with the following:
 #
-define git_info <<EOT
-CONFIG_GIT_REVISION_STR="$GIT_REVISION_STR"
-EOT
 
-echo "$git_info"
+echo "CONFIG_GIT_REVISION_STR=\"$GIT_REVISION_STR\""
