@@ -53,6 +53,12 @@
 #include "sched/sched.h"
 #include "signal/signal.h"
 
+#ifdef CONFIG_SIG_EVTHREAD_HPWORK
+#  define SIG_EVTHREAD_WORK HPWORK
+#else
+#  define SIG_EVTHREAD_WORK LPWORK
+#endif
+
 /****************************************************************************
  * Name: nxsig_notification_worker
  *
@@ -166,7 +172,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       /* Then queue the work */
 
-      return work_queue(LPWORK, &work->work,
+      return work_queue(SIG_EVTHREAD_WORK, &work->work,
                         nxsig_notification_worker, work, 0);
     }
 #endif
@@ -191,6 +197,6 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 #ifdef CONFIG_SIG_EVTHREAD
 void nxsig_cancel_notification(FAR struct sigwork_s *work)
 {
-  work_cancel(LPWORK, &work->work);
+  work_cancel(SIG_EVTHREAD_WORK, &work->work);
 }
 #endif

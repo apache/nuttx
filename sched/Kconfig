@@ -1340,6 +1340,19 @@ config SIG_EVTHREAD
 		different mechanism would need to be development to support this
 		feature on the PROTECTED or KERNEL build.
 
+config SIG_EVTHREAD_HPWORK
+	bool "SIGEV_EVTHREAD use HPWORK"
+	default n
+	depends on SIG_EVTHREAD && CONFIG_SCHED_HPWORK
+	---help---
+		if selected, SIGEV_THHREAD will use the high priority work queue.
+		If not, it will use the low priority work queue (if available).
+
+		REVISIT:  This solution is non-optimal.  Some notifications should
+		be high priority and others should be lower priority.  Ideally, you
+		should be able to determine which work queue is used on a
+		notification-by-notification basis.
+
 menuconfig SIG_DEFAULT
 	bool "Default signal actions"
 	default n
