@@ -182,8 +182,8 @@ endif
 NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)
 
-all: $(BIN)
-.PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+all: version_info $(BIN)
+.PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean version_info
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -260,15 +260,21 @@ endif
 tools/mkversion$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
 
+# create .version iff it doesn't already exist.  Note: it may have been
+# created manually and may contain other info
 $(TOPDIR)/.version:
-	$(Q) if [ ! -f .version ]; then \
-		echo "No .version file found, creating one"; \
-		tools/version.sh -v 0.0 -b 0 .version; \
-		chmod 755 .version; \
-	fi
+	$(Q) echo "No .version file found, creating one"
+	$(Q) tools/version.sh -v 0.0 -b 0 .version
+	$(Q) chmod 755 .version
 
-include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
-	$(Q) tools/mkversion $(TOPDIR) > include/nuttx/version.h
+# version_info will add git-specific info to the .version file
+# which must already exist.  First strip out any existing CONFIG_GIT_ info
+version_info: $(TOPDIR)/.version
+	$(Q) sed -i '/CONFIG_GIT_/d' $<
+	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> $<
+
+include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT) version_info
+	$(Q) tools/mkversion $(TOPDIR) > $@
 
 # Targets used to build include/nuttx/config.h.  Creation of config.h is
 # part of the overall NuttX configuration sequence. Notice that the
