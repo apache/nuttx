@@ -154,6 +154,10 @@ ifeq ($(CONFIG_IMXRT_LPSPI),y)
 CHIP_CSRCS += imxrt_lpspi.c
 endif
 
+ifeq ($(CONFIG_IMXRT_ENC),y)
+CHIP_CSRCS += imxrt_enc.c
+endif
+
 ifeq ($(CONFIG_IMXRT_USBOTG),y)
 CHIP_CSRCS += imxrt_ehci.c
 endif
