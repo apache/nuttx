@@ -432,16 +432,6 @@ void tcp_reset(FAR struct net_driver_s *dev)
   uint16_t tmp16;
   uint16_t acklen = 0;
   uint8_t seqbyte;
-  uint8_t domain;
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-  bool ipv6 = IFF_IS_IPv6(dev->d_flags);
-  domain    = ipv6 ? PF_INET6 : PF_INET;
-#elif defined(CONFIG_NET_IPv4)
-  domain    = PF_INET;
-#else /* defined(CONFIG_NET_IPv6) */
-  domain    = PF_INET6;
-#endif
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.rst++;
@@ -456,7 +446,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  if (ipv6)
+  if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
       FAR struct ipv6_hdr_s *ip = IPv6BUF;

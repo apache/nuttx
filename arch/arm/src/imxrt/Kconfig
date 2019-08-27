@@ -449,7 +449,7 @@ config ENC1_MOD
 if ENC1_MOD
 
 config ENC1_MODULUS
-	int "Modulus to wrap around"
+	hex "Modulus to wrap around"
 	default 0xffffffff
 
 endif # ENC1_MOD
@@ -524,7 +524,7 @@ config ENC2_MOD
 if ENC2_MOD
 
 config ENC2_MODULUS
-	int "Modulus to wrap around"
+	hex "Modulus to wrap around"
 	default 0xffffffff
 
 endif # ENC2_MOD
@@ -601,7 +601,7 @@ config ENC3_MOD
 if ENC3_MOD
 
 config ENC3_MODULUS
-	int "Modulus to wrap around"
+	hex "Modulus to wrap around"
 	default 0xffffffff
 
 endif # ENC3_MOD
@@ -676,7 +676,7 @@ config ENC4_MOD
 if ENC4_MOD
 
 config ENC4_MODULUS
-	int "Modulus to wrap around"
+	hex "Modulus to wrap around"
 	default 0xffffffff
 
 endif # ENC4_MOD
