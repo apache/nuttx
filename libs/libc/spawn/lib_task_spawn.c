@@ -42,7 +42,7 @@
 #include <spawn.h>
 #include <nuttx/spawn.h>
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_LIB_SYSCALL)
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Public Functions
@@ -91,4 +91,4 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   return nx_task_spawn(&parms);
 }
 
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_LIB_SYSCALL */
+#endif /* CONFIG_BUILD_PROTECTED */

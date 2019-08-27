@@ -458,7 +458,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_LIB_SYSCALL)
+#ifdef CONFIG_BUILD_PROTECTED
 int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
 {
   DEBUGASSERT(parms != NULL);
