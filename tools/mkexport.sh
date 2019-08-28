@@ -196,6 +196,13 @@ if [ "X${USRONLY}" != "Xy" ]; then
 
 		cp -p "${LDPATH}" "${EXPORTDIR}/build/." || \
 			{ echo "MK: cp ${LDPATH} failed"; exit 1; }
+
+		# Copy addtional ld scripts
+
+		LDDIR="$(dirname "${LDPATH}")"
+		for f in "${LDDIR}"/*.ld ; do
+			[ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/build/."
+		done
 	fi
 fi
 
