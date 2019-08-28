@@ -1,13 +1,14 @@
 /****************************************************************************
- * arch/drivers/analog/dac7571.c
+ * arch/drivers/analog/dac7554.c
  *
  *   Copyright (C) 2010, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2018 Daniel P. Carvalho. All rights reserved.
- *   Author: Daniel P. Carvalho <danieloak@gmail.com>
+ *   Copyright (C) 2019 Augusto Fraga Giachero. All rights reserved.
+ *   Author:  Augusto Fraga Giachero <afg@augustofg.net>
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,46 +53,35 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
-#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/spi/spi.h>
 
 /****************************************************************************
  * Preprocessor definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_I2C)
-#  error I2C Support Required.
+#if !defined(CONFIG_SPI)
+#  error SPI Support Required.
 #endif
 
-#if defined(CONFIG_DAC7571)
+#if defined(CONFIG_DAC7554)
 
-/* Operating modes - not controllable by user */
-
-#define DAC7571_CONFIG_OPMODE_SHIFT    4
-#define DAC7571_CONFIG_OPMODE_MASK     (0x0F << DAC7571_CONFIG_OPMODE_SHIFT)
-#define DAC7571_CONFIG_OPMODE_NORMAL   (0 << DAC7571_CONFIG_OPMODE_SHIFT)
-#define DAC7571_CONFIG_OPMODE_1K_PWD   (1 << DAC7571_CONFIG_OPMODE_SHIFT)
-#define DAC7571_CONFIG_OPMODE_100K_PWD (2 << DAC7571_CONFIG_OPMODE_SHIFT)
-#define DAC7571_CONFIG_OPMODE_HZ_PWD   (3 << DAC7571_CONFIG_OPMODE_SHIFT)
-
-#ifndef CONFIG_DAC7571_I2C_FREQUENCY
-#  define CONFIG_DAC7571_I2C_FREQUENCY 400000
+#ifndef CONFIG_DAC7554_SPI_FREQUENCY
+#  define CONFIG_DAC7554_SPI_FREQUENCY 1000000
 #endif
 
-#define I2C_NOSTARTSTOP_MSGS              2
-#define I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX 0
-#define I2C_NOSTARTSTOP_DATA_MSG_INDEX    1
+#define DAC7554_SPI_MODE (SPIDEV_MODE2) /* SPI Mode 2: CPOL=1,CPHA=0 */
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct dac7571_dev_s
+struct dac7554_dev_s
 {
-  FAR struct i2c_master_s *i2c;  /* I2C interface */
-  uint8_t addr;                  /* I2C address */
-  uint16_t state;                /* DAC7571 current state */
+  FAR struct spi_dev_s *spi;  /* SPI interface */
+  int spidev;                 /* SPI Chip Select number */
 };
 
 /****************************************************************************
@@ -102,35 +92,27 @@ struct dac7571_dev_s
 
 /* DAC methods */
 
-static void dac7571_reset(FAR struct dac_dev_s *dev);
-static int  dac7571_setup(FAR struct dac_dev_s *dev);
-static void dac7571_shutdown(FAR struct dac_dev_s *dev);
-static void dac7571_txint(FAR struct dac_dev_s *dev, bool enable);
-static int  dac7571_send(FAR struct dac_dev_s *dev,
+static void dac7554_reset(FAR struct dac_dev_s *dev);
+static int  dac7554_setup(FAR struct dac_dev_s *dev);
+static void dac7554_shutdown(FAR struct dac_dev_s *dev);
+static void dac7554_txint(FAR struct dac_dev_s *dev, bool enable);
+static int  dac7554_send(FAR struct dac_dev_s *dev,
               FAR struct dac_msg_s *msg);
-static int  dac7571_ioctl(FAR struct dac_dev_s *dev, int cmd,
+static int  dac7554_ioctl(FAR struct dac_dev_s *dev, int cmd,
               unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct dac7571_dev_s g_dacpriv;
-
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset    = dac7571_reset,
-  .ao_setup    = dac7571_setup,
-  .ao_shutdown = dac7571_shutdown,
-  .ao_txint    = dac7571_txint,
-  .ao_send     = dac7571_send,
-  .ao_ioctl    = dac7571_ioctl,
-};
-
-static struct dac_dev_s g_dacdev =
-{
-  .ad_ops      = &g_dacops,
-  .ad_priv     = &g_dacpriv,
+  .ao_reset    = dac7554_reset,
+  .ao_setup    = dac7554_setup,
+  .ao_shutdown = dac7554_shutdown,
+  .ao_txint    = dac7554_txint,
+  .ao_send     = dac7554_send,
+  .ao_ioctl    = dac7554_ioctl,
 };
 
 /****************************************************************************
@@ -138,7 +120,23 @@ static struct dac_dev_s g_dacdev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dac7571_reset
+ * Name: dac7554_configspi
+ *
+ * Description:
+ *   Configure the SPI interface
+ *
+ ****************************************************************************/
+
+static inline void dac7554_configspi(FAR struct spi_dev_s *spi)
+{
+  SPI_SETMODE(spi, DAC7554_SPI_MODE);
+  SPI_SETBITS(spi, 8);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_DAC7554_SPI_FREQUENCY);
+}
+
+/****************************************************************************
+ * Name: dac7554_reset
  *
  * Description:
  *   Reset the DAC device. Called early to initialize the hardware. This
@@ -146,12 +144,12 @@ static struct dac_dev_s g_dacdev =
  *
  ****************************************************************************/
 
-static void dac7571_reset(FAR struct dac_dev_s *dev)
+static void dac7554_reset(FAR struct dac_dev_s *dev)
 {
 }
 
 /****************************************************************************
- * Name: dac7571_setup
+ * Name: dac7554_setup
  *
  * Description:
  *   Configure the DAC. This method is called the first time that the DAC
@@ -161,13 +159,13 @@ static void dac7571_reset(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  dac7571_setup(FAR struct dac_dev_s *dev)
+static int  dac7554_setup(FAR struct dac_dev_s *dev)
 {
   return OK;
 }
 
 /****************************************************************************
- * Name: dac7571_shutdown
+ * Name: dac7554_shutdown
  *
  * Description:
  *   Disable the DAC. This method is called when the DAC device is closed.
@@ -175,70 +173,64 @@ static int  dac7571_setup(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static void dac7571_shutdown(FAR struct dac_dev_s *dev)
+static void dac7554_shutdown(FAR struct dac_dev_s *dev)
 {
 }
 
 /****************************************************************************
- * Name: dac7571_txint
+ * Name: dac7554_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void dac7571_txint(FAR struct dac_dev_s *dev, bool enable)
+static void dac7554_txint(FAR struct dac_dev_s *dev, bool enable)
 {
 }
 
 /****************************************************************************
- * Name: dac7571_send
+ * Name: dac7554_send
  ****************************************************************************/
 
-static int dac7571_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
+static int dac7554_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-  FAR struct dac7571_dev_s *priv = (FAR struct dac7571_dev_s *)dev->ad_priv;
-  struct i2c_config_s config;
-  int ret;
+  FAR struct dac7554_dev_s *priv = (FAR struct dac7554_dev_s *)dev->ad_priv;
+  uint16_t data;
 
   /* Sanity check */
 
-  DEBUGASSERT(priv->i2c != NULL);
+  DEBUGASSERT(priv->SPI != NULL);
 
   /* Set up message to send */
 
   ainfo("value: %08x\n", msg->am_data);
 
-  uint8_t const BUFFER_SIZE = 2;
-  uint8_t buffer[BUFFER_SIZE];
+  SPI_LOCK(priv->spi, true);
 
-  buffer[0] = (uint8_t)(msg->am_data >> 8);
-  buffer[0] &= ~(DAC7571_CONFIG_OPMODE_MASK); /* only normal op mode supported */
-  buffer[1] = (uint8_t)(msg->am_data);
+  dac7554_configspi(priv->spi);
 
-  /* Set up the I2C configuration */
+  data = ((msg->am_data >> 16) & 0x0fff) | ((msg->am_channel & 0x03) << 12) |
+    (1 << 15);
 
-  config.frequency = CONFIG_DAC7571_I2C_FREQUENCY;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  SPI_SELECT(priv->spi, priv->spidev, true);
 
-  /* Then perform the transfer. */
+  SPI_SEND(priv->spi, (data >> 8));
+  SPI_SEND(priv->spi, (data & 0xff));
 
-  ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
-  if (ret < 0)
-    {
-      aerr("ERROR: dac7571_send failed code:%d\n", ret);
-    }
+  SPI_SELECT(priv->spi, priv->spidev, false);
 
-  dac_txdone(&g_dacdev);
-  return ret;
+  SPI_LOCK(priv->spi, false);
+
+  dac_txdone(dev);
+  return 0;
 }
 
 /****************************************************************************
- * Name: dac7571_ioctl
+ * Name: dac7554_ioctl
  ****************************************************************************/
 
-static int dac7571_ioctl(FAR struct dac_dev_s *dev, int cmd,
+static int dac7554_ioctl(FAR struct dac_dev_s *dev, int cmd,
                          unsigned long arg)
 {
   return -ENOTTY;
@@ -249,7 +241,7 @@ static int dac7571_ioctl(FAR struct dac_dev_s *dev, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dac7571_initialize
+ * Name: dac7554_initialize
  *
  * Description:
  *   Initialize DAC
@@ -258,25 +250,31 @@ static int dac7571_ioctl(FAR struct dac_dev_s *dev, int cmd,
  *   Port number (for hardware that has multiple DAC interfaces)
  *
  * Returned Value:
- *   Valid DAC7571 device structure reference on success; a NULL on failure
+ *   Valid DAC7554 device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *dac7571_initialize(FAR struct i2c_master_s *i2c,
-                                         uint8_t addr)
+FAR struct dac_dev_s *dac7554_initialize(FAR struct spi_dev_s *spi,
+                                         int spidev)
 {
-  FAR struct dac7571_dev_s *priv;
+  FAR struct dac7554_dev_s *priv;
+  FAR struct dac_dev_s *g_dacdev;
 
   /* Sanity check */
 
   DEBUGASSERT(i2c != NULL);
 
-  /* Initialize the DAC7571 device structure */
+  /* Initialize the DAC7554 device structure */
 
-  priv = (FAR struct dac7571_dev_s *)g_dacdev.ad_priv;
-  priv->i2c = i2c;
-  priv->addr = addr;
-  return &g_dacdev;
+  priv = (FAR struct dac7554_dev_s *)kmm_malloc(sizeof(struct dac7554_dev_s));
+  priv->spi = spi;
+  priv->spidev = spidev;
+
+  g_dacdev = (FAR struct dac_dev_s *)kmm_malloc(sizeof(struct dac_dev_s));
+  g_dacdev->ad_ops = &g_dacops;
+  g_dacdev->ad_priv = priv;
+
+  return g_dacdev;
 }
 
-#endif /* CONFIG_DAC7571 */
+#endif /* CONFIG_DAC7554 */
