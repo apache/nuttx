@@ -80,7 +80,7 @@ int wd_delete(WDOG_ID wdog)
 {
   irqstate_t flags;
 
-  DEBUGASSERT(wdog);
+  DEBUGASSERT(wdog != NULL);
 
   /* The following steps are atomic... the watchdog must not be active when
    * it is being deallocated.
