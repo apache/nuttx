@@ -4219,9 +4219,9 @@ static int stm32_macenable(struct stm32_ethmac_s *priv)
 
   /* Clear Tx and Rx process stopped flags */
 
-  regval  = stm32_getreg(STM32_ETH_DMACRXCR);
+  regval  = stm32_getreg(STM32_ETH_DMACSR);
   regval |= (ETH_DMACSR_TPS | ETH_DMACSR_RPS);
-  stm32_putreg(regval, STM32_ETH_DMACRXCR);
+  stm32_putreg(regval, STM32_ETH_DMACSR);
 
   return OK;
 }
