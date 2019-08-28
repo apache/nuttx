@@ -462,3 +462,9 @@ shared worker task that collects the data.
 
 The cluster driver close() function calls the close functions of the leaf
 drivers.
+
+ADT7320 (Augusto Fraga Giachero)
+=======
+
+The ADT7320 is a SPI temperature sensor with a temperature range of
+−40°C to +150°C.

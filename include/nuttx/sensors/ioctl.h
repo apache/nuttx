@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/sensors/ioctl.h
  *
- *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -209,6 +209,10 @@
 /* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct sps30_conv_data_s* */
 #define SNIOC_SET_CLEAN_INTERVAL   _SNIOC(0x005d) /* Arg: uint32_t value (seconds) */
 #define SNIOC_START_FAN_CLEANING   _SNIOC(0x005e) /* Arg: None */
+
+/* IOCTL commands unique to the ADT7320 */
+
+#define SNIOC_READSTAT             _SNIOC(0x005f) /* Arg: uint8_t* pointer */
 
 /* IOCTL commands unique to the VL53L1X */
 

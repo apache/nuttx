@@ -807,3 +807,10 @@ config XEN1210_REGDEBUG
 config SENSORS_ZEROCROSS
 	bool "Zero Cross Sensor"
 	default n
+
+config SENSORS_ADT7320
+	bool "Analog Devices ADT7320 Driver"
+	default n
+	select SPI
+	---help---
+		Enables support for the ADT7320 Driver
