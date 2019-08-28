@@ -70,8 +70,8 @@
 
 #define STM32_ETH_MACMDIOAR_OFFSET   0x0200 /* Ethernet MAC MDIO address register */
 #define STM32_ETH_MACMDIODR_OFFSET   0x0204 /* Ethernet MAC MDIO data register */
+#define STM32_ETH_MACA0HR_OFFSET     0x0300 /* Address 0 high register */
 #define STM32_ETH_MACA0LR_OFFSET     0x0304 /* Address 0 low register */
-#define STM32_ETH_MACA0HR_OFFSET     0x0308 /* Address 0 high register */
 
 /* MTL Registers */
 

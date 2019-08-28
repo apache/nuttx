@@ -411,12 +411,10 @@
  * ETH_MACPFR_SAIF  Source address inverse filtering       0 (not used)
  * ETH_MACPFR_SAF   Source address filter                  0 (disabled)
  * ETH_MACPFR_HPF   Hash or perfect filter                 0 (Only matching frames passed)
- * ETH_MACPFR_RA    Receive all                            1 (enabled)
+ * ETH_MACPFR_RA    Receive all                            0 (disabled)
  */
 
-/* TODO: use proper mac filtering and not RA */
-
-#define MACPFR_SET_BITS (ETH_MACPFR_RA | ETH_MACPFR_PCF_PAUSE)
+#define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
 
 /* Clear the MACQTXFCR and MACRXFCR bits that will be setup during MAC
  * initialization (or that are cleared unconditionally).  Per the reference
