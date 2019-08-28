@@ -3197,7 +3197,9 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
+#if defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT) && \
+    defined(CONFIG_STM32F7_SDMMC_DMA)
+
 static int stm32_dmadelydinvldt(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
