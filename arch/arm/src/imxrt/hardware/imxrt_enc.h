@@ -189,26 +189,26 @@
 /* Input Filter Register */
 
 #define ENC_FILT_PER_SHIFT              (0)         /* Bits 0-7: Input Filter Sample Period */
-#define ENC_FILT_PER_MASK               (0xFF << ENC_FILT_PER_SHIFT)
+#define ENC_FILT_PER_MASK               (0xff << ENC_FILT_PER_SHIFT)
 #define ENC_FILT_CNT_SHIFT              (8)         /* Bits 8-10: Input Filter Sample Count */
 #define ENC_FILT_CNT_MASK               (0x7 << ENC_FILT_CNT_SHIFT)
 
 /* Input Monitor Register */
 
 #define ENC_IMR_HOME                    (1 << 0)    /* Bit 0: Raw HOME input */
-#define ENC_IMR_INDEX                   (1 << 0)    /* Bit 1: Raw INDEX input */
-#define ENC_IMR_PHB                     (1 << 0)    /* Bit 2: Raw PHASEB input */
-#define ENC_IMR_PHA                     (1 << 0)    /* Bit 3: Raw PHASEA input */
-#define ENC_IMR_FHOM                    (1 << 0)    /* Bit 4: Filtered HOME input */
-#define ENC_IMR_FIND                    (1 << 0)    /* Bit 5: Filtered INDEX input */
-#define ENC_IMR_FPHB                    (1 << 0)    /* Bit 6: Filtered PHASEB input */
-#define ENC_IMR_FPHA                    (1 << 0)    /* Bit 7: Filtered PHASEA input */
+#define ENC_IMR_INDEX                   (1 << 1)    /* Bit 1: Raw INDEX input */
+#define ENC_IMR_PHB                     (1 << 2)    /* Bit 2: Raw PHASEB input */
+#define ENC_IMR_PHA                     (1 << 3)    /* Bit 3: Raw PHASEA input */
+#define ENC_IMR_FHOM                    (1 << 4)    /* Bit 4: Filtered HOME input */
+#define ENC_IMR_FIND                    (1 << 5)    /* Bit 5: Filtered INDEX input */
+#define ENC_IMR_FPHB                    (1 << 6)    /* Bit 6: Filtered PHASEB input */
+#define ENC_IMR_FPHA                    (1 << 7)    /* Bit 7: Filtered PHASEA input */
                                                     /* Bits 8-15: Reserved */
 
 /* Test Register */
 
 #define ENC_TST_COUNT_SHIFT             (0)         /* Bits 0-7: # of quadrature advances to generate */
-#define ENC_TST_COUNT_MASK              (0xFF << ENC_TST_COUNT_SHIFT)
+#define ENC_TST_COUNT_MASK              (0xff << ENC_TST_COUNT_SHIFT)
 #define ENC_TST_PERIOD_SHIFT            (8)         /* Bits 8-12: Period of Quadrature Phase */
 #define ENC_TST_PERIOD_MASK             (0x1F << ENC_TST_PERIOD_SHIFT)
 #define ENC_TST_QDN                     (1 << 13)   /* Bit 13: Generate Negative Quadrature Decoder Signal */
