@@ -1421,7 +1421,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *   very early in the boot sequence.
  *
  ****************************************************************************/
-
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
   /* Configure all UARTs (except the CONSOLE UART) and disable interrupts */
@@ -1474,6 +1474,8 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
+
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
