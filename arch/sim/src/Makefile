@@ -64,6 +64,7 @@ CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
 CSRCS += up_allocateheap.c up_devconsole.c up_qspiflash.c
 
 VPATH = sim
+DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTSRCS = up_hostusleep.c
 
@@ -300,7 +301,7 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 # Dependencies
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
 depend: .depend

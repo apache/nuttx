@@ -38,7 +38,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP280)
+#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BMP280) || defined(CONFIG_SENSORS_BMP280_SCU))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -114,30 +114,49 @@ extern "C"
 
 struct bmp280_press_adj_s
 {
-  uint16_t  dig_p1; /** calibration P1 data */
-  int16_t   dig_p2; /** calibration P2 data */
-  int16_t   dig_p3; /** calibration P3 data */
-  int16_t   dig_p4; /** calibration P4 data */
-  int16_t   dig_p5; /** calibration P5 data */
-  int16_t   dig_p6; /** calibration P6 data */
-  int16_t   dig_p7; /** calibration P7 data */
-  int16_t   dig_p8; /** calibration P8 data */
-  int16_t   dig_p9; /** calibration P9 data */
+  uint16_t  dig_p1; /* calibration P1 data */
+  int16_t   dig_p2; /* calibration P2 data */
+  int16_t   dig_p3; /* calibration P3 data */
+  int16_t   dig_p4; /* calibration P4 data */
+  int16_t   dig_p5; /* calibration P5 data */
+  int16_t   dig_p6; /* calibration P6 data */
+  int16_t   dig_p7; /* calibration P7 data */
+  int16_t   dig_p8; /* calibration P8 data */
+  int16_t   dig_p9; /* calibration P9 data */
 };
 
 struct bmp280_temp_adj_s
 {
-  uint16_t  dig_t1; /** calibration T1 data */
-  int16_t   dig_t2; /** calibration T2 data */
-  int16_t   dig_t3; /** calibration T3 data */
+  uint16_t  dig_t1; /* calibration T1 data */
+  int16_t   dig_t2; /* calibration T2 data */
+  int16_t   dig_t3; /* calibration T3 data */
 };
 
 struct bmp280_meas_s
 {
-  uint8_t   msb;    /** meas value MSB */
-  uint8_t   lsb;    /** meas value LSB */
-  uint8_t   xlsb;   /** meas value XLSB */
+  uint8_t   msb;    /* meas value MSB */
+  uint8_t   lsb;    /* meas value LSB */
+  uint8_t   xlsb;   /* meas value XLSB */
 };
+
+#ifdef CONFIG_SENSORS_BMP280_SCU
+/****************************************************************************
+ * Name: bmp280_init
+ *
+ * Description:
+ *   Initialize BMP280 pressure device
+ *
+ * Input Parameters:
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             BMP280
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int bmp280_init(FAR struct i2c_master_s *i2c, int port);
+#endif
 
 /****************************************************************************
  * Name: bmp280_register
@@ -154,7 +173,14 @@ struct bmp280_meas_s
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+#ifdef CONFIG_SENSORS_BMP280_SCU
+int bmp280press_register(FAR const char *devpath, int minor,
+                         FAR struct i2c_master_s *i2c, int port);
+int bmp280temp_register(FAR const char *devpath, int minor,
+                        FAR struct i2c_master_s *i2c, int port);
+#else
 int bmp280_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

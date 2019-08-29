@@ -1095,7 +1095,8 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits,
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
     defined(CONFIG_STM32_SPI_DMA)
 static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
@@ -1311,6 +1312,13 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           clrbits = 0;
           break;
 
+#ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
+        case SPIDEV_MODETI:
+          setbits = 0;
+          clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+          break;
+#endif
+
         default:
           return;
         }
@@ -1318,6 +1326,31 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         spi_modifycr1(priv, 0, SPI_CR1_SPE);
         spi_modifycr1(priv, setbits, clrbits);
         spi_modifycr1(priv, SPI_CR1_SPE, 0);
+
+#ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
+      switch (mode)
+        {
+          case SPIDEV_MODE0:
+          case SPIDEV_MODE1:
+          case SPIDEV_MODE2:
+          case SPIDEV_MODE3:
+            setbits = 0;
+            clrbits = SPI_CR2_FRF;
+            break;
+
+          case SPIDEV_MODETI:
+            setbits = SPI_CR2_FRF;
+            clrbits = 0;
+            break;
+
+          default:
+            return;
+        }
+
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr2(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#endif
 
         /* Save the mode so that subsequent re-configurations will be faster */
 

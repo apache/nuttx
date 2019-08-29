@@ -63,7 +63,7 @@
 #define IMXRT_ENET_PALR_OFFSET     0x00e4 /* Physical Address Lower Register */
 #define IMXRT_ENET_PAUR_OFFSET     0x00e8 /* Physical Address Upper Register */
 #define IMXRT_ENET_OPD_OFFSET      0x00ec /* Opcode/Pause Duration Register */
-#define IMXRT_ENET_TXIC_OFFSET     0x00F0 /* Transmit Interrupt Coalescing Register */
+#define IMXRT_ENET_TXIC_OFFSET     0x00f0 /* Transmit Interrupt Coalescing Register */
 #define IMXRT_ENET_RXIC_OFFSET     0x0100 /* Receive Interrupt Coalescing Register */
 #define IMXRT_ENET_IAUR_OFFSET     0x0118 /* Descriptor Individual Upper Address Register */
 #define IMXRT_ENET_IALR_OFFSET     0x011c /* Descriptor Individual Lower Address Register */
@@ -200,6 +200,7 @@
 #endif
                                                /* Bits 9-31: Reserved */
 #define ECR_RESV_VAL                 (7 << 28) /* Reserve val to write */
+
 /* MII Management Frame Register */
 
 #define ENET_MMFR_DATA_SHIFT         (0)       /* Bits 0-15: Management frame data */
@@ -286,10 +287,11 @@
 #define ENET_OPD_OPCODE_SHIFT        (16)      /* Bits 16-31: Opcode field in PAUSE frames */
 #define ENET_OPD_OPCODE_MASK         (0xffff << ENET_OPD_OPCODE_SHIFT)
 
-/* Descriptor Individual Uupper/Lower Address Register (64-bit address in two 32-bit registers) */
+/* Descriptor Individual Upper/Lower Address Register (64-bit address in two 32-bit registers) */
 /* Descriptor Group Upper/Lower Address Register (64-bit address in two 32-bit registers) */
 
 /* Transmit Interrupt Coalescing Register */
+
 #define ENET_TXIC_ICTT_SHIFT         (0)       /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_TXIC_ICTT_SHIFT_MASK    (0xffff << ENET_TXIC_ICTT_SHIFT)
                                                /* Bits 16-19: Reserved */
@@ -299,6 +301,7 @@
 #define ENET_TXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Eable/disabel Interrupt Coalescing */
 
 /* Receive Interrupt Coalescing Register */
+
 #define ENET_RXIC_ICTT_SHIFT         (0)       /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_RXIC_ICTT_SHIFT_MASK    (0xffff << ENET_TXIC_ICTT_SHIFT)
                                                /* Bits 16-19: Reserved */

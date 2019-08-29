@@ -136,12 +136,14 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
+          int index;
+
           /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
            * for * extended address. More research discovers that the extended
            * address should be sent in reverse-canonical form.
            */
 
-          for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
+          for (index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
             {
               frame->io_data[mhr_len++] = meta->destaddr.eaddr[index];
             }
@@ -202,12 +204,14 @@ int mac802154_req_data(MACHANDLE mac,
         }
       else if (meta->srcmode == IEEE802154_ADDRMODE_EXTENDED)
         {
+          int index;
+
           /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
            * for * extended address. More research discovers that the extended
            * address should be sent in reverse-canonical form.
            */
 
-          for (int index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
+          for (index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
             {
               frame->io_data[mhr_len++] = priv->addr.eaddr[index];
             }

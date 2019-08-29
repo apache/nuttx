@@ -312,8 +312,8 @@ typedef uint8_t ioe_pinset_t;
 /* This type represents a pin interrupt callback function */
 
 struct ioexpander_dev_s;
-typedef int (*ioe_callback_t)(FAR struct ioexpander_dev_s *dev,
-                              ioe_pinset_t pinset, FAR void *arg);
+typedef CODE int (*ioe_callback_t)(FAR struct ioexpander_dev_s *dev,
+                                   ioe_pinset_t pinset, FAR void *arg);
 #endif /* CONFIG_IOEXPANDER_INT_ENABLE */
 
 /* I/O expander interface methods */

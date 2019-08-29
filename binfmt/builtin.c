@@ -51,13 +51,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/builtin.h>
+#include <nuttx/lib/builtin.h>
 
-#ifdef CONFIG_BUILTIN
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef HAVE_BUILTIN_CONTEXT
 
 /****************************************************************************
  * Private Function Prototypes
@@ -197,5 +193,5 @@ void builtin_uninitialize(void)
   (void)unregister_binfmt(&g_builtin_binfmt);
 }
 
-#endif /* CONFIG_BUILTIN */
+#endif /* HAVE_BUILTIN_CONTEXT */
 

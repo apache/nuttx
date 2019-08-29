@@ -56,7 +56,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/binfmt/builtin.h>
 
 #include "cromfs.h"
 

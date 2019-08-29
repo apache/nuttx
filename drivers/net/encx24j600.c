@@ -2855,7 +2855,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->lower        = lower;         /* Save the low-level MCU interface */
 
   /* The interface should be in the down state.  However, this function is
-   * called too early in initalization to perform the ENCX24J600 reset in
+   * called too early in initialization to perform the ENCX24J600 reset in
    * enc_ifdown.  We are depending upon the fact that the application level
    * logic will call enc_ifdown later to reset the ENCX24J600.
    */

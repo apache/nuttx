@@ -128,7 +128,12 @@
 
 #ifndef CONFIG_BUILD_KERNEL
 #  define SYS_task_create              __SYS_task_create
+#ifdef CONFIG_BUILD_PROTECTED
+#  define SYS_nx_task_spawn            (__SYS_task_create + 1)
+#  define __SYS_task_delete            (__SYS_task_create + 2)
+#else
 #  define __SYS_task_delete            (__SYS_task_create + 1)
+#endif
 
 /* pgalloc() is only available with address environments with the page
  * allocator selected.  MMU support from the CPU is also required.

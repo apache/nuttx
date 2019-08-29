@@ -73,7 +73,7 @@
 #include "s32k1xx_config.h"
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)
-#  include "s32k14x/s32k14x_clocknames.h"
+#  include "s32k11x/s32k11x_clocknames.h"
 #elif defined(CONFIG_ARCH_CHIP_S32K14X)
 #  include "s32k14x/s32k14x_clocknames.h"
 #endif
@@ -91,10 +91,12 @@
 #define CLK_SRC_SIRC                   2  /* SCGIRCLK - Slow IRC Clock */
 #define CLK_SRC_FIRC                   3  /* SCGFIRCLK - Fast IRC Clock */
 #define CLK_SRC_SPLL                   6  /* SCGPCLK System PLL clock */
+
 #define CLK_SRC_SOSC_DIV1              1  /* OSCCLK - System Oscillator Bus Clock */
 #define CLK_SRC_SIRC_DIV1              2  /* SCGIRCLK - Slow IRC Clock */
 #define CLK_SRC_FIRC_DIV1              3  /* SCGFIRCLK - Fast IRC Clock */
 #define CLK_SRC_SPLL_DIV1              6  /* SCGPCLK System PLL clock */
+
 #define CLK_SRC_SOSC_DIV2              1  /* OSCCLK - System Oscillator Bus Clock */
 #define CLK_SRC_SIRC_DIV2              2  /* SCGIRCLK - Slow IRC Clock */
 #define CLK_SRC_FIRC_DIV2              3  /* SCGFIRCLK - Fast IRC Clock */
@@ -175,29 +177,17 @@ enum peripheral_clock_frac_e
   MULTIPLY_BY_TWO          = 1         /* Fractional value is one */
 };
 
-enum peripheral_clock_divider_e
-{
-  DIVIDE_BY_ONE            = 0,        /* Divide by 1 (pass-through, no clock divide) */
-  DIVIDE_BY_TWO            = 1,        /* Divide by 2 */
-  DIVIDE_BY_THREE          = 2,        /* Divide by 3 */
-  DIVIDE_BY_FOUR           = 3,        /* Divide by 4 */
-  DIVIDE_BY_FIVE           = 4,        /* Divide by 5 */
-  DIVIDE_BY_SIX            = 5,        /* Divide by 6 */
-  DIVIDE_BY_SEVEN          = 6,        /* Divide by 7 */
-  DIVIDE_BY_EIGTH          = 7         /* Divide by 8 */
-};
-
 struct peripheral_clock_config_s
 {
   /* clkname is the name of the peripheral clock.  It must be one of the values
    * defined in the chip specific xxxxxx_configname.h header file.
    */
 
-  enum clock_names_e clkname;              /* Peripheral clock name */
-  bool clkgate;                            /* Peripheral clock gate */
-  peripheral_clock_source_t clksrc;        /* Peripheral clock source */
-  enum peripheral_clock_frac_e frac;       /* Peripheral clock fractional value */
-  enum peripheral_clock_divider_e divider; /* Peripheral clock divider value */
+  enum clock_names_e clkname;          /* Peripheral clock name */
+  bool clkgate;                        /* Peripheral clock gate */
+  peripheral_clock_source_t clksrc;    /* Peripheral clock source */
+  enum peripheral_clock_frac_e frac;   /* Peripheral clock fractional value */
+  uint8_t divider;                     /* Peripheral clock divider, range 1..8 */
 };
 
 #ifndef __ASSEMBLY__

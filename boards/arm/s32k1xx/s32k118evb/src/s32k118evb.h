@@ -61,11 +61,13 @@
  *   RedLED   PTD16 (FTM0CH1)
  *   GreenLED PTD15 (FTM0CH0)
  *   BlueLED  PTE8  (FTM0CH6)
+ *
+ * An output of '1' illuminates the LED.
  */
 
-#define GPIO_LED_R     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_G     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_R     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_G     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
 
 /* Buttons.  The S32K118EVB supports two buttons:
  *

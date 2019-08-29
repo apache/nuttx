@@ -26,11 +26,28 @@ config CXD56_WLCSP
 
 endchoice
 
+comment "Debug Features"
+
+config CXD56_BACKUPLOG
+	bool "Backup Log driver"
+	default y
+
+config CXD56_RESET_ON_CRASH
+	bool "Enable Board Reset on crash"
+	default n
+	---help---
+		If selected the board_crashdump should reset the machine after
+		saveing the state of the machine
+
 comment "Basic Options"
 
 config CXD56_XOSC_CLOCK
 	int
 	default 26000000
+
+config CXD56_SPH
+	bool
+	default y if ASMP
 
 config CXD56_PMIC
 	bool

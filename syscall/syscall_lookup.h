@@ -90,6 +90,9 @@ SYSCALL_LOOKUP(sem_unlink,                 1, STUB_sem_unlink)
 
 #ifndef CONFIG_BUILD_KERNEL
 SYSCALL_LOOKUP(task_create,                5, STUB_task_create)
+#ifdef CONFIG_BUILD_PROTECTED
+SYSCALL_LOOKUP(nx_task_spawn,              1, STUB_nx_task_spawn)
+#endif
 #else
 SYSCALL_LOOKUP(pgalloc,                    2, STUB_pgalloc)
 #endif

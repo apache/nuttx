@@ -61,11 +61,13 @@
  *   RedLED   PTD15 (FTM0 CH0)
  *   GreenLED PTD16 (FTM0 CH1)
  *   BlueLED  PTD0  (FTM0 CH2)
+ *
+ * An output of '1' illuminates the LED.
  */
 
-#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
-#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_B     (PIN_PTE8  | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
 
 /* Buttons.  The S32K146EVB supports two buttons:
  *

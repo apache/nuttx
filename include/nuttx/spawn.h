@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spawn.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
+
 /* This enumerator identifies a file action */
 
 enum spawn_file_actions_e
@@ -102,6 +103,27 @@ struct spawn_open_file_action_s
 #define SIZEOF_OPEN_FILE_ACTION_S(n) \
   (sizeof(struct spawn_open_file_action_s) + (n))
 
+#ifdef CONFIG_LIB_SYSCALL
+/* task_spawn() and posix_spawn() are NuttX OS interfaces.  In PROTECTED and
+ * KERNEL build modes, then can be reached from applications only via a
+ * system call.  Currently, the number of parameters in a system call is
+ * limited to six; these spawn function have seven parameters.  Rather than
+ * extend the maximum number of parameters across all architectures, I opted
+ * instead to marshal the seven parameters into the following structure:
+ */
+
+struct spawn_syscall_parms_s
+{
+  FAR pid_t *pid;
+  FAR const char *name;
+  main_t entry;
+  FAR const posix_spawn_file_actions_t *file_actions;
+  FAR const posix_spawnattr_t *attr;
+  FAR char * const *argv;
+  FAR char * const *envp;
+};
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -113,6 +135,9 @@ extern "C"
 
 void add_file_action(FAR posix_spawn_file_actions_t *file_action,
                      FAR struct spawn_general_file_action_s *entry);
+#ifdef CONFIG_BUILD_PROTECTED
+int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms);
+#endif
 
 #ifdef __cplusplus
 }

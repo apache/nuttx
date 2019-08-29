@@ -1269,8 +1269,9 @@ static void swap_in_place(FAR uint8_t * buf, uint16_t len)
 static void array_shift(FAR const uint8_t *in, FAR uint8_t *out)
 {
   uint8_t overflow = 0;
+  int i;
 
-  for (int i = 15; i >= 0; i--)
+  for (i = 15; i >= 0; i--)
     {
       out[i] = in[i] << 1;
       /* previous byte */
@@ -1362,10 +1363,12 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
   uint8_t flag;
   uint8_t n;
   int err;
+  int i;
 
   swap_buf(key, key_s, 16);
 
   /* (K1,K2) = Generate_Subkey(K) */
+
   err = cmac_subkey(key_s, k1, k2);
   if (err)
     {
@@ -1374,13 +1377,13 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
 
   wlinfo("key %s subkeys k1 %s k2 %s\n", h(key, 16), h(k1, 16), h(k2, 16));
 
-  /* the number of blocks, n, is calculated, the block length is 16 bytes n =
+  /* The number of blocks, n, is calculated, the block length is 16 bytes n =
    * ceil(len/const_Bsize)
    */
 
   n = (len + 15) / 16;
 
-  /* check input length, flag indicate completed blocks */
+  /* Check input length, flag indicate completed blocks */
 
   if (n == 0)
     {
@@ -1407,7 +1410,8 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
 
   wlinfo("len %u n %u flag %u\n", len, n, flag);
 
-  /* if flag is true then M_last = M_n XOR K1 */
+  /* If flag is true then M_last = M_n XOR K1 */
+
   if (flag)
     {
       xor_128((FAR struct uint128_s *)&in[16 * (n - 1)],
@@ -1425,15 +1429,17 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
     }
 
   /* Reuse k1 and k2 buffers */
+
   x = k1;
   y = k2;
 
   /* Zeroing x */
+
   memset(x, 0, 16);
 
-  /* Rhe basic CBC-MAC is applied to M_1,...,M_{n-1},M_last */
+  /* The basic CBC-MAC is applied to M_1,...,M_{n-1},M_last */
 
-  for (int i = 0; i < n - 1; i++)
+  for (i = 0; i < n - 1; i++)
     {
       /* Y = X XOR M_i */
 

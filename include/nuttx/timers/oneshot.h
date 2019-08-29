@@ -187,8 +187,8 @@
  */
 
 struct oneshot_lowerhalf_s;
-typedef void (*oneshot_callback_t)(FAR struct oneshot_lowerhalf_s *lower,
-                                   FAR void *arg);
+typedef CODE void (*oneshot_callback_t)(FAR struct oneshot_lowerhalf_s *lower,
+                                        FAR void *arg);
 
 /* The one short operations supported by the lower half driver */
 

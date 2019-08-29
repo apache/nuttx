@@ -62,7 +62,7 @@
  *   (mqdes).  This is an internal OS interface.  It is functionally
  *   equivalent to mq_send() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_send() for a more complete description of the

@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Common commands
  *
  * CMD:           BOARDIOC_INIT
@@ -66,7 +67,7 @@
  *                board_app_initialize() implementation without modification.
  *                The argument has no meaning to NuttX; the meaning of the
  *                argument is a contract between the board-specific
- *                initalization logic and the matching application logic.
+ *                initialization logic and the matching application logic.
  *                The value cold be such things as a mode enumeration value,
  *                a set of DIP switch switch settings, a pointer to
  *                configuration data read from a file or serial FLASH, or
@@ -109,6 +110,25 @@
  *                modules.
  * ARG:           A pointer to an instance of struct boardioc_symtab_s
  * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
+ * DEPENDENCIES:  None
+ *
+ * CMD:           BOARDIOC_BUILTINS
+ * DESCRIPTION:   Provide the user-space list of built-in applications for
+ *                use by BINFS in protected mode.  Normally this is small
+ *                set of globals provided by user-space logic.  It provides
+ *                name-value pairs for associating built-in application
+ *                names with user-space entry point addresses.  These
+ *                globals are only needed for use by BINFS which executes
+ *                built-in applications from kernel-space in PROTECTED mode.
+ *                In the FLAT build, the user space globals are readily
+ *                available.  (BINFS is not supportable in KERNEL mode since
+ *                user-space address have no general meaning that
+ *                configuration).
+ * ARG:           A pointer to an instance of struct boardioc_builtin_s
+ * CONFIGURATION: This BOARDIOC command is always available when
+ *                CONFIG_BUILTIN is enabled, but does nothing unless
+ *                CONFIG_BUILD_PROTECTED and CONFIG_FS_BINFS are also
+ *                selected.
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_USBDEV_CONTROL
@@ -163,12 +183,13 @@
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
 #define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0006)
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0007)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0008)
-#define BOARDIOC_NX_START          _BOARDIOC(0x0009)
-#define BOARDIOC_VNC_START         _BOARDIOC(0x000a)
-#define BOARDIOC_NXTERM            _BOARDIOC(0x000b)
-#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000c)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x000d)
+#define BOARDIOC_BUILTINS          _BOARDIOC(0x0008)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0009)
+#define BOARDIOC_NX_START          _BOARDIOC(0x000a)
+#define BOARDIOC_VNC_START         _BOARDIOC(0x000b)
+#define BOARDIOC_NXTERM            _BOARDIOC(0x000c)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000d)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x000e)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -190,12 +211,23 @@
  * required.
  */
 
-struct symtab_s; /* Forward reference */
+struct symtab_s;  /* Forward reference */
 struct boardioc_symtab_s
 {
   FAR struct symtab_s *symtab;
   int nsymbols;
 };
+
+#ifdef CONFIG_BUILTIN
+/* Arguments passed with the BOARDIOC_BUILTIN command */
+
+struct builtin_s;  /* Forward reference */
+struct boardioc_builtin_s
+{
+  FAR const struct builtin_s *builtins;
+  int count;
+};
+#endif
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 /* This structure provides the argument BOARDIOC_USBDEV_CONTROL and
@@ -204,9 +236,9 @@ struct boardioc_symtab_s
  *
  * enum boardioc_usbdev_identifier_e: Identifies the USB device class.
  *   In the case of multiple instances of the USB device class, the
- *   specific instance is identifed by the 'inst' field of the structure.
+ *   specific instance is identified by the 'inst' field of the structure.
  *
- * enum boardioc_usbdev_action_e: Identifies the action to peform on
+ * enum boardioc_usbdev_action_e: Identifies the action to perform on
  *   the USB device class instance.
  *
  * struct boardioc_usbdev_ctrl_s:
@@ -274,7 +306,7 @@ enum boardioc_termtype_e
 {
   BOARDIOC_XTERM_RAW = 0,         /* Raw NX terminal window */
   BOARDIOC_XTERM_FRAMED,          /* Framed NxTK terminal window */
-  BOARDIOC_XTERM_TOOLBAR          /* Tooolbar of framed NxTK terminal window */
+  BOARDIOC_XTERM_TOOLBAR          /* Toolbar of framed NxTK terminal window */
 };
 
 struct boardioc_nxterm_create_s

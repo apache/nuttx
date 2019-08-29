@@ -32,6 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
+TOPDIR="${WD}/.."
+
 USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
 
@@ -123,20 +126,20 @@ CHIPLIST="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
   pic32mz lm32 mor1kx m32262f8 sh7032 gap8 nr5m100 sim qemu esp32 z16f2811
   ez80 z180 z8 z80"
 
-for arch in ${ARCHLIST}; do
-  for chip in ${CHIPLIST}; do
-    if [ -f ${TOPDIR}/boards/${arch}/${chip}/${boarddir}/Kconfig ]; then
-      ARCHSUBDIR=${arch}
-      CHIPSUBDIR=${chip}
+for ARCH in ${ARCHLIST}; do
+  for CHIP in ${CHIPLIST}; do
+    if [ -f ${TOPDIR}/boards/${ARCH}/${CHIP}/${BOARDSUBDIR}/Kconfig ]; then
+      ARCHSUBDIR=${ARCH}
+      CHIPSUBDIR=${CHIP}
       echo "  Detected ${ARCHSUBDIR} Architecture"
       echo "  Detected ${CHIPSUBDIR} Chip"
     fi
   done
 done
 
-for arch in ${ARCHLIST}; do
-  if [ -f boards/${arch}/${BOARDSUBDIR}/Kconfig ]; then
-    ARCHSUBDIR=${arch}
+for ARCH in ${ARCHLIST}; do
+  if [ -f boards/${ARCH}/${BOARDSUBDIR}/Kconfig ]; then
+    ARCHSUBDIR=${ARCH}
   fi
 done
 
@@ -159,8 +162,6 @@ if [ ! -x tools/${MYNAME} ] ; then
 fi
 
 # Set up the environment
-
-WD=${PWD}
 
 BOARDDIR=boards/$ARCHSUBDIR/$CHIPSUBDIR/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts

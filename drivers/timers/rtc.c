@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timers/rtc.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/timers/rtc.h>
 
@@ -412,6 +413,14 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (ops->settime)
           {
             ret = ops->settime(upper->lower, rtctime);
+            if (ret >= 0)
+              {
+                /* If the RTC time was set successfully, then update the
+                 * current system time to match.
+                 */
+
+                clock_synchronize();
+              }
           }
       }
       break;

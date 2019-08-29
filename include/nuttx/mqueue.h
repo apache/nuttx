@@ -159,7 +159,7 @@ struct task_group_s;  /* Forward reference */
  *   (mqdes).  This is an internal OS interface.  It is functionally
  *   equivalent to mq_send() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_send() for a more complete description of the
@@ -195,7 +195,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,\
  *   nxmq_timedsend() is functionally equivalent to mq_timedsend() except
  *   that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_timedsend() for a more complete description of the
@@ -224,7 +224,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,\
  *
  ****************************************************************************/
 
-int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, 
+int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
                    unsigned int prio, FAR const struct timespec *abstime);
 
 /****************************************************************************
@@ -235,7 +235,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
  *   from the message queue specified by "mqdes."  This is an internal OS
  *   interface.  It is functionally equivalent to mq_receive except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_receive() for a more complete description of the
@@ -270,7 +270,7 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
  *   nxmq_timedreceive() is an internal OS interface.  It is functionally
  *   equivalent to mq_timedreceive() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_timedreceive() for a more complete description of

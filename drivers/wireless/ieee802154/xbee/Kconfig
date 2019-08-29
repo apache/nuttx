@@ -5,6 +5,30 @@
 
 if IEEE802154_XBEE
 
+config XBEE_DEFAULT_PREFIX_0
+	hex "IPv6 Prefix 0"
+	default 0xfe80
+	---help---
+		First section of IPv6 Prefix
+
+config XBEE_DEFAULT_PREFIX_1
+	hex "IPv6 Prefix 1"
+	default 0x0000
+	---help---
+		Second section of IPv6 Prefix
+
+config XBEE_DEFAULT_PREFIX_2
+	hex "IPv6 Prefix 2"
+	default 0x0000
+	---help---
+		Third section of IPv6 Prefix
+
+config XBEE_DEFAULT_PREFIX_3
+	hex "IPv6 Prefix 3"
+	default 0x0000
+	---help---
+		Fourth section of IPv6 Prefix
+
 config IEEE802154_XBEE_FREQUENCY
 	int "SPI Frequency for XBee Radio"
 	default 2000000

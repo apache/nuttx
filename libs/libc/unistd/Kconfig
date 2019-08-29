@@ -54,6 +54,7 @@ config EXECFUNCS_HAVE_SYMTAB
 		from your application initialization logic.
 
 if EXECFUNCS_HAVE_SYMTAB
+
 config EXECFUNCS_SYMTAB_ARRAY
 	string "Symbol table name used by exec[l|v]"
 	default "g_symtab"
@@ -76,7 +77,7 @@ config EXECFUNCS_NSYMBOLS_VAR
 		symbols in that table.  This selection provides the name of an 'int'
 		variable that contains the number of symbols in the symbol table.
 
-config EXECFUNCS_GENERATE_SYSTEM_SYMTAB
+config EXECFUNCS_SYSTEM_SYMTAB
 	bool "Generate and include system symbol table"
 	default n
 	---help---
@@ -89,6 +90,7 @@ config EXECFUNCS_GENERATE_SYSTEM_SYMTAB
 		number of exported symbols g_nsymbols. It matches expected defaults
 		from entries above. But they can be changed and generated symbol table
 		can be used as template by application.
+
 endif # EXECFUNCS_HAVE_SYMTAB
 endif # LIBC_EXECFUNCS
 

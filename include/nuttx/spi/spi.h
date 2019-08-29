@@ -495,7 +495,7 @@
 
 /* The type of the media change callback function */
 
-typedef void (*spi_mediachange_t)(FAR void *arg);
+typedef CODE void (*spi_mediachange_t)(FAR void *arg);
 
 /* If the board supports multiple SPI devices types, this enumeration
  * identifies which is selected or de-selected.
@@ -537,7 +537,8 @@ enum spi_mode_e
   SPIDEV_MODE0 = 0,     /* CPOL=0 CHPHA=0 */
   SPIDEV_MODE1,         /* CPOL=0 CHPHA=1 */
   SPIDEV_MODE2,         /* CPOL=1 CHPHA=0 */
-  SPIDEV_MODE3          /* CPOL=1 CHPHA=1 */
+  SPIDEV_MODE3,         /* CPOL=1 CHPHA=1 */
+  SPIDEV_MODETI,        /* CPOL=0 CPHA=1 TI Synchronous Serial Frame Format */
 };
 
 #ifdef CONFIG_SPI_HWFEATURES

@@ -99,10 +99,10 @@ static int clock_get_current_time(FAR struct timespec *ts,
   nsec  -= sec    * NSEC_PER_SEC;
 
   nsec  += base->tv_nsec;
-  if (nsec > NSEC_PER_SEC)
+  if (nsec >= NSEC_PER_SEC)
     {
       nsec -= NSEC_PER_SEC;
-      sec += 1;
+      sec  += 1;
     }
 
   ts->tv_nsec = nsec;
@@ -153,7 +153,7 @@ errout_in_critical_section:
   return ret;
 }
 
-/********************************************************************************
+/****************************************************************************
  * Name: adjtime
  *
  * Description:
@@ -248,10 +248,10 @@ void clock_update_wall_time(void)
   nsec -= sec * NSEC_PER_SEC;
 
   nsec += g_clock_wall_time.tv_nsec;
-  if (nsec > NSEC_PER_SEC)
+  if (nsec >= NSEC_PER_SEC)
     {
       nsec -= NSEC_PER_SEC;
-      sec += 1;
+      sec  += 1;
     }
 
   if (g_clock_adjust != 0 && sec > 0)
@@ -267,13 +267,13 @@ void clock_update_wall_time(void)
       while (nsec < 0)
         {
           nsec += NSEC_PER_SEC;
-          sec -= 1;
+          sec  -= 1;
         }
 
-      while (nsec > NSEC_PER_SEC)
+      while (nsec >= NSEC_PER_SEC)
         {
           nsec -= NSEC_PER_SEC;
-          sec += 1;
+          sec  += 1;
         }
     }
 

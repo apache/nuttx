@@ -159,7 +159,8 @@
 #define RCC_PLLCFG_PLLQ_MASK        (15 << RCC_PLLCFG_PLLQ_SHIFT)
 #  define RCC_PLLCFG_PLLQ(n)        ((n) << RCC_PLLCFG_PLLQ_SHIFT) /* n=2..15 */
 
-#if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F446) ||\
+    defined(CONFIG_STM32_STM32F469)
 #  define RCC_PLLCFG_PLLR_SHIFT     (28)      /* Bits 28-30: Main PLLR (PLLR) divider
                                                * (I2Ss, SAIs, SYSTEM and SPDIF-Rx clocks) */
 #  define RCC_PLLCFG_PLLR_MASK      (7 << RCC_PLLCFG_PLLR_SHIFT)

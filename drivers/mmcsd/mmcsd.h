@@ -62,7 +62,7 @@
 #define MMCSD_CARDTYPE_MMC           1  /* Bit 0: MMC card */
 #define MMCSD_CARDTYPE_SDV1          2  /* Bit 1: SD version 1.x */
 #define MMCSD_CARDTYPE_SDV2          4  /* Bit 2: SD version 2.x with byte addressing */
-#define MMCSD_CARDTYPE_BLOCK         8  /* Bit 3: SD version 2.x with block addressing */
+#define MMCSD_CARDTYPE_BLOCK         8  /* Bit 3: SD version 2.x or MMC with block addressing */
 
 #define IS_MMC(t)   (((t) & MMCSD_CARDTYPE_MMC) != 0)
 #define IS_SD(t)    (((t) & (MMCSD_CARDTYPE_SDV1|MMCSD_CARDTYPE_SDV2)) != 0)
@@ -81,7 +81,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

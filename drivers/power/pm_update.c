@@ -83,7 +83,7 @@ static const int16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
  * state. Indexing is next state 0:IDLE, 1:STANDBY, 2:SLEEP.
  */
 
-static const int16_t g_pmenterthresh[3] =
+static const int32_t g_pmenterthresh[3] =
 {
   CONFIG_PM_IDLEENTER_THRESH,
   CONFIG_PM_STANDBYENTER_THRESH,
@@ -94,7 +94,7 @@ static const int16_t g_pmenterthresh[3] =
  * state. Indexing is current state 0:IDLE, 1: STANDBY, 2: SLEEP.
  */
 
-static const int16_t g_pmexitthresh[3] =
+static const int32_t g_pmexitthresh[3] =
 {
   CONFIG_PM_IDLEEXIT_THRESH,
   CONFIG_PM_STANDBYEXIT_THRESH,
@@ -105,7 +105,7 @@ static const int16_t g_pmexitthresh[3] =
  * state. Indexing is next state 0:IDLE, 1: STANDBY, 2: SLEEP.
  */
 
-static const uint16_t g_pmcount[3] =
+static const uint32_t g_pmcount[3] =
 {
   CONFIG_PM_IDLEENTER_COUNT,
   CONFIG_PM_STANDBYENTER_COUNT,

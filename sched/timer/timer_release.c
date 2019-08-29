@@ -119,7 +119,7 @@ int timer_release(FAR struct posix_timer_s *timer)
 {
   /* Some sanity checks */
 
-  if (!timer)
+  if (timer == NULL)
     {
       return -EINVAL;
     }

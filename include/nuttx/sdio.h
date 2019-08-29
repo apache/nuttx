@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/sdio.h
  *
- *   Copyright (C) 2009, 2011-2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013, 2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,8 +119,9 @@
 #  define MMCSD_CMDIDX6    6  /* HS_SWITCH: Checks switchable function */
 #  define MMCSD_CMDIDX7    7  /* SELECT/DESELECT CARD
                                * -Addressed Command, R1 response 31:16=RCA */
-#  define SD_CMDIDX8       8  /* IF_COND: Sends SD Memory Card interface condition
-                               * R7 response */
+#  define MMCSD_CMDIDX8    8  /* SD:  IF_COND: Sends SD Memory Card interface condition
+                               *      R7 response;
+                               * MMC: get extended CSD register 512 bytes R1 response */
 #  define MMCSD_CMDIDX9    9  /* SEND_CSD: Asks  card to send its card specific data (CSD)
                                * -Addressed Command, R2 response 31:16=RCA */
 #  define MMCSD_CMDIDX10  10  /* SEND_CID: Asks card to send its card identification (CID)
@@ -274,7 +276,8 @@
 #define MMCSD_CMD6      (MMCSD_CMDIDX6 |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
 #define MMCSD_CMD7S     (MMCSD_CMDIDX7 |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD7D     (MMCSD_CMDIDX7 |MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)  /* No response when de-selecting card */
-#define SD_CMD8         (SD_CMDIDX8    |MMCSD_R7_RESPONSE |MMCSD_NODATAXFR)
+#define SD_CMD8         (MMCSD_CMDIDX8 |MMCSD_R7_RESPONSE |MMCSD_NODATAXFR)
+#define MMC_CMD8        (MMCSD_CMDIDX8 |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
 #define MMCSD_CMD9      (MMCSD_CMDIDX9 |MMCSD_R2_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD10     (MMCSD_CMDIDX10|MMCSD_R2_RESPONSE |MMCSD_NODATAXFR)
 #define MMC_CMD11       (MMC_CMDIDX11  |MMCSD_R1_RESPONSE |MMCSD_RDSTREAM )

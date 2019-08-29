@@ -49,7 +49,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ********************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_PREALLOC_WDOGS
 #  define CONFIG_PREALLOC_WDOGS 32
@@ -69,7 +70,8 @@
 #  error CONFIG_WDOG_INTRESERVE >= CONFIG_PREALLOC_WDOGS
 #endif
 
-/* Watchdog Definitions *************************************************/
+/* Watchdog Definitions *****************************************************/
+
 /* Flag bits for the flags field of struct wdog_s */
 
 #define WDOGF_ACTIVE       (1 << 0) /* Bit 0: 1=Watchdog is actively timing */
@@ -102,6 +104,7 @@
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
+
 /* The arguments are passed as scalar wdparm_t values.  For systems where
  * the sizeof(pointer) < sizeof(uint32_t), the following union defines the
  * alignment of the pointer within the uint32_t.  For example, the SDCC

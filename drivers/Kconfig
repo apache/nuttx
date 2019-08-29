@@ -407,3 +407,13 @@ menuconfig 1WIRE
 source drivers/1wire/Kconfig
 
 source drivers/syslog/Kconfig
+
+menuconfig SPECIFIC_DRIVERS
+	bool "Board specific drivers"
+	default n
+	---help---
+		Board specific drivers located in each board/driver folder.
+
+if SPECIFIC_DRIVERS
+source drivers/platform/Kconfig
+endif # SPECIFIC_DRIVERS

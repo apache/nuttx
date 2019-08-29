@@ -159,6 +159,13 @@ config DAC7571_I2C_FREQUENCY
 	default 400000
 	depends on DAC7571
 
+config DAC7554
+	bool "DAC7554 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Texas Instruments DAC7554 dac.
+
 endif # DAC
 
 config OPAMP

@@ -85,10 +85,10 @@ CONTEXTDIRS = boards $(APPDIR)
 USERDIRS =
 OTHERDIRS = pass1
 
-ifeq ($(CONFIG_EXECFUNCS_GENERATE_SYSTEM_SYMTAB),y)
-USERDIRS += symtab
+ifeq ($(CONFIG_EXECFUNCS_SYSTEM_SYMTAB),y)
+USERDIRS += libs$(DELIM)symtab
 else
-OTHERDIRS += symtab
+OTHERDIRS += libs$(DELIM)symtab
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

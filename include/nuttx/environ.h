@@ -54,7 +54,7 @@
 
 /* Callback function used with env_foreach() */
 
-typedef int (*env_foreach_t)(FAR void *arg, FAR const char *pair);
+typedef CODE int (*env_foreach_t)(FAR void *arg, FAR const char *pair);
 
 /****************************************************************************
  * Public Function Prototypes

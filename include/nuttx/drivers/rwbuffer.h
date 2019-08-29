@@ -62,10 +62,10 @@
  * reload the read-ahead buffer, when appropriate.
  */
 
-typedef ssize_t (*rwbreload_t)(FAR void *dev, FAR uint8_t *buffer,
-                               off_t startblock, size_t nblocks);
-typedef ssize_t (*rwbflush_t)(FAR void *dev, FAR const uint8_t *buffer,
-                              off_t startblock, size_t nblocks);
+typedef CODE ssize_t (*rwbreload_t)(FAR void *dev, FAR uint8_t *buffer,
+                                    off_t startblock, size_t nblocks);
+typedef CODE ssize_t (*rwbflush_t)(FAR void *dev, FAR const uint8_t *buffer,
+                                   off_t startblock, size_t nblocks);
 
 /* This structure holds the state of the buffers.  In typical usage,
  * an instance of this structure is declared within each block driver

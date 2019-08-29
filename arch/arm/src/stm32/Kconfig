@@ -1702,6 +1702,7 @@ config STM32_STM32F427
 	select STM32_HAVE_I2C3
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_SPI6
+	select STM32_HAVE_I2SPLL
 
 # This is really 429/439, but we treat the two the same.
 

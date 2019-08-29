@@ -2,7 +2,7 @@
  * drivers/mtd/mx25lx.c
  * Driver for SPI-based or QSPI-based MX25Lxx33L parts of 32 or 64MBit.
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Aleksandr Vyhovanec <www.desh@gmail.com>
  *
  *   Copied from / based on sst25.c and w25.c drivers written by
@@ -64,6 +64,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* Per the data sheet, MX25L parts can be driven with either SPI mode 0 (CPOL=0 and
  * CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to specify
  * CONFIG_MX25L_SPIMODE to select the best mode for your device.  If
@@ -100,6 +101,11 @@
 #define MX25L_MX25L25635F_NSECTORS      8192
 #define MX25L_MX25L25635F_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 
+/* Parts larger than 128Mbit require 4-byte addressing */
+
+#define MX25L_ADDRESSBYTES_3            3
+#define MX25L_ADDRESSBYTES_4            4
+
 #ifdef CONFIG_MX25L_SECTOR512                /* Simulate a 512 byte sector */
 #  define MX25L_SECTOR512_SHIFT        9     /* Sector size 1 << 9 = 512 bytes */
 #endif
@@ -122,48 +128,63 @@
 #define CLR_DIRTY(p)               do { (p)->flags &= ~MX25L_CACHE_DIRTY; } while (0)
 #define CLR_ERASED(p)              do { (p)->flags &= ~MX25L_CACHE_ERASED; } while (0)
 
-/* MX25L Instructions *****************************************************************/
-/*      Command                    Value      Description               Addr   Data   */
-/*                                                                         Dummy      */
-#define MX25L_READ                  0x03    /* Read data bytes          3   0   >=1   */
-#define MX25L_FAST_READ             0x0b    /* Higher speed read        3   1   >=1   */
-#define MX25L_2READ                 0xbb    /* 2 x I/O read command     */
-#define MX25L_DREAD                 0x3b    /* 1I / 2O read command     3   1   >=1   */
-#define MX25L_4READ                 0xeb    /* 4 x I/O read command     */
-#define MX25L_QREAD                 0x6b    /* 1I / 4O read command     3   1   >=1   */
-#define MX25L_WREN                  0x06    /* Write Enable             0   0   0     */
-#define MX25L_WRDI                  0x04    /* Write Disable            0   0   0     */
-#define MX25L_RDSR                  0x05    /* Read status register     0   0   >=1   */
-#define MX25L_RDCR                  0x15    /* Read config register     0   0   >=1   */
-#define MX25L_WRSR                  0x01    /* Write stat/conf register 0   0   2     */
-#define MX25L_4PP                   0x38    /* Quad page program        3   0   1-256 */
-#define MX25L_SE                    0x20    /* 4Kb Sector erase         3   0   0     */
-#define MX25L_BE32                  0x52    /* 32Kbit block Erase       3   0   0     */
-#define MX25L_BE64                  0xd8    /* 64Kbit block Erase       3   0   0     */
-#define MX25L_CE                    0xc7    /* Chip erase               0   0   0     */
-#define MX25L_CE_ALT                0x60    /* Chip erase (alternate)   0   0   0     */
-#define MX25L_PP                    0x02    /* Page program             3   0   1-256 */
-#define MX25L_DP                    0xb9    /* Deep power down          0   0   0     */
-#define MX25L_RDP                   0xab    /* Release deep power down  0   0   0     */
-#define MX25L_PGM_SUSPEND           0x75    /* Suspends program         0   0   0     */
-#define MX25L_ERS_SUSPEND           0xb0    /* Suspends erase           0   0   0     */
-#define MX25L_PGM_RESUME            0x7A    /* Resume program           0   0   0     */
-#define MX25L_ERS_RESUME            0x30    /* Resume erase             0   0   0     */
-#define MX25L_RDID                  0x9f    /* Read identification      0   0   3     */
-#define MX25L_RES                   0xab    /* Read electronic ID       0   3   1     */
-#define MX25L_REMS                  0x90    /* Read manufacture and ID  1   2   >=2   */
-#define MX25L_ENSO                  0xb1    /* Enter secured OTP        0   0   0     */
-#define MX25L_EXSO                  0xc1    /* Exit secured OTP         0   0   0     */
-#define MX25L_RDSCUR                0x2b    /* Read security register   0   0   0     */
-#define MX25L_WRSCUR                0x2f    /* Write security register  0   0   0     */
-#define MX25L_RSTEN                 0x66    /* Reset Enable             0   0   0     */
-#define MX25L_RST                   0x99    /* Reset Memory             0   0   0     */
+/* MX25L Instructions *******************************************************************/
+
+/*      Command                    Value      Description                 Addr   Data   */
+/*                                                                           Dummy      */
+#define MX25L_READ                  0x03    /* Read data bytes            3/4 0   >=1   */
+#define MX25L_FAST_READ             0x0b    /* Higher speed read          3/4 1   >=1   */
+#define MX25L_2READ                 0xbb    /* 2 x I/O read command       */
+#define MX25L_DREAD                 0x3b    /* 1I / 2O read command       3/4 1   >=1   */
+#define MX25L_4READ                 0xeb    /* 4 x I/O read command       */
+#define MX25L_QREAD                 0x6b    /* 1I / 4O read command       3/4 1   >=1   */
+#define MX25L_WREN                  0x06    /* Write Enable               0   0   0     */
+#define MX25L_WRDI                  0x04    /* Write Disable              0   0   0     */
+#define MX25L_RDSR                  0x05    /* Read status register       0   0   >=1   */
+#define MX25L_RDCR                  0x15    /* Read config register       0   0   >=1   */
+#define MX25L_WRSR                  0x01    /* Write stat/conf register   0   0   2     */
+#define MX25L_4PP                   0x38    /* Quad page program          3/4 0   1-256 */
+#define MX25L_SE                    0x20    /* 4Kb Sector erase           3/4 0   0     */
+#define MX25L_BE32                  0x52    /* 32Kbit block Erase         3/4 0   0     */
+#define MX25L_BE64                  0xd8    /* 64Kbit block Erase         3/4 0   0     */
+#define MX25L_CE                    0xc7    /* Chip erase                 0   0   0     */
+#define MX25L_CE_ALT                0x60    /* Chip erase (alternate)     0   0   0     */
+#define MX25L_PP                    0x02    /* Page program               3   0   1-256 */
+#define MX25L_DP                    0xb9    /* Deep power down            0   0   0     */
+#define MX25L_RDP                   0xab    /* Release deep power down    0   0   0     */
+#define MX25L_PGM_SUSPEND           0x75    /* Suspends program           0   0   0     */
+#define MX25L_ERS_SUSPEND           0xb0    /* Suspends erase             0   0   0     */
+#define MX25L_PGM_RESUME            0x7A    /* Resume program             0   0   0     */
+#define MX25L_ERS_RESUME            0x30    /* Resume erase               0   0   0     */
+#define MX25L_RDID                  0x9f    /* Read identification        0   0   3     */
+#define MX25L_RES                   0xab    /* Read electronic ID         0   3   1     */
+#define MX25L_REMS                  0x90    /* Read manufacture and ID    1   2   >=2   */
+#define MX25L_ENSO                  0xb1    /* Enter secured OTP          0   0   0     */
+#define MX25L_EXSO                  0xc1    /* Exit secured OTP           0   0   0     */
+#define MX25L_RDSCUR                0x2b    /* Read security register     0   0   0     */
+#define MX25L_WRSCUR                0x2f    /* Write security register    0   0   0     */
+#define MX25L_RSTEN                 0x66    /* Reset Enable               0   0   0     */
+#define MX25L_RST                   0x99    /* Reset Memory               0   0   0     */
+#define MX25L_EN4B                  0xb7    /* Enter 4-byte mode          0   0   0     */
+#define MX25L_EX4B                  0xe9    /* Exit 4-byte mode           0   0   0     */
+#define MX25L_READ4B                0x13    /* Read data (4 Byte mode)    4   0   >=1   */
+#define MX25L_FAST_READ4B           0x0c    /* Higher speed read    (4B)  4   1   >=1   */
+#define MX25L_2READ4B               0xbc    /* 2 x I/O read command (4B)  */
+#define MX25L_DREAD4B               0x3c    /* 1I / 2O read command (4B)  4   1   >=1   */
+#define MX25L_4READ4B               0xec    /* 4 x I/O read command (4B)   */
+#define MX25L_QREAD4B               0x6c    /* 1I / 4O read command (4B)  4   1   >=1   */
+#define MX25L_4PP4B                 0x3e    /* Quad page program    (4B)  4   0   1-256 */
+#define MX25L_SE4B                  0x21    /* 4Kb Sector erase     (4B)  4   0   0     */
+#define MX25L_BE32K4B               0x5c    /* 32Kbit block Erase   (4B)  4   0   0     */
+#define MX25L_BE64K4B               0xdc    /* 64Kbit block Erase   (4B)  4   0   0     */
+#define MX25L_PP4B                  0x12    /* Page program         (4B)  4   0   1-256 */
 #define MX25L_RDSFDP                0x5a    /* read out until CS# high  */
 #define MX25L_SBL                   0xc0    /* Set Burst Length         */
 #define MX25L_SBL_ALT               0x77    /* Set Burst Length         */
-#define MX25L_NOP                   0x00    /* No Operation             0   0   0     */
+#define MX25L_NOP                   0x00    /* No Operation             0   0   0       */
 
 /* MX25L Registers ******************************************************************/
+
 /* Read ID (RDID) register values */
 
 #define MX25L_MANUFACTURER          0xc2  /* Macronix manufacturer ID */
@@ -186,7 +207,7 @@
 #define MX25L_SR_QE                 (1 << 6)  /* Bit 6: Quad enable */
 #define MX25L_SR_SRWD               (1 << 7)  /* Bit 7: Status register write protect */
 
-/* Configuration registerregister bit definitions */
+/* Configuration register bit definitions */
 
 #define MX25L_CR_ODS                (1 << 0)  /* Bit 0: Output driver strength */
 #define MX25L_CR_TB                 (1 << 3)  /* Bit 3: Top/bottom selected */
@@ -219,6 +240,7 @@ struct mx25l_dev_s
   FAR struct spi_dev_s *dev;         /* Saved SPI interface instance */
   uint8_t               sectorshift;
   uint8_t               pageshift;
+  uint8_t               addressbytes; /* Number of address bytes required */
   uint16_t              nsectors;
 #if defined(CONFIG_MX25L_SECTOR512)
   uint8_t               flags;       /* Buffered sector flags */
@@ -347,29 +369,32 @@ static inline int mx25l_readid(FAR struct mx25l_dev_s *priv)
 
       if (capacity == MX25L_JEDEC_MX25L3233F_CAPACITY)
         {
-           /* Save the FLASH geometry */
+          /* Save the FLASH geometry */
 
-           priv->sectorshift = MX25L_MX25L3233F_SECTOR_SHIFT;
-           priv->nsectors    = MX25L_MX25L3233F_NSECTORS;
-           priv->pageshift   = MX25L_MX25L3233F_PAGE_SHIFT;
-           return OK;
+          priv->sectorshift  = MX25L_MX25L3233F_SECTOR_SHIFT;
+          priv->nsectors     = MX25L_MX25L3233F_NSECTORS;
+          priv->pageshift    = MX25L_MX25L3233F_PAGE_SHIFT;
+          priv->addressbytes = MX25L_ADDRESSBYTES_3;
+          return OK;
         }
       else if (capacity == MX25L_JEDEC_MX25L6433F_CAPACITY)
         {
-           /* Save the FLASH geometry */
+          /* Save the FLASH geometry */
 
-           priv->sectorshift = MX25L_MX25L6433F_SECTOR_SHIFT;
-           priv->nsectors    = MX25L_MX25L6433F_NSECTORS;
-           priv->pageshift   = MX25L_MX25L6433F_PAGE_SHIFT;
-           return OK;
+          priv->sectorshift  = MX25L_MX25L6433F_SECTOR_SHIFT;
+          priv->nsectors     = MX25L_MX25L6433F_NSECTORS;
+          priv->pageshift    = MX25L_MX25L6433F_PAGE_SHIFT;
+          priv->addressbytes = MX25L_ADDRESSBYTES_3;
+          return OK;
         }
       else if (capacity == MX25L_JEDEC_MX25L25635F_CAPACITY)
         {
           /* Save the FLASH geometry */
 
-          priv->sectorshift = MX25L_MX25L25635F_SECTOR_SHIFT;
-          priv->nsectors    = MX25L_MX25L25635F_NSECTORS;
-          priv->pageshift   = MX25L_MX25L25635F_PAGE_SHIFT;
+          priv->sectorshift  = MX25L_MX25L25635F_SECTOR_SHIFT;
+          priv->nsectors     = MX25L_MX25L25635F_NSECTORS;
+          priv->pageshift    = MX25L_MX25L25635F_PAGE_SHIFT;
+          priv->addressbytes = MX25L_ADDRESSBYTES_4;
           return OK;
         }
     }
@@ -488,16 +513,32 @@ static void mx25l_sectorerase(FAR struct mx25l_dev_s *priv, off_t sector)
    * that was passed in as the erase type.
    */
 
-  (void)SPI_SEND(priv->dev, MX25L_SE);
+  /* The command we send varies depending on if we need 3 or 4 address bytes */
 
-  /* Send the sector offset high byte first.  For all of the supported
-   * parts, the sector number is completely contained in the first byte
-   * and the values used in the following two bytes don't really matter.
-   */
+  if (priv->addressbytes == MX25L_ADDRESSBYTES_4)
+    {
+      (void)SPI_SEND(priv->dev, MX25L_SE4B);
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+      /* Send the sector offset high byte first. */
+
+      (void)SPI_SEND(priv->dev, (offset >> 24) & 0xff);
+      (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+      (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+      (void)SPI_SEND(priv->dev, offset & 0xff);
+    }
+  else
+    {
+      (void)SPI_SEND(priv->dev, MX25L_SE);
+
+      /* Send the sector offset high byte first.  For all of the supported
+       * parts, the sector number is completely contained in the first byte
+       * and the values used in the following two bytes don't really matter.
+       */
+
+      (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+      (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+      (void)SPI_SEND(priv->dev, offset & 0xff);
+    }
 
   /* Deselect the FLASH */
 
@@ -559,15 +600,33 @@ static void mx25l_byteread(FAR struct mx25l_dev_s *priv, FAR uint8_t *buffer,
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
-  /* Send "Read from Memory " instruction */
+  /* The command we send varies depending on if we need 3 or 4 address bytes */
 
-  (void)SPI_SEND(priv->dev, MX25L_FAST_READ);
+  if (priv->addressbytes == MX25L_ADDRESSBYTES_4)
+    {
+      /* Send "Read from Memory - 4 byte mode" instruction */
 
-  /* Send the address high byte first. */
+      (void)SPI_SEND(priv->dev, MX25L_FAST_READ4B);
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+      /* Send the address high byte first. */
+
+      (void)SPI_SEND(priv->dev, (address >> 24) & 0xff);
+      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
+      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
+      (void)SPI_SEND(priv->dev, address & 0xff);
+    }
+  else
+    {
+      /* Send "Read from Memory " instruction */
+
+      (void)SPI_SEND(priv->dev, MX25L_FAST_READ);
+
+      /* Send the address high byte first. */
+
+      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
+      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
+      (void)SPI_SEND(priv->dev, address & 0xff);
+    }
 
   /* Send a dummy byte */
 
@@ -602,15 +661,31 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
 
-      /* Send the "Page Program (MX25L_PP)" Command */
+      if (priv->addressbytes == MX25L_ADDRESSBYTES_4)
+        {
+          /* Send the "Page Program - 4 byte mode (MX25L_PP4B)" Command */
 
-      SPI_SEND(priv->dev, MX25L_PP);
+          SPI_SEND(priv->dev, MX25L_PP4B);
 
-      /* Send the address high byte first. */
+          /* Send the address high byte first. */
 
-      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, address & 0xff);
+          (void)SPI_SEND(priv->dev, (address >> 24) & 0xff);
+          (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
+          (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
+          (void)SPI_SEND(priv->dev, address & 0xff);
+        }
+      else
+        {
+          /* Send the "Page Program (MX25L_PP)" Command */
+
+          SPI_SEND(priv->dev, MX25L_PP);
+
+          /* Send the address high byte first. */
+
+          (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
+          (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
+          (void)SPI_SEND(priv->dev, address & 0xff);
+        }
 
       /* Then send the page of data */
 
@@ -690,7 +765,8 @@ static FAR uint8_t *mx25l_cacheread(FAR struct mx25l_dev_s *priv, off_t sector)
 
       /* Read the erase block into the cache */
 
-      mx25l_byteread(priv, priv->sector, (esectno << priv->sectorshift), 1 << priv->sectorshift);
+      mx25l_byteread(priv, priv->sector, (esectno << priv->sectorshift),
+                     1 << priv->sectorshift);
 
       /* Mark the sector as cached */
 
@@ -853,8 +929,8 @@ static ssize_t mx25l_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   /* On this device, we can handle the block read just like the byte-oriented read */
 
 #ifdef CONFIG_MX25L_SECTOR512
-  nbytes = mx25l_read(dev, startblock << MX25L_SECTOR512_SHIFT, nblocks << MX25L_SECTOR512_SHIFT,
-                      buffer);
+  nbytes = mx25l_read(dev, startblock << MX25L_SECTOR512_SHIFT,
+                      nblocks << MX25L_SECTOR512_SHIFT, buffer);
   if (nbytes > 0)
     {
       return nbytes >> MX25L_SECTOR512_SHIFT;
@@ -904,7 +980,7 @@ static ssize_t mx25l_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t mx25l_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                           FAR uint8_t *buffer)
 {
-  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev; // TODO:
+  FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev;
 
   mxlinfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
@@ -932,7 +1008,8 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -947,7 +1024,8 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_MX25L_SECTOR512
               geo->blocksize    = (1 << MX25L_SECTOR512_SHIFT);
               geo->erasesize    = (1 << MX25L_SECTOR512_SHIFT);
-              geo->neraseblocks = priv->nsectors << (priv->sectorshift - MX25L_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors <<
+                                  (priv->sectorshift - MX25L_SECTOR512_SHIFT);
 #else
               geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);

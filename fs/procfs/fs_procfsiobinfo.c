@@ -278,6 +278,7 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
   size_t copysize;
   size_t totalsize;
   off_t offset;
+  int i;
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -313,7 +314,7 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
 
   /* Loop through each IOB user printing the usage statistics */
 
-  for (int i = 0; i < IOBUSER_GLOBAL; i++)
+  for (i = 0; i < IOBUSER_GLOBAL; i++)
     {
       if (totalsize < buflen)
         {

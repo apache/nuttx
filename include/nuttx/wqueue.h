@@ -262,7 +262,7 @@
 
 /* Defines the work callback */
 
-typedef void (*worker_t)(FAR void *arg);
+typedef CODE void (*worker_t)(FAR void *arg);
 
 /* Defines one entry in the work queue.  The user only needs this structure
  * in order to declare instances of the work structure.  Handling of all

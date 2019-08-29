@@ -20,6 +20,7 @@ config ARCH_CHIP_S32K116
 config ARCH_CHIP_S32K118
 	bool "S32K118"
 	select ARCH_CHIP_S32K11X
+	select S32K1XX_HAVE_LPSPI1
 	---help---
 		Cortex-M0+, 256Kb FLASH, 25Kb RAM incl. 2Kb FlexRAM
 
@@ -32,12 +33,14 @@ config ARCH_CHIP_S32K142
 config ARCH_CHIP_S32K144
 	bool "S32K144"
 	select ARCH_CHIP_S32K14X
+	select S32K1XX_HAVE_LPSPI2
 	---help---
 		Cortex-M4F, 512Kb FLASH, 64Kb RAM incl. 4Kb FlexRAM
 
 config ARCH_CHIP_S32K146
 	bool "S32K146"
 	select ARCH_CHIP_S32K14X
+	select S32K1XX_HAVE_LPSPI2
 	---help---
 		Cortex-M4F, 1Mb FLASH, 128Kb RAM incl. 4Kb FlexRAM
 
@@ -45,6 +48,8 @@ config ARCH_CHIP_S32K148
 	bool "S32K148"
 	select ARCH_CHIP_S32K14X
 	select S32K1XX_HAVE_ENET
+	select S32K1XX_HAVE_LPI2C1
+	select S32K1XX_HAVE_LPSPI2
 	select S32K1XX_HAVE_SAI
 	---help---
 		Cortex-M4F, 2Mb FLASH, 256Kb RAM incl. 4Kb FlexRAM
@@ -67,6 +72,7 @@ config ARCH_CHIP_S32K14X
 	select S32K1XX_HAVE_SPLL
 	select S32K1XX_HAVE_HSRUN
 	select S32K1XX_HAVE_LMEM
+	select S32K1XX_HAVE_LPSPI1
 
 # Chip Capabilities
 
@@ -90,6 +96,18 @@ config S32K1XX_HAVE_LMEM
 	bool
 	default n
 
+config S32K1XX_HAVE_LPI2C1
+	bool
+	default n
+
+config S32K1XX_HAVE_LPSPI1
+	bool
+	default n
+
+config S32K1XX_HAVE_LPSPI2
+	bool
+	default n
+
 config S32K1XX_HAVE_QSPI
 	bool
 	default n
@@ -105,6 +123,10 @@ config S32K1XX_HAVE_SPLL
 # Peripheral Group Selections
 
 config S32K1XX_LPUART
+	bool
+	default n
+
+config S32K1XX_LPI2C
 	bool
 	default n
 
@@ -125,6 +147,37 @@ config S32K1XX_ENET
 	default n
 	depends on S32K1XX_HAVE_ENET
 
+menuconfig S32K1XX_LPI2C0
+	bool "LPI2C0"
+	default n
+	select S32K1XX_LPI2C
+
+menuconfig S32K1XX_LPI2C1
+	bool "LPI2C1"
+	default n
+	select S32K1XX_LPI2C
+	depends on S32K1XX_HAVE_LPI2C1
+
+config S32K1XX_LPSPI0
+	bool "LPSPI0"
+	default n
+	select S32K1XX_LPSPI
+	select SPI
+
+config S32K1XX_LPSPI1
+	bool "LPSPI1"
+	default n
+	select S32K1XX_LPSPI
+	select SPI
+	depends on S32K1XX_HAVE_LPSPI1
+
+config S32K1XX_LPSPI2
+	bool "LPSPI2"
+	default n
+	select S32K1XX_LPSPI
+	select SPI
+	depends on S32K1XX_HAVE_LPSPI2
+
 config S32K1XX_LPUART0
 	bool "LPUART0"
 	default n
@@ -142,18 +195,6 @@ config S32K1XX_LPUART2
 	default n
 	select S32K1XX_LPUART
 	select LPUART2_SERIALDRIVER
-
-config S32K1XX_LPSPI0
-	bool "LPSPI0"
-	default n
-	select S32K1XX_LPSPI
-	select SPI
-
-config S32K1XX_LPSPI1
-	bool "LPSPI1"
-	default n
-	select S32K1XX_LPSPI
-	select SPI
 
 endmenu # S32K1XX Peripheral Selection
 
@@ -278,5 +319,71 @@ config S32K1XX_EDMA_EDBG
 		system exits debug mode or the EDBG bit is cleared
 
 endmenu # eDMA Global Configuration
+
+menu "LPI2C0 Configuration"
+	depends on S32K1XX_LPI2C0
+
+config LPI2C0_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C0_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C0_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endmenu # LPI2C0 Configuration
+
+menu "LPI2C1 Configuration"
+	depends on S32K1XX_LPI2C1
+
+config LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endmenu # LPI2C1 Configuration
+
+menu "Ethernet Configuration"
+	depends on S32K1XX_ENET
+
+config MXRT_ENET_NRXBUFFERS
+	int "Number Rx buffers"
+	default 6
+
+config S32K1XX_ENET_NTXBUFFERS
+	int "Number Tx buffers"
+	default 2
+
+config S32K1XX_ENET_ENHANCEDBD
+	bool # not optional
+	default n
+
+config S32K1XX_ENET_NETHIFS
+	int  # Not optional
+	default 1
+
+config S32K1XX_ENET_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_S32K1XX_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imxrt_phy_boardinitialize();  The i.MXRT ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # S32K1XX_ENET
 
 endif # ARCH_CHIP_S32K1XX

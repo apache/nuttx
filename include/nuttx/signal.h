@@ -319,7 +319,7 @@ int nxsig_kill(pid_t pid, int signo);
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sigtimedwait() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  * Input Parameters:

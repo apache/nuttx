@@ -38,7 +38,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_AK09912)
+#if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_AK09912) || defined (CONFIG_SENSORS_AK09912_SCU))
+
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +76,6 @@ extern "C"
 /* Arg: 0: Disable compensated
  *      1: Enable compensated
  */
-
 #define ENABLE_COMPENSATED (1)
 #define DISABLE_COMPENSATED (0)
 #define SNIOC_ENABLE_COMPENSATED   _SNIOC(0x0001)
@@ -96,6 +96,25 @@ struct ak09912_sensadj_s
   uint8_t z;
 };
 
+#ifdef CONFIG_SENSORS_AK09912_SCU
+/****************************************************************************
+ * Name: ak09912_init
+ *
+ * Description:
+ *   Initialize AK09912 magnetometer device
+ *
+ * Input Parameters:
+ *   i2c     - An instance of the I2C interface to use to communicate with
+ *             AK09912
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ak09912_init(FAR struct i2c_master_s *i2c, int port);
+#endif
+
 /****************************************************************************
  * Name: ak09912_register
  *
@@ -111,7 +130,12 @@ struct ak09912_sensadj_s
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+#ifdef CONFIG_SENSORS_AK09912_SCU
+int ak09912_register(FAR const char *devpath, int minor,
+                     FAR struct i2c_master_s *i2c, int port);
+#else
 int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -119,4 +143,4 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_AK09912 */
-#endif /* __DRIVERS_AK09912_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_AK09912_H */

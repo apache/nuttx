@@ -516,16 +516,6 @@ config STM32H7_SPI_DMA
 
 endmenu # "SPI Configuration"
 
-config STM32H7_DMACAPABLE
-	bool "Workaround non-DMA capable memory"
-	depends on ARCH_DMA
-	default n
-	---help---
-		This option enables the DMA interface stm32_dmacapable that can be
-		used to check if it is possible to do DMA from the selected address.
-		Drivers then may use this information to determine if they should
-		attempt the DMA or fall back to a different transfer method.
-
 menu "U[S]ART Configuration"
 	depends on STM32H7_USART
 
@@ -1088,6 +1078,34 @@ config STM32H7_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
+
+config STM32H7_DTCMEXCLUDE
+	bool "Exclude DTCM SRAM from the heap"
+	default y if ELF
+	depends on ARMV7M_HAVE_DTCM
+	---help---
+		Exclude DTCM SRAM from the HEAP because it appears to be impossible
+		to execute ELF modules from DTCM RAM (REVISIT!).
+
+config STM32H7_DTCM_PROCFS
+	bool "DTCM SRAM PROCFS support"
+	default n
+	depends on ARMV7M_DTCM && FS_PROCFS
+	---help---
+		Select to build in support for /proc/dtcm.  Reading from /proc/dtcm
+		will provide statistics about DTCM memory use similar to what you
+		would get from mallinfo() for the user heap.
+
+config STM32H7_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on ARCH_DMA
+	default n
+	---help---
+		This option enables the DMA interface stm32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
+
 
 menu "Timer Configuration"
 

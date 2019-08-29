@@ -226,7 +226,7 @@ int s32k1xx_lpuart_configure(uint32_t base,
 #ifdef CONFIG_S32K1XX_LPUART1
   if (base == S32K1XX_LPUART1_BASE)
     {
-      clkname = LPUART2_CLK;
+      clkname = LPUART1_CLK;
     }
   else
 #endif

@@ -90,7 +90,8 @@ uintptr_t STUB_getgid(int nbr);
 uintptr_t STUB_sem_close(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_open(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
+            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
+            uintptr_t parm6);
 uintptr_t STUB_sem_post(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_setprotocol(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sem_timedwait(int nbr, uintptr_t parm1, uintptr_t parm2);
@@ -101,6 +102,7 @@ uintptr_t STUB_sem_wait(int nbr, uintptr_t parm1);
 uintptr_t STUB_pgalloc(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+uintptr_t STUB_nx_task_spawn(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_delete(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_restart(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_setcancelstate(int nbr, uintptr_t parm1,

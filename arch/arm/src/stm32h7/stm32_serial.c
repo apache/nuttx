@@ -133,6 +133,7 @@ struct up_dev_s
    */
 
 #ifdef CONFIG_SERIAL_TERMIOS
+  uint8_t           rxftcfg;   /* Rx FIFO threshold level */
   uint8_t           parity;    /* 0=none, 1=odd, 2=even */
   uint8_t           bits;      /* Number of bits (7 or 8) */
   bool              stopbits2; /* True: Configure with 2 stop bits instead of 1 */

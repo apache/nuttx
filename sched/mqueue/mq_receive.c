@@ -64,7 +64,7 @@
  *   from the message queue specified by "mqdes."  This is an internal OS
  *   interface.  It is functionally equivalent to mq_receive except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *  See comments with mq_receive() for a more complete description of the

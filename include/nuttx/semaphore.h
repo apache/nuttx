@@ -204,7 +204,7 @@ int nxsem_destroy (FAR sem_t *sem);
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sem_wait except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  * Input Parameters:
@@ -268,7 +268,7 @@ int nxsem_trywait(FAR sem_t *sem);
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sem_wait except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  * Input Parameters:

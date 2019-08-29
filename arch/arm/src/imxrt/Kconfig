@@ -157,6 +157,10 @@ config IMXRT_LPSPI
 	bool
 	default n
 
+config IMXRT_ENC
+	bool
+	default n
+
 config IMXRT_HIGHSPEED_GPIO
 	bool
 	default n
@@ -410,6 +414,314 @@ config IMXRT_USDHC2
 	select IMXRT_USDHC
 	---help---
 		Support USDHC host controller 2
+
+menu "ENC Peripherals"
+
+menuconfig IMXRT_ENC1
+	bool "ENC1"
+	default n
+	select IMXRT_ENC
+
+if IMXRT_ENC1
+
+config ENC1_INITVAL
+	int "Initial position counter value"
+	default 0
+
+config ENC1_DIR
+	bool "Reverse positive rotation direction"
+	default n
+	---help---
+		Select if PHASEB leading PHASEA pulses is positive rotation
+
+config ENC1_FILTPER
+	int "Input filter sample period in clock cycles"
+	default 0
+
+config ENC1_FILTCNT
+	int "Number of input samples that filter will compare"
+	default 0
+
+config ENC1_MOD
+	bool "Enable modulo counting"
+	default n
+
+if ENC1_MOD
+
+config ENC1_MODULUS
+	hex "Modulus to wrap around"
+	default 0xffffffff
+
+endif # ENC1_MOD
+
+config ENC1_HIP
+	bool "HOME signal initializes position counter"
+	default n
+
+if ENC1_HIP
+
+config ENC1_HNE
+	bool "Initialize on negedge of HOME"
+	default n
+
+endif # ENC1_HIP
+
+config ENC1_XIP
+	bool "INDEX signal initializes position counter"
+	default n
+
+if ENC1_XIP
+
+config ENC1_XNE
+	bool "Initialize on negedge of INDEX"
+	default n
+
+endif # ENC1_XIP
+
+if DEBUG_SENSORS
+
+config ENC1_TST_DIR
+	bool "Generate negative test counter advances"
+	default n
+
+config ENC1_TST_PER
+	int "Period of test pulses in clock cycles"
+	default 31
+
+endif # DEBUG_SENSORS
+
+endif # IMXRT_ENC1
+
+menuconfig IMXRT_ENC2
+	bool "ENC2"
+	default n
+	select IMXRT_ENC
+
+if IMXRT_ENC2
+
+config ENC2_INITVAL
+	int "Initial position counter value"
+	default 0
+
+config ENC2_DIR
+	bool "Reverse positive rotation direction"
+	default n
+	---help---
+		Select if PHASEB leading PHASEA pulses is positive rotation
+
+config ENC2_FILTPER
+	int "Input filter sample period in clock cycles"
+	default 0
+
+config ENC2_FILTCNT
+	int "Number of input samples that filter will compare"
+	default 0
+
+config ENC2_MOD
+	bool "Enable modulo counting"
+	default n
+
+if ENC2_MOD
+
+config ENC2_MODULUS
+	hex "Modulus to wrap around"
+	default 0xffffffff
+
+endif # ENC2_MOD
+
+config ENC2_HIP
+	bool "HOME signal initializes position counter"
+	default n
+
+if ENC2_HIP
+
+config ENC2_HNE
+	bool "Initialize on negedge of HOME"
+	default n
+
+endif # ENC2_HIP
+
+config ENC2_XIP
+	bool "INDEX signal initializes position counter"
+	default n
+
+if ENC2_XIP
+
+config ENC2_XNE
+	bool "Initialize on negedge of INDEX"
+	default n
+
+endif # ENC2_XIP
+
+if DEBUG_SENSORS
+
+config ENC2_TST_DIR
+	bool "Generate negative test counter advances"
+	default n
+
+config ENC2_TST_PER
+	int "Period of test pulses in clock cycles"
+	default 31
+
+endif # DEBUG_SENSORS
+
+endif # IMXRT_ENC2
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+menuconfig IMXRT_ENC3
+	bool "ENC3"
+	default n
+	select IMXRT_ENC
+
+if IMXRT_ENC3
+
+config ENC3_INITVAL
+	int "Initial position counter value"
+	default 0
+
+config ENC3_DIR
+	bool "Reverse positive rotation direction"
+	default n
+	---help---
+		Select if PHASEB leading PHASEA pulses is positive rotation
+
+config ENC3_FILTPER
+	int "Input filter sample period in clock cycles"
+	default 0
+
+config ENC3_FILTCNT
+	int "Number of input samples that filter will compare"
+	default 0
+
+config ENC3_MOD
+	bool "Enable modulo counting"
+	default n
+
+if ENC3_MOD
+
+config ENC3_MODULUS
+	hex "Modulus to wrap around"
+	default 0xffffffff
+
+endif # ENC3_MOD
+
+config ENC3_HIP
+	bool "HOME signal initializes position counter"
+	default n
+
+if ENC3_HIP
+
+config ENC3_HNE
+	bool "Initialize on negedge of HOME"
+	default n
+
+endif # ENC3_HIP
+
+config ENC3_XIP
+	bool "INDEX signal initializes position counter"
+	default n
+
+if ENC3_XIP
+
+config ENC3_XNE
+	bool "Initialize on negedge of INDEX"
+	default n
+
+endif # ENC3_XIP
+
+if DEBUG_SENSORS
+
+config ENC3_TST_DIR
+	bool "Generate negative test counter advances"
+	default n
+
+config ENC3_TST_PER
+	int "Period of test pulses in clock cycles"
+	default 31
+
+endif # DEBUG_SENSORS
+
+endif # IMXRT_ENC3
+
+menuconfig IMXRT_ENC4
+	bool "ENC4"
+	default n
+	select IMXRT_ENC
+
+if IMXRT_ENC4
+
+config ENC4_INITVAL
+	int "Initial position counter value"
+	default 0
+
+config ENC4_DIR
+	bool "Reverse positive rotation direction"
+	default n
+	---help---
+		Select if PHASEB leading PHASEA pulses is positive rotation
+
+config ENC4_FILTPER
+	int "Input filter sample period in clock cycles"
+	default 0
+
+config ENC4_FILTCNT
+	int "Number of input samples that filter will compare"
+	default 0
+
+config ENC4_MOD
+	bool "Enable modulo counting"
+	default n
+
+if ENC4_MOD
+
+config ENC4_MODULUS
+	hex "Modulus to wrap around"
+	default 0xffffffff
+
+endif # ENC4_MOD
+
+config ENC4_HIP
+	bool "HOME signal initializes position counter"
+	default n
+
+if ENC4_HIP
+
+config ENC4_HNE
+	bool "Initialize on negedge of HOME"
+	default n
+
+endif # ENC4_HIP
+
+config ENC4_XIP
+	bool "INDEX signal initializes position counter"
+	default n
+
+if ENC4_XIP
+
+config ENC4_XNE
+	bool "Initialize on negedge of INDEX"
+	default n
+
+endif # ENC4_XIP
+
+if DEBUG_SENSORS
+
+config ENC4_TST_DIR
+	bool "Generate negative test counter advances"
+	default n
+
+config ENC4_TST_PER
+	int "Period of test pulses in clock cycles"
+	default 31
+
+endif # DEBUG_SENSORS
+
+endif # IMXRT_ENC4
+
+endif # ARCH_FAMILY_IMXRT105x | ARCH_FAMILY_IMXRT106x
+
+endmenu # ENC Peripherals
 
 endmenu # i.MX RT Peripheral Selection
 

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The S32K146 has 1Mb of FLASH beginning at address 0x0000:0000 and
- * 124Kb of SRAM beginning at address 0x1fff:fc00 (plus 4Kb of FlexRAM)
+ * 124Kb of SRAM beginning at address 0x1fff:0000 (plus 4Kb of FlexRAM)
  *
  * The on-chip RAM is split in two regions: SRAM_L and SRAM_U. The RAM is
  * implemented such that the SRAM_L and SRAM_U ranges form a contiguous
@@ -60,6 +60,7 @@ SECTIONS
   {
     _stext = ABSOLUTE(.);
     *(.vectors)
+    . = 0x0000410;    /* Skip over flash configuration field */
     *(.text .text.*)
     *(.fixup)
     *(.gnu.warning)
@@ -73,7 +74,6 @@ SECTIONS
     _etext = ABSOLUTE(.);
   } > flash
 
-  . = ALIGN(4);
   .init_section :
   {
     _sinit = ABSOLUTE(.);
@@ -81,13 +81,11 @@ SECTIONS
     _einit = ABSOLUTE(.);
   } > flash
 
-  . = ALIGN(4);
   .ARM.extab :
   {
     *(.ARM.extab*)
   } >flash
 
-  . = ALIGN(4);
   __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
@@ -95,7 +93,6 @@ SECTIONS
   } >flash
   __exidx_end = ABSOLUTE(.);
 
-  . = ALIGN(4);
   .data :
   {
     _sdata = ABSOLUTE(.);

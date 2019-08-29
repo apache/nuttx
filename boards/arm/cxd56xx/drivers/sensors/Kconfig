@@ -1,0 +1,178 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig SCU_SENSORS
+	bool "SCU Sensor Drivers"
+
+if SCU_SENSORS
+
+config SENSORS_AK09912_SCU
+	bool "Asahi AK09911/AK09912 Compass Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for AK09911/AK09912 Compass sensor.
+		NOTE: This sensor is connected to the SCU unit
+
+config SENSORS_APDS9930_SCU
+	bool "Avago APDS9930 Proximity and Ambient light Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for APDS9930 proximity and ambient light sensor.
+
+if SENSORS_APDS9930_SCU
+
+config SENSORS_APDS9930_PROXIMITY_INTERRUPT
+	bool "Use Proximity interrupt"
+	default y
+	---help---
+		Use Interrupt when the threshold is exceeded.
+		In this case, SCU sequencer is not used.
+
+endif
+
+config SENSORS_BH1721FVC_SCU
+	bool "Rohm BH1721FVC Ambient Light Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for the Rohm BH1721FVC light sensor.
+
+config SENSORS_BH1745NUC_SCU
+	bool "Rohm BH1745NUC Color Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for BH1745NUC color sensor.
+
+config SENSORS_BM1383GLV_SCU
+	bool "Rohm BM1383GLV/BM1383AGLV Pressure Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for BM1383GLV/BM1383AGLV pressure sensor.
+
+config SENSORS_BM1422GMV_SCU
+	bool "Rohm BM1422GMV/BM1422AGMV Magnetic Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for BM1422GMV/BM1422AGMV magnetic sensor.
+
+if SENSORS_BM1422GMV_SCU
+
+choice
+	prompt "Slave Address"
+	default BM1422GMV_SLAVE_ADDRESS_0F
+
+config BM1422GMV_SLAVE_ADDRESS_0E
+	bool "0x0E"
+
+config BM1422GMV_SLAVE_ADDRESS_0F
+	bool "0x0F"
+
+endchoice
+endif # SENSORS_BM1422GMV_SCU
+
+config SENSORS_BMI160_SCU
+	bool "Bosch BMI160 Sensor support"
+	default n
+	select CXD56_SCU
+	---help---
+		Enable driver support for the Bosch BMI160 sensor.
+
+if SENSORS_BMI160_SCU
+
+choice
+	prompt "BMI160 Interface"
+	default SENSORS_BMI160_SCU_SPI
+
+config SENSORS_BMI160_SCU_SPI
+	bool "BMI160 SPI Interface"
+	select CXD56_SPI
+	---help---
+		Enables support for the SPI interface.
+
+config SENSORS_BMI160_SCU_I2C
+	bool "BMI160 I2C Interface"
+	select CXD56_I2C
+	---help---
+		Enables support for the I2C interface
+
+endchoice
+endif # CONFIG_SENSORS_BMI160_SCU
+
+config SENSORS_BMP280_SCU
+	bool "Bosch BMP280 Barometic Pressure Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for the Bosch BMP280 barometic pressure sensor.
+
+config SENSORS_KX022_SCU
+	bool "Kionix KX022/KX122 Acceleration Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for the Kionix KX022/KX122 acceleration sensor.
+
+if SENSORS_KX022_SCU
+
+config SENSORS_KX122
+	bool "KX122 register compatibility"
+	default n
+	---help---
+		Use KX122 which has the register upper compatibility with KX022.
+
+endif # SENSORS_KX022
+
+config SENSORS_LT1PA01_SCU
+	bool "Murata LT1PA01 Proximity and Ambient light Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for LT1PA01 proximity and ambient light sensor.
+
+if SENSORS_LT1PA01_SCU
+
+config LT1PA01_PROXIMITY_INTERRUPT
+	bool "Use Proximity interrupt"
+	default y
+	---help---
+		Use Interrupt when the threshold is exceeded.
+		In this case, SCU sequencer is not used.
+
+endif # SENSORS_LT1PA01_SCU
+
+config SENSORS_RPR0521RS_SCU
+	bool "Rohm RPR0521RS Proximity and Ambient light Sensor"
+	default n
+	select CXD56_I2C
+	select CXD56_SCU
+	---help---
+		Enable driver for RPR0521RS proximity and ambient light sensor.
+
+if SENSORS_RPR0521RS_SCU
+
+config RPR0521RS_PROXIMITY_INTERRUPT
+	bool "Use Proximity interrupt"
+	default y
+	---help---
+		Use Interrupt when the threshold is exceeded.
+		In this case, SCU sequencer is not used.
+
+endif # SENSORS_RPR0521RS_SCU
+
+endif # SCU_SENSORS

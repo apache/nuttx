@@ -9,18 +9,29 @@ Contents
   o Status
   o Serial Console
   o LEDs and Buttons
+  o OpenSDA Notes
   o Configurations
 
 Status
 ======
 
-  2019-08-14:  Configuration created but entirely untested.  Support for the
-    S32K1XX family is incomplete.  This configuration is intended, initially,
-    to support development of the architecture support.  This is VERY much
-    a work in progress and you should not use this configuration unless you
-    are interested in assisting with the bring-up.
+  2019-08-14:  Configuration created but entirely untested.
+
   2019-08-17:  The port is code complete.  It compiles with no errors or
     warnings but is untested.  Still waiting for hardware.
+
+  2019-08-20:  The very first image that I wrote to FLASH seems to
+    have "bricked" the board.  The board is sensitive to (1) resetting
+    into a bad state and (2) incorrect flash configurations.  It is
+    difficult to impossiblel to recover from these start-up errors.
+
+  2019-80-22:  My S32K118EVB is still borked, but after some additional
+    changes, Fabio Balzano has verified that the NSH is functional on
+    that board.
+
+  TODO:  Need calibrate the delay loop.  The current value of
+  CONFIG_BOARD_LOOPSPERMSEC is a bogus value retained from a copy-paste
+  (see apps/examples/calib_udelay).
 
 Serial Console
 ==============
@@ -29,6 +40,9 @@ Serial Console
 
     OpenSDA UART TX  PTB1(LPUART0_TX)
     OpenSDA UART RX  PTB0(LPUART0_RX)
+
+  USB drivers for the PEMIcro CDC Serial port are available here:
+  http://www.pemicro.com/opensda/
 
 LEDs and Buttons
 ================
@@ -40,6 +54,8 @@ LEDs and Buttons
     RedLED   PTD16 (FTM0 CH1)
     GreenLED PTD15 (FTM0 CH0)
     BlueLED  PTE8  (FTM0 CH6)
+
+  An output of '1' illuminates the LED.
 
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
   any way.  The following definitions are used to access individual RGB
@@ -73,6 +89,18 @@ LEDs and Buttons
 
     SW2  PTD3
     SW3  PTD5
+
+OpenSDA Notes
+=============
+
+  - USB drivers for the PEMIcro CDC Serial port are available here:
+    http://www.pemicro.com/opensda/
+
+  - The drag'n'drog interface expects files in .srec format.
+
+  - Using Segger J-Link:  Easy... but remember to use the SWD connector J14
+    near the touch electrodes and not the OpenSDA connector near the OpenSDA
+    USB connector J7.
 
 Configurations
 ==============
@@ -108,3 +136,6 @@ Configurations
       Configures the NuttShell (nsh) located at apps/examples/nsh.  Support
       for builtin applications is enabled, but in the base configuration no
       builtin applications are selected.
+
+      NOTE:  This is a very minimal NSH configuration in order to recude
+      memory usage.  Most of the NSH niceties are not available.

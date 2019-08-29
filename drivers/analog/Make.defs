@@ -53,6 +53,10 @@ ifeq ($(CONFIG_DAC7571),y)
   CSRCS += dac7571.c
 endif
 
+ifeq ($(CONFIG_DAC7554),y)
+  CSRCS += dac7554.c
+endif
+
 endif
 
 # Check for COMP devices

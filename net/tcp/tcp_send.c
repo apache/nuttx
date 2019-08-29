@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send.c
  *
- *   Copyright (C) 2007-2010, 2012, 2015, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2010, 2012, 2015, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -428,7 +428,9 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_reset(FAR struct net_driver_s *dev)
 {
   FAR struct tcp_hdr_s *tcp = tcp_header(dev);
+  uint32_t ackno;
   uint16_t tmp16;
+  uint16_t acklen = 0;
   uint8_t seqbyte;
 
 #ifdef CONFIG_NET_STATISTICS
@@ -436,6 +438,33 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
 
   /* TCP setup */
+
+  if ((tcp->flags & TCP_SYN) != 0 || (tcp->flags & TCP_FIN) != 0)
+    {
+      acklen++;
+    }
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
+#endif
+    {
+      FAR struct ipv6_hdr_s *ip = IPv6BUF;
+      acklen += (ip->len[0] << 8 | ip->len[1]);
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
+#endif
+    {
+      FAR struct ipv4_hdr_s *ip = IPv4BUF;
+      acklen += (ip->len[0] << 8) + ip->len[1] - (ip->vhl & 0x0f) * 4;
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+  acklen        -= (tcp->tcpoffset >> 4) << 2;
 
   tcp->flags     = TCP_RST | TCP_ACK;
   tcp->tcpoffset = 5 << 4;
@@ -463,16 +492,9 @@ void tcp_reset(FAR struct net_driver_s *dev)
    * to propagate the carry to the other bytes as well.
    */
 
-  if (++(tcp->ackno[3]) == 0)
-    {
-      if (++(tcp->ackno[2]) == 0)
-        {
-          if (++(tcp->ackno[1]) == 0)
-            {
-              ++(tcp->ackno[0]);
-            }
-        }
-    }
+  ackno = tcp_addsequence(tcp->ackno, acklen);
+
+  tcp_setsequence(tcp->ackno, ackno);
 
   /* Swap port numbers. */
 

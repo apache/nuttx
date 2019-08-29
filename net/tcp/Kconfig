@@ -41,6 +41,18 @@ config NET_TCP_CONNS
 	---help---
 		Maximum number of TCP/IP connections (all tasks)
 
+config NET_TCP_RTO
+	int "RTO of TCP/IP connections"
+	default 3
+	---help---
+		RTO of TCP/IP connections (all tasks)
+
+config NET_TCP_WAIT_TIMEOUT
+	int "TIME_WAIT Length of TCP/IP connections"
+	default 120
+	---help---
+		TIME_WAIT Length of TCP/IP connections (all tasks)
+
 config NET_MAX_LISTENPORTS
 	int "Number of listening ports"
 	default 20

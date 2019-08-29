@@ -280,6 +280,8 @@ typedef volatile uint32_t cpu_set_t;
 #else
 #  error SMP: Extensions needed to support this number of CPUs
 #endif
+#else
+typedef volatile uint8_t cpu_set_t;
 #endif /* CONFIG_SMP */
 
 /* BSD types provided only to support porting to NuttX. */

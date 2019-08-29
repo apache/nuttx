@@ -231,7 +231,7 @@ typedef FAR void *pthread_addr_t;
 #define __PTHREAD_ADDR_T_DEFINED 1
 #endif
 
-typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
+typedef CODE pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
 
 struct pthread_attr_s

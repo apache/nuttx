@@ -374,7 +374,7 @@ void s32k1xx_pinirq_initialize(void);
  * Name: s32k1xx_pinirqattach
  *
  * Description:
- *   Attach a pin interrupt handler.  The normal initalization sequence is:
+ *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
  *   1. Call s32k1xx_pinconfig() to configure the interrupting pin (pin interrupts
  *      will be disabled.

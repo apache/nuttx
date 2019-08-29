@@ -27,3 +27,4 @@ source libs/libc/misc/Kconfig
 source libs/libc/wqueue/Kconfig
 source libs/libc/hex2bin/Kconfig
 source libs/libc/userfs/Kconfig
+source libs/libc/builtin/Kconfig

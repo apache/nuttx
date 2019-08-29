@@ -153,7 +153,7 @@ s32k1xx_set_pclkctrl(const struct peripheral_clock_config_s *pclk)
     * and the clock gate.
     */
 
-   regval =  PCC_PCS(pclk->clksrc) | PCC_PCD( pclk->divider);
+   regval =  PCC_PCS(pclk->clksrc) | PCC_PCD(pclk->divider);
 
    if (pclk->frac == MULTIPLY_BY_TWO)
      {
@@ -360,7 +360,7 @@ int s32k1xx_get_pclkfreq(enum clock_names_e clkname, uint32_t *frequency)
                   freq = s32k1xx_get_pclkfreq_divided(clkname, SCG_ASYNC_CLOCK_DIV1);
                 }
 
-              if ((g_periph_features[clkname] & HAS_PROTOCOL_CLOCK_FROM_ASYNC2) != 0U)
+              if ((g_periph_features[clkname] & HAS_PROTOCOL_CLOCK_FROM_ASYNC2) != 0)
                 {
                   /* Check whether the functional clock is clocked */
 

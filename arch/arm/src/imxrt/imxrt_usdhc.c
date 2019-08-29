@@ -4,6 +4,7 @@
  *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Dave Marples <dave@marples.net>
+ *           Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -2021,7 +2022,11 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & USDHC_RESPERR_INTS) != 0)
     {
-      putreg32(USDHC_SYSCTL_RSTC, priv->addr + IMXRT_USDHC_SYSCTL_OFFSET);
+      modifyreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET, 0, USDHC_SYSCTL_RSTC);
+      while ((getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET) &
+             USDHC_SYSCTL_RSTC) != 0)
+        {
+        }
     }
 
   timeout = USDHC_CMDTIMEOUT;

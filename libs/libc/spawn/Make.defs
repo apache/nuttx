@@ -50,6 +50,10 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += lib_psa_getstacksize.c lib_psa_setstacksize.c
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CSRCS += lib_task_spawn.c
+endif
+
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CSRCS += lib_psa_dump.c
 endif

@@ -196,44 +196,59 @@ if [ "X${USRONLY}" != "Xy" ]; then
 
 		cp -p "${LDPATH}" "${EXPORTDIR}/build/." || \
 			{ echo "MK: cp ${LDPATH} failed"; exit 1; }
+
+		# Copy addtional ld scripts
+
+		LDDIR="$(dirname "${LDPATH}")"
+		for f in "${LDDIR}"/*.ld ; do
+			[ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/build/."
+		done
 	fi
 fi
 
 # Save the compilation options
 
-if [ "X${USRONLY}" == "Xy" ]; then
-	echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "CC               = ${CC}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "CXX              = ${CXX}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "CPP              = ${CPP}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LD               = ${LD}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "AR               = ${AR}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "NM               = ${NM}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/build/Make.defs"
-else
-	echo "ARCHCFLAGS   = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
-	echo "ARCHCXXFLAGS = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
+echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/build/Make.defs"
+echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/build/Make.defs"
+echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/build/Make.defs"
+echo "CC               = ${CC}" >>"${EXPORTDIR}/build/Make.defs"
+echo "CXX              = ${CXX}" >>"${EXPORTDIR}/build/Make.defs"
+echo "CPP              = ${CPP}" >>"${EXPORTDIR}/build/Make.defs"
+echo "LD               = ${LD}" >>"${EXPORTDIR}/build/Make.defs"
+echo "AR               = ${AR}" >>"${EXPORTDIR}/build/Make.defs"
+echo "NM               = ${NM}" >>"${EXPORTDIR}/build/Make.defs"
+echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/build/Make.defs"
+echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/build/Make.defs"
+echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/build/Make.defs"
+echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/build/Make.defs"
+echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/build/Make.defs"
+echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/build/Make.defs"
+echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/build/Make.defs"
+echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
+echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/build/Make.defs"
+echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
+echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/build/Make.defs"
+echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/build/Make.defs"
+echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/build/Make.defs"
+
+# Additional compilation options when the kernel is built
+
+if [ "X${USRONLY}" != "Xy" ] then
+	echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/build/Make.defs"
 fi
 
 # Copy the system map file(s)

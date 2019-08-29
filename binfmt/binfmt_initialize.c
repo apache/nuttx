@@ -40,10 +40,12 @@
 #include <nuttx/config.h>
 
 #include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/builtin.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/binfmt/pcode.h>
 #include <nuttx/binfmt/nxflat.h>
+#include <nuttx/lib/builtin.h>
+
+#include "binfmt.h"
 
 #ifndef CONFIG_BINFMT_DISABLE
 
@@ -63,7 +65,7 @@ void binfmt_initialize(void)
 {
   int ret;
 
-#ifdef CONFIG_FS_BINFS
+#if defined(CONFIG_FS_BINFS) && defined(HAVE_BUILTIN_CONTEXT)
   ret = builtin_initialize();
   if (ret < 0)
     {

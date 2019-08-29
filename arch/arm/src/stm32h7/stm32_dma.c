@@ -146,7 +146,7 @@ struct stm32_dmach_s
 {
   bool           used;      /* Channel in use */
   uint8_t        ctrl:3;    /* DMA controller */
-  uint8_t        chan:5;    /* DMA stream/channel channel id*/
+  uint8_t        chan:5;    /* DMA stream/channel channel id */
   uint8_t        irq;       /* DMA stream IRQ number */
   uint8_t        shift;     /* ISR/IFCR bit shift value */
   uint32_t       base;      /* DMA register channel base address */
@@ -241,9 +241,11 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg);
 
 static uint32_t dmachan_getbase(DMA_CHANNEL dmachan);
 static uint32_t dmabase_getreg(DMA_CHANNEL dmachan, uint32_t offset);
-static void dmabase_putreg(DMA_CHANNEL dmachan, uint32_t offset, uint32_t value);
+static void dmabase_putreg(DMA_CHANNEL dmachan, uint32_t offset,
+                           uint32_t value);
 static uint32_t dmachan_getreg(DMA_CHANNEL dmachan, uint32_t offset);
-static void dmachan_putreg(DMA_CHANNEL dmachan, uint32_t offset, uint32_t value);
+static void dmachan_putreg(DMA_CHANNEL dmachan, uint32_t offset,
+                           uint32_t value);
 static void dmamux_putreg(DMA_MUX dmamux, uint32_t offset, uint32_t value);
 #ifdef CONFIG_DEBUG_DMA_INFO
 static uint32_t dmamux_getreg(DMA_MUX dmamux, uint32_t offset);
@@ -363,6 +365,7 @@ struct stm32_dmamux_s g_dmamux[DMAMUX_NUM] =
 struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   /* 0 - MDMA */
+
   {
     .base   = STM32_MDMA_BASE,
     .first  = MDMA_FIRST,
@@ -372,6 +375,7 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
 
   /* 1 - DMA1 */
+
   {
     .base   = STM32_DMA1_BASE,
     .first  = DMA1_FIRST,
@@ -381,6 +385,7 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
 
   /* 2 - DMA2 */
+
   {
     .base   = STM32_DMA2_BASE,
     .first  = DMA2_FIRST,
@@ -390,6 +395,7 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
 
   /* 3 - BDMA */
+
   {
     .base   = STM32_BDMA_BASE,
     .first  = BDMA_FIRST,
@@ -1155,7 +1161,8 @@ static int stm32_sdma_interrupt(int irq, void *context, FAR void *arg)
 
   /* Get the interrupt status for this stream */
 
-  status = (dmabase_getreg(dmachan, regoffset) >> dmachan->shift) & DMA_STREAM_MASK;
+  status = (dmabase_getreg(dmachan, regoffset) >> dmachan->shift)
+            & DMA_STREAM_MASK;
 
   /* Clear fetched stream interrupts by setting bits in the upper or lower IFCR
    * register
@@ -1265,8 +1272,8 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
    *
    * "When the peripheral flow controller is used for a given stream, the value
    *  written into the DMA_SxNDTR has no effect on the DMA transfer. Actually,
-   *  whatever the value written, it will be forced by hardware to 0xFFFF as soon
-   *  as the stream is enabled..."
+   *  whatever the value written, it will be forced by hardware to 0xFFFF as
+   *  soon as the stream is enabled..."
    */
 
   dmachan_putreg(dmachan, STM32_DMA_SNDTR_OFFSET, cfg->ndata);
@@ -1280,22 +1287,23 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
   regval |= scr & DMA_SCR_PL_MASK;
   dmachan_putreg(dmachan, STM32_DMA_SCR_OFFSET, regval);
 
-  /* "Configure the FIFO usage (enable or disable, threshold in transmission and
-   *  reception)"
+  /* "Configure the FIFO usage (enable or disable, threshold in transmission
+   * and reception)"
    *
-   * "Caution is required when choosing the FIFO threshold (bits FTH[1:0] of the
-   *  DMA_SxFCR register) and the size of the memory burst (MBURST[1:0] of the
-   *  DMA_SxCR register): The content pointed by the FIFO threshold must exactly
-   *  match to an integer number of memory burst transfers. If this is not in the
-   *  case, a FIFO error (flag FEIFx of the DMA_HISR or DMA_LISR register) will be
-   *  generated when the stream is enabled, then the stream will be automatically
-   *  disabled."
+   * "Caution is required when choosing the FIFO threshold (bits FTH[1:0] of
+   * the DMA_SxFCR register) and the size of the memory burst (MBURST[1:0] of
+   * the DMA_SxCR register): The content pointed by the FIFO threshold must
+   * exactly
+   *  match to an integer number of memory burst transfers. If this is not in
+   *  the case, a FIFO error (flag FEIFx of the DMA_HISR or DMA_LISR register)
+   *  will be generated when the stream is enabled, then the stream will be
+   *  automatically disabled."
    *
    * The FIFO is disabled in circular mode when transferring data from a
    * peripheral to memory, as in this case it is usually desirable to know that
-   * every byte from the peripheral is transferred immediately to memory.  It is
-   * not practical to flush the DMA FIFO, as this requires disabling the channel
-   * which triggers the transfer-complete interrupt.
+   * every byte from the peripheral is transferred immediately to memory.  It
+   * is not practical to flush the DMA FIFO, as this requires disabling the
+   * channel which triggers the transfer-complete interrupt.
    *
    * NOTE: The FEIFx error interrupt is not enabled because the FEIFx seems to
    * be reported spuriously causing good transfers to be marked as failures.
@@ -1303,7 +1311,8 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
 
   regval  = dmachan_getreg(dmachan, STM32_DMA_SFCR_OFFSET);
   regval &= ~(DMA_SFCR_FTH_MASK | DMA_SFCR_FS_MASK | DMA_SFCR_FEIE);
-  if (!((scr & (DMA_SCR_CIRC | DMA_SCR_DIR_MASK)) == (DMA_SCR_CIRC | DMA_SCR_DIR_P2M)))
+  if (!((scr & (DMA_SCR_CIRC | DMA_SCR_DIR_MASK)) ==
+      (DMA_SCR_CIRC | DMA_SCR_DIR_P2M)))
     {
       regval |= (DMA_SFCR_FTH_FULL | DMA_SFCR_DMDIS);
     }
@@ -1366,14 +1375,15 @@ static void stm32_sdma_start(DMA_HANDLE handle, dma_callback_t callback,
 
   if ((scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) == 0)
     {
-      /* Once half of the bytes are transferred, the half-transfer flag (HTIF) is
-       * set and an interrupt is generated if the Half-Transfer Interrupt Enable
-       * bit (HTIE) is set. At the end of the transfer, the Transfer Complete Flag
-       * (TCIF) is set and an interrupt is generated if the Transfer Complete
-       * Interrupt Enable bit (TCIE) is set.
+      /* Once half of the bytes are transferred, the half-transfer flag (HTIF)
+       * is set and an interrupt is generated if the Half-Transfer Interrupt
+       * Enable bit (HTIE) is set. At the end of the transfer, the Transfer
+       * Complete Flag (TCIF) is set and an interrupt is generated if the
+       * Transfer Complete Interrupt Enable bit (TCIE) is set.
        */
 
-      scr |= (half ? (DMA_SCR_HTIE | DMA_SCR_TEIE) : (DMA_SCR_TCIE | DMA_SCR_TEIE));
+      scr |= (half ? (DMA_SCR_HTIE | DMA_SCR_TEIE) :
+                      (DMA_SCR_TCIE | DMA_SCR_TEIE));
     }
   else
     {
@@ -1480,7 +1490,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
       return false;
     }
 
-#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#  if defined(CONFIG_ARMV7M_DCACHE) && \
+     !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
    * mode (not write-through) because a) arch_invalidate_dcache could lose
    * buffered writes and b) arch_flush_dcache could corrupt adjacent memory if
@@ -1488,8 +1499,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
-  if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
-      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
+  if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x mend:0x%08x\n",
               cfg->maddr, mend);
@@ -1548,7 +1559,7 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
 
   /* Verify that transfer is froma a supported memory region */
 
-  if (cfg->paddr & STM32_PREGION_MASK != STM32_D2_BASE)
+  if ((cfg->paddr & STM32_PREGION_MASK) != STM32_D2_BASE)
     {
       /* DMA1/DMA2 support only D2 domain */
 
@@ -1813,8 +1824,8 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
-  if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
-      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
+  if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x mend:0x%08x\n",
               cfg->maddr, mend);
@@ -1962,7 +1973,8 @@ void weak_function up_dma_initialize(void)
 
       /* Attach standard DMA interrupt vectors */
 
-      (void)irq_attach(dmachan->irq, g_dma_ops[controller].dma_interrupt, dmachan);
+      (void)irq_attach(dmachan->irq, g_dma_ops[controller].dma_interrupt,
+                       dmachan);
 
       /* Disable the DMA stream */
 
@@ -2069,7 +2081,7 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
   /* Find available channel for given controller */
 
   flags = enter_critical_section();
-  for (i = first; i < first+nchan; i+=1)
+  for (i = first; i < first + nchan; i += 1)
     {
       if (g_dmach[i].used == false)
         {

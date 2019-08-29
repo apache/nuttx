@@ -1,7 +1,7 @@
 ############################################################################
 # binfmt/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2016, 2018 Gregory Nutt. All rights
+#   Copyright (C) 2007-2009, 2012-2016, 2018-2019 Gregory Nutt. All rights
 #     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
@@ -57,6 +57,12 @@ ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 BINFMT_CSRCS += binfmt_execsymtab.c
 endif
 
+# Builtin application interfaces
+
+ifeq ($(CONFIG_BUILTIN),y)
+BINFMT_CSRCS += builtin.c
+endif
+
 # Add configured binary modules
 
 VPATH =
@@ -65,7 +71,6 @@ DEPPATH = --dep-path .
 
 include libnxflat$(DELIM)Make.defs
 include libelf$(DELIM)Make.defs
-include libbuiltin$(DELIM)Make.defs
 include libpcode$(DELIM)Make.defs
 
 BINFMT_AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))

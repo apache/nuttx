@@ -391,7 +391,9 @@ static const struct file_operations g_mx7_debug_fops =
 
 static int node_from_name(FAR const char *name)
 {
-  for (int n = 0; n < NODE_MAP_LEN; n++)
+  int n;
+
+  for (n = 0; n < NODE_MAP_LEN; n++)
     {
       if (!strcmp(name, node_map[n].path))
         {
@@ -406,7 +408,9 @@ static int node_from_name(FAR const char *name)
 
 static int regaddr_from_name(FAR const char *name)
 {
-  for (int n = 0; n < REG_NAME_MAP_LEN; n++)
+  int n;
+
+  for (n = 0; n < REG_NAME_MAP_LEN; n++)
     {
       if (!strcmp(name, reg_name_map[n].path))
         {
@@ -1778,6 +1782,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
   FAR struct mx7_dev_s *dev = NULL;
   int ret = 0;
   int osdbl = 0;
+  int n;
 
   /* Without config info, we can't do anything. */
 
@@ -1845,7 +1850,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
    *    /dev/osd0/cm
    */
 
-  for (int n = 0; ret >= 0 && n < NODE_MAP_LEN; n++)
+  for (n = 0; ret >= 0 && n < NODE_MAP_LEN; n++)
     {
       ret = add_interface(path, node_map[n].path, &g_mx7_fops, 0666, dev);
     }
@@ -1857,7 +1862,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
    * activities.
    */
 
-  for (int n = 0; ret >= 0 && n < REG_NAME_MAP_LEN; n++)
+  for (n = 0; ret >= 0 && n < REG_NAME_MAP_LEN; n++)
     {
       ret = add_interface(path, reg_name_map[n].path, &g_mx7_debug_fops,
                           0666, dev);
@@ -1879,7 +1884,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
    */
 
   uint8_t buf[300];
-  for (int n = 0; n < sizeof(buf); n++)
+  for (n = 0; n < sizeof(buf); n++)
     {
       buf[n] = n;
     }

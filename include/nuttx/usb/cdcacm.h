@@ -323,7 +323,7 @@ enum cdcacm_event_e
   CDCACM_EVENT_SENDBREAK       /* Send break request received */
 };
 
-typedef FAR void (*cdcacm_callback_t)(enum cdcacm_event_e event);
+typedef CODE void (*cdcacm_callback_t)(enum cdcacm_event_e event);
 
 /****************************************************************************
  * Public Function Prototypes

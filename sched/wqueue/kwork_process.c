@@ -128,7 +128,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
    */
 
   work = (FAR struct work_s *)wqueue->q.head;
-  while (work)
+  while (work != NULL)
     {
       /* Is this work ready?  It is ready if there is no delay or if
        * the delay has elapsed. qtime is the time that the work was added

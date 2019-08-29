@@ -109,7 +109,7 @@
  */
 
 struct xen1210_config_s;
-typedef void (*xen1210_handler_t)(FAR struct xen1210_config_s *config, FAR void *arg);
+typedef CODE void (*xen1210_handler_t)(FAR struct xen1210_config_s *config, FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the XEN1210 driver when the
  * driver is instantiated. This structure provides information about the configuration of

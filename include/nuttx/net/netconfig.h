@@ -9,7 +9,7 @@
  * Note: Network configuration options the netconfig.h should not be changed,
  * but rather the per-project defconfig file.
  *
- *   Copyright (C) 2007, 2011, 2014-2015, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -382,11 +382,18 @@
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.
+ * REVISIT:  TCP RTO really should be calculated dynamically for each TCP
+ * connection:
  *
- * This should not be changed.
+ * https://unix.stackexchange.com/questions/210367/changing-the-tcp-rto-value-in-linux
+ * http://sgros.blogspot.com/2012/02/calculating-tcp-rto.html
  */
 
-#define TCP_RTO 3
+#ifdef CONFIG_NET_TCP_RTO
+#  define TCP_RTO CONFIG_NET_TCP_RTO
+#else
+#  define TCP_RTO 3
+#endif
 
 /* The maximum number of times a segment should be retransmitted
  * before the connection should be aborted.
@@ -526,13 +533,13 @@
 #  define MIN_TCP_MSS           __MIN_TCP_MSS(__IPv6_HDRLEN)
 #endif
 
-/* How long a connection should stay in the TIME_WAIT state.
- *
- * This configuration option has no real implication, and it should be
- * left untouched. Units: half second.
- */
+/* How long a connection should stay in the TIME_WAIT state. */
 
-#define TCP_TIME_WAIT_TIMEOUT (60*2)
+#ifdef CONFIG_NET_TCP_WAIT_TIMEOUT
+#  define TCP_TIME_WAIT_TIMEOUT CONFIG_NET_TCP_WAIT_TIMEOUT
+#else
+#  define TCP_TIME_WAIT_TIMEOUT (60*2)
+#endif
 
 /* ARP configuration options */
 

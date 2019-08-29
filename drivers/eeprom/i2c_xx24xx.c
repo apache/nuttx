@@ -92,6 +92,7 @@
 #include <sys/types.h>
 #include <debug.h>
 #include <errno.h>
+#include <string.h>
 #include <nuttx/fs/fs.h>
 
 #include <nuttx/kmalloc.h>
@@ -106,6 +107,8 @@
 #  define CONFIG_EE24XX_FREQUENCY 100000
 #endif
 
+#define UUID_SIZE   16
+
 /****************************************************************************
  * Types
  ****************************************************************************/
@@ -117,7 +120,7 @@ struct ee24xx_geom_s
   uint8_t bytes    : 4; /* Power of two of 128 bytes (0:128 ... 11:262144) */
   uint8_t pagesize : 4; /* Power of two of   8 bytes (0:8 1:16 2:32 3:64 etc) */
   uint8_t addrlen  : 4; /* Nr of bytes in command address field */
-  uint8_t abits    : 3; /* Nr of Address MSBits in the i2c device address LSBs*/
+  uint8_t abits    : 3; /* Nr of Address MSBits in the i2c device address LSBs */
   uint8_t special  : 1; /* Special device: uchip 24xx00 (total 16 bytes)
                          * or 24xx1025 (shifted P bits) */
 };
@@ -160,6 +163,11 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int     ee24xx_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
+
+#ifdef CONFIG_AT24CS_UUID
+static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -209,6 +217,19 @@ static const struct file_operations ee24xx_fops =
   ee24xx_ioctl, /* ioctl */
   NULL          /* poll */
 };
+
+#ifdef CONFIG_AT24CS_UUID
+static const struct file_operations at24cs_uuid_fops =
+{
+  ee24xx_open,      /* piggyback on the ee24xx_open */
+  ee24xx_close,     /* piggyback on the ee24xx_close */
+  at24cs_read_uuid, /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  NULL,             /* ioctl */
+  NULL              /* poll */
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -272,7 +293,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   /* Write data address */
 
   maddr[0] = memaddr >> 8;
-  maddr[1] = memaddr &  0xFF;
+  maddr[1] = memaddr &  0xff;
 
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
@@ -507,7 +528,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   addr_hi           = (filep->f_pos >> (eedev->addrlen << 3));
 
   addr[0]           = (filep->f_pos) >> 8;
-  addr[1]           = (filep->f_pos) &  0xFF;
+  addr[1]           = (filep->f_pos) &  0xff;
 
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
@@ -539,6 +560,78 @@ done:
   ee24xx_semgive(eedev);
   return ret;
 }
+
+/****************************************************************************
+ * Name: at24cs_read_uuid
+ ****************************************************************************/
+
+#ifdef CONFIG_AT24CS_UUID
+static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
+                                size_t len)
+{
+  FAR struct ee24xx_dev_s *eedev;
+  FAR struct inode        *inode = filep->f_inode;
+  struct i2c_msg_s         msgs[2];
+  uint8_t                  regindx;
+  int                      ret;
+
+  DEBUGASSERT(inode && inode->i_private);
+  eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+
+  ee24xx_semtake(eedev);
+
+  /* trim len if read would go beyond end of device */
+
+  if ((filep->f_pos + len) > UUID_SIZE)
+    {
+      len = UUID_SIZE - filep->f_pos;
+    }
+
+  if (len == 0)
+    {
+      /* We are at end of file */
+
+      ret = 0;
+      goto done;
+    }
+
+  /* Write data address */
+
+  finfo("READ %d bytes at pos %d\n", len, filep->f_pos);
+
+  regindx           = 0x80;             /* reg index of UUID[0] */
+
+  msgs[0].frequency = eedev->freq;
+  msgs[0].addr      = eedev->addr + 8;  /* slave addr of UUID */
+  msgs[0].flags     = 0;
+  msgs[0].buffer    = &regindx;
+  msgs[0].length    = 1;
+
+  /* Read data */
+
+  msgs[1].frequency = msgs[0].frequency;
+  msgs[1].addr      = msgs[0].addr;
+  msgs[1].flags     = I2C_M_READ;
+  msgs[1].buffer    = (uint8_t *)buffer;
+  msgs[1].length    = len;
+
+  ret = I2C_TRANSFER(eedev->i2c, msgs, 2);
+  if (ret < 0)
+    {
+      goto done;
+    }
+
+  ret = len;
+
+  /* Update the file position */
+
+  filep->f_pos += len;
+
+done:
+  ee24xx_semgive(eedev);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: ee24xx_write
@@ -705,13 +798,17 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
                       FAR char *devname, int devtype, int readonly)
 {
   FAR struct ee24xx_dev_s *eedev;
+#ifdef CONFIG_AT24CS_UUID
+  FAR char                *uuidname;
+  int                     ret;
+#endif
 
   /* Check device type early */
 
   if ((devtype < 0) ||
       (devtype >= sizeof(g_ee24xx_devices) / sizeof(g_ee24xx_devices[0])))
     {
-     return -EINVAL;
+      return -EINVAL;
     }
 
   eedev = kmm_zalloc(sizeof(struct ee24xx_dev_s));
@@ -759,7 +856,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
           ferr("Device 24xx1025 is not supported for the moment, TODO.\n");
 
           eedev->haddrshift = 2;
-          free(eedev);
+          kmm_free(eedev);
           return -ENODEV;
         }
     }
@@ -767,6 +864,30 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
   finfo("EEPROM device %s, %d bytes, %d per page, addrlen %d, %s\n",
         devname, eedev->size, eedev->pgsize, eedev->addrlen,
         eedev->readonly ? "readonly" : "");
+
+#ifdef CONFIG_AT24CS_UUID
+  uuidname = kmm_zalloc(strlen(devname) + 8);
+  if (!uuidname)
+    {
+      return -ENOMEM;
+    }
+
+  /* register the UUID I2C slave with the same name as the parent
+   * EEPROM chip, but with the ".uuid" suffix
+   */
+
+  strcpy(uuidname, devname);
+  strcat(uuidname, ".uuid");
+  ret = register_driver(uuidname, &at24cs_uuid_fops, 0444, eedev);
+
+  kmm_free(uuidname);
+
+  if (OK != ret)
+    {
+      ferr("register uuid failed, ret = %d\n", ret);
+      return ret;
+    }
+#endif
 
   return register_driver(devname, &ee24xx_fops, 0666, eedev);
 }

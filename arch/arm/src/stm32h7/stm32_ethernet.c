@@ -373,11 +373,11 @@
   (ETH_MACCR_BL_10 | ETH_MACCR_DR | ETH_MACCR_IPG(96))
 #endif
 
-/* Clear the MACCR bits that will be setup during MAC initialization (or that
+/* Clear the MACPFR bits that will be setup during MAC initialization (or that
  * are cleared unconditionally).  Per the reference manual, all reserved bits
  * must be retained at their reset value.
  *
- * ETH_MACPFR_PM    Bit 0: Promiscuous mode
+ * ETH_MACPFR_PR    Bit 0: Promiscuous mode
  * ETH_MACPFR_HUC   Bit 1: Hash unicast
  * ETH_MACPFR_HMC   Bit 2: Hash multicast
  * ETH_MACPFR_DAIF  Bit 3: Destination address inverse filtering
@@ -394,29 +394,27 @@
  */
 
 #define MACPFR_CLEAR_BITS                                               \
-  (ETH_MACPFR_PM | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
+  (ETH_MACPFR_PR | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
    ETH_MACPFR_PM | ETH_MACPFR_DBF | ETH_MACPFR_PCF_MASK | ETH_MACPFR_SAIF | \
    ETH_MACPFR_SAF | ETH_MACPFR_HPF | ETH_MACPFR_VTFE | ETH_MACPFR_IPFE | \
    ETH_MACPFR_DNTU | ETH_MACPFR_RA)
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * ETH_MACPFR_PM    Promiscuous mode                       0 (disabled)
- * ETH_MACPFR_HU    Hash unicast                           0 (perfect dest filtering)
- * ETH_MACPFR_HM    Hash multicast                         0 (perfect dest filtering)
+ * ETH_MACPFR_PR    Promiscuous mode                       0 (disabled)
+ * ETH_MACPFR_HUC   Hash unicast                           0 (perfect dest filtering)
+ * ETH_MACPFR_HMC   Hash multicast                         0 (perfect dest filtering)
  * ETH_MACPFR_DAIF  Destination address inverse filtering  0 (normal)
- * ETH_MACPFR_PAM   Pass all multicast                     0 (Depends on HM bit)
- * ETH_MACPFR_BFD   Broadcast frames disable               0 (enabled)
+ * ETH_MACPFR_PM    Pass all multicast                     0 (Depends on HMC bit)
+ * ETH_MACPFR_DBF   Broadcast frames disable               0 (enabled)
  * ETH_MACPFR_PCF   Pass control frames                    1 (block all but PAUSE)
  * ETH_MACPFR_SAIF  Source address inverse filtering       0 (not used)
  * ETH_MACPFR_SAF   Source address filter                  0 (disabled)
  * ETH_MACPFR_HPF   Hash or perfect filter                 0 (Only matching frames passed)
- * ETH_MACPFR_RA    Receive all                            1 (enabled)
+ * ETH_MACPFR_RA    Receive all                            0 (disabled)
  */
 
-/* TODO: use proper mac filtering and not RA */
-
-#define MACPFR_SET_BITS (ETH_MACPFR_RA | ETH_MACPFR_PCF_PAUSE)
+#define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
 
 /* Clear the MACQTXFCR and MACRXFCR bits that will be setup during MAC
  * initialization (or that are cleared unconditionally).  Per the reference
@@ -2788,7 +2786,7 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
   stm32_putreg(temp, registeraddress);
 
   temp  = stm32_getreg(STM32_ETH_MACPFR);
-  temp |= (ETH_MACPFR_HM | ETH_MACPFR_HPF);
+  temp |= (ETH_MACPFR_HMC | ETH_MACPFR_HPF);
   stm32_putreg(temp, STM32_ETH_MACPFR);
 
   return OK;
@@ -2850,7 +2848,7 @@ static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
       stm32_getreg(STM32_ETH_MACHT1R) == 0)
     {
       temp = stm32_getreg(STM32_ETH_MACPFR);
-      temp &= ~(ETH_MACPFR_HM | ETH_MACPFR_HPF);
+      temp &= ~(ETH_MACPFR_HMC | ETH_MACPFR_HPF);
       stm32_putreg(temp, STM32_ETH_MACPFR);
     }
 
@@ -4221,9 +4219,9 @@ static int stm32_macenable(struct stm32_ethmac_s *priv)
 
   /* Clear Tx and Rx process stopped flags */
 
-  regval  = stm32_getreg(STM32_ETH_DMACRXCR);
+  regval  = stm32_getreg(STM32_ETH_DMACSR);
   regval |= (ETH_DMACSR_TPS | ETH_DMACSR_RPS);
-  stm32_putreg(regval, STM32_ETH_DMACRXCR);
+  stm32_putreg(regval, STM32_ETH_DMACSR);
 
   return OK;
 }

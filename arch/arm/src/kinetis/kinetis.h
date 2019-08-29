@@ -575,7 +575,7 @@ void kinetis_pinirqinitialize(void);
  * Name: kinetis_pinirqattach
  *
  * Description:
- *   Attach a pin interrupt handler.  The normal initalization sequence is:
+ *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
  *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin interrupts
  *      will be disabled.

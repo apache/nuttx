@@ -68,6 +68,10 @@
 #  include <nuttx/spinlock.h>
 #endif
 
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS)
+#  include <nuttx/lib/builtin.h>
+#endif
+
 #ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
@@ -270,7 +274,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        *                board_app_initialize() implementation without modification.
        *                The argument has no meaning to NuttX; the meaning of the
        *                argument is a contract between the board-specific
-       *                initalization logic and the matching application logic.
+       *                initialization logic and the matching application logic.
        *                The value cold be such things as a mode enumeration value,
        *                a set of DIP switch switch settings, a pointer to
        *                configuration data read from a file or serial FLASH, or
@@ -389,6 +393,40 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
          DEBUGASSERT(symdesc != NULL);
          modlib_setsymtab(symdesc->symtab, symdesc->nsymbols);
+         ret = OK;
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BUILTIN
+      /* CMD:           BOARDIOC_BUILTINS
+       * DESCRIPTION:   Provide the user-space list of built-in applications for
+       *                use by BINFS in protected mode.  Normally this is small
+       *                set of globals provided by user-space logic.  It provides
+       *                name-value pairs for associating built-in application
+       *                names with user-space entry point addresses.  These
+       *                globals are only needed for use by BINFS which executes
+       *                built-in applications from kernel-space in PROTECTED mode.
+       *                In the FLAT build, the user space globals are readily
+      *                 available.  (BINFS is not supportable in KERNEL mode since
+       *                user-space address have no general meaning that
+       *                configuration).
+       * ARG:           A pointer to an instance of struct boardioc_builtin_s
+       * CONFIGURATION: This BOARDIOC command is always available when
+       *                CONFIG_BUILTIN is enabled, but does nothing unless
+       *                CONFIG_BUILD_KERNEL and CONFIG_FS_BINFS are selected.
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_BUILTINS:
+        {
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS)
+          FAR const struct boardioc_builtin_s *builtin =
+            (FAR const struct boardioc_builtin_s *)arg;
+
+         DEBUGASSERT(builtin != NULL);
+         builtin_setlist(builtin->builtins, builtin->count);
+#endif
          ret = OK;
         }
         break;
