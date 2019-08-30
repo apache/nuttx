@@ -466,4 +466,22 @@
 #define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
 #define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
 
+#define UL_DRV_SYSLESS_CHIP "16450"
+#define UL_DRV_SYSLESS_PORT LPC17_40_UART1_BASE
+#define UL_DRV_SYSLESS_BAUD 19200
+#define UL_DRV_SYSLESS_BAUDBASE ((BOARD_PCLK_FREQUENCY + 8) / 16)
+#define UL_DRV_SYSLESS_IRQ LPC17_40_IRQ_UART1
+#define UL_DRV_SYSLESS_MY_ADR_DEFAULT 3
+
+typedef struct nuttx_ulan_chip_data {
+  const char *chip;
+  int my_adr;
+  int baud;
+  int baudbase;
+  int irq;
+  int port;
+};
+
+int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data *chip_data);
+
 #endif  /* __BOARDS_ARM_LX_CPU_INCLUDE_BOARD_H */

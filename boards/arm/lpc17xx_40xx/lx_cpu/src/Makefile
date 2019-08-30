@@ -68,4 +68,6 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += lpc17_40_can.c
 endif
 
+CSRCS += lpc17_40_ulan.c
+
 include $(TOPDIR)/boards/Board.mk
