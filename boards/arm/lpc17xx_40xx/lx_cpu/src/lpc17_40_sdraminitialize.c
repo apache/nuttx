@@ -1,8 +1,7 @@
 /************************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_sdraminitialize.c
- * arch/arm/src/board/lpc17_40_sdraminitialize.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +58,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK* (undivided), or
- * LPC17_40_CCLK / 2 as determined by settings in the board.h header file.
+/* The core clock is LPC17_40_EMCCLK which may be either LPC17_40_CCLK* (undivided)
+ * or LPC17_40_CCLK / 2 as determined by settings in the board.h header file.
  *
  * For example:
  *   LPC17_40_CCLCK      =  120,000,000
@@ -99,12 +98,14 @@
 
 #define SDRAM_BASE          0xa0000000 /* CS0 */
 
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static volatile uint32_t lx_cpu_ringosccount[2] = {0,0};
+static volatile uint32_t lx_cpu_ringosccount[2] =
+{
+  0, 0
+};
 
 /****************************************************************************
  * Private Functions
@@ -129,9 +130,13 @@ static int lx_cpu_running_from_sdram(void)
 
   if (((uint32_t)lx_cpu_running_from_sdram >= LPC17_40_EXTDRAM_CS0) &&
       ((uint32_t)lx_cpu_running_from_sdram < extdram_end))
-    return 1;
+    {
+      return 1;
+    }
   else
-    return 0;
+    {
+      return 0;
+    }
 }
 
 /* SDRAM code based on NXP application notes and emc_sdram.c example */
@@ -147,17 +152,20 @@ static int lx_cpu_running_from_sdram(void)
  *   1 if test passed, otherwise 0
  *
  ****************************************************************************/
-static uint32_t lx_cpu_sdram_test( void )
+
+static uint32_t lx_cpu_sdram_test(void)
 {
   volatile uint32_t *wr_ptr;
   volatile uint16_t *short_wr_ptr;
   uint32_t data;
-  uint32_t i, j;
+  uint32_t i;
+  uint32_t j;
 
   wr_ptr = (uint32_t *)LPC17_40_EXTDRAM_CS0;
   short_wr_ptr = (uint16_t *)wr_ptr;
 
   /* 16 bit write */
+
   for (i = 0; i < 64; i++)
     {
       for (j = 0; j < 0x100; j++)
@@ -168,19 +176,22 @@ static uint32_t lx_cpu_sdram_test( void )
     }
 
   /* Verifying */
+
   wr_ptr = (uint32_t *)LPC17_40_EXTDRAM_CS0;
   for (i = 0; i < 64; i++)
     {
       for (j = 0; j < 0x100; j++)
         {
           data = *wr_ptr;
-          if (data != (((((i + j) + 1) & 0xFFFF) << 16) | ((i + j) & 0xFFFF)))
-          {
-            return 0x0;
-          }
+          if (data != (((((i + j) + 1) & 0xffff) << 16) | ((i + j) & 0xffff)))
+            {
+              return 0x0;
+            }
+
           wr_ptr++;
         }
     }
+
   return 0x1;
 }
 
@@ -194,55 +205,65 @@ static uint32_t lx_cpu_sdram_test( void )
  *   1 if test passed, otherwise 0
  *
  ****************************************************************************/
+
 static uint32_t lx_cpu_sdram_find_cmddly(void)
 {
-  uint32_t cmddly, cmddlystart, cmddlyend, regval;
-  uint32_t ppass = 0x0, pass = 0x0;
+  uint32_t cmddly;
+  uint32_t cmddlystart;
+  uint32_t cmddlyend;
+  uint32_t regval;
+  uint32_t ppass = 0x0;
+  uint32_t pass = 0x0;
 
   cmddly = 0x0;
-  cmddlystart = cmddlyend = 0xFF;
+  cmddlystart = cmddlyend = 0xff;
 
   while (cmddly < 32)
-   {
-     regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
-     regval &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK;
-     regval |= cmddly << SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
-     putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
+    {
+      regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
+      regval &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK;
+      regval |= cmddly << SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
+      putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
 
-     if (lx_cpu_sdram_test() == 0x1)
-       {
-         /* Test passed */
-         if (cmddlystart == 0xFF)
-           {
-             cmddlystart = cmddly;
-           }
-           ppass = 0x1;
-         }
-       else
-         {
-           /* Test failed */
-           if (ppass == 1)
-           {
-             cmddlyend = cmddly;
-             pass = 0x1;
-             ppass = 0x0;
-           }
-       }
+      if (lx_cpu_sdram_test() == 0x1)
+        {
+          /* Test passed */
 
-       /* Try next value */
-       cmddly++;
+          if (cmddlystart == 0xff)
+            {
+              cmddlystart = cmddly;
+            }
+
+          ppass = 0x1;
+        }
+      else
+        {
+          /* Test failed */
+
+          if (ppass == 1)
+            {
+              cmddlyend = cmddly;
+              pass = 0x1;
+              ppass = 0x0;
+            }
+        }
+
+      /* Try next value */
+
+      cmddly++;
     }
 
   /* If the test passed, the we can use the average of the min and max
    * values to get an optimal DQSIN delay
    */
+
   if (pass == 0x1)
     {
       cmddly = (cmddlystart + cmddlyend) / 2;
     }
   else if (ppass == 0x1)
     {
-      cmddly = (cmddlystart + 0x1F) / 2;
+      cmddly = (cmddlystart + 0x1f) / 2;
     }
   else
     {
@@ -251,7 +272,8 @@ static uint32_t lx_cpu_sdram_find_cmddly(void)
        */
       cmddly = 0x10;
     }
-  regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
+
+  regval  = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
   regval &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK;
   regval |= cmddly << SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
   putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
@@ -269,13 +291,18 @@ static uint32_t lx_cpu_sdram_find_cmddly(void)
  *   1 if test passed, otherwise 0
  *
  ****************************************************************************/
+
 static uint32_t lx_cpu_sdram_find_fbclkdly(void)
 {
-  uint32_t fbclkdly, fbclkdlystart, fbclkdlyend, regval;
-  uint32_t ppass = 0x0, pass = 0x0;
+  uint32_t fbclkdly;
+  uint32_t fbclkdlystart;
+  uint32_t fbclkdlyend;
+  uint32_t regval;
+  uint32_t ppass = 0x0;
+  uint32_t pass = 0x0;
 
   fbclkdly = 0x0;
-  fbclkdlystart = fbclkdlyend = 0xFF;
+  fbclkdlystart = fbclkdlyend = 0xff;
 
   while (fbclkdly < 32)
     {
@@ -287,15 +314,18 @@ static uint32_t lx_cpu_sdram_find_fbclkdly(void)
       if (lx_cpu_sdram_test() == 0x1)
         {
           /* Test passed */
-          if (fbclkdlystart == 0xFF)
+
+          if (fbclkdlystart == 0xff)
             {
               fbclkdlystart = fbclkdly;
             }
+
           ppass = 0x1;
         }
       else
         {
           /* Test failed */
+
           if (ppass == 1)
             {
               fbclkdlyend = fbclkdly;
@@ -305,29 +335,32 @@ static uint32_t lx_cpu_sdram_find_fbclkdly(void)
         }
 
       /* Try next value */
+
       fbclkdly++;
     }
 
   /* If the test passed, the we can use the average of the
    * min and max values to get an optimal DQSIN delay
    */
-  if (pass == 0x1)
-  {
-        fbclkdly = (fbclkdlystart + fbclkdlyend) / 2;
-  }
-  else if (ppass == 0x1)
-  {
-        fbclkdly = (fbclkdlystart + 0x1F) / 2;
-  }
-  else
-  {
-        /* A working value couldn't be found, just pick something
-	 * safe so the system doesn't become unstable
-	 */
-        fbclkdly = 0x10;
-  }
 
-  regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
+  if (pass == 0x1)
+    {
+      fbclkdly = (fbclkdlystart + fbclkdlyend) / 2;
+    }
+  else if (ppass == 0x1)
+    {
+      fbclkdly = (fbclkdlystart + 0x1f) / 2;
+    }
+  else
+    {
+      /* A working value couldn't be found, just pick something
+       * safe so the system doesn't become unstable
+       */
+
+      fbclkdly = 0x10;
+    }
+
+  regval  = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
   regval &= ~SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
   regval |= fbclkdly << SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT;
   putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
@@ -345,10 +378,12 @@ static uint32_t lx_cpu_sdram_find_fbclkdly(void)
  *   current ring osc count
  *
  ****************************************************************************/
-static uint32_t lx_cpu_sdram_calibration( void )
+
+static uint32_t lx_cpu_sdram_calibration(void)
 {
-  uint32_t regval, i;
+  uint32_t regval;
   uint32_t cnt = 0;
+  uint32_t i;
 
   for (i = 0; i < 10; i++)
     {
@@ -361,8 +396,10 @@ static uint32_t lx_cpu_sdram_calibration( void )
         {
           regval = getreg32(LPC17_40_SYSCON_EMCCAL);
         }
-      cnt += (regval & 0xFF);
-  }
+
+      cnt += (regval & 0xff);
+    }
+
   return (cnt / 10);
 }
 
@@ -376,29 +413,33 @@ static uint32_t lx_cpu_sdram_calibration( void )
  *   None
  *
  ****************************************************************************/
-static void lx_cpu_sdram_adjust_timing( void )
+
+static void lx_cpu_sdram_adjust_timing(void)
 {
-  uint32_t regval, cmddly, fbclkdly;
+  uint32_t regval;
+  uint32_t cmddly;
+  uint32_t fbclkdly;
 
   /* Current value */
+
   lx_cpu_ringosccount[1] = lx_cpu_sdram_calibration();
 
-  regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
+  regval     = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
 
-  cmddly = regval & SYSCON_EMCDLYCTL_CMDDLY_MASK;
-  cmddly >>= SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
-  cmddly = cmddly * lx_cpu_ringosccount[0] / lx_cpu_ringosccount[1];
-  cmddly <<= SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
-  cmddly &= SYSCON_EMCDLYCTL_CMDDLY_MASK;
+  cmddly     = regval & SYSCON_EMCDLYCTL_CMDDLY_MASK;
+  cmddly   >>= SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
+  cmddly     = cmddly * lx_cpu_ringosccount[0] / lx_cpu_ringosccount[1];
+  cmddly   <<= SYSCON_EMCDLYCTL_CMDDLY_SHIFT;
+  cmddly    &= SYSCON_EMCDLYCTL_CMDDLY_MASK;
 
-  fbclkdly = regval & SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
+  fbclkdly   = regval & SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
   fbclkdly >>= SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT;
-  fbclkdly = fbclkdly * lx_cpu_ringosccount[0] / lx_cpu_ringosccount[1];
+  fbclkdly   = fbclkdly * lx_cpu_ringosccount[0] / lx_cpu_ringosccount[1];
   fbclkdly <<= SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT;
-  fbclkdly &= SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
+  fbclkdly  &= SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
 
-  regval &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK | SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
-  regval |= cmddly | fbclkdly;
+  regval    &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK | SYSCON_EMCDLYCTL_FBCLKDLY_MASK;
+  regval    |= cmddly | fbclkdly;
 
   putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
 }
@@ -426,9 +467,11 @@ void lx_cpu_sdram_initialize(void)
   volatile uint32_t delay;
 
   if (lx_cpu_running_from_sdram())
-    return;
-  /*
-   * Memory MT48LC4M32B2P
+    {
+      return;
+    }
+
+  /* Memory MT48LC4M32B2P
    * 4 Meg x 32 (1 Meg x 32 x 4 banks)
    * Configuration     1 Meg x 32 x 4 banks
    * Refresh count             4K
@@ -436,7 +479,6 @@ void lx_cpu_sdram_initialize(void)
    * Bank addressing        4   2-bit  BA[1:0]
    * Column addressing    256   8-bit  A[7:0]
    */
-
 
   /* Reconfigure delays:
    *
@@ -460,14 +502,14 @@ void lx_cpu_sdram_initialize(void)
   putreg32(regval, LPC17_40_SYSCON_EMCDLYCTL);
   putreg32(0, LPC17_40_EMC_CONFIG);
 
-
   /* Timing for 72 MHz Bus */
-  regval = MDKCFG_CASVAL << EMC_DYNAMICRASCAS_CAS_SHIFT;
+
+  regval  = MDKCFG_CASVAL << EMC_DYNAMICRASCAS_CAS_SHIFT;
   regval |= MDKCFG_RASVAL << EMC_DYNAMICRASCAS_RAS_SHIFT;
   putreg32(regval, LPC17_40_EMC_DYNAMICRASCAS0); /* 2 RAS, 2 CAS latency */
   putreg32(1, LPC17_40_EMC_DYNAMICREADCONFIG);   /* Command delayed strategy, using EMCCLKDELAY */
 
-                                              /* EMC_NS2CLK(20)  TRP   = 20 nS */
+                                                 /* EMC_NS2CLK(20)  TRP   = 20 nS */
   putreg32(1, LPC17_40_EMC_DYNAMICRP);           /* ( n + 1 ) -> 2 clock cycles */
 
   putreg32(3, LPC17_40_EMC_DYNAMICRAS);          /* ( n + 1 ) -> 4 clock cycles */
@@ -476,20 +518,20 @@ void lx_cpu_sdram_initialize(void)
 
   putreg32(2, LPC17_40_EMC_DYNAMICAPR);          /* ( n + 1 ) -> 3 clock cycles */
 
-                                              /* EMC_NS2CLK(20) + 2 TRP + TDPL = 20ns + 2clk */
+                                                 /* EMC_NS2CLK(20) + 2 TRP + TDPL = 20ns + 2clk */
   putreg32(3, LPC17_40_EMC_DYNAMICDAL);          /* ( n ) -> 3 clock cycles */
 
   putreg32(1, LPC17_40_EMC_DYNAMICWR);           /* ( n + 1 ) -> 2 clock cycles */
 
-                                              /* EMC_NS2CLK(63) */
+                                                 /* EMC_NS2CLK(63) */
   putreg32(4, LPC17_40_EMC_DYNAMICRC);           /* ( n + 1 ) -> 5 clock cycles */
 
-                                              /* EMC_NS2CLK(63) */
+                                                 /* EMC_NS2CLK(63) */
   putreg32(4, LPC17_40_EMC_DYNAMICRFC);          /* ( n + 1 ) -> 5 clock cycles */
 
   putreg32(5, LPC17_40_EMC_DYNAMICXSR);          /* ( n + 1 ) -> 6 clock cycles */
 
-                                              /* EMC_NS2CLK(63) */
+                                                 /* EMC_NS2CLK(63) */
   putreg32(1, LPC17_40_EMC_DYNAMICRRD);          /* ( n + 1 ) -> 2 clock cycles */
 
   putreg32(1, LPC17_40_EMC_STATICEXTENDEDWAIT);  /* ( n + 1 ) -> 2 clock cycles */
@@ -498,54 +540,59 @@ void lx_cpu_sdram_initialize(void)
   up_mdelay(100);
   regval = dynctl | EMC_DYNAMICCONTROL_I_NOP;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONTROL); /* Issue NOP command */
-  up_mdelay(200);                           /* wait 200ms */
+
+  up_mdelay(200);                                /* wait 200ms */
   regval = dynctl | EMC_DYNAMICCONTROL_I_PALL;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONTROL); /* Issue PAL command */
   putreg32(2, LPC17_40_EMC_DYNAMICREFRESH);      /* ( n * 16 ) -> 32 clock cycles */
-  for(delay = 0; delay < 0x80; delay++);       /* wait 128 AHB clock cycles */
 
+  for (delay = 0; delay < 0x80; delay++);        /* wait 128 AHB clock cycles */
 
   /* Timing for 72MHz Bus */
-  /* ( n * 16 ) -> 1120 clock cycles -> 15.556uS at 72MHz <= 15.625uS ( 64ms / 4096 row ) */
 
-  regval = 64000000 / (1 << 12);
-  regval -= 16;
+  /* ( n * 16 ) -> 1120 clock cycles -> 15.556uS at 72MHz <= 15.625uS (64ms / 4096 row) */
+
+  regval   = 64000000 / (1 << 12);
+  regval  -= 16;
   regval >>= 4;
-  regval = regval * LPC17_40_EMCCLK_MHZ / 1000;
+  regval   = regval * LPC17_40_EMCCLK_MHZ / 1000;
   putreg32(regval, LPC17_40_EMC_DYNAMICREFRESH);
 
-  regval = dynctl | EMC_DYNAMICCONTROL_I_MODE;
+  regval   = dynctl | EMC_DYNAMICCONTROL_I_MODE;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONTROL); /* Issue MODE command */
 
   /* Timing for 48/60/72MHZ Bus */
-  modeval = LPC17_40_EXTDRAM_CS0;
+
+  modeval  = LPC17_40_EXTDRAM_CS0;
   modeval |= 0x22 << (2 + 2 + 9); /* 4 burst, 2 CAS latency */
-  regval = *(volatile uint32_t *)modeval;
+  regval   = *(volatile uint32_t *)modeval;
   putreg32(EMC_DYNAMICCONTROL_I_NORMAL, LPC17_40_EMC_DYNAMICCONTROL); /* Issue NORMAL command */
 
   /* [re]enable buffers */
+
   /* 256MB, 8Mx32, 4 banks, row=12, column=9 */
-  regval = EMC_DYNAMICCONFIG_MD_SDRAM;
+
+  regval  = EMC_DYNAMICCONFIG_MD_SDRAM;
   regval |= 9 << EMC_DYNAMICCONFIG_AM0_SHIFT;
   regval |= 1 * EMC_DYNAMICCONFIG_AM1;
   regval |= EMC_DYNAMICCONFIG_B;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONFIG0);
 
   /* Nominal value */
+
   lx_cpu_ringosccount[0] = lx_cpu_sdram_calibration();
 
   if (lx_cpu_sdram_find_cmddly() == 0x0)
-  {
-        return;        /* fatal error */
-  }
+    {
+      return;        /* fatal error */
+    }
 
   if (lx_cpu_sdram_find_fbclkdly() == 0x0)
-  {
+    {
         return;        /* fatal error */
-  }
+    }
 
   lx_cpu_sdram_adjust_timing();
-
   return;
 }
 

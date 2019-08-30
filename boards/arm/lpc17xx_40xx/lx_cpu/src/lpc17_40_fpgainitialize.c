@@ -1,8 +1,7 @@
 /************************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_sdraminitialize.c
- * arch/arm/src/board/lpc17_40_sdraminitialize.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,10 +53,15 @@
 
 #include "lx_cpu.h"
 
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
 void lx_cpu_fpga_initialize(void)
 {
   uint32_t regval;
-  /* Initialze EMC for FPGA */
+
+  /* Initialize EMC for FPGA */
 
   lpc17_40_configgpio(BOARD_XC_PROGRAM_PIN);
   lpc17_40_configgpio(BOARD_XC_DONE_PIN);
@@ -73,6 +77,7 @@ void lx_cpu_fpga_initialize(void)
    * Buffer: disabled
    * Write protection: disabled
    */
+
   putreg32(0x00000002, LPC17_40_EMC_STATICCONFIG0);
 
   /* Delays - not measured at this point
@@ -81,11 +86,13 @@ void lx_cpu_fpga_initialize(void)
    * Write: 33 cycles
    * Turnaround: 2 cycles (cca. 28 ns)
    */
-  putreg32(0x1F, LPC17_40_EMC_STATICWAITRD0);
-  putreg32(0x1F, LPC17_40_EMC_STATICWAITWR0);
+
+  putreg32(0x1f, LPC17_40_EMC_STATICWAITRD0);
+  putreg32(0x1f, LPC17_40_EMC_STATICWAITWR0);
   putreg32(0x01, LPC17_40_EMC_STATICWAITTURN0);
 
   /* Shift addresses by 2 (32-bit bus) */
+
   regval = getreg32(LPC17_40_SYSCON_SCS);
   regval &= ~SYSCON_SCS_EMCSC;
   putreg32(regval, LPC17_40_SYSCON_SCS);

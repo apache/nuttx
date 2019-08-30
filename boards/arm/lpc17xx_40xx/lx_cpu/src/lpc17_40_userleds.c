@@ -1,8 +1,7 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_userleds.c
- * arch/arm/src/board/lpc17_40_userleds.c
  *
- *   Copyright (C) 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

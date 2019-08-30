@@ -57,11 +57,6 @@
 #include "lx_cpu.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -73,14 +68,15 @@
  *
  ************************************************************************************/
 
-int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data *chip_data)
+int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data_s *chip_data)
 {
   uint32_t   regval;
   irqstate_t flags;
 
   if (minor > 0)
-    return 0;
-
+    {
+      return 0;
+    }
 
   /* Step 1: Enable power on UART1 */
 
@@ -115,4 +111,3 @@ int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data *chip_data)
 
   return 1;
 }
-

@@ -1,10 +1,9 @@
 /*****************************************************************************
  * boards/pnev5180b/src/lpc17_40_composite.c
+ * Configure and register CDC-ACM and CDC-ECM
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Michael Jung <mijung@gmx.net>
- *
- * Configure and register CDC-ACM and CDC-ECM
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -64,9 +63,8 @@
 
 int board_composite_initialize(int port)
 {
-   syslog(LOG_INFO, "board_composite_initialize(port: %d)\n", port);
-
-   return OK;
+  syslog(LOG_INFO, "board_composite_initialize(port: %d)\n", port);
+  return OK;
 }
 
 /*****************************************************************************

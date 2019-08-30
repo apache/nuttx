@@ -1,7 +1,7 @@
 /************************************************************************************
  * boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_boardinitialize.c
  *
- *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,14 +52,6 @@
 #include "lx_cpu.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -67,9 +59,9 @@
  * Name: lpc17_40_boardinitialize
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All LPC17xx architectures must provide the following entry point.  This entry
+ *   point is called early in the initialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 

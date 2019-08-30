@@ -2,7 +2,7 @@
  * boards/arm/lpc17xx_40xx/lx_cpu/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,11 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Clocking *************************************************************************/
-/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included here
- * because the including C file may not have that file in its include path.
+
+/* NOTE:  The following definitions require lpc17_40_syscon.h.  It is not included
+ * here because the including C file may not have that file in its include path.
  */
 
 #define BOARD_XTAL_FREQUENCY       (12000000)            /* XTAL oscillator frequency */
@@ -163,11 +165,11 @@
 
 #define GPIO_USB_PWRD  (GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN10)
 
-/*
-#define GPIO_USB_PPWR
-#define GPIO_USB_PWRD
-#define GPIO_USB_OVRCR
-*/
+#if 0
+#  define GPIO_USB_PPWR
+#  define GPIO_USB_PWRD
+#  define GPIO_USB_OVRCR
+#endif
 
 /* FLASH Configuration */
 
@@ -252,9 +254,10 @@
 #define BOARD_NADDR 16
 #define BOARD_NDATA 32
 
-//#define BOARD_EMC_CONFIG_BY_LOADER 1
+/* #define BOARD_EMC_CONFIG_BY_LOADER 1 */
 
 /* LED definitions ******************************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
  *
@@ -284,7 +287,7 @@
 #define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
 #define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
 #define LED_STACKCREATED           3  /*  ON    ON  OFF  OFF                        */
-#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt          */
+#define LED_INIRQ                  4  /*  LED3 glows, on while in interrupt         */
 #define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
 #define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
 #define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
@@ -292,6 +295,7 @@
                                        *              OFF while sleeping            */
 
 /* Button definitions ***************************************************************/
+
 /* The LX_CPU supports several buttons.  All must be pulled up by the LX_CPU.
  * When closed, the pins will be pulled to ground.  So the buttons will read "1"
  * when open and "0" when closed.  All except USER1 are capable of generating
@@ -312,7 +316,6 @@
  * For the interrupting buttons, interrupts are generated on both edges (press and
  * release).
  */
-
 
 #define BOARD_BUTTON_USER1         0
 #define BOARD_BUTTON_USER2         1
@@ -448,19 +451,20 @@
 
 /* XPT2046 Touchscreen:
  *
-/* -------------- -------------------- ------------ --------------------------------
+ * -------------- -------------------- ------------ --------------------------------
  * XTPT2046       Module               Module       LX_CPU LED
  *                Signal               Connector    Connector
  * -------------- -------------------- ------------ ---------------------------------
  * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
- * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP LED)
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1  (Also USB HOST UP
+ *                                                                LED)
  * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
- * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device up LED and SD CD pin)
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1  (Also USB Device up
+ *                                                                LED and SD CD pin)
  * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO   (Also RMII_CRS_DV)
  * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
  * -------------- -------------------- ------------ ---------------------------------
  */
-
 
 #define GPIO_SSP1_MISO   GPIO_SSP1_MISO_3
 #define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
@@ -473,7 +477,8 @@
 #define UL_DRV_SYSLESS_IRQ LPC17_40_IRQ_UART1
 #define UL_DRV_SYSLESS_MY_ADR_DEFAULT 3
 
-typedef struct nuttx_ulan_chip_data {
+struct nuttx_ulan_chip_data_s
+{
   const char *chip;
   int my_adr;
   int baud;
@@ -482,6 +487,6 @@ typedef struct nuttx_ulan_chip_data {
   int port;
 };
 
-int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data *chip_data);
+int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data_s *chip_data);
 
 #endif  /* __BOARDS_ARM_LX_CPU_INCLUDE_BOARD_H */

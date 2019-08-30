@@ -6,7 +6,7 @@
  *
  *   Based on boards/olimex-lpc1766stk/src/lpc17_40_can.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 #define CAN_PORT1 1
@@ -71,7 +72,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: zkit_can_setup
+ * Name: lx_cpu_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device

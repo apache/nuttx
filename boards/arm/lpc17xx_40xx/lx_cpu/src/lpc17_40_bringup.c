@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/lx_cpu/src/lpc17_40_bringup.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define NSH_HAVE_MMCSD      1
@@ -73,7 +74,8 @@
 
 /* MMC/SD support */
 
-#if !defined(CONFIG_LPC17_40_SDCARD) || !defined(CONFIG_MMCSD) && !defined(CONFIG_MMCD_SDIO)
+#if !defined(CONFIG_LPC17_40_SDCARD) || !defined(CONFIG_MMCSD) && \
+    !defined(CONFIG_MMCD_SDIO)
 #  undef NSH_HAVE_MMCSD
 #endif
 
@@ -83,7 +85,9 @@
 #  undef NSH_HAVE_MMCSD
 #endif
 
-/* MMC/SD support requires that an SPI support is enabled and an SPI port is selected */
+/* MMC/SD support requires that an SPI support is enabled and an SPI port
+ * is selected.
+ */
 
 #ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
@@ -99,9 +103,9 @@
 #  endif
 #endif
 
-/* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
- * used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.  There is a jumper
- * on board that enables the CD pin.
+/* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It
+ * is also used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.
+ * There is a jumper on board that enables the CD pin.
  */
 
 #ifdef NSH_HAVE_MMCSD
@@ -180,7 +184,7 @@ static int nsh_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   syslog(LOG_INFO, "nsh_waiter: Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -252,9 +256,8 @@ static int nsh_sdinitialize(void)
    * inserted or deleted.
    */
 
-   (void)irq_attach(LPC17_40_IRQ_P0p13, nsh_cdinterrupt, NULL);
-   up_enable_irq(LPC17_40_IRQ_P0p13);
-
+  (void)irq_attach(LPC17_40_IRQ_P0p13, nsh_cdinterrupt, NULL);
+  up_enable_irq(LPC17_40_IRQ_P0p13);
 #endif
 #endif
 
@@ -321,7 +324,9 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the mass storage class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n",
+             ret);
     }
 #endif
 
@@ -331,7 +336,9 @@ static int nsh_usbhostinitialize(void)
   ret = usbhost_cdcacm_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n",
+             ret);
     }
 #endif
 
