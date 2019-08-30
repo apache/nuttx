@@ -365,6 +365,12 @@ boards/arm/lpc43xx/lpc4370-link2
   LPC4370FET100 MCU.  Based on the LPC4300 Xplorer port and provided by
   Lok Tep.
 
+boards/arm/lpc17xx_40xx/lx_cpu
+  This port uses the PiKRON LX_CPU board. See the
+  http://pikron.com/pages/products/cpu_boards/lx_cpu.html for further
+  information.  This board features the NXP LPC4088 (compatible with
+  LPC1788) and Xilinx Spartan 6 XC6SLX9
+
 boards/z80/ez80/makerlisp
   This port use the MakerLips machine based on an eZ80F091 ez80Acclaim!
   Microcontroller, and the Zilog ZDS-II Windows command line tools.  The
