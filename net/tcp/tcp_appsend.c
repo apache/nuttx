@@ -143,11 +143,14 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   else if ((result & TCP_CLOSE) != 0)
     {
       conn->tcpstateflags = TCP_FIN_WAIT_1;
-      conn->unacked  = 1;
-      conn->nrtx     = 0;
+      conn->unacked       = 1;
+      conn->nrtx          = 0;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
+#endif
       ninfo("TCP state: TCP_FIN_WAIT_1\n");
 
-      dev->d_sndlen  = 0;
+      dev->d_sndlen       = 0;
       tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);
     }
 

@@ -524,7 +524,7 @@ found:
        */
 
       ninfo("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
-            conn->sndseq, ackseq, unackseq, conn->unacked);
+            tcp_getsequence(conn->sndseq), ackseq, unackseq, conn->unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
@@ -785,6 +785,9 @@ found:
             conn->tcpstateflags = TCP_LAST_ACK;
             conn->unacked       = 1;
             conn->nrtx          = 0;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+            conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
+#endif
             ninfo("TCP state: TCP_LAST_ACK\n");
 
             tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
@@ -932,11 +935,10 @@ found:
 
         if ((tcp->flags & TCP_FIN) != 0)
           {
-            if ((flags & TCP_ACKDATA) != 0)
+            if ((flags & TCP_ACKDATA) != 0 && conn->unacked == 0)
               {
                 conn->tcpstateflags = TCP_TIME_WAIT;
                 conn->timer         = 0;
-                conn->unacked       = 0;
                 ninfo("TCP state: TCP_TIME_WAIT\n");
               }
             else
@@ -950,10 +952,9 @@ found:
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
-        else if ((flags & TCP_ACKDATA) != 0)
+        else if ((flags & TCP_ACKDATA) != 0 && conn->unacked == 0)
           {
             conn->tcpstateflags = TCP_FIN_WAIT_2;
-            conn->unacked = 0;
             ninfo("TCP state: TCP_FIN_WAIT_2\n");
             goto drop;
           }
