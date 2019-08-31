@@ -45,6 +45,10 @@
 
 #include "chip.h"
 
+/****************************************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************************************/
+
 /* This is implementation for STM32 ADC IPv1 - F1, F2, F37x, F4, F7.
  * NOTE: L1 use modified IPv1 (look at chip/stm32_adc_v1l1.h).
  */
@@ -75,10 +79,6 @@
 #else
 #  undef HAVE_ADC_VBAT
 #endif
-
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
 
 /* For the basic ADC IPv1, the ADCx_BASE definitions are defined in chip/stm32xxx_memorymap.h files */
 
