@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_poll.c
  *
- *   Copyright (C) 2010, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -56,6 +56,16 @@
 #include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* Buffer layout */
+
+#define RASIZE      (4)
+#define IPv4BUF     ((FAR struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IGMPBUF(hl) ((FAR struct igmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
 
 /****************************************************************************
  * Private Functions
@@ -141,10 +151,13 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
 void igmp_poll(FAR struct net_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
+  uint16_t iphdrlen;
 
   /* Setup the poll operation */
 
-  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN];
+  iphdrlen          = IPv4_HDRLEN + RASIZE;
+
+  dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + iphdrlen + IGMP_HDRLEN];
   dev->d_len     = 0;
   dev->d_sndlen  = 0;
 

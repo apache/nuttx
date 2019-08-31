@@ -86,6 +86,7 @@
 
 #ifdef CONFIG_NET_IPv4
 #  define IPv4_HDRLEN     20    /* Size of IPv4 header (without options) */
+#  define IPv4_HLMASK     0x0f  /* Isolates headler length in VHL field */
 #endif
 
 #ifdef CONFIG_NET_IPv6

@@ -118,40 +118,6 @@ struct icmp_hdr_s
   uint16_t seqno;            /* "  " "" "   " "      " "  " "     " */
 };
 
-/* The ICMP and IPv4 headers */
-
-struct icmp_iphdr_s
-{
-  /* IPv4 IP header */
-
-  uint8_t  vhl;             /*  8-bit Version (4) and header length (5 or 6) */
-  uint8_t  tos;             /*  8-bit Type of service (e.g., 6=TCP) */
-  uint8_t  len[2];          /* 16-bit Total length */
-  uint8_t  ipid[2];         /* 16-bit Identification */
-  uint8_t  ipoffset[2];     /* 16-bit IP flags + fragment offset */
-  uint8_t  ttl;             /*  8-bit Time to Live */
-  uint8_t  proto;           /*  8-bit Protocol */
-  uint16_t ipchksum;        /* 16-bit Header checksum */
-  uint16_t srcipaddr[2];    /* 32-bit Source IP address */
-  uint16_t destipaddr[2];   /* 32-bit Destination IP address */
-
-  /* ICMP header */
-
-  uint8_t  type;            /* Defines the format of the ICMP message */
-  uint8_t  icode;           /* Further qualifies the ICMP messsage */
-  uint16_t icmpchksum;      /* Checksum of ICMP header and data */
-
-  /* All ICMP packets have an 8-byte header and variable-sized data section.
-   * The first 4 bytes of the header have fixed format, while the last 4 bytes
-   * depend on the type/code of that ICMP packet.
-   */
-
-  /* ICMP_ECHO_REQUEST and ICMP_ECHO_REPLY data */
-
-  uint16_t id;               /* Used to match requests with replies */
-  uint16_t seqno;            /* "  " "" "   " "      " "  " "     " */
-};
-
 /* The structure holding the ICMP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.
  */

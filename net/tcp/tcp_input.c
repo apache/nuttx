@@ -2,7 +2,7 @@
  * net/tcp/tcp_input.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2014, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -61,6 +61,12 @@
 #include "devif/devif.h"
 #include "utils/utils.h"
 #include "tcp/tcp.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Functions
@@ -1037,13 +1043,20 @@ drop:
 #ifdef CONFIG_NET_IPv4
 void tcp_ipv4_input(FAR struct net_driver_s *dev)
 {
+  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  uint16_t iphdrlen;
+
   /* Configure to receive an TCP IPv4 packet */
 
   tcp_ipv4_select(dev);
 
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
   /* Then process in the TCP IPv4 input */
 
-  tcp_input(dev, PF_INET, IPv4_HDRLEN);
+  tcp_input(dev, PF_INET, iphdrlen);
 }
 #endif
 
