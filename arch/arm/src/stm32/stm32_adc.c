@@ -2436,6 +2436,8 @@ static void adc_calibrate(FAR struct stm32_dev_s *priv)
 
   adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_ADON, 0);
 }
+#else
+#  define adc_calibrate(priv)
 #endif
 
 /****************************************************************************
