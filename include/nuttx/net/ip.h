@@ -85,7 +85,7 @@
 /* IP Header sizes */
 
 #ifdef CONFIG_NET_IPv4
-#  define IPv4_HDRLEN     20    /* Size of IPv4 header */
+#  define IPv4_HDRLEN     20    /* Size of IPv4 header (without options) */
 #endif
 
 #ifdef CONFIG_NET_IPv6

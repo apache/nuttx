@@ -344,6 +344,9 @@ int ipv4_input(FAR struct net_driver_s *dev)
   /* Start of IP input header processing code.
    *
    * Check validity of the IP header.
+   * REVISIT:  Does not account for varying IP header length due to the
+   * presences of IPv4 options.  The header length is encoded as a number
+   * 32-bit words in the HL nibble of the VHL.
    */
 
   if (ipv4->vhl != 0x45)
