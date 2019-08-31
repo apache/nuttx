@@ -109,7 +109,7 @@ struct igmp_iphdr_s
 /* IGMPv2 packet structure as defined by RFC 2236.
  *
  * The Max Response Time (maxresp) specifies the time limit for the
- * corresponding report. The field has a resolution of 100 miliseconds, the
+ * corresponding report. The field has a resolution of 100 milliseconds, the
  * value is taken directly. This field is meaningful only in Membership Query
  * (0x11); in other messages it is set to 0 and ignored by the receiver.
  */
