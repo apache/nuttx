@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/local/loal.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,14 +126,28 @@ enum local_state_s
  *    implemented.
  */
 
+struct devif_callback_s;       /* Forward reference */
+
 struct local_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   /* lc_node supports a doubly linked list: Listening SOCK_STREAM servers
    * will be linked into a list of listeners; SOCK_STREAM clients will be
    * linked to the lc_waiters and lc_conn lists.
    */
 
   dq_entry_t lc_node;          /* Supports a doubly linked list */
+
+  /* This is a list of Local connection callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   * REVISIT:  Here for commonality with other connection structures; not
+   * used in the current implementation.
+   */
+
+  FAR struct devif_callback_s *lc_list;
+
+  /* Local-socket specific content follows */
 
   /* Fields common to SOCK_STREAM and SOCK_DGRAM */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp.h
  *
- *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@
 
 #include <stdint.h>
 #include <semaphore.h>
+#include <queue.h>
 #include <errno.h>
 
 #include <netinet/in.h>
@@ -152,7 +153,19 @@ struct arp_send_s
 
 struct arp_conn_s
 {
+  /* Common prologue of all connection structures.
+   * NOTE: The 'node' field is not used by the ARP implementation.
+   */
+
+  dq_entry_t node;                     /* Supports a doubly linked list */
+
+  /* This is a list of ARP callbacks.  Each callback represents a thread
+   * that is stalled, waiting for a device-specific event.
+   */
+
   FAR struct devif_callback_s *list;   /* ARP callbacks */
+
+  /* No ARP-specific content */
 };
 #endif
 

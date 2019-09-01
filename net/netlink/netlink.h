@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netlink/netlink.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,12 +61,20 @@
 
 struct netlink_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;                   /* Supports a doubly linked list */
-  uint8_t    crefs;                  /* Reference counts on this instance */
 
-  /* Defines the list of netlink callbacks */
+  /* This is a list of Netlink connection callbacks.  Each callback
+   * represents a thread that is stalled, waiting for a device-specific
+   * event.
+   */
 
-  FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list; /* Netlink callbacks */
+
+  /* Netlink-specific content follows */
+
+  uint8_t crefs;                     /* Reference counts on this instance */
 };
 
 /****************************************************************************

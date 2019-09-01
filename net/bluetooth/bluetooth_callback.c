@@ -2,7 +2,7 @@
  * net/bluetooth/bluetooth_callback.c
  * Forward events to waiting PF_BLUETOOTH sockets.
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
     {
       /* Perform the callback */
 
-      flags = devif_conn_event(&radio->r_dev, conn, flags, conn->list);
+      flags = devif_conn_event(&radio->r_dev, conn, flags, conn->bc_list);
     }
 
   return flags;
