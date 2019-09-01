@@ -213,6 +213,8 @@ struct socket_conn_s
    */
 
   FAR struct devif_callback_s *list;
+
+  /* Connection-specific content may follow */
 };
 
 /* This is the internal representation of a socket reference by a file
