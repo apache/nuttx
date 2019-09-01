@@ -147,29 +147,6 @@ struct arp_send_s
 #endif
 
 #ifdef CONFIG_NET_ARP_SEND
-/* For symmetry with other protocols, a "connection" structure is
- * provided.  But it is a singleton for the case of ARP packet transfers.
- */
-
-struct arp_conn_s
-{
-  /* Common prologue of all connection structures.
-   * NOTE: The 'node' field is not used by the ARP implementation.
-   */
-
-  dq_entry_t node;                     /* Supports a doubly linked list */
-
-  /* This is a list of ARP callbacks.  Each callback represents a thread
-   * that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *list;   /* ARP callbacks */
-
-  /* No ARP-specific content */
-};
-#endif
-
-#ifdef CONFIG_NET_ARP_SEND
 /* Used to notify a thread waiting for a particular ARP response */
 
 struct arp_notify_s
