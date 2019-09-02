@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/drivers/pwm.h
+ * include/nuttx/timers/pwm.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

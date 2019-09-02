@@ -49,7 +49,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #include "up_arch.h"
 #include "tiva_gpio.h"

@@ -39,7 +39,7 @@
 /* The EFM32 does not have dedicated PWM hardware.  Rather, pulsed output
  * control is a capability of the EFM32 timers.  The logic in this file
  * implements the lower half of the standard, NuttX PWM interface using the
- * EFM32 timers. That interface is described in include/nuttx/drivers/pwm.h.
+ * EFM32 timers. That interface is described in include/nuttx/timers/pwm.h.
  */
 
 /****************************************************************************

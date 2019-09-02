@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/audio/tone.h>
 #include <arch/board/board.h>

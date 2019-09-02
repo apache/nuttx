@@ -47,7 +47,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/xen1210.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
 
 #include <nuttx/irq.h>

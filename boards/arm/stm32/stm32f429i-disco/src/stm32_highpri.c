@@ -46,7 +46,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 
