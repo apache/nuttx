@@ -99,7 +99,7 @@ ports.
 
 2. Lazy Floating Point Register Save.
 
-   An alternative mplementation only saves and restores FPU registers only
+   An alternative implementation only saves and restores FPU registers only
    on context switches.  This means: (1) floating point registers are not
    stored on each context switch and, hence, possibly better interrupt
    performance.  But, (2) since floating point registers are not saved,
