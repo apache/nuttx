@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getgid.c
+ * libs/libc/unistd/lib_getegid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.net>
@@ -47,23 +47,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getgid
+ * Name: getegid
  *
  * Description:
- *   The getgid() function will return the real group ID of the calling
- *   task group.
+ *   The getegid() function will the effective group ID of the calling task
+ *   group.
  *
  * Input Parameters:
  *   None.
  *
  * Returned Value:
- *   The real group ID of the calling task group.
+ *   The effective group ID of the calling task group.
  *
  ****************************************************************************/
 
-gid_t getgid(void)
+gid_t getegid(void)
 {
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* If we have real UID/GID support, then treat the real group as the
+   * effective group ID.
+   */
+
+  return getgid();
+#else
   /* Return group identity 'root' with a gid value of 0. */
 
   return 0;
+#endif
 }

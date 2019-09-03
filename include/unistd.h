@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/unistd.h
  *
- *   Copyright (C) 2007-2009, 2013-2014, 2016-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2013-2014, 2016-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
@@ -374,6 +374,11 @@ int     setuid(uid_t uid);
 uid_t   getuid(void);
 int     setgid(gid_t gid);
 gid_t   getgid(void);
+
+int     seteuid(uid_t uid);
+uid_t   geteuid(void);
+int     setegid(gid_t gid);
+gid_t   getegid(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

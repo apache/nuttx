@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getgid.c
+ * libs/libc/unistd/lib_seteuid.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.net>
+ *   Author: Michael Jung <mijung@gmx.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,23 +47,42 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getgid
+ * Name: seteuid
  *
  * Description:
- *   The getgid() function will return the real group ID of the calling
- *   task group.
+ *   The seteuid() function sets the effective user ID of the calling task
+ *   group to uid.
  *
  * Input Parameters:
- *   None.
+ *   uid - User identity to set the various process' user ID attributes to.
  *
  * Returned Value:
- *   The real group ID of the calling task group.
+ *   Zero if successful and -1 in case of failure, in which case errno is set
+ *   appropriately.
  *
  ****************************************************************************/
 
-gid_t getgid(void)
+int seteuid(uid_t uid)
 {
-  /* Return group identity 'root' with a gid value of 0. */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* If we have real UID/GID support, then treat the effective user ID as
+   * the real user ID.
+   */
 
-  return 0;
+  return setuid(uid);
+#else
+  /* NuttX only supports the user identity 'root' with a uid value of 0. */
+
+  if (uid == 0)
+    {
+      return 0;
+    }
+
+  /* All other uid values are considered invalid and not supported by the
+   * implementation.
+   */
+
+  set_errno(EINVAL);
+  return -1;
+#endif
 }
