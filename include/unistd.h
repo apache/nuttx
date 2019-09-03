@@ -380,6 +380,9 @@ uid_t   geteuid(void);
 int     setegid(gid_t gid);
 gid_t   getegid(void);
 
+int     setreuid(uid_t ruid, uid_t euid);
+int     setregid(gid_t rgid, gid_t egid);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
