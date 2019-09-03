@@ -88,7 +88,18 @@ enum usrsock_conn_state_e
 
 struct usrsock_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;                   /* Supports a doubly linked list */
+
+  /* This is a list of usrsock callbacks.  Each callback represents a thread
+   * that is stalled, waiting for a specific event.
+   */
+
+  FAR struct devif_callback_s *list; /* Usersock callbacks */
+
+  /* usrsock-specific content follows */
+
   uint8_t    crefs;                  /* Reference counts on this instance */
 
   enum usrsock_conn_state_e state;   /* State of kernel<->daemon link for conn */
@@ -115,10 +126,6 @@ struct usrsock_conn_s
       size_t pos;            /* Writer position on input buffer */
     } datain;
   } resp;
-
-  /* Defines the list of usrsock callbacks */
-
-  FAR struct devif_callback_s *list;
 };
 
 struct usrsock_reqstate_s

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,18 @@ struct devif_callback_s;         /* Forward reference */
 
 struct icmp_conn_s
 {
-  dq_entry_t node;               /* Supports a double linked list */
+  /* Common prologue of all connection structures. */
+
+  dq_entry_t node;               /* Supports a doubly linked list */
+
+  /* This is a list of ICMP callbacks.  Each callback represents a thread
+   * that is stalled, waiting for a device-specific event.
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* ICMP-specific content follows */
+
   uint16_t   id;                 /* ICMP ECHO request ID */
   uint8_t    nreqs;              /* Number of requests with no response received */
   uint8_t    crefs;              /* Reference counts on this instance */
@@ -94,10 +105,6 @@ struct icmp_conn_s
 
   struct iob_queue_s readahead;  /* Read-ahead buffering */
 #endif
-
-  /* Defines the list of ICMP callbacks */
-
-  FAR struct devif_callback_s *list;
 };
 #endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,18 @@ struct devif_callback_s;                       /* Forward reference */
 
 struct ieee802154_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;                             /* Supports a double linked list */
+
+  /* This is a list of IEEE 802.15.4 callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* IEEE 802.15.4-specific content follows */
+
   struct ieee802154_saddr_s laddr;             /* Locally bound / source address */
   struct ieee802154_saddr_s raddr;             /* Connected remote address */
   uint8_t crefs;                               /* Reference counts on this instance */
@@ -122,12 +133,6 @@ struct ieee802154_conn_s
 
   FAR struct ieee802154_container_s *rxhead;
   FAR struct ieee802154_container_s *rxtail;
-
-  /* This is a list of IEEE 802.15.4 callbacks.  Each callback represents
-   * a thread that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *list;
 };
 
 /****************************************************************************

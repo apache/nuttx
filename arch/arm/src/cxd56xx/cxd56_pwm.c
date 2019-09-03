@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #include <sys/types.h>
 #include <stdint.h>

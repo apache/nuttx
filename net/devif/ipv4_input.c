@@ -2,7 +2,7 @@
  * net/devif/ipv4_input.c
  * Device driver IPv4 packet receipt interface
  *
- *   Copyright (C) 2007-2009, 2013-2015, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2013-2015, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -332,8 +332,8 @@ int ipv4_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4 = BUF;
   in_addr_t destipaddr;
-  uint16_t hdrlen;
-  uint16_t iplen;
+  uint16_t llhdrlen;
+  uint16_t totlen;
 
   /* This is where the input processing starts. */
 
@@ -344,9 +344,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
   /* Start of IP input header processing code.
    *
    * Check validity of the IP header.
+   * REVISIT:  Does not account for varying IP header length due to the
+   * presences of IPv4 options.  The header length is encoded as a number
+   * 32-bit words in the HL nibble of the VHL.
    */
 
-  if (ipv4->vhl != 0x45)
+  if ((ipv4->vhl & IP_VERSION_MASK) != 0x40 ||
+      (ipv4->vhl & IPv4_HLMASK) < 5)
     {
       /* IP version and header length. */
 
@@ -361,26 +365,26 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
-  hdrlen = NET_LL_HDRLEN(dev);
-  if ((hdrlen + IPv4_HDRLEN) > dev->d_len)
+  llhdrlen = NET_LL_HDRLEN(dev);
+  if ((llhdrlen + IPv4_HDRLEN) > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv4 header\n");
       goto drop;
     }
 
-  dev->d_len -= hdrlen;
+  dev->d_len -= llhdrlen;
 
-  /* Check the size of the packet. If the size reported to us in d_len is
+  /* Check the size of the packet.  If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet
-   * has been corrupted in transit. If the size of d_len is larger than the
+   * has been corrupted in transit.  If the size of d_len is larger than the
    * size reported in the IP packet header, the packet has been padded and
    * we set d_len to the correct value.
    */
 
-  iplen = (ipv4->len[0] << 8) + ipv4->len[1];
-  if (iplen <= dev->d_len)
+  totlen = (ipv4->len[0] << 8) + ipv4->len[1];
+  if (totlen <= dev->d_len)
     {
-      dev->d_len = iplen;
+      dev->d_len = totlen;
     }
   else
     {

@@ -1,8 +1,8 @@
 ############################################################################
-# drivers/pwm/Make.defs
+# boards/arm/lpc17xx_40xx/lx_cpu/src/Makefile
 #
-#   Copyright (C) 2017 Pinecone Inc. All rights reserved.
-#   Author: Xiang Xiao <xiaoxiang@pinecone.net>
+#   Copyright (C) 2013, 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,15 +33,41 @@
 #
 ############################################################################
 
-# Don't build anything if there is no PWM support
+-include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_PWM),y)
+ASRCS =
+CSRCS = lpc17_40_boardinitialize.c lpc17_40_bringup.c lpc17_40_ssp.c
 
-CSRCS += pwm.c
-
-# Include PWM device driver build support
-
-DEPPATH += --dep-path pwm
-VPATH += :pwm
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)pwm}
+ifeq ($(CONFIG_LPC17_40_EMC),y)
+ifeq ($(CONFIG_LPC17_40_EXTDRAM),y)
+  CSRCS += lpc17_40_sdraminitialize.c
 endif
+
+  CSRCS += lpc17_40_fpgainitialize.c
+endif
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+  CSRCS += lpc17_40_appinit.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+  CSRCS += lpc17_40_composite.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+  CSRCS += lpc17_40_autoleds.c
+else
+  CSRCS += lpc17_40_userleds.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+  CSRCS += lpc17_40_reset.c
+endif
+
+ifeq ($(CONFIG_CAN),y)
+CSRCS += lpc17_40_can.c
+endif
+
+CSRCS += lpc17_40_ulan.c
+
+include $(TOPDIR)/boards/Board.mk

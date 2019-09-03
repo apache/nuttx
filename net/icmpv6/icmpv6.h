@@ -78,7 +78,18 @@ struct devif_callback_s; /* Forward reference */
 
 struct icmpv6_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;     /* Supports a double linked list */
+
+  /* This is a list of ICMPV6 callbacks.  Each callback represents a thread
+   * that is stalled, waiting for a device-specific event.
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* ICMPv6-specific content follows */
+
   uint16_t   id;       /* ICMPv6 ECHO request ID */
   uint8_t    nreqs;    /* Number of requests with no response received */
   uint8_t    crefs;    /* Reference counts on this instance */
@@ -95,10 +106,6 @@ struct icmpv6_conn_s
 
   struct iob_queue_s readahead;  /* Read-ahead buffering */
 #endif
-
-  /* Defines the list of ICMPV6 callbacks */
-
-  FAR struct devif_callback_s *list;
 };
 #endif
 

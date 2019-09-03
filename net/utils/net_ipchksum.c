@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_ipchksum.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017-2018 Gregory Nutt.  All
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017-2019 Gregory Nutt.  All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -55,8 +55,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF   ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF   ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF  ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Functions
@@ -84,14 +84,19 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 {
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   uint16_t upperlen;
+  uint16_t iphdrlen;
   uint16_t sum;
+
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
 
   /* The length reported in the IPv4 header is the length of both the IPv4
    * header and the payload that follows the header.  We need to subtract
    * the size of the IPv4 header to get the size of the payload.
    */
 
-  upperlen = (((uint16_t)(ipv4->len[0]) << 8) + ipv4->len[1]) - IPv4_HDRLEN;
+  upperlen = (((uint16_t)(ipv4->len[0]) << 8) + ipv4->len[1]) - iphdrlen;
 
   /* Verify some minimal assumptions */
 
@@ -113,7 +118,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum IP payload data. */
 
-  sum = chksum(sum, &dev->d_buf[IPv4_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
+  sum = chksum(sum, &dev->d_buf[iphdrlen + NET_LL_HDRLEN(dev)], upperlen);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
@@ -205,9 +210,15 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NET_ARCH_CHKSUM)
 uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
 {
+  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  uint16_t iphdrlen;
   uint16_t sum;
 
-  sum = chksum(0, &dev->d_buf[NET_LL_HDRLEN(dev)], IPv4_HDRLEN);
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
+  sum = chksum(0, &dev->d_buf[NET_LL_HDRLEN(dev)], iphdrlen);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */

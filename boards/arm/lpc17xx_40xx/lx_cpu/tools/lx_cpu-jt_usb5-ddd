@@ -1,0 +1,22 @@
+#!/bin/sh
+
+SCRIP_DIR="$(dirname "$(readlink -f "$0")")"
+
+nc -w 3 -z localhost 4444
+if [ $? -ne 0 ]
+then
+  echo "Starting OpenOCD"
+  openocd -f "$SCRIP_DIR/lx_cpu-lpc4088.cfg" &
+  OPENOCD_PID=$!
+  nc -w 10 -z localhost 4444
+  if [ $? -ne 0 ]
+  then
+    echo "OpenOCD start failed"
+  fi
+fi
+
+sleep 10
+
+ddd --debugger arm-elf-gdb -x "$SCRIP_DIR/gdb-openocd.init" "$1"
+
+kill $OPENOCD_PID

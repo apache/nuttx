@@ -34,22 +34,32 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
 unset LIBLIST
 unset TGZ
+unset APPDIR
+
 USRONLY=n
 WINTOOL=n
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
 	case $1 in
+		-a )
+			shift
+			APPDIR="$1"
+			;;
 		-d )
 			set -x
 			;;
 		-l )
 			shift
 			LIBLIST=$1
+			;;
+		-m )
+			shift
+			MAKE="$1"
 			;;
 		-wy )
 			WINTOOL=y
@@ -240,7 +250,7 @@ echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/build/Make.defs"
 
 # Additional compilation options when the kernel is built
 
-if [ "X${USRONLY}" != "Xy" ] then
+if [ "X${USRONLY}" != "Xy" ]; then
 	echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/build/Make.defs"
@@ -398,6 +408,11 @@ done
 
 cd "${TOPDIR}" || \
 	{ echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
+
+if [ -e "${APPDIR}/Makefile" ]; then
+	"${MAKE}" -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
+			{ echo "MK: call make export for APPDIR not supported"; }
+fi
 
 if [ "X${TGZ}" = "Xy" ]; then
 	tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1

@@ -48,7 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"

@@ -106,7 +106,18 @@ struct udp_hdr_s;         /* Forward reference */
 
 struct udp_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;        /* Supports a doubly linked list */
+
+  /* This is a list of UDP connection callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* UDP-specific content follows */
+
   union ip_binding_u u;   /* IP address binding */
   uint16_t lport;         /* Bound local port number (network byte order) */
   uint16_t rport;         /* Remote port number (network byte order) */
@@ -140,10 +151,6 @@ struct udp_conn_s
   sq_queue_t write_q;             /* Write buffering for UDP packets */
   FAR struct net_driver_s *dev;   /* Last device */
 #endif
-
-  /* Defines the list of UDP callbacks */
-
-  FAR struct devif_callback_s *list;
 };
 
 /* This structure supports UDP write buffering.  It is simply a container

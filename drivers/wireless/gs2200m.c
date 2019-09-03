@@ -2427,6 +2427,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
   FAR struct sockaddr_in *inaddr;
   struct in_addr in[3];
   char addr[3][17];
+  bool getreq = false;
   int ret = OK;
 
   wlinfo("+++ start: cmd=%x \n", msg->cmd);
@@ -2435,6 +2436,12 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
 
   switch (msg->cmd)
     {
+      case SIOCGIFHWADDR:
+        getreq = true;
+        memcpy(&msg->ifr.ifr_hwaddr.sa_data,
+               dev->net_dev.d_mac.ether.ether_addr_octet, 6);
+        break;
+
       case SIOCSIFADDR:
         memcpy(&dev->net_dev.d_ipaddr,
                &inaddr->sin_addr, sizeof(inaddr->sin_addr)
@@ -2458,7 +2465,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
         break;
     }
 
-  if (OK == ret)
+  if (false == getreq && OK == ret)
     {
       memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
       memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));

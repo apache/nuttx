@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/inet/inet_close.c
  *
- *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,10 +127,13 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
       if (pstate != NULL)
         {
-          /* Wake up the waiting thread with a successful result */
+          if (conn->tcpstateflags == TCP_CLOSED)
+            {
+              /* Wake up the waiting thread with a successful result */
 
-          pstate->cl_result = OK;
-          goto end_wait;
+              pstate->cl_result = OK;
+              goto end_wait;
+            }
         }
 
       /* Otherwise, nothing is waiting on the close event and we can perform
@@ -566,7 +569,8 @@ int inet_close(FAR struct socket *psock)
               tcp_close_monitor(psock);
             }
 #else
-        nwarn("WARNING: SOCK_STREAM support is not available in this configuration\n");
+        nwarn("WARNING: SOCK_STREAM support is not available in this "
+              "configuration\n");
         return -EAFNOSUPPORT;
 #endif /* NET_TCP_HAVE_STACK */
         }
@@ -606,7 +610,8 @@ int inet_close(FAR struct socket *psock)
               conn->crefs--;
             }
 #else
-          nwarn("WARNING: SOCK_DGRAM support is not available in this configuration\n");
+          nwarn("WARNING: SOCK_DGRAM support is not available in this "
+                "configuration\n");
           return -EAFNOSUPPORT;
 #endif /* NET_UDP_HAVE_STACK */
         }

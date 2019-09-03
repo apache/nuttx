@@ -1831,6 +1831,8 @@ nuttx/
  |   |   |   |   `- README.txt
  |   |   |   |- lpcxpresso-lpc1768/
  |   |   |   |   `- README.txt
+ |   |   |   |- lx_cpu/
+ |   |   |   |   `- README.txt
  |   |   |   |- mbed/
  |   |   |   |   `- README.txt
  |   |   |   |- mcb1700/

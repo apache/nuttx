@@ -45,7 +45,7 @@
 
 #include <fixedmath.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_AUDIO_TONE

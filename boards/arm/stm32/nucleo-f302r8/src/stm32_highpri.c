@@ -50,7 +50,7 @@
 #include <arch/irq.h>
 #include <arch/armv7-m/nvicpri.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 

@@ -88,7 +88,7 @@ else
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c 
+CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
 CHIP_CSRCS += tiva_ssi.c
 
 ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)

@@ -45,6 +45,12 @@
 
 #include "chip.h"
 
+/****************************************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************************************/
+
+/* Configuration ************************************************************************************/
+
 /* This is implementation for STM32 ADC IPv1 modified for L1 */
 
 #define HAVE_IP_ADC_V1
@@ -66,19 +72,17 @@
 #  define HAVE_ADC_POWERDOWN
 #endif
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/* Base addresses ***********************************************************************************/
 
 #define STM32_ADC1_OFFSET            0x0000
 #define STM32_ADC2_OFFSET            0x0100
 #define STM32_ADC3_OFFSET            0x0200
 #define STM32_ADC_CMN_OFFSET         0x0300
 
-#define STM32_ADC1_BASE              (STM32_ADC1_OFFSET+STM32_ADC_BASE) /* ADC1 ADC */
-#define STM32_ADC2_BASE              (STM32_ADC2_OFFSET+STM32_ADC_BASE) /* ADC2 ADC */
-#define STM32_ADC3_BASE              (STM32_ADC3_OFFSET+STM32_ADC_BASE) /* ADC3 ADC */
-#define STM32_ADCCMN_BASE            (STM32_ADC_CMN_OFFSET+STM32_ADC_BASE) /* ADC1, ADC2, ADC3 common */
+#define STM32_ADC1_BASE              (STM32_ADC1_OFFSET + STM32_ADC_BASE) /* ADC1 ADC */
+#define STM32_ADC2_BASE              (STM32_ADC2_OFFSET + STM32_ADC_BASE) /* ADC2 ADC */
+#define STM32_ADC3_BASE              (STM32_ADC3_OFFSET + STM32_ADC_BASE) /* ADC3 ADC */
+#define STM32_ADCCMN_BASE            (STM32_ADC_CMN_OFFSET + STM32_ADC_BASE) /* ADC1, ADC2, ADC3 common */
 
 /* Register Offsets *********************************************************************************/
 
@@ -113,80 +117,80 @@
 /* Register Addresses *******************************************************************************/
 
 #if STM32_NADC > 0
-#  define STM32_ADC1_SR              (STM32_ADC1_BASE+STM32_ADC_SR_OFFSET)
-#  define STM32_ADC1_CR1             (STM32_ADC1_BASE+STM32_ADC_CR1_OFFSET)
-#  define STM32_ADC1_CR2             (STM32_ADC1_BASE+STM32_ADC_CR2_OFFSET)
-#  define STM32_ADC1_SMPR1           (STM32_ADC1_BASE+STM32_ADC_SMPR1_OFFSET)
-#  define STM32_ADC1_SMPR2           (STM32_ADC1_BASE+STM32_ADC_SMPR2_OFFSET)
-#  define STM32_ADC1_SMPR3           (STM32_ADC1_BASE+STM32_ADC_SMPR3_OFFSET)
-#  define STM32_ADC1_JOFR1           (STM32_ADC1_BASE+STM32_ADC_JOFR1_OFFSET)
-#  define STM32_ADC1_JOFR2           (STM32_ADC1_BASE+STM32_ADC_JOFR2_OFFSET)
-#  define STM32_ADC1_JOFR3           (STM32_ADC1_BASE+STM32_ADC_JOFR3_OFFSET)
-#  define STM32_ADC1_JOFR4           (STM32_ADC1_BASE+STM32_ADC_JOFR4_OFFSET)
-#  define STM32_ADC1_HTR             (STM32_ADC1_BASE+STM32_ADC_HTR_OFFSET)
-#  define STM32_ADC1_LTR             (STM32_ADC1_BASE+STM32_ADC_LTR_OFFSET)
-#  define STM32_ADC1_SQR1            (STM32_ADC1_BASE+STM32_ADC_SQR1_OFFSET)
-#  define STM32_ADC1_SQR2            (STM32_ADC1_BASE+STM32_ADC_SQR2_OFFSET)
-#  define STM32_ADC1_SQR3            (STM32_ADC1_BASE+STM32_ADC_SQR3_OFFSET)
-#  define STM32_ADC1_SQR4            (STM32_ADC1_BASE+STM32_ADC_SQR4_OFFSET)
-#  define STM32_ADC1_SQR5            (STM32_ADC1_BASE+STM32_ADC_SQR5_OFFSET)
-#  define STM32_ADC1_JSQR            (STM32_ADC1_BASE+STM32_ADC_JSQR_OFFSET)
-#  define STM32_ADC1_JDR1            (STM32_ADC1_BASE+STM32_ADC_JDR1_OFFSET)
-#  define STM32_ADC1_JDR2            (STM32_ADC1_BASE+STM32_ADC_JDR2_OFFSET)
-#  define STM32_ADC1_JDR3            (STM32_ADC1_BASE+STM32_ADC_JDR3_OFFSET)
-#  define STM32_ADC1_JDR4            (STM32_ADC1_BASE+STM32_ADC_JDR4_OFFSET)
-#  define STM32_ADC1_DR              (STM32_ADC1_BASE+STM32_ADC_DR_OFFSET)
-#  define STM32_ADC1_SMPR0           (STM32_ADC1_BASE+STM32_ADC_SMPR0_OFFSET)
+#  define STM32_ADC1_SR              (STM32_ADC1_BASE + STM32_ADC_SR_OFFSET)
+#  define STM32_ADC1_CR1             (STM32_ADC1_BASE + STM32_ADC_CR1_OFFSET)
+#  define STM32_ADC1_CR2             (STM32_ADC1_BASE + STM32_ADC_CR2_OFFSET)
+#  define STM32_ADC1_SMPR1           (STM32_ADC1_BASE + STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC1_SMPR2           (STM32_ADC1_BASE + STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC1_SMPR3           (STM32_ADC1_BASE + STM32_ADC_SMPR3_OFFSET)
+#  define STM32_ADC1_JOFR1           (STM32_ADC1_BASE + STM32_ADC_JOFR1_OFFSET)
+#  define STM32_ADC1_JOFR2           (STM32_ADC1_BASE + STM32_ADC_JOFR2_OFFSET)
+#  define STM32_ADC1_JOFR3           (STM32_ADC1_BASE + STM32_ADC_JOFR3_OFFSET)
+#  define STM32_ADC1_JOFR4           (STM32_ADC1_BASE + STM32_ADC_JOFR4_OFFSET)
+#  define STM32_ADC1_HTR             (STM32_ADC1_BASE + STM32_ADC_HTR_OFFSET)
+#  define STM32_ADC1_LTR             (STM32_ADC1_BASE + STM32_ADC_LTR_OFFSET)
+#  define STM32_ADC1_SQR1            (STM32_ADC1_BASE + STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC1_SQR2            (STM32_ADC1_BASE + STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC1_SQR3            (STM32_ADC1_BASE + STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC1_SQR4            (STM32_ADC1_BASE + STM32_ADC_SQR4_OFFSET)
+#  define STM32_ADC1_SQR5            (STM32_ADC1_BASE + STM32_ADC_SQR5_OFFSET)
+#  define STM32_ADC1_JSQR            (STM32_ADC1_BASE + STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC1_JDR1            (STM32_ADC1_BASE + STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC1_JDR2            (STM32_ADC1_BASE + STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC1_JDR3            (STM32_ADC1_BASE + STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC1_JDR4            (STM32_ADC1_BASE + STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC1_DR              (STM32_ADC1_BASE + STM32_ADC_DR_OFFSET)
+#  define STM32_ADC1_SMPR0           (STM32_ADC1_BASE + STM32_ADC_SMPR0_OFFSET)
 #endif
 
 #if STM32_NADC > 1
-#  define STM32_ADC2_SR              (STM32_ADC2_BASE+STM32_ADC_SR_OFFSET)
-#  define STM32_ADC2_CR1             (STM32_ADC2_BASE+STM32_ADC_CR1_OFFSET)
-#  define STM32_ADC2_CR2             (STM32_ADC2_BASE+STM32_ADC_CR2_OFFSET)
-#  define STM32_ADC2_SMPR1           (STM32_ADC2_BASE+STM32_ADC_SMPR1_OFFSET)
-#  define STM32_ADC2_SMPR2           (STM32_ADC2_BASE+STM32_ADC_SMPR2_OFFSET)
-#  define STM32_ADC2_JOFR1           (STM32_ADC2_BASE+STM32_ADC_JOFR1_OFFSET)
-#  define STM32_ADC2_JOFR2           (STM32_ADC2_BASE+STM32_ADC_JOFR2_OFFSET)
-#  define STM32_ADC2_JOFR3           (STM32_ADC2_BASE+STM32_ADC_JOFR3_OFFSET)
-#  define STM32_ADC2_JOFR4           (STM32_ADC2_BASE+STM32_ADC_JOFR4_OFFSET)
-#  define STM32_ADC2_HTR             (STM32_ADC2_BASE+STM32_ADC_HTR_OFFSET)
-#  define STM32_ADC2_LTR             (STM32_ADC2_BASE+STM32_ADC_LTR_OFFSET)
-#  define STM32_ADC2_SQR1            (STM32_ADC2_BASE+STM32_ADC_SQR1_OFFSET)
-#  define STM32_ADC2_SQR2            (STM32_ADC2_BASE+STM32_ADC_SQR2_OFFSET)
-#  define STM32_ADC2_SQR3            (STM32_ADC2_BASE+STM32_ADC_SQR3_OFFSET)
-#  define STM32_ADC2_JSQR            (STM32_ADC2_BASE+STM32_ADC_JSQR_OFFSET)
-#  define STM32_ADC2_JDR1            (STM32_ADC2_BASE+STM32_ADC_JDR1_OFFSET)
-#  define STM32_ADC2_JDR2            (STM32_ADC2_BASE+STM32_ADC_JDR2_OFFSET)
-#  define STM32_ADC2_JDR3            (STM32_ADC2_BASE+STM32_ADC_JDR3_OFFSET)
-#  define STM32_ADC2_JDR4            (STM32_ADC2_BASE+STM32_ADC_JDR4_OFFSET)
-#  define STM32_ADC2_DR              (STM32_ADC2_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC2_SR              (STM32_ADC2_BASE + STM32_ADC_SR_OFFSET)
+#  define STM32_ADC2_CR1             (STM32_ADC2_BASE + STM32_ADC_CR1_OFFSET)
+#  define STM32_ADC2_CR2             (STM32_ADC2_BASE + STM32_ADC_CR2_OFFSET)
+#  define STM32_ADC2_SMPR1           (STM32_ADC2_BASE + STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC2_SMPR2           (STM32_ADC2_BASE + STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC2_JOFR1           (STM32_ADC2_BASE + STM32_ADC_JOFR1_OFFSET)
+#  define STM32_ADC2_JOFR2           (STM32_ADC2_BASE + STM32_ADC_JOFR2_OFFSET)
+#  define STM32_ADC2_JOFR3           (STM32_ADC2_BASE + STM32_ADC_JOFR3_OFFSET)
+#  define STM32_ADC2_JOFR4           (STM32_ADC2_BASE + STM32_ADC_JOFR4_OFFSET)
+#  define STM32_ADC2_HTR             (STM32_ADC2_BASE + STM32_ADC_HTR_OFFSET)
+#  define STM32_ADC2_LTR             (STM32_ADC2_BASE + STM32_ADC_LTR_OFFSET)
+#  define STM32_ADC2_SQR1            (STM32_ADC2_BASE + STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC2_SQR2            (STM32_ADC2_BASE + STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC2_SQR3            (STM32_ADC2_BASE + STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC2_JSQR            (STM32_ADC2_BASE + STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC2_JDR1            (STM32_ADC2_BASE + STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC2_JDR2            (STM32_ADC2_BASE + STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC2_JDR3            (STM32_ADC2_BASE + STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC2_JDR4            (STM32_ADC2_BASE + STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC2_DR              (STM32_ADC2_BASE + STM32_ADC_DR_OFFSET)
 #endif
 
 #if STM32_NADC > 2
-#  define STM32_ADC3_SR              (STM32_ADC3_BASE+STM32_ADC_SR_OFFSET)
-#  define STM32_ADC3_CR1             (STM32_ADC3_BASE+STM32_ADC_CR1_OFFSET)
-#  define STM32_ADC3_CR2             (STM32_ADC3_BASE+STM32_ADC_CR2_OFFSET)
-#  define STM32_ADC3_SMPR1           (STM32_ADC3_BASE+STM32_ADC_SMPR1_OFFSET)
-#  define STM32_ADC3_SMPR2           (STM32_ADC3_BASE+STM32_ADC_SMPR2_OFFSET)
-#  define STM32_ADC3_JOFR1           (STM32_ADC3_BASE+STM32_ADC_JOFR1_OFFSET)
-#  define STM32_ADC3_JOFR2           (STM32_ADC3_BASE+STM32_ADC_JOFR2_OFFSET)
-#  define STM32_ADC3_JOFR3           (STM32_ADC3_BASE+STM32_ADC_JOFR3_OFFSET)
-#  define STM32_ADC3_JOFR4           (STM32_ADC3_BASE+STM32_ADC_JOFR4_OFFSET)
-#  define STM32_ADC3_HTR             (STM32_ADC3_BASE+STM32_ADC_HTR_OFFSET)
-#  define STM32_ADC3_LTR             (STM32_ADC3_BASE+STM32_ADC_LTR_OFFSET)
-#  define STM32_ADC3_SQR1            (STM32_ADC3_BASE+STM32_ADC_SQR1_OFFSET)
-#  define STM32_ADC3_SQR2            (STM32_ADC3_BASE+STM32_ADC_SQR2_OFFSET)
-#  define STM32_ADC3_SQR3            (STM32_ADC3_BASE+STM32_ADC_SQR3_OFFSET)
-#  define STM32_ADC3_JSQR            (STM32_ADC3_BASE+STM32_ADC_JSQR_OFFSET)
-#  define STM32_ADC3_JDR1            (STM32_ADC3_BASE+STM32_ADC_JDR1_OFFSET)
-#  define STM32_ADC3_JDR2            (STM32_ADC3_BASE+STM32_ADC_JDR2_OFFSET)
-#  define STM32_ADC3_JDR3            (STM32_ADC3_BASE+STM32_ADC_JDR3_OFFSET)
-#  define STM32_ADC3_JDR4            (STM32_ADC3_BASE+STM32_ADC_JDR4_OFFSET)
-#  define STM32_ADC3_DR              (STM32_ADC3_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC3_SR              (STM32_ADC3_BASE + STM32_ADC_SR_OFFSET)
+#  define STM32_ADC3_CR1             (STM32_ADC3_BASE + STM32_ADC_CR1_OFFSET)
+#  define STM32_ADC3_CR2             (STM32_ADC3_BASE + STM32_ADC_CR2_OFFSET)
+#  define STM32_ADC3_SMPR1           (STM32_ADC3_BASE + STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC3_SMPR2           (STM32_ADC3_BASE + STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC3_JOFR1           (STM32_ADC3_BASE + STM32_ADC_JOFR1_OFFSET)
+#  define STM32_ADC3_JOFR2           (STM32_ADC3_BASE + STM32_ADC_JOFR2_OFFSET)
+#  define STM32_ADC3_JOFR3           (STM32_ADC3_BASE + STM32_ADC_JOFR3_OFFSET)
+#  define STM32_ADC3_JOFR4           (STM32_ADC3_BASE + STM32_ADC_JOFR4_OFFSET)
+#  define STM32_ADC3_HTR             (STM32_ADC3_BASE + STM32_ADC_HTR_OFFSET)
+#  define STM32_ADC3_LTR             (STM32_ADC3_BASE + STM32_ADC_LTR_OFFSET)
+#  define STM32_ADC3_SQR1            (STM32_ADC3_BASE + STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC3_SQR2            (STM32_ADC3_BASE + STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC3_SQR3            (STM32_ADC3_BASE + STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC3_JSQR            (STM32_ADC3_BASE + STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC3_JDR1            (STM32_ADC3_BASE + STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC3_JDR2            (STM32_ADC3_BASE + STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC3_JDR3            (STM32_ADC3_BASE + STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC3_JDR4            (STM32_ADC3_BASE + STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC3_DR              (STM32_ADC3_BASE + STM32_ADC_DR_OFFSET)
 #endif
 
-#define STM32_ADC_CSR                (STM32_ADCCMN_BASE+STM32_ADC_CSR_OFFSET)
-#define STM32_ADC_CCR                (STM32_ADCCMN_BASE+STM32_ADC_CCR_OFFSET)
+#define STM32_ADC_CSR                (STM32_ADCCMN_BASE + STM32_ADC_CSR_OFFSET)
+#define STM32_ADC_CCR                (STM32_ADCCMN_BASE + STM32_ADC_CCR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 
@@ -239,7 +243,7 @@
 #define ADC_CR2_ADON                 (1 << 0)  /* Bit 0: A/D Converter ON / OFF */
 #define ADC_CR2_CONT                 (1 << 1)  /* Bit 1: Continuous Conversion */
 #define ADC_CR2_CFG                  (1 << 2)  /* Bit 2 : ADC configuration. This bit must be modified only when no
-                                                * conversion is on going.  This bit is available in high and medium+
+                                                * conversion is on going.  This bit is available in high and medium +
                                                 * density devices only.
                                                 */
 #define ADC_CR2_DELS_SHIFT           (4)       /* Bits 2-0: Delay selection */

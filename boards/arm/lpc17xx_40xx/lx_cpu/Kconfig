@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_LX_CPU
+
+choice
+	prompt "LX_CPU ode and boot memory selection"
+	default LX_CPU_BOOT_APP
+	depends on ARCH_BOARD_LX_CPU
+	---help---
+		Select where NuttX code/text is stored and how it is started.
+		Select "Code in internal FLASH - no loader used" (LX_CPU_BOOT_FLASH_BOOT)
+		if the code should be placed directly in start of the internal
+		FLASH memory and start directly after MCU reset. If there is
+		bool loader then NuttX can be placed into internal FLASH after
+		the loader - "Code in internal FLASH - loader used" (LX_CPU_BOOT_FLASH_APP)
+		or it can be loaded into extarnal SDRAM and start from there.
+
+config LX_CPU_BOOT_FLASH_APP
+	bool "Code in internal FLASH - loader used"
+
+config LX_CPU_BOOT_FLASH_BOOT
+	bool "Code in internal FLASH - no loader used"
+
+config LX_CPU_BOOT_SDRAM
+	bool "Code in external SDRAM"
+
+endchoice # LX_CPU ode and boot memory selection
+
+endif

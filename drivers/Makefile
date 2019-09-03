@@ -68,7 +68,6 @@ include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
 include pipes$(DELIM)Make.defs
 include power$(DELIM)Make.defs
-include pwm$(DELIM)Make.defs
 include sensors$(DELIM)Make.defs
 include serial$(DELIM)Make.defs
 include spi$(DELIM)Make.defs

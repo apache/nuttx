@@ -50,7 +50,8 @@
  * Name: getgid
  *
  * Description:
- *   The getgid() function will the real group ID of the calling task group.
+ *   The getgid() function will return the real group ID of the calling
+ *   task group.
  *
  * Input Parameters:
  *   None.

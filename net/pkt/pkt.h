@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/pkt/pkt.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,15 +68,22 @@ struct devif_callback_s; /* Forward reference */
 
 struct pkt_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;     /* Supports a double linked list */
+
+  /* This is a list of Pkt connection callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   */
+
+  struct devif_callback_s *list;
+
+  /* Pkt socket-specific content follows */
+
   uint8_t    lmac[6];  /* The local Ethernet address in network byte order */
   uint8_t    ifindex;
   uint16_t   proto;
   uint8_t    crefs;    /* Reference counts on this instance */
-
-  /* Defines the list of packet callbacks */
-
-  struct devif_callback_s *list;
 };
 
 /****************************************************************************

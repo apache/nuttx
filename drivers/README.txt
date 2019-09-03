@@ -132,7 +132,7 @@ power/
 pwm/
   Provides the "upper half" of a pulse width modulation (PWM) driver.
   The "lower half" of the PWM driver is provided by device-specific
-  logic.  See include/nuttx/drivers/pwm.h for usage information.
+  logic.  See include/nuttx/timers/pwm.h for usage information.
 
 sensors/
   Drivers for various sensors.  A sensor driver differs little from

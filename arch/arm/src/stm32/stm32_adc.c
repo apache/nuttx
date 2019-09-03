@@ -2405,13 +2405,39 @@ static void adc_calibrate(FAR struct stm32_dev_s *priv)
   UNUSED(priv);
 #endif
 }
-#else
+#elif defined(HAVE_IP_ADC_V1) && defined(HAVE_BASIC_ADC)
 static void adc_calibrate(FAR struct stm32_dev_s *priv)
 {
-  /* TODO: adc_calibrate for ADC IPv1*/
+  /* Power on the ADC */
 
-  UNUSED(priv);
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_ADON);
+
+  /* Wait for the ADC power on at least 2 ADCCLK cycles */
+
+  up_udelay(10);
+
+  /* Reset calibration registers */
+
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_RSTCAL);
+
+  /* Wait for the calibration register reset to complete */
+
+  while ((adc_getreg(priv, STM32_ADC_CR2_OFFSET) & ADC_CR2_RSTCAL) != 0);
+
+  /* Start ADC auto-calibration procedure  */
+
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_CAL);
+
+  /* Wait for the calibration procedure to complete */
+
+  while ((adc_getreg(priv, STM32_ADC_CR2_OFFSET) & ADC_CR2_CAL) != 0);
+
+  /* Power off the ADC */
+
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_ADON, 0);
 }
+#else
+#  define adc_calibrate(priv)
 #endif
 
 /****************************************************************************

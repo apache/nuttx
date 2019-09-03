@@ -294,7 +294,7 @@
 #define _ANIOCVALID(c)    (_IOC_TYPE(c)==_ANIOCBASE)
 #define _ANIOC(nr)        _IOC(_ANIOCBASE,nr)
 
-/* NuttX PWM ioctl definitions (see nuttx/drivers/pwm.h) ********************/
+/* NuttX PWM ioctl definitions (see nuttx/timers/pwm.h) *********************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)
