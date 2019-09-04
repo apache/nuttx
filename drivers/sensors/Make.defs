@@ -121,6 +121,9 @@ ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += bmp280.c
 endif
 
+ifeq ($(CONFIG_SENSORS_ISL29023),y)
+  CSRCS += isl29023.c
+endif
 
 ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c

@@ -145,6 +145,21 @@ config HCSR04_NPOLLWAITERS
 
 endif # SENSORS_HCSR04
 
+config SENSORS_ISL29023
+	bool "Renesas ISL29023 ALS sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Renesas ISL29023 ambient light sensor.
+
+if SENSORS_ISL29023
+
+config ISL29023_I2C_FREQUENCY
+	int "ISL29023 I2C frequency"
+	default 400000
+
+endif # SENSORS_ISL29023
+
 config SENSORS_HTS221
 	bool "STMicro HTS221 humidity sensor"
 	default n
