@@ -41,10 +41,10 @@ Status
   * The following subsystem have header files, drivers and have been
     exercised: PWR, RCC, GPIO, SYSCFG, LCD, USART.
 
-  * The following subsystenms have header files and ported drivers, but are
+  * The following subsystems have header files and ported drivers, but are
     untested:  DMA
 
-  * The following subystems have counterparts with other STM32 parts, but
+  * The following subsystems have counterparts with other STM32 parts, but
     have not been ported or verified:  ADC, DAC, TIM2-15, TIM9-11, RTC,
     IWDG, WWDG, I2C, SPI, DBG.  These may be close to functional depending
     upon how close the IP is on the STM32L15X.
@@ -57,7 +57,7 @@ Status
   * The STM32L15X does support USB, however, USB is not available on the
     STM32L-Discovery board.
 
-  * These subystems are available on other STM32L15x/16x parts, but not on
+  * These subsystems are available on other STM32L15x/16x parts, but not on
     the part used in the STM32L-Discovery board: CRC, AES, FSMC, SDIO
 
 GPIO Pin Usage

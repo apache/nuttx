@@ -72,12 +72,12 @@
  *
  * Both of these alignment limitations could be reduced by using multiple
  * regions to map the FLASH/SDRAM range or perhaps with some clever use of
- * subregions or with mutliple MPU regions per memory region.
+ * subregions or with multiple MPU regions per memory region.
  *
  * NOTE: The MPU is used in a mode where mappings are not required for
  * kernel addresses and, hence, there are not alignment issues for those
  * case.  Only the user address spaces suffer from alignment requirements.
- * However, in order to exploit this fact, we would staill need to change
+ * However, in order to exploit this fact, we would still need to change
  * the ordering of memory regions in SRAM.
  *
  * A detailed memory map for the 112KB SRAM region is as follows:

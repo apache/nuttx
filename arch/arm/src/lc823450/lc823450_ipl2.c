@@ -211,7 +211,7 @@ static int install_recovery(const char *srcpath)
 #ifdef IMG_SIGNATURE
   if (upg_image.sig != IMG_SIGNATURE)
     {
-      _info("image signature missmatch. IPL2=%u, UPG=%u\n",
+      _info("image signature mismatch. IPL2=%u, UPG=%u\n",
             IMG_SIGNATURE, upg_image.sig);
       _info("go normal boot\n");
 
@@ -285,12 +285,14 @@ static void load_kernel(const char *name, const char *devname)
   (void)blk_read(tmp, 512 * 1024, devname, 0);
 
   /* disable all IRQ */
+
   for (i = LC823450_IRQ_NMI + 1; i < NR_IRQS; i++)
     {
       up_disable_irq(i);
     }
 
   /* clear pending IRQ */
+
   putreg32(0xffffffff, NVIC_IRQ0_31_CLRPEND);
   putreg32(0xffffffff, NVIC_IRQ32_63_CLRPEND);
   putreg32(0xffffffff, NVIC_IRQ64_95_CLRPEND);

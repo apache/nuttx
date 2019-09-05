@@ -118,7 +118,7 @@ void usart1_configure(void);
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initializeation sequence to configure the serial console
+ *   early in the initialization sequence to configure the serial console
  *   uart (only).
  *
  ****************************************************************************/

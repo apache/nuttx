@@ -214,9 +214,9 @@ union sixlowpan_metadata_u
 
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
- * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
+ * and outgoing frame processing and possibly with multiple IEEE802.15.4 MAC
  * devices.  The network lock provides exclusive use of these globals
- * during that processing
+ * during that processing.
  */
 
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2

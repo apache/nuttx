@@ -21,7 +21,7 @@ at the present, but here is the longer term roadmap:
   NxWidgets - NxWidgets is a higher level, C++, object-oriented library for object-
               oriented access to graphics "widgets."  NxWidgets is provided as a separate
               package.  NxWidgets is built on top of the core NuttX graphics subsystem,
-              but is not a part of the core graphics subystems.
+              but is not a part of the core graphics subsystems.
   NXTOOLKIT - A set of C graphics tools that provide higher-level window drawing
               operations.  The toolkit can be used for window-oriented graphics
               without NxWidgets and is built on top of NX.
@@ -31,7 +31,7 @@ at the present, but here is the longer term roadmap:
               without NxWidgets and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is built on top of NXGLIB.
-  NxTerm - NxTerm is a write-only character device that is built on top of
+  NxTerm    - NxTerm is a write-only character device that is built on top of
               an NX window.  This character device can be used to provide stdout
               and stderr and, hence, can provide the output side of NuttX console.
 

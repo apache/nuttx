@@ -104,7 +104,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, FAR void *arg)
  *   Sets/clears EXTI alarm interrupt.
  *
  * Input Parameters:
- *  - rising/falling edge: enables interrupt on rising/falling edget
+ *  - rising/falling edge: enables interrupt on rising/falling edge
  *  - event:  generate event when set
  *  - func:   when non-NULL, generate interrupt
  *

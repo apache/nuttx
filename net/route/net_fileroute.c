@@ -178,7 +178,7 @@ int net_routesize(FAR const char *path, size_t entrysize)
 #ifdef CONFIG_DEBUG_NET_WARN
       if (nentries * entrysize != buf.st_size)
         {
-          nwarn("WARNING: Size of routing table is not an even mutliple of entries\n");
+          nwarn("WARNING: Size of routing table is not an even multiple of entries\n");
           nwarn("         %lu != %lu / %lu\n",
                 (unsigned long)nentries,
                 (unsigned long)buf.st_size,
