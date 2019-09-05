@@ -406,3 +406,13 @@ menuconfig SPECIFIC_DRIVERS
 if SPECIFIC_DRIVERS
 source drivers/platform/Kconfig
 endif # SPECIFIC_DRIVERS
+
+menuconfig DRIVERS_RF
+	bool "RF Device Support"
+	default n
+	---help---
+		Drivers for various RF devices
+
+if DRIVERS_RF
+source drivers/rf/Kconfig
+endif # DRIVERS_RF
