@@ -249,7 +249,7 @@
 	* sched/, mm/, and net/ subsystem debug can now be selectively enabled/disabled
 	* Correct socket close logic: needs to disconnect TCP socket on close
 	* uIP webserver now seems to be fully functional
-	* fs/ and lib/ subystem debug can now be selectively enabled/disabled
+	* fs/ and lib/ subsystem debug can now be selectively enabled/disabled
 	* Added vsnprintf
 	* Integrated uIP telnetd
 	* Add missing logic to read-ahead buffer logic
@@ -630,7 +630,7 @@
 	  wrong by 64 bytes (Kevin Franzen).
 	* eZ80Acclaim!: Corrected some stack handling errors during interrupt handling
 	   context save and restore (Kevin Franzen).
-	* eZ80Acclaim!: Corrected vector initializeation logic (Kevin Franzen).
+	* eZ80Acclaim!: Corrected vector initialization logic (Kevin Franzen).
 	* eZ80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
 		divisor, the system timer divisor, and the EMAC poll timer.
 	* eZ80Acclaim!: Fixed GPIO pin configuration get serial output
@@ -4639,7 +4639,7 @@
 6.28 2013-06-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Interrupts were not being
-	  re-enabled in the I2C initializeation function (2013-4-30).
+	  re-enabled in the I2C initialization function (2013-4-30).
 	* net/sendto.c:  Added skeleton of implementation of send timeouts
 	  for UDP.  However, this functionality really does not make
 	  sense, so it is disabled in the code (2013-4-30).

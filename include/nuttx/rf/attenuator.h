@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pminitialize.c
+ * include/nuttx/rf/attenuator.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019, Augusto Fraga Giachero. All rights reserved.
+ *   Author: Augusto Fraga Giachero <afg@augustofg.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,46 +33,36 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_RF_ATTENUATOR_H
+#define __INCLUDE_NUTTX_RF_ATTENUATOR_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <fixedmath.h>
 
-#include <nuttx/power/pm.h>
-
-#include "up_internal.h"
-#include "stm32_pm.h"
-
-#ifdef CONFIG_PM
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_pminitialize
- *
- * Description:
- *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subsystem.
- *   This function must be called *very* early in the initialization sequence
- *   *before* any other device drivers are initialized (since they may
- *   attempt to register with the power management subsystem).
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void up_pminitialize(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  /* Then initialize the NuttX power management subsystem proper */
+#else
+#define EXTERN extern
+#endif
 
-  pm_initialize();
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct attenuator_control
+{
+  b16_t attenuation;
+  int channel;
+};
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_PM */
+#endif /* __INCLUDE_NUTTX_RF_ATTENUATOR_H */

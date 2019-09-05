@@ -339,7 +339,7 @@ endif
 # Link the boards\<arch>\<chip>\drivers dir to drivers\platform
 
 $(ARCH_SRC)\drivers: .config
-	@echo LN: drivers\platform to $(BOARD_DIR)\drivers
+	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
 else

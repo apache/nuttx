@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_mtd.h
+ * include/nuttx/sensors/isl29023.h
  *
- *   Copyright 2014,2015,2017 Sony Video & Sound Products Inc.
- *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
+ *   Copyright (C) 2019 DataVision s.r.o. All rights reserved.
+ *   Authors: Matous Pokorny <matous.pokorny@datavision.cz>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,60 +33,61 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_LC823450_MTD_H
-#define __ARCH_ARM_SRC_LC823450_LC823450_MTD_H
+#ifndef __INCLUDE_NUTTX_SENSORS_ISL29023
+#define __INCLUDE_NUTTX_SENSORS_ISL29023
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
+#include <nuttx/sensors/ioctl.h>
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_ISL29023)
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-/* Partition #1: IPL2
- * Partition #2: IPL2 config
- * Partition #3: recovery kernel
- * Partition #4: normal kernel
- * Partition #5: etc
- * Partition #6: rootfs
- * Partition #7: log
- * Partition #8: db
- * Partition #9: cache
- * Partition #10: contents
- */
+struct i2c_master_s;
 
-#define LC823450_NPARTS         10        /* Number of partitions             */
-#define LC823450_PART1_START    0         /* Start sector of partition 1      */
-#define LC823450_PART1_NBLOCKS  1024      /* Number of sectors of partition 1 */
-#define LC823450_PART2_START    (LC823450_PART1_START + LC823450_PART1_NBLOCKS)
-#define LC823450_PART2_NBLOCKS  1024
-#define LC823450_PART3_START    (LC823450_PART2_START + LC823450_PART2_NBLOCKS)
-#define LC823450_PART3_NBLOCKS  1024
-#define LC823450_PART4_START    (LC823450_PART3_START + LC823450_PART3_NBLOCKS)
-#define LC823450_PART4_NBLOCKS  1024
-#define LC823450_PART5_START    (LC823450_PART4_START + LC823450_PART4_NBLOCKS)
-#define LC823450_PART5_NBLOCKS  32768
-#define LC823450_PART6_START    (LC823450_PART5_START + LC823450_PART5_NBLOCKS)
-#define LC823450_PART6_NBLOCKS  131072
-#define LC823450_PART7_START    (LC823450_PART6_START + LC823450_PART6_NBLOCKS)
-#define LC823450_PART7_NBLOCKS  32768
-#define LC823450_PART8_START    (LC823450_PART7_START + LC823450_PART7_NBLOCKS)
-#define LC823450_PART8_NBLOCKS  262144
-#define LC823450_PART9_START    (LC823450_PART8_START + LC823450_PART8_NBLOCKS)
-#define LC823450_PART9_NBLOCKS  139264
-#define LC823450_PART10_START   (LC823450_PART9_START + LC823450_PART9_NBLOCKS)
-#define LC823450_PART10_NBLOCKS  0      /* 0 means all remaining sectors     */
+enum isl29023_resolution_e
+{
+  ISL29023_RESOLUTION_16BITS =      0x0,
+  ISL29023_RESOLUTION_12BITS =      0x1,
+  ISL29023_RESOLUTION_8BITS =       0x2,
+  ISL29023_RESOLUTION_4BITS =       0x3,
+};
 
-#if CONFIG_MTD_CP_STARTBLOCK != LC823450_PART10_START
-#  error "Start sector of contents partition mismatched"
-#endif
+enum isl29023_als_range_e
+{
+  ISL29023_ALS_RANGE_1000 =         0x0,
+  ISL29023_ALS_RANGE_4000 =         0x1,
+  ISL29023_ALS_RANGE_16000 =        0x2,
+  ISL29023_ALS_RANGE_64000 =        0x3,
+};
+
+/* ISL2923 goes to power dowm mode after mode *once */
+
+enum isl29023_operational_mode_e
+{
+  ISL29023_OP_MODE_POWER_DOWN =     0x0,
+  ISL29023_OP_MODE_ALS_ONCE =       0x1,
+  ISL29023_OP_MODE_IR_ONCE =        0x2,
+  ISL29023_OP_MODE_ALS_CONTINUES =  0x5,
+  ISL29023_OP_MODE_IR_CONTINUES =   0x6,
+};
+
+/* Data transfer structure */
+
+struct isl29023_data_s
+{
+  uint16_t lux;               /* Converted lux value */
+  uint16_t raw;               /* Raw unconverted value */
+};
 
 /****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -98,14 +99,28 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Name: isl29023_register
+ *
+ * Description:
+ *   Register the ISL29023 ALS device as 'devpath'
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/als0"
+ *   i2c - An instance of the I2C interface to use to communicate with ALS
+ *   addr - The I2C address of the ALS.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
-int lc823450_mtd_initialize(uint32_t devno);
+int isl29023_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+                      uint8_t addr);
 
-#if defined(__cplusplus)
+#undef EXTERN
+#ifdef __cplusplus
 }
 #endif
-#undef EXTERN
 
-#endif /* __ARCH_ARM_SRC_LC823450_LC823450_MTD_H */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_ISL29023 */
+#endif /* __INCLUDE_NUTTX_SENSORS_ISL29023 */

@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pminitialize.c
+ * include/nuttx/rf/ioctl.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019, Augusto Fraga Giachero. All rights reserved.
+ *   Author: Augusto Fraga Giachero <afg@augustofg.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,46 +33,14 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __INCLUDE_NUTTX_RF_IOCTL_H
+#define __INCLUDE_NUTTX_RF_IOCTL_H
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
-#include <nuttx/power/pm.h>
+/* Generic IOCTLs commands used for digital attenuators */
 
-#include "up_internal.h"
-#include "stm32_pm.h"
+#define RFIOC_SETATT                        _RFIOC(0x0001) /* Set the attenuation, Arg: struct attenuator_control* */
 
-#ifdef CONFIG_PM
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_pminitialize
- *
- * Description:
- *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subsystem.
- *   This function must be called *very* early in the initialization sequence
- *   *before* any other device drivers are initialized (since they may
- *   attempt to register with the power management subsystem).
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void up_pminitialize(void)
-{
-  /* Then initialize the NuttX power management subsystem proper */
-
-  pm_initialize();
-}
-
-#endif /* CONFIG_PM */
+#endif

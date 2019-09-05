@@ -1,8 +1,10 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pminitialize.c
+ * include/nuttx/rf/dat-31r5-sp.h
+ * Character driver for the Mini-Circuits DAT-31R5-SP+ digital step
+ * attenuator.
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019, Augusto Fraga Giachero. All rights reserved.
+ *   Author: Augusto Fraga Giachero <afg@augustofg.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,46 +35,65 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_
+#define __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/irq.h>
 #include <nuttx/config.h>
-
-#include <nuttx/power/pm.h>
-
-#include "up_internal.h"
-#include "stm32_pm.h"
-
-#ifdef CONFIG_PM
+#include <nuttx/rf/ioctl.h>
+#include <nuttx/spi/spi.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: up_pminitialize
+ * Name: dat31r5sp_register
  *
  * Description:
- *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subsystem.
- *   This function must be called *very* early in the initialization sequence
- *   *before* any other device drivers are initialized (since they may
- *   attempt to register with the power management subsystem).
+ *   Register the dat31r5sp character device as 'devpath'. WARNING:
+ *   the DAT-31R5-SP+ is not spi compatible because it hasn't a proper
+ *   chip-select input, but it can coexist with other devices on the
+ *   spi bus assuming that the LE (Latch Enable) is always 0 when the
+ *   device isn't selected. With LE=0 the internal shift-register will
+ *   store the last 6 bits sent through the bus, but it will only
+ *   change the attenuation level when LE=1. This driver sends the
+ *   attenuation bitstream and gives a small positive pulse to LE.
+ *
+ *   Remember when implementing the corresponding spi select function
+ *   when selected == true LE should be 1, and when selected == false
+ *   LE should be 0.
  *
  * Input Parameters:
- *   None.
+ *   devpath - The full path to the driver to register. E.g., "/dev/att0"
+ *   spi     - An instance of the SPI interface to use to communicate with
+ *   spidev  - Number of the spi device (used to drive the Latch Enable pin).
+ *
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void up_pminitialize(void)
-{
-  /* Then initialize the NuttX power management subsystem proper */
+int dat31r5sp_register(FAR const char *devpath,
+                       FAR struct spi_dev_s *spi,
+                       int spidev);
 
-  pm_initialize();
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_PM */
+#endif /* __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_ */

@@ -76,7 +76,7 @@ endif
 # they contain spaces or any other characters that might get mangled by the
 # shell
 #
-# Depends on this setting passed as a make commaond line definition from the
+# Depends on this setting passed as a make command line definition from the
 # toplevel Makefile:
 #
 #   TOPDIR - The path to the top level NuttX directory in the form
@@ -302,7 +302,7 @@ endif
 #
 # USAGE:  FILELIST = $(call RWILDCARD,<dir>,<wildcard-filename)
 #
-# This is functionally equivent to the fillowing, but has the advantage in
+# This is functionally equivent to the following, but has the advantage in
 # that it is portable
 #
 # FILELIST = ${shell find <dir> -name <wildcard-file>}

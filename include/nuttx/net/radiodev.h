@@ -101,7 +101,7 @@ struct radiodev_properties_s
  *     the reassembled packet.
  *
  *     For fagemented frames, d_buf provided by radio driver will not be
- *     used.  6LoWPAN must handle mutliple reassemblies from different
+ *     used.  6LoWPAN must handle multiple reassemblies from different
  *     sources simultaneously.  To support this, 6LoWPAN will allocate a
  *     unique reassembly buffer for each active reassembly, based on the
  *     reassembly tag and source radio address.  These reassembly buffers

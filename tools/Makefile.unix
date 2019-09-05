@@ -364,7 +364,7 @@ endif
 # Link the boards/<arch>/<chip>/drivers dir to drivers/platform
 
 $(ARCH_SRC)/drivers: .config
-	@echo "LN: $(ARCH_SRC)/drivers to $(BOARD_DIR)/drivers/platform"
+	@echo "LN: $(TOPDIR)/drivers/platform to $(BOARD_DIR)/drivers"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/drivers $(TOPDIR)/drivers/platform
 
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
