@@ -2790,7 +2790,7 @@ config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
 	---help---
-		Enables support for the BOARDIOC_POWEROFF boardctl() command.
+		Enables support for board-specific boardctl() commands.
 		Architecture specific logic must provide board_ioctl() interface.
 
 endif # LIB_BOARDCTL
