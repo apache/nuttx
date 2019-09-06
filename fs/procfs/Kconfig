@@ -126,5 +126,5 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 	depends on FS_SMARTFS
 	default n
 
-endmenu #
+endmenu # Exclude individual procfs entries
 endif # FS_PROCFS
