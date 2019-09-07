@@ -42,7 +42,7 @@ include $(TOPDIR)/tools/Config.mk
 
 # In case .version file does not exist
 
-CONFIG_VERSION_STRING ?= "0.0"
+CONFIG_VERSION_STRING ?= "Unversioned"
 CONFIG_VERSION_MAJOR ?= 0
 CONFIG_VERSION_MINOR ?= 0
 CONFIG_VERSION_BUILD ?= "0"
@@ -288,7 +288,7 @@ tools/mkversion$(HOSTEXEEXT):
 
 $(TOPDIR)/.version:
 	$(Q) echo "Create .version"
-	$(Q) tools/version.sh -v $(CONFIG_VERSION_MAJOR).$(CONFIG_VERSION_MINOR) -b $(CONFIG_VERSION_BUILD) .version
+	$(Q) tools/version.sh -s $(CONFIG_VERSION_STRING) -v $(CONFIG_VERSION_MAJOR).$(CONFIG_VERSION_MINOR) -b $(CONFIG_VERSION_BUILD) .version
 ifeq ($(GIT_DIR),y)
 	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> .version
 endif
