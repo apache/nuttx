@@ -56,7 +56,7 @@
  * Description:
  *    Set semaphore protocol attribute.
  *
- *    One particularly important use of this furnction is when a semaphore
+ *    One particularly important use of this function is when a semaphore
  *    is used for inter-task communication like:
  *
  *      TASK A                 TASK B
@@ -114,7 +114,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
  * Description:
  *    Set semaphore protocol attribute.
  *
- *    One particularly important use of this furnction is when a semaphore
+ *    One particularly important use of this function is when a semaphore
  *    is used for inter-task communication like:
  *
  *      TASK A                 TASK B

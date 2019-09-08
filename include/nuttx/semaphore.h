@@ -144,7 +144,7 @@ extern "C"
  * Name: nxsem_init
  *
  * Description:
- *   This function initializes the UNAMED semaphore sem. Following a
+ *   This function initializes the UNNAMED semaphore sem. Following a
  *   successful call to nxsem_init(), the semaphore may be used in subsequent
  *   calls to nxsem_wait(), nxsem_post(), and nxsem_trywait().  The semaphore
  *   remains usable until it is destroyed.
@@ -451,7 +451,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  * Description:
  *    Set semaphore protocol attribute.
  *
- *    One particularly important use of this furnction is when a semaphore
+ *    One particularly important use of this function is when a semaphore
  *    is used for inter-task communication like:
  *
  *      TASK A                 TASK B

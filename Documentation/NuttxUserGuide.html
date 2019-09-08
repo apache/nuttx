@@ -3596,7 +3596,7 @@ interface of the same name.
 <p>
   <a name="lockingvssignaling"><b>Locking versus Signaling Semaphores</b></a>.
   Semaphores (and mutexes) may be used for many different purposes.
-  One typical use of for mutual exclusion and locking of resources:
+  One typical use is for mutual exclusion and locking of resources:
   In this usage, the thread that needs exclusive access to a resources takes the semaphore to get access to the resource.
   The same thread subsequently releases the seamphore count when it no longer needs exclusive access.
   Priority inheritance is intended just for this usage case.
@@ -3930,7 +3930,7 @@ interface of the same name.
 </p>
   The timeout will expire when the absolute time specified by <code>abstime</code> passes, as measured by the clock on which timeouts are based (that is, when the value of that clock equals or exceeds abstime), or if the absolute time specified by abstime has already been passed at the time of the call.
   This function attempts to lock the semaphore referenced by <code>sem</code>.
-  If the semaphore as already locked by another task, the calling task will not return until it either successfully acquires the lock or the call is interrupted by a signal.
+  If the semaphore is already locked by another task, the calling task will not return until it either successfully acquires the lock or the call is interrupted by a signal.
 <p>
 <b>Input Parameters:</b>
 <ul>

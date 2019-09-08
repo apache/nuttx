@@ -75,10 +75,10 @@ extern "C"
  * Name: nxmutex_init
  *
  * Description:
- *   This function initializes the UNAMED mutex. Following a
+ *   This function initializes the UNNAMED mutex. Following a
  *   successful call to nxmutex_init(), the mutex may be used in subsequent
- *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The mutex
- *   remains usable until it is destroyed.
+ *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The
+ *   mutex remains usable until it is destroyed.
  *
  * Parameters:
  *   mutex - Semaphore to be initialized
@@ -99,10 +99,10 @@ static inline int nxmutex_init(FAR mutex_t *mutex)
  * Name: nxmutex_destroy
  *
  * Description:
- *   This function initializes the UNAMED mutex. Following a
+ *   This function initializes the UNNAMED mutex. Following a
  *   successful call to nxmutex_init(), the mutex may be used in subsequent
- *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The mutex
- *   remains usable until it is destroyed.
+ *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The
+ *   mutex remains usable until it is destroyed.
  *
  * Parameters:
  *   mutex - Semaphore to be destroyed
