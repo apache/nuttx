@@ -2200,6 +2200,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
+  bool zlp;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -2208,8 +2209,9 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan  = &priv->chan[chidx];
   start = clock_systimer();
   xfrd  = 0;
+  zlp   = (buflen == 0);
 
-  while (buflen > 0)
+  while (buflen > 0 || zlp)
     {
       /* Transfer one packet at a time.  The hardware is capable of queueing
        * multiple OUT packets, but I just haven't figured out how to handle
@@ -2286,6 +2288,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           buffer += xfrlen;
           buflen -= xfrlen;
           xfrd   += chan->xfrd;
+          zlp     = false;
         }
     }
 
