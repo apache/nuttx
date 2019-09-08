@@ -167,7 +167,7 @@ static int get_pgtable(FAR group_addrenv_t *addrenv, uintptr_t vaddr)
         }
     }
 
-  return l1entry & ~SECTION_MASK;
+  return l1entry & PMD_PTE_PADDR_MASK;
 }
 
 /****************************************************************************
