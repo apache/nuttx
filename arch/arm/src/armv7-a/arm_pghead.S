@@ -106,7 +106,7 @@
  */
 
 #elif defined(CONFIG_BOOT_COPYTORAM)
-#  error "configuration not implemented
+#  error "configuration not implemented"
 
   /* Check for the identity mapping:  For this configuration, this would be
    * the case where the virtual beginning of FLASH is the same as the physical
@@ -754,7 +754,7 @@ arm_data_initialize:
 	/* Text-section constants:
 	 *
 	 *   _sbss is the start of the BSS region (see ld.script)
-	 *   _ebss is the end of the BSS regsion (see ld.script)
+	 *   _ebss is the end of the BSS region (see ld.script)
 	 *
 	 * The idle task stack usually starts at the end of BSS and is of size
 	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the

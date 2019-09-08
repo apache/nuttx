@@ -100,7 +100,7 @@
  */
 
 #elif defined(CONFIG_BOOT_COPYTORAM)
-#  error "configuration not implemented
+#  error "configuration not implemented"
 
   /* Check for the identity mapping:  For this configuration, this would be
    * the case where the virtual beginning of FLASH is the same as the physical
