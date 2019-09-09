@@ -292,7 +292,7 @@
 #  undef CONFIG_USBMSC_STRBASE
 #  define CONFIG_USBMSC_STRBASE       (0)
 #else
-#  define USBMSC_INTERFACESTRID       (CONFIG_USBMSC_STRBASE+1)
+#  define USBMSC_INTERFACESTRID       (CONFIG_USBMSC_STRBASE + 1)
 #endif
 
 #define USBMSC_LASTSTRID              USBMSC_INTERFACESTRID
@@ -300,7 +300,7 @@
 
 /* Configuration Descriptor */
 
-#define USBMSC_INTERFACEID            (CONFIG_USBMSC_IFNOBASE+0)
+#define USBMSC_INTERFACEID            (CONFIG_USBMSC_IFNOBASE + 0)
 #define USBMSC_ALTINTERFACEID         (0)
 
 #define USBMSC_CONFIGIDNONE           (0) /* Config ID means to return to address mode */
