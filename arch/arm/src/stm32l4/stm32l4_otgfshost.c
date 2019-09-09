@@ -75,7 +75,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
+
 /* STM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
@@ -139,8 +141,9 @@
 #endif
 
 /* HCD Setup *******************************************************************/
+
 /* Hardware capabilities */
-//XXX I think this needs to be 12 for the 'L4
+
 #define STM32L4_NHOST_CHANNELS      8   /* Number of host channels */
 #define STM32L4_MAX_PACKET_SIZE     64  /* Full speed max packet size */
 #define STM32L4_EP0_DEF_PACKET_SIZE 8   /* EP0 default packet size */
@@ -381,6 +384,7 @@ static int stm32l4_out_asynch(FAR struct stm32l4_usbhost_s *priv, int chidx,
 #endif
 
 /* Interrupt handling **********************************************************/
+
 /* Lower level interrupt handlers */
 
 static void stm32l4_gint_wrpacket(FAR struct stm32l4_usbhost_s *priv,
@@ -1293,7 +1297,8 @@ static int stm32l4_ctrlep_alloc(FAR struct stm32l4_usbhost_s *priv,
 
   /* Allocate a container for the control endpoint */
 
-  ctrlep = (FAR struct stm32l4_ctrlinfo_s *)kmm_malloc(sizeof(struct stm32l4_ctrlinfo_s));
+  ctrlep = (FAR struct stm32l4_ctrlinfo_s *)
+    kmm_malloc(sizeof(struct stm32l4_ctrlinfo_s));
   if (ctrlep == NULL)
     {
       uerr("ERROR: Failed to allocate control endpoint container\n");
@@ -1523,7 +1528,8 @@ static void stm32l4_transfer_start(FAR struct stm32l4_usbhost_s *priv,
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32l4_getreg(STM32L4_OTGFS_HNPTXSTS);
-            avail  = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >> OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+            avail  = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >>
+                       OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
           }
           break;
 
@@ -1535,7 +1541,8 @@ static void stm32l4_transfer_start(FAR struct stm32l4_usbhost_s *priv,
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32l4_getreg(STM32L4_OTGFS_HPTXSTS);
-            avail  = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >> OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+            avail  = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >>
+                       OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
           }
           break;
 
@@ -2284,7 +2291,7 @@ static ssize_t stm32l4_out_transfer(FAR struct stm32l4_usbhost_s *priv,
            * using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20*1000);
+          nxsig_usleep(20 * 1000);
         }
       else
         {
@@ -2505,7 +2512,8 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
     {
       /* Clear the NAK and STALL Conditions. */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), (OTGFS_HCINT_NAK | OTGFS_HCINT_STALL));
+      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+                     (OTGFS_HCINT_NAK | OTGFS_HCINT_STALL));
 
       /* Halt the channel when a STALL, TXERR, BBERR or DTERR interrupt is
        * received on the channel.
@@ -2532,7 +2540,8 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
 
       /* Clear the NAK and data toggle error conditions */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), (OTGFS_HCINT_NAK | OTGFS_HCINT_DTERR));
+      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+                     (OTGFS_HCINT_NAK | OTGFS_HCINT_DTERR));
     }
 
   /* Check for a pending FRaMe OverRun (FRMOR) interrupt */
@@ -2674,8 +2683,8 @@ static inline void stm32l4_gint_hcinisr(FAR struct stm32l4_usbhost_s *priv,
        * REVISIT: This can cause a lot of interrupts!
        */
 
-      else if (chan->eptype == OTGFS_EPTYPE_CTRL /*||
-               chan->eptype == OTGFS_EPTYPE_BULK*/)
+      else if (chan->eptype == OTGFS_EPTYPE_CTRL /* ||
+               chan->eptype == OTGFS_EPTYPE_BULK */)
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
@@ -2856,7 +2865,8 @@ static inline void stm32l4_gint_hcoutisr(FAR struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the Data Toggle ERRor (DTERR) and NAK interrupts */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), (OTGFS_HCINT_DTERR | OTGFS_HCINT_NAK));
+      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+                     (OTGFS_HCINT_DTERR | OTGFS_HCINT_NAK));
     }
 
   /* Check for a pending CHannel Halted (CHH) interrupt */
@@ -3022,6 +3032,7 @@ static void stm32l4_gint_disconnected(FAR struct stm32l4_usbhost_s *priv)
 static inline void stm32l4_gint_sofisr(FAR struct stm32l4_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
+
 #warning "Do what?"
 
   /* Clear pending SOF interrupt */
@@ -3181,7 +3192,8 @@ static inline void stm32l4_gint_nptxfeisr(FAR struct stm32l4_usbhost_s *priv)
 
   /* Extract the number of bytes available in the non-periodic Tx FIFO. */
 
-  avail = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >> OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+  avail = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >>
+           OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -3269,7 +3281,8 @@ static inline void stm32l4_gint_ptxfeisr(FAR struct stm32l4_usbhost_s *priv)
 
   /* Extract the number of bytes available in the periodic Tx FIFO. */
 
-  avail = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >> OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+  avail = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >>
+           OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -3370,6 +3383,7 @@ static inline void stm32l4_gint_hprtisr(FAR struct stm32l4_usbhost_s *priv)
   uint32_t hcfg;
 
   usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT, 0);
+
   /* Read the port status and control register (HPRT) */
 
   hprt = stm32l4_getreg(STM32L4_OTGFS_HPRT);
@@ -3459,7 +3473,6 @@ static inline void stm32l4_gint_hprtisr(FAR struct stm32l4_usbhost_s *priv)
             }
           else /* if ((hprt & OTGFS_HPRT_PSPD_MASK) == OTGFS_HPRT_PSPD_FS) */
             {
-
               usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSDEV, 0);
               stm32l4_putreg(STM32L4_OTGFS_HFIR, 48000);
 
@@ -3467,8 +3480,8 @@ static inline void stm32l4_gint_hprtisr(FAR struct stm32l4_usbhost_s *priv)
 
               if ((hcfg & OTGFS_HCFG_FSLSPCS_MASK) != OTGFS_HCFG_FSLSPCS_FS48MHz)
                 {
-
                   usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSFSSW, 0);
+
                   /* Yes... configure for FS */
 
                   hcfg &= ~OTGFS_HCFG_FSLSPCS_MASK;
@@ -3720,6 +3733,7 @@ static inline void stm32l4_hostinit_enable(void)
   stm32l4_putreg(STM32L4_OTGFS_GINTSTS, 0xbfffffff);
 
   /* Enable the host interrupts */
+
   /* Common interrupts:
    *
    *   OTGFS_GINT_WKUP     : Resume/remote wakeup detected interrupt
@@ -3955,7 +3969,7 @@ static int stm32l4_rh_enumerate(FAR struct stm32l4_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Reset the host port */
 
@@ -4183,8 +4197,9 @@ static int stm32l4_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   stm32l4_takesem(&priv->exclsem);
 
-  /* A single channel is represent by an index in the range of 0 to STM32L4_MAX_TX_FIFOS.
-   * Otherwise, the ep must be a pointer to an allocated control endpoint structure.
+  /* A single channel is represent by an index in the range of 0 to
+   * STM32L4_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an allocated
+   * control endpoint structure.
    */
 
   if ((uintptr_t)ep < STM32L4_MAX_TX_FIFOS)
@@ -4450,38 +4465,36 @@ static int stm32l4_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
           continue;
         }
 
+      /* Handle the IN data phase (if any) */
+
+      if (buflen > 0)
+        {
+          ret = stm32l4_ctrl_recvdata(priv, ep0info, buffer, buflen);
+          if (ret < 0)
+            {
+              usbhost_trace1(OTGFS_TRACE1_RECVDATA, -ret);
+              continue;
+            }
+        }
+
       /* Get the start time.  Loop again until the timeout expires */
 
       start = clock_systimer();
       do
         {
-          /* Handle the IN data phase (if any) */
-
-          if (buflen > 0)
-            {
-              ret = stm32l4_ctrl_recvdata(priv, ep0info, buffer, buflen);
-              if (ret < 0)
-                {
-                  usbhost_trace1(OTGFS_TRACE1_RECVDATA, -ret);
-                }
-            }
-
           /* Handle the status OUT phase */
 
+          priv->chan[ep0info->outndx].outdata1 ^= true;
+          ret = stm32l4_ctrl_senddata(priv, ep0info, NULL, 0);
           if (ret == OK)
             {
-              priv->chan[ep0info->outndx].outdata1 ^= true;
-              ret = stm32l4_ctrl_senddata(priv, ep0info, NULL, 0);
-              if (ret == OK)
-                {
-                  /* All success transactions exit here */
+              /* All success transactions exit here */
 
-                  stm32l4_givesem(&priv->exclsem);
-                  return OK;
-                }
-
-              usbhost_trace1(OTGFS_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
+              stm32l4_givesem(&priv->exclsem);
+              return OK;
             }
+
+          usbhost_trace1(OTGFS_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
 
           /* Get the elapsed time (in frames) */
 
@@ -5093,11 +5106,14 @@ static void stm32l4_host_initialize(FAR struct stm32l4_usbhost_s *priv)
 
   /* Clear the FS-/LS-only support bit in the HCFG register */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HCFG);
+  regval  = stm32l4_getreg(STM32L4_OTGFS_HCFG);
   regval &= ~OTGFS_HCFG_FSLSS;
   stm32l4_putreg(STM32L4_OTGFS_HCFG, regval);
 
-  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic Tx FIFOs */
+  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
+   * Tx FIFOs
+   */
+
   /* Configure Rx FIFO size (GRXFSIZ) */
 
   stm32l4_putreg(STM32L4_OTGFS_GRXFSIZ, CONFIG_STM32L4_OTGFS_RXFIFO_SIZE);
@@ -5105,13 +5121,15 @@ static void stm32l4_host_initialize(FAR struct stm32l4_usbhost_s *priv)
 
   /* Setup the host non-periodic Tx FIFO size (HNPTXFSIZ) */
 
-  regval = (offset | (CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE << OTGFS_HNPTXFSIZ_NPTXFD_SHIFT));
+  regval = (offset |
+            (CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE << OTGFS_HNPTXFSIZ_NPTXFD_SHIFT));
   stm32l4_putreg(STM32L4_OTGFS_HNPTXFSIZ, regval);
   offset += CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx fifo size register (HPTXFSIZ) */
 
-  regval = (offset | (CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE << OTGFS_HPTXFSIZ_PTXFD_SHIFT));
+  regval = (offset |
+            (CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE << OTGFS_HPTXFSIZ_PTXFD_SHIFT));
   stm32l4_putreg(STM32L4_OTGFS_HPTXFSIZ, regval);
 
   /* If OTG were supported, we sould need to clear HNP enable bit in the
@@ -5207,7 +5225,7 @@ static inline void stm32l4_sw_initialize(FAR struct stm32l4_usbhost_s *priv)
    * priority inheritance enabled.
    */
 
- nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 
