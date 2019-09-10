@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_rrgetinterval.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,14 +82,13 @@
 
 int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 {
-#if CONFIG_RR_INTERVAL > 0
   FAR struct tcb_s *rrtcb;
 
   /* If pid is zero, the timeslice for the calling process is written
    * into 'interval.'
    */
 
-  if (!pid)
+  if (pid == 0)
     {
       rrtcb = this_task();
     }
@@ -107,27 +106,39 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
   else
     {
       rrtcb = sched_gettcb(pid);
-      if (!rrtcb)
+      if (rrtcb == NULL)
         {
           set_errno(ESRCH);
           return ERROR;
         }
     }
 
-  if (!interval)
+  if (interval == NULL)
     {
       set_errno(EFAULT);
       return ERROR;
     }
 
-  /* Convert the timeslice value from ticks to timespec */
+#if CONFIG_RR_INTERVAL > 0
+  /* The thread has a timeslice ONLY if it is configured for round-robin
+   * scheduling.
+   */
 
-  interval->tv_sec  =  CONFIG_RR_INTERVAL / MSEC_PER_SEC;
-  interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) * NSEC_PER_MSEC;
+  if (rrtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+    {
+      /* Convert the timeslice value from ticks to a timespec */
+
+      interval->tv_sec  =  CONFIG_RR_INTERVAL / MSEC_PER_SEC;
+      interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) * NSEC_PER_MSEC;
+    }
+  else
+#endif
+  {
+    /* Return {0,0} meaning that the time slice is indefinite */
+
+    interval->tv_sec  = 0;
+    interval->tv_nsec = 0;
+  }
 
   return OK;
-#else
-  set_errno(ENOSYS);
-  return ERROR;
-#endif
 }
