@@ -124,7 +124,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
    * scheduling.
    */
 
-  if (rrtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((rrtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
       /* Convert the timeslice value from ticks to a timespec */
 
@@ -133,12 +133,12 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
     }
   else
 #endif
-  {
-    /* Return {0,0} meaning that the time slice is indefinite */
+    {
+      /* Return {0,0} meaning that the time slice is indefinite */
 
-    interval->tv_sec  = 0;
-    interval->tv_nsec = 0;
-  }
+      interval->tv_sec  = 0;
+      interval->tv_nsec = 0;
+    }
 
   return OK;
 }
