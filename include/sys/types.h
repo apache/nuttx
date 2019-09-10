@@ -85,17 +85,12 @@
 #undef  OK
 #define OK 0
 
-/* HPUX-like MIN/MAX value */
-
-#define PRIOR_RR_MIN      0
-#define PRIOR_RR_MAX    255
-#define PRIOR_FIFO_MIN    0
-#define PRIOR_FIFO_MAX  255
-#define PRIOR_OTHER_MIN   0
-#define PRIOR_OTHER_MAX 255
-
-/* Scheduling Priorities.  NOTE:  Only the idle task can take the true
- * minimum priority.
+/* Scheduling Priorities.
+ *
+ * NOTES:
+ * - Only the idle task can take the true minimum priority.
+ * - These definitions are non-standard internal definitions and, for
+ *   portability reasons, should not be used by application software.
  */
 
 #define SCHED_PRIORITY_MAX     255
