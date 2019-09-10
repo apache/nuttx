@@ -37,6 +37,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
+
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"

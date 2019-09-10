@@ -358,6 +358,7 @@ static int nsh_usbhostinitialize(void)
       return pid < 0 ? -ENOEXEC : OK;
     }
 
+  UNUSED(ret);
   return -ENODEV;
 }
 #else
