@@ -82,6 +82,7 @@ endif
 	@echo "LD=\"$(LD)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "AR=\"$(AR)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NM=\"$(NM)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NXFLATLDFLAGS1=\"$(NXFLATLDFLAGS1)\"" >> $(EXPORTDIR)/makeinfo.sh
@@ -97,6 +98,7 @@ endif
 	@echo "DIRLINK=\"$(DIRLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "DIRUNLINK=\"$(DIRUNLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "MKDEP=\"$(MKDEP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDSCRIPT=\"$(LDSCRIPT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:
