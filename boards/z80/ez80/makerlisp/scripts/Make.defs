@@ -168,7 +168,7 @@ else # ifeq ($(CONFIG_BOOT_RUNFROMEXTSRAM),y)
   LDSCRIPT = makerlisp_ram.linkcmd
 endif
 
-LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)ez80$(DELIM)makerlisp$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 # Tool names/paths.
 
