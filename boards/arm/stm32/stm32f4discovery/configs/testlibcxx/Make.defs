@@ -1,5 +1,5 @@
 ############################################################################
-# boards/stm32f4discovery/configs/testlibcxx/Make.defs
+# boards/arm/stm32/stm32f4discovery/configs/testlibcxx/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

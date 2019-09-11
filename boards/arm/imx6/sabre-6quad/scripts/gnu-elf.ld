@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lcp17xx_40xx/lx_cpu/scripts/gnu-elf.ld
+ * boards/arm/imx6/sabre-6quad/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
