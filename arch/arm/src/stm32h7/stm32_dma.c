@@ -1608,6 +1608,7 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
 
   switch (cfg->maddr & STM32_REGION_MASK)
     {
+      case STM32_AXISRAM_BASE:
       case STM32_FMC_BANK1:
       case STM32_FMC_BANK2:
       case STM32_FMC_BANK3:
