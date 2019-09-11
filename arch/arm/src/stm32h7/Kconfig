@@ -826,6 +826,13 @@ config STM32H7_SPI1_DMA_BUFFER
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
 
+config STM32H7_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	default 0
+	depends on STM32H7_SPI1
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
 config STM32H7_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
@@ -839,6 +846,13 @@ config STM32H7_SPI2_DMA_BUFFER
 	depends on STM32H7_SPI2_DMA
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
+config STM32H7_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	default 0
+	depends on STM32H7_SPI2
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 config STM32H7_SPI3_DMA
 	bool "SPI3 DMA"
@@ -854,6 +868,13 @@ config STM32H7_SPI3_DMA_BUFFER
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
 
+config STM32H7_SPI3_COMMTYPE
+	int "SPI3 Operation mode"
+	default 0
+	depends on STM32H7_SPI3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
 config STM32H7_SPI4_DMA
 	bool "SPI4 DMA"
 	default n
@@ -867,6 +888,13 @@ config STM32H7_SPI4_DMA_BUFFER
 	depends on STM32H7_SPI4_DMA
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
+config STM32H7_SPI4_COMMTYPE
+	int "SPI4 Operation mode"
+	default 0
+	depends on STM32H7_SPI4
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 config STM32H7_SPI5_DMA
 	bool "SPI5 DMA"
@@ -882,6 +910,13 @@ config STM32H7_SPI5_DMA_BUFFER
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
 
+config STM32H7_SPI5_COMMTYPE
+	int "SPI5 Operation mode"
+	default 0
+	depends on STM32H7_SPI5
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
 config STM32H7_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
@@ -895,6 +930,13 @@ config STM32H7_SPI6_DMA_BUFFER
 	depends on STM32H7_SPI6_DMA
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
+
+config STM32H7_SPI6_COMMTYPE
+	int "SPI6 Operation mode"
+	default 0
+	depends on STM32H7_SPI6
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 endmenu # "SPI Configuration"
 

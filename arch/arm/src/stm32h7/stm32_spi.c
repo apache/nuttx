@@ -221,6 +221,14 @@
  * Private Types
  ****************************************************************************/
 
+enum spi_config_e
+{
+  FULL_DUPLEX = 0,
+  SIMPLEX_TX,
+  SIMPLEX_RX,
+  HALF_DUPLEX
+};
+
 struct stm32_spidev_s
 {
   struct spi_dev_s spidev;       /* Externally visible part of the SPI interface */
@@ -257,6 +265,7 @@ struct stm32_spidev_s
 #ifdef CONFIG_PM
   struct pm_callback_s pm_cb;    /* PM callbacks */
 #endif
+  enum spi_config_e config;      /* full/half duplex, simplex transmit/read only */
 };
 
 /****************************************************************************
@@ -402,6 +411,11 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
+#ifdef CONFIG_STM32H7_SPI1_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI1_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
+#endif
 };
 #endif /* CONFIG_STM32H7_SPI1 */
 
@@ -464,6 +478,11 @@ static struct stm32_spidev_s g_spi2dev =
 #endif
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
+#endif
+#ifdef CONFIG_STM32H7_SPI2_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI2_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
 #endif
 };
 #endif /* CONFIG_STM32H7_SPI2 */
@@ -528,6 +547,11 @@ static struct stm32_spidev_s g_spi3dev =
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
+#ifdef CONFIG_STM32H7_SPI3_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI3_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
+#endif
 };
 #endif /* CONFIG_STM32H7_SPI3 */
 
@@ -590,6 +614,11 @@ static struct stm32_spidev_s g_spi4dev =
 #endif
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
+#endif
+#ifdef CONFIG_STM32H7_SPI4_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI4_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
 #endif
 };
 #endif /* CONFIG_STM32H7_SPI4 */
@@ -654,6 +683,11 @@ static struct stm32_spidev_s g_spi5dev =
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
+#ifdef CONFIG_STM32H7_SPI5_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI5_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
+#endif
 };
 #endif /* CONFIG_STM32H7_SPI5 */
 
@@ -716,6 +750,11 @@ static struct stm32_spidev_s g_spi6dev =
 #endif
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
+#endif
+#ifdef CONFIG_STM32H7_SPI6_COMMTYPE
+  .config   = CONFIG_STM32H7_SPI6_COMMTYPE,
+#else
+  .config   = FULL_DUPLEX,
 #endif
 };
 #endif /* CONFIG_STM32H7_SPI6 */
@@ -823,6 +862,13 @@ static inline void spi_putreg(FAR struct stm32_spidev_s *priv,
 
 static inline uint32_t spi_readword(FAR struct stm32_spidev_s *priv)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return 0;
+    }
+
   /* Wait until the receive buffer is not empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXP) == 0);
@@ -850,6 +896,13 @@ static inline uint32_t spi_readword(FAR struct stm32_spidev_s *priv)
 static inline void spi_writeword(FAR struct stm32_spidev_s *priv,
                                  uint32_t word)
 {
+  /* Can't transmit in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      return;
+    }
+
   /* Wait until the transmit buffer is empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXP) == 0);
@@ -875,6 +928,13 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv,
 
 static inline uint8_t spi_readbyte(FAR struct stm32_spidev_s *priv)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return 0;
+    }
+
   /* Wait until the receive buffer is not empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXP) == 0);
@@ -902,6 +962,13 @@ static inline uint8_t spi_readbyte(FAR struct stm32_spidev_s *priv)
 static inline void spi_writebyte(FAR struct stm32_spidev_s *priv,
                                  uint8_t byte)
 {
+  /* Can't transmit in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      return;
+    }
+
   /* Wait until the transmit buffer is empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXP) == 0);
@@ -942,6 +1009,13 @@ static int spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 {
   int ret;
 
+  /* Don't wait in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return OK;
+    }
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
@@ -974,6 +1048,13 @@ static int spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 static int spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 {
   int ret;
+
+  /* Don't wait in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      return OK;
+    }
 
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
@@ -1078,6 +1159,14 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv,
                            FAR void *rxbuffer, FAR void *rxdummy,
                            size_t nwords, stm32_dmacfg_t *dmacfg)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      priv->rxccr = 0;
+      return;
+    }
+
   /* 8- or 16-bit mode? */
 
   if (priv->nbits > 8)
@@ -1132,6 +1221,14 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv,
                            FAR const void *txbuffer, FAR const void *txdummy,
                            size_t nwords, stm32_dmacfg_t *dmacfg)
 {
+  /* Can't transmit in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      priv->txccr = 0;
+      return;
+    }
+
   /* 8- or 16-bit mode? */
 
   if (priv->nbits > 8)
@@ -1182,6 +1279,13 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv,
 #ifdef CONFIG_STM32H7_SPI_DMA
 static void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return;
+    }
+
   priv->rxresult = 0;
   stm32_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
 }
@@ -1198,6 +1302,13 @@ static void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 {
+  /* Can't transmit in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      return;
+    }
+
   priv->txresult = 0;
   stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
 }
@@ -1624,7 +1735,10 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   /* Master transfer start */
 
-  spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, 0, SPI_CR1_CSTART);
+  if (priv->config != SIMPLEX_RX)
+    {
+      spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, 0, SPI_CR1_CSTART);
+    }
 
   /* According to the number of bits, access data register as word or byte
    * This is absolutely required because of packing. With nbits <=8 bit
@@ -1829,7 +1943,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 #endif
 
-  if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
+  if ((priv->config != SIMPLEX_TX && priv->rxdma == NULL) ||
+      (priv->config != SIMPLEX_RX && priv->txdma == NULL) ||
       up_interrupt_context())
     {
       /* Invalid DMA channels, or interrupt context, fall
@@ -1870,8 +1985,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
     }
 
-  if (!stm32_dmacapable(priv->txdma, &txdmacfg) ||
-      !stm32_dmacapable(priv->rxdma, &rxdmacfg))
+  if ((priv->config != SIMPLEX_RX &&
+       !stm32_dmacapable(priv->txdma, &txdmacfg)) ||
+      (priv->config != SIMPLEX_TX &&
+       !stm32_dmacapable(priv->rxdma, &rxdmacfg)))
     {
       /* Unsupported memory region fall back to non-DMA method. */
 
@@ -1901,8 +2018,16 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       DEBUGASSERT(priv->spibase != 0);
 
       /* Setup the DMA */
-      stm32_dmasetup(priv->txdma, &txdmacfg);
-      stm32_dmasetup(priv->rxdma, &rxdmacfg);
+
+      if (priv->config != SIMPLEX_RX)
+        {
+          stm32_dmasetup(priv->txdma, &txdmacfg);
+        }
+
+      if (priv->config != SIMPLEX_TX)
+        {
+          stm32_dmasetup(priv->rxdma, &rxdmacfg);
+        }
 
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN |
                           SPI_CFG1_RXDMAEN);
@@ -2187,6 +2312,7 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 
   clrbits = SPI_CR1_SPE;
   setbits = SPI_CR1_SSI;
+
   spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, clrbits, setbits);
 
   /* CFG1 */
@@ -2200,6 +2326,24 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   clrbits = SPI_CFG2_CPHA | SPI_CFG2_CPOL | SPI_CFG2_LSBFRST |
             SPI_CFG2_COMM_MASK;
   setbits = SPI_CFG2_MASTER | SPI_CFG2_SSM;
+
+  switch (priv->config)
+    {
+    default:
+    case FULL_DUPLEX:
+      setbits |= SPI_CFG2_COMM_FULL;
+      break;
+    case SIMPLEX_TX:
+      setbits |= SPI_CFG2_COMM_STX;
+      break;
+    case SIMPLEX_RX:
+      setbits |= SPI_CFG2_COMM_SRX;
+      break;
+    case HALF_DUPLEX:
+      setbits |= SPI_CFG2_COMM_HALF;
+      break;
+    }
+
   spi_modifyreg(priv, STM32_SPI_CFG2_OFFSET, clrbits, setbits);
 
   priv->frequency = 0;
@@ -2238,12 +2382,21 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
    * forever in this function!  Don't let your design do that!
    */
 
-  priv->rxdma = stm32_dmachannel(priv->rxch);
-  priv->txdma = stm32_dmachannel(priv->txch);
-  DEBUGASSERT(priv->rxdma && priv->txdma);
+  priv->rxdma = NULL;
+  priv->txdma = NULL;
+  if (priv->config != SIMPLEX_TX)
+    {
+      priv->rxdma = stm32_dmachannel(priv->rxch);
+      DEBUGASSERT(priv->rxdma);
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_RXDMAEN);
+    }
 
-  spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0,
-                SPI_CFG1_RXDMAEN | SPI_CFG1_TXDMAEN);
+  if (priv->config != SIMPLEX_RX)
+    {
+      priv->txdma = stm32_dmachannel(priv->txch);
+      DEBUGASSERT(priv->txdma);
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
+    }
 #endif
 
   /* Enable SPI */
@@ -2288,7 +2441,6 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
   FAR struct stm32_spidev_s *priv = NULL;
 
   irqstate_t flags = enter_critical_section();
-
 #ifdef CONFIG_STM32H7_SPI1
   if (bus == 1)
     {
