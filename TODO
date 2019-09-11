@@ -286,6 +286,7 @@ o Task/Scheduler (sched/)
                  open() used within the OS.  There are places under libs/ and
                  boards/ that have not been converted.  I also note cases
                  where fopen() is called under libs/libc/netdb/.
+               2019-09-11:  built_isavail() no longer sets the errno varaible.
 
   Status:      Open
   Priority:    Low.  Things are working OK the way they are.  But the design

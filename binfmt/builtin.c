@@ -123,11 +123,9 @@ static int builtin_loadbinary(struct binary_s *binp)
   index = builtin_isavail(filename);
   if (index < 0)
     {
-      int errval = get_errno();
       berr("ERROR: %s is not a builtin application\n", filename);
       close(fd);
-      return -errval;
-
+      return index;
     }
 
   /* Return the load information.  NOTE: that there is no way to configure
