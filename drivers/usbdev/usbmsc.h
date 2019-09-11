@@ -667,7 +667,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
  * Name: usbmsc_deferredresponse
  *
  * Description:
- *   Some EP0 setup request cannot be responded to immediately becuase they
+ *   Some EP0 setup request cannot be responded to immediately because they
  *   require some asynchronous action from the SCSI worker thread.  This
  *   function is provided for the SCSI thread to make that deferred response.
  *   The specific requests that require this deferred response are:

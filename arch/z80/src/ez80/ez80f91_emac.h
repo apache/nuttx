@@ -56,7 +56,7 @@
 /* EMAC configuration 1/2/3 register bit settings ***********************************/
 
 #define EMAC_CFG1_DCRCC        0x01  /* Bit 0: 1=4 bytes of proprietary header */
-#define EMAC_CFG1_HUGEN        0x02  /* Bit 1: 1=Allow unlimited size frames to be recieved */
+#define EMAC_CFG1_HUGEN        0x02  /* Bit 1: 1=Allow unlimited size frames to be received */
 #define EMAC_CFG1_FLCHK        0x04  /* Bit 2: 1=Frame lengths compared to length/type */
 #define EMAC_CFG1_FULLHD       0x08  /* Bit 3: 1=Enable full duplex mode */
 #define EMAC_CFG1_CRCEN        0x10  /* Bit 4: 1=Append CRC to every frame */

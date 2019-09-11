@@ -932,7 +932,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  * Input Parameters:
  *   dev      - Device-specific state data
  *   buffer   - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
@@ -987,7 +987,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is

@@ -257,7 +257,7 @@ void up_lowsetup(void)
 
   up_udelay(100);
 
-  /* Then enable the transmitter and reciever */
+  /* Then enable the transmitter and receiver */
 
   scr |= (SH1_SCISCR_TE | SH1_SCISCR_RE);
   putreg8(scr, SH1_SCI_BASE + SH1_SCI_SCR_OFFSET);

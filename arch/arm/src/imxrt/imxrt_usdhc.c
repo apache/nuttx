@@ -1847,7 +1847,7 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if (cmdidx == SD_ACMDIDX53)
     {
-      /* Dynamically set parameters for ACMD53 because it can accomodate
+      /* Dynamically set parameters for ACMD53 because it can accommodate
        * different transmission characteristics (single and multi-block,
        * rx & tx).
        */

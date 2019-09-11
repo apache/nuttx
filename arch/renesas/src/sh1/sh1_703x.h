@@ -299,7 +299,7 @@
 #define SH1_SCISCR_MPIE     (0x08)        /* Bit 3: 1=Multiprocessor interrupt enable */
 #define SH1_SCISCR_RE       (0x10)        /* Bit 4: 1=Receiver enable */
 #define SH1_SCISCR_TE       (0x20)        /* Bit 5: 1=Transmitter enable */
-#define SH1_SCISCR_RIE      (0x40)        /* Bit 6: 1=Recieve-data-full interrupt enable */
+#define SH1_SCISCR_RIE      (0x40)        /* Bit 6: 1=Receive-data-full interrupt enable */
 #define SH1_SCISCR_TIE      (0x80)        /* Bit 7: 1=Transmit-data-empty interrupt enable */
 #define SH1_SCISCR_ALLINTS  (0xcc)
 

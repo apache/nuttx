@@ -101,7 +101,7 @@ extern "C"
  *   nor can it call upward into NX.  So, some other logic.
  *
  *   vnc_fbinitialize() provides an optional, alternative initialization
- *   function.  It is optional becuase it need not be called.  If it is not
+ *   function.  It is optional because it need not be called.  If it is not
  *   called, however, keyboard/mouse inputs from the remote VNC client will
  *   be lost.  By calling vnc_fbinitialize(), you can provide callout
  *   functions that can be received by logic higher in the architecture.

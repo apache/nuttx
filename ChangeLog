@@ -698,7 +698,7 @@
 
 0.4.6 2009-05-19 Gregory Nutt <gnutt@nuttx.org>
 
-	* Change SPI interface so that is can accomodate interfaces where the
+	* Change SPI interface so that is can accommodate interfaces where the
 	  number of bits per word is greater an 8 (such as with many 9-bit display
 	  interfaces). -- this might have broken a few things which will need to
 	  be retested!
@@ -4186,7 +4186,7 @@
 	  application is started.
 	* arch/arm/src/stm32/stm32_otgfsdev.c, drivers/usbdev/usbdev_trprintf.c,
 	  and include/nuttx/usb/usbdev_trace.h:  Add logic to support decoding
-	  of device-specific trace events to make the trace ouput more readable.
+	  of device-specific trace events to make the trace output more readable.
 	  From Petteri Aimonen.
 	* arch/arm/src/stm32/stm32_otgfsdev.c:  Need to manually set CNAK in
 	  the case where we are waiting for a SETUP command with DATA.  Otherwise,
@@ -16124,12 +16124,12 @@
 	  (2017-07-19).
 	* Initial port to STM32F769I-DISCO.  From Titus von Boxberg
 	  (2017-07-20).
-	* libc/math:  Fix wrong ouput in modf() API.  The sign of integral part
+	* libc/math:  Fix wrong output in modf() API.  The sign of integral part
 	  given by the modf() should be same as sign of input.  But for inputs
 	  between 0 and 1, the sign of integral part was not same as sign of
 	  input.  From Lokesh B V (2017-07-20).
-	* libc/math: Fix wrong ouput in ceil() API.  Ex:for input x = 1.0, the
-	  ouput should be 1.0, but the ouput was 2.0.    From Lokesh B V
+	* libc/math: Fix wrong output in ceil() API.  Ex:for input x = 1.0, the
+	  output should be 1.0, but the output was 2.0.    From Lokesh B V
 	  (2017-07-20).
 	* USB device:  Rename usbdev_description_s to usbdev_devinfo_s to avoid
 	  any more confusion of naming with device descriptions in the future.
@@ -16142,10 +16142,10 @@
 	* libc/stdlib: (1) Fix an error in mkstemp() the could result in an
 	  infinite loop.  (2)  Fix for wrong output in some cases.  For
 	  Example: (a) input: "FILEXX", output: "FILE00" and repeats same
-	  output for further invocations of mkstemp(). But, the ouput has to be
+	  output for further invocations of mkstemp(). But, the output has to be
 	  FILE01, FILE02, ...., FILEZZ. (b) input: "FILEXXXXXX", output:
 	  "FILE100000", for next invocation "FILE200000" and so on.  But it's
-	  good, if the ouput goes like FILE000001, FILE000002, ..., FILE000101,
+	  good, if the output goes like FILE000001, FILE000002, ..., FILE000101,
 	  ...  From Lokesh B V (2017-07-21).
 	* configs: add stm32f334-disco basic support.  From Mateusz Szafoni
 	  (2017-07-21).

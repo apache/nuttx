@@ -180,7 +180,7 @@
 
 #  define PIC32MX_RESET_K1BASE      (PIC32MX_SFR_K1BASE + 0x0000f600)
 
-/* Peripheral Pin Select Input/Ouput Register Base Address */
+/* Peripheral Pin Select Input/Output Register Base Address */
 
 #  define PIC32MX_INSEL_K1BASE      (PIC32MX_SFR_K1BASE + 0x0000fa00)
 #  define PIC32MX_OUTSEL_K1BASE     (PIC32MX_SFR_K1BASE + 0x0000fb00)

@@ -43,7 +43,7 @@ export SHELL=cmd
 endif
 
 # These are configuration variables that are quoted by configuration tool
-# but which must be unquoated when used in the build system.
+# but which must be unquoted when used in the build system.
 
 CONFIG_ARCH       := $(patsubst "%",%,$(strip $(CONFIG_ARCH)))
 CONFIG_ARCH_CHIP  := $(patsubst "%",%,$(strip $(CONFIG_ARCH_CHIP)))

@@ -364,7 +364,7 @@
 
 /* UART0/1 FCTL register bits *******************************************************/
 
-#define EZ80_UARTFCTL_TRIG     0xc0         /* Bits 6-7: UART recieve FIFO trigger level */
+#define EZ80_UARTFCTL_TRIG     0xc0         /* Bits 6-7: UART receive FIFO trigger level */
 #  define EZ80_UARTTRIG_1      0x00         /*   00: Receive FIFO trigger level=1 */
 #  define EZ80_UARTTRIG_4      0x40         /*   01: Receive FIFO trigger level=4 */
 #  define EZ80_UARTTRIG_8      0x80         /*   10: Receive FIFO trigger level=8 */

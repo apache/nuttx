@@ -824,7 +824,7 @@ static int tca64_multiwritepin(FAR struct ioexpander_dev_s *dev,
   ret = tca64_getreg(priv, regaddr, (FAR uint8_t *)&pinset, nregs);
   if (ret < 0)
     {
-      gpioerr("ERROR: Failed to read %u ouput registers at %u: %d\n",
+      gpioerr("ERROR: Failed to read %u output registers at %u: %d\n",
               nregs, regaddr, ret);
       goto errout_with_lock;
     }

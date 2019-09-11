@@ -1577,7 +1577,7 @@ static void sam_interrupt_work(FAR void *arg)
     }
 
 #ifdef CONFIG_DEBUG_NET
-  /* Check for PAUSE Frame recieved (PFRE).
+  /* Check for PAUSE Frame received (PFRE).
    *
    * ISR:PFRE indicates that a pause frame has been received.  Cleared on a read.
    */

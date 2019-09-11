@@ -83,7 +83,7 @@ FAR void *calloc(size_t n, size_t elem_size)
   return ret;
 
 #else
-  /* Use mm_calloc() becuase it implements the clear */
+  /* Use mm_calloc() because it implements the clear */
 
   return mm_calloc(USR_HEAP, n, elem_size);
 #endif

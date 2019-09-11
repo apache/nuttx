@@ -101,7 +101,7 @@
 #define UART_C0_TXEPT      0x08       /* Bit 3: Transmit register empty 1=empty */
 #define UART_C0_CRD        0x10       /* Bit 4: CTS/RTS disable bit 1=CTS/RTS disabled */
 #define UART_C0_NCH        0x20       /* Bit 5: Data output select 1=TxDi is N-channel open drain output */
-#define UART_C0_CKPOL      0x40       /* Bit 6: CLK polarity select 1=XMT rising, recieve falling */
+#define UART_C0_CKPOL      0x40       /* Bit 6: CLK polarity select 1=XMT rising, receive falling */
 #define UART_C0_UFORM      0x80       /* Bit 7: Transfer format select 1=MSB first */
 
 /* UART Transmit/Receive Control 1 */

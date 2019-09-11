@@ -1542,7 +1542,7 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - The length of data that can be received in the buffer in
  *              number of words.  The wordsize is determined by the number
  *              of bits-per-word selected for the SPI interface.  If nbits

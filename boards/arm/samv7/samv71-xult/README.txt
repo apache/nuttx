@@ -714,7 +714,7 @@ Selecting the GMAC peripheral
     CONFIG_NET_TCP_READAHEAD=y           : Enable TCP read-ahead buffering
     CONFIG_NET_TCP_WRITE_BUFFERS=y       : Enable TCP write buffering
     CONFIG_NET_UDP=y                     : Enable UDP networking
-    CONFIG_NET_BROADCAST=y               : Support UDP broadcase packets
+    CONFIG_NET_BROADCAST=y               : Support UDP broadcast packets
     CONFIG_NET_ICMP=y                    : Enable ICMP networking
     CONFIG_NET_ICMP_SOCKET=y             : Needed for NSH ping command
                                          : Defaults should be okay for other options

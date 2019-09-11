@@ -124,7 +124,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
   if (tcb->timeslice <= 0 && !sched_islocked_tcb(tcb))
     {
       /* We will also suppress context switches if we were called via one
-       * of the unusual cases handled by sched_timer_reasses().  In that
+       * of the unusual cases handled by sched_timer_reassess().  In that
        * case, we will return a value of one so that the timer will expire
        * as soon as possible and we can perform this action in the normal
        * timer expiration context.

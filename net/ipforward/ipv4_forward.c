@@ -355,7 +355,7 @@ errout:
  *
  * Description:
  *   This function is a callback from netdev_foreach.  It implements the
- *   the broadcase forwarding action for each network device (other than, of
+ *   the broadcast forwarding action for each network device (other than, of
  *   course, the device that received the packet).
  *
  * Input Parameters:

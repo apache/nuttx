@@ -818,7 +818,7 @@ Where <subdir> is one of the following:
        Storage Demo Board," UART2 is available and is configured to used as
        the SYSLOG device.  That means that all debug output will be directed
        out UART2.  Debug output is not enabled by default, however, so these
-       settings do nothing until you enable debug ouput.
+       settings do nothing until you enable debug output.
 
         Device Drivers -> System Logging Device Options:
           CONFIG_SYSLOG_CHAR=y

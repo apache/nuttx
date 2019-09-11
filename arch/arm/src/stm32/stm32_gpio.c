@@ -543,19 +543,19 @@ int stm32_configgpio(uint32_t cfgset)
         {
 #if defined(CONFIG_STM32_STM32L15XX)
           default:
-          case GPIO_SPEED_400KHz:    /* 400 kHz Very low speed ouput */
+          case GPIO_SPEED_400KHz:    /* 400 kHz Very low speed output */
             setting = GPIO_OSPEED_400KHz;
             break;
 
-          case GPIO_SPEED_2MHz:   /* 2 MHz Low speed ouput */
+          case GPIO_SPEED_2MHz:   /* 2 MHz Low speed output */
             setting = GPIO_OSPEED_2MHz;
             break;
 
-          case GPIO_SPEED_10MHz:   /* 10 MHz Medium speed ouput  */
+          case GPIO_SPEED_10MHz:   /* 10 MHz Medium speed output  */
             setting = GPIO_OSPEED_10MHz;
             break;
 
-          case GPIO_SPEED_40MHz:   /* 40 MHz High speed ouput */
+          case GPIO_SPEED_40MHz:   /* 40 MHz High speed output */
             setting = GPIO_OSPEED_40MHz;
             break;
 #else

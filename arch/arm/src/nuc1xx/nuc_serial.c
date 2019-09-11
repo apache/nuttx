@@ -667,7 +667,7 @@ static int up_interrupt(int irq, void *context,  void *arg)
 
           /* Disable, further RX timeout interrupts and set the RX FIFO
            * threshold so that an interrupt will be generated when the
-           * very next byte is recieved.
+           * very next byte is received.
            */
 
           up_rxto_disable(priv);
@@ -867,7 +867,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
         {
           /* The FIFO is empty.  Disable RX timeout interrupts and set the
            * RX FIFO threshold so that an interrupt will be generated when
-           * the very next byte is recieved.
+           * the very next byte is received.
            */
 
           up_rxto_disable(priv);

@@ -97,7 +97,7 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
   ssize_t nrecvd;
   size_t ntotal;
 
-  /* Loop until the rest of the message is recieved. */
+  /* Loop until the rest of the message is received. */
 
   for (ntotal = 0; ntotal < msglen; offset += nrecvd, ntotal += nrecvd)
     {

@@ -1742,7 +1742,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
           stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ACK, 0);
 
-          /* Read dcnt = 3, to ensure a BTF event after having recieved
+          /* Read dcnt = 3, to ensure a BTF event after having received
            * in the shift register.
            */
 

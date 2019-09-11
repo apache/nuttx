@@ -551,7 +551,7 @@ static inline int vnc_wait_connect(int display)
    * The RUNNING state indicates that the server has started, it has
    * established a connection with the VNC client, it is negotiated
    * encodings and framebuffer characteristics, and it has started the
-   * updater thread.  The server is now ready to recieve Client-to-Server
+   * updater thread.  The server is now ready to receive Client-to-Server
    * messages and to perform remote framebuffer updates.
    */
 

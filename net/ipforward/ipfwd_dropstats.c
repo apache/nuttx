@@ -64,7 +64,7 @@
  *
  * Returned Value:
  *   On success, zero (OK) is returned.  Otherwise, a negated errno value
- *   is returned.  The only error is if th protocol is not recognized.
+ *   is returned.  The only error is if the protocol is not recognized.
  *
  ****************************************************************************/
 

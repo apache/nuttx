@@ -2367,7 +2367,7 @@ The new features (some still incomplete) include:
 Bugfixes, order roughly on decreasing criticality include:
 
   * Message Queues.  Correct errors in mq_timedsend() and
-    mq_timedrecieve().
+    mq_timedreceive().
 
   * FAT. Writes that cross sector boundaries, stray write into the FAT,
     and a FAT long file name issue
@@ -15505,19 +15505,19 @@ detailed bugfix information):
       - C Library:  (1) Fix an error in mkstemp() the could result in an
         infinite loop.  (2)  Fix for wrong output in some cases.  For Example:
         (a) input: "FILEXX", output: "FILE00" and repeats same output for
-        further invocations of mkstemp(). But, the ouput has to be FILE01,
+        further invocations of mkstemp(). But, the output has to be FILE01,
         FILE02, ...., FILEZZ. (b) input: "FILEXXXXXX", output: "FILE100000",
         for next invocation "FILE200000" and so on.  But it's good, if the
-        ouput goes like FILE000001, FILE000002, ..., FILE000101, ...  From
+        output goes like FILE000001, FILE000002, ..., FILE000101, ...  From
         Lokesh B V.
       - C Library:  gethostbyname_r: Fix check for space in buffer.
       - C Library:  inet_ntop() was printing negative values for fields >127.
-      - Math Library:  Fix wrong ouput in modf() API.  The sign of integral
+      - Math Library:  Fix wrong output in modf() API.  The sign of integral
         part given by the modf() should be same as sign of input.  But for
         inputs between 0 and 1, the sign of integral part was not same as
         sign of input.  From Lokesh B V.
-      - Math Library:  Fix wrong ouput in ceil() API.  Ex:for input x = 1.0,
-        the output should be 1.0, but the ouput was 2.0.  From Lokesh B V.
+      - Math Library:  Fix wrong output in ceil() API.  Ex:for input x = 1.0,
+        the output should be 1.0, but the output was 2.0.  From Lokesh B V.
 
     * Tools
 

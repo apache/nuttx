@@ -142,8 +142,8 @@
 
 /* Interrupt set/clear/status/mask registers (can't clear RXIM or TXIM) */
 
-#define LPC214X_SP1INT_ROR       (0x01) /* Bit 0: 1=Recieve Overrun */
-#define LPC214X_SP1INT_RTIM      (0x02) /* Bit 1: 1=Recieve Timeout */
+#define LPC214X_SP1INT_ROR       (0x01) /* Bit 0: 1=Receive Overrun */
+#define LPC214X_SP1INT_RTIM      (0x02) /* Bit 1: 1=Receive Timeout */
 #define LPC214X_SP1INT_RXIM      (0x04) /* Bit 2: 1=RX FIFO at least half full */
 #define LPC214X_SP1INT_TXIM      (0x08) /* Bit 3: 1=TX FIFO at least half empty */
 

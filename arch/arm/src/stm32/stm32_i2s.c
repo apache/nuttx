@@ -1856,7 +1856,7 @@ static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   apb      - A pointer to the audio buffer in which to recieve data
+ *   apb      - A pointer to the audio buffer in which to receive data
  *   callback - A user provided callback function that will be called at
  *              the completion of the transfer.  The callback will be
  *              performed in the context of the worker thread.
