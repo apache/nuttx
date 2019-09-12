@@ -58,8 +58,7 @@ SECTIONS
         _etext = ABSOLUTE(.);
     } > kflash
 
-    . = ALIGN(4);
-    .init_section : {
+    .init_section :  ALIGN(4) {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
@@ -69,9 +68,8 @@ SECTIONS
         *(.ARM.extab*)
     } > kflash
 
-    . = ALIGN(4);
     __exidx_start = ABSOLUTE(.);
-    .ARM.exidx : {
+    .ARM.exidx :  ALIGN(4) {
         *(.ARM.exidx*)
     } > kflash
 
@@ -79,8 +77,7 @@ SECTIONS
 
     _eronly = ABSOLUTE(.);
 
-    . = ALIGN(4);
-    .data : {
+    .data :  ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
@@ -88,7 +85,7 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } > ksram AT > kflash
 
-    .bss : {
+    .bss :  ALIGN(4) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
