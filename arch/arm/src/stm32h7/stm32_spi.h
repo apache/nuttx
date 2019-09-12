@@ -83,6 +83,22 @@ struct spi_dev_s; /* Forward reference */
 FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
 
 /*****************************************************************************
+ * Name: stm32_spi_slave_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI bus for slave operation
+ *
+ * Input Parameters:
+ *   bus number
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
+ *****************************************************************************/
+
+FAR struct spi_sctrlr_s *stm32_spi_slave_initialize(int bus);
+
+/*****************************************************************************
  * Name:  stm32_spi1/2/...select and stm32_spi1/2/...status
  *
  * Description:
