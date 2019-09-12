@@ -69,12 +69,11 @@ SECTIONS
         *(.ARM.extab*)
     } > uflash
 
-    __exidx_start = ABSOLUTE(.);
     .ARM.exidx : ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
     } > uflash
-
-    __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
 

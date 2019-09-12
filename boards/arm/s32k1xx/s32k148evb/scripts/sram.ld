@@ -85,12 +85,12 @@ SECTIONS
     *(.ARM.extab*)
   } >sram
 
-  __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
+    __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
+    __exidx_end = ABSOLUTE(.);
   } >sram
-  __exidx_end = ABSOLUTE(.);
 
   .data :
   {

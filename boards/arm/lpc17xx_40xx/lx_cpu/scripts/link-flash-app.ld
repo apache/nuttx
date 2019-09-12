@@ -88,12 +88,11 @@ SECTIONS
         *(.ARM.extab*)
     } > FLASH
 
-    __exidx_start = ABSOLUTE(.);
     .ARM.exidx : ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
     } > FLASH
-
-    __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
 

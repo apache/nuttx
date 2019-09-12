@@ -68,12 +68,11 @@ SECTIONS
         *(.ARM.extab*)
     } > kflash
 
-    __exidx_start = ABSOLUTE(.);
     .ARM.exidx :  ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
     } > kflash
-
-    __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
 

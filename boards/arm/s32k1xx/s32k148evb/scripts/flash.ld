@@ -86,12 +86,12 @@ SECTIONS
     *(.ARM.extab*)
   } >flash
 
-  __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
+    __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
+    __exidx_end = ABSOLUTE(.);
   } >flash
-  __exidx_end = ABSOLUTE(.);
 
   .data :
   {

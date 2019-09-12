@@ -89,12 +89,12 @@ SECTIONS
 
 	/* .ARM.exidx is sorted, so has to go in its own output section.  */
 
-	PROVIDE_HIDDEN (__exidx_start = .);
 	.ARM.exidx :
 	{
+		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
+		__exidx_end = ABSOLUTE(.);
 	} > norflash
-	PROVIDE_HIDDEN (__exidx_end = .);
 
 	.data :
 	{

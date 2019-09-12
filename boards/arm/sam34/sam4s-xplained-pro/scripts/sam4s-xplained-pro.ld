@@ -79,11 +79,11 @@ SECTIONS
 		*(.ARM.extab*)
 	} >flash0
 
-	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
+		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
+		__exidx_end = ABSOLUTE(.);
 	} >flash0
-	__exidx_end = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);

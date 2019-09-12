@@ -108,12 +108,12 @@ SECTIONS
 		*(.ARM.extab*)
 	} > progflash
 
-	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx :
 	{
+		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
+		__exidx_end = ABSOLUTE(.);
 	} > progflash
-	__exidx_end = ABSOLUTE(.);
 
 	.data :
 	{
