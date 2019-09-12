@@ -62,8 +62,7 @@ SECTIONS
       _etext = ABSOLUTE(.);
     } > flash
 
-  . = ALIGN(4);
-  .init_section :
+  .init_section : ALIGN(4)
     {
       _sinit = ABSOLUTE(.);
       KEEP(*(.init_array .init_array.*))
@@ -75,9 +74,8 @@ SECTIONS
       *(.ARM.extab*)
     } > flash
 
-  . = ALIGN(4);
   __exidx_start = ABSOLUTE(.);
-  .ARM.exidx :
+  .ARM.exidx : ALIGN(4)
     {
       *(.ARM.exidx*)
     } > flash
@@ -85,8 +83,7 @@ SECTIONS
 
   _eronly = ABSOLUTE(LOADADDR(.data));
 
-  . = ALIGN(4);
-  .data :
+  .data : ALIGN(4)
     {
       _sdata = ABSOLUTE(.);
       *(.data .data.*)

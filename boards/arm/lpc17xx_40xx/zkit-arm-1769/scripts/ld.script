@@ -74,8 +74,7 @@ SECTIONS
 
         _eronly = ABSOLUTE(.);
 
-        . = ALIGN(4);
-        .data : {
+        .data : ALIGN(4) {
                 _sdata = ABSOLUTE(.);
                 *(.data .data.*)
                 *(.gnu.linkonce.d.*)
@@ -83,19 +82,17 @@ SECTIONS
                 _edata = ABSOLUTE(.);
         } > sram AT > flash
 
-        . = ALIGN(4);
-        .ARM.extab : {
+        .ARM.extab : ALIGN(4) {
                 *(.ARM.extab*)
         } >sram
 
-        . = ALIGN(4);
         __exidx_start = ABSOLUTE(.);
-        .ARM.exidx : {
+        .ARM.exidx : ALIGN(4) {
                 *(.ARM.exidx*)
         } >sram
         __exidx_end = ABSOLUTE(.);
 
-        .bss : {
+        .bss : ALIGN(4) {
                 _sbss = ABSOLUTE(.);
                 *(.bss .bss.*)
                 *(.gnu.linkonce.b.*)

@@ -66,28 +66,24 @@ SECTIONS
                 _etext = ABSOLUTE(.);
         } > ROM
 
-        . = ALIGN(4);
-        .init_section : {
+        .init_section : ALIGN(4) {
                 _sinit = ABSOLUTE(.);
                 *(.init_array .init_array.*)
                 _einit = ABSOLUTE(.);
         } > ROM
 
-        . = ALIGN(4);
-        .ARM.extab : {
+        .ARM.extab : ALIGN(4) {
                 *(.ARM.extab*)
         } > ROM
 
-        . = ALIGN(4);
         __exidx_start = ABSOLUTE(.);
-        .ARM.exidx : {
+        .ARM.exidx : ALIGN(4) {
                 *(.ARM.exidx*)
         } > ROM
         __exidx_end = ABSOLUTE(.);
 
         _eronly = ABSOLUTE(.);
 
-        . = ALIGN(4);
         .data :
         {
                 _sdata = ABSOLUTE(.);

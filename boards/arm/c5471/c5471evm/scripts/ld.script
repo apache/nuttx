@@ -78,15 +78,14 @@ SECTIONS
         _eronly = ABSOLUTE(.);          /* See below                    */
         . = ALIGN(4096);
 
-        . = ALIGN(4);
-        .data : {
+        .data : ALIGN(4) {
                 _sdata = ABSOLUTE(.);
                 *(.data)
                 CONSTRUCTORS
                 _edata = ABSOLUTE(.);
         }
 
-        .bss : {                        /* BSS                          */
+        .bss : ALIGN(4) {               /* BSS                          */
                 _sbss = ABSOLUTE(.);
                 *(.bss)
                 *(COMMON)

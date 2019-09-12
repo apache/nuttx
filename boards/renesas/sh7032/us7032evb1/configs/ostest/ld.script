@@ -62,15 +62,14 @@ SECTIONS
                 _etext = ABSOLUTE(.);
         }
 
-        . = ALIGN(4);
-        .data : {
+        .data : ALIGN(4) {
                 _sdata = ABSOLUTE(.);
                 *(.data)                /* Modifiable data              */
                 CONSTRUCTORS
                 _edata = ABSOLUTE(.);
         }
 
-        .bss : {                        /* BSS                          */
+        .bss : ALIGN(4) {               /* BSS                          */
                 _sbss = ABSOLUTE(.);
                 *(.bss)
                 *(COMMON)

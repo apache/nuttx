@@ -64,21 +64,18 @@ SECTIONS
                 _etext = ABSOLUTE(.);
         } > progmem
 
-        . = ALIGN(4);
-        .init_section : {
+        .init_section : ALIGN(4) {
                 _sinit = ABSOLUTE(.);
                 KEEP(*(.init_array .init_array.*))
                 _einit = ABSOLUTE(.);
         } > progmem
 
-        . = ALIGN(4);
-        .ARM.extab : {
+        .ARM.extab : ALIGN(4) {
                 *(.ARM.extab*)
         } > progmem
 
-        . = ALIGN(4);
         __exidx_start = ABSOLUTE(.);
-        .ARM.exidx : {
+        .ARM.exidx : ALIGN(4) {
                 *(.ARM.exidx*)
         } > progmem
         __exidx_end = ABSOLUTE(.);
@@ -86,22 +83,19 @@ SECTIONS
         _eronly = ABSOLUTE(LOADADDR(.data));
 
 
-        . = ALIGN(4);
-        .data : {
+        .data : ALIGN(4) {
                 _sdata = ABSOLUTE(.);
                 *(.data .data.*)
                 *(.gnu.linkonce.d.*)
                 CONSTRUCTORS
-                . = ALIGN(4);
                 _edata = ABSOLUTE(.);
         } > sram AT > progmem
 
-        .bss : {
+        .bss : ALIGN(4) {
                 _sbss = ABSOLUTE(.);
                 *(.bss .bss.*)
                 *(.gnu.linkonce.b.*)
                 *(COMMON)
-                . = ALIGN(4);
                 _ebss = ABSOLUTE(.);
         } > sram
 

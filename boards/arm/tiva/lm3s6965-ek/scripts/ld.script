@@ -64,21 +64,18 @@ SECTIONS
                 _etext = ABSOLUTE(.);
         } > flash
 
-        . = ALIGN(4);
-        .init_section : {
+        .init_section : ALIGN(4)) {
                 _sinit = ABSOLUTE(.);
                 *(.init_array .init_array.*)
                 _einit = ABSOLUTE(.);
         } > flash
 
-        . = ALIGN(4);
-        .ARM.extab : {
+        .ARM.extab : ALIGN(4)) {
                 *(.ARM.extab*)
         } > flash
 
-        . = ALIGN(4);
         __exidx_start = ABSOLUTE(.);
-        .ARM.exidx : {
+        .ARM.exidx : ALIGN(4)) {
                 *(.ARM.exidx*)
         } > flash
         __exidx_end = ABSOLUTE(.);
@@ -87,8 +84,7 @@ SECTIONS
 
         /* The LM3S6918 has 64Kb of SRAM beginning at the following address */
 
-        . = ALIGN(4);
-        .data : {
+        .data : ALIGN(4)) {
                 _sdata = ABSOLUTE(.);
                 *(.data .data.*)
                 *(.gnu.linkonce.d.*)
@@ -96,7 +92,7 @@ SECTIONS
                 _edata = ABSOLUTE(.);
         } > sram AT > flash
 
-        .bss : {                        /* BSS                          */
+        .bss : ALIGN(4)) {              /* BSS                          */
                 _sbss = ABSOLUTE(.);
                 *(.bss .bss.*)
                 *(.gnu.linkonce.b.*)
