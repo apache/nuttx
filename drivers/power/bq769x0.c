@@ -80,6 +80,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Helpers ******************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+#ifndef MAX
+#  define MAX(a,b) (a > b ? a : b)
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_BQ769X0
@@ -134,9 +143,9 @@ static int bq769x0_getreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
                              FAR uint16_t *regvals, unsigned int count);
 
+/* Device functions */
 static inline int bq769x0_getreport(FAR struct bq769x0_dev_s *priv,
                                     uint8_t *report);
-
 static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts);
 static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc);
 static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
@@ -573,7 +582,8 @@ static int bq769x0_online(struct battery_monitor_dev_s *dev, bool *status)
 static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts)
 {
   uint16_t regval;
-  int ret, idx;
+  int ret;
+  int idx;
 
   ret = bq769x0_getreg16(priv, BQ769X0_REG_BAT_HI, &regval);
   if (ret < 0)
@@ -604,41 +614,92 @@ static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts)
  ****************************************************************************/
 
 static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
-    struct battery_monitor_voltage_s *voltages) {
-    int16_t regval[BQ769X0_MAX_CELLS];
-    int ret, idx;
+                                      struct battery_monitor_voltage_s *voltages)
+  {
+  uint16_t regvals[BQ769X0_MAX_CELLS];
+  int ret
+  int idx;
 
-    if (voltages)
-      {
-       if (voltages->cell_count > BQ769X0_MAX_CELLS)
-         {
-           voltages->cell_count = BQ769X0_MAX_CELLS;
-         }
-      }
-
-    ret = bq769x0_getnreg16(priv, BQ769X0_REG_VC1_HI, (uint16_t *)&regval, 2 * voltages->cell_count);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
-
-    for (idx = 0; idx < voltages->cell_count; idx += 1) {
-
-        /* Voltage is returned from the chip in units of <gain>uV/LSB
-         * An offset also needs to be added.
-         */
-
-      #warning fixme units and 32bit?
-        voltages->cell_voltages[idx] *= priv->gain;
-        voltages->cell_voltages[idx] += priv->offset;
+  if (voltages)
+    {
+     if (voltages->cell_count > BQ769X0_MAX_CELLS)
+       {
+         voltages->cell_count = BQ769X0_MAX_CELLS;
+       }
     }
 
+  ret = bq769x0_getnreg16(priv, BQ769X0_REG_VC1_HI, regvals, voltages->cell_count);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  for (idx = 0; idx < voltages->cell_count; idx += 1) {
+
+      /* Voltage is returned from the chip in units of <gain>uV/LSB
+       * An offset also needs to be added.
+       */
+
+      voltages->cell_voltages[idx] = ((uint32_t) regvals[i] * priv->gain) + priv->offset;
+  }
+}
+
+/****************************************************************************
+ * Name: bq769x0_gettemperature
+ *
+ * Description:
+ *   Gets the voltage(s) at the temperature sensor input(s) of the chip
+ *   It is up to the user to convert these voltage values into temperature
+ *   values, as many types of temperature sensors exist.
+ *
+ ****************************************************************************/
+static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
+                                         struct battery_monitor_temperature_s *temps)
+{
+  int chip_sensors;
+  int ret;
+  int i;
+  uint16_t regvals[3];
+
+  /* The number of temperature registers varies depending on the chip variant */
+
+  switch (priv->chip)
+    {
+    case CHIP_BQ76920:
+      chip_sensors = 1;
+      break;
+    case CHIP_BQ76930:
+      chip_sensors = 2;
+      break;
+    default:
+    case CHIP_BQ76940:
+      chip_sensors = 3;
+      break;
+    }
+
+  /* Read the number of sensors requested or available, whichever is smaller */
+
+  temps->sensor_count = MIN(chip_sensors, temps->sensor_count);
+  ret = bq769x0_getnreg16(priv, BQ769X0_REG_TS1_HI, regvals, temps->sensor_count);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Convert temp sensor ADC values to microvolts */
+
+  for (i = 0; i < temps->sensor_count; i += 1)
+    {
+      temps->temperatures[i] = ((uint32_t) regvals[i] * priv->gain) + priv->offset;
+    }
+  return OK;
 
 }
 
 /****************************************************************************
- * Name: bq769x0_setcurr
+ * Name: bq769x0_getcc
  *
  * Description:
  *   Gets the value of the Coulomb counter from the BQ769X0
@@ -648,7 +709,8 @@ static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
 static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc)
 {
   int16_t regval;
-  int ret, idx;
+  int ret
+  int idx;
 
 #warning scaling
   ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI, (uint16_t *)&regval);
@@ -704,6 +766,12 @@ static int bq769x0_current(struct battery_monitor_dev_s *dev, int *value)
      */
 
     return -ENOSYS;
+}
+
+static int bq769x0_temp(struct battery_monitor_dev_s *dev,
+    struct battery_monitor_temperature_s *temps)
+{
+    return bq769x0_gettemperature(dev, temps);
 }
 
 /****************************************************************************
