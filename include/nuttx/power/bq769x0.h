@@ -41,6 +41,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Chip variant definitions */
+#define CHIP_BQ76920                    0
+#define CHIP_BQ76930                    1
+#define CHIP_BQ76940                    2
+
 /* Auxiliary Definitions */
 #define BQ769X0_BASE_GAIN               365 /* uV/LSB */
 #define BQ769X0_MAX_CELLS               15 /* No more than 15 cells per chip*/

@@ -289,7 +289,12 @@ int battery_monitor_register(FAR const char *devpath,
  *   addr      - The I2C address of the BQ769X0 (Can be 0x08 or 0x18).
  *   frequency - The I2C frequency
  *   crc       - True if the device has CRC enabled (see TI datasheet)
- *
+ *   cellcount - The number of battery cells attached to the BQ769X0.  The
+ *               mapping of the cells changes based on count - see datasheet.
+ *   chip      - The chip type (either CHIP_BQ76920, CHIP_BQ76930, or
+ *               CHIP_BQ76940).  This is used to map cell numbers when the
+ *               full capacity of the chip is not used.  See the TI datasheet
+ *               for cell wiring information.
  * Returned Value:
  *   A pointer to the initialized battery driver instance.  A NULL pointer
  *   is returned on a failure to initialize the BQ769X0 lower half.
@@ -299,10 +304,11 @@ int battery_monitor_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ769X0)
 
 struct i2c_master_s;
-FAR struct battery_monitor_dev_s *BQ769X0_initialize(FAR struct i2c_master_s *i2c,
+FAR struct battery_monitor_dev_s *bq769x0_initialize(FAR struct i2c_master_s *i2c,
                                                      uint8_t addr,
                                                      uint32_t frequency,
-                                                     bool crc);
+                                                     bool crc, uint8_t cellcount,
+                                                     uint8_t chip);
 #endif
 
 #undef EXTERN

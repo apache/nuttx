@@ -2,7 +2,7 @@
  * drivers/power/bq769x0.c
  * Lower half driver for BQ769x0 battery monitor
  *
- *   Copyright (C) 2G Engineering. All rights reserved.
+ *   Copyright (C) 2019 2G Engineering. All rights reserved.
  *   Author: Josh Lange <jlange@2g-eng.com>
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -83,15 +83,18 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_BQ769X0
-#  define baterr  _err
-#  define batreg  _err
+#  define baterr    _err
+#  define batreg    _err
+#  define batinfo   _info
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define baterr(x...)
 #    define batreg(x...)
+#    define batinfo(x...)
 #  else
-#    define baterr (void)
-#    define batreg (void)
+#    define baterr(void)
+#    define batreg(void)
+#    define batinfo(void)
 #  endif
 #endif
 
@@ -110,6 +113,7 @@ struct bq769x0_dev_s
 
   FAR struct i2c_master_s *i2c; /* I2C interface */
   uint8_t addr;                 /* I2C address */
+  uint8_t chip;                 /* Chip Type (e.g. CHIP_76920) */
   uint32_t frequency;           /* I2C frequency */
   uint32_t gain;                /* ADC gain value in uV */
   uint32_t offset;              /* ADC offset value in uV */
@@ -119,14 +123,16 @@ struct bq769x0_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-/* I2C support */
+/* I2C support functions */
 
 static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
-                             FAR uint8_t *regval);
+                           FAR uint8_t *regval);
 static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
-                             uint8_t regval);
+                           uint8_t regval);
 static int bq769x0_getreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
-                           FAR uint16_t *regval);
+                            FAR uint16_t *regval);
+static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
+                             FAR uint16_t *regvals, unsigned int count);
 
 static inline int bq769x0_getreport(FAR struct bq769x0_dev_s *priv,
                                     uint8_t *report);
@@ -340,9 +346,9 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   uint8_t crc;
   int i;
 
-  if (count >= (sizeof(val / 2)))
+  if (count >= (sizeof(val) / 2))
     {
-      count = sizeof(val / 2) - 1;
+      count = sizeof(val) / 2 - 1;
     }
 
   /* Set up the I2C configuration */
@@ -394,8 +400,8 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 
   /* Copy 16-bit values to be returned */
   for (i = 0; i < datalen; i += 1) {
-      *regval = (uint16_t)val[2 * i] << 8 | (uint16_t)val[(2 * i) + 1];
-      regval += 1;
+      *regvals = (uint16_t)val[2 * i] << 8 | (uint16_t)val[(2 * i) + 1];
+      regvals += 1;
   }
   return OK;
 }
@@ -736,6 +742,12 @@ static int bq769x0_operate(struct battery_monitor_dev_s *dev, uintptr_t param)
  *   addr      - The I2C address of the BQ769X0 (Can be 0x08 or 0x18).
  *   frequency - The I2C frequency
  *   crc       - True if the device has CRC enabled (see TI datasheet)
+ *   cellcount - The number of battery cells attached to the BQ769X0.  The
+ *               mapping of the cells changes based on count - see datasheet.
+ *   chip      - The chip type (either CHIP_BQ76920, CHIP_BQ76930, or
+ *               CHIP_BQ76940).  This is used to map cell numbers when the
+ *               full capacity of the chip is not used.  See the TI datasheet
+ *               for cell wiring information.
  *
  * Returned Value:
  *   A pointer to the initialized lower-half driver instance.  A NULL pointer
@@ -745,7 +757,8 @@ static int bq769x0_operate(struct battery_monitor_dev_s *dev, uintptr_t param)
 
 FAR struct battery_monitor_dev_s *
   bq769x0_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                     uint32_t frequency, bool crc)
+                     uint32_t frequency, bool crc, uint8_t cellcount,
+                     uint8_t chip)
 {
   FAR struct bq769x0_dev_s *priv;
   int ret;
@@ -763,6 +776,7 @@ FAR struct battery_monitor_dev_s *
       priv->addr      = addr;
       priv->frequency = frequency;
       priv->crc       = crc;
+      priv->chip      = chip;
 
       /* Configure the BQ769x0 */
 
