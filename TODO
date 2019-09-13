@@ -940,6 +940,8 @@ o Kernel/Protected Build
                -------- ----------------------------------------------
                mkrd     ramdisk_register()
 
+               See http://www.nuttx.org/doku.php?id=wiki:howtos:protected-ramdisk
+
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
