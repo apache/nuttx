@@ -15482,7 +15482,7 @@
 	  pinmap with unsupported devices removed (2017-06-08).
 	* configs/stm32f103-minumum SPI: SPIDEV_WIRELESS used when this has
 	  changed to SPIDEV_CONTACTLESS. From Nicolas Estibals (2017-06-08).
-	* stm32f103-minimum: dd GPIO device driver example for
+	* stm32f103-minimum: Add GPIO device driver example for
 	  STM32F103-Minimum.  This chang eadds the initialization needed by
 	  stm32f103-minimum board to support the NuttX GPIO Subsystem.  From
 	  Alan Carvalho de Assis (2017-06-08).
@@ -25069,7 +25069,7 @@
 	  NULL.  Modify to use group_exitchild to get the pointer of recent exited
 	  child.  From Yang ChungFan (2019-07-20).
 
-8.1 2019-09-15 Gregory Nutt <gnutt@nuttx.org>
+8.1 2019-09-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sam34/Kconfig:  Add missing DMA configuration setting.
 	  From Bernd Walter (2019-07-21).
@@ -26305,7 +26305,7 @@
 	  board.  From Pavel Pisa (2019-08-30).
 	* board/Kconfig and board/README.txt:  Add configuration support for the
 	  LX_CPU board.  From Gregory Nutt (2019-08-30).
-	* README.txt and Documentstion/README.html:  Update README file
+	* README.txt and Documentation/README.html:  Update README file
 	  references to include the LX_CPU board README file.  From Gregory Nutt
 	  (2019-08-30).
 	* boards/arm/lpc17xx_40xx/lx_cpu/src/lpc17_40_ulan.c:  Provides for
@@ -26319,7 +26319,7 @@
 	* tools/Makefile.win:  Port changes of commit
 	  3ed844640d25b854457b6cc08f89d907072c0054 to Makefile.win.  Untested
 	  because I don't have a Windows native build platform setup.  There
-	  have been a log of changes to the build system lately do to directory
+	  have been a lot of changes to the build system lately do to directory
 	  re-organization so likely the native build is broken.  Certainly
 	  tools/configure.bat should be replaces with tools/configure.c.  From
 	  Gregory Nutt (2019-08-30).
@@ -26339,8 +26339,9 @@
 	  called even when it was conditioned out, causing a link time failure.
 	  From Gregory Nutt (2019-08-31).
 	* net/:  Re-order the content of all address-family socket 'connection'
-	  structures so that they begin with a comomon prologue.  This permits
-	  better use of logic for different address family types.  From Gregory Nutt (2019-09-01).
+	  structures so that they begin with a common prologue.  This permits
+	  better use of logic for different address family types.  From Gregory
+	  Nutt (2019-09-01).
 	* net/local/local_conn.c:  Removed unnecessary memset().  Connection
 	  structure is allocated with kmm_zalloc() which will clear all memory.
 	  From Gregory Nutt (2019-09-01).
@@ -26367,7 +26368,7 @@
 	* arch/arm/src/arm/up_fullcontextrestore.S:  When performing stability
 	  test, the application would cause kernel crash. When I trace the
 	  stack, I find that register R1 has been changed, and its value is the
-	  same as register CPSR.  In p_fullcontextrestore.S, the restoration of
+	  same as register CPSR.  In up_fullcontextrestore.S, the restoration of
 	  R0 and R1 is not atomic:  'msr cpsr r1 will enable interrupts and the
 	  recovery of r0 and r1 may be interrupted and the value or R1 may be
 	  changed.  Fix is to use a single ldmia to restore R0, R1, and return
@@ -26383,7 +26384,7 @@
 	* Fix some typos. Also minor update to stm32f7/nucleo-144/README.txt and
 	  stm32l4/nucleo-l496zg/README.txt board documentation.  From Juha
 	  Niskanen (2019-09-05).
-	* drivers/rf/dat-31r5-sp.c: dd support to the DAT-31R5-SP+ digital
+	* drivers/rf/dat-31r5-sp.c: Add support to the DAT-31R5-SP+ digital
 	  attenuator.  Creates a the new device driver directory drivers/rf/ to
 	  support drivers related to RF peripherals. It also adds support for
 	  the DAT-31R5-SP+ digital attenuator.  From Augusto Fraga Giachero
@@ -26411,10 +26412,10 @@
 	  major and minor version number  From Gregory Nutt (2019-09-07).
 	* arch/arm/src/stm32/stm32_otg[fs|hs]host.c:  STM32 host only initiates
 	  transfer if buflenl > 0.  From Adam Porter (2019-09-08).
-	* STM32F7/H7/L4 OTG host:  Adam porters fix for STM32 FS/HS probably
+	* STM32F7/H7/L4 OTG host:  Adam Porter's fix for STM32 FS/HS probably
 	  should be applied to STM32 F7, H7, and L4 OTG host which are very
 	  similar.  From Gregory Nutt (2019-09-08).
-	* EFM32 OTG host:  Adam porters fix for STM32 FS/HS probably should be
+	* EFM32 OTG host:  Adam Porter's fix for STM32 FS/HS probably should be
 	  applied to EFM32 host which which has very similar IP.  From Gregory
 	  Nutt (2019-09-08).
 	* arch/arm/src/armv7-a:  Fix typo and missing quotation for armv7-a.
@@ -26463,7 +26464,7 @@
 	  re-organization.  From Gregory Nutt (2019-09-11).
 	* boards/arm/imx6/sabre-6quad/scripts/Make.defs:  Yet another boards/
 	  re-organization fix-up.  From Gregory Nutt (2019-09-11).
-	* libs/libc/builtin/: builtint_isavail() should not set the errno
+	* libs/libc/builtin/: builtin_isavail() should not set the errno
 	  variable because this functions may be used by internal OS logic for
 	  which setting the errno variable would be inappropriate.  From Gregory
 	  Nutt (2019-09-11).
