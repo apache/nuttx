@@ -24719,16 +24719,16 @@ Additional new features and extended functionality:
 
       - Add ARMv7-M setjmp/longjump functions.  From David S. Alessio.
 
-    * NXP i.MXRT Drivers:
+    * NXP i.MXRT:
 
       - i.MXRT Clocking:  Enable TRACE clocks if the divider has been
         defined in the board's board.h file.  From Dave Marples.
-      - i.MXRT QEncoder:  Adds quadrature encoder driver for IMXRT.  From
-        Nicholas Chin.
 
     * NXP i.MXRT Drivers:
 
-      - i.MXRT USDHC:  This change completes SDIO support for IMXRT, and
+      - i.MXRT QEncoder:  Adds quadrature encoder driver for IMXRT.  From
+        Nicholas Chin.
+      - i.MXRT uSDHC:  This change completes SDIO support for IMXRT, and
         also adds support for WiFi using the AP6212A module based on Simon
         Piriou's rather excellent work. The patch should also address
         DavidS's concern about width setting for USDHC1 and 2.  Testing of
@@ -24764,7 +24764,7 @@ Additional new features and extended functionality:
 
       - Added architecture support for the NXP S32K1xx family.  Basic
         support includes the boot up logic, clock configuration, LPUART
-        console, Systick timer, GPIO controls, and DMA (unverified).
+        console, Systick timer, GPIO controls, and eDMA (unverified).
 
     * NXP S31K1xx Drivers:
 
@@ -24824,7 +24824,7 @@ Additional new features and extended functionality:
         o Kionix KX022/KX122 Acceleration Sensor.
         o Murata LT1PA01 Proximity and Ambient light Sensor.
         o Rohm RPR0521RS Proximity and Ambient light Sensor.
-        o BMI160: add optional I2C address.
+        o BMI160:  Add optional I2C address.
         From Alin Jerpelea.
       - CXD56xx:  Add the sensor initialization for CXD56xx boards in the
         common board folder:
