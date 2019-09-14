@@ -2592,7 +2592,8 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
 
       default:
-        ASSERT(false);
+        DEBUGPANIC();
+        break;
     }
 
   /* Enable gs2200m irq again */

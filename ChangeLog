@@ -25186,8 +25186,6 @@
 	  +105C. The R means it ships in Tape and Reel packaging as opposed to
 	  Tray.)  From Nathan Hartman (2019-07-29).
 	* Only use PCLKSEL0 for ADC on LPC176x family.  From jjlange (2019-07-29).
-	* arch/arm/src/lpc17xx_40xx/lpc17_40_adc.c:  Fix very minor coding
-	  standard problem in last PR.  From Gregory Nutt (2019-07-29).
 	* arch/arm/src/tiva:  Rename TM4C1294NC identifiers to TM4C1294NCPDT.
 	  Rationale: TM4C1294NC is ambiguous: TM4C1294NCPDT is a 128-TQFP,
 	  TM4C1294NCZAD is a 212-NFBGA.  The TM4C1294NC part currently supported
@@ -25296,7 +25294,7 @@
 	* Rename the arch/risc-v/src/gap8/gap.h to arch/risc-v/src/gap8/gap8.h
 	  From Kejun ZHOU (2019-08-04).
 	* libs/libc/pwd and libs/libc/grp:  Modify to get user/group data from
-	    /etc/passwd and /etc/group if so configurated.
+	    /etc/passwd and /etc/group if so configured.
 	  libs/libc/pwd/lib_find_pwdfile.c:  Add logic to look up user
 	    information in /etc/passwd file, if available.
 	  libs/libc/grp/lib_find_grpfile.c:  Add logic to look up group
@@ -25881,7 +25879,7 @@
 	  From Gregory Nutt (2019-08-17).
 	* - arch/arm/src/s32k1xx:  Add peripheral feature arrays.
 	  - arch/arm/src/s32k1xx/:  Add logic to look up the peripheral clock
-	    frequency.  Fix baud calcuation logic in s32k1xx_lowputc.c:  In no
+	    frequency.  Fix baud calculation logic in s32k1xx_lowputc.c:  In no
 	    longer tries to enable clocking.  That must be done with board
 	    logic.  Now gets the peripheral functional clock frequency to
 	    determine the baud rate.
@@ -25910,7 +25908,7 @@
 	  GPIO functionality.  This also address register definition header file
 	  for LMEM and MPU.  From Gregory Nutt (2019-08-18).
 	* This commit adds support for the S32K146EVB
-	  - arm/s32k1xx/s32k146evb:  Initial support fof S32K146EVB.  Starting
+	  - arm/s32k1xx/s32k146evb:  Initial support for the S32K146EVB.  Starting
 	    point is just the S32K118EVB with name changes.
 	  - boards/arm/s32k1xx/s32k146evb/src/s32k146_periphclocks.c:  Update
 	    peripheral clocking for the S32K146.
@@ -25978,7 +25976,7 @@
 	  verified while running from SRAM.
 	  - boards/arm/s32k1xx/s32k*evb/configs/nsh/defconfig:  Create Motorola
 	    SREC output format.
-	  - arch/arm/src/s32k1xx/s32k1xx_wdog.h:  Fix a typo in a register name.i
+	  - arch/arm/src/s32k1xx/s32k1xx_wdog.h:  Fix a typo in a register name.
 	  - arch/arm/src/s32k1xx/s32k1xx_clockconfig.h:  Remove crystal
 	    frequency, it is not used.
 	  - boards/arm/s32k1xx/s32k118evb:  Add support for execution out of
@@ -26028,9 +26026,9 @@
 	  UUID to read as a file or displayed from an nsh prompt with:  hexdump
 	  /dev/eeprom.uuid  From David Alessio (2019-08-21).
 	* drivers/mmcsd:  Added support for MMC(eMMC) bigger than 2 GB (Tested
-	  with IMXRT1050EVKB and samsung eMMC 16GB).  arch/arm/src/imxrt:  IMXRT
-	  uSDHC driver cmd line reset logic modified.  From Ivan Ucherdzhiev
-	  (2019-08-21).
+	  with IMXRT1050EVKB and samsung eMMC 16GB).
+	* arch/arm/src/imxrt:  IMXRT uSDHC driver cmd line reset logic modified.
+	  From Ivan Ucherdzhiev (2019-08-21).
 	* drivers/mmcsd/mmcsd_sdio.c:  Copy/paste error fix for MMC.  From Ivan
 	  Ucherdzhiev (2019-08-21).
 	* arch/arm/src/s32k1xx:  This commit brings in the LPSPI and LPI2C
