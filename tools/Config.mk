@@ -38,6 +38,10 @@
 #
 ############################################################################
 
+# Disable all built-in rules
+
+.SUFFIXES:
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 export SHELL=cmd
 endif
