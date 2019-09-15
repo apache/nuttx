@@ -235,7 +235,7 @@ endif
 
 ifeq ($(NEED_MATH_H),y)
 include/math.h: include/nuttx/lib/math.h
-	$(Q) cp -f include/nuttx/lib/math.h include/math.h
+	$(Q) cp -pf include/nuttx/lib/math.h include/math.h
 else
 include/math.h:
 endif
@@ -248,7 +248,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
 include/float.h: include/nuttx/lib/float.h
-	$(Q) cp -f include/nuttx/lib/float.h include/float.h
+	$(Q) cp -pf include/nuttx/lib/float.h include/float.h
 else
 include/float.h:
 endif
@@ -260,7 +260,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
 include/stdarg.h: include/nuttx/lib/stdarg.h
-	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
+	$(Q) cp -pf include/nuttx/lib/stdarg.h include/stdarg.h
 else
 include/stdarg.h:
 endif
@@ -272,7 +272,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 include/setjmp.h: include/nuttx/lib/setjmp.h
-	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
+	$(Q) cp -pf include/nuttx/lib/setjmp.h include/setjmp.h
 else
 include/setjmp.h:
 endif
@@ -296,7 +296,8 @@ endif
 
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
 	$(Q) echo "Create version.h"
-	$(Q) tools/mkversion $(TOPDIR) > $@
+	$(Q) tools/mkversion $(TOPDIR) > $@.tmp
+	$(Q) $(call TESTANDREPLACEFILE, $@.tmp, $@)
 
 # Targets used to build include/nuttx/config.h.  Creation of config.h is
 # part of the overall NuttX configuration sequence. Notice that the
@@ -309,7 +310,8 @@ staging:
 	$(Q) mkdir staging
 
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
-	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h
+	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h.tmp
+	$(Q) $(call TESTANDREPLACEFILE, include/nuttx/config.h.tmp, $@)
 
 # Targets used to create dependencies
 
@@ -412,8 +414,6 @@ context: check_context staging include/nuttx/config.h include/nuttx/version.h in
 clean_context:
 	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" clean_context
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" clean_context
-	$(call DELFILE, include/nuttx/config.h)
-	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
@@ -679,6 +679,8 @@ distclean: clean subdir_distclean clean_context
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
 endif
+	$(call DELFILE, include/nuttx/config.h)
+	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
