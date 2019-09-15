@@ -1026,3 +1026,20 @@ config GD25_SLOWREAD
 	default n
 
 endif # MTD_GD25
+
+config MTD_GD5F
+	bool "SPI-based GD5F nand FLASH"
+	default n
+	select SPI
+
+if MTD_GD5F
+
+config GD5F_SPIMODE
+	int "GD5F SPI Mode"
+	default 0
+
+config GD5F_SPIFREQUENCY
+	int "GD5F SPI Frequency"
+	default 20000000
+
+endif # MTD_GD5F
