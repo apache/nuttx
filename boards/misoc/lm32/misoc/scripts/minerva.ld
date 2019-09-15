@@ -71,6 +71,7 @@ SECTIONS
         *(.sdata .sdata.*)
         *(.gnu.linkonce.s.*)
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > main_ram
 

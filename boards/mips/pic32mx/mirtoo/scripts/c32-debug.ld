@@ -247,6 +247,7 @@ SECTIONS
     .lit4 :
     {
         *(.lit4)
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } >kseg1_datamem AT>kseg0_progmem
 

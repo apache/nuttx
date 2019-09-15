@@ -108,8 +108,8 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    _edata = ABSOLUTE(.);
     . = ALIGN(4);
+    _edata = ABSOLUTE(.);
 
     /* Heap starts at the end of .data */
 

@@ -78,6 +78,7 @@ SECTIONS
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > sram AT > flash
 

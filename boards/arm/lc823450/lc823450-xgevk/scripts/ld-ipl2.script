@@ -36,9 +36,9 @@
 
 MEMORY
 {
-    progmem (rx) : ORIGIN = 0x02000e00, LENGTH = 124K
-    sram   (rwx) : ORIGIN = 0x02100000, LENGTH = 256K
-    ramlog (rwx) : ORIGIN = 0x020fe000, LENGTH = 8K
+  progmem (rx) : ORIGIN = 0x02000e00, LENGTH = 124K
+  sram   (rwx) : ORIGIN = 0x02100000, LENGTH = 256K
+  ramlog (rwx) : ORIGIN = 0x020fe000, LENGTH = 8K
 }
 
 OUTPUT_ARCH(arm)
@@ -46,75 +46,75 @@ EXTERN(_vectors)
 ENTRY(_stext)
 SECTIONS
 {
+    .text : {
+        _stext = ABSOLUTE(.);
+        KEEP(*(.vectors))
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > progmem
 
-        .text : {
-                _stext = ABSOLUTE(.);
-                KEEP(*(.vectors))
-                *(.vectors)
-                *(.text .text.*)
-                *(.fixup)
-                *(.gnu.warning)
-                *(.rodata .rodata.*)
-                *(.gnu.linkonce.t.*)
-                *(.glue_7)
-                *(.glue_7t)
-                *(.got)
-                *(.gcc_except_table)
-                *(.gnu.linkonce.r.*)
-                _etext = ABSOLUTE(.);
-        } > progmem
+    .init_section : ALIGN(4) {
+        _sinit = ABSOLUTE(.);
+        KEEP(*(.init_array .init_array.*))
+        _einit = ABSOLUTE(.);
+    } > progmem
 
-        .init_section : ALIGN(4) {
-                _sinit = ABSOLUTE(.);
-                KEEP(*(.init_array .init_array.*))
-                _einit = ABSOLUTE(.);
-        } > progmem
+    .ARM.extab : ALIGN(4) {
+        *(.ARM.extab*)
+    } > progmem
 
-        .ARM.extab : ALIGN(4) {
-                *(.ARM.extab*)
-        } > progmem
+    .ARM.exidx : ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
+        *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
+    } > progmem
 
-        .ARM.exidx : ALIGN(4) {
-                __exidx_start = ABSOLUTE(.);
-                *(.ARM.exidx*)
-                __exidx_end = ABSOLUTE(.);
-        } > progmem
+    _eronly = ABSOLUTE(LOADADDR(.data));
 
-        _eronly = ABSOLUTE(LOADADDR(.data));
+    .data : ALIGN(4) {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    } > sram AT > progmem
 
+    .bss : ALIGN(4) {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sram
 
-        .data : ALIGN(4) {
-                _sdata = ABSOLUTE(.);
-                *(.data .data.*)
-                *(.gnu.linkonce.d.*)
-                CONSTRUCTORS
-                _edata = ABSOLUTE(.);
-        } > sram AT > progmem
+    .ramlog : {
+        *(.ramlog)
+    } > ramlog
 
-        .bss : ALIGN(4) {
-                _sbss = ABSOLUTE(.);
-                *(.bss .bss.*)
-                *(.gnu.linkonce.b.*)
-                *(COMMON)
-                . = ALIGN(4);
-                _ebss = ABSOLUTE(.);
-        } > sram
+    /* Stabs debugging sections. */
 
-        .ramlog : {
-                *(.ramlog)
-        } > ramlog
-
-        /* Stabs debugging sections. */
-        .stab 0 : { *(.stab) }
-        .stabstr 0 : { *(.stabstr) }
-        .stab.excl 0 : { *(.stab.excl) }
-        .stab.exclstr 0 : { *(.stab.exclstr) }
-        .stab.index 0 : { *(.stab.index) }
-        .stab.indexstr 0 : { *(.stab.indexstr) }
-        .comment 0 : { *(.comment) }
-        .debug_abbrev 0 : { *(.debug_abbrev) }
-        .debug_info 0 : { *(.debug_info) }
-        .debug_line 0 : { *(.debug_line) }
-        .debug_pubnames 0 : { *(.debug_pubnames) }
-        .debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

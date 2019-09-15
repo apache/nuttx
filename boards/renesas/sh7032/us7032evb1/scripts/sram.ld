@@ -66,6 +66,7 @@ SECTIONS
         _sdata = ABSOLUTE(.);
         *(.data)        /* Modifiable data      */
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     }
 
