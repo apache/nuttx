@@ -89,9 +89,12 @@ SECTIONS
                 _sbss = ABSOLUTE(.);
                 *(.bss)
                 *(COMMON)
+                . = ALIGN(4);
                 _ebss = ABSOLUTE(.);
         }
-                                        /* Stabs debugging sections.    */
+
+        /* Stabs debugging sections. */
+
         .stab 0 : { *(.stab) }
         .stabstr 0 : { *(.stabstr) }
         .stab.excl 0 : { *(.stab.excl) }

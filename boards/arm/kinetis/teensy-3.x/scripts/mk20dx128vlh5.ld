@@ -48,10 +48,10 @@
 
 MEMORY
 {
-	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
-	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
-	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 128K - 2K
-	datasram (rwx)  : ORIGIN = 0x1fffe000, LENGTH = 16K
+  vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
+  cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
+  progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 128K - 2K
+  datasram (rwx)  : ORIGIN = 0x1fffe000, LENGTH = 16K
 }
 
 OUTPUT_ARCH(arm)
@@ -60,84 +60,85 @@ ENTRY(_stext)
 EXTERN(__flashconfigbytes)
 SECTIONS
 {
-	.vectors : {
-		_svectors = ABSOLUTE(.);
-		*(.vectors)
-		_evectors = ABSOLUTE(.);
-	} > vectflash
+    .vectors : {
+        _svectors = ABSOLUTE(.);
+        *(.vectors)
+        _evectors = ABSOLUTE(.);
+    } > vectflash
 
-	.cfmprotect : {
-		KEEP(*(.cfmconfig))
-	} > cfmprotect
+    .cfmprotect : {
+        KEEP(*(.cfmconfig))
+    } > cfmprotect
 
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > progflash
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > progflash
 
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > progflash
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > progflash
 
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > progflash
+    .ARM.extab : {
+        *(.ARM.extab*)
+    } > progflash
 
-	.ARM.exidx : {
-		__exidx_start = ABSOLUTE(.);
-		*(.ARM.exidx*)
-		__exidx_end = ABSOLUTE(.);
-	} > progflash
+    .ARM.exidx : {
+        __exidx_start = ABSOLUTE(.);
+        *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
+    } > progflash
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > datasram AT > progflash
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > datasram AT > progflash
 
-	_eronly = LOADADDR(.data);
+    _eronly = LOADADDR(.data);
 
-	.ramfunc ALIGN(4): {
-		_sramfuncs = ABSOLUTE(.);
-		*(.ramfunc  .ramfunc.*)
-		_eramfuncs = ABSOLUTE(.);
-	} > datasram AT > progflash
+    .ramfunc ALIGN(4): {
+        _sramfuncs = ABSOLUTE(.);
+        *(.ramfunc  .ramfunc.*)
+        _eramfuncs = ABSOLUTE(.);
+    } > datasram AT > progflash
 
-	_framfuncs = LOADADDR(.ramfunc);
+    _framfuncs = LOADADDR(.ramfunc);
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > datasram
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > datasram
 
-	/* Stabs debugging sections. */
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    /* Stabs debugging sections. */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

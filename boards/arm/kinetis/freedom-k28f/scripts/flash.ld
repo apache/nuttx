@@ -55,11 +55,11 @@
 
 MEMORY
 {
-	vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
-	cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
-	progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 1M - 2K
-	tcm (rwx)       : ORIGIN = 0x1ffc0000, LENGTH = 512K
-	ocram (rwx)     : ORIGIN = 0x34000000, LENGTH = 512K
+  vectflash (rx)  : ORIGIN = 0x00000000, LENGTH = 1K
+  cfmprotect (rx) : ORIGIN = 0x00000400, LENGTH = 16
+  progflash (rx)  : ORIGIN = 0x00000800, LENGTH = 1M - 2K
+  tcm (rwx)       : ORIGIN = 0x1ffc0000, LENGTH = 512K
+  ocram (rwx)     : ORIGIN = 0x34000000, LENGTH = 512K
 }
 
 OUTPUT_ARCH(arm)
@@ -68,94 +68,95 @@ ENTRY(_stext)
 EXTERN(__flashconfigbytes)
 SECTIONS
 {
-	.vectors :
-	{
-		_svectors = ABSOLUTE(.);
-		*(.vectors)
-		_evectors = ABSOLUTE(.);
-	} > vectflash
+    .vectors :
+    {
+        _svectors = ABSOLUTE(.);
+        *(.vectors)
+        _evectors = ABSOLUTE(.);
+    } > vectflash
 
-	.cfmprotect :
-	{
-		KEEP(*(.cfmconfig))
-	} > cfmprotect
+    .cfmprotect :
+    {
+        KEEP(*(.cfmconfig))
+    } > cfmprotect
 
-	.text :
-	{
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > progflash
+    .text :
+    {
+        _stext = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > progflash
 
-	.init_section :
-	{
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > progflash
+    .init_section :
+    {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > progflash
 
-	.ARM.extab :
-	{
-		*(.ARM.extab*)
-	} > progflash
+    .ARM.extab :
+    {
+        *(.ARM.extab*)
+    } > progflash
 
-	.ARM.exidx :
-	{
-		__exidx_start = ABSOLUTE(.);
-		*(.ARM.exidx*)
-		__exidx_end = ABSOLUTE(.);
-	} > progflash
+    .ARM.exidx :
+    {
+        __exidx_start = ABSOLUTE(.);
+        *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
+    } > progflash
 
-	.data :
-	{
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > ocram AT > progflash
+    .data :
+    {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > ocram AT > progflash
 
-	_eronly = LOADADDR(.data);
+    _eronly = LOADADDR(.data);
 
-	.ramfunc ALIGN(4):
-	{
-		_sramfuncs = ABSOLUTE(.);
-		*(.ramfunc  .ramfunc.*)
-		_eramfuncs = ABSOLUTE(.);
-	} > ocram AT > progflash
+    .ramfunc ALIGN(4):
+    {
+        _sramfuncs = ABSOLUTE(.);
+        *(.ramfunc  .ramfunc.*)
+        _eramfuncs = ABSOLUTE(.);
+    } > ocram AT > progflash
 
-	_framfuncs = LOADADDR(.ramfunc);
+    _framfuncs = LOADADDR(.ramfunc);
 
-	.bss :
-	{
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > ocram
+    .bss :
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > ocram
 
-	/* Stabs debugging sections. */
+    /* Stabs debugging sections. */
 
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

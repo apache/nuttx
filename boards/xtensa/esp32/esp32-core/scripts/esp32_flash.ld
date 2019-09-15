@@ -83,7 +83,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    . = ALIGN (8);
+    . = ALIGN(8);
     _ebss = ABSOLUTE(.);
 
     /* Uninitialized .bss */

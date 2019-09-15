@@ -48,9 +48,9 @@
 
 MEMORY
 {
-	norflash (W!RX) : ORIGIN = 0x10000000, LENGTH = 128M
-	isram    (WR)   : ORIGIN = 0x00304000, LENGTH = 128K - 16K
-	sdram    (W!RX) : ORIGIN = 0x20000000, LENGTH = 256K
+    norflash (W!RX) : ORIGIN = 0x10000000, LENGTH = 128M
+    isram    (WR)   : ORIGIN = 0x00304000, LENGTH = 128K - 16K
+    sdram    (W!RX) : ORIGIN = 0x20000000, LENGTH = 256K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -60,87 +60,88 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text :
-	{
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		*(.ARM.extab*)
-		*(.gnu.linkonce.armextab.*)
-		_etext = ABSOLUTE(.);
-	} > norflash
+    .text :
+    {
+        _stext = ABSOLUTE(.);
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        *(.ARM.extab*)
+        *(.gnu.linkonce.armextab.*)
+        _etext = ABSOLUTE(.);
+    } > norflash
 
-	.init_section :
-	{
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > norflash
+    .init_section :
+    {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > norflash
 
-	.ARM.extab :
-	{
-		*(.ARM.extab*)
-	} > norflash
+    .ARM.extab :
+    {
+        *(.ARM.extab*)
+    } > norflash
 
-	/* .ARM.exidx is sorted, so has to go in its own output section.  */
+    /* .ARM.exidx is sorted, so has to go in its own output section.  */
 
-	PROVIDE_HIDDEN (__exidx_start = .);
-	.ARM.exidx :
-	{
-		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
-	} > norflash
-	PROVIDE_HIDDEN (__exidx_end = .);
+    PROVIDE_HIDDEN (__exidx_start = .);
+    .ARM.exidx :
+    {
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    } > norflash
+    PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data :
-	{
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sdram AT > norflash
+    .data :
+    {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > sdram AT > norflash
 
-	_eronly = LOADADDR(.data);
+    _eronly = LOADADDR(.data);
 
-	.bss :
-	{
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sdram
+    .bss :
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sdram
 
-	/* Uninitialized data */
+    /* Uninitialized data */
 
-	.noinit :
-	{
-		_snoinit = ABSOLUTE(.);
-		*(.noinit*)
-		_enoinit = ABSOLUTE(.);
-	} > sdram
+    .noinit :
+    {
+        _snoinit = ABSOLUTE(.);
+        *(.noinit*)
+        _enoinit = ABSOLUTE(.);
+    } > sdram
 
-	/* Stabs debugging sections. */
+    /* Stabs debugging sections. */
 
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

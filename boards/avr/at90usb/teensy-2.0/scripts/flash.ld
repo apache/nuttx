@@ -9,14 +9,14 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *	notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *	notice, this list of conditions and the following disclaimer in
- *	the documentation and/or other materials provided with the
- *	distribution.
+ *  notice, this list of conditions and the following disclaimer in
+ *  the documentation and/or other materials provided with the
+ *  distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
- *	used to endorse or promote products derived from this software
- *	without specific prior written permission.
+ *  used to endorse or promote products derived from this software
+ *  without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -44,9 +44,9 @@
 
 MEMORY
 {
-	flash    (rx) : ORIGIN = 0, LENGTH = 128K
-	sram   (rw!x) : ORIGIN = 0x800100, LENGTH = 8K
-	eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 4K
+  flash    (rx) : ORIGIN = 0, LENGTH = 128K
+  sram   (rw!x) : ORIGIN = 0x800100, LENGTH = 8K
+  eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 4K
 }
 
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
@@ -55,158 +55,159 @@ ENTRY(__start)
 
 SECTIONS
 {
-	/* Read-only sections, merged into text segment: */
+    /* Read-only sections, merged into text segment: */
 
-	.hash			: { *(.hash) }
-	.dynsym			: { *(.dynsym) }
-	.dynstr			: { *(.dynstr) }
-	.gnu.version	: { *(.gnu.version) }
-	.gnu.version_d	: { *(.gnu.version_d) }
-	.gnu.version_r	: { *(.gnu.version_r) }
-	.rel.init		: { *(.rel.init) }
-	.rela.init		: { *(.rela.init) }
+    .hash           : { *(.hash) }
+    .dynsym         : { *(.dynsym) }
+    .dynstr         : { *(.dynstr) }
+    .gnu.version    : { *(.gnu.version) }
+    .gnu.version_d  : { *(.gnu.version_d) }
+    .gnu.version_r  : { *(.gnu.version_r) }
+    .rel.init       : { *(.rel.init) }
+    .rela.init      : { *(.rela.init) }
 
-	.rel.text		:
-		{
-			*(.rel.text)
-			*(.rel.text.*)
-			*(.rel.gnu.linkonce.t*)
-		}
+    .rel.text       :
+        {
+            *(.rel.text)
+            *(.rel.text.*)
+            *(.rel.gnu.linkonce.t*)
+        }
 
-	.rela.text		:
-		{
-			*(.rela.text)
-			*(.rela.text.*)
-			*(.rela.gnu.linkonce.t*)
-		}
+    .rela.text      :
+        {
+            *(.rela.text)
+            *(.rela.text.*)
+            *(.rela.gnu.linkonce.t*)
+        }
 
-	.rel.fini		: { *(.rel.fini) }
-	.rela.fini		: { *(.rela.fini) }
+    .rel.fini       : { *(.rel.fini) }
+    .rela.fini      : { *(.rela.fini) }
 
-	.rel.rodata		:
-		{
-			*(.rel.rodata)
-			*(.rel.rodata.*)
-			*(.rel.gnu.linkonce.r*)
-		}
+    .rel.rodata     :
+        {
+            *(.rel.rodata)
+            *(.rel.rodata.*)
+            *(.rel.gnu.linkonce.r*)
+        }
 
-	.rela.rodata	:
-		{
-			*(.rela.rodata)
-			*(.rela.rodata.*)
-			*(.rela.gnu.linkonce.r*)
-		}
+    .rela.rodata    :
+        {
+            *(.rela.rodata)
+            *(.rela.rodata.*)
+            *(.rela.gnu.linkonce.r*)
+        }
 
-	.rel.data		:
-		{
-			*(.rel.data)
-			*(.rel.data.*)
-			*(.rel.gnu.linkonce.d*)
-		}
+    .rel.data       :
+        {
+            *(.rel.data)
+            *(.rel.data.*)
+            *(.rel.gnu.linkonce.d*)
+        }
 
-	.rela.data		:
-		{
-			*(.rela.data)
-			*(.rela.data.*)
-			*(.rela.gnu.linkonce.d*)
-		}
+    .rela.data      :
+        {
+            *(.rela.data)
+            *(.rela.data.*)
+            *(.rela.gnu.linkonce.d*)
+        }
 
-	.rel.ctors		: { *(.rel.ctors) }
-	.rela.ctors		: { *(.rela.ctors) }
-	.rel.dtors		: { *(.rel.dtors) }
-	.rela.dtors		: { *(.rela.dtors) }
-	.rel.got		: { *(.rel.got) }
-	.rela.got		: { *(.rela.got) }
-	.rel.bss		: { *(.rel.bss) }
-	.rela.bss		: { *(.rela.bss) }
-	.rel.plt		: { *(.rel.plt) }
-	.rela.plt		: { *(.rela.plt) }
+    .rel.ctors      : { *(.rel.ctors) }
+    .rela.ctors     : { *(.rela.ctors) }
+    .rel.dtors      : { *(.rel.dtors) }
+    .rela.dtors     : { *(.rela.dtors) }
+    .rel.got        : { *(.rel.got) }
+    .rela.got       : { *(.rela.got) }
+    .rel.bss        : { *(.rel.bss) }
+    .rela.bss       : { *(.rela.bss) }
+    .rel.plt        : { *(.rel.plt) }
+    .rela.plt       : { *(.rela.plt) }
 
-	.text			:
-	{
-		_stext = . ;
-		*(.vectors)
-		*(.init)
-		*(.handlers)
-		*(.progmem .progmem.*)
-		*(.text)
-		*(.text.*)
-		_etext = . ;
-	} > flash
+    .text           :
+    {
+        _stext = . ;
+        *(.vectors)
+        *(.init)
+        *(.handlers)
+        *(.progmem .progmem.*)
+        *(.text)
+        *(.text.*)
+        _etext = . ;
+    } > flash
 
-	_eronly = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	.data			:
-	{
-		_sdata = ABSOLUTE(.);
-		*(.rodata .rodata.*)
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+    .data           :
+    {
+        _sdata = ABSOLUTE(.);
+        *(.rodata .rodata.*)
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > sram AT > flash
 
-	.bss			:
-	{
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sram
+    .bss            :
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sram
 
-	/* Global data not cleared after reset.	*/
+    /* Global data not cleared after reset. */
 
-	.noinit			:
-	{
-		_snoinit = ABSOLUTE(.);
-		*(.noinit*)
-		_enoinit = ABSOLUTE(.);
-	}	> sram
+    .noinit         :
+    {
+        _snoinit = ABSOLUTE(.);
+        *(.noinit*)
+        _enoinit = ABSOLUTE(.);
+    }   > sram
 
-	.eeprom			:
-	{
-		_seeprom = ABSOLUTE(.);
-		*(.eeprom*)
-		_eeeprom = ABSOLUTE(.);
-	}	> eeprom
+    .eeprom         :
+    {
+        _seeprom = ABSOLUTE(.);
+        *(.eeprom*)
+        _eeeprom = ABSOLUTE(.);
+    }   > eeprom
 
-	/* Stabs debugging sections.	*/
+    /* Stabs debugging sections.    */
 
-	.stab 0				: { *(.stab) }
-	.stabstr 0			: { *(.stabstr) }
-	.stab.excl 0		: { *(.stab.excl) }
-	.stab.exclstr 0		: { *(.stab.exclstr) }
-	.stab.index 0		: { *(.stab.index) }
-	.stab.indexstr 0	: { *(.stab.indexstr) }
-	.comment 0			: { *(.comment) }
+    .stab 0             : { *(.stab) }
+    .stabstr 0          : { *(.stabstr) }
+    .stab.excl 0        : { *(.stab.excl) }
+    .stab.exclstr 0     : { *(.stab.exclstr) }
+    .stab.index 0       : { *(.stab.index) }
+    .stab.indexstr 0    : { *(.stab.indexstr) }
+    .comment 0          : { *(.comment) }
 
-	/* DWARF debug sections.
-		 Symbols in the DWARF debugging sections are relative to the beginning
-		 of the section so we begin them at 0.	*/
+    /* DWARF debug sections.
+         Symbols in the DWARF debugging sections are relative to the beginning
+         of the section so we begin them at 0.  */
 
-	/* DWARF 1 */
+    /* DWARF 1 */
 
-	.debug 0			: { *(.debug) }
-	.line 0				: { *(.line) }
+    .debug 0            : { *(.debug) }
+    .line 0             : { *(.line) }
 
-	/* GNU DWARF 1 extensions */
+    /* GNU DWARF 1 extensions */
 
-	.debug_srcinfo 0	: { *(.debug_srcinfo) }
-	.debug_sfnames 0	: { *(.debug_sfnames) }
+    .debug_srcinfo 0    : { *(.debug_srcinfo) }
+    .debug_sfnames 0    : { *(.debug_sfnames) }
 
-	/* DWARF 1.1 and DWARF 2 */
+    /* DWARF 1.1 and DWARF 2 */
 
-	.debug_aranges 0 	: { *(.debug_aranges) }
-	.debug_pubnames 0	: { *(.debug_pubnames) }
+    .debug_aranges 0    : { *(.debug_aranges) }
+    .debug_pubnames 0   : { *(.debug_pubnames) }
 
-	/* DWARF 2 */
+    /* DWARF 2 */
 
-	.debug_info 0		: { *(.debug_info) *(.gnu.linkonce.wi.*) }
-	.debug_abbrev 0		: { *(.debug_abbrev) }
-	.debug_line 0		: { *(.debug_line) }
-	.debug_frame 0		: { *(.debug_frame) }
-	.debug_str 0		: { *(.debug_str) }
-	.debug_loc 0		: { *(.debug_loc) }
-	.debug_macinfo 0	: { *(.debug_macinfo) }
+    .debug_info 0       : { *(.debug_info) *(.gnu.linkonce.wi.*) }
+    .debug_abbrev 0     : { *(.debug_abbrev) }
+    .debug_line 0       : { *(.debug_line) }
+    .debug_frame 0      : { *(.debug_frame) }
+    .debug_str 0        : { *(.debug_str) }
+    .debug_loc 0        : { *(.debug_loc) }
+    .debug_macinfo 0    : { *(.debug_macinfo) }
 }

@@ -68,14 +68,14 @@
 
 MEMORY
 {
-    /* 2048KiB of internal FLASH */
+  /* 2048KiB of internal FLASH */
 
-    kflash (rx)      : ORIGIN = 0x00400000, LENGTH = 1M
-    uflash (rx)      : ORIGIN = 0x00500000, LENGTH = 1M
+  kflash (rx)      : ORIGIN = 0x00400000, LENGTH = 1M
+  uflash (rx)      : ORIGIN = 0x00500000, LENGTH = 1M
 
-    /* 384Kb of internal SRAM */
+  /* 384Kb of internal SRAM */
 
-    ksram (rwx)      : ORIGIN = 0x20400000, LENGTH = 128K
-    usram (rwx)      : ORIGIN = 0x20420000, LENGTH = 128K
-    xsram (rwx)      : ORIGIN = 0x20440000, LENGTH = 128K
+  ksram (rwx)      : ORIGIN = 0x20400000, LENGTH = 128K
+  usram (rwx)      : ORIGIN = 0x20420000, LENGTH = 128K
+  xsram (rwx)      : ORIGIN = 0x20440000, LENGTH = 128K
 }

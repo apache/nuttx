@@ -37,49 +37,50 @@ OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	/* The OS entry point is here */
+    /* The OS entry point is here */
 
-	. = 0x00008000;
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
-		_etext = ABSOLUTE(.);
-	}
+    . = 0x00008000;
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)         /* Global offset table      */
+        _etext = ABSOLUTE(.);
+    }
 
-	_eronly = ABSOLUTE(.);
-	. = ALIGN(4096);
+    _eronly = ABSOLUTE(.);
+    . = ALIGN(4096);
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    }
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    }
 
-	/* Stabs debugging sections. */
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    /* Stabs debugging sections. */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

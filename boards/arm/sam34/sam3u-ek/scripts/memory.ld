@@ -79,19 +79,19 @@
 
 MEMORY
 {
-    /* 256Kb FLASH */
+  /* 256Kb FLASH */
 
-    kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 64K
-    uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 64K
-    xflash (rx)  : ORIGIN = 0x000a0000, LENGTH = 128K
+  kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 64K
+  uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 64K
+  xflash (rx)  : ORIGIN = 0x000a0000, LENGTH = 128K
 
-    /* 32Kb SRAM */
+  /* 32Kb SRAM */
 
-    ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
-    usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 4K
-    xsram1 (rwx) : ORIGIN = 0x20002000, LENGTH = 24K
+  ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
+  usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 4K
+  xsram1 (rwx) : ORIGIN = 0x20002000, LENGTH = 24K
 
-    /* 16Kb SRAM */
+  /* 16Kb SRAM */
 
-    sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
+  sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
 }

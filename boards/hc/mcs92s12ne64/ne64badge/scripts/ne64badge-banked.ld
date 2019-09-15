@@ -51,8 +51,8 @@ MEMORY
    * top 256 bytes of page 3f is reserved to hold the interrupt vectors
    */
 
-  lowtext(rx)   : ORIGIN = 0x4000, LENGTH = 16K			/* Page 3e */
-  hitext (rx)   : ORIGIN = 0xc000, LENGTH = 16K-256		/* Page 3f */
+  lowtext(rx)   : ORIGIN = 0x4000, LENGTH = 16K         /* Page 3e */
+  hitext (rx)   : ORIGIN = 0xc000, LENGTH = 16K-256     /* Page 3f */
 
   /* Flash memory pages:
    *
@@ -65,23 +65,23 @@ MEMORY
    * with PPAGE values 0x30 through 0x3f, is occupied by on chip flash.
    */
 
-  page30 (rx)   : ORIGIN = 0x0c0000, LENGTH = 16K		/* Page 30 */
-  page31 (rx)   : ORIGIN = 0x0c4000, LENGTH = 16K		/* Page 31 */
-  page32 (rx)   : ORIGIN = 0x0c8000, LENGTH = 16K		/* Page 32 */
-  page33 (rx)   : ORIGIN = 0x0cc000, LENGTH = 16K		/* Page 33 */
-  page34 (rx)   : ORIGIN = 0x0d0000, LENGTH = 16K		/* Page 34 */
-  page35 (rx)   : ORIGIN = 0x0d4000, LENGTH = 16K		/* Page 35 */
-  page36 (rx)   : ORIGIN = 0x0d8000, LENGTH = 16K		/* Page 36 */
-  page37 (rx)   : ORIGIN = 0x0dc000, LENGTH = 16K		/* Page 37 */
-  page38 (rx)   : ORIGIN = 0x0e0000, LENGTH = 16K		/* Page 38 */
-  page39 (rx)   : ORIGIN = 0x0e4000, LENGTH = 16K		/* Page 39 */
-  page3a (rx)   : ORIGIN = 0x0e8000, LENGTH = 16K		/* Page 3a */
-  page3b (rx)   : ORIGIN = 0x0ec000, LENGTH = 16K		/* Page 3b */
-  page3c (rx)   : ORIGIN = 0x0f0000, LENGTH = 16K		/* Page 3c */
-  page3d (rx)   : ORIGIN = 0x0f4000, LENGTH = 16K		/* Page 3d */
+  page30 (rx)   : ORIGIN = 0x0c0000, LENGTH = 16K       /* Page 30 */
+  page31 (rx)   : ORIGIN = 0x0c4000, LENGTH = 16K       /* Page 31 */
+  page32 (rx)   : ORIGIN = 0x0c8000, LENGTH = 16K       /* Page 32 */
+  page33 (rx)   : ORIGIN = 0x0cc000, LENGTH = 16K       /* Page 33 */
+  page34 (rx)   : ORIGIN = 0x0d0000, LENGTH = 16K       /* Page 34 */
+  page35 (rx)   : ORIGIN = 0x0d4000, LENGTH = 16K       /* Page 35 */
+  page36 (rx)   : ORIGIN = 0x0d8000, LENGTH = 16K       /* Page 36 */
+  page37 (rx)   : ORIGIN = 0x0dc000, LENGTH = 16K       /* Page 37 */
+  page38 (rx)   : ORIGIN = 0x0e0000, LENGTH = 16K       /* Page 38 */
+  page39 (rx)   : ORIGIN = 0x0e4000, LENGTH = 16K       /* Page 39 */
+  page3a (rx)   : ORIGIN = 0x0e8000, LENGTH = 16K       /* Page 3a */
+  page3b (rx)   : ORIGIN = 0x0ec000, LENGTH = 16K       /* Page 3b */
+  page3c (rx)   : ORIGIN = 0x0f0000, LENGTH = 16K       /* Page 3c */
+  page3d (rx)   : ORIGIN = 0x0f4000, LENGTH = 16K       /* Page 3d */
 
-  page3e (rx)   : ORIGIN = 0x0f8000, LENGTH = 16K		/* Page 3e */
-  page3f (rx)   : ORIGIN = 0x0fc000, LENGTH = 16K-2K	/* Page 3f */
+  page3e (rx)   : ORIGIN = 0x0f8000, LENGTH = 16K       /* Page 3e */
+  page3f (rx)   : ORIGIN = 0x0fc000, LENGTH = 16K-2K    /* Page 3f */
 
   /* Vectors */
 
@@ -91,61 +91,62 @@ MEMORY
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(nonbanked)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > hitext
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(nonbanked)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > hitext
 
-	_eronly = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sram AT > lowtext
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > sram AT > lowtext
 
-	.vectors : {
-		*(vectors)
-	} > vectors
+    .vectors : {
+        *(vectors)
+    } > vectors
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sram
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+               . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sram
 
-	.vectors : {
-		_svectors = ABSOLUTE(.);
-		*(.vectors)
-		_evectors = ABSOLUTE(.);
-	} > vectors
+    .vectors : {
+        _svectors = ABSOLUTE(.);
+        *(.vectors)
+        _evectors = ABSOLUTE(.);
+    } > vectors
 
-	/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    /* Stabs debugging sections.    */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

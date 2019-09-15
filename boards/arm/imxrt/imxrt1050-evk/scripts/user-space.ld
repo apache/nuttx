@@ -113,6 +113,7 @@ SECTIONS
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    . = ALIGN(4);
     _ebss = ABSOLUTE(.);
   } > uocram
 
