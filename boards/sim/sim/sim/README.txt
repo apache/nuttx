@@ -621,7 +621,7 @@ nsh
   1. This version has one builtin function:  This configuration:
      apps/examples/hello.
 
-  2. This version has password protection enable.  Here is the login:
+  2. This version has password protection enabled.  Here is the login info:
 
        USERNAME:  admin
        PASSWORD:  Administrator
