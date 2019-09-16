@@ -125,6 +125,16 @@ has a similar BSD style license:
    Copyright (c) 2001-2003, Adam Dunkels.
    All rights reserved.
 
+Rhombus Math Library
+====================
+
+The math library used in NuttX derives from the Rhombus OS by Nick Johnson
+(with many, many addtions).  The Rhombus OS is/was distributed under the ISC
+license.  The ISC licsense is a permissive license that allows people do
+anything with your code with proper attribution and without warranty.  The
+ISC license is functionally equivalent to the BSD 2-Clause and MIT licenses,
+removing some language that is no longer necessary.
+
 IGMP
 ===
 
