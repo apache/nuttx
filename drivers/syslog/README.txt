@@ -162,7 +162,7 @@ SYSLOG Channels
 
   Returned Value:
 
-    Zero (OK)is returned on  success.  A negated errno value is returned
+    Zero (OK) is returned on success.  A negated errno value is returned
     on any failure.
 
   SYSLOG Channel Initialization
@@ -244,14 +244,15 @@ SYSLOG Channels
   SYSLOG output from interrupt level logic.  In an embedded system, that is
   often where the most critical operations are performed.
 
-  There are three conditions under which SYSLOG output generated from interrupt level processing can a included the SYSLOG output stream:
+  There are three conditions under which SYSLOG output generated from
+  interrupt level processing can a included the SYSLOG output stream:
 
   1. Low-Level Serial Output
   --------------------------
   If you are using a SYSLOG console channel (CONFIG_SYSLOG_CONSOLE) with a
   serial console (CONFIG_SYSLOG_SERIAL_CONSOLE) and if the underlying
   architecture supports the low-level up_putc() interface
-  (CONFIG_ARCH_LOWPUTC), then the SYLOG logic will direct the output to
+  (CONFIG_ARCH_LOWPUTC), then the SYSLOG logic will direct the output to
   up_putc() which is capable of generating the serial output within the
   context of an interrupt handler.
 
@@ -288,7 +289,7 @@ SYSLOG Channels
       In this case, the interrupt level SYSLOG output will interrupt the
       normal output stream and the interrupt level SYSLOG output will be
       inserted into the correct position in the SYSLOG output when the next
-      normal SYLOG output is generated.
+      normal SYSLOG output is generated.
 
   The SYSLOG interrupt buffer is enabled with CONFIG_SYSLOG_INTBUFFER.  When
   the interrupt buffer is enabled, you must also provide the size of the

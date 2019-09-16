@@ -68,22 +68,22 @@ static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
   do
     {
       /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
+       * syslog_force returns a negated errno value.
        */
 
       ret = syslog_force(ch);
-      if (ret != EOF)
+      if (ret >= 0)
         {
           this->nput++;
           return;
         }
 
-      /* The special errno value -EINTR means that syslog_putc() was
+      /* The special return value -EINTR means that syslog_force() was
        * awakened by a signal.  This is not a real error and must be
        * ignored in this context.
        */
     }
-  while (errno == -EINTR);
+  while (ret == -EINTR);
 }
 
 /****************************************************************************
