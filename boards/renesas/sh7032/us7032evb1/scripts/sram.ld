@@ -74,7 +74,7 @@ SECTIONS
         _sbss = ABSOLUTE(.);
         *(.bss)
         *(COMMON)
-               . = ALIGN(4);
+        . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     }
     /* Stabs debugging sections.    */
