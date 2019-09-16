@@ -307,7 +307,7 @@ void spin_lockr(FAR struct spinlock_s *lock)
         }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-      /* Notify that we have thespinlock */
+      /* Notify that we have the spinlock */
 
       sched_note_spinlocked(this_task(), &lock->sp_lock);
 #endif
@@ -338,11 +338,11 @@ void spin_lockr(FAR struct spinlock_s *lock)
   while (up_testset(&lock->sp_lock) == SP_LOCKED)
     {
       sched_yield();
-      SP_DSB()
+      SP_DSB();
     }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  /* Notify that we have thespinlock */
+  /* Notify that we have the spinlock */
 
   sched_note_spinlocked(this_task(), &lock->sp_lock);
 #endif
