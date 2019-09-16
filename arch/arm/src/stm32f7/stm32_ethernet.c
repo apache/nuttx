@@ -1796,7 +1796,17 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
       if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
-          nwarn("WARNING: DROPPED Too big: %d\n", dev->d_len);
+          nerr("ERROR: Dropped, Too big: %d\n", dev->d_len);
+
+          /* Free dropped packet buffer */
+
+          if (dev->d_buf)
+            {
+              stm32_freebuffer(priv, dev->d_buf);
+              dev->d_buf = NULL;
+              dev->d_len = 0;
+            }
+
           continue;
         }
 
