@@ -114,7 +114,6 @@ SECTIONS
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
-        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > sram AT > lowtext
 
@@ -127,7 +126,6 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
-               . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > sram
 

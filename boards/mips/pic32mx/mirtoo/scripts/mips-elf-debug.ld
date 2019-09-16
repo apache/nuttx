@@ -265,7 +265,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
-               . = ALIGN(4);
+        . = ALIGN(16);
         _ebss = ABSOLUTE(.);
     } > kseg1_datamem
 
