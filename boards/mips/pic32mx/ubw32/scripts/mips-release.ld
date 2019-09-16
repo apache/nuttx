@@ -257,6 +257,7 @@ SECTIONS
 
     .sbss :
     {
+        . = ALIGN(16);
         _sbss = ABSOLUTE(.);
         *(.dynsbss)
         *(.sbss .sbss.* .gnu.linkonce.sb.*)
