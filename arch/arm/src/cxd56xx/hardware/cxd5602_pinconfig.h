@@ -649,11 +649,11 @@
 #define PINCONFS_USB_VBUSINT_GPIO           { PINCONF_USB_VBUSINT_GPIO }
 #define PINCONFS_USB_VBUSINT                { PINCONF_USB_VBUSINT }
 
-#ifdef CONFIG_BOARD_CUSTOM_PINCONFIG
+#ifdef CONFIG_CXD56_CUSTOM_PINCONFIG
 /* Change the pin configuration depending on each board */
 
 #  include <arch/board/board_pinconfig.h>
 
-#endif /* CONFIG_BOARD_CUSTOM_PINCONFIG */
+#endif /* CONFIG_CXD56_CUSTOM_PINCONFIG */
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H */
