@@ -355,9 +355,17 @@ endmenu # Binary Output Formats
 
 menu "Customize Header Files"
 
+config ARCH_HAVE_STDINT_H
+	bool
+	default n
+	---help---
+		Selected by architecture specific logic if the architecture provides
+		a stdint.h header file.
+
 config ARCH_STDINT_H
 	bool "stdint.h"
 	default n
+	depends on ARCH_HAVE_STDINT_H
 	---help---
 		The stdint.h header file can be found at nuttx/include/stdint.h.
 		However, that header includes logic to redirect the inclusion of an
@@ -372,9 +380,17 @@ config ARCH_STDINT_H
 		Recall that that include path, include/arch, is a symbolic link and
 		will refer to a version of stdint.h at nuttx/arch/<architecture>/include/stdint.h.
 
+config ARCH_HAVE_STDBOOL_H
+	bool
+	default n
+	---help---
+		Selected by architecture specific logic if the architecture provides
+		a stdbool.h header file.
+
 config ARCH_STDBOOL_H
 	bool "stdbool.h"
 	default n
+	depends on ARCH_HAVE_STDBOOL_H
 	---help---
 		The stdbool.h header file can be found at nuttx/include/stdbool.h.
 		However, that header includes logic to redirect the inclusion of an
@@ -389,8 +405,16 @@ config ARCH_STDBOOL_H
 		Recall that that include path, include/arch, is a symbolic link and
 		will refer to a version of stdbool.h at nuttx/arch/<architecture>/include/stdbool.h.
 
+config ARCH_HAVE_MATH_H
+	bool
+	default n
+	---help---
+		Selected by architecture specific logic if the architecture provides
+		a math.h header file.
+
 config ARCH_MATH_H
 	bool "math.h"
+	depends on ARCH_HAVE_MATH_H
 	default n
 	---help---
 		There is also a re-directing version of math.h in the source tree.
@@ -421,8 +445,16 @@ config ARCH_FLOAT_H
 		there is no assurance that the settings in this float.h are actually
 		correct for your platform!
 
+config ARCH_HAVE_STDARG_H
+	bool
+	default n
+	---help---
+		Selected by architecture specific logic if the architecture provides
+		a math.h header file.
+
 config ARCH_STDARG_H
 	bool "stdarg.h"
+	depends on ARCH_HAVE_STDARG_H
 	default n
 	---help---
 		There is a redirecting version of stdarg.h in the source tree. It
