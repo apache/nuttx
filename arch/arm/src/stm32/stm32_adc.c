@@ -4563,7 +4563,7 @@ static void adc_llops_dumpregs(FAR struct stm32_adc_dev_s *dev)
  *   channels  - Number of channels (regular + injected)
  *
  * Returned Value:
- *   Valid ADC device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

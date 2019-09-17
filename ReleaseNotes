@@ -2540,7 +2540,7 @@ Bugfixes include:
     * STM32.  GPIO initialize logic (submitted by Mike Smith).  Fix the
       debug logic that dumps the GPIO configuration.
 
-    * LPC17xxx.  Correct an integeter overlow in GPIO interrupt setup
+    * LPC17xxx.  Correct an integer overflow in GPIO interrupt setup
       (prevented pins > 15 from being used as interrupt sources).  Correct
       a value used in GPIO interrupt number range test.
 
@@ -14028,7 +14028,7 @@ detailed bugfix information):
         pend_reprios.  The second case rtcb->sched_priority <=
         htcb->sched_priority did not check if there is sufficient space in
         the pend_reprios array.  From David Sidrane.
-      - lp_worker:  Guard from pend_reprios overlow.  From David Sidrane.
+      - lp_worker:  Guard from pend_reprios overflow.  From David Sidrane.
       - Priority inheritance: Fixes improper restoration of base_priority in
         the case of CONFIG_SEM_PREALLOCHOLDERS=0.  The call to
         sem_restorebaseprio_task context switches in the
@@ -15168,7 +15168,7 @@ detailed bugfix information):
       - TCP Networking:  Correct some issues that prevent TCP from working
         correctly when both IPv4 and IPv6 are enabled.
       - TCP Networking:  TCP disconnection callbacks are not retained in a
-        list.  This will support mutiple callbacks per lower-level TCP
+        list.  This will support multiple callbacks per lower-level TCP
         connection structure.  That is necessary for the cae where a socket is
         dup'ed and shares the same lower-level connection structure.  NOTE:
         There still needs to be a call to tcp_start_monitor() when the socket
@@ -21993,7 +21993,7 @@ Additional new features and extended functionality:
       - ARMv7-A:  Support thumb mode and fix interworking issue. From
         zhangyuan7.
       - ARMv7-A:  Add weak attribute to arm_data_initialize so platform
-        could provide the new implemenation as needed.  From zhangyuan7.
+        could provide the new implementation as needed.  From zhangyuan7.
       - ARMv7-A:  Add SCR bit definitions.  From Xiang Xiao.
       - ARMv7-A:  Add mmu_l1_map_regions() to remove the code duplication.
         From Xiang Xiao.
@@ -22714,7 +22714,7 @@ detailed bugfix information):
         defined.  From GregoryN.
       - STM32F769I-DISCO:  Remove CONFIG_STM32F7_QUADSPI=y from the
         configuration.  This was apparently set before the implementation
-        was added.  Now that the implemenation was added, the configuration
+        was added.  Now that the implementation was added, the configuration
         will not build because it requires that QSPI GPIO pin definitions
         be provided in the board.h header file.  From Gregory Nutt.
 
@@ -24979,7 +24979,7 @@ Additional new features and extended functionality:
         with applications.  This should permit built-in application in the
         PROTECTED build where binfmt/libbuiltin was not available in user
         space.  From Gregory Nutt.
-      - libs/libc/dirent/:  Added alphasort() implemenation, scandir()
+      - libs/libc/dirent/:  Added alphasort() implementation, scandir()
         implementation and DT_* definitions to include/dirent.h.  Apparently
         those definitions are not required by POSIX, but are part of
         4.3BSD and available in glibc as well.  From Michael Jung.

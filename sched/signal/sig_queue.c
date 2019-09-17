@@ -159,7 +159,7 @@ int nxsig_queue(int pid, int signo, void *sival_ptr)
  *
  * Returned Value:
  *    On  success (at least one signal was sent), zero (OK) is returned.  On
- *    any failure, -1 (ERROR) is returned and errno varaible is set
+ *    any failure, -1 (ERROR) is returned and errno variable is set
  *    appropriately:
  *
  *    EGAIN  - The limit of signals which may be queued has been reached.

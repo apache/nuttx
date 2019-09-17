@@ -1492,14 +1492,14 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
  *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Theregore, all GPIO chip management is deferred to board-
+ *   required.  Therefore, all GPIO chip management is deferred to board-
  *   specific logic.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SSI interfaces)
+ *   Port number (for hardware that has multiple SSI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -1555,7 +1555,7 @@ static int dac_blockinit(void)
  *   intf - The DAC interface number.
  *
  * Returned Value:
- *   Valid dac device structure reference on succcess; a NULL on failure.
+ *   Valid DAC device structure reference on success; a NULL on failure.
  *
  * Assumptions:
  *   1. Clock to the DAC block has enabled,

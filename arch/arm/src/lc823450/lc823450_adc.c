@@ -530,7 +530,7 @@ static int lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
  * Input Parameters:
  *
  * Returned Value:
- *   Valid ADC device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

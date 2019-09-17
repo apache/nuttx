@@ -1118,7 +1118,7 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
  *   the packing operation to begin with.
  *
  *   Writing is performed at the end of the free FLASH region and this
- *   implemenation is restricted to a single writer.  The new inode is not
+ *   implementation is restricted to a single writer.  The new inode is not
  *   written to FLASH until the writer is closed and so will not be
  *   found by nxffs_packblock().
  *
@@ -1503,7 +1503,7 @@ start_pack:
                               packed = true;
 
                               /* Writing is performed at the end of the free
-                               * FLASH region and this implemenation is restricted
+                               * FLASH region and this implementation is restricted
                                * to a single writer.  The new inode is not
                                * written to FLASH until the writer is closed
                                * and so will not be found by nxffs_packblock().

@@ -5222,7 +5222,7 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
  * Name: efm32_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

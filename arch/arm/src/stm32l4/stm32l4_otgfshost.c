@@ -5258,7 +5258,7 @@ static inline void stm32l4_sw_initialize(FAR struct stm32l4_usbhost_s *priv)
  * Name: stm32l4_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

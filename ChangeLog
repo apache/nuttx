@@ -14252,7 +14252,7 @@
 	* arch/arm/src/xmc4:  Initial, partial support for Infineon XMC4xxx
 	  (2017-03-14).
 	* photon:  Porting wlan device.  From Simon Piriou (2017-03-14).
-	* lp_worker:  Guard from pend_reprios overlow.  From David Sidrane
+	* lp_worker:  Guard from pend_reprios overflow.  From David Sidrane
 	  (2017-03-15).
 	* wireless/ieee802154: Renamed file ieee802154_device to
 	  radio802154_device.  From Anthony Merlino (2017-03-15).
@@ -16621,7 +16621,7 @@
 	  another TCP-specific logic in inet/ that should be moved sometime,
 	  but those are more entangled (2017-08-29).
 	* Networking:  TCP disconnection callbacks are not retained in a list.
-	  This will support mutiple callbacks per lower-level TCP connection
+	  This will support multiple callbacks per lower-level TCP connection
 	  structure.  That is necessary for the cae where a socket is dup'ed
 	  and shares the same lower-level connection structure.  NOTE:  There
 	  still needs to be a call to tcp_start_monitor() when the socket is
@@ -23637,7 +23637,7 @@
 	* arch/arm/src/armv7-a:  Guard some assembly files if configuration not
 	  selected.  From zhangyuan7 (2019-03-19).
 	* arch/arm/src/armv7-a/arm_head.S:  Add weak attribute to
-	  arm_data_initialize so platform could provide the new implemenation as
+	  arm_data_initialize so platform could provide the new implementation as
 	  needed.  From zhangyuan7 (2019-03-19).
 	* arch/arm/src/armv7-a:  Fix assemble error when including gic.h  From
 	  Xiang Xiao (2019-03-19).
@@ -23714,7 +23714,7 @@
 	  apps/examples/pwlines.  From Gregory Nutt (2019-03-20).
 	* configs/stm32f769i-disco/netnsh/defconfig:  Remove
 	  CONFIG_STM32F7_QUADSPI=y from the configuration.  This was apparently
-	  set before the implementation was added.  Now that the implemenation
+	  set before the implementation was added.  Now that the implementation
 	  was added, the configuration will not build because it requires that
 	  QSPI GPIO pin definitions be provided in the board.h header file.
 	  From Gregory Nutt (2019-03-20).
@@ -25209,7 +25209,7 @@
 	* fs/dirent/fs_opendir.c:  Fix typo and style.  opendir() did set errno
 	  to a negative value in one error case.  Fixed some coding style issues
 	  found by nxstyle.  From Michael Jung (2019-07-31).
-	* libs/libc/dirent/:  Added alphasort() implemenation, scandir()
+	* libs/libc/dirent/:  Added alphasort() implementation, scandir()
 	  implementation and DT_* definitions to include/dirent.h.  Apparently
 	  those definitions are not required by POSIX, but are part of 4.3BSD and
 	  available in glibc as well.  From Michael Jung (2019-07-31).

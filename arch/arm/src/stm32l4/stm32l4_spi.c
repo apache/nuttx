@@ -1769,10 +1769,10 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
  *   Initialize the selected SPI bus
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ************************************************************************************/
 

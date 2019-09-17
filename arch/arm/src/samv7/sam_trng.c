@@ -250,7 +250,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
-  /* Get exclusive access to the TRNG harware */
+  /* Get exclusive access to the TRNG hardware */
 
   ret = nxsem_wait(&g_trngdev.exclsem);
   if (ret < 0)

@@ -192,7 +192,7 @@ static int  dac_interrupt(int irq, void *context, FAR void *arg)
  *   Initialize the DAC
  *
  * Returned Value:
- *   Valid dac device structure reference on succcess; a NULL on failure
+ *   Valid dac device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -16,15 +16,15 @@ config SERIAL_PM_ACTIVITY_DOMAIN
 	depends on PM
 	---help---
 		When characters are received on a console device, pm_activity()
-		will be called with this PM domain
+		will be called with this PM domain.
 
 config SERIAL_PM_ACTIVITY_PRIORITY
-	int "PM activity priority when reive character"
+	int "PM activity priority when receive character"
 	default 6
 	depends on PM
 	---help---
 		When characters are received on a console device, pm_activity()
-		will be called with this PM priority
+		will be called with this PM priority.
 
 config SERIAL_REMOVABLE
 	bool

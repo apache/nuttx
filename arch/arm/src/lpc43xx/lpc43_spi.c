@@ -509,7 +509,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *   port Port number (must be zero)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

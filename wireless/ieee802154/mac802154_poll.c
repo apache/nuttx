@@ -92,7 +92,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * CoordPANId and CoordAddress parameters.
    */
 
-  /* Get exlusive access to the operation sempaphore. This must happen before
+  /* Get exclusive access to the operation semaphore. This must happen before
    * getting exclusive access to the MAC struct or else there could be a lockup
    * condition. This would occur if another thread is using the cmdtrans but
    * needs access to the MAC in order to unlock it.

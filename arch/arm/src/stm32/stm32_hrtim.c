@@ -5842,7 +5842,7 @@ errout:
  *   Initialize the HRTIM.
  *
  * Returned Value:
- *   Valid HRTIM device structure reference on succcess; a NULL on failure.
+ *   Valid HRTIM device structure reference on success; a NULL on failure.
  *
  * Assumptions:
  *   1. Clock to the HRTIM block has enabled,

@@ -109,7 +109,7 @@
 #  define KINETIS_SDRAMC_BASE        0x4000f000 /* SDRAMC */
 #  define KINETIS_FMC_BASE           0x4001f000 /* Flash memory controller */
 #  define KINETIS_FTFE_BASE          0x40020000 /* Flash memory */
-#  define KINETIS_DMAMUX0_BASE       0x40021000 /* DMA channel mutiplexer 0 */
+#  define KINETIS_DMAMUX0_BASE       0x40021000 /* DMA channel multiplexer 0 */
 #  define KINETIS_SPI0_BASE          0x4002c000 /* DSPI 0 */
 #  define KINETIS_SPI1_BASE          0x4002d000 /* DSPI 1 */
 #  define KINETIS_SAI0_BASE          0x4002f000 /* SAI 0 (12S/SSI) */

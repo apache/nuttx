@@ -3373,7 +3373,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
  *   port - I2S "port" number (identifying the "logical" SSC port)
  *
  * Returned Value:
- *   Valid SSC device structure reference on succcess; a NULL on failure
+ *   Valid SSC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

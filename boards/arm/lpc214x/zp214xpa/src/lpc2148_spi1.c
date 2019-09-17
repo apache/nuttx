@@ -582,10 +582,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   Initialize the selected SPI port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structre reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

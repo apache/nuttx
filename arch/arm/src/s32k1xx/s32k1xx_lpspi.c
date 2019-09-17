@@ -1475,7 +1475,7 @@ static void s32k1xx_lpspi_bus_initialize(struct s32k1xx_lpspidev_s *priv)
  *   Initialize the selected SPI bus
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure

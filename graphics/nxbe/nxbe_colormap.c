@@ -57,7 +57,7 @@
  * Name: nxbe_colormap
  *
  * Description:
- *   Set the harware color map to the palette expected by NX
+ *   Set the hardware color map to the palette expected by NX
  *
  ****************************************************************************/
 

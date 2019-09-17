@@ -1642,7 +1642,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  *   cs - Chip select number (identifying the "logical" SPI port)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

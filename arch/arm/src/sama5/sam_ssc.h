@@ -84,10 +84,10 @@ extern "C"
  *   Initialize the selected I2S port.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple I2S interfaces)
+ *   Port number (for hardware that has multiple I2S interfaces)
  *
  * Returned Value:
- *   Valid I2S device structure reference on succcess; a NULL on failure
+ *   Valid I2S device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -197,7 +197,7 @@ extern "C"
 *   intf - The COMP interface number.
 *
 * Returned Value:
-*   Valid COMP device structure reference on succcess; a NULL on failure.
+*   Valid COMP device structure reference on success; a NULL on failure.
 *
 * Assumptions:
 *   1. Clock to the COMP block has enabled,

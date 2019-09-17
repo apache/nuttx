@@ -668,7 +668,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -721,7 +721,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -781,7 +781,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
  *   port - Port number (0=SSP0, 1=SSP1)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
