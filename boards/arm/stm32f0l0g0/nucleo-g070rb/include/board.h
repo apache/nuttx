@@ -89,42 +89,42 @@
 
 /* Considering:
  * - PLL_SOURCE_FREQUENCY = STM32_HSI_FREQUENCY = 16,000,000
- * - PLL_DIV_M = 2
+ * - PLL_DIV_M = 1
  * - PLL_DIV_N = 8
  * - PLL_DIV_R = 2
  * - PLL_DIV_P = 2
  *
- *   PLL_VCO = (16,000,000 / 2) * 8 = 64 MHz
- *   PLLP    =    (PLL_VCO / 2)     = 32 MHz
- *   PLLR    =    (PLL_VCO / 2)     = 32 MHz
+ *   PLL_VCO = (16,000,000 / 1) * 8 = 128 MHz
+ *   PLLP    =    (PLL_VCO / 2)     = 64 MHz
+ *   PLLR    =    (PLL_VCO / 2)     = 64 MHz
  */
 
 #define STM32_PLLCFG_PLLSRC     RCC_PLLCFG_PLLSRC_HSI
 #define STM32_PLLCFG_PLLCFG     (RCC_PLLCFG_PLLPEN | \
                                  RCC_PLLCFG_PLLREN)
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(2)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(1)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(8)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP(2)
 #define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(2)
 
-#define STM32_VCO_FREQUENCY     ((STM32_HSI_FREQUENCY / 2) * 8)
+#define STM32_VCO_FREQUENCY     ((STM32_HSI_FREQUENCY / 1) * 8)
 #define STM32_PLLP_FREQUENCY    (STM32_VCO_FREQUENCY / 2)
 #define STM32_PLLR_FREQUENCY    (STM32_VCO_FREQUENCY / 2)
 
-/* Use the PLL and set the SYSCLK source to be the PLLR (32 MHz) */
+/* Use the PLL and set the SYSCLK source to be the PLLR (64 MHz) */
 
 #define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL
 #define STM32_SYSCLK_SWS        RCC_CFGR_SWS_PLL
 #define STM32_SYSCLK_FREQUENCY  (STM32_PLLR_FREQUENCY)
 
-/* AHB clock (HCLK) is SYSCLK (32 MHz) */
+/* AHB clock (HCLK) is SYSCLK (64 MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY
 
-/* APB1 clock (PCLK1) is HCLK (32 MHz) */
+/* APB1 clock (PCLK1) is HCLK (64 MHz) */
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY

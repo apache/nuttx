@@ -8,4 +8,5 @@ STATUS
 
   2019-09-04: Initial support for the STM32 Nucleo-G070RB board, based on STM32 Nucleo-G071RB.  
               Basic NSH configuration is functional.
+  2019-09-16: Enable PWR peripheral and increase sysclk to max. frequency.
 
