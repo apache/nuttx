@@ -450,6 +450,21 @@ config ARCH_CHIP_STM32F098VC
 	select STM32F0L0G0_LOWVOLTLINE
 	depends on ARCH_CHIP_STM32F0
 
+config ARCH_CHIP_STM32G070CB
+	bool "STM32G070CB"
+	select STM32F0L0G0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G070KB
+	bool "STM32G070KB"
+	select STM32F0L0G0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G070RB
+	bool "STM32G070RB"
+	select STM32F0L0G0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
 config ARCH_CHIP_STM32G071EB
 	bool "STM32G071EB"
 	select STM32F0L0G0_STM32G0
@@ -1013,12 +1028,12 @@ config STM32F0L0G0_HAVE_CAN1
 	default n
 
 config STM32F0L0G0_HAVE_COMP1
-       bool
-       default n
+	bool
+	default n
 
 config STM32F0L0G0_HAVE_COMP2
-       bool
-       default n
+	bool
+	default n
 
 config STM32F0L0G0_HAVE_DAC1
 	bool
@@ -1077,20 +1092,20 @@ config STM32F0L0G0_HAVE_I2SPLL
 	default n
 
 config STM32F0L0G0_HAVE_OPAMP1
-       bool
-       default n
+	bool
+	default n
 
 config STM32F0L0G0_HAVE_OPAMP2
-       bool
-       default n
+	bool
+	default n
 
 config STM32F0L0G0_HAVE_OPAMP3
-       bool
-       default n
+	bool
+	default n
 
 config STM32F0L0G0_HAVE_OPAMP4
-       bool
-       default n
+	bool
+	default n
 
 # These are STM32 peripherals IP blocks
 

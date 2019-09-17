@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *           Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -563,7 +564,12 @@ static void stm32_stdclockconfig(void)
 
   /* Configure PLL clock outputs division */
 
+#if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
+    defined(CONFIG_ARCH_CHIP_STM32G070RB)
+  regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLR;
+#else
   regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLQ | STM32_PLLCFG_PLLR;
+#endif
 
   /* Write PLLCFG register */
 
