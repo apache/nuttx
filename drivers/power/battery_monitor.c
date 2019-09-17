@@ -241,6 +241,16 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_BALANCE:
+        {
+          FAR struct battery_monitor_balance_s *ptr = (struct battery_monitor_balance_s *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->balance(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;

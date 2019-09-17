@@ -464,6 +464,10 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   uint8_t sl_addr;
   uint8_t crc;
   int i;
+
+  /* Make sure specified number of registers will fit in our buffer.
+   * If not, limit read to the available buffer size
+   */
   if (priv->crc)
     {
       if (count >= (sizeof(tmp_val) / 4))
@@ -917,6 +921,12 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
   int cellnum;
   int ret;
   uint8_t regval;
+  uint16_t balancebits;
+
+  bool currentbit;
+  bool lastbit;
+  int currentindex;
+
 
   /*Check how many balance switches were requested.  If more than available,
    * overwrite with the number available.
@@ -927,27 +937,49 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
       bal->balance_count = priv->cellcount;
     }
 
-  /* revisit: can we write CELBAL2/CELBAL3 on parts without these registers? */
+  /* Scan through the input and look for adjacent cells in each group.
+   * This is not allowed by the chip, so we will remove them.
+   * At the same time, copy the balance inputs into a single bit field.
+   * This allows us to get cell remapping out of the way.
+   * We will never have more than 15 cells, so we can store the
+   * result in a 16-bit int.
+   */
+  balancebits = 0;
+
   for (i = 0; i < BQ769X0_BAL_REG_COUNT; i += 1)
     {
-      regval = 0;
+      lastbit = false;
       for (j = 0; j < BQ769X0_BAL_BITS_PER_REG; j += 1)
         {
-          cellnum = (i * BQ769X0_BAL_BITS_PER_REG) + j;
-          if (cellnum < bal->balance_count)
+          currentindex = i * BQ769X0_BAL_BITS_PER_REG + j;
+          if (currentindex >= bal->balance_count)
             {
-              #warning not currently mapped correctly
-              /* Fixme: remap balance bits depending on cell count */
-              /* also fixme: do we need to set intermediate switches to on or off when balancing an incomplete set of cells? */
-              regval |= (bal->balance[cellnum] ? 1 : 0) << j;
-            }
+              break;
+          }
+          currentbit = bal->balance[currentindex];
+          if (currentbit && lastbit) {
+              bal->balance[currentindex] = false;
+              batinfo("Skipping cell %d because it is set and previous cell is set\n", currentindex);
+          } else {
+              balancebits |= (currentbit ? 1 : 0) << priv->mapping[currentindex];
+              batinfo("Setting cell balance %d to %d\n", currentindex, currentbit);
+              batinfo("Balance bits are %02x\n", balancebits);
+          }
+          lastbit = currentbit;
         }
+    }
+
+  /* Now split the result into 3 groups of 5 and send*/
+
+  for (i = 0; i < BQ769X0_BAL_REG_COUNT; i += 1)
+    {
+      regval = (balancebits >> (i * 5)) & BQ769X0_CELLBAL_MASK;
       ret = bq769x0_putreg8(priv, BQ769X0_REG_CELLBAL1 + i, regval);
       if (ret < 0)
         {
-          baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+          baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
           return ret;
-            }
+        }
     }
   return OK;
 }
@@ -1236,6 +1268,7 @@ FAR struct battery_monitor_dev_s *
         }
 
       /* Configure the BQ769x0 */
+
       ret = bq769x0_putreg8(priv, BQ769X0_REG_CC_CFG, BQ769X0_CC_CFG_DEFAULT_VAL);
       if (ret < 0)
         {

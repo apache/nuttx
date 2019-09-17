@@ -139,6 +139,10 @@ struct battery_monitor_voltage_s
   /* Pointer to array where cell voltages should be stored.
    * MUST contain at least cell_count elements.
    * Cell voltages are stored in microvolts (uV)
+   * Cell voltages in this array should be ordered according to the
+   * physical layout of cells in the system.  Driver should rearrange
+   * voltage values as necssary to present the user with a contiguous
+   * list of cell voltages in the expected order.
    */
 
   uint32_t *cell_voltages;
@@ -167,7 +171,11 @@ struct battery_monitor_balance_s
   /* Pointer to array where balance switch values should be stored.
    * MUST contain at least balance_count elements.
    * Balance switch is turned on if true, off if false
+   * Array indices for balance switches should correspond to those
+   * for cell voltage.  The driver must rearrange the balance values as
+   * necessary to make this happen.
    */
+
   bool *balance;
 };
  /* This structure defines the lower half battery interface */

@@ -61,6 +61,7 @@
 #define BQ76930_TEMP_COUNT              2
 #define BQ76940_TEMP_COUNT              3
 #define BQ769X0_CC_CFG_DEFAULT_VAL      0x19 /* Per Datasheet */
+#define BQ769X0_CELLBAL_MASK            0x1F; /* 5 LSBs in each register */
 
 
 /* BQ769x0 Register Definitions ********************************************/
