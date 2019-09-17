@@ -203,24 +203,20 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_VOLTAGE:
         {
-          int volts;
           FAR int *voltsp = (FAR int *)((uintptr_t)arg);
           if (voltsp)
             {
-              volts = *voltsp;
-              ret = dev->ops->voltage(dev, volts);
+              ret = dev->ops->voltage(dev, voltsp);
             }
         }
         break;
 
       case BATIOC_CURRENT:
         {
-          int amps;
           FAR int *ampsp = (FAR int *)((uintptr_t)arg);
           if (ampsp)
             {
-              amps = *ampsp;
-              ret = dev->ops->current(dev, amps);
+              ret = dev->ops->current(dev, ampsp);
             }
         }
         break;
@@ -231,6 +227,16 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
           if (ptr)
             {
               ret = dev->ops->operate(dev, (uintptr_t)arg);
+            }
+        }
+        break;
+
+      case BATIOC_CELLVOLTAGE:
+        {
+          FAR struct battery_monitor_voltage_s *ptr = (struct battery_monitor_voltage_s *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->cell_voltage(dev, ptr);
             }
         }
         break;

@@ -164,6 +164,10 @@ struct battery_monitor_balance_s
 {
   int balance_count;
 
+  /* Pointer to array where balance switch values should be stored.
+   * MUST contain at least balance_count elements.
+   * Balance switch is turned on if true, off if false
+   */
   bool *balance;
 };
  /* This structure defines the lower half battery interface */

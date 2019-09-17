@@ -49,6 +49,19 @@
 /* Auxiliary Definitions */
 #define BQ769X0_BASE_GAIN               365 /* uV/LSB */
 #define BQ769X0_MAX_CELLS               15 /* No more than 15 cells per chip*/
+#define BQ769X0_BAL_REG_COUNT           3 /* CELBAL1, CELBAL2, CELBAL3 */
+#define BQ769X0_BAL_BITS_PER_REG        5
+#define BQ76920_MIN_CELL_COUNT          3
+#define BQ76920_MAX_CELL_COUNT          5
+#define BQ76930_MIN_CELL_COUNT          6
+#define BQ76930_MAX_CELL_COUNT          10
+#define BQ76940_MIN_CELL_COUNT          9
+#define BQ76940_MAX_CELL_COUNT          15
+#define BQ76920_TEMP_COUNT              1
+#define BQ76930_TEMP_COUNT              2
+#define BQ76940_TEMP_COUNT              3
+#define BQ769X0_CC_CFG_DEFAULT_VAL      0x19 /* Per Datasheet */
+
 
 /* BQ769x0 Register Definitions ********************************************/
 

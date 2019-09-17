@@ -89,6 +89,10 @@
 #  define MAX(a,b) (a > b ? a : b)
 #endif
 
+/* The CRC function expects to see address bytes as they appear on the wire */
+#define WR_ADDR(a)  ((a) << 1)
+#define RD_ADDR(a)  (((a) << 1) | 1)
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_BQ769X0
@@ -123,11 +127,106 @@ struct bq769x0_dev_s
   FAR struct i2c_master_s *i2c; /* I2C interface */
   uint8_t addr;                 /* I2C address */
   uint8_t chip;                 /* Chip Type (e.g. CHIP_76920) */
+  uint8_t cellcount;            /* Number of cells attached to chip */
   uint32_t frequency;           /* I2C frequency */
   uint32_t gain;                /* ADC gain value in uV */
   uint32_t offset;              /* ADC offset value in uV */
+  const uint8_t *mapping;       /* Pointer to cell mapping table */
   bool crc;                     /* Whether or not the device has CRC enabled */
 };
+
+/* Cell mapping tables
+ * Some channels are not used depending on how many cells are connected
+ * to the BQ769X0.  These tables map cell number (array index) to physical
+ * cell channel (array value).  See TI datasheet for cell connections table.
+ */
+static const uint8_t bq76920_3cell_mapping[] =
+    {
+        0, 1, 4
+    };
+static const uint8_t bq76920_4cell_mapping[] =
+    {
+        0, 1, 2, 4
+    };
+static const uint8_t bq76920_5cell_mapping[] =
+    {
+        0, 1, 2, 3, 4
+    };
+static const uint8_t *bq76920_cell_mapping[] =
+    {
+        bq76920_3cell_mapping,
+        bq76920_4cell_mapping,
+        bq76920_5cell_mapping
+    };
+
+static const uint8_t bq76930_6cell_mapping[] =
+{
+    0, 1, 4, 5, 6, 9
+};
+static const uint8_t bq76930_7cell_mapping[] =
+{
+    0,1, 2, 4, 5, 6, 9
+};
+static const uint8_t bq76930_8cell_mapping[] =
+{
+    0, 1, 2, 4, 5, 6, 7, 9
+};
+static const uint8_t bq76930_9cell_mapping[] =
+{
+    0, 1, 2, 3, 4, 5, 6, 7, 9
+};
+static const uint8_t bq76930_10cell_mapping[] =
+{
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+};
+static const uint8_t *bq76930_cell_mapping[] =
+    {
+        bq76930_6cell_mapping,
+        bq76930_7cell_mapping,
+        bq76930_8cell_mapping,
+        bq76930_9cell_mapping,
+        bq76930_10cell_mapping
+    };
+
+static const uint8_t bq76940_9cell_mapping[] =
+    {
+        0, 1, 4, 5, 6, 9, 10, 11, 14
+    };
+static const uint8_t bq76940_10cell_mapping[] =
+    {
+        0, 1, 2, 4, 5, 6, 9, 10, 11, 14
+    };
+static const uint8_t bq76940_11cell_mapping[] =
+    {
+        0, 1, 2, 4, 5, 6, 7, 9, 10, 11, 14
+    };
+static const uint8_t bq76940_12cell_mapping[] =
+    {
+        0, 1, 2, 4, 5, 6, 7, 9, 10, 11, 12, 14
+    };
+static const uint8_t bq76940_13cell_mapping[] =
+    {
+        0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 14
+    };
+static const uint8_t bq76940_14cell_mapping[] =
+    {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14
+    };
+static const uint8_t bq76940_15cell_mapping[] =
+
+    {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+      };
+static const uint8_t *bq76940_cell_mapping[] =
+    {
+        bq76940_9cell_mapping,
+        bq76940_10cell_mapping,
+        bq76940_11cell_mapping,
+        bq76940_12cell_mapping,
+        bq76940_13cell_mapping,
+        bq76940_14cell_mapping,
+        bq76940_15cell_mapping,
+    };
 
 /****************************************************************************
  * Private Function Prototypes
@@ -149,11 +248,14 @@ static inline int bq769x0_getreport(FAR struct bq769x0_dev_s *priv,
 static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts);
 static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc);
 static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
-    struct battery_monitor_voltage_s *voltages);
+                                      struct battery_monitor_voltage_s *voltages);
 static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
-    struct battery_monitor_temperature_s *temps);
-
+                                         struct battery_monitor_temperature_s *temps);
+static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
+                                         struct battery_monitor_balance_s *bal);
 static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv);
+
+static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv);
 
 /* Battery driver lower half methods */
 
@@ -162,14 +264,14 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health);
 static int bq769x0_online(struct battery_monitor_dev_s *dev, bool *status);
 static int bq769x0_voltage(struct battery_monitor_dev_s *dev, int *value);
 static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
-    struct battery_monitor_voltage_s *cellv);
+                               struct battery_monitor_voltage_s *cellv);
 static int bq769x0_current(struct battery_monitor_dev_s *dev, int *value);
 static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value);
-static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, uintptr_t param);
+static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs);
 static int bq769x0_temp(struct battery_monitor_dev_s *dev,
-    struct battery_monitor_temperature_s *temps);
+                        struct battery_monitor_temperature_s *temps);
 static int bq769x0_balance(struct battery_monitor_dev_s *dev,
-    struct battery_monitor_balance_s *bal);
+                           struct battery_monitor_balance_s *bal);
 static int bq769x0_operate(struct battery_monitor_dev_s *dev, uintptr_t param);
 
 /****************************************************************************
@@ -213,6 +315,7 @@ static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   uint8_t val[2];
   int ret;
   int datalen;
+  uint8_t sl_addr;
   uint8_t crc;
 
   /* Set up the I2C configuration */
@@ -253,7 +356,8 @@ static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   /* If CRC is used, verify that it is correct */
   if (priv->crc)
     {
-      crc = crc8ccittpart(&priv->addr, 1, 0);
+      sl_addr = RD_ADDR(priv->addr);
+      crc = crc8ccittpart(&sl_addr, 1, 0);
       crc = crc8ccittpart(val, 1, crc);
       if (crc != val[1])
         {
@@ -284,6 +388,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   struct i2c_config_s config;
   uint8_t buffer[3];
   int datalen;
+  uint8_t sl_addr;
   uint8_t crc;
 
   /* Set up the I2C configuration */
@@ -292,7 +397,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batreg("addr: %02x regval: %08x\n", regaddr, regval);
+  batreg("addr: %02x regval: %02x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -303,9 +408,11 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   if (priv->crc)
     {
       datalen = 3;
-      crc = crc8ccittpart(&priv->addr, 1, 0);
+      sl_addr = WR_ADDR(priv->addr);
+      crc = crc8ccittpart(&sl_addr, 1, 0);
       crc = crc8ccittpart(buffer, 2, crc);
       buffer[2] = crc;
+      batreg("write crc: %02x\n", crc);
     }
   else
     {
@@ -316,7 +423,6 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 
   return i2c_write(priv->i2c, &config, buffer, datalen);
 }
-
 
 /****************************************************************************
  * Name: bq769x0_getreg16
@@ -343,22 +449,35 @@ static int bq769x0_getreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
  *   START <I2C write address> ACK <Reg address> ACK
  *   REPEATED-START <I2C read address> ACK Data0 ACK Data1 NO-ACK STOP
  *
+ *   count is number of 16-bit words to read
+ *
  ****************************************************************************/
 
 static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
                            FAR uint16_t *regvals, unsigned int count)
 {
   struct i2c_config_s config;
-  uint8_t val[(2 * 22) + 1];
+  uint8_t tmp_val[(4 * 22)]; /* Maximum of 22 registers per read with CRC */
   int ret;
   int datalen;
+  int byte_count;
+  uint8_t sl_addr;
   uint8_t crc;
   int i;
-
-  if (count >= (sizeof(val) / 2))
+  if (priv->crc)
     {
-      count = sizeof(val) / 2 - 1;
+      if (count >= (sizeof(tmp_val) / 4))
+        {
+          count = sizeof(tmp_val) / 4;
+        }
     }
+  else
+    {
+  if (count >= (sizeof(tmp_val) / 2))
+    {
+      count = sizeof(tmp_val) / 2;
+    }
+  }
 
   /* Set up the I2C configuration */
 
@@ -375,43 +494,59 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
       return ret;
     }
 
-  /* Our expected data length varies depending on whether or not a CRC is used */
+  byte_count = 2 * count;
+
+  /* Our expected I2C data length varies depending on whether or not a CRC is used */
 
   if (priv->crc)
     {
-      datalen = (2 * count) + 1;
+      /* When reading multiple bytes, there is 1 CRC byte per data byte */
+      datalen = (4 * count);
     }
   else
     {
-      datalen = (2 * count);
+      datalen = byte_count;
     }
 
   /* Restart and read 16-bits from the register */
 
-  ret = i2c_read(priv->i2c, &config, val, datalen);
+  ret = i2c_read(priv->i2c, &config, tmp_val, datalen);
   if (ret < 0)
     {
       baterr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
-  /* If CRC is used, verify that it is correct */
+  /* If CRC is used, verify that it is correct
+   * We only include the address with the first data byte.
+   * After that, we compare the CRC of each byte with its following byte*/
   if (priv->crc)
     {
-      crc = crc8ccittpart(&priv->addr, 1, 0);
-      crc = crc8ccittpart(val, datalen, crc);
-      if (crc != val[datalen - 1])
-        {
-          baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n", val[2], crc);
-          return ERROR;
-        }
+      sl_addr = RD_ADDR(priv->addr);
+      crc = crc8ccittpart(&sl_addr, 1, 0);
+      for (i = 0; i < byte_count; i += 2) {
+        crc = crc8ccittpart(&tmp_val[i], 1, crc);
+        if (crc != tmp_val[i + 1])
+          {
+            baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n", tmp_val[2], crc);
+            return ERROR;
+          }
+        crc = 0;
+      }
+      /* Copy 16-bit values to be returned, skipping CRC bytes*/
+      for (i = 0; i < datalen; i += 4) {
+          *regvals = (uint16_t)tmp_val[i] << 8 | (uint16_t)tmp_val[i + 2];
+          regvals += 1;
+      }
     }
-
-  /* Copy 16-bit values to be returned */
-  for (i = 0; i < datalen; i += 1) {
-      *regvals = (uint16_t)val[2 * i] << 8 | (uint16_t)val[(2 * i) + 1];
-      regvals += 1;
-  }
+  else
+    {
+      /* Copy 16-bit values to be returned */
+      for (i = 0; i < datalen; i += 2) {
+          *regvals = (uint16_t)tmp_val[i] << 8 | (uint16_t)tmp_val[i + 1];
+          regvals += 1;
+      }
+    }
   return OK;
 }
 
@@ -488,7 +623,7 @@ static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv)
   priv->gain = gain + BQ769X0_BASE_GAIN;
   priv->offset = offset * 1000; /* Convert mV to uV */
 
-  batinfo("Battery monitor gain: %d, offset: %d.%\n", priv->gain, priv->offset);
+  batinfo("Battery monitor gain: %d uV/LSB, offset: %d uV.\n", priv->gain, priv->offset);
 
   return OK;
 }
@@ -514,7 +649,7 @@ static int bq769x0_state(struct battery_monitor_dev_s *dev, int *status)
       return ret;
     }
 
-#warning fixme
+#warning fixme convert to useful state information?
   *status = regval;
 
   return OK;
@@ -543,7 +678,7 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health)
       *health = BATTERY_HEALTH_UNKNOWN;
       return ret;
     }
-
+#warning fixme convert to useful state information?
   switch (regval)
   {
 
@@ -583,24 +718,24 @@ static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts)
 {
   uint16_t regval;
   int ret;
-  int idx;
 
   ret = bq769x0_getreg16(priv, BQ769X0_REG_BAT_HI, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      baterr("ERROR: Error reading voltage from BQ769X0! Error = %d\n", ret);
       return ret;
     }
 
   /* Voltage is returned from the chip in units of <gain>uV/LSB
    * An offset also needs to be added.
+   * Reading the two bytes in a single operation guarantees atomic access.
+   * The pack voltage is divided by 4 in order to fit in a 16-bit register
+   * Multiply gain by 4, and offset by number of channels on the chip, since
+   * it is cumulative.  See TI appnote SLUUB41.
    */
 
-#warning fixme
-  regval = regval * priv->gain;
-  regval = regval + priv->offset;
-
-  *volts = regval;
+*volts = ((uint32_t) regval * priv->gain * 4) +
+          (priv->offset * bq769x0_chip_cellcount(priv));
 
   return OK;
 }
@@ -617,32 +752,47 @@ static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
                                       struct battery_monitor_voltage_s *voltages)
   {
   uint16_t regvals[BQ769X0_MAX_CELLS];
-  int ret
-  int idx;
+  int ret;
+  int i;
+  int cellsread;
 
   if (voltages)
     {
-     if (voltages->cell_count > BQ769X0_MAX_CELLS)
+
+      /*Check how many cells were requested.  If more than available,
+       * overwrite with the number available.
+       */
+
+     if (voltages->cell_count > priv->cellcount)
        {
-         voltages->cell_count = BQ769X0_MAX_CELLS;
+         voltages->cell_count = priv->cellcount;
        }
     }
 
-  ret = bq769x0_getnreg16(priv, BQ769X0_REG_VC1_HI, regvals, voltages->cell_count);
+  /* Due to gaps in cell voltages when the whole stack is not filled,
+   * We'll read the maximum number of cells supported by the chip
+   * and discard what we don't need.
+   */
+  cellsread = bq769x0_chip_cellcount(priv);
+  ret = bq769x0_getnreg16(priv, BQ769X0_REG_VC1_HI, regvals, cellsread);
   if (ret < 0)
     {
       baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
       return ret;
     }
 
-  for (idx = 0; idx < voltages->cell_count; idx += 1) {
-
+  for (i = 0; i < voltages->cell_count; i += 1)
+    {
       /* Voltage is returned from the chip in units of <gain>uV/LSB
        * An offset also needs to be added.
+       * We use the mapping table to determine mapping between cell number
+       * and ADC channel
        */
 
-      voltages->cell_voltages[idx] = ((uint32_t) regvals[i] * priv->gain) + priv->offset;
+      voltages->cell_voltages[i] = ((uint32_t) regvals[priv->mapping[i]] *
+                                    priv->gain) + priv->offset;
   }
+  return OK;
 }
 
 /****************************************************************************
@@ -667,18 +817,20 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
   switch (priv->chip)
     {
     case CHIP_BQ76920:
-      chip_sensors = 1;
+      chip_sensors = BQ76920_TEMP_COUNT;
       break;
     case CHIP_BQ76930:
-      chip_sensors = 2;
+      chip_sensors = BQ76930_TEMP_COUNT;
       break;
     default:
     case CHIP_BQ76940:
-      chip_sensors = 3;
+      chip_sensors = BQ76940_TEMP_COUNT;
       break;
     }
 
-  /* Read the number of sensors requested or available, whichever is smaller */
+  /* Read the number of sensors requested or available, whichever is smaller
+   * We replace the requested count with the number of channels actually read
+   */
 
   temps->sensor_count = MIN(chip_sensors, temps->sensor_count);
   ret = bq769x0_getnreg16(priv, BQ769X0_REG_TS1_HI, regvals, temps->sensor_count);
@@ -699,6 +851,32 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: bq769x0_chip_cellcount
+ *
+ * Description:
+ *   Returns the number of cell channels on the specified part
+ *
+ ****************************************************************************/
+static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv)
+{
+  switch (priv->chip)
+    {
+    case CHIP_BQ76920:
+      return BQ76920_MAX_CELL_COUNT;
+      break;
+
+    case CHIP_BQ76930:
+      return BQ76930_MAX_CELL_COUNT;
+      break;
+
+    default:
+    case CHIP_BQ76940:
+      return BQ76940_MAX_CELL_COUNT;
+      break;
+    }
+}
+
+/****************************************************************************
  * Name: bq769x0_getcc
  *
  * Description:
@@ -709,8 +887,7 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
 static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc)
 {
   int16_t regval;
-  int ret
-  int idx;
+  int ret;
 
 #warning scaling
   ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI, (uint16_t *)&regval);
@@ -724,6 +901,56 @@ static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc)
   return OK;
 }
 
+/****************************************************************************
+ * Name: bq769x0_setbalance
+ *
+ * Description:
+ *   Sets the values of the BQ769X0 balance switches
+ *
+ ****************************************************************************/
+
+static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
+                                         struct battery_monitor_balance_s *bal)
+{
+  int i;
+  int j;
+  int cellnum;
+  int ret;
+  uint8_t regval;
+
+  /*Check how many balance switches were requested.  If more than available,
+   * overwrite with the number available.
+   */
+
+  if (bal->balance_count > priv->cellcount)
+    {
+      bal->balance_count = priv->cellcount;
+    }
+
+  /* revisit: can we write CELBAL2/CELBAL3 on parts without these registers? */
+  for (i = 0; i < BQ769X0_BAL_REG_COUNT; i += 1)
+    {
+      regval = 0;
+      for (j = 0; j < BQ769X0_BAL_BITS_PER_REG; j += 1)
+        {
+          cellnum = (i * BQ769X0_BAL_BITS_PER_REG) + j;
+          if (cellnum < bal->balance_count)
+            {
+              #warning not currently mapped correctly
+              /* Fixme: remap balance bits depending on cell count */
+              /* also fixme: do we need to set intermediate switches to on or off when balancing an incomplete set of cells? */
+              regval |= (bal->balance[cellnum] ? 1 : 0) << j;
+            }
+        }
+      ret = bq769x0_putreg8(priv, BQ769X0_REG_CELLBAL1 + i, regval);
+      if (ret < 0)
+        {
+          baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+          return ret;
+            }
+    }
+  return OK;
+}
 
 /****************************************************************************
  * Name: bq769x0_voltage
@@ -751,6 +978,32 @@ static int bq769x0_voltage(struct battery_monitor_dev_s *dev, int *value)
 }
 
 /****************************************************************************
+ * Name: bq769x0_voltage
+ *
+ * Description:
+ *   Get 1 or more cell voltages
+ *
+ ****************************************************************************/
+
+static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
+                               struct battery_monitor_voltage_s *cellv) {
+
+  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+  int ret;
+
+  /* Get cell voltages from battery monitor */
+
+  ret = bq769x0_getcellvolt(priv, cellv);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error getting voltage from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: bq769x0_current
  *
  * Description:
@@ -761,19 +1014,102 @@ static int bq769x0_voltage(struct battery_monitor_dev_s *dev, int *value)
 static int bq769x0_current(struct battery_monitor_dev_s *dev, int *value)
 {
 
-    /* The BQ769X0 does not support directly reporting pack curent, although you could
-     * come up with an average value by looking at the Coulomb counter over time.
-     */
+  /* The BQ769X0 does not support directly reporting pack curent, although you could
+   * come up with an average value by looking at the Coulomb counter over time.
+   */
 
-    return -ENOSYS;
+  return -ENOSYS;
 }
+
+/****************************************************************************
+ * Name: bq769x0_soc
+ *
+ * Description:
+ *   Get the pack state of charge (in percent)
+ *
+ ****************************************************************************/
+
+static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value) {
+
+  /* The BQ769X0 does not support directly reporting pack state of charge.
+   * You should be able to come up with a state-of-charge value by knowing an
+   * initial value and looking at the Coulomb counter
+   */
+
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: bq769x0_coulombs
+ *
+ * Description:
+ *   Get the raw value of the pack coulomb counter
+ *
+ ****************************************************************************/
+
+static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs) {
+
+  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+  int ret;
+
+  /* Get cell voltages from battery monitor */
+
+  ret =     bq769x0_getcc(priv, coulombs);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error getting coulombs from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bq769x0_temp
+ *
+ * Description:
+ *   Get the pack temperature(s)
+ *
+ ****************************************************************************/
 
 static int bq769x0_temp(struct battery_monitor_dev_s *dev,
-    struct battery_monitor_temperature_s *temps)
+                        struct battery_monitor_temperature_s *temps)
 {
-    return bq769x0_gettemperature(dev, temps);
+  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+  int ret;
+
+  ret =  bq769x0_gettemperature(priv, temps);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
 
+/****************************************************************************
+ * Name: bq769x0_balance
+ *
+ * Description:
+ *   Set the specified cell balance switches
+ *
+ ****************************************************************************/
+
+static int bq769x0_balance(struct battery_monitor_dev_s *dev,
+                           struct battery_monitor_balance_s *bal) {
+  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+  int ret;
+
+  ret =  bq769x0_setbalance(priv, bal);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
 /****************************************************************************
  * Name: bq769x0_operate
  *
@@ -845,9 +1181,68 @@ FAR struct battery_monitor_dev_s *
       priv->frequency = frequency;
       priv->crc       = crc;
       priv->chip      = chip;
+      priv->cellcount = cellcount;
+
+      /* Sanity check the device setup and assign cell mapping table */
+      switch (chip)
+        {
+        case CHIP_BQ76920:
+          if (cellcount < BQ76920_MIN_CELL_COUNT ||
+              cellcount > BQ76920_MAX_CELL_COUNT)
+            {
+              berr("ERROR: Invalid number of cells (%d) for BQ76920\n",
+                   cellcount);
+              kmm_free(priv);
+              return NULL;
+            } else {
+                priv->mapping = bq76920_cell_mapping[cellcount -
+                                                     BQ76920_MIN_CELL_COUNT];
+            }
+          break;
+
+        case CHIP_BQ76930:
+          if (cellcount < BQ76930_MIN_CELL_COUNT ||
+              cellcount > BQ76930_MAX_CELL_COUNT)
+            {
+              berr("ERROR: Invalid number of cells (%d) for BQ76930\n",
+                   cellcount);
+              kmm_free(priv);
+              return NULL;
+            } else {
+                priv->mapping = bq76930_cell_mapping[cellcount -
+                                                     BQ76930_MIN_CELL_COUNT];
+            }
+          break;
+
+        case CHIP_BQ76940:
+          if (cellcount < BQ76940_MIN_CELL_COUNT ||
+              cellcount > BQ76940_MAX_CELL_COUNT)
+            {
+              berr("ERROR: Invalid number of cells (%d) for BQ76940\n",
+                   cellcount);
+              kmm_free(priv);
+              return NULL;
+            } else {
+                priv->mapping = bq76940_cell_mapping[cellcount -
+                                                     BQ76940_MIN_CELL_COUNT];
+            }
+          break;
+
+        default:
+          berr("ERROR: Unrecognized chip type: %d\n", chip);
+          kmm_free(priv);
+          return NULL;
+          break;
+        }
 
       /* Configure the BQ769x0 */
-
+      ret = bq769x0_putreg8(priv, BQ769X0_REG_CC_CFG, BQ769X0_CC_CFG_DEFAULT_VAL);
+      if (ret < 0)
+        {
+          baterr("ERROR: Failed to configure the BQ769x0: %d\n", ret);
+          kmm_free(priv);
+          return NULL;
+        }
 
       /* Pull the factory-calibrated gain and offset values from the chip. */
 
