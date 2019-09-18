@@ -351,7 +351,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

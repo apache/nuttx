@@ -535,6 +535,16 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
+ * Name: gd5f_initialize
+ *
+ * Description:
+ *   Initializes the driver for SPI-based GD5F FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *gd5f_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
  * Name: s25fl1_initialize
  *
  * Description:

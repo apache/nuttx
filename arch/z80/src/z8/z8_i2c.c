@@ -639,10 +639,10 @@ static int z8_i2c_reset(FAR struct i2c_master_s * dev)
  *   different frequency and slave address.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple I2C interfaces)
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
- *   Valid I2C device structre reference on succcess; a NULL on failure
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

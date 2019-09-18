@@ -459,7 +459,7 @@ Configurations
 
     tools/configure.sh samd21-xplained:<subdir>
 
-  Before building, make sure the PATH environment varaible include the
+  Before building, make sure the PATH environment variable include the
   correct path to the directory than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of

@@ -131,9 +131,9 @@ EXTERN const int g_builtin_count;
  *
  * Input Parameters:
  *   builtins - The list of built-in functions.  Each entry is a name-value
- *              pair that maps a builtin function name to its user-space
+ *              pair that maps a built-in function name to its user-space
  *              entry point address.
- *   count    - The number of name-value pairs in the builtin list.
+ *   count    - The number of name-value pairs in the built-in list.
  *
  * Returned Value:
  *   None
@@ -149,15 +149,18 @@ void builtin_setlist(FAR const struct builtin_s *builtins, int count);
  * Name: builtin_isavail
  *
  * Description:
- *   Checks for availability of application registered during compile time.
+ *   Checks for availability of an application named 'appname' registered
+ *   during compile time and, if available, returns the index into the table
+ *   of built-in applications.
  *
  * Input Parameters:
  *   filename - Name of the linked-in binary to be started.
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
- *   Returns index of builtin application. If it is not found then it
- *   returns -1 (ERROR) and sets errno appropriately.
+ *   This is an internal function, used by by the NuttX binfmt logic and
+ *   by the application built-in logic.  It returns a non-negative index to
+ *   the application entry in the table of built-in applications on success
+ *   or a negated errno value in the event of a failure.
  *
  ****************************************************************************/
 
@@ -185,9 +188,10 @@ FAR const char *builtin_getname(int index);
  * Name: builtin_for_index
  *
  * Description:
- *   Returns the builtin_s structure for the selected builtin.
- *   If support for builtin functions is enabled in the NuttX configuration,
- *   then this function must be provided by the application code.
+ *   Returns the builtin_s structure for the selected built-in.
+ *   If support for built-in functions is enabled in the NuttX
+ *   configuration, then this function must be provided by the application
+ *   code.
  *
  * Input Parameters:
  *   index, from 0 and on...

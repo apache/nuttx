@@ -315,7 +315,7 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
  *
  * Input Parameters:
  *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
+ *                  lib_outstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
@@ -365,7 +365,7 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_syslogstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
@@ -382,7 +382,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream);
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_syslogstream_s to be initialized.
  *
  * Returned Value:
  *   None (Resources freed).
@@ -404,7 +404,7 @@ void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_outstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).

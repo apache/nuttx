@@ -81,20 +81,20 @@
 
 MEMORY
 {
-    /* 256Kb FLASH */
+  /* 256Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 256K /* More than needed */
-    uflash (rx)      : ORIGIN = 0x00040000, LENGTH = 256K
+  kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 256K /* More than needed */
+  uflash (rx)      : ORIGIN = 0x00040000, LENGTH = 256K
 
-    /* 64Kb of SRAM in the CPU block */
+  /* 64Kb of SRAM in the CPU block */
 
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K   /* May include waste */
-    usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 4K
-    xsram (rwx)      : ORIGIN = 0x10002000, LENGTH = 24K  /* All used as heap */
+  ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K   /* May include waste */
+  usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 4K
+  xsram (rwx)      : ORIGIN = 0x10002000, LENGTH = 24K  /* All used as heap */
 
-    /* Other peripheral memory (free, nothing is linked here) */
+  /* Other peripheral memory (free, nothing is linked here) */
 
-    ahbram8_b0a(rwx) : ORIGIN = 0x20000000, LENGTH = 8K
-    ahbram8_b0b(rwx) : ORIGIN = 0x20002000, LENGTH = 8K
-    ahbram16(rwx)    : ORIGIN = 0x20004000, LENGTH = 16K
+  ahbram8_b0a(rwx) : ORIGIN = 0x20000000, LENGTH = 8K
+  ahbram8_b0b(rwx) : ORIGIN = 0x20002000, LENGTH = 8K
+  ahbram16(rwx)    : ORIGIN = 0x20004000, LENGTH = 16K
 }

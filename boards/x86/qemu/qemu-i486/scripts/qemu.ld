@@ -37,55 +37,57 @@ OUTPUT_ARCH(i386)
 ENTRY(__start)
 SECTIONS
 {
-	. = 0x00100000;
+    . = 0x00100000;
 
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text .text.*)
-		*(.gnu.linkonce.t.*)
-		_etext = ABSOLUTE(.);
-	}
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.gnu.linkonce.t.*)
+        _etext = ABSOLUTE(.);
+    }
 
-	.text ALIGN (0x1000) : {
-		_srodata = ABSOLUTE(.);
-		*(.rodata .rodata.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_erodata = ABSOLUTE(.);
-	}
+    .text ALIGN (0x1000) : {
+        _srodata = ABSOLUTE(.);
+        *(.rodata .rodata.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _erodata = ABSOLUTE(.);
+    }
 
-	.data ALIGN (0x1000) : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	}
+    .data ALIGN (0x1000) : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    }
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	}
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    }
 
-	/* Stabs debugging sections */
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    /* Stabs debugging sections */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

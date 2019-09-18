@@ -141,7 +141,7 @@ fields in the configuration descriptor:
   cfg.rows = 2;
   cfg.cols = 16;
 
-The lcd backpack can accomodate all known 1-line and 2-line displays, and
+The lcd backpack can accommodate all known 1-line and 2-line displays, and
 4-line displays up to 4 x 32.  Explicitly, the 4 x 40 /cannot/ be supported
 because it has an important hardware difference (it is actually two 4x20
 controllers, and the LCD backpack does not have the wiring for the

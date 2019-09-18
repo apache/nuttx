@@ -78,7 +78,7 @@ FAR void *zalloc(size_t size)
   return alloc;
 
 #else
-  /* Use mm_zalloc() becuase it implements the clear */
+  /* Use mm_zalloc() because it implements the clear */
 
   return mm_zalloc(USR_HEAP, size);
 #endif

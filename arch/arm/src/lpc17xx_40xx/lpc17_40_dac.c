@@ -187,7 +187,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  *   Initialize the DAC
  *
  * Returned Value:
- *   Valid dac device structure reference on succcess; a NULL on failure
+ *   Valid DAC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -302,7 +302,7 @@ static int waveform_init(FAR struct spwm_s *spwm, float (*f)(float))
 
   printf("Initialize waveform\n");
 
-  /* Get phase step to acheive one sine waveform period */
+  /* Get phase step to achieve one sine waveform period */
 
   spwm->phase_step = (float)(2 * M_PI / spwm->samples);
 

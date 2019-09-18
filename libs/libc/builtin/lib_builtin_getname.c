@@ -58,8 +58,15 @@
  * Name: builtin_getname
  *
  * Description:
- *   Return the name of the application at index in the table of builtin
- *   applications.
+ *   Returns pointer the a name of the application at 'index' in the table
+ *   of built-in applications.
+ *
+ * Input Parameters:
+ *   index - From 0 and on ...
+ *
+ * Returned Value:
+ *   Returns valid pointer pointing to the app name if index is valid.
+ *   Otherwise NULL is returned.
  *
  ****************************************************************************/
 

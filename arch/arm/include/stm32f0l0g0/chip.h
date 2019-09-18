@@ -4,6 +4,7 @@
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
+ *           Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -212,6 +213,36 @@
 #    define STM32_NCAP          18 /* Capacitive sensing channels */
 #  endif
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
+      defined(CONFIG_ARCH_CHIP_STM32G070RB)
+
+#  define STM32_FLASH_SIZE     (128*1024) /* 128Kb */
+#  define STM32_SRAM_SIZE      (32*1024)  /* 32Kb */
+
+#  define STM32_NATIM           1  /* One advanced timer TIM1 */
+#  define STM32_NGTIM16         5  /* 16-bit general up/down timers TIM3,
+                                    * TIM14-17 */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module (SPI or I2S) */
+#  define STM32_NI2C            2  /* Two I2C (1 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG */
+#  define STM32_NCEC            0  /* One HDMI-CEC controller */
+#  define STM32_NADC            1  /* (1) ADC1, 16-channels */
+
+#  define STM32_NDAC            0  /* No DAC */
+#  define STM32_NCOMP           0  /* No Analog Comparators */
+#  define STM32_NCRC            1  /* No CRC module */
+#  define STM32_NRNG            0  /* No Random number generator (RNG) */
+#  define STM32_NCAP            0  /* No Capacitive sensing channels */
+#  define STM32_NPORTS          5  /* Five GPIO ports, GPIOA-D, F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32G071EB)   || defined(CONFIG_ARCH_CHIP_STM32G071G8)   || \
       defined(CONFIG_ARCH_CHIP_STM32G071GB)   || defined(CONFIG_ARCH_CHIP_STM32G071G8XN) || \

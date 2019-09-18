@@ -47,13 +47,13 @@
 
 MEMORY
 {
-    /* 512Kb FLASH - Leave 256Kb for application usage */
+  /* 512Kb FLASH - Leave 256Kb for application usage */
 
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 128K 
-    uflash (rx)      : ORIGIN = 0x00020000, LENGTH = 128K
+  kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 128K
+  uflash (rx)      : ORIGIN = 0x00020000, LENGTH = 128K
 
-    /* 32Kb of SRAM in the CPU block - Leave 32Kb of AHB SRAM for app usage */
+  /* 32Kb of SRAM in the CPU block - Leave 32Kb of AHB SRAM for app usage */
 
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 16K
-    usram (rwx)      : ORIGIN = 0x10004000, LENGTH = 16K
+  ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 16K
+  usram (rwx)      : ORIGIN = 0x10004000, LENGTH = 16K
 }

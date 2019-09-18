@@ -37,103 +37,103 @@ OUTPUT_ARCH(m32c)
 ENTRY(_stext)
 SECTIONS
 {
-	/* "Far" flash memory begins at address 0xf0000 for the M20262F8 part and
-	 * ends at address 0xfffff (all parts).  The program entry point is
-	 * the first address in flash
-	 */
+    /* "Far" flash memory begins at address 0xf0000 for the M20262F8 part and
+     * ends at address 0xfffff (all parts).  The program entry point is
+     * the first address in flash
+     */
 
-	. = 0xf0000;
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.text)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)			/* Global offset table		*/
-		_etext = ABSOLUTE(.);
-	}
+    . = 0xf0000;
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)         /* Global offset table      */
+        _etext = ABSOLUTE(.);
+    }
 
-	_enronly = ABSOLUTE(.);		/* End of read-only values      */
-					/* .ndata will be relocated     */
-					/* from this address            */
+    _enronly = ABSOLUTE(.);     /* End of read-only values      */
+    /* .ndata will be relocated     */
+    /* from this address            */
 
-	/* The "variable" vector table will be fixed at the following address */
+    /* The "variable" vector table will be fixed at the following address */
 
-	. = 0xffd00;
-	.varvect : {
-		_svarvect = ABSOLUTE(.);
-		*(.varvect)
-		_evarvect = ABSOLUTE(.);
-	}
+    . = 0xffd00;
+    .varvect : {
+        _svarvect = ABSOLUTE(.);
+        *(.varvect)
+        _evarvect = ABSOLUTE(.);
+    }
 
-	/* Followed by the special page/fixed vector table. */
+    /* Followed by the special page/fixed vector table. */
 
-	. = 0xffe00;
-	.specpg : {
-		_sspecpg = ABSOLUTE(.);
-		*(.specpg)
-		_especpg = ABSOLUTE(.);
-	}
+    . = 0xffe00;
+    .specpg : {
+        _sspecpg = ABSOLUTE(.);
+        *(.specpg)
+        _especpg = ABSOLUTE(.);
+    }
 
-	. = 0xfffdc;
-	.fixvect : {
-		_sfixvect = ABSOLUTE(.);
-		*(.fixvect)
-		_efixvect = ABSOLUTE(.);
-	}
+    . = 0xfffdc;
+    .fixvect : {
+        _sfixvect = ABSOLUTE(.);
+        *(.fixvect)
+        _efixvect = ABSOLUTE(.);
+    }
 
-	/* Internal "near" RAM begins at address 0x00400 (all parts) and ends at
-	 * address 0x00bff (M20262F6 and M20262F8 parts).  With the RAM
-	 * region, used is .data followed by .bss.  The remainder of RAM
-	 * carved up by the start-up code into stacks and heaps.
-	 */
+    /* Internal "near" RAM begins at address 0x00400 (all parts) and ends at
+     * address 0x00bff (M20262F6 and M20262F8 parts).  With the RAM
+     * region, used is .data followed by .bss.  The remainder of RAM
+     * carved up by the start-up code into stacks and heaps.
+     */
 
-	. = 0x00400;
+    . = 0x00400;
 
-	.ndata : {
-		_sndata = ABSOLUTE(.);
-		*(.data)
-		CONSTRUCTORS
-		_endata = ABSOLUTE(.);
-	}
+    .ndata : {
+        _sndata = ABSOLUTE(.);
+        *(.data)
+        CONSTRUCTORS
+        _endata = ABSOLUTE(.);
+    }
 
-	.nbss : {			/* BSS				*/
-		_snbss = ABSOLUTE(.);
-		*(.bss)
-		*(COMMON)
-		_enbss = ABSOLUTE(.);
-	}
+    .nbss : {           /* BSS              */
+        _snbss = ABSOLUTE(.);
+        *(.bss)
+        *(COMMON)
+        _enbss = ABSOLUTE(.);
+    }
 
-	/* "Far" RAM begins at 0x10000.  The SKP16C26 has no far RAM */
+    /* "Far" RAM begins at 0x10000.  The SKP16C26 has no far RAM */
 
-	. = 0x10000;
+    . = 0x10000;
 
-	.fdata : {
-		_sfdata = ABSOLUTE(.);
-		*(.fdata)
-		CONSTRUCTORS
-		_efdata = ABSOLUTE(.);
-	}
+    .fdata : {
+        _sfdata = ABSOLUTE(.);
+        *(.fdata)
+        CONSTRUCTORS
+        _efdata = ABSOLUTE(.);
+    }
 
-	.fbss : {			/* BSS				*/
-		_sfbss = ABSOLUTE(.);
-		*(.fbss)
-		*(COMMON)
-		_efbss = ABSOLUTE(.);
-	}
-					/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .fbss : {           /* BSS              */
+        _sfbss = ABSOLUTE(.);
+        *(.fbss)
+        *(COMMON)
+        _efbss = ABSOLUTE(.);
+    }
+    /* Stabs debugging sections.    */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

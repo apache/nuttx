@@ -208,7 +208,7 @@ void syslog_register(void);
  *
  * Description:
  *   Add one more character to the interrupt buffer.  In the event of
- *   buffer overlowed, the character will be dropped.  The indication
+ *   buffer overflowed, the character will be dropped.  The indication
  *   "[truncated]\n" will be appended to the end of the interrupt buffer.
  *
  * Input Parameters:
@@ -262,8 +262,8 @@ int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
  *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  Minus one
- *   is returned on any failure with the errno set correctly.
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
  *
  ****************************************************************************/
 
@@ -310,7 +310,7 @@ int syslog_force(int ch);
  * Name: syslog_dev_write
  *
  * Description:
- *   This is the low-level, multile byte, system logging interface provided
+ *   This is the low-level, multiple byte, system logging interface provided
  *   for the character driver interface.
  *
  * Input Parameters:

@@ -143,13 +143,13 @@
 /* These string IDs only exist if a user-defined string is provided */
 
 #ifdef CONFIG_CDCACM_NOTIFSTR
-#  define CDCACM_NOTIFSTRID        (CDCACM_LASTBASESTRID+1)
+#  define CDCACM_NOTIFSTRID        (CDCACM_LASTBASESTRID + 1)
 #else
 #  define CDCACM_NOTIFSTRID        CDCACM_LASTBASESTRID
 #endif
 
 #ifdef CONFIG_CDCACM_DATAIFSTR
-#  define CDCACM_DATAIFSTRID       (CDCACM_NOTIFSTRID+1)
+#  define CDCACM_DATAIFSTRID       (CDCACM_NOTIFSTRID + 1)
 #else
 #  define CDCACM_DATAIFSTRID       CDCACM_NOTIFSTRID
 #endif

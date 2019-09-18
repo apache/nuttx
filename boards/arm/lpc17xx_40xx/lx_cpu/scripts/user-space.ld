@@ -59,41 +59,39 @@ SECTIONS
         _etext = ABSOLUTE(.);
     } > uflash
 
-    . = ALIGN(4);
-    .init_section : {
+    .init_section : ALIGN(4) {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
     } > uflash
 
-    .ARM.extab : {
+    .ARM.extab : ALIGN(4) {
         *(.ARM.extab*)
     } > uflash
 
-    . = ALIGN(4);
-    __exidx_start = ABSOLUTE(.);
-    .ARM.exidx : {
+    .ARM.exidx : ALIGN(4) {
+        __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
     } > uflash
-
-    __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
 
-    . = ALIGN(4);
-    .data : {
+    .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > usram AT > uflash
 
-    .bss : {
+    .bss : ALIGN(4) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
+        . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > usram
 

@@ -1,7 +1,7 @@
 SMARTFS README
 ^^^^^^^^^^^^^^
 
-This README file contains information about the implemenation of the NuttX
+This README file contains information about the implementation of the NuttX
 Sector Mapped Allocation for Really Tiny (SMART) FLASH file system, SMARTFS.
 
 Contents:

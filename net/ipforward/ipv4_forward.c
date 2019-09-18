@@ -152,10 +152,9 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 
 static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 {
-  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   uint16_t iphdrlen;
   uint16_t sum;
-  int ttl
+  int ttl;
 
   /* Check time-to-live (TTL) */
 
@@ -356,7 +355,7 @@ errout:
  *
  * Description:
  *   This function is a callback from netdev_foreach.  It implements the
- *   the broadcase forwarding action for each network device (other than, of
+ *   the broadcast forwarding action for each network device (other than, of
  *   course, the device that received the packet).
  *
  * Input Parameters:

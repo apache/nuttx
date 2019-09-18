@@ -79,10 +79,10 @@ struct spi_dev_s; /* Forward reference */
  *   Initialize the selected SPI port.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ************************************************************************************/
 

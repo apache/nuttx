@@ -70,6 +70,8 @@
 #include "cxd56_rpr0521rs.h"
 #include "cxd56_sensors.h"
 
+#include "cxd56_isx012.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -256,6 +258,13 @@ enum board_power_device
 
 #define SENSOR_I2C      0
 #define SENSOR_SPI      3
+
+/* Imager device pin definitions *******************************************/
+
+#define IMAGER_RST      PIN_SDIO_DIR1_3
+#define IMAGER_SLEEP    PIN_SDIO_DIR0
+
+#define IMAGER_I2C      2
 
 /* Set signal id for notify USB device connection status and
  * supply current value.

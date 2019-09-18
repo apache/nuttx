@@ -44,12 +44,14 @@
 /*----------------------------------------------------------------------*/
 
 /* The OUTPUT_ARCH command specifies the machine architecture where the
-   argument is one of the names used in the BFD library. More
-   specifically one of the entires in bfd/cpu-mips.c */
+ * argument is one of the names used in the BFD library. More
+ * specifically one of the entires in bfd/cpu-mips.c
+ */
 
 OUTPUT_ARCH( "riscv" )
 
 /* Define the memory regions were we put stuff */
+
 MEMORY
 {
   sram (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
@@ -58,21 +60,23 @@ MEMORY
 stack_size = 4096;
 
 /* Define the beginning and ending stack */
+
 __stack_start = ORIGIN(sram) + LENGTH(sram);
 __stack_end   = __stack_start - stack_size;
 
-
 /* The ENTRY command specifies the entry point (ie. first instruction to
-   execute). The symbol _start is defined in crt0.S */
+ * execute). The symbol _start is defined in crt0.S
+ */
 
 ENTRY( __reset )
 
 /* The GROUP command is special since the listed archives will be
-   searched repeatedly until there are no new undefined references. We
-   need this since -lc depends on -lgloss and -lgloss depends on -lc. I
-   thought gcc would automatically include -lgcc when needed, but
-   idt32.ld includes it explicitly here and I was seeing link errors
-   without it. */
+ * searched repeatedly until there are no new undefined references. We
+ * need this since -lc depends on -lgloss and -lgloss depends on -lc. I
+ * thought gcc would automatically include -lgcc when needed, but
+ * idt32.ld includes it explicitly here and I was seeing link errors
+ * without it.
+ */
 
 /*GROUP( -lc -lgloss -lgcc ) */
 GROUP( -lc )
@@ -80,55 +84,57 @@ GROUP( -lc )
 /*----------------------------------------------------------------------*/
 /* Sections                                                             */
 /*----------------------------------------------------------------------*/
+
 /* This is where we specify how the input sections map to output
-   sections. The .= commands set the location counter, and the
-   sections are inserted in increasing address order according to the
-   location counter. The following statement will take all of the .bar
-   input sections and reloate them into the .foo output section which
-   starts at address 0x1000.
-
-    . = 0.x1000;
-    .foo : { *(.bar) }
-
-   If we wrap an input specification with a KEEP command then it
-   prevents it from being eliminted during "link-time garbage
-   collection". I'm not sure what this is, so I just followed what was
-   done in idt32.ld.
-
-   We can also set a global external symbol to a specific address in the
-   output binary with this syntax:
-
-    _etext = .;
-    PROVIDE( etext = . );
-
-   This will set the global symbol _ftext to the current location. If we
-   wrap this in a PROVIDE commad, the symbol will only be set if it is
-   not defined. We do this with symbols which don't begin with an
-   underscore since technically in ansi C someone might have a function
-   with the same name (eg. etext).
-
-   If we need to label the beginning of a section we need to make sure
-   that the linker doesn't insert an orphan section inbetween where we
-   set the symbol and the actual begining of the section. We can do that
-   by assigning the location dot to itself.
-
-    . = .
-    _ftext = .;
-    .text :
-    { }
-
-   */
+ * sections. The .= commands set the location counter, and the
+ * sections are inserted in increasing address order according to the
+ * location counter. The following statement will take all of the .bar
+ * input sections and reloate them into the .foo output section which
+ * starts at address 0x1000.
+ *
+ *  . = 0.x1000;
+ *  .foo : { *(.bar) }
+ *
+ * If we wrap an input specification with a KEEP command then it
+ * prevents it from being eliminted during "link-time garbage
+ * collection". I'm not sure what this is, so I just followed what was
+ * done in idt32.ld.
+ *
+ * We can also set a global external symbol to a specific address in the
+ * output binary with this syntax:
+ *
+ *  _etext = .;
+ *  PROVIDE( etext = . );
+ *
+ * This will set the global symbol _ftext to the current location. If we
+ * wrap this in a PROVIDE commad, the symbol will only be set if it is
+ * not defined. We do this with symbols which don't begin with an
+ * underscore since technically in ansi C someone might have a function
+ * with the same name (eg. etext).
+ *
+ * If we need to label the beginning of a section we need to make sure
+ * that the linker doesn't insert an orphan section inbetween where we
+ * set the symbol and the actual begining of the section. We can do that
+ * by assigning the location dot to itself.
+ *
+ *  . = .
+ *  _ftext = .;
+ *  .text :
+ *  { }
+ *
+ */
 
 SECTIONS
 {
-
   /*--------------------------------------------------------------------*/
   /* Startup vectors
   /*--------------------------------------------------------------------*/
+
   . = 0x20000000;
   _vectors = .;
 
   /* vectors: Program code section */
+
   .vectors :
   {
     *(.text.vec)
@@ -142,11 +148,14 @@ SECTIONS
   /*--------------------------------------------------------------------*/
 
   /* Begining of code and text segment */
+
   . = 0x20000030;
+
   _ftext = .;
   PROVIDE( eprol = . );
 
   /* text: Program code section */
+
   .text :
   {
     _stext = ABSOLUTE(.);
@@ -156,18 +165,21 @@ SECTIONS
   }
 
   /* init: Code to execute before main (called by crt0.S) */
+
   .init :
   {
     KEEP( *(.init) )
   }
 
   /* fini: Code to execute after main (called by crt0.S) */
+
   .fini :
   {
     KEEP( *(.fini) )
   }
 
   /* rodata: Read-only data */
+
   _rodata = .;
   .rodata :
   {
@@ -178,6 +190,7 @@ SECTIONS
   }
 
   /* End of code and read-only segment */
+
   PROVIDE( etext = . );
   _etext = .;
 
@@ -211,9 +224,11 @@ SECTIONS
   /*--------------------------------------------------------------------*/
   /* Other misc gcc segments (this was in idt32.ld)                     */
   /*--------------------------------------------------------------------*/
+
   /* I am not quite sure about these sections but it seems they are for
-     C++ exception handling. I think .jcr is for "Java Class
-     Registration" but it seems to end up in C++ binaries as well. */
+   * C++ exception handling. I think .jcr is for "Java Class
+   * Registration" but it seems to end up in C++ binaries as well.
+   */
 
   .eh_frame_hdr     : { *(.eh_frame_hdr)     }
   .eh_frame         : { KEEP( *(.eh_frame) ) }
@@ -240,6 +255,8 @@ SECTIONS
   }
 
   /* End of initialized data segment */
+
+  . = ALIGN(4);
   PROVIDE( edata = . );
   _edata = .;
 
@@ -279,7 +296,6 @@ SECTIONS
 
   /* bss: Uninitialized writeable data section */
 
-  . = .;
   _bss_start = .;
   .bss :
   {
@@ -288,6 +304,8 @@ SECTIONS
     *(.gnu.linkonce.b.*)
     *(COMMON)
   }
+
+  . = ALIGN(4);
   _bss_end = .;
   _ebss = .;
 
@@ -297,17 +315,18 @@ SECTIONS
   PROVIDE( end = . );
   _end = ALIGN(16);
 
-        /* Stabs debugging sections. */
-        .stab 0 : { *(.stab) }
-        .stabstr 0 : { *(.stabstr) }
-        .stab.excl 0 : { *(.stab.excl) }
-        .stab.exclstr 0 : { *(.stab.exclstr) }
-        .stab.index 0 : { *(.stab.index) }
-        .stab.indexstr 0 : { *(.stab.indexstr) }
-        .comment 0 : { *(.comment) }
-        .debug_abbrev 0 : { *(.debug_abbrev) }
-        .debug_info 0 : { *(.debug_info) }
-        .debug_line 0 : { *(.debug_line) }
-        .debug_pubnames 0 : { *(.debug_pubnames) }
-        .debug_aranges 0 : { *(.debug_aranges) }
+  /* Stabs debugging sections. */
+
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+  .stab.excl 0 : { *(.stab.excl) }
+  .stab.exclstr 0 : { *(.stab.exclstr) }
+  .stab.index 0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+  .comment 0 : { *(.comment) }
+  .debug_abbrev 0 : { *(.debug_abbrev) }
+  .debug_info 0 : { *(.debug_info) }
+  .debug_line 0 : { *(.debug_line) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges 0 : { *(.debug_aranges) }
 }

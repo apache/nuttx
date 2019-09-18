@@ -232,7 +232,7 @@ static char *dequote_value(const char *varname, char *varval)
 
   if (dqval)
     {
-      /* Check if the variable name is in the list of strings to be dequoated */
+      /* Check if the variable name is in the list of strings to be dequoted */
 
       for (dqnam = dequote_list; *dqnam; dqnam++)
         {

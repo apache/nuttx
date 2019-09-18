@@ -142,22 +142,14 @@
 
 /* Interrupt set/clear/status/mask registers (can't clear RXIM or TXIM) */
 
-#define LPC214X_SP1INT_ROR       (0x01) /* Bit 0: 1=Recieve Overrun */
-#define LPC214X_SP1INT_RTIM      (0x02) /* Bit 1: 1=Recieve Timeout */
+#define LPC214X_SP1INT_ROR       (0x01) /* Bit 0: 1=Receive Overrun */
+#define LPC214X_SP1INT_RTIM      (0x02) /* Bit 1: 1=Receive Timeout */
 #define LPC214X_SP1INT_RXIM      (0x04) /* Bit 2: 1=RX FIFO at least half full */
 #define LPC214X_SP1INT_TXIM      (0x08) /* Bit 3: 1=TX FIFO at least half empty */
 
 /* SPI1 supports an 8-frame FIFO */
 
 #define LPC214X_SPI1_FIFOSZ      (8)
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Inline Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Function Prototypes
@@ -172,10 +164,10 @@ struct spi_dev_s; /* Forward reference */
  *   Initialize the selected SPI port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structre reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -135,19 +135,7 @@
 #define STR71X_BSPICSR2_TIEMASK     (3 << STR71X_BSPICSR2_TIESHIFT)
 #define STR71X_BSPICSR2_TIEDISABLED (0 << STR71X_BSPICSR2_TIESHIFT) /* Disabled  */
 #define STR71X_BSPICSR2_TIETFE      (1 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit FIFO empty  */
-#define STR71X_BSPICSR2_TIETUFL     (2 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit underlow */
+#define STR71X_BSPICSR2_TIETUFL     (2 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit underflow */
 #define STR71X_BSPICSR2_TIETFF      (3 << STR71X_BSPICSR2_TIESHIFT) /* Interrupt on transmit FIFO full  */
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_BSPI_H */

@@ -35,8 +35,8 @@
 
 MEMORY
 {
-    flash   (rx) : ORIGIN = 0x05000000, LENGTH = 16384K
-    sram   (rwx) : ORIGIN = 0x02001000, LENGTH = 1652K
+  flash   (rx) : ORIGIN = 0x05000000, LENGTH = 16384K
+  sram   (rwx) : ORIGIN = 0x02001000, LENGTH = 1652K
 }
 
 OUTPUT_ARCH(arm)
@@ -62,8 +62,7 @@ SECTIONS
       _etext = ABSOLUTE(.);
     } > flash
 
-  . = ALIGN(4);
-  .init_section :
+  .init_section : ALIGN(4)
     {
       _sinit = ABSOLUTE(.);
       KEEP(*(.init_array .init_array.*))
@@ -75,23 +74,22 @@ SECTIONS
       *(.ARM.extab*)
     } > flash
 
-  . = ALIGN(4);
-  __exidx_start = ABSOLUTE(.);
-  .ARM.exidx :
+  .ARM.exidx : ALIGN(4)
     {
+      __exidx_start = ABSOLUTE(.);
       *(.ARM.exidx*)
+      __exidx_end = ABSOLUTE(.);
     } > flash
-  __exidx_end = ABSOLUTE(.);
 
   _eronly = ABSOLUTE(LOADADDR(.data));
 
-  . = ALIGN(4);
-  .data :
+  .data : ALIGN(4)
     {
       _sdata = ABSOLUTE(.);
       *(.data .data.*)
       *(.gnu.linkonce.d.*)
       CONSTRUCTORS
+      . = ALIGN(4);
       _edata = ABSOLUTE(.);
     } > sram AT > flash
 
@@ -110,6 +108,7 @@ SECTIONS
       *(.bss .bss.*)
       *(.gnu.linkonce.b.*)
       *(COMMON)
+      . = ALIGN(4);
       _ebss = ABSOLUTE(.);
     } > sram
 

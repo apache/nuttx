@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *           Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -447,7 +448,7 @@ static void stm32_stdclockconfig(void)
   uint16_t pwrcr;
 #endif
   uint32_t pwr_vos;
-  bool flash_1ws;
+  uint32_t flash_ws;
 
   /* Enable PWR clock from APB1 to give access to PWR_CR register */
 
@@ -455,8 +456,52 @@ static void stm32_stdclockconfig(void)
   regval |= RCC_APB1ENR_PWREN;
   putreg32(regval, STM32_RCC_APB1ENR);
 
-#warning TODO: configure VOS range
-  UNUSED(pwr_vos);
+  /* Two voltage ranges are available:
+   *
+   * Range 1: High-performance range (default)
+   *          Typical output voltage 1.2 V
+   *          SYSLCK up to 64 MHz
+   *
+   * Range 2: Low-power range
+   *          Typical output voltage 1.0V
+   *          SYSLCK up to 16 MHz
+   *
+   * Flash wait states (latency) according to range and HCLK:
+   *
+   * Range 1:
+   * - Flash 0WS if HCLK <= 24
+   * - Flash 1WS if HCLK <= 48
+   * - Flash 2WS if HCLK <= 64
+   *
+   * Range 2:
+   * - Flash 0WS if HCLK <= 8
+   * - Flash 1WS if HCLK <= 16
+   *
+   * Where HCLK = (SYSCLK / HPRE div)
+   */
+
+  if (STM32_SYSCLK_FREQUENCY > 16000000)
+    {
+      pwr_vos = PWR_CR1_VOS_RANGE1;
+
+      if (STM32_HCLK_FREQUENCY <= 24000000)
+        flash_ws = FLASH_ACR_LATENCY_0;
+      else if (STM32_HCLK_FREQUENCY <= 48000000)
+        flash_ws = FLASH_ACR_LATENCY_1;
+      else
+        flash_ws = FLASH_ACR_LATENCY_2;
+    }
+  else
+    {
+      pwr_vos = PWR_CR1_VOS_RANGE2;
+
+      if (STM32_HCLK_FREQUENCY <= 8000000)
+        flash_ws = FLASH_ACR_LATENCY_0;
+      else
+        flash_ws = FLASH_ACR_LATENCY_1;
+    }
+
+  stm32_pwr_setvos(pwr_vos);
 
 #if defined(CONFIG_STM32F0L0G0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler
@@ -532,8 +577,12 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-#warning TODO: configure flash latency
-  UNUSED(flash_1ws);
+  /* Configure FLASH wait states and enable prefetch */
+
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (flash_ws & FLASH_ACR_LATENCY_MASK) | FLASH_ACR_PRFTEN;
+  putreg32(regval, STM32_FLASH_ACR);
 
   /* Set the HCLK source/divider */
 
@@ -563,7 +612,12 @@ static void stm32_stdclockconfig(void)
 
   /* Configure PLL clock outputs division */
 
+#if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
+    defined(CONFIG_ARCH_CHIP_STM32G070RB)
+  regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLR;
+#else
   regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLQ | STM32_PLLCFG_PLLR;
+#endif
 
   /* Write PLLCFG register */
 

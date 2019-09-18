@@ -105,8 +105,8 @@
  * locations in the form of the Load-Exclusive (LDREX) and Store-Exclusive
  * (STREX) instructions in ARM and Thumb instruction sets.  ARMv6K extended
  * this to included byte, halfword, and doubleword variants of LDREX and
- * STREX.  ARMv7-M supports byte and halfwor, but not the doudleword varient
- * (ARMv6-M does not support exlusive access)
+ * STREX.  ARMv7-M supports byte and halfword, but not the doubleword varient
+ * (ARMv6-M does not support exclusive access)
  *
  * ARM architectures prior to ARMv6 supported SWP and SWPB instructions that
  * atomically swap a 32-bit word for byte value between a register and a

@@ -80,8 +80,8 @@
 
 enum mqalloc_e
 {
-  MQ_ALLOC_FIXED = 0,  /* pre-allocated; never freed */
-  MQ_ALLOC_DYN,        /* dynamically allocated; free when unused */
+  MQ_ALLOC_FIXED = 0,  /* Pre-allocated; never freed */
+  MQ_ALLOC_DYN,        /* Dynamically allocated; free when unused */
   MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
 };
 

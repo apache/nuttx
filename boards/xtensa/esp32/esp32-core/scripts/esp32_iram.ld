@@ -94,7 +94,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    . = ALIGN (8);
+    . = ALIGN(8);
     _ebss = ABSOLUTE(.);
 
     /* Uninitialized .bss */
@@ -119,8 +119,8 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    _edata = ABSOLUTE(.);
     . = ALIGN(4);
+    _edata = ABSOLUTE(.);
 
     _srodata = ABSOLUTE(.);
     *(.rodata)

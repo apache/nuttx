@@ -1275,7 +1275,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   /* If multiple MAX11802 devices are supported, then we will need to add
    * this new instance to a list of device instances so that it can be
-   * found by the interrupt handler based on the recieved IRQ number.
+   * found by the interrupt handler based on the received IRQ number.
    */
 
 #ifdef CONFIG_MAX11802_MULTIPLE

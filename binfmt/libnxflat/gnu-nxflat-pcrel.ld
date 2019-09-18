@@ -148,6 +148,7 @@ SECTIONS
       *(.dtors)
       _dtors_end = . ;
 
+      . = ALIGN(4);
       _edata = . ;
       edata = ALIGN( 0x10 ) ;
     } > DSPACE

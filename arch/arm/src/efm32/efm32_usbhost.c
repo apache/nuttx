@@ -74,7 +74,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
+
 /* EFM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
@@ -131,6 +133,7 @@
 #endif
 
 /* HCD Setup *******************************************************************/
+
 /* Hardware capabilities */
 
 #define EFM32_NHOST_CHANNELS      8   /* Number of host channels */
@@ -392,6 +395,7 @@ static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
 #endif
 
 /* Interrupt handling **********************************************************/
+
 /* Lower level interrupt handlers */
 
 static void efm32_gint_wrpacket(FAR struct efm32_usbhost_s *priv,
@@ -1596,7 +1600,8 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = efm32_getreg(EFM32_USB_GNPTXSTS);
-            avail  = ((regval & _USB_GNPTXSTS_NPTXFSPCAVAIL_MASK) >> _USB_GNPTXSTS_NPTXFSPCAVAIL_SHIFT) << 2;
+            avail  = ((regval & _USB_GNPTXSTS_NPTXFSPCAVAIL_MASK) >>
+                       _USB_GNPTXSTS_NPTXFSPCAVAIL_SHIFT) << 2;
           }
           break;
 
@@ -1608,7 +1613,8 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = efm32_getreg(EFM32_USB_HPTXSTS);
-            avail  = ((regval & _USB_HPTXSTS_PTXFSPCAVAIL_MASK) >> _USB_HPTXSTS_PTXFSPCAVAIL_SHIFT) << 2;
+            avail  = ((regval & _USB_HPTXSTS_PTXFSPCAVAIL_MASK) >>
+                       _USB_HPTXSTS_PTXFSPCAVAIL_SHIFT) << 2;
           }
           break;
 
@@ -2177,6 +2183,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
+  bool zlp;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -2185,8 +2192,9 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   chan  = &priv->chan[chidx];
   start = clock_systimer();
   xfrd  = 0;
+  zlp   = (buflen == 0);
 
-  while (buflen > 0)
+  while (buflen > 0 || zlp)
     {
       /* Transfer one packet at a time.  The hardware is capable of queueing
        * multiple OUT packets, but I just haven't figured out how to handle
@@ -2254,7 +2262,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
            * using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20*1000);
+          nxsig_usleep(20 * 1000);
         }
       else
         {
@@ -2263,6 +2271,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           buffer += xfrlen;
           buflen -= xfrlen;
           xfrd   += chan->xfrd;
+          zlp     = false;
         }
     }
 
@@ -2501,7 +2510,8 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
 
       /* Clear the NAK and data toggle error conditions */
 
-      efm32_putreg(EFM32_USB_HCn_INT(chidx), (USB_HC_INT_NAK | USB_HC_INT_DATATGLERR));
+      efm32_putreg(EFM32_USB_HCn_INT(chidx),
+                   (USB_HC_INT_NAK | USB_HC_INT_DATATGLERR));
     }
 
   /* Check for a pending FRaMe OverRun (FRMOR) interrupt */
@@ -2819,7 +2829,8 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
 
       /* Clear the pending the Data Toggle ERRor (DTERR) and NAK interrupts */
 
-      efm32_putreg(EFM32_USB_HCn_INT(chidx), (USB_HC_INT_DATATGLERR | USB_HC_INT_NAK));
+      efm32_putreg(EFM32_USB_HCn_INT(chidx),
+                   (USB_HC_INT_DATATGLERR | USB_HC_INT_NAK));
     }
 
   /* Check for a pending CHannel Halted (CHH) interrupt */
@@ -2984,6 +2995,7 @@ static void efm32_gint_disconnected(FAR struct efm32_usbhost_s *priv)
 static inline void efm32_gint_sofisr(FAR struct efm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
+
 #warning "Do what?"
 
   /* Clear pending SOF interrupt */
@@ -3232,7 +3244,8 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
 
   /* Extract the number of bytes available in the periodic Tx FIFO. */
 
-  avail = ((regval & _USB_HPTXSTS_PTXFSPCAVAIL_MASK) >> _USB_HPTXSTS_PTXFSPCAVAIL_SHIFT) << 2;
+  avail = ((regval & _USB_HPTXSTS_PTXFSPCAVAIL_MASK) >>
+            _USB_HPTXSTS_PTXFSPCAVAIL_SHIFT) << 2;
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -3408,8 +3421,8 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
 
               if ((hcfg & _USB_HCFG_FSLSPCLKSEL_MASK) != USB_HCFG_FSLSPCLKSEL_DIV8)
                 {
-
                   usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_FSLSSW, 0);
+
                   /* Yes... configure for LS */
 
                   hcfg &= ~_USB_HCFG_FSLSPCLKSEL_MASK;
@@ -3423,7 +3436,6 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
             }
           else /* if ((hprt & _USB_HPRT_PRTSPD_MASK) == USB_HPRT_PSPD_FS) */
             {
-
               usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_FSDEV, 0);
               efm32_putreg(EFM32_USB_HFIR, 48000);
 
@@ -3431,8 +3443,8 @@ static inline void efm32_gint_hprtisr(FAR struct efm32_usbhost_s *priv)
 
               if ((hcfg & _USB_HCFG_FSLSPCLKSEL_MASK) != USB_HCFG_FSLSPCLKSEL_DIV1)
                 {
-
                   usbhost_vtrace1(USBHOST_VTRACE1_GINT_HPRT_LSFSSW, 0);
+
                   /* Yes... configure for FS */
 
                   hcfg &= ~_USB_HCFG_FSLSPCLKSEL_MASK;
@@ -3487,7 +3499,7 @@ static inline void efm32_gint_ipxfrisr(FAR struct efm32_usbhost_s *priv)
    * CHDIS : Set to stop transmitting/receiving data on a channel
    */
 
-  regval = efm32_getreg(EFM32_USB_HCn_CHAR(0));
+  regval  = efm32_getreg(EFM32_USB_HCn_CHAR(0));
   regval |= (USB_HC_CHAR_CHDIS | USB_HC_CHAR_CHENA);
   efm32_putreg(EFM32_USB_HCn_CHAR(0), regval);
 
@@ -3684,6 +3696,7 @@ static inline void efm32_hostinit_enable(void)
   efm32_putreg(EFM32_USB_GINTSTS, 0xbfffffff);
 
   /* Enable the host interrupts */
+
   /* Common interrupts:
    *
    *   USB_GINTMSK_WKUPINTMSK      : Resume/remote wakeup detected interrupt
@@ -3919,7 +3932,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
 
   /* USB 2.0 spec says at least 50ms delay before port reset.  We wait 100ms. */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Reset the host port */
 
@@ -4085,7 +4098,6 @@ static int efm32_epalloc(FAR struct usbhost_driver_s *drvr,
                          FAR const struct usbhost_epdesc_s *epdesc,
                          FAR usbhost_ep_t *ep)
 {
-
   FAR struct efm32_usbhost_s *priv = (FAR struct efm32_usbhost_s *)drvr;
   int ret;
 
@@ -4148,8 +4160,9 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   efm32_takesem(&priv->exclsem);
 
-  /* A single channel is represent by an index in the range of 0 to EFM32_MAX_TX_FIFOS.
-   * Otherwise, the ep must be a pointer to an allocated control endpoint structure.
+  /* A single channel is represent by an index in the range of 0 to
+   * EFM32_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an allocated
+   * control endpoint structure.
    */
 
   if ((uintptr_t)ep < EFM32_MAX_TX_FIFOS)
@@ -4415,38 +4428,36 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
           continue;
         }
 
+      /* Handle the IN data phase (if any) */
+
+      if (buflen > 0)
+        {
+          ret = efm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
+          if (ret < 0)
+            {
+              usbhost_trace1(USBHOST_TRACE1_RECVDATA, -ret);
+              continue;
+            }
+        }
+
       /* Get the start time.  Loop again until the timeout expires */
 
       start = clock_systimer();
       do
         {
-          /* Handle the IN data phase (if any) */
-
-          if (buflen > 0)
-            {
-              ret = efm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
-              if (ret < 0)
-                {
-                  usbhost_trace1(USBHOST_TRACE1_RECVDATA, -ret);
-                }
-            }
-
           /* Handle the status OUT phase */
 
+          priv->chan[ep0info->outndx].outdata1 ^= true;
+          ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
           if (ret == OK)
             {
-              priv->chan[ep0info->outndx].outdata1 ^= true;
-              ret = efm32_ctrl_senddata(priv, ep0info, NULL, 0);
-              if (ret == OK)
-                {
-                  /* All success transactions exit here */
+              /* All success transactions exit here */
 
-                  efm32_givesem(&priv->exclsem);
-                  return OK;
-                }
-
-              usbhost_trace1(USBHOST_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
+              efm32_givesem(&priv->exclsem);
+              return OK;
             }
+
+          usbhost_trace1(USBHOST_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
 
           /* Get the elapsed time (in frames) */
 
@@ -5062,7 +5073,10 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
   regval &= ~USB_HCFG_FSLSSUPP;
   efm32_putreg(EFM32_USB_HCFG, regval);
 
-  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic Tx FIFOs */
+  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
+   * Tx FIFOs
+   */
+
   /* Configure Rx FIFO size (GRXFSIZ) */
 
   efm32_putreg(EFM32_USB_GRXFSIZ, CONFIG_EFM32_OTGFS_RXFIFO_SIZE);
@@ -5070,13 +5084,16 @@ static void efm32_host_initialize(FAR struct efm32_usbhost_s *priv)
 
   /* Setup the host non-periodic Tx FIFO size (GNPTXFSIZ) */
 
-  regval = (offset | (CONFIG_EFM32_OTGFS_NPTXFIFO_SIZE << _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_SHIFT));
+  regval = (offset |
+            (CONFIG_EFM32_OTGFS_NPTXFIFO_SIZE <<
+             _USB_GNPTXFSIZ_NPTXFINEPTXF0DEP_SHIFT));
   efm32_putreg(EFM32_USB_GNPTXFSIZ, regval);
   offset += CONFIG_EFM32_OTGFS_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx FIFO size register (HPTXFSIZ) */
 
-  regval = (offset | (CONFIG_EFM32_OTGFS_PTXFIFO_SIZE << _USB_HPTXFSIZ_PTXFSIZE_SHIFT));
+  regval = (offset |
+            (CONFIG_EFM32_OTGFS_PTXFIFO_SIZE << _USB_HPTXFSIZ_PTXFSIZE_SHIFT));
   efm32_putreg(EFM32_USB_HPTXFSIZ, regval);
 
   /* If OTG were supported, we would need to clear HNP enable bit in the
@@ -5205,7 +5222,7 @@ static inline void efm32_sw_initialize(FAR struct efm32_usbhost_s *priv)
  * Name: efm32_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

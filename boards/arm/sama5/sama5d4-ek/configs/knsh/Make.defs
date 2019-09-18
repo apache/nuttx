@@ -1,5 +1,5 @@
 ############################################################################
-# boards/sama5d4-ek/configs/knsh/Make.defs
+# boards/arm/sama5/sama5d4-ek/configs/knsh/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

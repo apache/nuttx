@@ -1,5 +1,5 @@
 ############################################################################
-# boards/ea3131/configs/pgnsh/Make.defs
+# boards/arm/lpc31xx/ea3131/configs/pgnsh/Make.defs
 #
 #   Copyright (C) 2010,2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

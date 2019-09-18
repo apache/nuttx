@@ -486,7 +486,7 @@ MAPPING TO STM32 F4:
    FSMC_NWE         ~WR    pin 22  PD5  P2 pin 29 Conflict (Note 3)
    FSMC_NOE         ~RD    pin 21  PD4  P2 pin 32 Conflict (Note 4)
    PC6              RESET  pin 24  PC6  P2 pin 47 Free I/O
-   Timer ouput      BL_CNT pin 23  (to be determined)
+   Timer output     BL_CNT pin 23  (to be determined)
   ---------------- -------------- ----------------------------------
 
    1 Used for the RED LED

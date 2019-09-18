@@ -47,6 +47,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "nvic.h"
 #include "itm.h"
 
 #include "stm32.h"
@@ -70,6 +71,10 @@
 void stm32_boardinitialize(void)
 {
 #ifdef CONFIG_SCHED_CRITMONITOR
+  /* Enable ITM and DWT resources, if not left enabled by debugger. */
+
+  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
+
   /* Make sure the high speed cycle counter is running.  It will be started
    * automatically only if a debugger is connected.
    */

@@ -26,6 +26,15 @@ config CXD56_WLCSP
 
 endchoice
 
+config CXD56_CUSTOM_PINCONFIG
+	bool "Board-specific pin configuration"
+	default n
+	---help---
+		Custom PIN Configuration of CXD56xx pins to fit a specific board.
+		If this option is enabled, some PINs configurations are overwritten
+		in "boards/arm/cxd56xx/<board>/include/board_pinconfig.h"
+		from "arch/arm/src/cxd56xx/hardware/cxd56xx_pinconfig.h".
+
 comment "Debug Features"
 
 config CXD56_BACKUPLOG

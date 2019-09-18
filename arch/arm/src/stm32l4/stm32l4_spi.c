@@ -1567,7 +1567,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that can be received in the buffer in number
  *              of words.  The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
@@ -1769,10 +1769,10 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
  *   Initialize the selected SPI bus
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ************************************************************************************/
 

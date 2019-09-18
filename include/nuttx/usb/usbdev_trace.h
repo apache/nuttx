@@ -50,9 +50,9 @@
 
 /* Event encoding/decoding macros *******************************************/
 
-#define TRACE_EVENT(id,data)     ((uint16_t)(id)|(data))
-#define TRACE_ID(event)          ((event)&0xff00)
-#define TRACE_DATA(event)        ((event)&0x00ff)
+#define TRACE_EVENT(id,data)     ((uint16_t)(id) | (data))
+#define TRACE_ID(event)          ((event) & 0xff00)
+#define TRACE_DATA(event)        ((event) & 0x00ff)
 
 /* Events ******************************************************************/
 

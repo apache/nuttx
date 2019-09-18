@@ -120,7 +120,7 @@
 # define KINETIS_SDRAMC_BASE        0x4000f000 /* SDRAMC */
 # define KINETIS_FMC_BASE           0x4001f000 /* Flash memory controller */
 # define KINETIS_FTFE_BASE          0x40020000 /* Flash memory */
-# define KINETIS_DMAMUX0_BASE       0x40021000 /* DMA channel mutiplexer 0 */
+# define KINETIS_DMAMUX0_BASE       0x40021000 /* DMA channel multiplexer 0 */
 # define KINETIS_CAN0_BASE          0x40024000 /* FlexCAN 0 */
 # define KINETIS_RNGA_BASE          0x40029000 /* Random Number Generator (RNGA) */
 # define KINETIS_SPI0_BASE          0x4002c000 /* DSPI 0 */

@@ -79,7 +79,7 @@
 # define KL_DMAC_BASE      0x40008000 /* DMA controller */
 # define KL_AIPSGPIO_BASE  0x4000f000 /* GPIO controller (aliased to 0x400ff000) */
 # define KL_FTFL_BASE      0x40020000 /* Flash memory */
-# define KL_DMAMUX0_BASE   0x40021000 /* DMA channel mutiplexer 0 */
+# define KL_DMAMUX0_BASE   0x40021000 /* DMA channel multiplexer 0 */
 # define KL_PIT_BASE       0x40037000 /* Periodic interrupt timers (PIT) */
 # define KL_TPM0_BASE      0x40038000 /* Timer/PWM (TPM) 0 */
 # define KL_TPM1_BASE      0x40039000 /* Timer/PWM (TPM) 1 */

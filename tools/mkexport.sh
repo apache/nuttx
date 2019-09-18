@@ -241,12 +241,14 @@ echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/build/Make.defs"
 echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/build/Make.defs"
 echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
 echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/build/Make.defs"
+echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/build/Make.defs"
 echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
 echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/build/Make.defs"
 echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/build/Make.defs"
 echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/build/Make.defs"
+echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/build/Make.defs"
 
 # Additional compilation options when the kernel is built
 

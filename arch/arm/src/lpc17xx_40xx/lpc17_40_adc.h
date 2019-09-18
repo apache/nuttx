@@ -104,10 +104,10 @@ EXTERN uint8_t g_adc_chanlist[CONFIG_LPC17_40_ADC_NCHANNELS];
  * Name: lpc17_40_adcinitialize
  *
  * Description:
- *   Initialize the adc
+ *   Initialize the ADC
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

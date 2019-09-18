@@ -168,7 +168,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
           do
             {
               /* Write the character to the supported logging device.  On
-               * failure, syslog_putc returns EOF with the errno value set;
+               * failure, syslog_putc returns a negated errno value.
                */
 
               ret = syslog_putc(ch);
@@ -201,7 +201,7 @@ static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_syslogstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
@@ -247,7 +247,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
  *
  * Input Parameters:
  *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *            lib_syslogstream_s to be initialized.
  *
  * Returned Value:
  *   None (Resources freed).

@@ -13,6 +13,18 @@ config CXD56_SPIFLASHSIZE
 		Specify the SPI flash total available size for the application.
 		This value is generally set half of SPI flash device capacity.
 
+config SPRESENSE_EXTENSION
+	bool "Extension board"
+	default n
+	select CXD56_CUSTOM_PINCONFIG
+	---help---
+		Indicates to the configuration that an SPresense extension board is
+		present.  If there is no extension board attached, the SPresense
+		may run in a low-power mode by default (as determined by the
+		CONFIG_CXD56_CUSTOM_PINCONFIG option).  If an extension board is
+		present, then the SPresense will need to run at a higher power mode,
+		selected by this option.
+
 config SDCARD_TXS02612
 	bool "SD Card TXS02612 port expander with voltage level translation"
 	default y

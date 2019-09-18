@@ -551,7 +551,7 @@ static inline int vnc_wait_connect(int display)
    * The RUNNING state indicates that the server has started, it has
    * established a connection with the VNC client, it is negotiated
    * encodings and framebuffer characteristics, and it has started the
-   * updater thread.  The server is now ready to recieve Client-to-Server
+   * updater thread.  The server is now ready to receive Client-to-Server
    * messages and to perform remote framebuffer updates.
    */
 
@@ -680,11 +680,11 @@ int up_fbinitialize(int display)
  *   nor can it call upward into NX.  So, some other logic.
  *
  *   vnc_fbinitialize() provides an optional, alternative initialization
- *   function.  It is optional becuase it need not be called.  If it is not
+ *   function.  It is optional because it need not be called.  If it is not
  *   called, however, keyboard/mouse inputs from the remote VNC client will
  *   be lost.  By calling vnc_fbinitialize(), you can provide callout
- *   functions that can be received by logic higher in the architure.  This
- *   higher level level callouts can then call nx_kbdin() or nx_mousein() on
+ *   functions that can be received by logic higher in the architecture.
+ *   These higher level callouts can then call nx_kbdin() or nx_mousein() on
  *   behalf of the VNC server.
  *
  * Input Parameters:

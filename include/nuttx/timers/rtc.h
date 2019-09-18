@@ -271,7 +271,7 @@ struct rtc_setrelative_s
   time_t reltime;           /* Relative time in seconds */
 };
 
-/* Callback type used by the RTC harware to notify the RTC driver when the
+/* Callback type used by the RTC hardware to notify the RTC driver when the
  * alarm expires.
  */
 
@@ -319,7 +319,7 @@ struct rtc_setperiodic_s
   struct timespec period;   /* Period between wakeups */
 };
 
-/* Callback type used by the RTC harware to notify the RTC driver when the
+/* Callback type used by the RTC hardware to notify the RTC driver when the
  * wakeup period expires.
  */
 

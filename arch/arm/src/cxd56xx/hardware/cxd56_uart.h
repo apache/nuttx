@@ -51,7 +51,7 @@
 /* Common Register Offsets */
 
 #define CXD56_UART_DR       0x000    /* Data register */
-#define CXD56_UART_RSR_ECR  0x004    /* Recieve status/error clear register */
+#define CXD56_UART_RSR_ECR  0x004    /* Receive status/error clear register */
 #define CXD56_UART_FR       0x018    /* Flag register */
 #define CXD56_UART_ILPR     0x020    /* IrDA low-power counter register */
 #define CXD56_UART_IBRD     0x024    /* Integer baud rate register */

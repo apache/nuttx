@@ -1,5 +1,5 @@
 ############################################################################
-# boards/nucleo-144/configs/f746-nsh/Make.defs
+# boards/arm/stm32f7/nucleo-144/configs/f746-nsh/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Authors: Gregory Nutt <gnutt@nuttx.org>

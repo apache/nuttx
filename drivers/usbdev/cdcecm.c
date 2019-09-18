@@ -1065,10 +1065,6 @@ static void cdcecm_ipv6multicast(FAR struct cdcecm_driver_s *priv)
 static int cdcecm_ioctl(FAR struct net_driver_s *dev, int cmd,
                       unsigned long arg)
 {
-  FAR struct cdcecm_driver_s *priv =
-    (FAR struct cdcecm_driver_s *)dev->d_private;
-  int ret;
-
   /* Decode and dispatch the driver-specific IOCTL command */
 
   switch (cmd)

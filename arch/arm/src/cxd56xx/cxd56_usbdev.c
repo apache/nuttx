@@ -1762,7 +1762,7 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
 
                 if (!(stat & USB_INT_MRXFIFOEMPTY))
                   {
-                    /* Flush Recieve FIFO and clear NAK to finish status stage */
+                    /* Flush Receive FIFO and clear NAK to finish status stage */
 
                     putreg32(ctrl | USB_MRXFLUSH, CXD56_USB_OUT_EP_CONTROL(n));
                   }

@@ -2,7 +2,8 @@
 # Config.mk
 # Global build rules and macros.
 #
-#   Copyright (C) 2011, 2013-2014, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2014, 2018-2019 Gregory Nutt. All rights
+#     reserved.
 #   Author: Richard Cochran
 #           Gregory Nutt <gnutt@nuttx.org>
 #
@@ -38,12 +39,16 @@
 #
 ############################################################################
 
+# Disable all built-in rules
+
+.SUFFIXES:
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 export SHELL=cmd
 endif
 
 # These are configuration variables that are quoted by configuration tool
-# but which must be unquoated when used in the build system.
+# but which must be unquoted when used in the build system.
 
 CONFIG_ARCH       := $(patsubst "%",%,$(strip $(CONFIG_ARCH)))
 CONFIG_ARCH_CHIP  := $(patsubst "%",%,$(strip $(CONFIG_ARCH_CHIP)))
@@ -302,7 +307,7 @@ endif
 #
 # USAGE:  FILELIST = $(call RWILDCARD,<dir>,<wildcard-filename)
 #
-# This is functionally equivent to the following, but has the advantage in
+# This is functionally equivalent to the following, but has the advantage in
 # that it is portable
 #
 # FILELIST = ${shell find <dir> -name <wildcard-file>}
@@ -323,5 +328,27 @@ endef
 else
 define CLEAN
 	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
+endef
+endif
+
+# TESTANDREPLACEFILE - Test if two files are different. If so replace the
+#                      second with the first.  Otherwise, delete the first.
+#
+# USAGE:  $(call TESTANDREPLACEFILE, newfile, oldfile)
+#
+# args: $1 - newfile:  Temporary file to test
+#       $2 - oldfile:  File to replace
+
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+define TESTANDREPLACEFILE
+	if [ -f $2 ]; then \
+		if cmp $1 $2; then \
+			rm -f $1; \
+		else \
+			mv $1 $2; \
+		fi \
+	else \
+		mv $1 $2; \
+	fi
 endef
 endif

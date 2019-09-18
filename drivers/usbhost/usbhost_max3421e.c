@@ -4703,7 +4703,7 @@ static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
  * Name: max3421e_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

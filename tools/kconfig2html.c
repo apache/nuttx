@@ -1788,7 +1788,7 @@ static inline char *process_config(FILE *stream, const char *varname,
         }
     }
 
-  /* Is this an internal configuration varaible with no description?
+  /* Is this an internal configuration variable with no description?
    * If so, send the output to the appendix file.
    */
 

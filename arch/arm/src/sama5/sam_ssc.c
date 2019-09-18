@@ -2179,7 +2179,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   apb      - A pointer to the audio buffer in which to recieve data
+ *   apb      - A pointer to the audio buffer in which to receive data
  *   callback - A user provided callback function that will be called at
  *              the completion of the transfer.  The callback will be
  *              performed in the context of the worker thread.
@@ -3397,7 +3397,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
  *   port - I2S "port" number (identifying the "logical" SSC port)
  *
  * Returned Value:
- *   Valid SSC device structure reference on succcess; a NULL on failure
+ *   Valid SSC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

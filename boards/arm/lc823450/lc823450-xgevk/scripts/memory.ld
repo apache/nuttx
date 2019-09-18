@@ -37,15 +37,15 @@
 
 MEMORY
 {
-    /* 1024Kb FLASH (tentative) */
+  /* 1024Kb FLASH (tentative) */
 
-    kflash (rx)      : ORIGIN = 0x05000000, LENGTH = 128K
-    uflash (rx)      : ORIGIN = 0x05020000, LENGTH = 128K
-    xflash (rx)      : ORIGIN = 0x05040000, LENGTH = 768K
+  kflash (rx)      : ORIGIN = 0x05000000, LENGTH = 128K
+  uflash (rx)      : ORIGIN = 0x05020000, LENGTH = 128K
+  xflash (rx)      : ORIGIN = 0x05040000, LENGTH = 768K
 
-    /* 256Kb SRAM (tentative) */
+  /* 256Kb SRAM (tentative) */
 
-    ksram (rwx)      : ORIGIN = 0x020c0000, LENGTH = 32K
-    usram (rwx)      : ORIGIN = 0x020c8000, LENGTH = 32K
-    xsram (rwx)      : ORIGIN = 0x020d0000, LENGTH = 192K
+  ksram (rwx)      : ORIGIN = 0x020c0000, LENGTH = 32K
+  usram (rwx)      : ORIGIN = 0x020c8000, LENGTH = 32K
+  xsram (rwx)      : ORIGIN = 0x020d0000, LENGTH = 192K
 }

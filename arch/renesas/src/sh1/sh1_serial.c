@@ -440,7 +440,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_udelay(100);
 
-  /* Then enable the transmitter and reciever */
+  /* Then enable the transmitter and receiver */
 
   priv->scr |= (SH1_SCISCR_TE | SH1_SCISCR_RE);
   up_serialout(priv, SH1_SCI_SCR_OFFSET, priv->scr);

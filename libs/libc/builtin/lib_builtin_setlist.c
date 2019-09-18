@@ -78,9 +78,9 @@ int g_builtin_count;
  *
  * Input Parameters:
  *   builtins - The list of built-in functions.  Each entry is a name-value
- *              pair that maps a builtin function name to its user-space
+ *              pair that maps a built-in function name to its user-space
  *              entry point address.
- *   count    - The number of name-value pairs in the builtin list.
+ *   count    - The number of name-value pairs in the built-in list.
  *
  * Returned Value:
  *   None

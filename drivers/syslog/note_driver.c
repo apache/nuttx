@@ -148,7 +148,7 @@ static ssize_t note_read(FAR struct file *filep, FAR char *buffer,
  *
  * Description:
  *   Register a serial driver at /dev/note that can be used by an
- *   application to read data from the circular not buffer.
+ *   application to read data from the circular note buffer.
  *
  * Input Parameters:
  *   None.

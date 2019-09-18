@@ -193,7 +193,7 @@
 
 #define USB_INT_CDC_CLEAR   (1<<28)              /*  */
 #define USB_INT_XFERDONE    (1<<27)              /* Tfansfer Done/Transmit FIFO Empty */
-#define USB_INT_RSS         (1<<26)              /* Recieved Set Stall Indication */
+#define USB_INT_RSS         (1<<26)              /* Received Set Stall Indication */
 #define USB_INT_RCS         (1<<25)              /* Received Clear Stall Indication */
 #define USB_INT_TXEMPTY     (1<<24)              /* Transmit FIFO Empty */
 #define USB_INT_ISO_IN_DONE (1<<23)              /* Isochronous IN transaction for the current microframe is complete */

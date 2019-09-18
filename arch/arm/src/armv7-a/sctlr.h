@@ -152,7 +152,7 @@
 
 /* Auxiliary Control Register (ACTLR) */
 
-#define ACTLR_FW                 (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcase */
+#define ACTLR_FW                 (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcast */
 #define ACTLR_L2_PREFECTH        (1 << 1)  /* Bit 1: L2 pre-fetch hint enable */
 #define ACTLR_L1_PREFETCH        (1 << 2)  /* Bit 2: L1 Dside pre-fetch enable */
 #define ACTLR_LINE_ZERO          (1 << 3)  /* Bit 3: Enable write full line zero mode */
