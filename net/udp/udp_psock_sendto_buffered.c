@@ -109,12 +109,6 @@
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
 #endif
-#ifdef CONFIG_NET_ETHERNET
-static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
-                                    FAR struct net_driver_s *dev);
-#else
-#  define sendto_addrcheck(c,d) (true)
-#endif
 #ifdef CONFIG_NET_SOCKOPTS
 static inline int sendto_timeout(FAR struct socket *psock,
                                  FAR struct udp_conn_s *conn);
@@ -238,76 +232,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
     }
 }
 #endif
-
-/****************************************************************************
- * Name: sendto_addrcheck
- *
- * Description:
- *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
- *   tables.  If not, then the send won't actually make it out... it will be
- *   replaced with an ARP request (IPv4) or a Neighbor Solicitation (IPv6).
- *
- *   NOTE 1: This could be an expensive check if there are a lot of
- *   entries in the ARP or Neighbor tables.
- *
- *   NOTE 2: If we are actually harvesting IP addresses on incoming IP
- *   packets, then this check should not be necessary; the MAC mapping
- *   should already be in the ARP table in many cases (IPv4 only).
- *
- *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
- *   address mapping is already in the ARP table.
- *
- * Input Parameters:
- *   conn - The UDP connection structure
- *   dev  - Polling network device
- *
- * Returned Value:
- *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
- *          the network device is not Ethernet).
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ETHERNET
-static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
-                                    FAR struct net_driver_s *dev)
-{
-  /* REVISIT: Could the MAC address not also be in a routing table? */
-
-  if (dev->d_lltype != NET_LL_ETHERNET)
-    {
-      return true;
-    }
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
-#endif
-    {
-#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(conn->u.ipv4.raddr, NULL) >= 0);
-#else
-      return true;
-#endif
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_lookup(conn->u.ipv6.raddr, NULL) >= 0);
-#else
-      return true;
-#endif
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-#endif /* CONFIG_NET_ETHERNET */
 
 /****************************************************************************
  * Name: sendto_timeout
@@ -514,61 +438,52 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
   if (dev->d_sndlen <= 0 && (flags & UDP_NEWDATA) == 0 &&
       (flags & UDP_POLL) != 0 && !sq_empty(&conn->write_q))
     {
-      /* Check if the destination IP address is in the ARP, Neighbor
-       * table, or routing table.  If not, then the send won't actually
-       * make it out... it will be replaced with an ARP request or
-       * Neighbor Solicitation.
+      FAR struct udp_wrbuffer_s *wrb;
+      size_t sndlen;
+
+      /* Peek at the head of the write queue (but don't remove anything
+       * from the write queue yet).  We know from the above test that
+       * the write_q is not empty.
        */
 
-      if (sendto_addrcheck(conn, dev))
-        {
-          FAR struct udp_wrbuffer_s *wrb;
-          size_t sndlen;
+      wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
+      DEBUGASSERT(wrb != NULL);
 
-          /* Peek at the head of the write queue (but don't remove anything
-           * from the write queue yet).  We know from the above test that
-           * the write_q is not empty.
-           */
+      /* Get the amount of data that we can send in the next packet.
+       * We will send either the remaining data in the buffer I/O
+       * buffer chain, or as much as will fit given the MSS and current
+       * window size.
+       */
 
-          wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
-          DEBUGASSERT(wrb != NULL);
-
-          /* Get the amount of data that we can send in the next packet.
-           * We will send either the remaining data in the buffer I/O
-           * buffer chain, or as much as will fit given the MSS and current
-           * window size.
-           */
-
-          sndlen = wrb->wb_iob->io_pktlen;
-          ninfo("wrb=%p sndlen=%u\n", wrb, sndlen);
+      sndlen = wrb->wb_iob->io_pktlen;
+      ninfo("wrb=%p sndlen=%u\n", wrb, sndlen);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
-          /* If both IPv4 and IPv6 support are enabled, then we will need to
-           * select which one to use when generating the outgoing packet.
-           * If only one domain is selected, then the setup is already in
-           * place and we need do nothing.
-           */
+      /* If both IPv4 and IPv6 support are enabled, then we will need to
+       * select which one to use when generating the outgoing packet.
+       * If only one domain is selected, then the setup is already in
+       * place and we need do nothing.
+       */
 
-          sendto_ipselect(dev, conn);
+      sendto_ipselect(dev, conn);
 #endif
-          /* Then set-up to send that amount of data with the offset
-           * corresponding to the size of the IP-dependent address structure.
-           */
+      /* Then set-up to send that amount of data with the offset
+       * corresponding to the size of the IP-dependent address structure.
+       */
 
-          devif_iob_send(dev, wrb->wb_iob, sndlen, 0);
+      devif_iob_send(dev, wrb->wb_iob, sndlen, 0);
 
-          /* Free the write buffer at the head of the queue and attempt to
-           * setup the next transfer.
-           */
+      /* Free the write buffer at the head of the queue and attempt to
+       * setup the next transfer.
+       */
 
-          sendto_writebuffer_release(psock, conn);
+      sendto_writebuffer_release(psock, conn);
 
-          /* Only one data can be sent by low level driver at once,
-           * tell the caller stop polling the other connections.
-           */
+      /* Only one data can be sent by low level driver at once,
+       * tell the caller stop polling the other connections.
+       */
 
-          flags &= ~UDP_POLL;
-        }
+      flags &= ~UDP_POLL;
     }
 
 #ifdef CONFIG_NET_SOCKOPTS

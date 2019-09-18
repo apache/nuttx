@@ -111,84 +111,6 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 #endif
 
 /****************************************************************************
- * Name: ipfwd_addrchk
- *
- * Description:
- *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
- *   tables.  If not, then the send won't actually make it out... it will be
- *   replaced with an ARP request (IPv4) or a Neighbor Solicitation (IPv6).
- *
- *   NOTE 1: This could be an expensive check if there are a lot of
- *   entries in the ARP or Neighbor tables.
- *
- *   NOTE 2: If we are actually harvesting IP addresses on incoming IP
- *   packets, then this check should not be necessary; the MAC mapping
- *   should already be in the ARP table in many cases (IPv4 only).
- *
- *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
- *   address mapping is already in the ARP table.
- *
- * Input Parameters:
- *   fwd - The forwarding state structure
- *
- * Returned Value:
- *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
- *          the network device is not Ethernet).
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ETHERNET
-static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
-{
-  DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
-
-  /* REVISIT: Could the MAC address not also be in a routing table? */
-
-  if (fwd->f_dev->d_lltype != NET_LL_ETHERNET)
-    {
-      return true;
-    }
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (fwd->f_domain == PF_INET)
-#endif
-    {
-#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      FAR struct ipv4_hdr_s *ipv4 = (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data;
-      int ret;
-
-      ret = arp_find(*(in_addr_t *)ipv4->destipaddr, NULL);
-      return (ret >= 0);
-#else
-      return true;
-#endif
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-#if defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)fwd->f_iob->io_data;
-      return (neighbor_lookup(ipv6->destipaddr, NULL) >= 0);
-#else
-      return true;
-#endif
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-
-#else /* CONFIG_NET_ETHERNET */
-#  define ipfwd_addrchk(r) (true)
-#endif /* CONFIG_NET_ETHERNET */
-
-/****************************************************************************
  * Name: ipfwd_eventhandler
  *
  * Description:
@@ -266,16 +188,6 @@ static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev, FAR void *conn,
 
           devif_forward(fwd);
           flags &= ~DEVPOLL_MASK;
-
-          /* Check if the destination IP address is in the ARP or Neighbor
-           * table.  If not, then the send won't actually make it out... it
-           * will be replaced with an ARP request or Neighbor Solicitation.
-           */
-
-          if (!ipfwd_addrchk(fwd))
-            {
-              return flags;
-            }
         }
 
       /* Free the allocated callback structure */
