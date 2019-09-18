@@ -447,7 +447,9 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_STM32F0L0G0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   uint16_t pwrcr;
 #endif
+#ifdef CONFIG_STM32F0L0G0_PWR
   uint32_t pwr_vos;
+#endif
   uint32_t flash_ws;
 
   /* Enable PWR clock from APB1 to give access to PWR_CR register */
@@ -482,7 +484,9 @@ static void stm32_stdclockconfig(void)
 
   if (STM32_SYSCLK_FREQUENCY > 16000000)
     {
+#ifdef CONFIG_STM32F0L0G0_PWR
       pwr_vos = PWR_CR1_VOS_RANGE1;
+#endif
 
       if (STM32_HCLK_FREQUENCY <= 24000000)
         {
@@ -499,7 +503,9 @@ static void stm32_stdclockconfig(void)
     }
   else
     {
+#ifdef CONFIG_STM32F0L0G0_PWR
       pwr_vos = PWR_CR1_VOS_RANGE2;
+#endif
 
       if (STM32_HCLK_FREQUENCY <= 8000000)
         {
@@ -511,7 +517,9 @@ static void stm32_stdclockconfig(void)
         }
     }
 
+#ifdef CONFIG_STM32F0L0G0_PWR
   stm32_pwr_setvos(pwr_vos);
+#endif
 
 #if defined(CONFIG_STM32F0L0G0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler

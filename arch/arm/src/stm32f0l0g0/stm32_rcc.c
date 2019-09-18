@@ -63,6 +63,7 @@
 #    error RNG requires CLK48 enabled
 #  endif
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_USB
 #  ifndef STM32_USE_CLK48
 #    error USB requires CLK48 enabled

@@ -338,7 +338,6 @@ void stm32_pwr_setvos(uint16_t vos)
     {
     }
 }
-#endif
 
 /****************************************************************************
  * Name: stm32_pwr_setpvd
@@ -359,7 +358,6 @@ void stm32_pwr_setvos(uint16_t vos)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_ENERGYLITE
 void stm32_pwr_setpvd(uint16_t pls)
 {
   uint16_t regval;

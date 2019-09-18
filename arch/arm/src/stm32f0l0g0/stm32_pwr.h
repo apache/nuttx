@@ -48,6 +48,8 @@
 #include "chip.h"
 #include "hardware/stm32_pwr.h"
 
+#ifdef CONFIG_STM32F0L0G0_PWR
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -234,4 +236,5 @@ void stm32_pwr_disablepvd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_STM32F0L0G0_PWR */
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_PWR_H */
