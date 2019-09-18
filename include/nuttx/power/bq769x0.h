@@ -61,7 +61,10 @@
 #define BQ76930_TEMP_COUNT              2
 #define BQ76940_TEMP_COUNT              3
 #define BQ769X0_CC_CFG_DEFAULT_VAL      0x19 /* Per Datasheet */
-#define BQ769X0_CELLBAL_MASK            0x1F; /* 5 LSBs in each register */
+#define BQ769X0_CELLBAL_MASK            0x1F /* 5 LSBs in each register */
+#define BQ769X0_CC_TIME                 250 /* milliseconds per CC sample */
+#define BQ769X0_CC_POLL_INTERVAL        50 /* milliseconds (arbitrary) */
+#define BQ769X0_CC_SCALE                8440 /* nanovolts / LSB */
 
 
 /* BQ769x0 Register Definitions ********************************************/

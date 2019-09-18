@@ -213,10 +213,11 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_CURRENT:
         {
-          FAR int *ampsp = (FAR int *)((uintptr_t)arg);
-          if (ampsp)
+          FAR struct battery_monitor_current_s *current =
+              (FAR struct battery_monitor_current_s *)((uintptr_t)arg);
+          if (current)
             {
-              ret = dev->ops->current(dev, ampsp);
+              ret = dev->ops->current(dev, current);
             }
         }
         break;
@@ -233,7 +234,8 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_CELLVOLTAGE:
         {
-          FAR struct battery_monitor_voltage_s *ptr = (FAR struct battery_monitor_voltage_s *)((uintptr_t)arg);
+          FAR struct battery_monitor_voltage_s *ptr =
+              (FAR struct battery_monitor_voltage_s *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->cell_voltage(dev, ptr);
@@ -243,7 +245,8 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_BALANCE:
         {
-          FAR struct battery_monitor_balance_s *ptr = (FAR struct battery_monitor_balance_s *)((uintptr_t)arg);
+          FAR struct battery_monitor_balance_s *ptr =
+              (FAR struct battery_monitor_balance_s *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->balance(dev, ptr);
@@ -260,7 +263,8 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_SETLIMITS:
         {
-          FAR struct battery_monitor_limits_s *ptr = (FAR struct battery_monitor_limits_s *)((uintptr_t)arg);
+          FAR struct battery_monitor_limits_s *ptr =
+              (FAR struct battery_monitor_limits_s *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->setlimits(dev, ptr);
@@ -270,7 +274,8 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
 
       case BATIOC_CHGDSG:
         {
-          FAR struct battery_monitor_switches_s *ptr = (FAR struct battery_monitor_switches_s *)((uintptr_t)arg);
+          FAR struct battery_monitor_switches_s *ptr =
+              (FAR struct battery_monitor_switches_s *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->chgdsg(dev, ptr);

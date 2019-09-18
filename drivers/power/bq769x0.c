@@ -268,22 +268,24 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 
 /* Device functions */
 static inline int bq769x0_getreport(FAR struct bq769x0_dev_s *priv,
-                                    uint8_t *report);
-static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts);
-static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc);
+                                    FAR uint8_t *report);
+static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv,
+                                  FAR int *volts);
+static inline int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
+                                     FAR struct battery_monitor_current_s *current);
 static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
-                                      struct battery_monitor_voltage_s *voltages);
+                                      FAR struct battery_monitor_voltage_s *voltages);
 static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
-                                         struct battery_monitor_temperature_s *temps);
+                                         FAR struct battery_monitor_temperature_s *temps);
 static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
-                                     struct battery_monitor_balance_s *bal);
+                                     FAR struct battery_monitor_balance_s *bal);
 static inline int bq769x0_doshutdown(FAR struct bq769x0_dev_s *priv);
 static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
-                                    struct battery_monitor_limits_s *limits);
+                                    FAR struct battery_monitor_limits_s *limits);
 static inline int bq769x0_setchgdsg(FAR struct bq769x0_dev_s *priv,
-                                    struct battery_monitor_switches_s *sw);
-static inline int bq769x0_clear_chip_faults(FAR struct bq769x0_dev_s *priv,
-                                     uint8_t faults);
+                                    FAR struct battery_monitor_switches_s *sw);
+static inline int bq769x0_clear_chipfaults(FAR struct bq769x0_dev_s *priv,
+                                           uint8_t faults);
 static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv);
 static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv);
 
@@ -295,7 +297,8 @@ static int bq769x0_online(struct battery_monitor_dev_s *dev, bool *status);
 static int bq769x0_voltage(struct battery_monitor_dev_s *dev, int *value);
 static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
                                struct battery_monitor_voltage_s *cellv);
-static int bq769x0_current(struct battery_monitor_dev_s *dev, int *value);
+static int bq769x0_current(struct battery_monitor_dev_s *dev,
+                           struct battery_monitor_current_s *current);
 static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value);
 static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs);
 static int bq769x0_temp(struct battery_monitor_dev_s *dev,
@@ -1192,7 +1195,7 @@ static inline int bq769x0_setchgdsg(FAR struct bq769x0_dev_s *priv,
  *
  ****************************************************************************/
 
-static inline int bq769x0_clear_chip_faults(FAR struct bq769x0_dev_s *priv,
+static inline int bq769x0_clear_chipfaults(FAR struct bq769x0_dev_s *priv,
                                             uint8_t faults)
 {
     int ret;
@@ -1491,28 +1494,91 @@ static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: bq769x0_getcc
+ * Name: bq769x0_getcurrent
  *
  * Description:
- *   Gets the value of the Coulomb counter from the BQ769X0
+ *   Gets the value of the battery current as measured by the BQ769X0
  *
  ****************************************************************************/
 
-static inline int bq769x0_getcc(FAR struct bq769x0_dev_s *priv, int *cc)
+static inline int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
+                                     FAR struct battery_monitor_current_s *current)
 {
-  int16_t regval;
-  int ret;
 
-#warning scaling
-  ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI, (uint16_t *)&regval);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-      return ret;
-    }
+    /* The BQ769X0's "coulomb counter" reports average current over a 250ms period.
+      * This can be integrated by the user application to measure amp-hours.
+      */
 
-  *cc = regval;
-  return OK;
+       int i;
+       uint8_t regval;
+       int16_t ccval;
+       int32_t ccvolts;
+       int32_t ccamps;
+       int ret;
+
+       /* Poll SYS_STAT register until a new Coulomb counter value is ready
+        * or until we time out */
+       for (i = 0; i < 6; i += 1)
+         {
+           ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_STAT, &regval);
+           if (ret < 0)
+             {
+               baterr("ERROR: Failed to read BQ769X0 Status! Error = %d\n", ret);
+               return ret;
+             }
+
+           if (regval & BQ769X0_CC_READY)
+             {
+
+               /* Clear the CC_ready flag */
+
+               ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_STAT, BQ769X0_CC_READY);
+               if (ret < 0)
+                 {
+                   baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+                   return ret;
+                 }
+
+               /* Get the CC register data (a signed value) */
+
+               ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI, (uint16_t *)&ccval);
+               if (ret < 0)
+                 {
+                   baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+                   return ret;
+                 }
+
+               batinfo("Coulomb counter raw value: %d\n", ccval);
+
+               /* Convert coulomb counter to real units
+                * Multiply by 4 for some extra resolution
+                */
+
+               ccvolts = ccval * BQ769X0_CC_SCALE * 4;
+
+               /* ccvolts is nV, sense_r is uOhm.  Result is in mA
+                * convert to uA, and don't forget to divide the 4 back out
+                */
+
+               ccamps = ccvolts / (priv->sense_r);
+               ccamps *= 1000;
+               ccamps /= 4;
+               current->current = ccamps;
+
+               /* Acquisition time is constant with this device */
+
+               current->time = (BQ769X0_CC_TIME * USEC_PER_MSEC);
+               return OK;
+             }
+
+           /* Sample is not complete, wait and try again */
+
+           usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
+         }
+
+       /* CC value didn't become available in the expected amount of time */
+
+       return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -1592,6 +1658,7 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
           return ret;
         }
     }
+
   return OK;
 }
 
@@ -1654,14 +1721,23 @@ static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
  *
  ****************************************************************************/
 
-static int bq769x0_current(struct battery_monitor_dev_s *dev, int *value)
+static int bq769x0_current(struct battery_monitor_dev_s *dev,
+    struct battery_monitor_current_s *current)
 {
 
-  /* The BQ769X0 does not support directly reporting pack curent, although you could
-   * come up with an average value by looking at the Coulomb counter over time.
-   */
+    FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+     int ret;
 
-  return -ENOSYS;
+     /* Get current from battery monitor */
+
+     ret = bq769x0_getcurrent(priv, current);
+     if (ret < 0)
+       {
+         baterr("ERROR: Error getting current from BQ769X0! Error = %d\n", ret);
+         return ret;
+       }
+
+     return OK;
 }
 
 /****************************************************************************
@@ -1686,25 +1762,17 @@ static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value) {
  * Name: bq769x0_coulombs
  *
  * Description:
- *   Get the raw value of the pack coulomb counter
+ *   Get the raw value of the coulomb counter
  *
  ****************************************************************************/
 
 static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs) {
 
-  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
-  int ret;
 
-  /* Get cell voltages from battery monitor */
-
-  ret =     bq769x0_getcc(priv, coulombs);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error getting coulombs from BQ769X0! Error = %d\n", ret);
-      return ret;
-    }
-
-  return OK;
+  /* The data from the coulomb counter on this part can be accessed via
+   * the current command.
+   */
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -1841,7 +1909,7 @@ static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
   FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
   int ret;
 
-  ret =  bq769x0_clear_chip_faults(priv, BQ769X0_FAULT_MASK);
+  ret =  bq769x0_clear_chipfaults(priv, BQ769X0_FAULT_MASK);
   if (ret < 0)
     {
       baterr("ERROR: Error clearing faults! Error = %d\n", ret);

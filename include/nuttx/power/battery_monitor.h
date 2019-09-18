@@ -211,9 +211,27 @@ struct battery_monitor_switches_s
   bool discharge;
 
 };
+
+struct battery_monitor_current_s
+{
+  /* The value of current measured by the monitor IC, in uA */
+  int32_t current;
+
+  /* The time over which the above current was measured,
+   * in uS.  The application may request a specific time interval
+   * by filling in this field when calling the BATIOC_CURRENT function,
+   * and the driver may or may not choose to honor it.  The driver
+   * will always overwrite this field with the actual measurement time.
+   * A value of 0 means that instantaneous current should be measured.
+   */
+
+  uint32_t time;
+
+};
  /* This structure defines the lower half battery interface */
 
 struct battery_monitor_dev_s;
+
 struct battery_monitor_operations_s
 {
   /* Return the current battery state (see enum battery_monitor_status_e) */
@@ -239,7 +257,8 @@ struct battery_monitor_operations_s
 
   /* Get the battery pack current */
 
-  int (*current)(struct battery_monitor_dev_s *dev, int *value);
+  int (*current)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_current_s *current);
 
   /* Get the battery pack state of charge */
 
