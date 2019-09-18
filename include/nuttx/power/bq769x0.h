@@ -144,6 +144,7 @@
 #define BQ769X0_OV                      (1 << 2) /* Overvoltage fault */
 #define BQ769X0_SCD                     (1 << 1) /* Short circuit in discharge fault */
 #define BQ769X0_OCD                     (1 << 0) /* Over current in discharge fault */
+#define BQ769X0_FAULT_MASK              (0x3F)   /* Bottom 6 bits */
 
 /* REG_SYS_CTRL1 */
 
@@ -156,6 +157,9 @@
 #define BQ769X0_SHUT_A                  (1 << 1) /* Shutdown command, bit A */
 #define BQ769X0_SHUT_B                  (1 << 0) /* Shutdown command, bit B */
 
+#define BQ769X0_SYS_CTRL1_WRITE_MASK    (0x1B)   /* Bits 0, 1, 3, and 4 are writeable */
+#define BQ769X0_SYS_CTRL1_SHUTDOWN_MASK (0x03)   /* Bits 0 and 1 for shutdown */
+
 /* REG_SYS_CTRL2 */
 #define BQ769X0_DELAY_DIS               (1 << 7) /* 1 = Disable protection delays for testing */
 #define BQ769X0_CC_EN                   (1 << 6) /* 1 = Enable continuous Coulomb counter readings */
@@ -165,6 +169,9 @@
                                                  /* Bit 2: Reserved */
 #define BQ769X0_DSG_ON                  (1 << 1) /* DSG (Discharge FET) control */
 #define BQ769X0_CHG_ON                  (1 << 0) /* CHG (Charge FET) control */
+
+#define BQ769X0_SYS_CTRL2_WRITE_MASK    (0xE3)   /* Bits 0, 1, 5, 6, and 7 are writeable */
+#define BQ769X0_SYS_CTRL2_CHGDSG_MASK   (0x03)   /* Bits 0 and 1 for charge/discharge */
 
 /* REG_PROTECT1 */
 #define BQ769X0_RSNS                    (1 << 7 ) /* Selects low or high input range for OCD/SCD */
@@ -208,7 +215,7 @@
 #  define BQ769X0_OCD_DELAY_160MS       (4 << BQ769X0_OCD_DELAY_SHIFT)
 #  define BQ769X0_OCD_DELAY_320MS       (5 << BQ769X0_OCD_DELAY_SHIFT)
 #  define BQ769X0_OCD_DELAY_640MS       (6 << BQ769X0_OCD_DELAY_SHIFT)
-#  define BQ769X0_OCD_DELAY 1280MS      (7 << BQ769X0_OCD_DELAY_SHIFT)
+#  define BQ769X0_OCD_DELAY_1280MS      (7 << BQ769X0_OCD_DELAY_SHIFT)
 #define BQ769X0_OCD_THRESH_SHIFT        (0) /* Over current in discharge threshold value */
 #define BQ769X0_OCD_THRESH_MASK         (0x0F << BQ769X0_OCD_THRESH_SHIFT)
 /* These defines apply when RSNS is 0 */
@@ -256,10 +263,10 @@
 #  define BQ769X0_UV_DELAY_16S          (3 << BQ769X0_UV_DELAY_SHIFT)
 #define BQ769X0_OV_DELAY_SHIFT          (4)
 #define BQ769X0_OV_DELAY_MASK           (0x03 << BQ769X0_OV_DELAY_SHIFT)
-#  define BQ769_OV_DELAY_1S             (0 << BQ769X0_OV_DELAY_SHIFT)
-#  define BQ769_OV_DELAY_2S             (1 << BQ769X0_OV_DELAY_SHIFT)
-#  define BQ769_OV_DELAY_4S             (2 << BQ769X0_OV_DELAY_SHIFT)
-#  define BQ769_OV_DELAY_8S             (3 << BQ769X0_OV_DELAY_SHIFT)
+#  define BQ769X0_OV_DELAY_1S           (0 << BQ769X0_OV_DELAY_SHIFT)
+#  define BQ769X0_OV_DELAY_2S           (1 << BQ769X0_OV_DELAY_SHIFT)
+#  define BQ769X0_OV_DELAY_4S           (2 << BQ769X0_OV_DELAY_SHIFT)
+#  define BQ769X0_OV_DELAY_8S           (3 << BQ769X0_OV_DELAY_SHIFT)
 
 /* REG_ADCGAIN1 */
 #define BQ769X0_ADCGAIN1_SHIFT          (2)

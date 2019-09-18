@@ -122,6 +122,9 @@ enum battery_monitor_health_e
   BATTERY_HEALTH_DEAD,         /* Battery is dead, nothing we can do */
   BATTERY_HEALTH_OVERHEAT,     /* Battery is over recommended temperature */
   BATTERY_HEALTH_OVERVOLTAGE,  /* Battery voltage is over recommended level */
+  BATTERY_HEALTH_UNDERVOLTAGE, /* Battery monitor reported an unspecified failure */
+  BATTERY_HEALTH_OVERCURRENT,  /* Battery monitor reported an overcurrent event */
+  BATTERY_HEALTH_SHORT_CIRCUIT,/* Battery monitor reported a short circuit event */
   BATTERY_HEALTH_UNSPEC_FAIL,  /* Battery monitor reported an unspecified failure */
   BATTERY_HEALTH_COLD,         /* Battery is under recommended temperature */
   BATTERY_HEALTH_WD_TMR_EXP,   /* Battery WatchDog Timer Expired */
@@ -178,6 +181,36 @@ struct battery_monitor_balance_s
 
   bool *balance;
 };
+
+struct battery_monitor_limits_s
+{
+  /* All voltage limits are per-cell */
+  uint32_t overvoltage_limit;   /* Overvoltage trip threshold, in uV */
+  uint32_t undervoltage_limit;  /* Undervoltage trip threshold, in uV */
+  uint32_t overcurrent_limit;   /* Overcurrent trip threshold, in mA */
+  uint32_t shortcircuit_limit;  /* Short circuit current limit, in mA */
+  uint32_t overvoltage_delay;   /* Delay before overvoltage trips, in uS */
+  uint32_t undervoltage_delay;  /* Delay before undervoltage trips, in uS */
+  uint32_t overcurrent_delay;   /* Delay before overcurrent trips, in uS */
+  uint32_t shortcircuit_delay;  /* Delay before short circuit trips, in uS */
+
+};
+
+struct battery_monitor_switches_s
+{
+
+  /* Sets the state of the CHARGE switch, which allows the
+   * battery to accept current.
+   */
+  bool charge;
+
+  /* Sets the state of the DISCHARGE switch, which allows the
+   * battery to supply current.
+   */
+
+  bool discharge;
+
+};
  /* This structure defines the lower half battery interface */
 
 struct battery_monitor_dev_s;
@@ -201,7 +234,8 @@ struct battery_monitor_operations_s
 
   /* Get the battery cell voltages */
 
-  int (*cell_voltage)(struct battery_monitor_dev_s *dev, struct battery_monitor_voltage_s *cellv);
+  int (*cell_voltage)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_voltage_s *cellv);
 
   /* Get the battery pack current */
 
@@ -217,11 +251,31 @@ struct battery_monitor_operations_s
 
   /* Read battery pack temperature sensor(s) */
 
-  int (*temperature)(struct battery_monitor_dev_s *dev, struct battery_monitor_temperature_s *temps);
+  int (*temperature)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_temperature_s *temps);
 
   /* Set balance switches on battery cells */
 
-  int (*balance)(struct battery_monitor_dev_s *dev, struct battery_monitor_balance_s *bal);
+  int (*balance)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_balance_s *bal);
+
+  /* Put monitor device into low-power shutdown mode */
+
+  int (*shutdown)(struct battery_monitor_dev_s *dev, uintptr_t param);
+
+  /* Configure safety limits for the device */
+
+  int (*setlimits)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_limits_s *limits);
+
+  /* Set the state of charge/discharge switches to allow battery to source/sink power */
+
+  int (*chgdsg)(struct battery_monitor_dev_s *dev,
+      struct battery_monitor_switches_s *sw);
+
+  /* Clear battery monitor faults */
+
+  int (*clearfaults)(struct battery_monitor_dev_s *dev, uintptr_t param);
 
   /* Do device specific operation */
 
@@ -307,6 +361,9 @@ int battery_monitor_register(FAR const char *devpath,
  *               CHIP_BQ76940).  This is used to map cell numbers when the
  *               full capacity of the chip is not used.  See the TI datasheet
  *               for cell wiring information.
+ *   sense_r   - The value of the current sense resistor, in micro ohms.
+ *               This value is used to calculate reported current, and when
+ *               setting overcurrent thresholds.
  * Returned Value:
  *   A pointer to the initialized battery driver instance.  A NULL pointer
  *   is returned on a failure to initialize the BQ769X0 lower half.
@@ -320,7 +377,8 @@ FAR struct battery_monitor_dev_s *bq769x0_initialize(FAR struct i2c_master_s *i2
                                                      uint8_t addr,
                                                      uint32_t frequency,
                                                      bool crc, uint8_t cellcount,
-                                                     uint8_t chip);
+                                                     uint8_t chip,
+                                                     uint32_t sense_r);
 #endif
 
 #undef EXTERN

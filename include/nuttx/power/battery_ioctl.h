@@ -64,6 +64,10 @@
 #define BATIOC_CELLVOLTAGE   _BATIOC(0x0009)
 #define BATIOC_TEMPERATURE   _BATIOC(0x000A)
 #define BATIOC_BALANCE       _BATIOC(0x000B)
+#define BATIOC_SHUTDOWN      _BATIOC(0x000C)
+#define BATIOC_SETLIMITS     _BATIOC(0x000D)
+#define BATIOC_CHGDSG        _BATIOC(0x000E)
+#define BATIOC_CLEARFAULTS   _BATIOC(0x000F)
 
 /****************************************************************************
  * Public Types
