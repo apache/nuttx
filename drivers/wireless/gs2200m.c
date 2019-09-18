@@ -1036,7 +1036,9 @@ enum spi_status_e gs2200m_hal_read(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  /* Get how many bytes we should read */
+  /* Send READ_REQUEST then receive READ_RESPONSE
+   * to get how many bytes we should read
+   */
 
   *len = _read_data_len(dev);
 
@@ -1046,7 +1048,7 @@ enum spi_status_e gs2200m_hal_read(FAR struct gs2200m_dev_s *dev,
 
   ASSERT(0 < *len);
 
-  /* Read response header */
+  /* Read data header */
 
   _read_data(dev, hdr, sizeof(hdr));
 
@@ -2310,8 +2312,8 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
   t = gs2200m_enable_dhcpc(dev, 0);
   ASSERT(TYPE_OK == t);
 
-
   /* Set static address */
+
   t = gs2200m_set_addresses(dev,
                             "10.0.0.2",
                             "255.255.255.0",
