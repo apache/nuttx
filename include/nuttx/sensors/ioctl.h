@@ -216,15 +216,15 @@
 
 /* IOCTL commands unique to the VL53L1X */
 
-#define SNIOC_DISTANCESHORT        _SNIOC(0x0100) /* Arg: None */
-#define SNIOC_DISTANCELONG         _SNIOC(0x0101) /* Arg: None */
-#define SNIOC_CALIBRATE            _SNIOC(0x0102) /* Arg: b16_t value */
-#define SNIOC_TEMPUPDATE           _SNIOC(0x0103) /* Arg: b16_t value */
+#define SNIOC_DISTANCESHORT        _SNIOC(0x0060) /* Arg: None */
+#define SNIOC_DISTANCELONG         _SNIOC(0x0061) /* Arg: None */
+#define SNIOC_CALIBRATE            _SNIOC(0x0062) /* Arg: b16_t value */
+#define SNIOC_TEMPUPDATE           _SNIOC(0x0063) /* Arg: b16_t value */
 
 /* IOCTL commands unique to the ISL29023 */
 
-#define SNIOC_SET_OPERATIONAL_MODE _SNIOC(0x0060) /* Arg: uint8_t value */
-#define SNIOC_SET_RESOLUTION       _SNIOC(0x0062) /* Arg: uint8_t value */
-#define SNIOC_SET_RANGE            _SNIOC(0x0064) /* Arg: uint8_t value */
+#define SNIOC_SET_OPERATIONAL_MODE _SNIOC(0x0064) /* Arg: uint8_t value */
+#define SNIOC_SET_RESOLUTION       _SNIOC(0x0065) /* Arg: uint8_t value */
+#define SNIOC_SET_RANGE            _SNIOC(0x0066) /* Arg: uint8_t value */
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
