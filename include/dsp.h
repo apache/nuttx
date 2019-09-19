@@ -364,7 +364,7 @@ struct foc_data_s
   dq_frame_t       i_dq;     /* Current in dq frame */
   dq_frame_t       i_dq_err; /* DQ current error */
 
-  dq_frame_t       i_dq_ref; /* Currrent dq reference frame */
+  dq_frame_t       i_dq_ref; /* Current dq reference frame */
   pid_controller_t id_pid;   /* Current d-axis component PI controller */
   pid_controller_t iq_pid;   /* Current q-axis component PI controller */
 

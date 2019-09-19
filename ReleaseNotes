@@ -19635,7 +19635,7 @@ detailed bugfix information):
         order.  From Xiang Xiao.
       - apps/system/ping and ping6:  Change dependency in ping and ping6
         Kconfig.  These may be implemented in users sockets and, hence,
-        may need to be avaiable even if ICMP and ICMPv6 sockets are not
+        may need to be available even if ICMP and ICMPv6 sockets are not
         support.  From Xiang Xiao.
       - apps/system/system:  Add 'const' to make function prototype
         compatible with OpenGroup.org requirement  From Xiang Xiao.

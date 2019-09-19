@@ -166,7 +166,7 @@ void board_autoled_off(int led)
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board
  *   LEDs up until the completion of boot.
  *   Then it will continue to control LED2;
- *   LED1 is avaiable for application use.
+ *   LED1 is available for application use.
  *
  *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available
  *   for application use.
