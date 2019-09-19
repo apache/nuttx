@@ -1,9 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32h7x3xx_rcc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
  ****************************************************************************/
 
 #include "stm32_pwr.h"
+#include "hardware/stm32_axi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,6 +95,14 @@ static inline void rcc_reset(void)
   regval = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;
   putreg32(regval, STM32_RCC_CR);
+
+#if defined(CONFIG_STM32H7_AXI_SRAM_CORRUPTION_WAR)
+  /* Errata 2.2.9 Enable workaround for Reading from AXI SRAM may lead to data
+   * read corruption. See ES0392 Rev 6.
+   */
+
+  putreg32(AXI_TARG_READ_ISS_OVERRIDE, STM32_AXI_TARG7_FN_MOD);
+#endif
 
   /* Reset CFGR register */
 
@@ -209,7 +218,7 @@ static inline void rcc_enableahb2(void)
 
   regval = getreg32(STM32_RCC_AHB2ENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB2ENR);   /* Enable peripherals */
 }
@@ -244,7 +253,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_SDMMC1EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
 }
@@ -379,13 +388,13 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1LENR_I2C3EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB1LENR);   /* Enable APB1L peripherals */
 
   regval = getreg32(STM32_RCC_APB1HENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB1HENR);   /* Enable APB1H peripherals */
 }
@@ -453,7 +462,7 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB3ENR);   /* Enable peripherals */
 }
@@ -494,7 +503,7 @@ static inline void rcc_enableapb4(void)
   regval |= RCC_APB4ENR_SPI6EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB4ENR);   /* Enable peripherals */
 }
@@ -620,7 +629,6 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D3CFGR_D3PPRE;
       putreg32(regval, STM32_RCC_D3CFGR);
 
-
 #ifdef CONFIG_STM32H7_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
@@ -729,7 +737,8 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL1)
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+             RCC_CFGR_SWS_PLL1)
         {
         }
 
@@ -789,7 +798,6 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D3CCIPR_ADCSEL;
       putreg32(regval, STM32_RCC_D3CCIPR);
 #endif
-
 
 #if defined(CONFIG_STM32H7_IWDG) || defined(CONFIG_STM32H7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */

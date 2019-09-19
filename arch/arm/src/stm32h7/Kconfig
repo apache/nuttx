@@ -27,6 +27,7 @@ config STM32H7_STM32H7X3XX
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_SDIO_DELAYED_INVLDT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
@@ -73,6 +74,22 @@ config STM32H7_FLASH_OVERRIDE_I
 			bool "I 2048KiB"
 
 endchoice # "Override Flash Size Designator"
+
+config STM32H7_AXI_SRAM_CORRUPTION_WAR
+	bool "Errata 2.2.9 Reading from AXI SRAM data read corruption Workaround"
+	default y
+	---help---
+		Enable workaround for Reading from AXI SRAM may lead to data read
+		corruption. See ES0392 Rev 6.
+
+		Read data may be corrupted when the following conditions are met:
+		- Several read transactions are performed to the AXI SRAM,
+		- and a master delays its data acceptance while a new transfer is
+		  requested
+
+		This workaround will set the READ_ISS_OVERRIDE bit in the
+		AXI_TARG7_FN_MOD register. This will reduce the read issuing capability
+		of the SRAM to 1 at AXI interconnect level and avoid data corruption.
 
 menu "STM32H7 Peripheral Selection"
 
@@ -245,6 +262,8 @@ config STM32H7_SDMMC1
 	select STM32H7_SDMMC
 	select ARCH_HAVE_SDIO
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT
+	select SDIO_BLOCKSETUP
 
 config STM32H7_SDMMC2
 	bool "SDMMC2"
@@ -252,6 +271,8 @@ config STM32H7_SDMMC2
 	select STM32H7_SDMMC
 	select ARCH_HAVE_SDIO
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT
+	select SDIO_BLOCKSETUP
 
 menu "STM32H7 I2C Selection"
 
@@ -919,8 +940,7 @@ config STM32H7_SDMMC_XFRDEBUG
 config STM32H7_SDMMC_IDMA
 	bool "Support IDMA data transfers"
 	default y
-	select STM32H7_SDMMC_DMA
-	depends on STM32H7_DMA
+	select SDIO_DMA
 	---help---
 		Support IDMA data transfers.
 

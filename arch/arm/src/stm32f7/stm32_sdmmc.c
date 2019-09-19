@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2009, 2011-2018,2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david.sidrane@nscdg.com>
+ *            David Sidrane <david.sidrane @nscdg.com>
  *            Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Required system configuration options:
  *
  *   CONFIG_ARCH_DMA - Enable architecture-specific DMA subsystem
@@ -88,8 +89,8 @@
  *   CONFIG_SDIO_MUXBUS - Setting this configuration enables some locking
  *     APIs to manage concurrent accesses on the SDMMC bus.  This is not
  *     needed for the simple case of a single SD card, for example.
- *   CONFIG_STM32F7_SDMMC_DMA - Enable SDMMC.  This is a marginally optional.  For
- *     most usages, SDMMC will cause data overruns if used without DMA.
+ *   CONFIG_STM32F7_SDMMC_DMA - Enable SDMMC.  This is a marginally optional.
+ *   For most usages, SDMMC will cause data overruns if used without DMA.
  *     NOTE the above system DMA configuration options.
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
@@ -185,8 +186,9 @@
 #endif
 
 /* Mode dependent settings.  These depend on clock divisor settings that must
- * be defined in the board-specific board.h header file: STM32_SDMMC_INIT_CLKDIV,
- * STM32_SDMMC_MMCXFR_CLKDIV, and STM32_SDMMC_SDXFR_CLKDIV.
+ * be defined in the board-specific board.h header file:
+ * STM32_SDMMC_INIT_CLKDIV, STM32_SDMMC_MMCXFR_CLKDIV, and
+ * STM32_SDMMC_SDXFR_CLKDIV.
  */
 
 #define STM32_CLCKCR_INIT           (STM32_SDMMC_INIT_CLKDIV      | \
@@ -230,7 +232,6 @@
  * - Memory burst size (F4 only)
  */
 
-
 /* STM32 stream configuration register (SCR) settings base settings sans
  * priority.
  */
@@ -251,7 +252,6 @@
 
 #  define SDMMC1_DMACHAN          DMAMAP_SDMMC1
 #endif
-
 
 #ifdef DMAMAP_SDMMC2
 
@@ -337,7 +337,6 @@
 
 /* Let's wait until we have both SDIO transfer complete and DMA complete. */
 
-
 #define SDMMC_XFRDONE_FLAG  (1)
 #define SDMMC_DMADONE_FLAG  (2)
 #define SDMMC_ALLDONE       (3)
@@ -371,6 +370,7 @@ struct stm32_dev_s
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
 
   /* STM32-specific extensions */
+
   uint32_t          base;
   int               nirq;
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
@@ -748,7 +748,7 @@ static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
  * Name: sdmmc_putreg32
  ****************************************************************************/
 
-static inline void sdmmc_putreg32(struct stm32_dev_s *priv, uint32_t value,\
+static inline void sdmmc_putreg32(struct stm32_dev_s *priv, uint32_t value,
                                   int offset)
 {
   putreg32(value, priv->base + offset);
@@ -896,7 +896,7 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
     {
       /* Do not use this in STM32_SDMMC_MASK register */
 
-      waitmask &= !SDIOWAIT_WRCOMPLETE;
+      waitmask &= ~SDIOWAIT_WRCOMPLETE;
 
       pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK);
       pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
@@ -933,7 +933,8 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   else
 #endif
     {
-      sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask, STM32_SDMMC_MASK_OFFSET);
+      sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask,
+                     STM32_SDMMC_MASK_OFFSET);
     }
 
   leave_critical_section(flags);
@@ -1039,7 +1040,8 @@ static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv)
 #ifdef CONFIG_STM32F7_SDMMC_XFRDEBUG
 static void stm32_sampleinit(void)
 {
-  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct stm32_sampleregs_s));
+  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES *
+         sizeof(struct stm32_sampleregs_s));
 }
 #endif
 
@@ -1149,22 +1151,26 @@ static void stm32_dumpsample(struct stm32_dev_s *priv,
 #ifdef CONFIG_STM32F7_SDMMC_XFRDEBUG
 static void stm32_dumpsamples(struct stm32_dev_s *priv)
 {
-  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
+  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP],
+                   "Before setup");
 
 #if defined(CONFIG_DEBUG_DMA_INFO) && defined(CONFIG_STM32F7_SDMMC_DMA)
   if (priv->dmamode)
     {
-      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE],
+                       "Before DMA enable");
     }
 #endif
 
   stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER],
+                   "End of transfer");
 
 #if defined(CONFIG_DEBUG_DMA_INFO) && defined(CONFIG_STM32F7_SDMMC_DMA)
   if (priv->dmamode)
     {
-      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK],
+                       "DMA Callback");
     }
 #endif
 }
@@ -1312,6 +1318,7 @@ static void stm32_datadisable(struct stm32_dev_s *priv)
   /* Disable the data path */
 
   /* Reset DTIMER */
+
   sdmmc_putreg32(priv, SDMMC_DTIMER_DATATIMEOUT, STM32_SDMMC_DTIMER_OFFSET);
   sdmmc_putreg32(priv, 0, STM32_SDMMC_DLEN_OFFSET);   /* Reset DLEN */
 
@@ -1349,7 +1356,8 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
   /* Loop while there is more data to be sent and the RX FIFO is not full */
 
   while (priv->remaining > 0 &&
-         (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) & STM32_SDMMC_STA_TXFIFOF) == 0)
+         (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
+          STM32_SDMMC_STA_TXFIFOF) == 0)
     {
       /* Is there a full word remaining in the user buffer? */
 
@@ -1413,7 +1421,8 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
    */
 
   while (priv->remaining > 0 &&
-         (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) & STM32_SDMMC_STA_RXDAVL) != 0)
+         (sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) &
+          STM32_SDMMC_STA_RXDAVL) != 0)
     {
       /* Read the next word from the RX FIFO */
 
@@ -1637,12 +1646,12 @@ static int stm32_sdmmc_rdyinterrupt(int irq, void *context, void *arg)
 
 static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 {
-  struct stm32_dev_s *priv =(struct stm32_dev_s *)arg;
   uint32_t enabled;
   uint32_t pending;
 #ifdef HAVE_SDMMC_SDIO_MODE
   uint32_t mask;
 #endif
+  struct stm32_dev_s *priv = (struct stm32_dev_s *) arg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1676,9 +1685,9 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                   stm32_recvfifo(priv);
                 }
 
-              /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
-               * be processing a send transaction.  NOTE:  We can't be processing
-               * both!
+              /* Otherwise, Is the transmit FIFO half empty or less?  If so we
+               * must be processing a send transaction.  NOTE:  We can't be
+               * processing both!
                */
 
               else if ((pending & STM32_SDMMC_STA_TXFIFOHE) != 0)
@@ -1772,7 +1781,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
+              mcerr("ERROR: TX FIFO underrun, remaining: %d\n",
+                    priv->remaining);
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
@@ -1803,7 +1813,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                   /* Yes.. wake the thread up */
 
                  sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR |
-                                STM32_SDMMC_CMDDONE_ICR, STM32_SDMMC_ICR_OFFSET);
+                                STM32_SDMMC_CMDDONE_ICR,
+                                STM32_SDMMC_ICR_OFFSET);
                   stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
                 }
             }
@@ -2117,7 +2128,6 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
   ret = irq_attach(priv->nirq, stm32_sdmmc_interrupt, priv);
   if (ret == OK)
     {
-
       /* Disable all interrupts at the SDIO controller and clear static
        * interrupt flags
        */
@@ -2255,7 +2265,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                            size_t nbytes)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  uint32_t dblksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2276,9 +2286,9 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
-                   nbytes, dblocksize | STM32_SDMMC_DCTRL_DTDIR);
+                   nbytes, dblksize | STM32_SDMMC_DCTRL_DTDIR);
 
   /* And enable interrupts */
 
@@ -2310,7 +2320,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
                            uint8_t *buffer, size_t nbytes)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  uint32_t dblksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2331,9 +2341,9 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
-                   nbytes, dblocksize);
+                   nbytes, dblksize);
 
   /* Enable TX interrupts */
 
@@ -2436,7 +2446,6 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
       timeout = SDMMC_LONGTIMEOUT;
       break;
 
-
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
       events  = STM32_SDMMC_RESPDONE_STA;
@@ -2517,7 +2526,6 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
    *     7:1       bit6   - bit0   CRC7
    *     0         1               End bit
    */
-
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
@@ -2632,7 +2640,8 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
   return ret;
 }
 
-static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                           uint32_t *rshort)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   uint32_t regval;
@@ -3009,21 +3018,22 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  uint32_t dblksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
 #else
-#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#  if defined(CONFIG_ARMV7M_DCACHE) && \
+      !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
    * mode (not write-through) because the up_invalidate_dcache could lose
    * buffered buffered writes if the buffer alignment and sizes are not on
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
-  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
-      (buflen & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
+  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+      (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       return -EFAULT;
     }
@@ -3048,9 +3058,9 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
-                   buflen, dblocksize | STM32_SDMMC_DCTRL_DTDIR);
+                   buflen, dblksize | STM32_SDMMC_DCTRL_DTDIR);
 
   /* Configure the RX DMA */
 
@@ -3066,7 +3076,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   if ((uintptr_t)buffer < DTCM_START || (uintptr_t)buffer + buflen > DTCM_END)
     {
 #if !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
-      up_invalidate_dcache((uintptr_t)buffer,(uintptr_t)buffer + buflen);
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #endif
     }
 
@@ -3104,21 +3114,22 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  uint32_t dblksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
 #else
-#  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#  if defined(CONFIG_ARMV7M_DCACHE) && \
+      !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
-   * mode (not write-through) because the up_flush_dcache would corrupt adjacent
-   * memory if the buffer alignment and sizes are not on ARMV7M_DCACHE_LINESIZE
-   * boundaries.
+   * mode (not write-through) because the up_flush_dcache would corrupt
+   * adjacent memory if the buffer alignment and sizes are not on
+   * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
-  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE-1)) != 0 ||
-      (buflen & (ARMV7M_DCACHE_LINESIZE-1)) != 0)
+  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+      (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       return -EFAULT;
     }
@@ -3153,14 +3164,15 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
-                   buflen, dblocksize);
+                   buflen, dblksize);
 
   /* Configure the TX DMA */
 
-  stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET, (uint32_t)buffer,
-                 (buflen + 3) >> 2, SDMMC_TXDMA32_CONFIG | priv->dmapri);
+  stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
+                 (uint32_t)buffer, (buflen + 3) >> 2,
+                 SDMMC_TXDMA32_CONFIG | priv->dmapri);
 
   sdmmc_modifyreg32(priv, STM32_SDMMC_DCTRL_OFFSET, 0, STM32_SDMMC_DCTRL_DMAEN);
   stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
@@ -3286,7 +3298,8 @@ static void stm32_callback(void *arg)
           /* Yes.. queue it */
 
            mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                           priv->cbarg, 0);
         }
       else
         {
@@ -3424,6 +3437,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
     }
 
   /* Initialize the SDIO slot structure */
+
   /* Initialize semaphores */
 
   nxsem_init(&priv->waitsem, 0, 0);
@@ -3542,7 +3556,6 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 }
 #endif /* CONFIG_STM32F7_SDMMC1 || CONFIG_STM32F7_SDMMC2 */
 
-
 #ifdef HAVE_SDMMC_SDIO_MODE
 void sdio_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
                             int (*func)(void *), void *arg)
@@ -3561,6 +3574,7 @@ void sdio_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
       priv->sdiointmask = 0;
     }
 
-  sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask | priv->sdiointmask, STM32_SDMMC_MASK_OFFSET);
+  sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask | priv->sdiointmask,
+                 STM32_SDMMC_MASK_OFFSET);
 }
 #endif

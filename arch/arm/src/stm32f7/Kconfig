@@ -2329,7 +2329,7 @@ config STM32F7_SDMMC2_DMAPRIO
 	hex "SDMMC2 DMA priority"
 	default 0x00010000
 	---help---
-		Select SDMMC1 DMA prority.
+		Select SDMMC2 DMA prority.
 
 		Options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
