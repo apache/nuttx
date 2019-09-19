@@ -1554,15 +1554,15 @@ static inline int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
                 * Multiply by 4 for some extra resolution
                 */
 
-               ccvolts = ccval * BQ769X0_CC_SCALE * 4;
+               ccvolts = (int32_t)ccval * (int32_t)BQ769X0_CC_SCALE * (int32_t)4;
 
                /* ccvolts is nV, sense_r is uOhm.  Result is in mA
                 * convert to uA, and don't forget to divide the 4 back out
                 */
 
-               ccamps = ccvolts / (priv->sense_r);
-               ccamps *= 1000;
-               ccamps /= 4;
+               ccamps = ccvolts / ((int32_t)priv->sense_r);
+               ccamps *= (int32_t)1000;
+               ccamps /= (int32_t)4;
                current->current = ccamps;
 
                /* Acquisition time is constant with this device */
@@ -1909,7 +1909,7 @@ static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
   FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
   int ret;
 
-  ret =  bq769x0_clear_chipfaults(priv, BQ769X0_FAULT_MASK);
+  ret =  bq769x0_clear_chipfaults(priv, BQ769X0_FAULT_MASK | BQ769X0_CC_READY);
   if (ret < 0)
     {
       baterr("ERROR: Error clearing faults! Error = %d\n", ret);

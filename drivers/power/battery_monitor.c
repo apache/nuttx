@@ -290,6 +290,17 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_TEMPERATURE:
+        {
+          FAR struct battery_monitor_temperature_s *ptr =
+              (FAR struct battery_monitor_temperature_s *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->temperature(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;

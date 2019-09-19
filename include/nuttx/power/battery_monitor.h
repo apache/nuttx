@@ -161,10 +161,15 @@ struct battery_monitor_temperature_s
 
   /* Pointer to array where temperature values should be stored.
    * MUST contain at least sensor_count elements.
-   * Temperatures are stored in fixed-point degrees C
+   * Temperature values are stored in microvolts (uV)
+   * It is up to the application to convert these to
+   * actual temperature values, as the system could have
+   * any number of different types of sensors hooked up,
+   * each of which have a different conversion between voltage
+   * and current.
    */
 
-  b8_t *temperatures;
+  uint32_t *temperatures;
 };
 
 struct battery_monitor_balance_s
