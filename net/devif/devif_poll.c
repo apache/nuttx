@@ -369,7 +369,8 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
     {
       /* Perform the ICMPV6 poll
        * Note: conn equal NULL in the first iteration means poll dev's callback list
-       * since icmpv6_neighbor still append it's callback into this list.
+       * since icmpv6_autoconfig and icmpv6_neighbor still append it's callback into
+       * this list.
        */
 
       icmpv6_poll(dev, conn);

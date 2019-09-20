@@ -186,7 +186,6 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   dev       - The device to use to send the solicitation
- *   conn      - A pointer to the ICMPv6 connection structure
  *   advertise - True: Send the Neighbor Advertisement message
  *
  * Returned Value:
@@ -198,9 +197,7 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int icmpv6_send_message(FAR struct net_driver_s *dev,
-                               FAR struct icmpv6_conn_s *conn,
-                               bool advertise)
+static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 {
   struct icmpv6_router_s state;
   int ret;
@@ -225,7 +222,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev,
    * want anything to happen until we are ready.
    */
 
-  state.snd_cb = icmpv6_callback_alloc(dev, conn);
+  state.snd_cb = devif_callback_alloc(dev, &dev->d_conncb);
   if (!state.snd_cb)
     {
       nerr("ERROR: Failed to allocate a cllback\n");
@@ -257,7 +254,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev,
   while (!state.snd_sent);
 
   ret = state.snd_result;
-  icmpv6_callback_free(dev, conn, state.snd_cb);
+  devif_dev_callback_free(dev, state.snd_cb);
 
 errout_with_semaphore:
   nxsem_destroy(&state.snd_sem);
@@ -293,9 +290,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-int icmpv6_autoconfig(FAR struct net_driver_s *dev, FAR struct socket *psock)
+int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
-  FAR struct icmpv6_conn_s *conn = psock->s_conn;
   struct icmpv6_rnotify_s notify;
   struct timespec delay;
   net_ipv6addr_t lladdr;
@@ -400,7 +396,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev, FAR struct socket *psock)
 
       /* Send the ICMPv6 Router solicitation message */
 
-      ret = icmpv6_send_message(dev, conn, false);
+      ret = icmpv6_send_message(dev, false);
       if (ret < 0)
         {
           nerr("ERROR: Failed send router solicitation: %d\n", ret);
@@ -436,7 +432,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev, FAR struct socket *psock)
        * Advertisement message.
        */
 
-      ret = icmpv6_send_message(dev, conn, true);
+      ret = icmpv6_send_message(dev, true);
       if (ret < 0)
         {
           nerr("ERROR: Failed send neighbor advertisement: %d\n", ret);
