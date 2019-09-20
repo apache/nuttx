@@ -49,7 +49,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_SPI_SLAVE - Enable support for SPI slave features
  * CONFIG_SPI_SLAVE_DMA - Enable support for DMA data transfers (not
  *   implemented in initial version).
@@ -109,18 +111,21 @@
  *
  * Input Parameters:
  *   sctrlr - SPI slave controller interface instance
- *   data   - Command/data mode data value to be shifted out.  The width of
- *            the data must be the same as the nbits parameter previously
- *            provided to the bind() methods.
+ *   data   - Pointer to the command/data mode data to be shifted out.
+ *            The data width must be aligned to the nbits parameter which was
+ *            previously provided to the bind() methods.
+ *   len    - Number of units of "nbits" wide to enqueue,
+ *            "nbits" being the data width given in "bind"
  *
  * Returned Value:
- *   Zero if the word was successfully queue; A negated errno valid is
- *   returned on any failure to enqueue the word (such as if the queue is
- *   full).
+ *   Number of data items successfully queued, or a negated errno:
+ *          - "len" if all the data was successfully queued
+ *          - "0..len-1" if queue is full
+ *          - "-errno" in any other error
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_ENQUEUE(c,v)  ((c)->ops->enqueue(c,v))
+#define SPI_SCTRLR_ENQUEUE(c,v,l)  ((c)->ops->enqueue(c,v,l))
 
 /****************************************************************************
  * Name: SPI_SCTRLR_QFULL
@@ -156,6 +161,43 @@
  ****************************************************************************/
 
 #define SPI_SCTRLR_QFLUSH(c)  ((c)->ops->qflush(c))
+
+/****************************************************************************
+ * Name: SPI_SCTRLR_QPOLL
+ *
+ * Description:
+ *   Tell the controller to output all the receive queue data.
+ *
+ *   This will cause 1..n SPI_SDEV_RECEIVE calls back to the slave device,
+ *   offering blocks of data to the device. From each call, the slave device
+ *   driver will return the number of data units it accepted/read out.
+ *
+ *   The poll will return when:
+ *   1. slave device returns that it received less data than what was
+ *      offered to it
+ *   OR
+ *   2. all the buffered data has been offered to the slave device
+ *
+ *   If the slave device wants the poll to return and leave data into the
+ *   controller driver's queue, it shall return any number less than what was
+ *   offered. The controller driver will discard the amount of data that the
+ *   slave device accepted. The data left to the buffers will be offered
+ *   again in the next qpoll.
+ *
+ *   If the slave device wants the poll to return and let the controller
+ *   driver throw away the buffered data it shall just return the same number
+ *   of bytes that was offered to each receive call.
+ *
+ * Input Parameters:
+ *   sctrlr - SPI slave controller interface instance
+ *
+ * Returned Value:
+ *   Number of units of width "nbits" left in the rx queue. If the device
+ *   accepted all the data, the return value will be 0
+ *
+ ****************************************************************************/
+
+#define SPI_SCTRLR_QPOLL(c)  ((c)->ops->qpoll(c))
 
 /****************************************************************************
  * Name: SPI_SDEV_SELECT
@@ -222,9 +264,11 @@
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
+ *   data - Pointer to the data buffer pointer to be shifed out.
+ *          The device will set the data buffer pointer to the actual data
  *
  * Returned Value:
- *   The next data value to be shifted out
+ *   The number of data bytes to be shifted out from the data buffer
  *
  * Assumptions:
  *   May be called from an interrupt handler and the response is usually
@@ -232,7 +276,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_GETDATA(d)  ((d)->ops->getdata(d))
+#define SPI_SDEV_GETDATA(d,v)  ((d)->ops->getdata(d,v))
 
 /****************************************************************************
  * Name: SPI_SDEV_RECEIVE
@@ -245,10 +289,13 @@
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
- *   data - The last command/data value that was shifted in
+ *   data - Pointer to the new data that has been shifted in
+ *   len  - Length of the new data in units of nbits wide,
+ *          nbits being the data width given in "bind"
  *
  * Returned Value:
- *   None
+ *   Number of units accepted by the device. In other words,
+ *   number of units to be removed from controller's receive queue.
  *
  * Assumptions:
  *   May be called from an interrupt handler and in time-critical
@@ -258,11 +305,12 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_RECEIVE(d,v)  ((d)->ops->receive(d,v))
+#define SPI_SDEV_RECEIVE(d,v,l)  ((d)->ops->receive(d,v,l))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* There are two interfaces defined for the implementation of SPI slave:
  *
  * 1) struct spi_sctrlr_s:   Defines one interface between the SPI
@@ -451,9 +499,11 @@ struct spi_sctrlrops_s
                    FAR struct spi_sdev_s *sdev, enum spi_smode_e mode,
                    int nbits);
   CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE int      (*enqueue)(FAR struct spi_sctrlr_s *sctrlr, uint16_t data);
+  CODE int      (*enqueue)(FAR struct spi_sctrlr_s *sctrlr,
+                   FAR const void *data, size_t nwords);
   CODE bool     (*qfull)(FAR struct spi_sctrlr_s *sctrlr);
   CODE void     (*qflush)(FAR struct spi_sctrlr_s *sctrlr);
+  CODE size_t   (*qpoll)(FAR struct spi_sctrlr_s *sctrlr);
 };
 
 /* SPI slave controller private data.  This structure only defines the
@@ -475,8 +525,10 @@ struct spi_sdevops_s
 {
   CODE void     (*select)(FAR struct spi_sdev_s *sdev, bool selected);
   CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool data);
-  CODE uint16_t (*getdata)(FAR struct spi_sdev_s *sdev);
-  CODE void     (*receive)(FAR struct spi_sdev_s *sdev, uint16_t cmd);
+  CODE size_t   (*getdata)(FAR struct spi_sdev_s *sdev,
+                           FAR const void **data);
+  CODE size_t   (*receive)(FAR struct spi_sdev_s *sdev,
+                           FAR const void *data, size_t nwords);
 };
 
 /* SPI slave device private data.  This structure only defines the initial
@@ -504,10 +556,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
