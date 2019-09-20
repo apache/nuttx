@@ -277,7 +277,7 @@ OpenOCD for the ESP32
   to reflect the physical JTAG adapter connected.
 
   NOTE: A copy of this OpenOCD configuration file available in the NuttX
-  source tree at nuttx/boards/tensa/esp32/esp32-core/scripts/esp32.cfg .  It has these
+  source tree at nuttx/boards/xtensa/esp32/esp32-core/scripts/esp32.cfg .  It has these
   modifications:
 
     - The referenced "set ESP32_RTOS none" line has been uncommented
