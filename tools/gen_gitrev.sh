@@ -50,20 +50,8 @@ declare GIT=/usr/bin/git
 declare TR=/usr/bin/tr
 declare WC=/usr/bin/wc
 
-case $OSTYPE in
-    linux-gnu|netbsd|darwin*)
-        declare DATE=/bin/date
-        declare HOSTNAME=/bin/hostname
-        ;;
-    cygwin)
-        declare DATE=/usr/bin/date
-        declare HOSTNAME=/usr/bin/hostname
-        ;;
-    *)
-        declare DATE=/bin/date
-        declare HOSTNAME=/bin/hostname
-        ;;
-esac
+declare DATE=date
+declare HOSTNAME=hostname
 
 
 
