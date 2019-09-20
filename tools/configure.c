@@ -1311,7 +1311,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
           disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_M32");
         }
         break;
 
@@ -1331,7 +1330,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
           disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_M32");
         }
         break;
 
@@ -1346,8 +1344,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
           disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-
-          disable_feature(destconfig, "CONFIG_SIM_M32");
 
           switch (g_windows)
             {
