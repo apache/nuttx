@@ -102,8 +102,8 @@ static int foreach_inodelevel(FAR struct inode *node, struct inode_path_s *info)
 
       ret = info->handler(node, info->path, info->arg);
 
-      /* Break out of the looop early if the handler returns a non-zero
-       * value
+      /* Break out of the loop early if the handler returns a non-zero
+       * value.
        */
 
       if (ret != 0)

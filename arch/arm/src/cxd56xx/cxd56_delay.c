@@ -91,7 +91,7 @@ void up_mdelay(unsigned int milliseconds)
  * Description:
  *   Delay inline for the requested number of microseconds.  NOTE:  Because
  *   of all of the setup, several microseconds will be lost before the actual
- *   timing looop begins.  Thus, the delay will always be a few microseconds
+ *   timing loop begins.  Thus, the delay will always be a few microseconds
  *   longer than requested.
  *
  *   *** NOT multi-tasking friendly ***

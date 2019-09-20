@@ -60,7 +60,7 @@
  *  Initialize open-loop data
  *
  * Input Parameters:
- *   op  - (in/out) pointer to the openlooop data structure
+ *   op  - (in/out) pointer to the openloop data structure
  *   max - (in) maximum openloop speed
  *   per - (in) period of the open-loop control
  *
@@ -126,7 +126,7 @@ void motor_openloop(FAR struct openloop_data_s *op, float speed, float dir)
 
   op->angle += phase_step;
 
-  /* Normalize the open-looop angle to 0.0 - 2PI range */
+  /* Normalize the open-loop angle to 0.0 - 2PI range */
 
   angle_norm_2pi(&op->angle, MOTOR_ANGLE_E_MIN, MOTOR_ANGLE_E_MAX);
 }

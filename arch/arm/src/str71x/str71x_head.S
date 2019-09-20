@@ -418,10 +418,10 @@ eicloop:
  * Name: _vector_table
  *
  * Description:
- *   Interrrupt vector table.  This must be located at the beginning
+ *   Interrupt vector table.  This must be located at the beginning
  *   of the memory space (at the beginning FLASH which will be mapped to
  *   address 0x00000000).  The first entry in the vector table is the reset
- *   vector and this is the code that will execute whn the processor is reset.
+ *   vector and this is the code that will execute when the processor is reset.
  *
  *****************************************************************************/
 

@@ -104,7 +104,7 @@ struct icmp_hdr_s
   /* ICMP header */
 
   uint8_t  type;            /* Defines the format of the ICMP message */
-  uint8_t  icode;           /* Further qualifies the ICMP messsage */
+  uint8_t  icode;           /* Further qualifies the ICMP message */
   uint16_t icmpchksum;      /* Checksum of ICMP header and data */
 
   /* All ICMP packets have an 8-byte header and variable-sized data section.

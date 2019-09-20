@@ -68,7 +68,7 @@ config MEMCPY_64BIT
 	bool "64-bit memcpy()"
 	default n
 	---help---
-		Compiles memcpy() for architectures that suppport 64-bit operations
+		Compiles memcpy() for architectures that support 64-bit operations
 		efficiently.
 
 endif # MEMCPY_VIK
@@ -86,7 +86,7 @@ config MEMSET_64BIT
 	default n
 	depends on MEMSET_OPTSPEED
 	---help---
-		Compiles memset() for architectures that suppport 64-bit operations
+		Compiles memset() for architectures that support 64-bit operations
 		efficiently.
 
 endmenu # memcpy/memset Options

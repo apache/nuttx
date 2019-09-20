@@ -240,7 +240,7 @@ int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
  *
  *   In the case there the IEEE 802.15.4 node functions as an endpoint in a
  *   start topology, the destination address will, instead, be the address
- *   of the star hub (which is assumed to be the address of the cooordinator).
+ *   of the star hub (which is assumed to be the address of the coordinator).
  *
  ****************************************************************************/
 

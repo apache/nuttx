@@ -497,7 +497,7 @@ source drivers/serial/Kconfig-usart
 source drivers/serial/Kconfig-sci
 
 menuconfig PSEUDOTERM
-	bool "Pseudo-Terminal (PTY) suppport"
+	bool "Pseudo-Terminal (PTY) support"
 	default n
 	select PIPES
 	select ARCH_HAVE_SERIAL_TERMIOS

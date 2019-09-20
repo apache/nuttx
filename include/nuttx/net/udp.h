@@ -94,7 +94,7 @@ struct udp_hdr_s
 struct udp_stats_s
 {
   net_stats_t drop;         /* Number of dropped UDP segments */
-  net_stats_t recv;         /* Number of recived UDP segments */
+  net_stats_t recv;         /* Number of received UDP segments */
   net_stats_t sent;         /* Number of sent UDP segments */
   net_stats_t chkerr;       /* Number of UDP segments with a bad checksum */
 };

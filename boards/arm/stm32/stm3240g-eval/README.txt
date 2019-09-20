@@ -1002,7 +1002,7 @@ Where <subdir> is one of the following:
        CONFIG_EXAMPLES_nxlines              :
 
        CONFIG_STM32_FSMC=y       : FSMC support is required for the LCD
-       CONFIG_NX=y               : Enable graphics suppport
+       CONFIG_NX=y               : Enable graphics support
        CONFIG_MM_REGIONS=3       : When FSMC is enabled, so is the on-board SRAM memory region
 
     10. USB OTG FS Device or Host Support

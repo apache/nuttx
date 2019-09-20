@@ -19311,7 +19311,7 @@
 	* include/sys:  Add resource.h  From Gregory Nutt (2018-05-13).
 	* rgbled: Fixes led issues caused by uninitialized memory with
 	  CONFIG_RGBLED_MULTICHAN.  The uninitialized pwm_info_s struct caused a
-	  rogue channel to be started causing errros in the pwm driver  From Anthony
+	  rogue channel to be started causing errors in the pwm driver  From Anthony
 	  Merlino (2018-05-14).
 	* arch/arm/src/imxrt/chip:  Add pin multiplexing header files.  From Gregory
 	  Nutt (2018-05-14).

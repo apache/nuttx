@@ -182,7 +182,7 @@ static int kinetis_nmi(int irq, FAR void *context, FAR void *arg)
 static int kinetis_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
-  _err("PANIC!!! Bus fault recived\n");
+  _err("PANIC!!! Bus fault received\n");
   PANIC();
   return 0;
 }

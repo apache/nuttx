@@ -716,7 +716,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
 
   reqlen += sizeof(struct rpc_call_header);
 
-  /* Send the RPC call messsages and receive the RPC response.  A limited
+  /* Send the RPC call messages and receive the RPC response.  A limited
    * number of re-tries will be attempted, but only for the case of response
    * timeouts.
    */

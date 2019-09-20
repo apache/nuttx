@@ -316,10 +316,10 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
         {
           int ret;
 
-          /* Increment the link counter.  This is necesssary to avoid
+          /* Increment the link counter.  This is necessary to avoid
            * infinite recursion if loops are encountered in the traversal.
            * If we encounter more SYMLOOP_MAX symbolic links at any time
-           * during the travrsal, error out.
+           * during the traversal, error out.
            *
            * NOTE: That inode_search() will automatically skip over
            * consecutive, intermediate symbolic links.  Those numbers will

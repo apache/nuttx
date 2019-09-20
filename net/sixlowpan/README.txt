@@ -163,7 +163,7 @@ created with the following settings in the configuration file:
 
 The CONFIG_NET_STARPOINT selection informs the endpoint 6LoWPAN stack that
 it must send all frames to the hub of the star, rather than directly to the
-recipient.  The star hub is assumed to be the cooordinator.
+recipient.  The star hub is assumed to be the coordinator.
 
 The star hub configuration, on the other hand, uses these setting:
 

@@ -46,24 +46,12 @@
 
 #include "up_internal.h"
 
-/* This is a "stub" file to suppport up_putc if no real serial driver is
+/* This is a "stub" file to support up_putc if no real serial driver is
  * configured.  Normally, drivers/serial/uart_16550.c provides the serial
  * driver for this platform.
  */
 
 #ifdef USE_SERIALDRIVER
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -74,7 +62,7 @@
  *
  * Description:
  *   These functions must be provided by the processor-specific code in order
- *   to correctly access 16550 registers
+ *   to correctly access 16550 registers.
  *
  ****************************************************************************/
 

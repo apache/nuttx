@@ -54,8 +54,8 @@
  * Name: ferror
  *
  * Description:
- *   This function will test if the last operation resulted in an eror.  This
- *   is used to disambiguate EOF and error conditions.
+ *   This function will test if the last operation resulted in an error.
+ *   This is used to disambiguate EOF and error conditions.
  *
  * Returned Value:
  *   A non-zero value is returned to indicate the error condition.

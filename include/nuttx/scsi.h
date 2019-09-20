@@ -493,9 +493,9 @@
 #define SCSIRESP_SENSEDATA_NOSENSE               0x00 /*   Nothing to be reported */
 #define SCSIRESP_SENSEDATA_RECOVEREDERROR        0x01 /*   Successful after recovery action */
 #define SCSIRESP_SENSEDATA_NOTREADY              0x02 /*   Logical unit is not accessible */
-#define SCSIRESP_SENSEDATA_MEDIUMERROR           0x03 /*   Error posssibly caused by flaw in medium */
+#define SCSIRESP_SENSEDATA_MEDIUMERROR           0x03 /*   Error possibly caused by flaw in medium */
 #define SCSIRESP_SENSEDATA_HARDWAREERROR         0x04 /*   Non-recoverable hardware error */
-#define SCSIRESP_SENSEDATA_ILLEGALREQUEST        0x05 /*   Error in recived request */
+#define SCSIRESP_SENSEDATA_ILLEGALREQUEST        0x05 /*   Error in received request */
 #define SCSIRESP_SENSEDATA_UNITATTENTION         0x06 /*   Unit attention condition */
 #define SCSIRESP_SENSEDATA_DATAPROTECT           0x07 /*   Action failed, medium protected */
 #define SCSIRESP_SENSEDATA_BLANKCHECK            0x08 /*   Encountered blank media */

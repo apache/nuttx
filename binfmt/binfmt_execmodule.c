@@ -65,7 +65,7 @@
  */
 
 #if defined(CONFIG_BINFMT_CONSTRUCTORS) && !defined(CONFIG_SCHED_STARTHOOK)
-#  errror "CONFIG_SCHED_STARTHOOK must be defined to use constructors"
+#  error "CONFIG_SCHED_STARTHOOK must be defined to use constructors"
 #endif
 
 /****************************************************************************

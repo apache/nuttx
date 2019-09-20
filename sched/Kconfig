@@ -255,7 +255,7 @@ config SPINLOCK
 	default n
 	depends on ARCH_HAVE_TESTSET
 	---help---
-		Enables suppport for spinlocks.  Spinlocks are used primarily for
+		Enables support for spinlocks.  Spinlocks are used primarily for
 		synchronization in SMP configurations but are available for general
 		synchronization between CPUs.  Use in a single CPU configuration would
 		most likely be fatal.  Note, however, that this does not depend on
@@ -267,7 +267,7 @@ config SPINLOCK_IRQ
 	default n
 	depends on ARCH_GLOBAL_IRQDISABLE
 	---help---
-		Enables suppport for spinlocks with IRQ control. This feature can be
+		Enables support for spinlocks with IRQ control. This feature can be
 		used to protect data in SMP mode.
 
 config IRQCHAIN

@@ -333,7 +333,7 @@ void kinetis_pllconfig(void)
    * establish the multiplication factor applied to the reference clock
    * frequency.  Also set
    *
-   * LOLIE       = 0 (Loss of Lock Interrrupt Enable)
+   * LOLIE       = 0 (Loss of Lock Interrupt Enable)
    * PLLS        = 1 (PLL Select)
    * CME         = 0 (Clock Monitor Enable)
    */

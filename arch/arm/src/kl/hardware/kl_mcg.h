@@ -146,7 +146,7 @@
 #  define MCG_C6_VDIV(n)          (((n)-24) << MCG_C6_VDIV_SHIFT) /* Divide factor n=24..55 */
 #define MCG_C6_CME                (1 << 5)  /* Bit 5:  Clock Monitor Enable */
 #define MCG_C6_PLLS               (1 << 6)  /* Bit 6:  PLL Select */
-#define MCG_C6_LOLIE              (1 << 7)  /* Bit 7:  Loss of Lock Interrrupt Enable */
+#define MCG_C6_LOLIE              (1 << 7)  /* Bit 7:  Loss of Lock Interrupt Enable */
 
 /* MCG Status Register */
 

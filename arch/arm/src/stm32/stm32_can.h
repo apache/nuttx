@@ -85,7 +85,7 @@
 #endif
 
 #if CONFIG_STM32_CAN_TSEG1 < 1 || CONFIG_STM32_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
-#  errror "CONFIG_STM32_CAN_TSEG1 is out of range"
+#  error "CONFIG_STM32_CAN_TSEG1 is out of range"
 #endif
 
 #ifndef CONFIG_STM32_CAN_TSEG2
@@ -93,7 +93,7 @@
 #endif
 
 #if CONFIG_STM32_CAN_TSEG2 < 1 || CONFIG_STM32_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
-#  errror "CONFIG_STM32_CAN_TSEG2 is out of range"
+#  error "CONFIG_STM32_CAN_TSEG2 is out of range"
 #endif
 
 /************************************************************************************
