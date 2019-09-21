@@ -1187,10 +1187,10 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
 }
 
 /****************************************************************************
- * Name: bt_check_fw_upload()
+ * Name: bt_check_fw_download()
  *
  * Description:
- *   This function uploads firmware to the bt device if it is needed.
+ *   This function downloads firmware to the bt device if it is needed.
  *
  * Input Parameters:
  *   none
@@ -1201,7 +1201,7 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
  ****************************************************************************/
 
 #ifdef CONFIG_BLUETOOTH_FIRMWARE_DOWNLOAD
-static int bt_check_fw_upload(void)
+static int bt_check_fw_download(void)
 {
   uint8_t               *rp = (uint8_t *)bt_firmware_hcd;
   FAR uint8_t           *bm;
@@ -1332,7 +1332,7 @@ static int bt_check_fw_upload(void)
 }
 
 #else
-#  define bt_check_fw_upload()  OK
+#  define bt_check_fw_download()  OK
 #endif
 
 /****************************************************************************
@@ -1368,9 +1368,9 @@ static int hci_initialize(void)
 
   bt_buf_release(rsp);
 
-  /* Upload new firmware when/if needed */
+  /* Download new firmware when/if needed */
 
-  ret = bt_check_fw_upload();
+  ret = bt_check_fw_download();
   if (ret < 0)
     {
       wlerr("ERROR: Firmware upload failed: %d\n", ret);
