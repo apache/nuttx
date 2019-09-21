@@ -83,8 +83,6 @@
 #define TIMEOUT_SEC    2
 #define TIMEOUT_NSEC   500 * 1024 * 1024
 
-#define BT_FIRMWARE_UPLOAD  /* REVISIT:  Should be a Kconfig option? */
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -96,11 +94,6 @@
  */
 
 struct bt_dev_s g_btdev;
-
-#ifdef BT_FIRMWARE_UPLOAD
-extern const uint8_t bt_firmware_hcd[];
-const long int bt_firmware_len;
-#endiuf
 
 /****************************************************************************
  * Private Data
@@ -1207,7 +1200,7 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
  *
  ****************************************************************************/
 
-#ifdef BT_FIRMWARE_UPLOAD
+#ifdef CONFIG_BLUETOOTH_FIRMWARE_DOWNLOAD
 static int bt_check_fw_upload(void)
 {
   uint8_t               *rp = (uint8_t *)bt_firmware_hcd;
