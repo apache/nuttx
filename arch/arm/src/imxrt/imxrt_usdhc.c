@@ -2011,13 +2011,8 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   mcinfo("cmd: %08x arg: %08x regval: %08x mcrval: %08x\n", cmd, arg,
          regval, mcrregval);
 
-  /* The Command Inhibit (CIHB) bit is set in the PRSSTAT bit immediately
-   * after the transfer type register is written.  This bit is cleared
-   * when the command response is received.  If this status bit is 0, it
-   * indicates that the CMD line is not in use and the USDHC can issue a
-   * SD/MMC Command using the CMD line. CIHB should always be clear before
-   * this function is called, but this check is performed here to provide
-   * overlap and maximum performance.
+  /* If there has been a response error then perform a reset and wait for it
+   * to complete.
    */
 
   if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & USDHC_RESPERR_INTS) != 0)
@@ -2028,6 +2023,15 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
         {
         }
     }
+
+  /* The Command Inhibit (CIHB) bit is set in the PRSSTAT bit immediately
+   * after the transfer type register is written.  This bit is cleared
+   * when the command response is received.  If this status bit is 0, it
+   * indicates that the CMD line is not in use and the USDHC can issue a
+   * SD/MMC Command using the CMD line. CIHB should always be clear before
+   * this function is called, but this check is performed here to provide
+   * overlap and maximum performance.
+   */
 
   timeout = USDHC_CMDTIMEOUT;
   start   = clock_systimer();
