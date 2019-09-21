@@ -2022,6 +2022,8 @@ nuttx/
  |   |   |   |   `- README.txt
  |   |   |   |- nucleo-f091rc/
  |   |   |   |   `- README.txt
+ |   |   |   |- nucleo-g070rb/
+ |   |   |   |   `- README.txt
  |   |   |   |- nucleo-g071rb/
  |   |   |   |   `- README.txt
  |   |   |   |- nucleo-l073rz/
