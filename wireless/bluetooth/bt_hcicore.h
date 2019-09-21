@@ -166,13 +166,6 @@ typedef CODE void bt_le_scan_cb_t(FAR const bt_addr_le_t *addr, int8_t rssi,
 
 extern struct bt_dev_s g_btdev;
 
-#ifdef CONFIG_BLUETOOTH_FIRMWARE_DOWNLOAD
-/* Location and size of HCI firmware download */
-
-extern const uint8_t bt_firmware_hcd[];
-extern const long int bt_firmware_len;
-#endif
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/

@@ -54,20 +54,6 @@ menuconfig WIRELESS_BLUETOOTH
 
 if WIRELESS_BLUETOOTH
 
-config BLUETOOTH_FIRMWARE_DOWNLOAD
-	bool "Generic firmware download"
-	default n
-	---help---
-		Enables support for generic firmware download in the MAC layer.  Do
-		not enable this option if no download is required OR if the download
-		if performed by the Bluetooth HCI layer.
-
-		If this option is selected, then your board-specific code must
-		provide the firmware data via:
-
-			const uint8_t bt_firmware_hcd[];
-			const long int bt_firmware_len;
-
 config BLUETOOTH_MAX_CONN
 	int "Maximum number of simultaneous connections"
 	default 1
