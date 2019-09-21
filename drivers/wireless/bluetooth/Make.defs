@@ -44,6 +44,9 @@ CSRCS += bt_uart.c
 ifeq ($(CONFIG_BLUETOOTH_UART_GENERIC),y)
 CSRCS += bt_uart_generic.c
 endif
+ifeq ($(CONFIG_BLUETOOTH_UART_SHIM),y)
+CSRCS += bt_uart_shim.c bt_uart_generic.c
+endif
 ifeq ($(CONFIG_BLUETOOTH_UART_CC2564),y)
 CSRCS += bt_uart_cc2564.c
 endif

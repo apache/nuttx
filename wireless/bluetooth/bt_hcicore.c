@@ -83,6 +83,8 @@
 #define TIMEOUT_SEC    2
 #define TIMEOUT_NSEC   500 * 1024 * 1024
 
+#define BT_FIRMWARE_UPLOAD  /* REVISIT:  Should be a Kconfig option? */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -94,6 +96,11 @@
  */
 
 struct bt_dev_s g_btdev;
+
+#ifdef BT_FIRMWARE_UPLOAD
+extern const uint8_t bt_firmware_hcd[];
+const long int bt_firmware_len;
+#endiuf
 
 /****************************************************************************
  * Private Data
@@ -186,8 +193,8 @@ static FAR struct bt_buf_s *bt_dequeue_bufwork(FAR struct bt_bufferlist_s *list)
           for (prev = list->head;
                prev && prev->flink != buf;
                prev = prev->flink)
-           {
-           }
+            {
+            }
 
           if (prev != NULL)
             {
@@ -421,7 +428,8 @@ static void hci_cmd_status(FAR struct bt_buf_s *buf)
 static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_num_completed_packets_s *evt = (FAR void *)buf->data;
-  uint16_t i, num_handles = BT_LE162HOST(evt->num_handles);
+  uint16_t num_handles = BT_LE162HOST(evt->num_handles);
+  uint16_t i;
 
   wlinfo("num_handles %u\n", num_handles);
 
@@ -555,7 +563,8 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
 
 static int bt_hci_stop_scanning(void)
 {
-  FAR struct bt_buf_s *buf, *rsp;
+  FAR struct bt_buf_s *buf;
+  FAR struct bt_buf_s *rsp;
   FAR struct bt_hci_cp_le_set_scan_enable_s *scan_enable;
   int ret;
 
@@ -616,7 +625,7 @@ static int hci_le_create_conn(FAR const bt_addr_le_t *addr)
   cp->conn_interval_min   = BT_HOST2LE16(0x0018);
   cp->scan_interval       = BT_HOST2LE16(0x0060);
   cp->scan_window         = BT_HOST2LE16(0x0030);
-  cp->supervision_timeout = BT_HOST2LE16(0x07D0);
+  cp->supervision_timeout = BT_HOST2LE16(0x07d0);
 
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_CREATE_CONN, buf, NULL);
 }
@@ -1184,6 +1193,168 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
   g_btdev.le_pkts = rp->le_max_num;
 }
 
+/****************************************************************************
+ * Name: bt_check_fw_upload()
+ *
+ * Description:
+ *   This function uploads firmware to the bt device if it is needed.
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef BT_FIRMWARE_UPLOAD
+static int bt_check_fw_upload(void)
+{
+  uint8_t               *rp = (uint8_t *)bt_firmware_hcd;
+  FAR uint8_t           *bm;
+
+  FAR struct bt_buf_s   *buf;
+  FAR struct bt_buf_s   *rsp;
+  uint8_t               command;
+  uint8_t               command2;
+  uint8_t               txlen;
+  uint32_t              addr;
+  int                   ret = OK;
+
+  const uint8_t         HCD_PATCHRAM_COMMAND    = 0x2e;
+  const uint8_t         HCD_LAUNCH_COMMAND      = 0x4e;
+  const uint8_t         HCD_WRITE_COMMAND       = 0x4c;
+  const uint8_t         HCD_COMMAND_BYTE2       = 0xfc;
+  const uint8_t         HCD_LAUNCH_LEN          = 4;
+  const uint8_t         HCD_LAUNCH_PAYLOAD      = 0xff;
+
+  ret = bt_hci_cmd_send_sync(HCD_PATCHRAM_COMMAND | (HCD_COMMAND_BYTE2 << 8),
+                             NULL, &rsp);
+  bt_buf_release(rsp);
+
+  if (ret < 0)
+    {
+      wlerr("ERROR: HCD_LAUNCH_COMMAND failed: %d\n", ret);
+      return ret;
+    }
+
+  while (rp < (bt_firmware_hcd + bt_firmware_len))
+    {
+      command   = rp[0];
+      command2  = rp[1];
+      txlen     = rp[2];
+      addr      = rp[3] | (rp[4] << 8) | (rp[5] << 16) | (rp[6] << 24);
+
+      /* Sanity check on the data as they are read */
+
+      if (command == HCD_LAUNCH_COMMAND)
+        {
+          break;
+        }
+
+      if ((txlen < 4) || (command2 != HCD_COMMAND_BYTE2) ||
+          (command != HCD_WRITE_COMMAND))
+        {
+          wlerr("ERROR:  Firmware file format\n");
+          return -ENODEV;
+        }
+
+      /* Jump past the header and remove the length from the send amount */
+
+      rp    += 7;
+      txlen -= 4;
+
+      while (txlen > 0)
+        {
+          uint8_t txelement = txlen >
+                              (BLUETOOTH_MAX_MTU - 4) ? (BLUETOOTH_MAX_MTU -
+                                                         4) : txlen;
+          buf = bt_hci_cmd_create(command | (command2 << 8), txelement + 4);
+          if (buf == NULL)
+            {
+              wlerr("ERROR:  Failed to create buffer\n");
+              return -ENOBUFS;
+            }
+
+          bm    = (uint8_t *)bt_buf_extend(buf, txelement + 4);
+          bm[0] = addr & 0xff;
+          bm[1] = (addr >> 8) & 0xff;
+          bm[2] = (addr >> 16) & 0xff;
+          bm[3] = (addr >> 24) & 0xff;
+          memcpy(&bm[4], rp, txelement);
+
+          ret = bt_hci_cmd_send_sync(command | (command2 << 8), buf, &rsp);
+          if (ret < 0)
+            {
+              wlerr("ERROR: Upload failed: %d\n", ret);
+              return ret;
+            }
+
+          bt_buf_release(rsp);
+          rp    += txelement;
+          txlen -= txelement;
+          addr  += txelement;
+        }
+    }
+
+  /* To have gotten here we must've uploaded correctly */
+
+  buf = bt_hci_cmd_create(HCD_LAUNCH_COMMAND | (HCD_COMMAND_BYTE2 << 8),
+                          HCD_LAUNCH_LEN);
+  if (buf == NULL)
+    {
+      wlerr("ERROR:  Failed to create buffer\n");
+      return -ENOBUFS;
+    }
+
+  bm = (uint8_t *)bt_buf_extend(buf, HCD_LAUNCH_LEN);
+  memset(bm, HCD_LAUNCH_PAYLOAD, HCD_LAUNCH_LEN);
+
+  ret = bt_hci_cmd_send_sync(HCD_LAUNCH_COMMAND | (HCD_COMMAND_BYTE2 << 8),
+                             buf, &rsp);
+  bt_buf_release(rsp);
+
+  if (ret < 0)
+    {
+      wlerr("ERROR: HCD_LAUNCH_COMMAND failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Give everything time to start up */
+
+  nxsig_usleep(1000000);
+
+  /* Everything happened and the new firmware is launched */
+
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_RESET, NULL, &rsp);
+  if (ret < 0)
+    {
+      wlerr("ERROR: BT_HCI_OP_RESET failed: %d\n", ret);
+      return ret;
+    }
+
+  bt_buf_release(rsp);
+
+  return OK;
+}
+
+#else
+#  define bt_check_fw_upload()  OK
+#endif
+
+/****************************************************************************
+ * Name: hci_initialize()
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 static int hci_initialize(void)
 {
   FAR struct bt_hci_cp_host_buffer_size_s *hbs;
@@ -1195,14 +1366,30 @@ static int hci_initialize(void)
 
   /* Send HCI_RESET */
 
-  bt_hci_cmd_send(BT_HCI_OP_RESET, NULL);
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_RESET, NULL, &rsp);
+  if (ret < 0)
+    {
+      wlerr("ERROR: BT_HCI_OP_RESET failed: %d\n", ret);
+      return ret;
+    }
+
+  bt_buf_release(rsp);
+
+  /* Upload new firmware when/if needed */
+
+  ret = bt_check_fw_upload();
+  if (ret < 0)
+    {
+      wlerr("ERROR: Firmware upload failed: %d\n", ret);
+      return ret;
+    }
 
   /* Read Local Supported Features */
 
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR: BT_HCI_OP_READ_LOCAL_FEATURES failed: %d\n", ret);
       return ret;
     }
 
@@ -1246,7 +1433,7 @@ static int hci_initialize(void)
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_LOCAL_FEATURES, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR:  BT_HCI_OP_LE_READ_LOCAL_FEATURES failed: %d\n", ret);
       return ret;
     }
 
@@ -1258,7 +1445,7 @@ static int hci_initialize(void)
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_BUFFER_SIZE, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR:  BT_HCI_OP_LE_READ_BUFFER_SIZE failed: %d\n", ret);
       return ret;
     }
 
@@ -1274,6 +1461,7 @@ static int hci_initialize(void)
 
   ev = bt_buf_extend(buf, sizeof(*ev));
   memset(ev, 0, sizeof(*ev));
+
   ev->events[0] |= 0x10;        /* Disconnection Complete */
   ev->events[1] |= 0x08;        /* Read Remote Version Information Complete */
   ev->events[1] |= 0x20;        /* Command Complete */
@@ -1574,6 +1762,7 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
     }
 
   /* All others use the low priority work queue */
+
   /* Add the buffer to the low priority Rx buffer list */
 
   bt_enqueue_bufwork(&g_lp_rxlist, buf);

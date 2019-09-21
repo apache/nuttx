@@ -26,6 +26,9 @@ config BLUETOOTH_UART_BT860
 	bool "Laird BT860"
 	select BLUETOOTH_UART_GENERIC
 
+config BLUETOOTH_UART_SHIM
+	bool "Generic shim to serial port"
+
 config BLUETOOTH_UART_CC2564
 	bool "TI CC2564"
 	depends on EXPERIMENTAL

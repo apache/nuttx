@@ -81,7 +81,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
       nread = lower->read(lower, buffer, buflen);
       if (nread == 0)
         {
-          wlinfo("Got zero bytes from UART\n");
+          wlwarn("Got zero bytes from UART\n");
           if (ntotal < minread)
             {
               continue;
@@ -91,6 +91,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
         }
       else if (nread < 0)
         {
+          wlwarn("Returned error %d\n", nread);
           return nread;
         }
 
@@ -239,6 +240,12 @@ static void btuart_rxwork(FAR void *arg)
   while (remaining > 0)
     {
       nread = btuart_read(upper, bt_buf_tail(buf), remaining, 0);
+      if (nread < 0)
+        {
+          wlerr("ERROR: Read returned error %d\n", nread);
+          goto errout_with_buf;
+        }
+
       wlinfo("Received %ld bytes\n", (long)nread);
 
       buf->len  += nread;
@@ -257,9 +264,8 @@ static void btuart_rxwork(FAR void *arg)
 
   /* Pass buffer to the stack */
 
-  upper->busy = false;
-
   BT_DUMP("Received",  buf->data, buf->len);
+  upper->busy = false;
   bt_hci_receive(buf);
   return;
 
@@ -281,14 +287,12 @@ static void btuart_rxcallback(FAR const struct btuart_lowerhalf_s *lower,
 
   if (!upper->busy)
     {
+      upper->busy = true;
       int ret = work_queue(HPWORK, &upper->work, btuart_rxwork, arg, 0);
       if (ret < 0)
         {
+          upper->busy = false;
           wlerr("ERROR: work_queue failed: %d\n", ret);
-        }
-      else
-        {
-          upper->busy = true;
         }
     }
 }
