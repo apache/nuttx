@@ -38,6 +38,7 @@ Contents
   - Quadrature Encoder
   - FPU
   - STM32F4DIS-BB
+  - RTC DS1307
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
   - HCI UART
@@ -416,6 +417,52 @@ On-board PIO usage:
   PC11       CD/DAT3
   PC10       DAT2
   ---------- ------------- ------------------------------
+
+RTC DS1307
+==========
+
+It is possible to use a low cost extern DS1307 RTC to keep date and time
+always updated. These DS1307 RTC modules come with a 3V button battery, then
+even when the board is turned OFF the Date/Time registers keep running.
+
+You can connect the module this way (STM32F4Discovery to DS1307 board): GND
+to GND; 5V to VCC; PB9 to SDA; PB6 to SCL. In the NuttX menuconfig you need
+to enable these options:
+
+System Type  --->
+    STM32 Peripheral Support  --->
+        [*] I2C1
+
+Device Drivers  --->
+    Timer Driver Support  --->
+        [*] RTC Driver Support  --->
+            -*-   Date/Time RTC Support
+            [*]   External RTC Support
+            [*]     DS130x/DS323x RTC Driver
+                      Maxim Integrated RTC (DS1307)  --->
+            (100000)  DS1307/DS323x I2C frequency
+
+Application Configuration  --->
+    NSH Library  --->
+        Disable Individual commands  --->
+            [ ] Disable date ( <-- Deselect )
+
+It is also a good idea to enable the DEBUG to RTC initially, you will see:
+
+ABCDF
+stm32_ds1307_init: Initialize I2C1
+stm32_ds1307_init: Bind the DS1307 RTC driver to I2C1
+rtc_dumptime: Returning:
+rtc_dumptime:    tm_sec: 00000039
+rtc_dumptime:    tm_min: 00000001
+rtc_dumptime:   tm_hour: 00000009
+rtc_dumptime:   tm_mday: 00000016
+rtc_dumptime:    tm_mon: 00000008
+rtc_dumptime:   tm_year: 00000077
+
+NuttShell (NSH)
+nsh> date
+Sep 22 09:01:58 2019
 
 SSD1289
 =======

@@ -216,6 +216,7 @@
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -495,6 +496,18 @@ int nunchuck_initialize(FAR char *devname);
 
 #ifdef CONFIG_LEDS_MAX7219
 int stm32_max7219init(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_ds1307_init
+ *
+ * Description:
+ *   Initialize and register the DS1307 RTC
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DS1307
+int stm32_ds1307_init(void);
 #endif
 
 /****************************************************************************
