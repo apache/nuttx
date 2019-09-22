@@ -141,3 +141,9 @@ Configuration sub-directories
         37   PB22 SERCOM5 / USART RX
         38   PB23 SERCOM5 / USART TX
 
+  usbnsh:
+    This configuration directory will build the NuttShell to work over USB.
+    It uses the internal SAMD21 USB port working as CDC/ACM Serial/Modem.
+
+    Using the configuration you don't need to solder the header pins RXD/TXD
+    to get access the NSH terminal.
