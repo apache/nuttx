@@ -77,11 +77,10 @@
 
 #include "chip.h"
 #include "hardware/sam_pinmap.h"
-//#include "sam_pio.h"
 #include "sam_periphclks.h"
 //#include "sam_memories.h"
 #include "sam_ethernet.h"
-
+#include "sam_port.h"
 #include <arch/board/board.h>
 
 #if defined(CONFIG_NET) && defined(CONFIG_SAMD5E5_GMAC)
@@ -1602,7 +1601,7 @@ static void sam_interrupt_work(FAR void *arg)
 
   /* Re-enable Ethernet interrupts */
 
-  up_enable_irq(SAM_IRQ_GMAC);
+  up_enable_irq(SAM_IRQ_GMAL);
 }
 
 /****************************************************************************
@@ -1632,7 +1631,7 @@ static int sam_gmac_interrupt(int irq, void *context, FAR void *arg)
    * condition here.
    */
 
-  up_disable_irq(SAM_IRQ_GMAC);
+  up_disable_irq(SAM_IRQ_GMAL);
 
   /* Check for the completion of a transmission.  Careful:
    *
@@ -1722,7 +1721,7 @@ static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
    * condition with interrupt work that is already queued and in progress.
    */
 
-  up_disable_irq(SAM_IRQ_GMAC);
+  up_disable_irq(SAM_IRQ_GMAL);
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
@@ -1872,7 +1871,7 @@ static int sam_ifup(struct net_driver_s *dev)
   /* Enable the GMAC interrupt */
 
   priv->ifup = true;
-  up_enable_irq(SAM_IRQ_GMAC);
+  up_enable_irq(SAM_IRQ_GMAL);
   return OK;
 }
 
@@ -1902,7 +1901,7 @@ static int sam_ifdown(struct net_driver_s *dev)
   /* Disable the GMAC interrupt */
 
   flags = enter_critical_section();
-  up_disable_irq(SAM_IRQ_GMAC);
+  up_disable_irq(SAM_IRQ_GMAL);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -3295,25 +3294,37 @@ static inline void sam_ethgpioconfig(struct sam_gmac_s *priv)
 {
   /* Configure PIO pins to support GMAC in RGMII mode */
 
-  sam_configpio(PIO_GMAC_TX0);
-  sam_configpio(PIO_GMAC_TX1);
-  sam_configpio(PIO_GMAC_TX2);
-  sam_configpio(PIO_GMAC_TX3);
+  sam_portconfig(PORT_GMAC_GTX0);
+  sam_portconfig(PORT_GMAC_GTX1);
+#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+  sam_portconfig(PORT_GMAC_GTX2);
+  sam_portconfig(PORT_GMAC_GTX3);
+#endif
 
-  sam_configpio(PIO_GMAC_RX0);
-  sam_configpio(PIO_GMAC_RX1);
-  sam_configpio(PIO_GMAC_RX2);
-  sam_configpio(PIO_GMAC_RX3);
+  sam_portconfig(PORT_GMAC_GRX0);
+  sam_portconfig(PORT_GMAC_GRX1);
+#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+  sam_portconfig(PORT_GMAC_GRX1);
+  sam_portconfig(PORT_GMAC_GRX2);
+#endif
 
-  sam_configpio(PIO_GMAC_TXCK);
-  sam_configpio(PIO_GMAC_TXEN);
-  sam_configpio(PIO_GMAC_RXCK);
-  sam_configpio(PIO_GMAC_RXDV);
-  sam_configpio(PIO_GMAC_RXER);
+/* TXCK is REFCK in RMII mode */
+  sam_portconfig(PORT_GMAC_GTXCK);
+#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+  sam_portconfig(PORT_GMAC_GRXCK);
+#endif
+/* RXDV is CRSDV in RMII mode */
+  sam_portconfig(PORT_GMAC_GRXDV);
+  sam_portconfig(PORT_GMAC_GTXEN);
+  sam_portconfig(PORT_GMAC_GRXER);
+#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+  sam_portconfig(PORT_GMAC_GTXER);
+  sam_portconfig(PORT_GMAC_GCOL);
+  sam_portconfig(PORT_GMAC_GCRS);
+#endif
 
-  sam_configpio(PIO_GMAC_MDC);
-  sam_configpio(PIO_GMAC_MDIO);
-  sam_configpio(PIO_GMAC_125CK);
+  sam_portconfig(BOARD_GMAC_GMDC);
+  sam_portconfig(BOARD_GMAC_GMDIO);
 }
 
 /****************************************************************************
@@ -3804,10 +3815,10 @@ int sam_gmac_initialize(void)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(SAM_IRQ_GMAC, sam_gmac_interrupt, NULL);
+  ret = irq_attach(SAM_IRQ_GMAL, sam_gmac_interrupt, NULL);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_GMAC);
+      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_GMAL);
       goto errout_with_buffers;
     }
 

@@ -465,4 +465,9 @@
 
 #define BOARD_USB_GCLKGEN            1                   /* GCLK1, 48MHz */
 
+/* Ethernet */
+
+#define BOARD_GMAC_GMDC    PORT_GMAC_GMDC_3
+#define BOARD_GMAC_GMDIO   PORT_GMAC_GMDIO_3
+
 #endif  /* __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_INCLUDE_BOARD_H */
