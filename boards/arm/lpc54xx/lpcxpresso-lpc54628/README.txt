@@ -567,3 +567,8 @@ Configurations
        borderless.  There is however, a fine border around each toolbar
        widget with ruins the feel that the theme was trying for.
 
+    4. Revisiting this configuration after a few months, I found that the
+       configuration generated a hardfault.  This turned out to be an issue
+       with the toolchain and dropping the optimization level eliminated the
+       problem; -O2 was sufficient for me.  If you see odd behavior like
+       this, you might want to do the same.
