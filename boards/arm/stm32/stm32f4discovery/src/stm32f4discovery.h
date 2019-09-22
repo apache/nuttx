@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012, 2015-2016, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2011-2012, 2015-2016, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *

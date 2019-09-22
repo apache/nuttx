@@ -1921,6 +1921,8 @@ nuttx/
  |   |   |   `- sama5d4-ek/
  |   |   |       `- README.txt
  |   |   |- samd2l2/
+ |   |   |   |- arduino-m0/
+ |   |   |   |   `- README.txt
  |   |   |   |- samd20-xplained/
  |   |   |   |   `- README.txt
  |   |   |   |- samd21-xplained/
