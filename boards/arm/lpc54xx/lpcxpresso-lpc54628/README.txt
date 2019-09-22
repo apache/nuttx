@@ -100,7 +100,7 @@ STATUS
   2018-10-22:  Dave Marples recently fixed the LPC43 version of the USB
     device controller driver.  That driver is a clone from the LPC54 USB
     DCD.  I have backported Dave's changes to the LPC54 DCD.  Unfortunately,
-    it did not fixe the problem.  Then I discovered this errata for the LPC54:
+    it did not fix the problem.  Then I discovered this errata for the LPC54:
 
       For the 4-bit mode to work successfully, four otherwise unused upper
       data bits (SD_D[4] to SD_D[7]) must be functionally assigned to GPIO
@@ -120,11 +120,15 @@ STATUS
     the peripheral is properly configured, initialized, and clocked.  The
     clock setup logic is missing as of this writing (the driver is not yet
     even included in the build and completely unverified).
+  2019-00-22:  Although everyone with the older Rev C boards were booting
+    happily, it was reported that people with Rev F boards could not boot.
+    A patch updating the clock configuration for those boards was verified
+    (on both Rev C and Rev F) and pushed upstream.
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is
   a complete but not entirely functional SD card driver and and tested SPI
   driver.  There is also a partial port of the USB0 OHCI host driver if
-  anyone is ambitious enought to finish that off.  There are no on-board
+  anyone is ambitious enough to finish that off.  There are no on-board
   devices to support SPI testing.
 
 Configurations
@@ -309,7 +313,7 @@ Configurations
        not enabled
 
     3. SDRAM support is enabled and the SDRAM is added to the system heap.
-       The ramtest application is not enabled.
+       The RAM test application is not enabled.
 
     4. This configuration does not include support for asynchronous network
        initialization.  As a consequence, NSH must bring up the network
@@ -343,7 +347,7 @@ Configurations
 
     2. SDRAM support is enabled, but the SDRAM is *not* added to the system
        heap.  The apps/system/ramtest utility is include in the build as an
-       NSH builtin function that can be used to verify the SDRAM.
+       NSH built-in function that can be used to verify the SDRAM.
 
          nsh> ramtest -h
          RAMTest: Missing required arguments
@@ -398,7 +402,7 @@ Configurations
          60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          70: -- -- -- -- -- -- -- --
 
-       I believe that the on-board Accelerometer, Audio Codec, and touch
+       I believe that the on-board Accelerometer, Audio CODEC, and touch
        panel controller should have been detected (but perhaps the touch
        panel is not powered in this configuration since the LCD is not
        configured?)
@@ -492,24 +496,24 @@ Configurations
   pwfb:
 
     This configuration uses the test at apps/examples/pwfb to verify the
-    operation of the per-window framebuffers.  That example shows three
+    operation of the per-window framebuffer.  That example shows three
     windows containing text moving around, crossing each other from
     "above" and from "below".  The example application is NOT updating the
     windows any anyway!  The application is only changing the window
     position.  The windows are being updated from the per-winidow
-    framebuffers automatically.
+    frame buffers automatically.
 
-    This example is reminescent of Pong:  Each window travels in straight
+    This example is reminiscent of Pong:  Each window travels in straight
     line until it hits an edge, then it bounces off.  The window is also
     raised when it hits the edge (gets "focus").  This tests all
-    combinations of overap.
+    combinations of overlap.
 
       2019-03-19:  Everything works fine!
 
   pwlines:
 
     This configuration uses the test at apps/examples/pwline.  It is another
-    verification of the operation of the per-window framebuffers.  This
+    verification of the operation of the per-window frame buffers.  This
     examples is very similar to the pwfb example used in pwfb configuration
     except that instead of text, each window has an (trivial) animated
     graphic (based on the rotating line of apps/examples/nslines).
@@ -535,12 +539,12 @@ Configurations
     STATUS:
 
     Refer to apps/graphics/twm4nx/README.txt for an overall status.  Here
-    just some issues/topics unique to the LPCXpresso-LPC54628 and/or this
-    configuration.
+    are just some issues/topics unique to the LPCXpresso-LPC54628 and/or
+    this configuration.
 
     1. There is a responsive-ness issue the the FT5x06 touchscreen controller.
        The pin selected by the board designers will not support interrupts.
-       Therefore, a fallback polled mode is use.  This polled mode has
+       Therefore, a fall-back polled mode is use.  This polled mode has
        significant inherent delays that effect the user experience when
        touching buttons or grabbing and moving objects on the desktop.
 
@@ -562,13 +566,13 @@ Configurations
        non-polled mode.
 
     3. Color artifacts:  In the CLASSIC configuration, the background of the
-       cental NX image is a slightly different hue of blue.  For the
+       central NX image is a slightly different hue of blue.  For the
        CONTEMPORARY configuration, the toolbar buttons are supposed to be
        borderless.  There is however, a fine border around each toolbar
        widget with ruins the feel that the theme was trying for.
 
     4. Revisiting this configuration after a few months, I found that the
-       configuration generated a hardfault.  This turned out to be an issue
+       configuration generated a hard fault.  This turned out to be an issue
        with the toolchain and dropping the optimization level eliminated the
        problem; -O2 was sufficient for me.  If you see odd behavior like
        this, you might want to do the same.
