@@ -111,7 +111,8 @@ static struct rng_s g_rng;
 #ifdef CONFIG_BOARD_ENTROPY_POOL
 /* Entropy pool structure can be provided by board source. Use for this is,
  * for example, allocate entropy pool from special area of RAM which content
- * is kept over system reset. */
+ * is kept over system reset.
+ */
 
 #  define entropy_pool board_entropy_pool
 #else
