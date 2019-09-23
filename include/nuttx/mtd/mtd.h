@@ -274,7 +274,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
 #endif
 
 /****************************************************************************
- * Name: ftl_initialize_by_name
+ * Name: ftl_initialize_by_path
  *
  * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
