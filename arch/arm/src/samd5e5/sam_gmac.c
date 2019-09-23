@@ -3296,28 +3296,28 @@ static inline void sam_ethgpioconfig(struct sam_gmac_s *priv)
 
   sam_portconfig(PORT_GMAC_GTX0);
   sam_portconfig(PORT_GMAC_GTX1);
-#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+#ifdef CONFIG_SAMD5E5_GMAC_MII
   sam_portconfig(PORT_GMAC_GTX2);
   sam_portconfig(PORT_GMAC_GTX3);
 #endif
 
   sam_portconfig(PORT_GMAC_GRX0);
   sam_portconfig(PORT_GMAC_GRX1);
-#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+#ifdef CONFIG_SAMD5E5_GMAC_MII
   sam_portconfig(PORT_GMAC_GRX1);
   sam_portconfig(PORT_GMAC_GRX2);
 #endif
 
 /* TXCK is REFCK in RMII mode */
   sam_portconfig(PORT_GMAC_GTXCK);
-#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+#ifdef CONFIG_SAMD5E5_GMAC_MII
   sam_portconfig(PORT_GMAC_GRXCK);
 #endif
 /* RXDV is CRSDV in RMII mode */
   sam_portconfig(PORT_GMAC_GRXDV);
   sam_portconfig(PORT_GMAC_GTXEN);
   sam_portconfig(PORT_GMAC_GRXER);
-#ifdef CONFIG_SAMD5E5_ETHERNET_MII
+#ifdef CONFIG_SAMD5E5_GMAC_MII
   sam_portconfig(PORT_GMAC_GTXER);
   sam_portconfig(PORT_GMAC_GCOL);
   sam_portconfig(PORT_GMAC_GCRS);
