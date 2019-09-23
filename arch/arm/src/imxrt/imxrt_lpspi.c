@@ -325,6 +325,10 @@ static struct imxrt_lpspidev_s g_lpspi3dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI3,
 #endif
+#ifdef CONFIG_IMXRT_LPSPI_DMA
+  .rxch         = DMAMAP_LPSPI3_RX,
+  .txch         = DMAMAP_LPSPI3_TX,
+#endif
 };
 #endif
 
@@ -368,8 +372,8 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
   .spiirq       = IMXRT_IRQ_LPSPI4,
 #endif
 #ifdef CONFIG_IMXRT_LPSPI_DMA
-  .rxch         = DMAMAP_LPSPI1_RX,
-  .txch         = DMAMAP_LPSPI1_TX,
+  .rxch         = DMAMAP_LPSPI4_RX,
+  .txch         = DMAMAP_LPSPI4_TX,
 #endif
 };
 #endif
