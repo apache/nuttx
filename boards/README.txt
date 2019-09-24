@@ -145,9 +145,9 @@ Configuration Variables
 
 At one time, this section provided a list of all NuttX configuration
 variables. However, NuttX has since converted to use the kconfig-frontends
-tools (See http://ymorin.is-a-geek.org/projects/kconfig-frontends).  Now,
-the NuttX configuration is determined by a self-documenting set of Kconfig
-files.
+tools (See https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/.)
+Now, the NuttX configuration is determined by a self-documenting set of
+Kconfig files.
 
 The current NuttX configuration variables are also documented in separate,
 auto-generated configuration variable document.  That configuration variable

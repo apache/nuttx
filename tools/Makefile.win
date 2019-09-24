@@ -554,7 +554,7 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 #
 # These targets depend on the kconfig-frontends packages.  To use these, you
 # must first download and install the kconfig-frontends package from this
-# location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
+# location: https://bitbucket.org/nuttx/tools/downloads/.  See
 # misc\tools\README.txt for additional information.
 
 do_config: dirlinks apps_preconfig
