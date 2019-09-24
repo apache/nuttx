@@ -70,6 +70,26 @@
 #  error BOARD_FLASH_WAITSTATES is out of range
 #endif
 
+/* PLL are only enabled if the P,Q or R outputs are enabled. */
+
+#undef USE_PLL1
+#if STM32_PLLCFG_PLL1CFG & (RCC_PLLCFGR_DIVP1EN | RCC_PLLCFGR_DIVQ1EN | \
+                            RCC_PLLCFGR_DIVR1EN)
+#  define USE_PLL1
+#endif
+
+#undef USE_PLL2
+#if STM32_PLLCFG_PLL2CFG & (RCC_PLLCFGR_DIVP2EN | RCC_PLLCFGR_DIVQ2EN | \
+                            RCC_PLLCFGR_DIVR2EN)
+#  define USE_PLL2
+#endif
+
+#undef USE_PLL3
+#if STM32_PLLCFG_PLL3CFG & (RCC_PLLCFGR_DIVP3EN | RCC_PLLCFGR_DIVQ3EN | \
+                            RCC_PLLCFGR_DIVR3EN)
+#  define USE_PLL3
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -686,32 +706,48 @@ static void stm32_stdclockconfig(void)
                 STM32_PLLCFG_PLL3CFG);
       putreg32(regval, STM32_RCC_PLLCFGR);
 
+      regval = getreg32(STM32_RCC_CR);
+#if defined(USE_PLL1)
       /* Enable the PLL1 */
 
-      regval = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLL1ON;
-      putreg32(regval, STM32_RCC_CR);
+#endif
 
+#if defined(USE_PLL2)
       /* Enable the PLL2 */
 
-      regval = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLL2ON;
+#endif
+
+#if defined(USE_PLL3)
+      /* Enable the PLL3 */
+
+      regval |= RCC_CR_PLL3ON;
+#endif
       putreg32(regval, STM32_RCC_CR);
 
-      /* TODO: Enable the PLL3 */
-
+#if defined(USE_PLL1)
       /* Wait until the PLL1 is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
         {
         }
+#endif
 
+#if defined(USE_PLL2)
       /* Wait until the PLL2 is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0)
         {
         }
+#endif
+#if defined(USE_PLL3)
+      /* Wait until the PLL3 is ready */
 
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL3RDY) == 0)
+        {
+        }
+#endif
       /* Configure FLASH wait states */
 
       regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
