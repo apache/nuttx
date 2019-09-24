@@ -270,12 +270,12 @@
 #endif
 #define ADC_CR_ADCALLIN              (1 << 16) /* Bit 16: ADC Linearity calibration */
                                                /* Bits 17-21: Reserved */
-#define ADC_CR_LINCALRDYW1           (1 << 22) /* Bit 22: ADC Linearity calibration ready Word 1*/
-#define ADC_CR_LINCALRDYW2           (1 << 23) /* Bit 23: ADC Linearity calibration ready Word 1*/
-#define ADC_CR_LINCALRDYW3           (1 << 24) /* Bit 24: ADC Linearity calibration ready Word 1*/
-#define ADC_CR_LINCALRDYW4           (1 << 25) /* Bit 25: ADC Linearity calibration ready Word 1*/
-#define ADC_CR_LINCALRDYW5           (1 << 26) /* Bit 26: ADC Linearity calibration ready Word 1*/
-#define ADC_CR_LINCALRDYW6           (1 << 27) /* Bit 27: ADC Linearity calibration ready Word 1*/
+#define ADC_CR_LINCALRDYW1           (1 << 22) /* Bit 22: ADC Linearity calibration ready Word 1 */
+#define ADC_CR_LINCALRDYW2           (1 << 23) /* Bit 23: ADC Linearity calibration ready Word 2 */
+#define ADC_CR_LINCALRDYW3           (1 << 24) /* Bit 24: ADC Linearity calibration ready Word 3 */
+#define ADC_CR_LINCALRDYW4           (1 << 25) /* Bit 25: ADC Linearity calibration ready Word 4 */
+#define ADC_CR_LINCALRDYW5           (1 << 26) /* Bit 26: ADC Linearity calibration ready Word 5 */
+#define ADC_CR_LINCALRDYW6           (1 << 27) /* Bit 27: ADC Linearity calibration ready Word 6 */
 #define ADC_CR_ADVREGEN              (1 << 28) /* Bit 28: ADC voltage regulator enable */
 #define ADC_CR_DEEPPWD               (1 << 29) /* Bit 29: Deep-power-down enable */
 #define ADC_CR_ADCALDIF              (1 << 30) /* Bit 30: Differential mode for calibration */
@@ -289,7 +289,7 @@
 #  define ADC_CFGR_DMNGT_DMA_ONESHOT (1 << ADC_CFGR_DMNGT_SHIFT) /* RDMA One Shot Mode selected */
 #  define ADC_CFGR_DMNGT_DFSDM       (2 << ADC_CFGR_DMNGT_SHIFT) /* DFSDM mode selected */
 #  define ADC_CFGR_DMNGT_DMA_CIR     (3 << ADC_CFGR_DMNGT_SHIFT) /* DMA Circular Mode selected */
-#define ADC_CFGR_RES_SHIFT           (0)       /* Bits 2-4: Data resolution */
+#define ADC_CFGR_RES_SHIFT           (2)       /* Bits 2-4: Data resolution */
 #define ADC_CFGR_RES_MASK            (7 << ADC_CFGR_RES_SHIFT)
 #  define ADC_CFGR_RES_16BIT         (0 << ADC_CFGR_RES_SHIFT) /* 16 Bit */
 #  define ADC_CFGR_RES_14BIT         (1 << ADC_CFGR_RES_SHIFT) /* 14 Bit */
@@ -339,9 +339,9 @@
 #  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT) /* n = 1..8 channels */
 #define ADC_CFGR_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
 #define ADC_CFGR_JQM                 (1 << 21) /* Bit 21: JSQR queue mode */
-#define ADC_CFGR_AWD1SGL             (1 << 22) /* Bit 22: Enable watchdog on single/all channels */
-#define ADC_CFGR_AWD1EN              (1 << 23) /* Bit 23: Analog watchdog enable 1 regular channels */
-#define ADC_CFGR_JAWD1EN             (1 << 22) /* Bit 22: Analog watchdog enable 1 injected channels */
+#define ADC_CFGR_AWD1SGL             (1 << 22) /* Bit 22: Enable watchdog 1 on single/all channels */
+#define ADC_CFGR_AWD1EN              (1 << 23) /* Bit 23: Analog watchdog 1 enable on regular channels */
+#define ADC_CFGR_JAWD1EN             (1 << 24) /* Bit 24: Analog watchdog 1 enable on injected channels */
 #define ADC_CFGR_JAUTO               (1 << 25) /* Bit 25: Automatic Injected Group conversion */
 #define ADC_CFGR_AWD1CH_SHIFT        (26)      /* Bits 26-30: Analog watchdog 1 channel select bits */
 #define ADC_CFGR_AWD1CH_MASK         (31 << ADC_CFGR_AWD1CH_SHIFT)
@@ -489,9 +489,9 @@
 
 /* ADC regular sequence register 2 */
 
-#define ADC_SQR2_SQ5_SHIFT           (0)       /* Bits 4-0:   5th conversion in regular sequence */
+#define ADC_SQR2_SQ5_SHIFT           (0)       /* Bits 0-4:   5th conversion in regular sequence */
 #define ADC_SQR2_SQ5_MASK            (0x1f << ADC_SQR2_SQ5_SHIFT)
-                                               /* Bits 4-5: Reserved */
+                                               /* Bit 5: Reserved */
 #define ADC_SQR2_SQ6_SHIFT           (6)       /* Bits 6-10:  6th conversion in regular sequence */
 #define ADC_SQR2_SQ6_MASK            (0x1f << ADC_SQR2_SQ6_SHIFT)
                                                /* Bit 11: Reserved */
@@ -511,9 +511,9 @@
 
 /* ADC regular sequence register 3 */
 
-#define ADC_SQR3_SQ10_SHIFT          (0)       /* Bits 4-0:   10th conversion in regular sequence */
+#define ADC_SQR3_SQ10_SHIFT          (0)       /* Bits 0-4:   10th conversion in regular sequence */
 #define ADC_SQR3_SQ10_MASK           (0x1f << ADC_SQR3_SQ10_SHIFT)
-                                               /* Bits 4-5: Reserved */
+                                               /* Bit 5: Reserved */
 #define ADC_SQR3_SQ11_SHIFT          (6)       /* Bits 6-10:  11th conversion in regular sequence */
 #define ADC_SQR3_SQ11_MASK           (0x1f << ADC_SQR3_SQ11_SHIFT)
                                                /* Bit 11: Reserved */
@@ -525,6 +525,7 @@
                                                /* Bit 23: Reserved */
 #define ADC_SQR3_SQ14_SHIFT          (24)      /* Bits 24-28: 14th conversion in regular sequence */
 #define ADC_SQR3_SQ14_MASK           (0x1f << ADC_SQR3_SQ14_SHIFT)
+                                               /* Bits 29-31: Reserved */
 #define ADC_SQR3_RESERVED            (0xe0820820)
 #define ADC_SQR3_FIRST               (10)
 #define ADC_SQR3_LAST                (14)
@@ -532,7 +533,7 @@
 
 /* ADC regular sequence register 4 */
 
-#define ADC_SQR4_SQ15_SHIFT          (0)       /* Bits 4-0:   15th conversion in regular sequence */
+#define ADC_SQR4_SQ15_SHIFT          (0)       /* Bits 0-4:   15th conversion in regular sequence */
 #define ADC_SQR4_SQ15_MASK           (0x1f << ADC_SQR4_SQ15_SHIFT)
                                                /* Bit 5: Reserved */
 #define ADC_SQR4_SQ16_SHIFT          (6)       /* Bits 6-10:  16th conversion in regular sequence */
@@ -723,7 +724,7 @@
 #  define ADC_CCR_PRESC_DIV256       (11 << ADC_CCR_PRESC_SHIFT) /* Input ADC clock divided by 256 */
 #define ADC_CCR_VREFEN               (1 << 22) /* Bit 22: VREFINT enable */
 #define ADC_CCR_VSENSEEN             (1 << 23) /* Bit 23: Temperature sensor voltage enable */
-#define ADC_CCR_VBATEN               (1 << 24) /* Bit 22: VBAT enable */
+#define ADC_CCR_VBATEN               (1 << 24) /* Bit 24: VBAT enable */
 
 /* Common regular data register for dual mode */
 
