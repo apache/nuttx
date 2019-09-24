@@ -120,9 +120,10 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
   net_ipv6_pref2mask(preflen, dev->d_ipv6netmask);
 
   ninfo("preflen=%d netmask=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        preflen, dev->d_ipv6netmask[0], dev->d_ipv6netmask[1],
-        dev->d_ipv6netmask[2], dev->d_ipv6netmask[3], dev->d_ipv6netmask[4],
-        dev->d_ipv6netmask[5], dev->d_ipv6netmask[6], dev->d_ipv6netmask[7]);
+        preflen, ntohs(dev->d_ipv6netmask[0]), ntohs(dev->d_ipv6netmask[1]),
+        ntohs(dev->d_ipv6netmask[2]), ntohs(dev->d_ipv6netmask[3]),
+        ntohs(dev->d_ipv6netmask[4]), ntohs(dev->d_ipv6netmask[5]),
+        ntohs(dev->d_ipv6netmask[6]), ntohs(dev->d_ipv6netmask[7]));
 
   /* Copy prefix to the current IPv6 address, applying the mask */
 
@@ -133,21 +134,24 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
     }
 
   ninfo("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        prefix[0], prefix[1], prefix[2], prefix[3],
-        prefix[4], prefix[6], prefix[6], prefix[7]);
+        ntohs(prefix[0]), ntohs(prefix[1]), ntohs(prefix[2]),
+        ntohs(prefix[3]), ntohs(prefix[4]), ntohs(prefix[6]),
+        ntohs(prefix[6]), ntohs(prefix[7]));
   ninfo("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[6],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+        ntohs(dev->d_ipv6addr[0]), ntohs(dev->d_ipv6addr[1]),
+        ntohs(dev->d_ipv6addr[2]), ntohs(dev->d_ipv6addr[3]),
+        ntohs(dev->d_ipv6addr[4]), ntohs(dev->d_ipv6addr[5]),
+        ntohs(dev->d_ipv6addr[6]), ntohs(dev->d_ipv6addr[7]));
 
   /* Finally, copy the router address */
 
   net_ipv6addr_copy(dev->d_ipv6draddr, draddr);
 
   ninfo("DR address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6draddr[0], dev->d_ipv6draddr[1], dev->d_ipv6draddr[2],
-        dev->d_ipv6draddr[3], dev->d_ipv6draddr[4], dev->d_ipv6draddr[6],
-        dev->d_ipv6draddr[6], dev->d_ipv6draddr[7]);
+        ntohs(dev->d_ipv6draddr[0]), ntohs(dev->d_ipv6draddr[1]),
+        ntohs(dev->d_ipv6draddr[2]), ntohs(dev->d_ipv6draddr[3]),
+        ntohs(dev->d_ipv6draddr[4]), ntohs(dev->d_ipv6draddr[5]),
+        ntohs(dev->d_ipv6draddr[6]), ntohs(dev->d_ipv6draddr[7]));
 
   net_unlock();
 }
