@@ -108,7 +108,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
-  DEBUGASSERT(conn != NULL);
+  DEBUGASSERT(pstate != NULL && conn != NULL);
 
   ninfo("conn: %p flags: %04x\n", conn, flags);
 
@@ -121,35 +121,33 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* The disconnection is complete */
-
-      /* pstate non-NULL means that we are performing a LINGERing close. */
-
-      if (pstate != NULL)
-        {
-          if (conn->tcpstateflags == TCP_CLOSED)
-            {
-              /* Wake up the waiting thread with a successful result */
-
-              pstate->cl_result = OK;
-              goto end_wait;
-            }
-        }
-
-      /* Otherwise, nothing is waiting on the close event and we can perform
-       * the completion actions here.
+      /* The disconnection is complete.  Wake up the waiting thread with an
+       * appropriate result:
+       *
+       * * TCP_CLOSE indicates normal successful closure.  TCP_ABORT is less
+       *   likely but still means that the socket was closed, albeit
+       *   abnormally.  We will call either a success.
+       *
+       * * NETDEV_DOWN would indicate that the network went down before the
+       *   close completed.  TCP_TIMEDOUT is not expected in this context.
+       *   Non-standard return values are used to indicate these anomalous
+       *   cases.
        */
 
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          pstate->cl_result = -ENODEV;
+        }
+      else if ((flags & TCP_TIMEDOUT) != 0)
+        {
+          pstate->cl_result = -ETIMEDOUT;
+        }
       else
         {
-          /* Free connection resources */
-
-          tcp_free(conn);
-
-          /* Stop further callbacks */
-
-          flags = 0;
+          pstate->cl_result = OK;
         }
+
+       goto end_wait;
     }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
