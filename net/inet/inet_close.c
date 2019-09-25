@@ -122,31 +122,35 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
       /* The disconnection is complete.  Wake up the waiting thread with an
-       * appropriate result:
+       * appropriate result.  Success is returned in these cases:
        *
-       * * TCP_CLOSE indicates normal successful closure.  TCP_ABORT is less
-       *   likely but still means that the socket was closed, albeit
-       *   abnormally.  We will call either a success.
+       * * TCP_CLOSE indicates normal successful closure.  The TCP_CLOSE
+       *   event is sent when the remote ACKs the outgoing FIN in the
+       *   FIN_WAIT_1 state.  That is the appropriate time for the
+       *   application to close the socket.
+       *
+       *   NOTE:  The underlying connection, however, will persist, waiting
+       *   for the FIN to be returned by the remote in the TIME_WAIT state.
+       *
+       * * TCP_ABORT is less likely but still means that the socket was
+       *   closed, albeit abnormally due to a RST from the remote.
+       *
+       * * TCP_TIMEDOUT would be reported in this context if there is no
+       *   ACK response to the FIN in the FIN_WAIT_2 state.  The socket will
+       *   again be closed abnormally.
+       *
+       * This is the only true error case.
        *
        * * NETDEV_DOWN would indicate that the network went down before the
-       *   close completed.  TCP_TIMEDOUT is not expected in this context.
-       *   Non-standard return values are used to indicate these anomalous
-       *   cases.
-       *
-       * NOTE:  In the TCP_CLOSE case, the event is sent when the remote
-       * ACKs then outgoing FIN in the FIN_WAIT_1 state.  That is the
-       * appropriate time for the application to close the socket.  The
-       * underlying connection, however, will persist, waiting for the FIN
-       * to be returned by the remote in the TIME_WAIT state.
+       *   close completed.  A non-standard ENODEV error will be returned
+       *   in this case.  The socket will be left in a limbo state if the
+       *   network is taken down but should recover later when the
+       *   NETWORK_DOWN event is processed further.
        */
 
       if ((flags & NETDEV_DOWN) != 0)
         {
           pstate->cl_result = -ENODEV;
-        }
-      else if ((flags & TCP_TIMEDOUT) != 0)
-        {
-          pstate->cl_result = -ETIMEDOUT;
         }
       else
         {
