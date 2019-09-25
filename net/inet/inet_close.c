@@ -132,6 +132,12 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        *   close completed.  TCP_TIMEDOUT is not expected in this context.
        *   Non-standard return values are used to indicate these anomalous
        *   cases.
+       *
+       * NOTE:  In the TCP_CLOSE case, the event is sent when the remote
+       * ACKs then outgoing FIN in the FIN_WAIT_1 state.  That is the
+       * appropriate time for the application to close the socket.  The
+       * underlying connection, however, will persist, waiting for the FIN
+       * to be returned by the remote in the TIME_WAIT state.
        */
 
       if ((flags & NETDEV_DOWN) != 0)
