@@ -275,7 +275,7 @@ struct nxsvrmsg_closewindow_s
   FAR struct nxbe_window_s *wnd;   /* The window to be closed */
 };
 
-/* This messsage is just a marker that is queued and forwarded by the server
+/* This message is just a marker that is queued and forwarded by the server
  * (NX_CLIMSG_BLOCKED).  Messages to the window were blocked just after this
  * message was sent.  Receipt of this message indicates both that the window
  * blocked and that there are no further queued messages for the window.

@@ -50,22 +50,6 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -74,8 +58,8 @@
  *
  * Description:
  *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subystem.
- *   This function must be called *very* early in the initializeation sequence
+ *   order to provide one-time initialization the power management subsystem.
+ *   This function must be called *very* early in the initialization sequence
  *   *before* any other device drivers are initialized (since they may
  *   attempt to register with the power management subsystem).
  *

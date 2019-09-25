@@ -79,7 +79,7 @@
  */
 
 #if !defined(CONFIG_SCHED_HPWORK)
-  /* REVISIT: The low priority work queue would be preferred if it is avaiable */
+  /* REVISIT: The low priority work queue would be preferred if it is available */
 
 #  error High priority work queue support is required
 #endif

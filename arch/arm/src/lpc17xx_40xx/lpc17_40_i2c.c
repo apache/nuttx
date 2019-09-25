@@ -221,7 +221,7 @@ static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
 
   /* Get the total transaction length and the minimum frequency */
 
-  for(i = 0; i < priv->nmsg; i++)
+  for (i = 0; i < priv->nmsg; i++)
     {
       total_len += priv->msgs[i].length;
       if (priv->msgs[i].frequency < freq)
@@ -342,7 +342,24 @@ static void lpc17_40_stopnext(struct lpc17_40_i2cdev_s *priv)
   if (priv->nmsg > 0)
     {
       priv->msgs++;
-      putreg32(I2C_CONSET_STA, priv->base + LPC17_40_I2C_CONSET_OFFSET);
+
+      /* Check if a restart condition should be issued */
+
+      if (priv->msgs->flags & I2C_M_NOSTART)
+        {
+          priv->wrcnt = 0;
+
+          /* Starts transmitting the data buffer of the next message without
+           * issuing a restart.
+           */
+
+          putreg32(priv->msgs->buffer[priv->wrcnt],
+                   priv->base + LPC17_40_I2C_DAT_OFFSET);
+        }
+      else
+        {
+          putreg32(I2C_CONSET_STA, priv->base + LPC17_40_I2C_CONSET_OFFSET);
+        }
     }
   else
     {

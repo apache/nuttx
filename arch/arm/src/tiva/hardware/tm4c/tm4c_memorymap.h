@@ -71,7 +71,7 @@
 #  define TIVA_ETM_BASE       0xe0041000 /* -0xe0041fff: Embedded Trace Macrocell */
                                          /* -0xffffffff: Reserved */
 
-#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC) || defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNCZAD) || defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
 #  define TIVA_FLASH_BASE     0x00000000 /* -0x000fffff: On-chip FLASH */
                                          /* -0x01ffffff: Reserved */
 #  define TIVA_ROM_BASE       0x02000000 /* -0x02ffffff: On-chip ROM (16 MB) */
@@ -336,7 +336,7 @@
 #  define TIVA_SYSCON_BASE    (TIVA_PERIPH_BASE + 0xfe000)  /* -0xfefff: System Control */
 #  define TIVA_UDMA_BASE      (TIVA_PERIPH_BASE + 0xff000)  /* -0xfffff: Micro Direct Memory Access */
 
-#elif defined(CONFIG_ARCH_CHIP_TM4C129XNC)
+#elif defined(CONFIG_ARCH_CHIP_TM4C129XNCZAD)
 
 /* Peripheral region 1 */
 

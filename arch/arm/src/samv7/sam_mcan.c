@@ -2768,7 +2768,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_BUSOFF_RECOVERY:
        *   Description : Initiates the BUS - OFF recovery sequence
        *   Argument : None
-       *   Returned Value : Zero(OK) is returned on success.Otherwise - 1 (ERROR)
+       *   Returned Value : Zero (OK) is returned on success. Otherwise - 1 (ERROR)
        *                    is returned with the errno variable set to indicate the
        *                    nature of the error.
        *   Dependencies : None

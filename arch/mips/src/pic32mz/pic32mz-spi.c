@@ -717,7 +717,7 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that to be exchanged in units of words.
  *
  * Returned Value:
@@ -1291,7 +1291,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   else
 #endif
     {
-      spierr("ERROR: Unsuppport port: %d\n", port);
+      spierr("ERROR: Unsupported port: %d\n", port);
       return NULL;
     }
 

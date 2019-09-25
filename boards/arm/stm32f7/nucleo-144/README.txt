@@ -45,17 +45,22 @@ LQFP144 package.  Variants include
   STM32F767ZIT6  NUCLEO-F767ZI
   STM32L496ZGT6  NUCLEO-L496ZG
   STM32L496ZGT6P NUCLEO-L496ZG-P
-
+  STM32L4A6ZGT6  NUCLEO-L4A6ZG
+  STM32L4R5ZIT6  NUCLEO-L4R5ZI
+  STM32L4R5ZIT6P NUCLEO-L4R5ZI-P
   ------------- ------------------
 
-This directory is intended to support all Nucleo-144 variants since the
-boards are identical, differing only in the installed part.  This common
+This directory is intended to support all STM32F7 Nucleo-144 variants since
+the boards are identical, differing only in the installed part.  This common
 board design provides uniformity in the documentation from ST and should
 allow us to quickly change configurations by just cloning a configuration
 and changing the CPU choice and board initialization.  Unfortunately for
 the developer, the CPU specific information must be extracted from the
-common information in the documentation. The exception are the STM32L496ZG
-boards, which are supported by boards/nucleo-l496zg
+common information in the documentation.
+
+The NUCLEO-L496ZG and NUCLEO-L496ZG-P boards are not supported by this
+directory, but by boards/arm/stm32l4/nucleo-l496zg. Any other STM32L4
+Nucleo-144 boards are also not supported by this directory.
 
 Please read the User Manual UM1727: Getting started with STM32 Nucleo board
 software development tools and take note of the Powering options for the

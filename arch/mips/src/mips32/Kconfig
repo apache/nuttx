@@ -73,7 +73,7 @@ config MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED
 		The free, unlicensed XC32 compiler will not support either
 		optimization or the microMIPs ISA.  If you are using a licensed,
 		XC32 compiler then select this option so that the build system will
-		suppport higher levels of optimization.
+		support higher levels of optimization.
 
 config MIPS32_FRAMEPOINTER
 	bool "ABI Uses Frame Pointer"

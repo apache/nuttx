@@ -57,7 +57,7 @@ config LIBC_PRINT_LEGACY
 	---help---
 		By default, printf (and friends) are implemented using a port from
 		newlib-nano.  That port can be signifcantly smaller, especially if
-		floating support is enabled.  This option may is avaiable, however,
+		floating support is enabled.  This option is available, however,
 		to revert to the legacy printf version is so desired.
 
 config LIBC_FLOATINGPOINT

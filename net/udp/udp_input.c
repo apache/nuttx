@@ -2,7 +2,8 @@
  * net/udp/udp_input.c
  * Handling incoming UDP input
  *
- *   Copyright (C) 2007-2009, 2011, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2018-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -55,6 +56,12 @@
 #include "devif/devif.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Functions
@@ -254,13 +261,20 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #ifdef CONFIG_NET_IPv4
 int udp_ipv4_input(FAR struct net_driver_s *dev)
 {
+  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  uint16_t iphdrlen;
+
   /* Configure to receive an UDP IPv4 packet */
 
   udp_ipv4_select(dev);
 
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
   /* Then process in the UDP IPv4 input */
 
-  return udp_input(dev, IPv4_HDRLEN);
+  return udp_input(dev, iphdrlen);
 }
 #endif
 

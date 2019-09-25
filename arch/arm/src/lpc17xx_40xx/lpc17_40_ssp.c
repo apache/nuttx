@@ -696,7 +696,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
@@ -769,7 +769,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -823,7 +823,7 @@ static inline FAR struct lpc17_40_sspdev_s *lpc17_40_ssp0initialize(void)
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -877,7 +877,7 @@ static inline FAR struct lpc17_40_sspdev_s *lpc17_40_ssp1initialize(void)
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -931,10 +931,10 @@ static inline FAR struct lpc17_40_sspdev_s *lpc17_40_ssp2initialize(void)
  *   Initialize the selected SSP port.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

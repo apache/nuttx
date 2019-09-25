@@ -30,6 +30,9 @@ NOTE:  Includes basic NSH command support with full 8MByte SDRAM + the
 Refer to the http://www.st.com website for further information about this
 board (search keyword: 429i-disco)
 
+NOTE:  This port was based on the original discovery kit, STM32F429I-DISCO.
+That board has been superceded by the new STM32F429I-DISC1.
+
 Contents
 ========
 
@@ -268,7 +271,7 @@ There are two version of the FPU support built into the STM32 port.
 
 2. Lazy Floating Point Register Save.
 
-   An alternative mplementation only saves and restores FPU registers only
+   An alternative implementation only saves and restores FPU registers only
    on context switches.  This means: (1) floating point registers are not
    stored on each context switch and, hence, possibly better interrupt
    performance.  But, (2) since floating point registers are not saved,
@@ -776,7 +779,7 @@ Where <subdir> is one of the following:
 
        The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
        has a maximum timeout value of 49 milliseconds.  for WWDG watchdog, you
-       should also add the fillowing to the configuration file:
+       should also add the following to the configuration file:
 
        CONFIG_EXAMPLES_WATCHDOG_PINGDELAY=20
        CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49

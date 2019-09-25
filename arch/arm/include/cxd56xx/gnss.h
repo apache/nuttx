@@ -72,8 +72,8 @@ extern "C" {
 /* Select the satellite systems.
  * This command is used to select the satellite systems to be used for
  * positioning.
- * The satellite system is defined as a bit, and you can select mutiple
- * sattelites using OR value.
+ * The satellite system is defined as a bit, and you can select multiple
+ * satellites using OR value.
  * Do not specify zero, please select at least one system.
  * This command must be issued in idle mode.
  *

@@ -677,7 +677,7 @@ Where <subdir> is one of the following:
 
        The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
        has a maximum timeout value of 49 milliseconds.  For WWDG watchdog, you
-       should also add the fillowing to the configuration file:
+       should also add the following to the configuration file:
 
        CONFIG_EXAMPLES_WATCHDOG_PINGDELAY=20
        CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49
@@ -696,7 +696,7 @@ Where <subdir> is one of the following:
        defconfig (nuttx/.config):
 
        CONFIG_STM32_FSMC=y       : FSMC support is required for the LCD
-       CONFIG_NX=y               : Enable graphics suppport
+       CONFIG_NX=y               : Enable graphics support
        CONFIG_MM_REGIONS=2       : When FSMC is enabled, so is the on-board SRAM memory region
 
     10. USB OTG FS Device or Host Support

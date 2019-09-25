@@ -62,7 +62,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF     ((FAR struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IGMPBUF(hl) ((FAR struct igmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
 
 /****************************************************************************
  * Public Functions
@@ -112,16 +113,27 @@
 
 void igmp_input(struct net_driver_s *dev)
 {
+  FAR struct igmp_iphdr_s *ipv4 = IPv4BUF;
+  FAR struct igmp_hdr_s *igmp;
   FAR struct igmp_group_s *group;
   in_addr_t destipaddr;
   in_addr_t grpaddr;
+  uint16_t iphdrlen;
   unsigned int ticks;
 
-  ninfo("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);
+  ninfo("IGMP message: %04x%04x\n", ipv4->destipaddr[1], ipv4->destipaddr[0]);
+
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
+  /* The IGMP header immediately follows the IP header */
+
+  igmp = IGMPBUF(iphdrlen);
 
   /* Verify the message length */
 
-  if (dev->d_len < NET_LL_HDRLEN(dev) + IPIGMP_HDRLEN)
+  if (dev->d_len < NET_LL_HDRLEN(dev) + (iphdrlen + IGMP_HDRLEN))
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
       nwarn("WARNING: Length error\n");
@@ -130,7 +142,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Calculate and check the IGMP checksum */
 
-  if (net_chksum((FAR uint16_t *)&IGMPBUF->type, IGMP_HDRLEN) != 0)
+  if (net_chksum((FAR uint16_t *)igmp, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nwarn("WARNING: Checksum error\n");
@@ -139,7 +151,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Find the group (or create a new one) using the incoming IP address. */
 
-  destipaddr = net_ip4addr_conv32(IGMPBUF->destipaddr);
+  destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
 
   group = igmp_grpallocfind(dev, &destipaddr);
   if (group == NULL)
@@ -150,7 +162,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Now handle the message based on the IGMP message type */
 
-  switch (IGMPBUF->type)
+  switch (igmp->type)
     {
       case IGMP_MEMBERSHIP_QUERY:
         /* RFC 2236, 2.2.  ax Response Time
@@ -181,17 +193,17 @@ void igmp_input(struct net_driver_s *dev)
              *    Query."
              */
 
-            if (IGMPBUF->grpaddr == 0)
+            if (igmp->grpaddr == 0)
               {
                 FAR struct igmp_group_s *member;
 
                 /* This is the general query */
 
                 ninfo("General multicast query\n");
-                if (IGMPBUF->maxresp == 0)
+                if (igmp->maxresp == 0)
                   {
                     IGMP_STATINCR(g_netstats.igmp.v1_received);
-                    IGMPBUF->maxresp = 10;
+                    igmp->maxresp = 10;
 
                     nwarn("WARNING: V1 not implemented\n");
                   }
@@ -206,7 +218,7 @@ void igmp_input(struct net_driver_s *dev)
 
                     if (!net_ipv4addr_cmp(member->grpaddr, g_ipv4_allsystems))
                       {
-                        ticks = net_dsec2tick((int)IGMPBUF->maxresp);
+                        ticks = net_dsec2tick((int)igmp->maxresp);
                         if (IS_IDLEMEMBER(member->flags) ||
                             igmp_cmptimer(member, ticks))
                           {
@@ -216,7 +228,7 @@ void igmp_input(struct net_driver_s *dev)
                       }
                   }
               }
-            else /* if (IGMPBUF->grpaddr != 0) */
+            else /* if (igmp->grpaddr != 0) */
               {
                 ninfo("Group-specific multicast query\n");
 
@@ -226,12 +238,12 @@ void igmp_input(struct net_driver_s *dev)
 
                 IGMP_STATINCR(g_netstats.igmp.ucast_query);
 
-                grpaddr = net_ip4addr_conv32(IGMPBUF->grpaddr);
+                grpaddr = net_ip4addr_conv32(igmp->grpaddr);
                 group   = igmp_grpallocfind(dev, &grpaddr);
 
                 if (group != NULL)
                   {
-                    ticks   = net_dsec2tick((int)IGMPBUF->maxresp);
+                    ticks   = net_dsec2tick((int)igmp->maxresp);
 
                     if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
                       {
@@ -251,7 +263,7 @@ void igmp_input(struct net_driver_s *dev)
 
             ninfo("Query to a specific group with the group address as destination\n");
 
-            ticks = net_dsec2tick((int)IGMPBUF->maxresp);
+            ticks = net_dsec2tick((int)igmp->maxresp);
             if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
               {
                 igmp_startticks(group, ticks);
@@ -278,7 +290,7 @@ void igmp_input(struct net_driver_s *dev)
 
       default:
         {
-          nwarn("WARNING: Unexpected msg %02x\n", IGMPBUF->type);
+          nwarn("WARNING: Unexpected msg %02x\n", igmp->type);
         }
         break;
     }

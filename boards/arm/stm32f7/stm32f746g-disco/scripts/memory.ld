@@ -106,24 +106,24 @@
 
 MEMORY
 {
-	/* ITCM boot address */
+  /* ITCM boot address */
 
-	itcm  (rwx) : ORIGIN = 0x00200000, LENGTH = 1024K
+  itcm  (rwx) : ORIGIN = 0x00200000, LENGTH = 1024K
 
-	/* 1024KB FLASH */
+  /* 1024KB FLASH */
 
-	kflash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
-	uflash (rx) : ORIGIN = 0x08020000, LENGTH = 128K
-	xflash (rx) : ORIGIN = 0x08040000, LENGTH = 768K
+  kflash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+  uflash (rx) : ORIGIN = 0x08020000, LENGTH = 128K
+  xflash (rx) : ORIGIN = 0x08040000, LENGTH = 768K
 
-	/* 240KB of contiguous SRAM1 */
+  /* 240KB of contiguous SRAM1 */
 
-	ksram (rwx) : ORIGIN = 0x20010000, LENGTH = 4K
-	usram (rwx) : ORIGIN = 0x20011000, LENGTH = 4K
-	xsram (rwx) : ORIGIN = 0x20012000, LENGTH = 240K - 8K
+  ksram (rwx) : ORIGIN = 0x20010000, LENGTH = 4K
+  usram (rwx) : ORIGIN = 0x20011000, LENGTH = 4K
+  xsram (rwx) : ORIGIN = 0x20012000, LENGTH = 240K - 8K
 
-    /* DTCM SRAM */
+  /* DTCM SRAM */
 
-	dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
-	sram2 (rwx) : ORIGIN = 0x2004c000, LENGTH = 16K
+  dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  sram2 (rwx) : ORIGIN = 0x2004c000, LENGTH = 16K
 }

@@ -114,7 +114,7 @@
 #define CSPI_CTRL_BITCOUNT_SHIFT   0
 #define CSPI_CTRL_BITCOUNT_MASK    (15 << CSPI_CTRL_BITCOUNT_SHIFT)
 
-/* CSPI Interrrupt Control/Status Register */
+/* CSPI Interrupt Control/Status Register */
 
 #define CSPI_INTCS_TE              (1 << 0)  /* Bit  0: TXFIFO Empty Status */
 #define CSPI_INTCS_TH              (1 << 1)  /* Bit  1: TXFIFO Half Status */
@@ -190,14 +190,14 @@ struct spi_dev_s; /* Forward reference */
  *
  *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
  *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Theregore, all GPIO chip management is deferred to board-
+ *   required.  Therefore, all GPIO chip management is deferred to board-
  *   specific logic.
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structre reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

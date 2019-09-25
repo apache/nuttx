@@ -272,7 +272,7 @@
 #define IM_RX_OVRN_INT          0x10   /* Set by Receiver Overruns */
 #define IM_ALLOC_INT            0x08   /* Set when allocation request is completed */
 #define IM_TX_EMPTY_INT         0x04   /* Set if the TX FIFO goes empty */
-#define IM_TX_INT               0x02   /* Transmit Interrrupt */
+#define IM_TX_INT               0x02   /* Transmit Interrupt */
 #define IM_RCV_INT              0x01   /* Receive Interrupt */
 
 /* Multicast Table Registers */

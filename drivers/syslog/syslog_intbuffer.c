@@ -130,7 +130,7 @@ int syslog_remove_intbuffer(void)
 
   flags = enter_critical_section();
 
-  /* Check if the interrupt buffer? is empty */
+  /* Check if the interrupt buffer is empty */
 
   outndx = (uint32_t)g_syslog_intbuffer.si_outndx;
   if (outndx != (uint32_t)g_syslog_intbuffer.si_inndx)
@@ -165,7 +165,7 @@ int syslog_remove_intbuffer(void)
  *
  * Description:
  *   Add one more character to the interrupt buffer.  In the event of
- *   buffer overlowed, the character will be dropped.  The indication
+ *   buffer overflowed, the character will be dropped.  The indication
  *   "[truncated]\n" will be appended to the end of the interrupt buffer.
  *
  * Input Parameters:

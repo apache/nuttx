@@ -119,10 +119,6 @@ static const uint8_t g_syscrlf[2] =
 
 /****************************************************************************
  * Name: syslog_dev_takesem
- *
- * Description:
- *   Write to the syslog device
- *
  ****************************************************************************/
 
 static inline int syslog_dev_takesem(void)
@@ -163,10 +159,6 @@ static inline int syslog_dev_takesem(void)
 
 /****************************************************************************
  * Name: syslog_dev_givesem
- *
- * Description:
- *   Write to the syslog device
- *
  ****************************************************************************/
 
 static inline void syslog_dev_givesem(void)
@@ -207,15 +199,15 @@ static inline void syslog_dev_givesem(void)
  *     this case, we won't ever bother to try again (ever).
  *
  * NOTE: That the third case is different.  It applies only to the thread
- * that currently holds the sl_sem sempaphore.  Other threads should wait.
+ * that currently holds the sl_sem semaphore.  Other threads should wait.
  * that is why that case is handled in syslog_semtake().
  *
  * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
+ *   None.
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -259,7 +251,7 @@ static int syslog_dev_outputready(void)
        *
        * NOTE that the scheduler is locked.  That is because we do not have
        * fully initialized semaphore capability until the SYSLOG device is
-       * successfully initialized
+       * successfully initialized.
        */
 
       sched_lock();
@@ -326,7 +318,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
   int ret;
 
   /* At this point, the only expected states are SYSLOG_UNINITIALIZED or
-   * SYSLOG_REOPEN..  Not SYSLOG_INITIALIZING, SYSLOG_FAILURE, SYSLOG_OPENED.
+   * SYSLOG_REOPEN.  Not SYSLOG_INITIALIZING, SYSLOG_FAILURE, SYSLOG_OPENED.
    */
 
   DEBUGASSERT(g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
@@ -334,7 +326,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
 
   /* Save the path to the device in case we have to re-open it.
    * If we get here and sl_devpath is not equal to NULL, that is a clue
-   * that we will are re-openingthe file.
+   * that we are re-opening the file.
    */
 
   if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
@@ -443,7 +435,7 @@ int syslog_dev_uninitialize(void)
  * Name: syslog_dev_write
  *
  * Description:
- *   This is the low-level, multile byte, system logging interface provided
+ *   This is the low-level, multiple byte, system logging interface provided
  *   for the character driver interface.
  *
  * Input Parameters:
@@ -585,8 +577,8 @@ errout_with_sem:
  *   ch - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  Minus one
- *   is returned on any failure with the errno set correctly.
+ *   On success, the character is echoed back to the caller. A negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 

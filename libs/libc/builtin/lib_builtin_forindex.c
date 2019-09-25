@@ -49,6 +49,25 @@
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: builtin_for_index
+ *
+ * Description:
+ *   Returns the builtin_s structure for the selected built-in.
+ *   If support for built-in functions is enabled in the NuttX
+ *   configuration, then this function must be provided by the application
+ *   code.
+ *
+ * Input Parameters:
+ *   index, from 0 and on...
+ *
+ * Returned Value:
+ *   Returns valid pointer pointing to the builtin_s structure if index is
+ *   valid.
+ *   Otherwise, NULL is returned.
+ *
+ ****************************************************************************/
+
 FAR const struct builtin_s *builtin_for_index(int index)
 {
   if (index < g_builtin_count)

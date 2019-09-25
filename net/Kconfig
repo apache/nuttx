@@ -45,8 +45,9 @@ config NET_ETH_PKTSIZE
 	int "Ethernet packet buffer size"
 	default 1294 if NET_IPv6
 	default 590 if !NET_IPv6
+	range 1294 1518 if NET_IPv6
+	range 590 1518 if !NET_IPv6
 	depends on NET_ETHERNET
-	range 590 1518
 	---help---
 		Packet buffer size.  This size includes the TCP/UDP payload plus the
 		size of TCP/UDP header, the IP header, and the Ethernet header.

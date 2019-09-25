@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/bluetooth/bluetooth.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@
 /* Allocate a new Bluetooth socket data callback */
 
 #define bluetooth_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->list)
+  devif_callback_alloc(dev, &conn->bc_list)
 #define bluetooth_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list)
+  devif_conn_callback_free(dev, cb, &conn->bc_list)
 
 /* Memory Pools */
 
@@ -90,7 +90,18 @@ struct devif_callback_s;                      /* Forward reference */
 
 struct bluetooth_conn_s
 {
-  dq_entry_t bc_node;                         /* Supports a double linked list */
+  /* Common prologue of all connection structures. */
+
+  dq_entry_t bc_node;                         /* Supports a doubly linked list */
+
+  /* This is a list of Bluetooth callbacks.  Each callback represents
+   * a thread that is stalled, waiting for a device-specific event.
+   */
+
+  FAR struct devif_callback_s *bc_list;       /* Bluetooth callbacks */
+
+  /* Bluetooth-specific content follows. */
+
   bt_addr_t bc_laddr;                         /* Locally bound / source address.
                                                * Necessary only to support multiple
                                                * Bluetooth devices */
@@ -105,12 +116,6 @@ struct bluetooth_conn_s
 
   FAR struct bluetooth_container_s *bc_rxhead;
   FAR struct bluetooth_container_s *bc_rxtail;
-
-  /* This is a list of Bluetooth callbacks.  Each callback represents
-   * a thread that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *list;
 };
 
 /****************************************************************************

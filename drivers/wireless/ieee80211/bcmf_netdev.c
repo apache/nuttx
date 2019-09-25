@@ -211,7 +211,7 @@ static int bcmf_transmit(FAR struct bcmf_dev_s *priv,
       return -EIO;
     }
 
-  NETDEV_TXPACKETS(priv->bc_dev);
+  NETDEV_TXPACKETS(&priv->bc_dev);
 
   return OK;
 }
@@ -351,7 +351,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
            */
 
           if (priv->bc_dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -531,7 +531,9 @@ static void bcmf_rxpoll(FAR void *arg)
    * transmissions.
    */
 
-  // bcmf_txdone(priv);
+#if 0
+  bcmf_txdone(priv);
+#endif
   net_unlock();
 }
 

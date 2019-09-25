@@ -41,7 +41,7 @@
 /* The STM32L4 does not have dedicated PWM hardware.  Rather, pulsed output control
  * is a capability of the STM32L4 timers.  The logic in this file implements the
  * lower half of the standard, NuttX PWM interface using the STM32L4 timers.  That
- * interface is described in include/nuttx/drivers/pwm.h.
+ * interface is described in include/nuttx/timers/pwm.h.
  */
 
 /************************************************************************************

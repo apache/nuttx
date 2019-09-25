@@ -1902,7 +1902,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
- *   qid   - The transfer queue on which the packet was recieved
+ *   qid   - The transfer queue on which the packet was received
  *
  * Returned Value:
  *   None

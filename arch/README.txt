@@ -268,7 +268,7 @@ arch/xtensa
     LX6 DPU support:
       arch/xtensa/include/lx6 and arch/xtensa/xtensa/lx6
 
-    Expressif ESP32 implemenation of the LX6 DPU:
+    Expressif ESP32 implementation of the LX6 DPU:
       arch/xtensa/include/esp32 and arch/xtensa/xtensa/esp32
 
 arch/z16 - ZiLOG 16-bit processors

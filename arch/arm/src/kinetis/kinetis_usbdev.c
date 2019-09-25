@@ -1582,7 +1582,7 @@ static int khci_rdsetup(struct khci_ep_s *privep, uint8_t *dest, int readlen)
    * in order to improve performance.
    *
    * Note that we NULLify the BDT OUT entries.  This is so that we can tell
-   * that the BDT readlly available.  No, it is not sufficient to look at the
+   * that the BDT readily available.  No, it is not sufficient to look at the
    * UOWN bit.  If UOWN==0, then the transfer has been completed BUT it may
    * not yet have been processed.  But a completely NULLified BDT is a sure
    * indication

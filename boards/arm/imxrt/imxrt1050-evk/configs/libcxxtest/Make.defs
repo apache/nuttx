@@ -1,5 +1,5 @@
 ############################################################################
-# boards/imxrt1050-evk/configs/libcxxtest/Make.defs
+# boards/arm/imxrt/imxrt1050-evk/configs/libcxxtest/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

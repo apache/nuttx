@@ -639,7 +639,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
@@ -668,7 +668,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -721,7 +721,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp0initialize(void)
  *   None
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -781,7 +781,7 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
  *   port - Port number (0=SSP0, 1=SSP1)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

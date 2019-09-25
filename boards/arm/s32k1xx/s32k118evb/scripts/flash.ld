@@ -86,12 +86,12 @@ SECTIONS
     *(.ARM.extab*)
   } >flash
 
-  __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
+    __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
+    __exidx_end = ABSOLUTE(.);
   } >flash
-  __exidx_end = ABSOLUTE(.);
 
   .data :
   {
@@ -99,6 +99,7 @@ SECTIONS
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
+    . = ALIGN(4);
     _edata = ABSOLUTE(.);
   } > sram AT > flash
 
@@ -119,6 +120,7 @@ SECTIONS
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    . = ALIGN(4);
     _ebss = ABSOLUTE(.);
   } > sram
 

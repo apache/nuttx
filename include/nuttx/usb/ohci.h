@@ -86,7 +86,7 @@
 
 #define OHCI_MAX_RHPORT             15     /* Maximum number of OHCI root hub ports */
 
-#define OHCI_RHPORTST_OFFSET(n)     (0x0054+(((n)-1) << 2))
+#define OHCI_RHPORTST_OFFSET(n)     (0x0054 + (((n) - 1) << 2))
 #define OHCI_RHPORTST1_OFFSET       0x0054 /* HcRhPort1Status:  Root hub port status 1 */
 #define OHCI_RHPORTST2_OFFSET       0x0058 /* HcRhPort2Status:  Root hub port status 2 */
 #define OHCI_RHPORTST3_OFFSET       0x005c /* HcRhPort3Status:  Root hub port status 3 */
@@ -348,11 +348,11 @@
 
 /* Host Controller Communications Area Format (4.4.1) ***********************/
 
-/* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
+/* HccaInterruptTable: 32x32-bit pointers to interrupt EDs */
 
 #define HCCA_INTTBL_OFFSET         (0x00)
 #define HCCA_INTTBL_WSIZE          (32)
-#define HCCA_INTTBL_BSIZE          (HCCA_INTTBL_WSIZE*4)
+#define HCCA_INTTBL_BSIZE          (HCCA_INTTBL_WSIZE * 4)
 
 /* HccaFrameNumber: Current frame number */
 
@@ -422,7 +422,7 @@ struct ohci_itd_s
 
 struct ohci_hcca_s
 {
-  /* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
+  /* HccaInterruptTable: 32x32-bit pointers to interrupt EDs */
 
   volatile uint32_t inttbl[HCCA_INTTBL_WSIZE];
 

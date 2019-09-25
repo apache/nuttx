@@ -236,8 +236,6 @@ static const struct file_operations g_video_fops =
   0                         /* unlink */
 };
 
-static FAR const struct video_devops_s *g_video_devops;
-
 static bool is_initialized = false;
 
 /****************************************************************************

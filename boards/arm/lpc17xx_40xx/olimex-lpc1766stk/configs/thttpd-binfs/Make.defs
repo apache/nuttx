@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-lpc1766stk/configs/thttpd-binfs/Make.defs
+# boards/arm/lpc17xx_40xx/olimex-lpc1766stk/configs/thttpd-binfs/Make.defs
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

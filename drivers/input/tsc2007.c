@@ -1294,7 +1294,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 
   /* If multiple TSC2007 devices are supported, then we will need to add
    * this new instance to a list of device instances so that it can be
-   * found by the interrupt handler based on the recieved IRQ number.
+   * found by the interrupt handler based on the received IRQ number.
    */
 
 #ifdef CONFIG_TSC2007_MULTIPLE

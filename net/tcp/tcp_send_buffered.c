@@ -292,140 +292,6 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: psock_send_addrchck
- *
- * Description:
- *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
- *   tables.  If not, then the send won't actually make it out... it will be
- *   replaced with an ARP request (IPv4) or a Neighbor Solicitation (IPv6).
- *
- *   NOTE 1: This could be an expensive check if there are a lot of
- *   entries in the ARP or Neighbor tables.
- *
- *   NOTE 2: If we are actually harvesting IP addresses on incoming IP
- *   packets, then this check should not be necessary; the MAC mapping
- *   should already be in the ARP table in many cases (IPv4 only).
- *
- *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
- *   address mapping is already in the ARP table.
- *
- * Input Parameters:
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
- *          the network device is not Ethernet).
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ETHERNET
-static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
-{
-  /* Only Ethernet drivers are supported by this function.
-   *
-   * REVISIT: Could the MAC address not also be in a routing table?
-   */
-
-  if (conn->dev->d_lltype != NET_LL_ETHERNET)
-    {
-      return true;
-    }
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
-#endif
-    {
-      /* For historical reasons, we will return true if both the ARP and the
-       * routing table are disabled.
-       */
-
-      bool ret = true;
-#ifdef CONFIG_NET_ROUTE
-      in_addr_t router;
-#endif
-
-#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      if (arp_find(conn->u.ipv4.raddr, NULL) >= 0)
-        {
-          /* Return true if the address was found in the ARP table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-#ifdef CONFIG_NET_ROUTE
-      if (net_ipv4_router(conn->u.ipv4.raddr, &router) == OK)
-        {
-          /* Return true if the address was found in the routing table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-
-      return ret;
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      /* For historical reasons, we will return true if both the ICMPv6
-       * neighbor support and the routing table are disabled.
-       */
-
-      bool ret = true;
-#ifdef CONFIG_NET_ROUTE
-      net_ipv6addr_t router;
-#endif
-
-#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      if (neighbor_lookup(conn->u.ipv6.raddr, NULL) >= 0)
-        {
-          /* Return true if the address was found in the neighbor table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-#ifdef CONFIG_NET_ROUTE
-      if (net_ipv6_router(conn->u.ipv6.raddr, router) == OK)
-        {
-          /* Return true if the address was found in the routing table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-
-      return ret;
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-
-#else /* CONFIG_NET_ETHERNET */
-#  define psock_send_addrchck(r) (true)
-#endif /* CONFIG_NET_ETHERNET */
-
-/****************************************************************************
  * Name: psock_send_eventhandler
  *
  * Description:
@@ -826,139 +692,131 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       !(sq_empty(&conn->write_q)) &&
       conn->winsize > 0)
     {
-      /* Check if the destination IP address is in the ARP  or Neighbor
-       * table.  If not, then the send won't actually make it out... it
-       * will be replaced with an ARP request or Neighbor Solicitation.
+      FAR struct tcp_wrbuffer_s *wrb;
+      uint32_t predicted_seqno;
+      size_t sndlen;
+
+      /* Peek at the head of the write queue (but don't remove anything
+       * from the write queue yet).  We know from the above test that
+       * the write_q is not empty.
        */
 
-      if (psock_send_addrchck(conn))
+      wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
+      DEBUGASSERT(wrb);
+
+      /* Get the amount of data that we can send in the next packet.
+       * We will send either the remaining data in the buffer I/O
+       * buffer chain, or as much as will fit given the MSS and current
+       * window size.
+       */
+
+      sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
+      if (sndlen > conn->mss)
         {
-          FAR struct tcp_wrbuffer_s *wrb;
-          uint32_t predicted_seqno;
-          size_t sndlen;
+          sndlen = conn->mss;
+        }
 
-          /* Peek at the head of the write queue (but don't remove anything
-           * from the write queue yet).  We know from the above test that
-           * the write_q is not empty.
-           */
+      if (sndlen > conn->winsize)
+        {
+          sndlen = conn->winsize;
+        }
 
-          wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-          DEBUGASSERT(wrb);
+      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u "
+            "winsize=%u\n",
+            wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
+            conn->winsize);
 
-          /* Get the amount of data that we can send in the next packet.
-           * We will send either the remaining data in the buffer I/O
-           * buffer chain, or as much as will fit given the MSS and current
-           * window size.
-           */
+      /* Set the sequence number for this segment.  If we are
+       * retransmitting, then the sequence number will already
+       * be set for this write buffer.
+       */
 
-          sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
-          if (sndlen > conn->mss)
-            {
-              sndlen = conn->mss;
-            }
+      if (TCP_WBSEQNO(wrb) == (unsigned)-1)
+        {
+          TCP_WBSEQNO(wrb) = conn->isn + conn->sent;
+        }
 
-          if (sndlen > conn->winsize)
-            {
-              sndlen = conn->winsize;
-            }
+      /* The TCP stack updates sndseq on receipt of ACK *before*
+       * this function is called. In that case sndseq will point
+       * to the next unacknowledged byte (which might have already
+       * been sent). We will overwrite the value of sndseq here
+       * before the packet is sent.
+       */
 
-          ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u "
-                "winsize=%u\n",
-                wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
-                conn->winsize);
-
-          /* Set the sequence number for this segment.  If we are
-           * retransmitting, then the sequence number will already
-           * be set for this write buffer.
-           */
-
-          if (TCP_WBSEQNO(wrb) == (unsigned)-1)
-            {
-              TCP_WBSEQNO(wrb) = conn->isn + conn->sent;
-            }
-
-          /* The TCP stack updates sndseq on receipt of ACK *before*
-           * this function is called. In that case sndseq will point
-           * to the next unacknowledged byte (which might have already
-           * been sent). We will overwrite the value of sndseq here
-           * before the packet is sent.
-           */
-
-          tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb));
+      tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb));
 
 #ifdef NEED_IPDOMAIN_SUPPORT
-          /* If both IPv4 and IPv6 support are enabled, then we will need to
-           * select which one to use when generating the outgoing packet.
-           * If only one domain is selected, then the setup is already in
-           * place and we need do nothing.
-           */
+      /* If both IPv4 and IPv6 support are enabled, then we will need to
+       * select which one to use when generating the outgoing packet.
+       * If only one domain is selected, then the setup is already in
+       * place and we need do nothing.
+       */
 
-          send_ipselect(dev, conn);
+      send_ipselect(dev, conn);
 #endif
-          /* Then set-up to send that amount of data with the offset
-           * corresponding to the amount of data already sent. (this
-           * won't actually happen until the polling cycle completes).
-           */
+      /* Then set-up to send that amount of data with the offset
+       * corresponding to the amount of data already sent. (this
+       * won't actually happen until the polling cycle completes).
+       */
 
-          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, TCP_WBSENT(wrb));
+      devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, TCP_WBSENT(wrb));
 
-          /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  Just increment
-           * the amount of data sent. This will be needed in sequence
-           * number calculations.
-           */
+      /* Remember how much data we send out now so that we know
+       * when everything has been acknowledged.  Just increment
+       * the amount of data sent. This will be needed in sequence
+       * number calculations.
+       */
 
-          conn->unacked += sndlen;
-          conn->sent    += sndlen;
+      conn->unacked += sndlen;
+      conn->sent    += sndlen;
 
-          /* Below prediction will become true, unless retransmission occurrence */
+      /* Below prediction will become true, unless retransmission occurrence */
 
-          predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
+      predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
 
-          if ((predicted_seqno > conn->sndseq_max) ||
-              (tcp_getsequence(conn->sndseq) > predicted_seqno)) /* overflow */
-            {
-               conn->sndseq_max = predicted_seqno;
-            }
-
-          ninfo("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
-                wrb, TCP_WBNRTX(wrb), conn->unacked, conn->sent);
-
-          /* Increment the count of bytes sent from this write buffer */
-
-          TCP_WBSENT(wrb) += sndlen;
-
-          ninfo("SEND: wrb=%p sent=%u pktlen=%u\n",
-                wrb, TCP_WBSENT(wrb), TCP_WBPKTLEN(wrb));
-
-          /* Remove the write buffer from the write queue if the
-           * last of the data has been sent from the buffer.
-           */
-
-          DEBUGASSERT(TCP_WBSENT(wrb) <= TCP_WBPKTLEN(wrb));
-          if (TCP_WBSENT(wrb) >= TCP_WBPKTLEN(wrb))
-            {
-              FAR struct tcp_wrbuffer_s *tmp;
-
-              ninfo("SEND: wrb=%p Move to unacked_q\n", wrb);
-
-              tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
-              DEBUGASSERT(tmp == wrb);
-              UNUSED(tmp);
-
-              /* Put the I/O buffer chain in the un-acked queue; the
-               * segment is waiting for ACK again
-               */
-
-              psock_insert_segment(wrb, &conn->unacked_q);
-            }
-
-          /* Only one data can be sent by low level driver at once,
-           * tell the caller stop polling the other connection.
-           */
-
-          flags &= ~TCP_POLL;
+      if ((predicted_seqno > conn->sndseq_max) ||
+          (tcp_getsequence(conn->sndseq) > predicted_seqno)) /* overflow */
+        {
+           conn->sndseq_max = predicted_seqno;
         }
+
+      ninfo("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
+            wrb, TCP_WBNRTX(wrb), conn->unacked, conn->sent);
+
+      /* Increment the count of bytes sent from this write buffer */
+
+      TCP_WBSENT(wrb) += sndlen;
+
+      ninfo("SEND: wrb=%p sent=%u pktlen=%u\n",
+            wrb, TCP_WBSENT(wrb), TCP_WBPKTLEN(wrb));
+
+      /* Remove the write buffer from the write queue if the
+       * last of the data has been sent from the buffer.
+       */
+
+      DEBUGASSERT(TCP_WBSENT(wrb) <= TCP_WBPKTLEN(wrb));
+      if (TCP_WBSENT(wrb) >= TCP_WBPKTLEN(wrb))
+        {
+          FAR struct tcp_wrbuffer_s *tmp;
+
+          ninfo("SEND: wrb=%p Move to unacked_q\n", wrb);
+
+          tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+          DEBUGASSERT(tmp == wrb);
+          UNUSED(tmp);
+
+          /* Put the I/O buffer chain in the un-acked queue; the
+           * segment is waiting for ACK again
+           */
+
+          psock_insert_segment(wrb, &conn->unacked_q);
+        }
+
+      /* Only one data can be sent by low level driver at once,
+       * tell the caller stop polling the other connection.
+       */
+
+      flags &= ~TCP_POLL;
     }
 
   /* Continue waiting */

@@ -47,7 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #include "hardware/sam_pinmap.h"
 #include <arch/board/board.h>

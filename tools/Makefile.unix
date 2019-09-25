@@ -36,8 +36,16 @@
 
 TOPDIR := ${shell pwd | sed -e 's/ /\\ /g'}
 -include $(TOPDIR)/.config
+-include $(TOPDIR)/.version
 include $(TOPDIR)/tools/Config.mk
 -include $(TOPDIR)/Make.defs
+
+# In case .version file does not exist
+
+CONFIG_VERSION_STRING ?= "Unversioned"
+CONFIG_VERSION_MAJOR ?= 0
+CONFIG_VERSION_MINOR ?= 0
+CONFIG_VERSION_BUILD ?= "0"
 
 # Control build verbosity
 #
@@ -179,6 +187,13 @@ else ifeq ($(CONFIG_BUILD_LOADABLE),y)
 MKEXPORT_ARGS += -u
 endif
 
+ifneq ($(APPDIR),)
+ifneq ($(shell [ -e $(APPDIR)/Makefile ] && echo yes),)
+MKEXPORT_ARGS += -a "$(APPDIR)"
+MKEXPORT_ARGS += -m "$(MAKE)"
+endif
+endif
+
 ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
@@ -190,6 +205,9 @@ BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean version_info
+ifeq ($(GIT_DIR),y)
+.PHONY: $(TOPDIR)/.version
+endif
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -217,7 +235,7 @@ endif
 
 ifeq ($(NEED_MATH_H),y)
 include/math.h: include/nuttx/lib/math.h
-	$(Q) cp -f include/nuttx/lib/math.h include/math.h
+	$(Q) cp -pf include/nuttx/lib/math.h include/math.h
 else
 include/math.h:
 endif
@@ -230,7 +248,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
 include/float.h: include/nuttx/lib/float.h
-	$(Q) cp -f include/nuttx/lib/float.h include/float.h
+	$(Q) cp -pf include/nuttx/lib/float.h include/float.h
 else
 include/float.h:
 endif
@@ -242,7 +260,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
 include/stdarg.h: include/nuttx/lib/stdarg.h
-	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
+	$(Q) cp -pf include/nuttx/lib/stdarg.h include/stdarg.h
 else
 include/stdarg.h:
 endif
@@ -254,7 +272,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 include/setjmp.h: include/nuttx/lib/setjmp.h
-	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
+	$(Q) cp -pf include/nuttx/lib/setjmp.h include/setjmp.h
 else
 include/setjmp.h:
 endif
@@ -266,25 +284,20 @@ endif
 tools/mkversion$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
 
-# create .version if it doesn't already exist.  Note: it may have been
-# created manually and may contain other info
+# [Re-]create .version if it doesn't already exist.
 
 $(TOPDIR)/.version:
-	$(Q) echo "No .version file found, creating one"
-	$(Q) tools/version.sh -v 0.0 -b 0 .version
+	$(Q) echo "Create .version"
+	$(Q) tools/version.sh -s $(CONFIG_VERSION_STRING) -v $(CONFIG_VERSION_MAJOR).$(CONFIG_VERSION_MINOR) -b $(CONFIG_VERSION_BUILD) .version
+ifeq ($(GIT_DIR),y)
+	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> .version
+endif
 	$(Q) chmod 755 .version
 
-# version_info will add git-specific info to the .version file
-# which must already exist.  First strip out any existing CONFIG_GIT_ info
-
-version_info: $(TOPDIR)/.version
-ifeq ($(GIT_DIR),y)
-	$(Q) sed -i '/CONFIG_GIT_/d' $<
-	$(Q) tools/gen_gitrev.sh -t $(TOPDIR) >> $<
-endif
-
-include/nuttx/version.h: version_info tools/mkversion$(HOSTEXEEXT)
-	$(Q) tools/mkversion $(TOPDIR) > $@
+include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
+	$(Q) echo "Create version.h"
+	$(Q) tools/mkversion $(TOPDIR) > $@.tmp
+	$(Q) $(call TESTANDREPLACEFILE, $@.tmp, $@)
 
 # Targets used to build include/nuttx/config.h.  Creation of config.h is
 # part of the overall NuttX configuration sequence. Notice that the
@@ -294,10 +307,11 @@ tools/mkconfig$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig$(HOSTEXEEXT)
 
 staging:
-	$(Q) mkdir staging
+	$(Q) mkdir -p staging
 
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
-	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h
+	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h.tmp
+	$(Q) $(call TESTANDREPLACEFILE, include/nuttx/config.h.tmp, $@)
 
 # Targets used to create dependencies
 
@@ -357,7 +371,7 @@ endif
 # Link the boards/<arch>/<chip>/drivers dir to drivers/platform
 
 $(ARCH_SRC)/drivers: .config
-	@echo "LN: $(ARCH_SRC)/drivers to $(BOARD_DIR)/drivers/platform"
+	@echo "LN: $(TOPDIR)/drivers/platform to $(BOARD_DIR)/drivers"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/drivers $(TOPDIR)/drivers/platform
 
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
@@ -400,8 +414,6 @@ context: check_context staging include/nuttx/config.h include/nuttx/version.h in
 clean_context:
 	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" clean_context
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" clean_context
-	$(call DELFILE, include/nuttx/config.h)
-	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
@@ -549,8 +561,8 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 #
 # These targets depend on the kconfig-frontends packages.  To use these, you
 # must first download and install the kconfig-frontends package from this
-# location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
-# README.txt file in the NuttX tools GIT repository for additional information.
+# location: https://bitbucket.org/nuttx/tools/downloads/.  See README.txt
+# file in the NuttX tools GIT repository for additional information.
 
 do_config: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig
@@ -597,7 +609,7 @@ savedefconfig: do_savedefconfig
 	$(Q) grep "^CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_BOARD=" .config && grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
 	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config && grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
-	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config && grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config >> defconfig.tmp; true
+	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config && grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) export LC_ALL=C; cat defconfig.tmp | sort | uniq > sortedconfig.tmp
 	$(Q) echo "#" > warning.tmp
 	$(Q) echo "# This file is autogenerated: PLEASE DO NOT EDIT IT." >> warning.tmp
@@ -667,6 +679,8 @@ distclean: clean subdir_distclean clean_context
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
 endif
+	$(call DELFILE, include/nuttx/config.h)
+	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)

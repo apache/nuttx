@@ -38,6 +38,7 @@ Contents
   - Quadrature Encoder
   - FPU
   - STM32F4DIS-BB
+  - RTC DS1307
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
   - HCI UART
@@ -321,7 +322,7 @@ There are two version of the FPU support built into the STM32 port.
 
 2. Lazy Floating Point Register Save.
 
-   An alternative mplementation only saves and restores FPU registers only
+   An alternative implementation only saves and restores FPU registers only
    on context switches.  This means: (1) floating point registers are not
    stored on each context switch and, hence, possibly better interrupt
    performance.  But, (2) since floating point registers are not saved,
@@ -417,6 +418,52 @@ On-board PIO usage:
   PC10       DAT2
   ---------- ------------- ------------------------------
 
+RTC DS1307
+==========
+
+It is possible to use a low cost extern DS1307 RTC to keep date and time
+always updated. These DS1307 RTC modules come with a 3V button battery, then
+even when the board is turned OFF the Date/Time registers keep running.
+
+You can connect the module this way (STM32F4Discovery to DS1307 board): GND
+to GND; 5V to VCC; PB9 to SDA; PB6 to SCL. In the NuttX menuconfig you need
+to enable these options:
+
+System Type  --->
+    STM32 Peripheral Support  --->
+        [*] I2C1
+
+Device Drivers  --->
+    Timer Driver Support  --->
+        [*] RTC Driver Support  --->
+            -*-   Date/Time RTC Support
+            [*]   External RTC Support
+            [*]     DS130x/DS323x RTC Driver
+                      Maxim Integrated RTC (DS1307)  --->
+            (100000)  DS1307/DS323x I2C frequency
+
+Application Configuration  --->
+    NSH Library  --->
+        Disable Individual commands  --->
+            [ ] Disable date ( <-- Deselect )
+
+It is also a good idea to enable the DEBUG to RTC initially, you will see:
+
+ABCDF
+stm32_ds1307_init: Initialize I2C1
+stm32_ds1307_init: Bind the DS1307 RTC driver to I2C1
+rtc_dumptime: Returning:
+rtc_dumptime:    tm_sec: 00000039
+rtc_dumptime:    tm_min: 00000001
+rtc_dumptime:   tm_hour: 00000009
+rtc_dumptime:   tm_mday: 00000016
+rtc_dumptime:    tm_mon: 00000008
+rtc_dumptime:   tm_year: 00000077
+
+NuttShell (NSH)
+nsh> date
+Sep 22 09:01:58 2019
+
 SSD1289
 =======
 
@@ -486,7 +533,7 @@ MAPPING TO STM32 F4:
    FSMC_NWE         ~WR    pin 22  PD5  P2 pin 29 Conflict (Note 3)
    FSMC_NOE         ~RD    pin 21  PD4  P2 pin 32 Conflict (Note 4)
    PC6              RESET  pin 24  PC6  P2 pin 47 Free I/O
-   Timer ouput      BL_CNT pin 23  (to be determined)
+   Timer output     BL_CNT pin 23  (to be determined)
   ---------------- -------------- ----------------------------------
 
    1 Used for the RED LED
@@ -1783,8 +1830,8 @@ Configuration Sub-directories
        CONFIG_STM32_IWDG=y        : Enables the IWDG timer facility (but not both)
 
        The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
-       has a maximum timeout value of 49 milliseconds.  for WWDG watchdog, you
-       should also add the fillowing to the configuration file:
+       has a maximum timeout value of 49 milliseconds.  For WWDG watchdog, you
+       should also add the following to the configuration file:
 
        CONFIG_EXAMPLES_WATCHDOG_PINGDELAY=20
        CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49

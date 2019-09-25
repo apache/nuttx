@@ -65,8 +65,8 @@
  *
  * Input Parameters:
  *   buf - a pointer to the location in which the current working directory
- *     pathaname is returned.
- *   size - The size in bytes avaiable at 'buf'
+ *     pathname is returned.
+ *   size - The size in bytes available at 'buf'
  *
  * Returned Value:
  *   Upon successful completion, getcwd() returns the 'buf' argument.
@@ -77,11 +77,11 @@
  *     The 'size' argument is 0 or the 'buf' argument is NULL.
  *   ERANGE
  *     The size argument is greater than 0, but is smaller than the length
- *     of the currrent working directory pathname +1.
+ *     of the current working directory pathname +1.
  *   EACCES
  *     Read or search permission was denied for a component of the pathname.
  *   ENOMEM
- *  Insufficient storage space is available.
+ *     Insufficient storage space is available.
  *
  ****************************************************************************/
 
@@ -118,7 +118,6 @@ FAR char *getcwd(FAR char *buf, size_t size)
   /* Copy the cwd to the user buffer */
 
   strcpy(buf, pwd);
-  sched_unlock();
   return buf;
 }
 #endif /* !CONFIG_DISABLE_ENVIRON */

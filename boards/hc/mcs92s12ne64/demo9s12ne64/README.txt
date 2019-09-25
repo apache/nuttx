@@ -197,7 +197,7 @@ FreeScale HCS12 Serial Monitor
     115,200 baud. The monitor must have exclusive use of this interface.
     Access to the serial port is available through a monitor jump table.
 
-  Interrrupts:
+  Interrupts:
     The serial monitor redirects interrupt vectors to an unprotected
     portion of FLASH just before the protected monitor program
     (0xf780–0xf7fe).  The monitor will automatically redirect vector

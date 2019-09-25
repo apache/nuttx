@@ -5320,7 +5320,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 </p>
 <ul>
   <li><b>Interface Definition</b>.
-    The header file for the NuttX PWM driver reside at <code>include/nuttx/drivers/pwm.h</code>.
+    The header file for the NuttX PWM driver reside at <code>include/nuttx/timers/pwm.h</code>.
     This header file includes both the application level interface to the PWM driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
     The PWM module uses a standard character driver framework.
     However, since the PWM driver is a devices control interface and not a data transfer interface,
@@ -7281,7 +7281,7 @@ void (*notify)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate
 
 <p>
   At one time, this section provided a list of all NuttX configuration variables.
-  However, NuttX has since converted to use the <a href="http://ymorin.is-a-geek.org/projects/kconfig-frontends">kconfig-frontends</a> tools.
+  However, NuttX has since converted to use the <a href="https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/">kconfig-frontends</a> tools.
   Now, the NuttX configuration is determined by a self-documenting set of <code>Kconfig</code> files.
 </p>
 <p>

@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012, 2015-2016, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2011-2012, 2015-2016, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -216,6 +216,7 @@
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -498,6 +499,18 @@ int stm32_max7219init(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: stm32_ds1307_init
+ *
+ * Description:
+ *   Initialize and register the DS1307 RTC
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DS1307
+int stm32_ds1307_init(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_st7032init
  *
  * Description:
@@ -677,7 +690,7 @@ int stm32_zerocross_initialize(void);
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   bus     - Bus number (for hardware that has mutiple SPI interfaces)
+ *   bus     - Bus number (for hardware that has multiple SPI interfaces)
  *   devid   - ID associated to the device. E.g., 0, 1, 2, etc.
  *
  * Returned Value:

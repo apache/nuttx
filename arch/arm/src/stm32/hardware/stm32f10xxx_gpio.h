@@ -235,7 +235,7 @@
 #define GPIO_CRH_CNF15_SHIFT         (30)     /* Bits 31:30: Port configuration bits */
 #define GPIO_CRL_CNF15_MASK          (3 << GPIO_CRL_CNF15_SHIFT)
 
-/* Port input/ouput data register */
+/* Port input/output data register */
 
 #define GPIO_IDR(n)                  (1 << (n))
 #define GPIO_ODR(n)                  (1 << (n))

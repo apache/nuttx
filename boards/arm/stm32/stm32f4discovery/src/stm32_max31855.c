@@ -63,7 +63,7 @@
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register.  E.g., "/dev/temp0"
- *   bus     - Bus number (for hardware that has mutiple SPI interfaces)
+ *   bus     - Bus number (for hardware that has multiple SPI interfaces)
  *   devid   - ID associated to the device.  E.g., 0, 1, 2, etc.
  *
  * Returned Value:

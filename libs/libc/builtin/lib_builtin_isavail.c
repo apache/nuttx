@@ -8,7 +8,7 @@
  *
  * With subsequent updates, modifications, and general maintenance by:
  *
- *   Copyright (C) 2012-2013 Gregory Nutt.  All rights reserved.
+ *   Copyright (C) 2012-2013, 2019 Gregory Nutt.  All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,18 @@
  * Name: builtin_isavail
  *
  * Description:
- *   Return the index into the table of applications for the application with
- *   the name 'appname'.
+ *   Checks for availability of an application named 'appname' registered
+ *   during compile time and, if available, returns the index into the table
+ *   of built-in applications.
+ *
+ * Input Parameters:
+ *   filename - Name of the linked-in binary to be started.
+ *
+ * Returned Value:
+ *   This is an internal function, used by by the NuttX binfmt logic and
+ *   by the application built-in logic.  It returns a non-negative index to
+ *   the application entry in the table of built-in applications on success
+ *   or a negated errno value in the event of a failure.
  *
  ****************************************************************************/
 
@@ -72,16 +82,15 @@ int builtin_isavail(FAR const char *appname)
   FAR const char *name;
   int i;
 
-  for (i = 0; (name = builtin_getname(i)); i++)
+  for (i = 0; (name = builtin_getname(i)) != NULL; i++)
     {
-      if (!strncmp(name, appname, NAME_MAX))
+      if (strncmp(name, appname, NAME_MAX) == 0)
         {
           return i;
         }
     }
 
-  set_errno(ENOENT);
-  return ERROR;
+  return -ENOENT;
 }
 
 #endif /* HAVE_BUILTIN_CONTEXT */

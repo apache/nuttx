@@ -86,15 +86,15 @@
 
 MEMORY
 {
-    /* 1024Kb FLASH */
+  /* 1024Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x14000000, LENGTH = 256K
-    uflash (rx)      : ORIGIN = 0x14040000, LENGTH = 256K
-    xflash (rx)      : ORIGIN = 0x14080000, LENGTH = 768K
+  kflash (rx)      : ORIGIN = 0x14000000, LENGTH = 256K
+  uflash (rx)      : ORIGIN = 0x14040000, LENGTH = 256K
+  xflash (rx)      : ORIGIN = 0x14080000, LENGTH = 768K
 
-    /* 128Kb of contiguous SRAM */
+  /* 128Kb of contiguous SRAM */
 
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 16K
-    usram (rwx)      : ORIGIN = 0x10004000, LENGTH = 16K
-    xsram (rwx)      : ORIGIN = 0x10008000, LENGTH = 96K
+  ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 16K
+  usram (rwx)      : ORIGIN = 0x10004000, LENGTH = 16K
+  xsram (rwx)      : ORIGIN = 0x10008000, LENGTH = 96K
 }

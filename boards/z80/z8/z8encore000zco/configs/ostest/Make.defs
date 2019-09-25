@@ -1,5 +1,5 @@
 ############################################################################
-# boards/z8encore000zco/configs/ostest/Make.defs
+# boards/z80/z8/z8encore000zco/configs/ostest/Make.defs
 #
 #   Copyright (C) 2008, 2012-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -179,7 +179,7 @@ ARFLAGS = -quiet -warn
 
 # Linker definitions
 
-LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)z8encore000zco$(DELIM)ostest$(DELIM)ostest.linkcmd
+LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)configs$(DELIM)ostest$(DELIM)ostest.linkcmd
 
 # Tool names/pathes
 

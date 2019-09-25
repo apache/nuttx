@@ -214,9 +214,9 @@ union sixlowpan_metadata_u
 
 /* The following data values are used to hold intermediate settings while
  * processing IEEE802.15.4 frames.  These globals are shared with incoming
- * and outgoing frame processing and possibly with mutliple IEEE802.15.4 MAC
+ * and outgoing frame processing and possibly with multiple IEEE802.15.4 MAC
  * devices.  The network lock provides exclusive use of these globals
- * during that processing
+ * during that processing.
  */
 
 /* g_uncomp_hdrlen is the length of the headers before compression (if HC2
@@ -594,7 +594,7 @@ int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
  *
  *   In the case there the IEEE 802.15.4 node functions as an endpoint in a
  *   start topology, the destination address will, instead, be the address
- *   of the star hub (which is assumed to be the address of the cooordinator).
+ *   of the star hub (which is assumed to be the address of the coordinator).
  *
  *   sixlowpan_ipfrom[s|e]addr():  Create a link-local, MAC-based IPv6
  *   address from an IEEE802.15.4 short address (saddr) or extended address

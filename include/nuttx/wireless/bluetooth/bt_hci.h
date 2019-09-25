@@ -113,6 +113,9 @@
 
 /* Construct OpCode from OGF and OCF */
 
+#define BT_OGF_VENDOR                         0x18
+#define BT_HC_VN_READ_CONT_FEATURES           BT_OP(BT_OGF_VENDOR, 0x06E)
+
 #define BT_OP(ogf, ocf)          ((ocf) | ((ogf) << 10))
 
 #define BT_HCI_OP_DISCONNECT                  BT_OP(BT_OGF_LINK_CTRL, 0x0006)

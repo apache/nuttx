@@ -170,7 +170,7 @@ int sched_unlock(void)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
                * to up_release_pending() above may have actually replaced
-               * the task at the head of the read-to-run list.  In that case,
+               * the task at the head of the ready-to-run list.  In that case,
                * we need only to reset the timeslice value back to the
                * maximum.
                */
@@ -301,7 +301,7 @@ int sched_unlock(void)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
                * to up_release_pending() above may have actually replaced
-               * the task at the head of the read-to-run list.  In that case,
+               * the task at the head of the ready-to-run list.  In that case,
                * we need only to reset the timeslice value back to the
                * maximum.
                */

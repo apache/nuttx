@@ -89,17 +89,6 @@ config ARCH_HAVE_PWM_MULTICHAN
 	bool
 	default n
 
-menuconfig PWM
-	bool "PWM Driver Support"
-	default n
-	---help---
-		This selection enables building of the "upper-half" PWM driver.
-		See include/nuttx/drivers/pwm.h for further PWM driver information.
-
-if PWM
-source drivers/pwm/Kconfig
-endif # PWM
-
 config ARCH_HAVE_I2CRESET
 	bool
 	default n
@@ -417,3 +406,13 @@ menuconfig SPECIFIC_DRIVERS
 if SPECIFIC_DRIVERS
 source drivers/platform/Kconfig
 endif # SPECIFIC_DRIVERS
+
+menuconfig DRIVERS_RF
+	bool "RF Device Support"
+	default n
+	---help---
+		Drivers for various RF devices
+
+if DRIVERS_RF
+source drivers/rf/Kconfig
+endif # DRIVERS_RF

@@ -62,7 +62,9 @@
 #define STM32_SDMMC_ICR_OFFSET                0x0038 /* SDMMC interrupt clear register */
 #define STM32_SDMMC_MASK_OFFSET               0x003c /* SDMMC mask register */
 #define STM32_SDMMC_IDMACTRLR_OFFSET          0x0050 /* SDMMC DMA control register */
+#define STM32_SDMMC_IDMABSIZER_OFFSET         0x0054 /* SDMMC DMA size register */
 #define STM32_SDMMC_IDMABASE0R_OFFSET         0x0058 /* SDMMC IDMA buffer 0 base register */
+#define STM32_SDMMC_IDMABASE1R_OFFSET         0x005c /* SDMMC IDMA buffer 1 base register */
 #define STM32_SDMMC_FIFO_OFFSET               0x0080 /* SDMMC data FIFO register */
 
 /* Register Bitfield Definitions ****************************************************/
@@ -78,13 +80,21 @@
 #define STM32_SDMMC_CLKCR_CLKDIV_SHIFT        (0)       /* Bits 9-0: Clock divide factor */
 #define STM32_SDMMC_CLKCR_CLKDIV_MASK         (0x3ff << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #define STM32_SDMMC_CLKCR_PWRSAV              (1 << 12)  /* Bit 12: Power saving configuration bit */
-#define STM32_SDMMC_CLKCR_WIDBUS_SHIFT        (14)      /* Bits 12-11: Wide bus mode enable bits */
+#define STM32_SDMMC_CLKCR_WIDBUS_SHIFT        (14)      /* Bits 15-14: Wide bus mode enable bits */
 #define STM32_SDMMC_CLKCR_WIDBUS_MASK         (3 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT)
 #  define STM32_SDMMC_CLKCR_WIDBUS_D1         (0 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 00: Default (STM32_SDMMC_D0) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D4         (1 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 01: 4-wide (STM32_SDMMC_D[3:0]) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D8         (2 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 10: 8-wide (STM32_SDMMC_D[7:0]) */
 #define STM32_SDMMC_CLKCR_NEGEDGE             (1 << 16) /* Bit 16: STM32_SDMMC_CK dephasing selection bit */
 #define STM32_SDMMC_CLKCR_HWFC_EN             (1 << 17) /* Bit 17: HW Flow Control enable */
+#define STM32_SDMMC_CLKCR_DDR                 (1 << 18) /* Bit 18: Data rate signaling selection */
+#define STM32_SDMMC_CLKCR_BUS_SPEED           (1 << 19) /* Bit 19: Bus speed mode selection */
+#define STM32_SDMMC_CLKCR_SELCLKRX_SHIFT      (20)      /* Bits 21-20: Receive clock selection */
+#define STM32_SDMMC_CLKCR_SELCLKRX_MASK       (3 << STM32_SDMMC_CLKCR_SELCLKRX_SHIFT)
+#  define STM32_SDMMC_CLKCR_SELCLKRX_IO_IN    (0 << STM32_SDMMC_CLKCR_SELCLKRX_SHIFT) /* 00: sdmmc_io_in_ck selected as receive clock */
+#  define STM32_SDMMC_CLKCR_SELCLKRX_CKIN     (1 << STM32_SDMMC_CLKCR_SELCLKRX_SHIFT) /* 01: SDMMC_CKIN feedback clock selected as receive clock */
+#  define STM32_SDMMC_CLKCR_SELCLKRX_FB       (2 << STM32_SDMMC_CLKCR_SELCLKRX_SHIFT) /* 10: sdmmc_fb_ck tuned feedback clock selected as receive clock. */
+                                                                                      /* 11: Reserved (select sdmmc_io_in_ck) */
 
 #define STM32_SDMMC_CLKCR_RESET               (0)       /* Reset value */
 
@@ -209,7 +219,7 @@
 #define STM32_SDMMC_ICR_IDMATEC               (1 << 27) /* Bit 27: IDMA transfer error clear bit */
 #define STM32_SDMMC_ICR_IDMABTCC              (1 << 28) /* Bit 28: IDMA buffer transfer complete clear bit */
 
-#define STM32_SDMMC_ICR_RESET                 0x00000000
+#define STM32_SDMMC_ICR_RESET                 0x1fe00fff
 #define STM32_SDMMC_ICR_ALLFLAGS              0x1fe00fff
 
 #define STM32_SDMMC_MASK_CCRCFAILIE           (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
@@ -238,7 +248,12 @@
 
 #define STM32_SDMMC_MASK_RESET                (0)
 
-#define STM32_SDMMC_IDMACTRLR_IDMAEN          (1 << 0)
+#define STM32_SDMMC_IDMACTRLR_IDMAEN          (1 << 0) /* Bit 0: IDMA enable */
+#define STM32_SDMMC_IDMACTRLR_IDMABMODE       (1 << 1) /* Bit 1: Buffer mode selection */
+#define STM32_SDMMC_IDMACTRLR_IDMABACT        (1 << 2) /* Bit 2: Double buffer mode active buffer indication */
+
+#define STM32_SDMMC_IDMABSIZER_SHIFT          (5)      /* Bits 12-5: Number of bytes per buffer divided by 32 */
+#define STM32_SDMMC_IDMABSIZER_MASK           (0xff << STM32_SDMMC_IDMABSIZER_SHIFT)
 
 #define STM32_SDMMC_FIFOCNT_SHIFT             (0)
 #define STM32_SDMMC_FIFOCNT_MASK              (0x0ffffff << STM32_SDMMC_FIFOCNT_SHIFT)

@@ -46,7 +46,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

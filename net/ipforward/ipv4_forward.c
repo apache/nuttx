@@ -80,7 +80,13 @@
 #ifdef CONFIG_DEBUG_NET_WARN
 static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 {
-  /* Size is determined by the following protocol header, */
+  uint16_t iphdrlen;
+
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
+  /* Size is also determined by the following protocol header, */
 
   switch (ipv4->proto)
     {
@@ -88,7 +94,7 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
     case IP_PROTO_TCP:
       {
         FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + IPv4_HDRLEN);
+          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
         unsigned int tcpsize;
 
         /* The TCP header length is encoded in the top 4 bits of the
@@ -96,20 +102,20 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
          */
 
         tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-        return IPv4_HDRLEN + tcpsize;
+        return iphdrlen + tcpsize;
       }
       break;
 #endif
 
 #ifdef CONFIG_NET_UDP
     case IP_PROTO_UDP:
-      return IPv4_HDRLEN + UDP_HDRLEN;
+      return iphdrlen + UDP_HDRLEN;
       break;
 #endif
 
 #ifdef CONFIG_NET_ICMP
     case IP_PROTO_ICMP:
-      return IPv4_HDRLEN + ICMP_HDRLEN;
+      return iphdrlen + ICMP_HDRLEN;
       break;
 #endif
 
@@ -146,9 +152,13 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 
 static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 {
+  uint16_t iphdrlen;
   uint16_t sum;
-  int ttl = (int)ipv4->ttl - 1;
+  int ttl;
 
+  /* Check time-to-live (TTL) */
+
+  ttl = (int)ipv4->ttl - 1;
   if (ttl <= 0)
     {
 #ifdef CONFIG_NET_ICMP
@@ -165,13 +175,17 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
 
   ipv4->ttl = ttl;
 
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
   /* Re-calculate the IPv4 checksum.  This checksum is the Internet checksum
    * of the 20 bytes of the IPv4 header.  This checksum will be different
    * because we just modify the IPv4 TTL.
    */
 
   ipv4->ipchksum = 0;
-  sum            = chksum(0, (FAR const uint8_t *)ipv4, IPv4_HDRLEN);
+  sum            = chksum(0, (FAR const uint8_t *)ipv4, iphdrlen);
   if (sum == 0)
     {
       sum = 0xffff;
@@ -341,7 +355,7 @@ errout:
  *
  * Description:
  *   This function is a callback from netdev_foreach.  It implements the
- *   the broadcase forwarding action for each network device (other than, of
+ *   the broadcast forwarding action for each network device (other than, of
  *   course, the device that received the packet).
  *
  * Input Parameters:

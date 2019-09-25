@@ -44,8 +44,8 @@
 
 MEMORY
 {
-	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
-	sdram (W!RX) : ORIGIN = 0x20008000, LENGTH = 256M - 32K
+    isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
+    sdram (W!RX) : ORIGIN = 0x20008000, LENGTH = 256M - 32K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -55,85 +55,87 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	.text :
-	{
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		*(.ARM.extab*)
-		*(.gnu.linkonce.armextab.*)
-		_etext = ABSOLUTE(.);
-	} > sdram
+    .text :
+    {
+        _stext = ABSOLUTE(.);
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        *(.ARM.extab*)
+        *(.gnu.linkonce.armextab.*)
+        _etext = ABSOLUTE(.);
+    } > sdram
 
-	.init_section :
-	{
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > sdram
+    .init_section :
+    {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > sdram
 
-	.ARM.extab :
-	{
-		*(.ARM.extab*)
-	} > sdram
+    .ARM.extab :
+    {
+        *(.ARM.extab*)
+    } > sdram
 
-	/* .ARM.exidx is sorted, so has to go in its own output section.  */
+    /* .ARM.exidx is sorted, so has to go in its own output section.  */
 
-	PROVIDE_HIDDEN (__exidx_start = .);
-	.ARM.exidx :
-	{
-		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
-	} > sdram
-	PROVIDE_HIDDEN (__exidx_end = .);
+    PROVIDE_HIDDEN (__exidx_start = .);
+    .ARM.exidx :
+    {
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    } > sdram
+    PROVIDE_HIDDEN (__exidx_end = .);
 
-	.data :
-	{
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sdram
+    .data :
+    {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    } > sdram
 
-	.bss :
-	{
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sdram
+    .bss :
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sdram
 
-	/* Uninitialized data */
+    /* Uninitialized data */
 
-	.noinit :
-	{
-		_snoinit = ABSOLUTE(.);
-		*(.noinit*)
-		_enoinit = ABSOLUTE(.);
-	} > sdram
+    .noinit :
+    {
+        _snoinit = ABSOLUTE(.);
+        *(.noinit*)
+        _enoinit = ABSOLUTE(.);
+    } > sdram
 
-	/* Stabs debugging sections. */
+    /* Stabs debugging sections. */
 
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

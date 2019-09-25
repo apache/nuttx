@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pwm/pwm.c
+ * drivers/timers/pwm.c
  *
  *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #include <nuttx/irq.h>
 

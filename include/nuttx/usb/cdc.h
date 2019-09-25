@@ -617,6 +617,7 @@ struct cdc_hdr_funcdesc_s
   uint8_t cdc[2];    /* bcdCDC, USB Class Definitions for Communication Devices Specification
                       * release number in binary-coded decimal. */
 };
+
 #define SIZEOF_HDR_FUNCDESC 5
 
 /* Table 27: Call Management Functional Descriptor */
@@ -631,6 +632,7 @@ struct cdc_callmgmt_funcdesc_s
                       * optionally used for call management
                       */
 };
+
 #define SIZEOF_CALLMGMT_FUNCDESC 5
 
 /* Table 28: Abstract Control Management Functional Descriptor */
@@ -642,6 +644,7 @@ struct cdc_acm_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ACM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_ACM_FUNCDESC 4
 
 /* Table 29: Direct Line Management Functional Descriptor */
@@ -653,6 +656,7 @@ struct cdc_dlc_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_DLC as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_DLC_FUNCDESC 4
 
 /* Table 30: Telephone Ringer Functional Descriptor */
@@ -667,6 +671,7 @@ struct cdc_tcmr_funcdesc_s
                       */
   uint8_t npats;     /* bNumRingerPatterns: Number of ringer patterns supported. */
 };
+
 #define SIZEOF_TCMR_FUNCDESC 5
 
 /* Table 31: Telephone Operational Modes Functional Descriptor */
@@ -678,6 +683,7 @@ struct cdc_tcmops_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_TCMOPS as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_TCMOPS_FUNCDESC 4
 
 /* Table 32: Telephone Call State Reporting Capabilities Descriptor */
@@ -689,6 +695,7 @@ struct cdc_tcmc_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_TCMCALL as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_TCMC_FUNCDESC 4
 
 /* Table 33: Union Interface Functional Descriptor */
@@ -706,7 +713,8 @@ struct cdc_union_funcdesc_s
                       * interface in the union
                       */
 };
-#define SIZEOF_UNION_FUNCDESC(n) ((n)+4)
+
+#define SIZEOF_UNION_FUNCDESC(n) ((n) + 4)
 
 /* Table 34: Country Selection Functional Descriptor */
 
@@ -722,7 +730,8 @@ struct cdc_country_funcdesc_s
                       * release date as specified in offset 3 for Nth country supported
                       */
 };
-#define SIZEOF_COUNTRY_FUNCDESC(n) (sizeof(uint16_t)*(n) + 4)
+
+#define SIZEOF_COUNTRY_FUNCDESC(n) (sizeof(uint16_t) * (n) + 4)
 
 /* Table 35: USB Terminal Functional Descriptor */
 
@@ -741,7 +750,8 @@ struct cdc_usbterm_funcdesc_s
   uint8_t options;   /* bmOptions, bit-encoded options */
   uint8_t child[1];  /* Nth ID of lower Terminal or Unit to which this Terminal is connected. */
 };
-#define SIZEOF_USBTERM_FUNCDESC(n) ((n)+7)
+
+#define SIZEOF_USBTERM_FUNCDESC(n) ((n) + 7)
 
 /* Table 36: Network Channel Terminal Functional Descriptor */
 
@@ -757,6 +767,7 @@ struct cdc_netchan_funcdesc_s
   uint8_t index;     /* bChannelIndex, The channel index of the associated network channel */
   uint8_t phyif;     /* bPhysicalInterface, Type of physical interface */
 };
+
 #define SIZEOF_NETCHAN_FUNCDESC 7
 
 /* Table 37: Protocol Unit Functional Descriptor */
@@ -770,7 +781,8 @@ struct cdc_protounit_funcdesc_s
   uint8_t proto;     /* bProtocol, Protocol code as defined in Table 19 */
   uint8_t child[1];  /* Nth ID of lower Terminal or Unit to which this Terminal is connected */
 };
-#define SIZEOF_PROTOUNIT_FUNCDESC(n) ((n)+5)
+
+#define SIZEOF_PROTOUNIT_FUNCDESC(n) ((n) + 5)
 
 /* Table 38: Extension Unit Functional Descriptor */
 
@@ -784,7 +796,8 @@ struct cdc_extunit_funcdesc_s
   uint8_t name;      /* iName, Index of string descriptor, describing the name of the Extension Unit */
   uint8_t child[1];  /* Nth ID of lower Terminal or Unit to which this Terminal is connected */
 };
-#define SIZEOF_EXTUNIT_FUNCDESC(n) ((n)+6)
+
+#define SIZEOF_EXTUNIT_FUNCDESC(n) ((n) + 6)
 
 /* Table 39: Multi-Channel Management Functional Descriptor */
 
@@ -795,6 +808,7 @@ struct cdc_mcm_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_MCM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_MCM_FUNCDESC 4
 
 /* Table 40: CAPI Control Management Functional Descriptor */
@@ -806,6 +820,7 @@ struct cdc_capi_funcdesc_s
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_CAPI as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
+
 #define SIZEOF_CAPI_FUNCDESC 4
 
 /* Table 41: Ethernet Networking Functional Descriptor */
@@ -829,6 +844,7 @@ struct cdc_ecm_funcdesc_s
                       * available for causing wake-up of the host.
                       */
 };
+
 #define SIZEOF_ECM_FUNCDESC 13
 
 /* Table 43: ATM Networking Functional Descriptor */
@@ -853,6 +869,7 @@ struct cdc_atm_funcdesc_s
                       * capable of supporting
                       */
 };
+
 #define SIZEOF_ATM_FUNCDESC 12
 
 /* Descriptor Data Structures ***************************************************************/
@@ -865,6 +882,7 @@ struct cdc_linecoding_s
   uint8_t parity;    /* bParityType, 0=None, 1=Odd, 2=Even, 3=Mark, 4=Space */
   uint8_t nbits;     /* bDataBits, Data bits (5,6,7,8, or 16) */
 };
+
 #define SIZEOF_CDC_LINECODING 7
 
 /* Table 55: Line Status Information Structure */
@@ -892,6 +910,7 @@ struct cdc_notification_s
   uint8_t len[2];              /* wLength - length of variable data */
   uint8_t data[1];             /* Variable length data begins here */
 };
+
 #define SIZEOF_NOTIFICATION_S(n) (sizeof(struct cdc_notification_s) + (n) - 1)
 
 /* Table 60: Unit Parameter Structure */

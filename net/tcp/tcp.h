@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
- *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,7 +126,38 @@ struct tcp_hdr_s;         /* Forward reference */
 
 struct tcp_conn_s
 {
+  /* Common prologue of all connection structures. */
+
   dq_entry_t node;        /* Implements a doubly linked list */
+
+  /* TCP callbacks:
+   *
+   * Data transfer events are retained in 'list'.  Event handlers in 'list'
+   * are called for events specified in the flags set within struct
+   * devif_callback_s
+   *
+   * When an callback is executed from 'list', the input flags are normally
+   * returned, however, the implementation may set one of the following:
+   *
+   *   TCP_CLOSE   - Gracefully close the current connection
+   *   TCP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents TCP_CLOSE from working.
+   *
+   * And/Or set/clear the following:
+   *
+   *   TCP_NEWDATA - May be cleared to indicate that the data was consumed
+   *                 and that no further process of the new data should be
+   *                 attempted.
+   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
+   *                 to indicate that an ACK should be included in the response.
+   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set, then
+   *                 dev->d_len should also be cleared).
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* TCP-specific content follows */
+
   union ip_binding_u u;   /* IP address binding */
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
@@ -220,32 +251,6 @@ struct tcp_conn_s
   uint8_t    keepcnt;     /* Number of retries before the socket is closed */
   uint8_t    keepretries; /* Number of retries attempted */
 #endif
-
-  /* Application callbacks:
-   *
-   * Data transfer events are retained in 'list'.  Event handlers in 'list'
-   * are called for events specified in the flags set within struct
-   * devif_callback_s
-   *
-   * When an callback is executed from 'list', the input flags are normally
-   * returned, however, the implementation may set one of the following:
-   *
-   *   TCP_CLOSE   - Gracefully close the current connection
-   *   TCP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents TCP_CLOSE from working.
-   *
-   * And/Or set/clear the following:
-   *
-   *   TCP_NEWDATA - May be cleared to indicate that the data was consumed
-   *                 and that no further process of the new data should be
-   *                 attempted.
-   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
-   *                 to indicate that an ACK should be included in the response.
-   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set, then
-   *                 dev->d_len should also be cleared).
-   */
-
-  FAR struct devif_callback_s *list;
 
   /* connevents is a list of callbacks for each socket the uses this
    * connection (there can be more that one in the event that the the socket

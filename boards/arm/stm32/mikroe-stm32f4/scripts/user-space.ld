@@ -83,6 +83,7 @@ SECTIONS
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > usram AT > uflash
 
@@ -91,6 +92,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
+        . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > usram
 

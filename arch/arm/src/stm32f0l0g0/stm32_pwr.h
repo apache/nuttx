@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,6 +47,8 @@
 
 #include "chip.h"
 #include "hardware/stm32_pwr.h"
+
+#ifdef CONFIG_STM32F0L0G0_PWR
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -181,8 +184,9 @@ bool stm32_pwr_getwuf(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_ENERGYLITE
+#if defined(CONFIG_STM32F0L0G0_ENERGYLITE) || defined(CONFIG_STM32F0L0G0_STM32G0)
 void stm32_pwr_setvos(uint16_t vos);
+#endif /* CONFIG_STM32F0L0G0_ENERGYLITE || CONFIG_STM32F0L0G0_STM32G0 */
 
 /************************************************************************************
  * Name: stm32_pwr_setpvd
@@ -201,6 +205,7 @@ void stm32_pwr_setvos(uint16_t vos);
  *
  ************************************************************************************/
 
+#if defined(CONFIG_STM32F0L0G0_ENERGYLITE)
 void stm32_pwr_setpvd(uint16_t pls);
 
 /************************************************************************************
@@ -231,4 +236,5 @@ void stm32_pwr_disablepvd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_STM32F0L0G0_PWR */
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_PWR_H */

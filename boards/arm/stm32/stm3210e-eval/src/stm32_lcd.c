@@ -1702,7 +1702,7 @@ static void stm3210e_backlight(void)
 
   ccer &= ~(ATIM_CCER_CC1NP|ATIM_CCER_CC1NE);
 
-  /* Reset the Ouput Compare and Output Compare N IDLE State */
+  /* Reset the Output Compare and Output Compare N IDLE State */
 
   cr2 &= ~(ATIM_CR2_OIS1|ATIM_CR2_OIS1N);
 

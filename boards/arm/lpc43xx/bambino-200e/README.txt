@@ -99,7 +99,7 @@ ports.
 
 2. Lazy Floating Point Register Save.
 
-   An alternative mplementation only saves and restores FPU registers only
+   An alternative implementation only saves and restores FPU registers only
    on context switches.  This means: (1) floating point registers are not
    stored on each context switch and, hence, possibly better interrupt
    performance.  But, (2) since floating point registers are not saved,
@@ -127,7 +127,7 @@ Configuration Changes
 ---------------------
 
 Below are all of the configuration changes that I had to make to
-boards/stm3240g-eval/configs/nsh2 in order to successfully build NuttX using
+boards/arm/stm32/stm3240g-eval/configs/nsh2 in order to successfully build NuttX using
 the Atollic toolchain WITH FPU support:
 
   -CONFIG_ARCH_FPU=n                       : Enable FPU support

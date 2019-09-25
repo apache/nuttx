@@ -97,11 +97,11 @@
        /* Defines for third byte of header */
 #define MAGIC_1  (char_type)'\037'      /* First byte of compressed file */
 #define MAGIC_2  (char_type)'\235'      /* Second byte of compressed file */
-#define BIT_MASK 0x1f           /* Mask for 'number of compresssion bits' */
+#define BIT_MASK 0x1f           /* Mask for 'number of compression bits' */
          /* Masks 0x20 and 0x40 are free.  */
          /* I think 0x20 should mean that there is */
          /* a fourth header byte (for expansion).  */
-#define BLOCK_MODE 0x80         /* Block compresssion if table is full and */
+#define BLOCK_MODE 0x80         /* Block compression if table is full and */
          /* compression rate is dropping flush tables */
 
    /* the next two codes should not be changed lightly, as they must not */

@@ -139,7 +139,7 @@ static int sixlowpan_compress_ipv6hdr(FAR const struct ipv6_hdr_s *ipv6hdr,
  * Name: sixlowpan_protosize
  *
  * Description:
- *   Get the size of any uncompresssed protocol header that follows the
+ *   Get the size of any uncompressed protocol header that follows the
  *   IPv6 header.
  *
  ****************************************************************************/

@@ -177,10 +177,10 @@ void lpc31_clockconfig(void);
  *   Initialize the selected SPI port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ************************************************************************************/
 
@@ -327,7 +327,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno);
  * Name: sdio_mediachange
  *
  * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   Called by board-specific logic -- possibly from an interrupt handler --
  *   in order to signal to the driver that a card has been inserted or
  *   removed from the slot
  *

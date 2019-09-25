@@ -1,5 +1,5 @@
 ############################################################################
-# boards/open1788/configs/knxterm/Make.defs
+# boards/arm/lpc17xx_40xx/open1788/configs/knxterm/Make.defs
 #
 #   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

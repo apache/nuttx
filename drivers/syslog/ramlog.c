@@ -471,9 +471,8 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
           ret = ramlog_addchar(priv, '\r');
           if (ret < 0)
             {
-              /* The buffer is full and nothing was saved. Break out of the
-               * loop to return the number of bytes written up to this point.
-               * The data to be written is dropped on the floor.
+              /* The buffer is full and nothing was saved.  The remaining
+               * data to be written is dropped on the floor.
                */
 
               break;
@@ -486,9 +485,8 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
       ret = ramlog_addchar(priv, ch);
       if (ret < 0)
         {
-          /* The buffer is full and nothing was saved. Break out of the
-           * loop to return the number of bytes written up to this point.
-           * The data to be written is dropped on the floor.
+          /* The buffer is full and nothing was saved.  The remaining
+           * data to be written is dropped on the floor.
            */
 
           break;
@@ -524,7 +522,7 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer, size
 
   /* We always have to return the number of bytes requested and NOT the
    * number of bytes that were actually written.  Otherwise, callers
-   * will think that this is a short write and probably retry (causing
+   * probably retry, causing same error condition again.
    */
 
   return len;
@@ -561,7 +559,7 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   if (setup)
     {
       /* This is a request to set up the poll.  Find an available
-       * slot for the poll structure reference
+       * slot for the poll structure reference.
        */
 
       for (i = 0; i < CONFIG_RAMLOG_NPOLLWAITERS; i++)
@@ -787,7 +785,7 @@ int ramlog_putc(int ch)
   ret = ramlog_addchar(priv, ch);
   if (ret < 0)
     {
-      /* ramlog_addchar() failed */
+      /* The buffer is full and 'ch' was not saved. */
 
       return ret;
     }

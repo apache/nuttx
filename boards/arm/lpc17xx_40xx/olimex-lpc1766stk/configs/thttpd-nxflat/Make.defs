@@ -1,5 +1,5 @@
 ############################################################################
-# boards/olimex-lpc1766stk/configs/thttpd-nxflat/Make.defs
+# boards/arm/lpc17xx_40xx/olimex-lpc1766stk/configs/thttpd-nxflat/Make.defs
 #
 #   Copyright (C) 2010, 2012, 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -669,7 +669,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   /* First calculate the desired bitrate (fout).  This is based on
    *
    * 1. The I2S frame length (in bits)
-   * 2. The number of frames per second = nchannnels * samplerate
+   * 2. The number of frames per second = nchannels * samplerate
    */
 
   framelen = (priv->bpsamp == 8) ? WM8904_FRAMELEN8 : WM8904_FRAMELEN16;

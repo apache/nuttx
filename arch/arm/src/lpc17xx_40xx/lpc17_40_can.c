@@ -144,7 +144,7 @@
 #endif
 
 #if CONFIG_LPC17_40_CAN_TSEG1 < 1 || CONFIG_LPC17_40_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
-#  errror "CONFIG_LPC17_40_CAN_TSEG1 is out of range"
+#  error "CONFIG_LPC17_40_CAN_TSEG1 is out of range"
 #endif
 
 #ifndef CONFIG_LPC17_40_CAN_TSEG2
@@ -152,7 +152,7 @@
 #endif
 
 #if CONFIG_LPC17_40_CAN_TSEG2 < 1 || CONFIG_LPC17_40_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
-#  errror "CONFIG_LPC17_40_CAN_TSEG2 is out of range"
+#  error "CONFIG_LPC17_40_CAN_TSEG2 is out of range"
 #endif
 
 #define CAN_BIT_QUANTA (CONFIG_LPC17_40_CAN_TSEG1 + CONFIG_LPC17_40_CAN_TSEG2 + 1)
@@ -1213,13 +1213,13 @@ static int can_bittiming(struct up_dev_s *priv)
  * Name: lpc17_40_caninitialize
  *
  * Description:
- *   Initialize the selected can port
+ *   Initialize the selected CAN port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple can interfaces)
+ *   Port number (for hardware that has multiple CAN interfaces)
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid CAN device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

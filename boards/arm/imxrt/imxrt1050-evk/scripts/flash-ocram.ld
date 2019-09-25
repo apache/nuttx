@@ -37,10 +37,10 @@
 
 MEMORY
 {
-	flash (rx)  : ORIGIN = 0x60000000, LENGTH = 0x04000000
-	sram  (rwx) : ORIGIN = 0x20200000, LENGTH = 0x00080000
-	itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 0x00020000
-	dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00020000
+  flash (rx)  : ORIGIN = 0x60000000, LENGTH = 0x04000000
+  sram  (rwx) : ORIGIN = 0x20200000, LENGTH = 0x00080000
+  itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 0x00020000
+  dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00020000
 }
 
 OUTPUT_ARCH(arm)
@@ -54,102 +54,103 @@ ENTRY(_stext)
 
 SECTIONS
 {
-	/* Image Vector Table and Boot Data for booting from external flash */
+    /* Image Vector Table and Boot Data for booting from external flash */
 
-	.boot_hdr : ALIGN(4)
-	{
-		FILL(0xff)
-		__boot_hdr_start__ = ABSOLUTE(.) ;
-		KEEP(*(.boot_hdr.conf))
-		. = 0x1000 ;
-		KEEP(*(.boot_hdr.ivt))
-		. = 0x1020 ;
-		KEEP(*(.boot_hdr.boot_data))
-		. = 0x1030 ;
-		KEEP(*(.boot_hdr.dcd_data))
-		__boot_hdr_end__ = ABSOLUTE(.) ;
-		. = 0x2000 ;
-	} >flash
+    .boot_hdr : ALIGN(4)
+    {
+        FILL(0xff)
+        __boot_hdr_start__ = ABSOLUTE(.) ;
+        KEEP(*(.boot_hdr.conf))
+        . = 0x1000 ;
+        KEEP(*(.boot_hdr.ivt))
+        . = 0x1020 ;
+        KEEP(*(.boot_hdr.boot_data))
+        . = 0x1030 ;
+        KEEP(*(.boot_hdr.dcd_data))
+        __boot_hdr_end__ = ABSOLUTE(.) ;
+        . = 0x2000 ;
+    } >flash
 
-	.text :
-	{
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > flash
+    .text :
+    {
+        _stext = ABSOLUTE(.);
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > flash
 
-	.init_section :
-	{
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > flash
+    .init_section :
+    {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > flash
 
-	.ARM.extab :
-	{
-		*(.ARM.extab*)
-	} > flash
+    .ARM.extab :
+    {
+        *(.ARM.extab*)
+    } > flash
 
-	__exidx_start = ABSOLUTE(.);
+    .ARM.exidx :
+    {
+        __exidx_start = ABSOLUTE(.);
+        *(.ARM.exidx*)
+        __exidx_end = ABSOLUTE(.);
+    } > flash
 
-	.ARM.exidx :
-	{
-		*(.ARM.exidx*)
-	} > flash
-	__exidx_end = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	_eronly = ABSOLUTE(.);
+    .data :
+    {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    } > sram AT > flash
 
-	.data :
-	{
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+    .ramfunc ALIGN(4):
+    {
+        _sramfuncs = ABSOLUTE(.);
+        *(.ramfunc  .ramfunc.*)
+        _eramfuncs = ABSOLUTE(.);
+    } > sram AT > flash
 
-	.ramfunc ALIGN(4):
-	{
-		_sramfuncs = ABSOLUTE(.);
-		*(.ramfunc  .ramfunc.*)
-		_eramfuncs = ABSOLUTE(.);
-	} > sram AT > flash
+    _framfuncs = LOADADDR(.ramfunc);
 
-	_framfuncs = LOADADDR(.ramfunc);
+    .bss :
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > sram
 
-	.bss :
-	{
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > sram
+    /* Stabs debugging sections. */
 
-	/* Stabs debugging sections. */
-
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }
 

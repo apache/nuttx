@@ -186,8 +186,8 @@ static FAR struct bt_buf_s *bt_dequeue_bufwork(FAR struct bt_bufferlist_s *list)
           for (prev = list->head;
                prev && prev->flink != buf;
                prev = prev->flink)
-           {
-           }
+            {
+            }
 
           if (prev != NULL)
             {
@@ -421,7 +421,8 @@ static void hci_cmd_status(FAR struct bt_buf_s *buf)
 static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_num_completed_packets_s *evt = (FAR void *)buf->data;
-  uint16_t i, num_handles = BT_LE162HOST(evt->num_handles);
+  uint16_t num_handles = BT_LE162HOST(evt->num_handles);
+  uint16_t i;
 
   wlinfo("num_handles %u\n", num_handles);
 
@@ -555,7 +556,8 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
 
 static int bt_hci_stop_scanning(void)
 {
-  FAR struct bt_buf_s *buf, *rsp;
+  FAR struct bt_buf_s *buf;
+  FAR struct bt_buf_s *rsp;
   FAR struct bt_hci_cp_le_set_scan_enable_s *scan_enable;
   int ret;
 
@@ -616,7 +618,7 @@ static int hci_le_create_conn(FAR const bt_addr_le_t *addr)
   cp->conn_interval_min   = BT_HOST2LE16(0x0018);
   cp->scan_interval       = BT_HOST2LE16(0x0060);
   cp->scan_window         = BT_HOST2LE16(0x0030);
-  cp->supervision_timeout = BT_HOST2LE16(0x07D0);
+  cp->supervision_timeout = BT_HOST2LE16(0x07d0);
 
   return bt_hci_cmd_send_sync(BT_HCI_OP_LE_CREATE_CONN, buf, NULL);
 }
@@ -1184,6 +1186,19 @@ static void le_read_buffer_size_complete(FAR struct bt_buf_s *buf)
   g_btdev.le_pkts = rp->le_max_num;
 }
 
+/****************************************************************************
+ * Name: hci_initialize()
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *   none
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 static int hci_initialize(void)
 {
   FAR struct bt_hci_cp_host_buffer_size_s *hbs;
@@ -1195,14 +1210,21 @@ static int hci_initialize(void)
 
   /* Send HCI_RESET */
 
-  bt_hci_cmd_send(BT_HCI_OP_RESET, NULL);
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_RESET, NULL, &rsp);
+  if (ret < 0)
+    {
+      wlerr("ERROR: BT_HCI_OP_RESET failed: %d\n", ret);
+      return ret;
+    }
+
+  bt_buf_release(rsp);
 
   /* Read Local Supported Features */
 
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR: BT_HCI_OP_READ_LOCAL_FEATURES failed: %d\n", ret);
       return ret;
     }
 
@@ -1246,7 +1268,7 @@ static int hci_initialize(void)
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_LOCAL_FEATURES, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR:  BT_HCI_OP_LE_READ_LOCAL_FEATURES failed: %d\n", ret);
       return ret;
     }
 
@@ -1258,7 +1280,7 @@ static int hci_initialize(void)
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_READ_BUFFER_SIZE, NULL, &rsp);
   if (ret < 0)
     {
-      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      wlerr("ERROR:  BT_HCI_OP_LE_READ_BUFFER_SIZE failed: %d\n", ret);
       return ret;
     }
 
@@ -1274,6 +1296,7 @@ static int hci_initialize(void)
 
   ev = bt_buf_extend(buf, sizeof(*ev));
   memset(ev, 0, sizeof(*ev));
+
   ev->events[0] |= 0x10;        /* Disconnection Complete */
   ev->events[1] |= 0x08;        /* Read Remote Version Information Complete */
   ev->events[1] |= 0x20;        /* Command Complete */
@@ -1574,6 +1597,7 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
     }
 
   /* All others use the low priority work queue */
+
   /* Add the buffer to the low priority Rx buffer list */
 
   bt_enqueue_bufwork(&g_lp_rxlist, buf);

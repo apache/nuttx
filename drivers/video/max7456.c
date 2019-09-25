@@ -66,7 +66,7 @@
  *
  * OSD insertion is ultimately an analog process, and a few of the chip's
  * control registers are provided to adjust the OSD multiplexer's rise and
- * fall times. This is necesssary to strike the user's preferred balance
+ * fall times. This is necessary to strike the user's preferred balance
  * between overlay sharpness and certain, undesirable display artifacts. The
  * defaults are probably good enough to start with, though.
  *

@@ -257,7 +257,7 @@ FAR const struct videomode_s *
  *
  * Description:
  *   Find the video mode in a look-up table with the matching width and
- *   height and the closest refrsh rate that does not exceed the requested
+ *   height and the closest refresh rate that does not exceed the requested
  *   rate.
  *
  ****************************************************************************/

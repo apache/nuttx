@@ -648,7 +648,7 @@
 
 /* RX Partial Store and Forward Register */
 
-#define EMAC_RPSF_RPB1ADR_SHIFT   (0)       /* Bits 0-11: Recieve Partial Store and Forward Address */
+#define EMAC_RPSF_RPB1ADR_SHIFT   (0)       /* Bits 0-11: Receive Partial Store and Forward Address */
 #define EMAC_RPSF_RPB1ADR_MASK    (0xfff << EMAC_RPSF_RPB1ADR_SHIFT)
 #  define EMAC_RPSF_RPB1ADR(n)    ((uint32_t)(n) << EMAC_RPSF_RPB1ADR_SHIFT)
 #define EMAC_RPSF_ENRXP           (1 << 31) /* Bit 31: Enable RX Partial Store and Forward Operation */

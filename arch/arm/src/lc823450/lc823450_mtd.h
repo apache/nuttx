@@ -82,7 +82,7 @@
 #define LC823450_PART10_NBLOCKS  0      /* 0 means all remaining sectors     */
 
 #if CONFIG_MTD_CP_STARTBLOCK != LC823450_PART10_START
-#  error "Start sector of contents patrition missmatched"
+#  error "Start sector of contents partition mismatched"
 #endif
 
 /****************************************************************************

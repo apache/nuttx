@@ -68,90 +68,92 @@
 
 MEMORY
 {
-    locked (rx) : ORIGIN = 0x11029080, LENGTH = 48K - 4224
-    paged  (rx) : ORIGIN = 0x11034000, LENGTH = 384K
-    data   (rw) : ORIGIN = 0x11094000, LENGTH = 44K
+  locked (rx) : ORIGIN = 0x11029080, LENGTH = 48K - 4224
+  paged  (rx) : ORIGIN = 0x11034000, LENGTH = 384K
+  data   (rw) : ORIGIN = 0x11094000, LENGTH = 44K
 }
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	.locked : {
-		_slocked = ABSOLUTE(.);
-		*(.vectors)
-		up_head.o locked.r (.text .text.*)
-		up_head.o locked.r (.fixup)
-		up_head.o locked.r (.gnu.warning)
-		up_head.o locked.r (.rodata .rodata.*)
-		up_head.o locked.r (.gnu.linkonce.t.*)
-		up_head.o locked.r (.glue_7)
-		up_head.o locked.r (.glue_7t)
-		up_head.o locked.r (.got)
-		up_head.o locked.r (.gcc_except_table)
-		up_head.o locked.r (.gnu.linkonce.r.*)
-		_elocked = ABSOLUTE(.);
-	} >locked
+    .locked : {
+        _slocked = ABSOLUTE(.);
+        *(.vectors)
+        up_head.o locked.r (.text .text.*)
+        up_head.o locked.r (.fixup)
+        up_head.o locked.r (.gnu.warning)
+        up_head.o locked.r (.rodata .rodata.*)
+        up_head.o locked.r (.gnu.linkonce.t.*)
+        up_head.o locked.r (.glue_7)
+        up_head.o locked.r (.glue_7t)
+        up_head.o locked.r (.got)
+        up_head.o locked.r (.gcc_except_table)
+        up_head.o locked.r (.gnu.linkonce.r.*)
+        _elocked = ABSOLUTE(.);
+    } >locked
 
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > locked
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > locked
 
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > locked
+    .ARM.extab : {
+        *(.ARM.extab*)
+    } > locked
 
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} > locked
-	__exidx_end = ABSOLUTE(.);
+    __exidx_start = ABSOLUTE(.);
+    .ARM.exidx : {
+        *(.ARM.exidx*)
+    } > locked
+    __exidx_end = ABSOLUTE(.);
 
-	_eronly = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	.paged : {
-		_spaged = ABSOLUTE(.);
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_epaged = ABSOLUTE(.);
-	} > paged
+    .paged : {
+        _spaged = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _epaged = ABSOLUTE(.);
+    } > paged
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > data AT > locked
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    } > data AT > locked
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > data
-					/* Stabs debugging sections.	*/
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > data
+                    /* Stabs debugging sections.    */
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

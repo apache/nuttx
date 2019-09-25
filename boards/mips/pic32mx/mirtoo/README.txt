@@ -525,7 +525,7 @@ LED Usage
 UART Usage
 ==========
 
-  When mounted on the DTX1-4000L EV-kit1 board, serial output is avaiable through
+  When mounted on the DTX1-4000L EV-kit1 board, serial output is available through
   an FT230X device via the FUNC0 and FUNC1 module outputs.  If CONFIG_PIC32MX_UART2
   is enabled, the src/pic32_boot will configure the UART2 pins as follows:
 

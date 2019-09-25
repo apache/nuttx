@@ -104,7 +104,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 9, 2019</p>
+      <p>Last Updated:  September 14, 2019</p>
     </td>
   </tr>
 </table>
@@ -1467,11 +1467,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.31.
-  NuttX 7.31 is the 131<sup>st</sup> release of NuttX.
-  It was released on July 21, 2019, and is available for download from the
+  The current release is NuttX 8.1.
+  NuttX 8.1 is the 132<sup>nd</sup> release of NuttX.
+  It was released on September 14, 2019, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.31.tar.gz</code> and <code>apps-7.31.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-8.1.tar.gz</code> and <code>apps-8.1.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1480,7 +1480,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.31 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 8.1 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1488,7 +1488,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.31 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 8.1 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1544,9 +1544,9 @@
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (2)</li>
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (2)</li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (11)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (39)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (57)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (59)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (14)</li>
     </ul>
   <li>Atmel AVR
@@ -1744,6 +1744,11 @@
       <li><a href="#nxplpc43xx">NXP LPC43xx</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#nxplpc54xx">NXP LPC54xx</a> <small>(ARM Cortex-M4)</small></li>
     </ul>
+    <ul>
+      <li><a href="#nxps32k11x">NXP S32K11x</a> <small>(Cortex-M0+)</small></li>
+      <li><a href="#nxps32k14x">NXP S32K14x</a> <small>(Cortex-M4F)</small></li>
+    </ul>
+
   </li>
   <li>ON Semiconductor:
     <ul>
@@ -2799,6 +2804,28 @@ nsh>
 </tr>
 
 <tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="nxps32k11x"><b>NXP S32K11x</b>.</a>
+      Support is provided for the NXP S32K11x family of processors and, in particular, the S32K118EVB development board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The first released version was provided in NuttX 8.1.
+        The S32K118EVB port port provides a minimal NSH configuration.
+        Refer to the S32K118EVB board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/s32k1xx/s32k118evb/README.txt" target="_blank">README.txt</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+
+<tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
     <a name="armcortexm3"><b>ARM Cortex-M3</b>.</a>
@@ -3031,7 +3058,7 @@ nsh>
         </ul>
         <p>
           <b>STATUS</b>.
-          The board suppport is complete but untested because of tool-related issues.  An OpenOCD compatible, SWD debugger would be required to make further progress in testing.
+          The board support is complete but untested because of tool-related issues.  An OpenOCD compatible, SWD debugger would be required to make further progress in testing.
         </p>
         <p>
            Refer to the Olimex EFM32G880F120-STK <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/efm32/olimex-efm32g880f129-stk/README.txt" target="_blank"><i>README.txt</i></a> for further information.
@@ -4283,6 +4310,10 @@ nsh>
           These new architectural features include:  Inter-core communications, power management, and clock management.
           New drivers include:  GPIO, PMIC, USB, SDHC, SPI, I2C, DMA, RTC, PWM, Timers, Watchdog Timer, UID, SCU, ADC, eMMC, Camera CISIF, GNSS, and others.
         </p>
+        <p>
+          <b>NuttX-8.1</b>.
+          Alin Jerpelea brought in ten (external) sensor drivers that integrate through the CXD56xx's SCU.
+        </p>
       </li>
     <ul>
     </ul>
@@ -4996,14 +5027,18 @@ nsh>
       </p>
     </ul>
     <p>
+       <b>LX CPU</b>.
+       Pavel Pisa add support for the PiKRON LX CPU board.
+       This board may be configured to use either the LPC4088 or the LPC1788.
+    </p>
+    <p>
       <b>Driver Status.</b>
     </p>
     <ul>
       <b>NuttX-7.31</b>.
       No new unique drivers for the LPC40xx family are needed.
       Most (if not all) LPC17xx drivers should be simply used with the LPC40xx.
-      That is an unverified assertion, however.
-      Not a proven fact.
+      That is an unverified assertion, however, not a proven fact.
     </ul>
   </td>
 </tr>
@@ -5169,9 +5204,8 @@ nsh>
     </p>
     <p>
       <b>LPC4508</b>.
-      The port was verified on an LPC5408 by a NuttX user with relevant changes incorported in NuttX-7.26.
+      The port was verified on an LPC5408 by a NuttX user with relevant changes incorporated in NuttX-7.26.
     </p>
-  </td>
   </td>
 </tr>
 <tr>
@@ -5193,6 +5227,50 @@ nsh>
     <p>
       Refer to the LPCXpresso-LPC54628 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc54xx/lpcxpresso-lpc54628/README.txt" target="_blank">README</a> file for more detailed information about this port.
     </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="nxps32k14x"><b>NXP S32K14x</b>.</a>
+      Support for the S32K14x family was added in NuttX-8.1.
+      Two boards are supported
+    </p>
+    <ul>
+      <li><b>S32K146EVB</b>.
+        A port to the S32K146EVB was included in NuttX-8.1.  The initial release supports two full-featured NSH configurations.
+        Refer to the S32K146EVB board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/s32k1xx/s32k146evb/README.txt" target="_blank">README</a> file for more detailed information about this port.
+      </li>
+      <li><b>S32K148EVB</b>.
+        A port to the S32K148EVB was also provided in NuttX-8.1.  The initial release supports two full-featured NSH configurations.
+        Refer to the S32K148EVB board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/s32k1xx/s32k148evb/README.txt" target="_blank">README</a> file for more detailed information about this port.
+      </li>
+    </ul>
+  <p>
+    Both boards featured two NSH configurations:  One for execution out of FLASH and a <i>safe</i> version that executes out of SRAM and, hence, cannot lock up the system because of a bad FLASH image.
+  </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Driver Status</b>.
+    </p>
+    <ul>
+      <li>
+        <p><b>NuttX-8.1</b>
+        The initial release for the S32K14x boards in NuttX included the following verfied drivers:  Basic boot up logic, clock configuration, LPUART
+        console, Systick timer, and GPIO controls.
+        Additional complete-but-unverified drivers were also included:  GPIO interrupts, eDMA, LPSPI, LPI2C, and Ethernet (S32K148 only).
+      </li>
+    </ul>
   </td>
 </tr>
 
@@ -5229,24 +5307,30 @@ nsh>
       This port uses the Tiva C Series TM4C123G LaunchPad Evaluation Kit <a href="http://www.ti.com/tool/ek-tm4c123gxl">(EK-TM4C123GXL)</a>.
     </p>
     <ul>
-      <p>
-        <b>STATUS:</b>
-        <ul>
-          <li>
-            Initial architectural support for the EK-TM4C123GXL was implemented and was released in NuttX 7.1.
-            Basic board support the EK-TM4C123GXL was also included in that release but was not fully tested.
-            This basic board support included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
-           </li>
-           <li>
-              The fully verified port to the EK-TM4C123GXL was provided in NuttX-7.2.
-           </li>
-           <li>
-              An I2C driver was added in NuttX-7.7.
-           </li>
-        </ul>
       </p>
         Refer to the EK-TM4C123GXL board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/tm4c123g-launchpad/README.txt" target="_blank">README</a> file for more detailed information about this port.
       </p>
+    </ul>
+    <p>
+      <b>TI Tiva TM4C123H</b>.</a>
+      Architectural support for the Tiva TM4C123AH6PM was contributed in NuttX-8.1 by Nathan Hartman.
+    </p>
+    <b>STATUS:</b>
+    <ul>
+      <li><b>NuttX-7.1</b>.
+        Initial architectural support for the EK-TM4C123GXL was implemented and was released in NuttX 7.1.
+        Basic board support the EK-TM4C123GXL was also included in that release but was not fully tested.
+        This basic board support included a configuration for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+      </li>
+      <li><b>NuttX-7.2</b>.
+        The fully verified port to the EK-TM4C123GXL was provided in NuttX-7.2.
+      </li>
+      <li><b>NuttX-7.7</b>.
+         An I2C driver was added in NuttX-7.7.
+      </li>
+      <li><b>NuttX-8.1</b>.
+         Along with TM4C123AH6PM support, Nathan Hartman also reinstated and extended the Tiva Quadrature Encoder driver.
+      </li>
     </ul>
   </td>
 </tr>
@@ -5408,7 +5492,7 @@ nsh> free
 Mem:         29232       5920      23312      23312
 </pre></ul>
     <p>
-      You can see that 22.8KB (71.1%) of the SRAM heap is staill available for further application development while NSH is running.
+      You can see that 22.8KB (71.1%) of the SRAM heap is still available for further application development while NSH is running.
     </p>
     </ul>
   </td>
@@ -5884,6 +5968,11 @@ Mem:         29232       5920      23312      23312
       <li>
         <p><b>NuttX-7.30</b>.
          Added support for Ethernet, SDMMC, and Timer drivers.  All from Jukka Laitinen.
+        </p>
+      </li>
+      <li>
+        <p><b>NuttX-8.1</b>.
+         Added support for BBSRAM, DTCM, RTC, and UID.  All from David Sidrane.
         </p>
       </li>
     </p>
@@ -6439,7 +6528,7 @@ Mem:         29232       5920      23312      23312
         for download from the <a href="http://www.microchip.com">MicroChip</a> website, or
       </li>
       <li>
-        The Pinguino MIPS ELF toolchain avaiable from the Pinquino <a href="http://code.google.com/p/pinguino32/downloads/list">website</a>.
+        The Pinguino MIPS ELF toolchain available from the Pinguino <a href="http://code.google.com/p/pinguino32/downloads/list">website</a>.
       </li>
       <li>
         The MIPS SDE toolchain available from the <a href="http://www.mentor.com">Mentor Graphics</a> website.
@@ -7237,12 +7326,15 @@ if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
   <li>NuttX is a registered trademark of Gregory Nutt.</li>
   <li>ARM, ARM7 ARM7TDMI, ARM9, ARM920T, ARM926EJS, Cortex-M3 are trademarks of Advanced RISC Machines, Limited.</li>
   <li>Beaglebone is a trademark of GHI.</li>
+  <li>BSD is a trademark of the University of California, Berkeley, USA.</li>
   <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
   <li>Linux is a registered trademark of Linus Torvalds.</li>
   <li>Eagle-100 is a trademark of <a href=" http://www.micromint.com/">Micromint USA, LLC</a>.
   <li>EnergyLite is a trademark of STMicroelectronics.</li>
   <li>EFM32 is a trademark of Silicon Laboratories, Inc.</li>
   <li>LPC2148 is a trademark of NXP Semiconductors.</li>
+  <li>POSIX is a trademark of the Institute of Electrical and Electronic Engineers, Inc.</li>
+  <li>RISC-V is a registration pending trade mark of the RISC-V Foundation.</li>
   <li>Sitara is a trademark of Texas Instruments Incorporated.</li>
   <li>TI is a tradename of Texas Instruments Incorporated.</li>
   <li>Tiva is a trademark of Texas Instruments Incorporated.</li>

@@ -1207,7 +1207,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
  *   Port number (for hardware that has multiple 1-Wire interfaces)
  *
  * Returned Value:
- *   Valid 1-Wire device structure reference on succcess; a NULL on failure
+ *   Valid 1-Wire device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

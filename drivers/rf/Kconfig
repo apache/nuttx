@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config RF_DAT31R5SP
+	bool "Mini-Circuits DAT-31R5-SP digital attenuator support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Mini-Circuits DAT-31R5-SP digital
+		attenuator.

@@ -1313,7 +1313,7 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
  *   cchannels - Number of channels
  *
  * Returned Value:
- *   Valid ADC device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

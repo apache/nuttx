@@ -970,7 +970,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        * (at least by default) like edge interrupts.
        *
        * In any event, faking a TX interrupt here solves the problem;
-       * Call uart_xmitchars() just as would have been done if we recieved
+       * Call uart_xmitchars() just as would have been done if we received
        * the TX interrupt.
        */
 

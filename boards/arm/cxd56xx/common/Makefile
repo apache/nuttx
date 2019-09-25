@@ -1,7 +1,7 @@
 ############################################################################
-# boards/arm/cxd56x/spresense/src/Makefile
+# boards/arm/cxd56x/common/Makefile
 #
-#   Copyright 2018 Sony Semiconductor Solutions Corporation
+#   Copyright 2019 Sony Semiconductor Solutions Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,5 +36,8 @@
 
 include board$(DELIM)Make.defs
 include src$(DELIM)Make.defs
+
+DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk

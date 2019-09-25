@@ -145,9 +145,9 @@ Configuration Variables
 
 At one time, this section provided a list of all NuttX configuration
 variables. However, NuttX has since converted to use the kconfig-frontends
-tools (See http://ymorin.is-a-geek.org/projects/kconfig-frontends).  Now,
-the NuttX configuration is determined by a self-documenting set of Kconfig
-files.
+tools (See https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/.)
+Now, the NuttX configuration is determined by a self-documenting set of
+Kconfig files.
 
 The current NuttX configuration variables are also documented in separate,
 auto-generated configuration variable document.  That configuration variable
@@ -364,6 +364,12 @@ boards/arm/lpc43xx/lpc4370-link2
   NuttX port to the NXP LPC4370-Link2 development board featuring the NXP
   LPC4370FET100 MCU.  Based on the LPC4300 Xplorer port and provided by
   Lok Tep.
+
+boards/arm/lpc17xx_40xx/lx_cpu
+  This port uses the PiKRON LX_CPU board. See the
+  http://pikron.com/pages/products/cpu_boards/lx_cpu.html for further
+  information.  This board features the NXP LPC4088 (compatible with
+  LPC1788) and Xilinx Spartan 6 XC6SLX9
 
 boards/z80/ez80/makerlisp
   This port use the MakerLips machine based on an eZ80F091 ez80Acclaim!

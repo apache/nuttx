@@ -47,6 +47,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #ifdef CONFIG_RNDIS
@@ -325,6 +326,21 @@ int cxd56_bringup(void)
       _err("ERROR: Failed to initialze SPI-Flash. %d\n", errno);
     }
 #endif
+
+#ifdef CONFIG_VIDEO_ISX012
+  ret = board_isx012_initialize(IMAGER_I2C);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize ISX012 board. %d\n", errno);
+    }
+
+  g_video_devops = isx012_initialize();
+  if (g_video_devops == NULL)
+    {
+      _err("ERROR: Failed to populate ISX012 devops. %d\n", errno);
+      ret = ERROR;
+    }
+#endif /* CONFIG_VIDEO_ISX012 */
 
   /* In order to prevent Hi-Z from being input to the SD Card controller,
    * Initialize SDIO pins to GPIO low output with internal pull-down.

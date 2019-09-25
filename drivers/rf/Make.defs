@@ -1,8 +1,9 @@
 ############################################################################
-# drivers/pwm/Make.defs
+# drivers/rf/Make.defs
 #
-#   Copyright (C) 2017 Pinecone Inc. All rights reserved.
-#   Author: Xiang Xiao <xiaoxiang@pinecone.net>
+#   Copyright (C) 2011-2012, 2015-2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2019 Augusto Fraga Giachero. All rights reserved.
+#   Author: Augusto Fraga Giachero <afg@augustofg.net>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,15 +34,24 @@
 #
 ############################################################################
 
-# Don't build anything if there is no PWM support
+# Include rf drivers
 
-ifeq ($(CONFIG_PWM),y)
+RFDEPPATH =
+RFVPATH =
 
-CSRCS += pwm.c
+ifeq ($(CONFIG_DRIVERS_RF),y)
 
-# Include PWM device driver build support
+ifeq ($(CONFIG_SPI),y)
 
-DEPPATH += --dep-path pwm
-VPATH += :pwm
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)pwm}
+ifeq ($(CONFIG_RF_DAT31R5SP),y)
+  CSRCS += dat-31r5-sp.c
+  RFDEPPATH = --dep-path rf
+  RFVPATH = :rf
 endif
+
+endif # CONFIG_SPI
+
+endif # CONFIG_DRIVERS_RF
+
+DEPPATH += $(RFDEPPATH)
+VPATH += $(RFVPATH)

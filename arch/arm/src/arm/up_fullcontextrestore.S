@@ -103,16 +103,10 @@ up_fullcontextrestore:
 	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
 	msr	cpsr, r1		/* Set the CPSR */
 
-	/* Now recover r0 and r1 */
-
-	ldr	r0, [sp]
-	ldr	r1, [sp, #4]
-	add	sp, sp, #(2*4)
-
-	/* Then return to the address at the stop of the stack,
-	 * destroying the stack frame
+	/* Now recover r0 and r1. Then return to the address at the stop of
+         * the stack, destroying the stack frame
 	 */
 
-	ldr	pc, [sp], #4
+	ldmia	sp!, {r0-r1, r15}
 	.size up_fullcontextrestore, . - up_fullcontextrestore
 

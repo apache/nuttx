@@ -287,7 +287,7 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
   i_est->a = smo->F_gain * i_est->a + smo->G_gain * (v_err->a - z->a);
   i_est->b = smo->F_gain * i_est->b + smo->G_gain * (v_err->b - z->b);
 
-  /* Get motor current errror */
+  /* Get motor current error */
 
   i_err->a = i_ab->a - i_est->a;
   i_err->b = i_ab->b - i_est->b;

@@ -229,9 +229,13 @@ static void imxrt_lcd_clockconfig(void)
 static void imxrt_pllsetup(void)
 
 {
+#ifdef CONFIG_ARCH_FAMILY_IMXRT102x
+  uint32_t pll2reg;
+  uint32_t pll3reg;
+#endif
   uint32_t reg;
-#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
 
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
   /* Init Arm PLL1 */
 
   reg = CCM_ANALOG_PLL_ARM_DIV_SELECT(IMXRT_ARM_PLL_DIV_SELECT) |
@@ -258,8 +262,10 @@ static void imxrt_pllsetup(void)
 
   /* Init ENET PLL6 */
 
-  reg    = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ | CCM_ANALOG_PLL_ENET_ENET1_125M_EN |
-           CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN | CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN |
+  reg    = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
+           CCM_ANALOG_PLL_ENET_ENET1_125M_EN          |
+           CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN        |
+           CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN       |
            CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ;
 
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
@@ -270,59 +276,66 @@ static void imxrt_pllsetup(void)
 
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
   /* Init Sys PLL2 */
+
   /* First reset its fractional dividers */
 
-  uint32_t pll2reg=getreg32(IMXRT_CCM_ANALOG_PFD_528);
-    putreg32(pll2reg |
-             CCM_ANALOG_PFD_528_PFD0_CLKGATE |
-             CCM_ANALOG_PFD_528_PFD1_CLKGATE |
-             CCM_ANALOG_PFD_528_PFD2_CLKGATE |
-             CCM_ANALOG_PFD_528_PFD3_CLKGATE,
-             IMXRT_CCM_ANALOG_PFD_528 );
+  pll2reg = getreg32(IMXRT_CCM_ANALOG_PFD_528);
+  putreg32(pll2reg |
+           CCM_ANALOG_PFD_528_PFD0_CLKGATE |
+           CCM_ANALOG_PFD_528_PFD1_CLKGATE |
+           CCM_ANALOG_PFD_528_PFD2_CLKGATE |
+           CCM_ANALOG_PFD_528_PFD3_CLKGATE,
+           IMXRT_CCM_ANALOG_PFD_528);
 
   reg = CCM_ANALOG_PLL_SYS_DIV_SELECT(IMXRT_SYS_PLL_DIV_SELECT) |
         CCM_ANALOG_PLL_SYS_ENABLE;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_SYS);
+
   while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
     {
     }
 
-  putreg32(pll2reg,IMXRT_CCM_ANALOG_PFD_528);
+  putreg32(pll2reg, IMXRT_CCM_ANALOG_PFD_528);
 
   /* Init USB PLL3 */
+
   /* capture it's original value */
 
-  uint32_t pll3reg=getreg32(IMXRT_CCM_ANALOG_PFD_480);
-  putreg32(pll3reg |
-            CCM_ANALOG_PFD_480_PFD0_CLKGATE |
-            CCM_ANALOG_PFD_480_PFD1_CLKGATE |
-            CCM_ANALOG_PFD_480_PFD2_CLKGATE |
-            CCM_ANALOG_PFD_480_PFD3_CLKGATE,
-            IMXRT_CCM_ANALOG_PFD_480 );
+  pll3reg = getreg32(IMXRT_CCM_ANALOG_PFD_480);
+  putreg32(pll3reg                         |
+           CCM_ANALOG_PFD_480_PFD0_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD1_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD2_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD3_CLKGATE,
+           IMXRT_CCM_ANALOG_PFD_480);
 
   reg = CCM_ANALOG_PLL_USB1_DIV_SELECT(IMXRT_USB1_PLL_DIV_SELECT) |
         CCM_ANALOG_PLL_USB1_ENABLE | CCM_ANALOG_PLL_USB1_EN_USB_CLKS |
         CCM_ANALOG_PLL_USB1_POWER;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB1);
+
   while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) & CCM_ANALOG_PLL_USB1_LOCK) == 0)
     {
     }
 
-  putreg32(pll3reg,IMXRT_CCM_ANALOG_PFD_480);
+  putreg32(pll3reg, IMXRT_CCM_ANALOG_PFD_480);
 
   /* Init Audio PLL4 */
 
   reg = CCM_ANALOG_PLL_AUDIO_DIV_SELECT(IMXRT_AUDIO_PLL_DIV_SELECT) |
         CCM_ANALOG_PLL_AUDIO_ENABLE;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_AUDIO);
+
   while ((getreg32(IMXRT_CCM_ANALOG_PLL_AUDIO) & CCM_ANALOG_PLL_AUDIO_LOCK) == 0)
     {
     }
 
   /* Init ENET PLL6 */
 
-  reg = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ | CCM_ANALOG_PLL_ENET_ENET1_125M_EN |
-        CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN | CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN;
+  reg = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
+        CCM_ANALOG_PLL_ENET_ENET1_125M_EN          |
+        CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN        |
+        CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN;
 
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
 
@@ -331,9 +344,8 @@ static void imxrt_pllsetup(void)
     }
 
 #else
-#error Unrecognised IMXRT family member for clock config
+#  error Unrecognised IMXRT family member for clock config
 #endif
-
 }
 
 /****************************************************************************
@@ -482,7 +494,7 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
-  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5-1);
+  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5 - 1);
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
   while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)

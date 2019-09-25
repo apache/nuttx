@@ -47,7 +47,7 @@
 #include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #ifdef CONFIG_BUTTONS
 #  include <nuttx/input/buttons.h>

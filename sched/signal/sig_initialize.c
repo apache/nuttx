@@ -42,6 +42,8 @@
 
 #include <stdint.h>
 #include <queue.h>
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 
 #include "signal/signal.h"
@@ -137,22 +139,24 @@ static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
  *
  ****************************************************************************/
 
-static sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
-                                 uint8_t sigtype)
+static FAR sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
+                                     uint8_t sigtype)
 {
   FAR sigq_t *sigqalloc;
   FAR sigq_t *sigq;
   int i;
 
-  /* Allocate a block of pending signal actions */
+  /* Allocate a block of pending signal actions. */
 
   sigqalloc = (FAR sigq_t *)kmm_malloc((sizeof(sigq_t)) * nsigs);
-
-  sigq = sigqalloc;
-  for (i = 0; i < nsigs; i++)
+  if (sigqalloc != NULL)
     {
-      sigq->type = sigtype;
-      sq_addlast((FAR sq_entry_t *)sigq++, siglist);
+      sigq = sigqalloc;
+      for (i = 0; i < nsigs; i++)
+        {
+          sigq->type = sigtype;
+          sq_addlast((FAR sq_entry_t *)sigq++, siglist);
+        }
     }
 
   return sigqalloc;
@@ -179,11 +183,14 @@ static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
   sigpendalloc =
     (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)) * nsigs);
 
-  sigpend = sigpendalloc;
-  for (i = 0; i < nsigs; i++)
+  if (sigpendalloc != NULL)
     {
-      sigpend->type = sigtype;
-      sq_addlast((FAR sq_entry_t *)sigpend++, siglist);
+      sigpend = sigpendalloc;
+      for (i = 0; i < nsigs; i++)
+        {
+          sigpend->type = sigtype;
+          sq_addlast((FAR sq_entry_t *)sigpend++, siglist);
+        }
     }
 
   return sigpendalloc;
@@ -217,11 +224,13 @@ void nxsig_initialize(void)
     nxsig_alloc_block(&g_sigpendingaction,
                       NUM_PENDING_ACTIONS,
                       SIG_ALLOC_FIXED);
+  DEBUGASSERT(g_sigpendingactionalloc != NULL);
 
   g_sigpendingirqactionalloc =
     nxsig_alloc_block(&g_sigpendingirqaction,
                       NUM_PENDING_INT_ACTIONS,
                       SIG_ALLOC_IRQ);
+  DEBUGASSERT(g_sigpendingirqactionalloc != NULL);
 
   nxsig_alloc_actionblock();
 
@@ -229,11 +238,13 @@ void nxsig_initialize(void)
     nxsig_alloc_pendingsignalblock(&g_sigpendingsignal,
                                    NUM_SIGNALS_PENDING,
                                    SIG_ALLOC_FIXED);
+  DEBUGASSERT(g_sigpendingsignalalloc != NULL);
 
   g_sigpendingirqsignalalloc =
     nxsig_alloc_pendingsignalblock(&g_sigpendingirqsignal,
                                    NUM_INT_SIGNALS_PENDING,
                                    SIG_ALLOC_IRQ);
+  DEBUGASSERT(g_sigpendingirqsignalalloc != NULL);
 }
 
 /****************************************************************************
@@ -255,9 +266,12 @@ void nxsig_alloc_actionblock(void)
   g_sigactionalloc =
     (FAR sigactq_t *)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
 
-  sigact = g_sigactionalloc;
-  for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
+  if (g_sigactionalloc != NULL)
     {
-      sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
+      sigact = g_sigactionalloc;
+      for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
+        {
+          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
+        }
     }
 }

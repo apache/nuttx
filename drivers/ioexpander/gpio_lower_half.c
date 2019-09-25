@@ -395,7 +395,7 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
    * interrupting pin types.
    */
 
-  DEBUGASSERT(pintype != GPIO_INTERRUPT_PIN);
+  DEBUGASSERT(pintype < GPIO_INTERRUPT_PIN);
 #endif
 
   /* Allocate an new instance of the GPIO lower half driver */
@@ -412,18 +412,16 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
   priv->pin        = (uint8_t)pin;
   priv->ioe        = ioe;
   gpio             = &priv->gpio;
-  gpio->gp_pintype = (uint8_t)pintype;
   gpio->gp_ops     = &g_gplh_ops;
 
-  if (pintype == GPIO_OUTPUT_PIN)
+  /* Set pintype */
+
+  ret = gplh_setpintype(gpio, pintype);
+  if (ret < 0)
     {
-      IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_OUT);
-    }
-  else
-    {
-      IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_IN);
-      IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INTCFG,
-                      (FAR void *)g_gplh_inttype[pintype]);
+      gpioerr("ERROR: gplh_setpintype() failed: %d\n", ret);
+      kmm_free(priv);
+      return ret;
     }
 
   /* Register the GPIO driver */

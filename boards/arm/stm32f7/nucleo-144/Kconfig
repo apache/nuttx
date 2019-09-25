@@ -38,13 +38,13 @@ choice
 		Advantage: Use the ST-Link as a console. No Extra wiring
 		needed.
 
-		Disdvantage: Not the best choice for initial bring up.
+		Disadvantage: Not the best choice for initial bring up.
 
 		ARDUINO Connector:
 
 		Advantage: You have a shield so it is easy.
 
-		Disdvantage: You loose the use of the
+		Disadvantage: You loose the use of the
 		other functions on PC6, PC7
 
 				STM32F7

@@ -67,10 +67,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF   ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPICMPBUF ((FAR struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPBUF   ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define ICMPSIZE  ((dev)->d_len - IPv4_HDRLEN)
+#define IPv4BUF      ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPBUF(hl)  ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
+#define ICMPSIZE(hl) ((dev)->d_len - (hl))
 
 /****************************************************************************
  * Private Functions
@@ -104,6 +103,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   FAR struct iob_s *iob;
   uint16_t offset;
   uint16_t buflen;
+  uint16_t iphdrlen;
   uint8_t addrsize;
   int ret;
 
@@ -164,11 +164,15 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
 
   offset += sizeof(struct sockaddr_in);
 
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
   /* Copy the new ICMP reply into the I/O buffer chain (without waiting) */
 
-  buflen = ICMPSIZE;
-  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF, buflen, offset, true,
-                      IOBUSER_NET_SOCK_ICMP);
+  buflen = ICMPSIZE(iphdrlen);
+  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF(iphdrlen), buflen, offset,
+                      true, IOBUSER_NET_SOCK_ICMP);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -227,57 +231,71 @@ drop:
 
 void icmp_input(FAR struct net_driver_s *dev)
 {
-  FAR struct icmp_iphdr_s *ipicmp = IPICMPBUF;
+  FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  FAR struct icmp_hdr_s *icmp;
+  uint16_t iphdrlen;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.recv++;
 #endif
+
+  /* Get the IP header length (accounting for possible options). */
+
+  iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
+  /* The ICMP header immediately follows the IP header */
+
+  icmp = ICMPBUF(iphdrlen);
 
   /* ICMP echo (i.e., ping) processing. This is simple, we only change the
    * ICMP type from ECHO to ECHO_REPLY and adjust the ICMP checksum before
    * we return the packet.
    */
 
-  if (ipicmp->type == ICMP_ECHO_REQUEST)
+  if (icmp->type == ICMP_ECHO_REQUEST)
     {
       /* Change the ICMP type */
 
-      ipicmp->type = ICMP_ECHO_REPLY;
+      icmp->type = ICMP_ECHO_REPLY;
 
       /* Swap IP addresses. */
 
-      net_ipv4addr_hdrcopy(ipicmp->destipaddr, ipicmp->srcipaddr);
-      net_ipv4addr_hdrcopy(ipicmp->srcipaddr, &dev->d_ipaddr);
+      net_ipv4addr_hdrcopy(ipv4->destipaddr, ipv4->srcipaddr);
+      net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
 
       /* Recalculate the ICMP checksum */
 
 #if 0
+      /* Get the IP header length (accounting for possible options). */
+
+      iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
+
       /* The slow way... sum over the ICMP message */
 
-      ipicmp->icmpchksum = 0;
-      ipicmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)ipicmp->len[0] << 8) |
-                                               (uint16_t)ipicmp->len[1]) - IPv4_HDRLEN);
-      if (ipicmp->icmpchksum == 0)
+      icmp->icmpchksum = 0;
+      icmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)ipv4->len[0] << 8) |
+                                             (uint16_t)ipv4->len[1]) - iphdrlen);
+      if (icmp->icmpchksum == 0)
         {
-          ipicmp->icmpchksum = 0xffff;
+          icmp->icmpchksum = 0xffff;
         }
 #else
       /* The quick way -- Since only the type has changed, just adjust the
        * checksum for the change of type
        */
 
-      if (ipicmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
+      if (icmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
         {
-          ipicmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
+          icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
         }
       else
         {
-          ipicmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
+          icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
         }
 #endif
 
       ninfo("Outgoing ICMP packet length: %d (%d)\n",
-            dev->d_len, (ipicmp->len[0] << 8) | ipicmp->len[1]);
+            dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.icmp.sent++;
@@ -290,7 +308,7 @@ void icmp_input(FAR struct net_driver_s *dev)
    * a thread waiting to received the echo response.
    */
 
-  else if (ipicmp->type == ICMP_ECHO_REPLY)
+  else if (icmp->type == ICMP_ECHO_REPLY)
     {
       FAR struct icmp_conn_s *conn;
       uint16_t flags;
@@ -302,7 +320,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
       /* Is there any connection that might expect this reply? */
 
-      conn = icmp_findconn(dev, ipicmp->id);
+      conn = icmp_findconn(dev, icmp->id);
       if (conn == NULL)
         {
           /* No.. drop the packet */
@@ -334,7 +352,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   else
     {
-      nwarn("WARNING: Unknown ICMP cmd: %d\n", ipicmp->type);
+      nwarn("WARNING: Unknown ICMP cmd: %d\n", icmp->type);
       goto typeerr;
     }
 

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpcxpresso-lpc1768/configs/thttpd/Make.defs
+# boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/configs/thttpd/Make.defs
 #
 #   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

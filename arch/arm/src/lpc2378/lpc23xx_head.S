@@ -80,10 +80,10 @@
  * Name: _vector_table
  *
  * Description:
- *   Interrrupt vector table.  This must be located at the beginning
+ *   Interrupt vector table.  This must be located at the beginning
  *   of the memory space (at CONFIG_LPC2378_CODE_BASE).  The first entry in
  *   the vector table is the reset vector and this is the code that
- *   will execute whn the processor is reset.
+ *   will execute when the processor is reset.
  *
  *****************************************************************************/
 

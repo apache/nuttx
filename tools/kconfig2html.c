@@ -1788,7 +1788,7 @@ static inline char *process_config(FILE *stream, const char *varname,
         }
     }
 
-  /* Is this an internal configuration varaible with no description?
+  /* Is this an internal configuration variable with no description?
    * If so, send the output to the appendix file.
    */
 
@@ -2659,7 +2659,7 @@ int main(int argc, char **argv, char **envp)
   body("<p>\n");
   body("  <b>Overview</b>.\n");
   body("  The NuttX RTOS is highly configurable.\n");
-  body("  The NuttX configuration files are maintained using the <a href=\"http://ymorin.is-a-geek.org/projects/kconfig-frontends\">kconfig-frontends</a> tool.\n");
+  body("  The NuttX configuration files are maintained using the <a href=\"https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends\">kconfig-frontends</a> tool.\n");
   body("  That configuration tool uses <code>Kconfig</code> files that can be found through the NuttX source tree.\n");
   body("  Each <code>Kconfig</code> files contains declarations of configuration variables.\n");
   body("  Each configuration variable provides one configuration option for the NuttX RTOS.\n");

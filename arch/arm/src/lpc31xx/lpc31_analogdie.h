@@ -375,7 +375,7 @@
 #define CODEC_INT_DACPC_SHIFT           (1)       /* Bits 1-7: Program counter on the CLKIN_DSP clock for interpolator */
 #define CODEC_INT_DACPC_MASK            (0x7f << CODEC_INT_DACPC_SHIFT)
 #define CODEC_INT_SDETECTEDR1           (1 << 8)  /* Bit 8:  Silence detection output channel 1 RIGHT */
-#define CODEC_INT_SDETECTEDL1           (1 << 9)  /* Bit 9:  Silence detection ouput channel 1 LEFT */
+#define CODEC_INT_SDETECTEDL1           (1 << 9)  /* Bit 9:  Silence detection output channel 1 LEFT */
 #define CODEC_INT_MUTESTATEM            (1 << 10) /* Bit 10: Mute status of master channel */
 #define CODEC_INT_INVNDAC               (1 << 11) /* Bit 11: Control signal to invert neg. channel data for differential application */
 #define CODEC_INT_DSR                   (1 << 12) /* Bit 12: DAC silence switch control signal RIGHT */

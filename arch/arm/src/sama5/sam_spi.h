@@ -115,7 +115,7 @@ struct spi_dev_s;  /* Forward reference */
  *   cs - Chip select number (identifying the "logical" SPI port)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

@@ -1220,7 +1220,7 @@ static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit)
  *   Port number (for hardware that has multiple 1-Wire interfaces)
  *
  * Returned Value:
- *   Valid 1-Wire device structure reference on succcess; a NULL on failure
+ *   Valid 1-Wire device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

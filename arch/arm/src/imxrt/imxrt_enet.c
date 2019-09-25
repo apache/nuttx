@@ -116,7 +116,7 @@
 #endif
 
 #define NENET_NBUFFERS \
-  (CONFIG_IMXRT_ENET_NTXBUFFERS+CONFIG_IMXRT_ENET_NRXBUFFERS)
+  (CONFIG_IMXRT_ENET_NTXBUFFERS + CONFIG_IMXRT_ENET_NRXBUFFERS)
 
 /* Normally you would clean the cache after writing new values to the DMA
  * memory so assure that the dirty cache lines are flushed to memory
@@ -141,7 +141,7 @@
  * second.
  */
 
-#define IMXRT_WDDELAY     (1*CLK_TCK)
+#define IMXRT_WDDELAY     (1 * CLK_TCK)
 
 /* Align assuming that the D-Cache is enabled (probably 32-bytes).
  *
@@ -159,9 +159,9 @@
 
 /* TX timeout = 1 minute */
 
-#define IMXRT_TXTIMEOUT   (60*CLK_TCK)
+#define IMXRT_TXTIMEOUT   (60 * CLK_TCK)
 #define MII_MAXPOLLS      (0x1ffff)
-#define LINK_WAITUS       (500*1000)
+#define LINK_WAITUS       (500 * 1000)
 #define LINK_NLOOPS       (10)
 
 /* PHY definitions.
@@ -240,7 +240,7 @@
  * locking up of the Ethernet interface.
  */
 
-#define CRITICAL_ERROR    (ENET_INT_UN | ENET_INT_RL | ENET_INT_EBERR )
+#define CRITICAL_ERROR    (ENET_INT_UN | ENET_INT_RL | ENET_INT_EBERR)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 

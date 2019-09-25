@@ -193,7 +193,7 @@
 #define LIS3DSH_CTRL_REG_6_ADD_INC_bm     (1<<4)  /* Register address automatically incremented during a multiple byte access with a serial interface */
 #define LIS3DSH_CTRL_REG_6_P1_EMPTY_bm    (1<<3)  /* Enable FIFO empty indication on Int1 */
 #define LIS3DSH_CTRL_REG_6_P1_WTM_bm      (1<<2)  /* FIFO watermark interrupt Int1 */
-#define LIS3DSH_CTRL_REG_6_P1_OVERRUN_bm  (1<<1)  /* FIFO overrrun interrupt on Int1 */
+#define LIS3DSH_CTRL_REG_6_P1_OVERRUN_bm  (1<<1)  /* FIFO overrun interrupt on Int1 */
 #define LIS3DSH_CTRL_REG_6_P2_BOOT_bm     (1<<0)  /* BOOT interrupt on Int2 */
 
 /* SPI BUS PARAMETERS *******************************************************/

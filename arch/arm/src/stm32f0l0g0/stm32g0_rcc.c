@@ -1,8 +1,9 @@
-/****************************************************************************
+/********************************************************************
  * arch/arm/src/stm32f0l0g0/stm32g0_rcc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *           Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,17 +32,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************/
 
-/****************************************************************************
+/********************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************/
 
 #include "stm32_pwr.h"
 
-/****************************************************************************
+/********************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ********************************************************************/
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are
@@ -55,21 +56,21 @@
 
 #define HSE_DIVISOR RCC_CR_RTCPRE_HSEd8
 
-/****************************************************************************
+/********************************************************************
  * Private Data
- ****************************************************************************/
+ ********************************************************************/
 
-/****************************************************************************
+/********************************************************************
  * Private Functions
- ****************************************************************************/
+ ********************************************************************/
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_reset
  *
  * Description:
  *   Put all RCC registers in reset state
  *
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_reset(void)
 {
@@ -93,13 +94,13 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_enableio
  *
  * Description:
  *   Enable selected GPIO
  *
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_enableio(void)
 {
@@ -113,13 +114,13 @@ static inline void rcc_enableio(void)
   putreg32(regval, STM32_RCC_IOPENR);   /* Enable GPIO */
 }
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_enableahb
  *
  * Description:
  *   Enable selected AHB peripherals
  *
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_enableahb(void)
 {
@@ -164,13 +165,13 @@ static inline void rcc_enableahb(void)
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
 }
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_enableapb1
  *
  * Description:
  *   Enable selected APB1 peripherals
  *
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_enableapb1(void)
 {
@@ -294,13 +295,13 @@ static inline void rcc_enableapb1(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_enableapb2
  *
  * Description:
  *   Enable selected APB2 peripherals
  *
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_enableapb2(void)
 {
@@ -381,13 +382,13 @@ static inline void rcc_enableapb2(void)
   putreg32(regval, STM32_RCC_APB2ENR);
 }
 
-/****************************************************************************
+/********************************************************************
  * Name: stm32_rcc_enablehse
  *
  * Description:
  *   Enable the External High-Speed (HSE) Oscillator.
  *
- ****************************************************************************/
+ ********************************************************************/
 
 #if (STM32_PLLCFG_PLLSRC == RCC_PLLCFG_PLLSRC_HSE) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
 static inline bool stm32_rcc_enablehse(void)
@@ -428,7 +429,7 @@ static inline bool stm32_rcc_enablehse(void)
 }
 #endif
 
-/****************************************************************************
+/********************************************************************
  * Name: stm32_stdclockconfig
  *
  * Description:
@@ -437,7 +438,7 @@ static inline bool stm32_rcc_enablehse(void)
  *   NOTE:  This logic would need to be extended if you need to select low-
  *   power clocking modes or any clocking other than PLL driven by the HSE.
  *
- ****************************************************************************/
+ ********************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 static void stm32_stdclockconfig(void)
@@ -446,8 +447,10 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_STM32F0L0G0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   uint16_t pwrcr;
 #endif
+#ifdef CONFIG_STM32F0L0G0_PWR
   uint32_t pwr_vos;
-  bool flash_1ws;
+#endif
+  uint32_t flash_ws;
 
   /* Enable PWR clock from APB1 to give access to PWR_CR register */
 
@@ -455,8 +458,68 @@ static void stm32_stdclockconfig(void)
   regval |= RCC_APB1ENR_PWREN;
   putreg32(regval, STM32_RCC_APB1ENR);
 
-#warning TODO: configure VOS range
-  UNUSED(pwr_vos);
+  /* Two voltage ranges are available:
+   *
+   * Range 1: High-performance range (default)
+   *          Typical output voltage 1.2 V
+   *          SYSLCK up to 64 MHz
+   *
+   * Range 2: Low-power range
+   *          Typical output voltage 1.0V
+   *          SYSLCK up to 16 MHz
+   *
+   * Flash wait states (latency) according to range and HCLK:
+   *
+   * Range 1:
+   * - Flash 0WS if HCLK <= 24
+   * - Flash 1WS if HCLK <= 48
+   * - Flash 2WS if HCLK <= 64
+   *
+   * Range 2:
+   * - Flash 0WS if HCLK <= 8
+   * - Flash 1WS if HCLK <= 16
+   *
+   * Where HCLK = (SYSCLK / HPRE div)
+   */
+
+  if (STM32_SYSCLK_FREQUENCY > 16000000)
+    {
+#ifdef CONFIG_STM32F0L0G0_PWR
+      pwr_vos = PWR_CR1_VOS_RANGE1;
+#endif
+
+      if (STM32_HCLK_FREQUENCY <= 24000000)
+        {
+          flash_ws = FLASH_ACR_LATENCY_0;
+        }
+      else if (STM32_HCLK_FREQUENCY <= 48000000)
+        {
+          flash_ws = FLASH_ACR_LATENCY_1;
+        }
+      else
+        {
+          flash_ws = FLASH_ACR_LATENCY_2;
+        }
+    }
+  else
+    {
+#ifdef CONFIG_STM32F0L0G0_PWR
+      pwr_vos = PWR_CR1_VOS_RANGE2;
+#endif
+
+      if (STM32_HCLK_FREQUENCY <= 8000000)
+        {
+          flash_ws = FLASH_ACR_LATENCY_0;
+        }
+      else
+        {
+          flash_ws = FLASH_ACR_LATENCY_1;
+        }
+    }
+
+#ifdef CONFIG_STM32F0L0G0_PWR
+  stm32_pwr_setvos(pwr_vos);
+#endif
 
 #if defined(CONFIG_STM32F0L0G0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler
@@ -532,19 +595,23 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-#warning TODO: configure flash latency
-  UNUSED(flash_1ws);
+  /* Configure FLASH wait states and enable prefetch */
+
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (flash_ws & FLASH_ACR_LATENCY_MASK) | FLASH_ACR_PRFTEN;
+  putreg32(regval, STM32_FLASH_ACR);
 
   /* Set the HCLK source/divider */
 
-  regval = getreg32(STM32_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_HPRE_MASK;
   regval |= STM32_RCC_CFGR_HPRE;
   putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PCLK1 divider */
 
-  regval = getreg32(STM32_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_PPRE1_MASK;
   regval |= STM32_RCC_CFGR_PPRE1;
   putreg32(regval, STM32_RCC_CFGR);
@@ -563,7 +630,12 @@ static void stm32_stdclockconfig(void)
 
   /* Configure PLL clock outputs division */
 
+#if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
+    defined(CONFIG_ARCH_CHIP_STM32G070RB)
+  regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLR;
+#else
   regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLQ | STM32_PLLCFG_PLLR;
+#endif
 
   /* Write PLLCFG register */
 
@@ -571,7 +643,7 @@ static void stm32_stdclockconfig(void)
 
   /* Enable PLL */
 
-  regval = getreg32(STM32_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_PLLON;
   putreg32(regval, STM32_RCC_CR);
 #endif
@@ -618,9 +690,9 @@ static void stm32_stdclockconfig(void)
 }
 #endif
 
-/****************************************************************************
+/********************************************************************
  * Name: rcc_enableperiphals
- ****************************************************************************/
+ ********************************************************************/
 
 static inline void rcc_enableperipherals(void)
 {
@@ -630,6 +702,6 @@ static inline void rcc_enableperipherals(void)
   rcc_enableapb1();
 }
 
-/****************************************************************************
+/********************************************************************
  * Public Functions
- ****************************************************************************/
+ ********************************************************************/

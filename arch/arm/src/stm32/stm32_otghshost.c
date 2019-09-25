@@ -75,7 +75,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
+
 /* STM32 USB OTG HS Host Driver Support
  *
  * Pre-requisites
@@ -139,6 +141,7 @@
 #endif
 
 /* HCD Setup *******************************************************************/
+
 /* Hardware capabilities */
 
 #if defined(CONFIG_STM32_STM32F446)
@@ -386,6 +389,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 #endif
 
 /* Interrupt handling **********************************************************/
+
 /* Lower level interrupt handlers */
 
 static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
@@ -1304,7 +1308,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
       return -ENOMEM;
     }
 
-  /* Then allocate and configure the IN/OUT channnels  */
+  /* Then allocate and configure the IN/OUT channels */
 
   ret = stm32_ctrlchan_alloc(priv, epdesc->addr & USB_EPNO_MASK,
                              hport->funcaddr, hport->speed, ctrlep);
@@ -1526,7 +1530,8 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32_getreg(STM32_OTGHS_HNPTXSTS);
-            avail  = ((regval & OTGHS_HNPTXSTS_NPTXFSAV_MASK) >> OTGHS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+            avail  = ((regval & OTGHS_HNPTXSTS_NPTXFSAV_MASK) >>
+                      OTGHS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
           }
           break;
 
@@ -1538,7 +1543,8 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32_getreg(STM32_OTGHS_HPTXSTS);
-            avail  = ((regval & OTGHS_HPTXSTS_PTXFSAVL_MASK) >> OTGHS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+            avail  = ((regval & OTGHS_HPTXSTS_PTXFSAVL_MASK) >>
+                      OTGHS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
           }
           break;
 
@@ -2206,6 +2212,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
+  bool zlp;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -2214,8 +2221,9 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan  = &priv->chan[chidx];
   start = clock_systimer();
   xfrd  = 0;
+  zlp   = (buflen == 0);
 
-  while (buflen > 0)
+  while (buflen > 0 || zlp)
     {
       /* Transfer one packet at a time.  The hardware is capable of queueing
        * multiple OUT packets, but I just haven't figured out how to handle
@@ -2283,7 +2291,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
            * using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20*1000);
+          nxsig_usleep(20 * 1000);
         }
       else
         {
@@ -2292,6 +2300,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           buffer += xfrlen;
           buflen -= xfrlen;
           xfrd   += chan->xfrd;
+          zlp     = false;
         }
     }
 
@@ -2672,8 +2681,8 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
        * REVISIT: This can cause a lot of interrupts!
        */
 
-      else if (chan->eptype == OTGHS_EPTYPE_CTRL /*||
-               chan->eptype == OTGHS_EPTYPE_BULK*/)
+      else if (chan->eptype == OTGHS_EPTYPE_CTRL /* ||
+               chan->eptype == OTGHS_EPTYPE_BULK */)
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
@@ -3020,6 +3029,7 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
+
 #warning "Do what?"
 
   /* Clear pending SOF interrupt */
@@ -3179,7 +3189,8 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Extract the number of bytes available in the non-periodic Tx FIFO. */
 
-  avail = ((regval & OTGHS_HNPTXSTS_NPTXFSAV_MASK) >> OTGHS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+  avail = ((regval & OTGHS_HNPTXSTS_NPTXFSAV_MASK) >>
+           OTGHS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -3267,7 +3278,8 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   /* Extract the number of bytes available in the periodic Tx FIFO. */
 
-  avail = ((regval & OTGHS_HPTXSTS_PTXFSAVL_MASK) >> OTGHS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+  avail = ((regval & OTGHS_HPTXSTS_PTXFSAVL_MASK) >>
+           OTGHS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -3368,6 +3380,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
   uint32_t hcfg;
 
   usbhost_vtrace1(OTGHS_VTRACE1_GINT_HPRT, 0);
+
   /* Read the port status and control register (HPRT) */
 
   hprt = stm32_getreg(STM32_OTGHS_HPRT);
@@ -3457,7 +3470,6 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
             }
           else /* if ((hprt & OTGHS_HPRT_PSPD_MASK) == OTGHS_HPRT_PSPD_HS) */
             {
-
               usbhost_vtrace1(OTGHS_VTRACE1_GINT_HPRT_FSDEV, 0);
               stm32_putreg(STM32_OTGHS_HFIR, 48000);
 
@@ -3465,8 +3477,8 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
 
               if ((hcfg & OTGHS_HCFG_FSLSPCS_MASK) != OTGHS_HCFG_FSLSPCS_FS48MHz)
                 {
-
                   usbhost_vtrace1(OTGHS_VTRACE1_GINT_HPRT_LSFSSW, 0);
+
                   /* Yes... configure for HS */
 
                   hcfg &= ~OTGHS_HCFG_FSLSPCS_MASK;
@@ -3718,6 +3730,7 @@ static inline void stm32_hostinit_enable(void)
   stm32_putreg(STM32_OTGHS_GINTSTS, 0xbfffffff);
 
   /* Enable the host interrupts */
+
   /* Common interrupts:
    *
    *   OTGHS_GINT_WKUP     : Resume/remote wakeup detected interrupt
@@ -3953,7 +3966,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Reset the host port */
 
@@ -4181,8 +4194,9 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   stm32_takesem(&priv->exclsem);
 
-  /* A single channel is represent by an index in the range of 0 to STM32_MAX_TX_FIFOS.
-   * Otherwise, the ep must be a pointer to an allocated control endpoint structure.
+  /* A single channel is represent by an index in the range of 0 to
+   * STM32_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an allocated
+   * control endpoint structure.
    */
 
   if ((uintptr_t)ep < STM32_MAX_TX_FIFOS)
@@ -4448,38 +4462,36 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
           continue;
         }
 
+      /* Handle the IN data phase (if any) */
+
+      if (buflen > 0)
+        {
+          ret = stm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
+          if (ret < 0)
+            {
+              usbhost_trace1(OTGHS_TRACE1_RECVDATA, -ret);
+              continue;
+            }
+        }
+
       /* Get the start time.  Loop again until the timeout expires */
 
       start = clock_systimer();
       do
         {
-          /* Handle the IN data phase (if any) */
-
-          if (buflen > 0)
-            {
-              ret = stm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
-              if (ret < 0)
-                {
-                  usbhost_trace1(OTGHS_TRACE1_RECVDATA, -ret);
-                }
-            }
-
           /* Handle the status OUT phase */
 
+          priv->chan[ep0info->outndx].outdata1 ^= true;
+          ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
           if (ret == OK)
             {
-              priv->chan[ep0info->outndx].outdata1 ^= true;
-              ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
-              if (ret == OK)
-                {
-                  /* All success transactions exit here */
+              /* All success transactions exit here */
 
-                  stm32_givesem(&priv->exclsem);
-                  return OK;
-                }
-
-              usbhost_trace1(OTGHS_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
+              stm32_givesem(&priv->exclsem);
+              return OK;
             }
+
+          usbhost_trace1(OTGHS_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
 
           /* Get the elapsed time (in frames) */
 
@@ -5096,7 +5108,10 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
   regval &= ~OTGHS_HCFG_FSLSS;
   stm32_putreg(STM32_OTGHS_HCFG, regval);
 
-  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic Tx FIFOs */
+  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
+   * Tx FIFOs
+   */
+
   /* Configure Rx FIFO size (GRXHSIZ) */
 
   stm32_putreg(STM32_OTGHS_GRXFSIZ, CONFIG_STM32_OTGHS_RXFIFO_SIZE);
@@ -5104,13 +5119,15 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
 
   /* Setup the host non-periodic Tx FIFO size (HNPTXHSIZ) */
 
-  regval = (offset | (CONFIG_STM32_OTGHS_NPTXFIFO_SIZE << OTGHS_HNPTXFSIZ_NPTXFD_SHIFT));
+  regval  = (offset |
+             (CONFIG_STM32_OTGHS_NPTXFIFO_SIZE << OTGHS_HNPTXFSIZ_NPTXFD_SHIFT));
   stm32_putreg(STM32_OTGHS_HNPTXFSIZ, regval);
   offset += CONFIG_STM32_OTGHS_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx fifo size register (HPTXHSIZ) */
 
-  regval = (offset | (CONFIG_STM32_OTGHS_PTXFIFO_SIZE << OTGHS_HPTXFSIZ_PTXFD_SHIFT));
+  regval  = (offset |
+             (CONFIG_STM32_OTGHS_PTXFIFO_SIZE << OTGHS_HPTXFSIZ_PTXFD_SHIFT));
   stm32_putreg(STM32_OTGHS_HPTXFSIZ, regval);
 
   /* If OTG were supported, we sould need to clear HNP enable bit in the
@@ -5206,7 +5223,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
    * priority inheritance enabled.
    */
 
- nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 
@@ -5239,7 +5256,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
  * Name: stm32_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

@@ -68,7 +68,6 @@ include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
 include pipes$(DELIM)Make.defs
 include power$(DELIM)Make.defs
-include pwm$(DELIM)Make.defs
 include sensors$(DELIM)Make.defs
 include serial$(DELIM)Make.defs
 include spi$(DELIM)Make.defs
@@ -82,6 +81,7 @@ include video$(DELIM)Make.defs
 include wireless$(DELIM)Make.defs
 include contactless$(DELIM)Make.defs
 include 1wire$(DELIM)Make.defs
+include rf$(DELIM)Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 include platform$(DELIM)Make.defs

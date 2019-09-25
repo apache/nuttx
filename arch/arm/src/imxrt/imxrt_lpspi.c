@@ -325,6 +325,10 @@ static struct imxrt_lpspidev_s g_lpspi3dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI3,
 #endif
+#ifdef CONFIG_IMXRT_LPSPI_DMA
+  .rxch         = DMAMAP_LPSPI3_RX,
+  .txch         = DMAMAP_LPSPI3_TX,
+#endif
 };
 #endif
 
@@ -368,8 +372,8 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
   .spiirq       = IMXRT_IRQ_LPSPI4,
 #endif
 #ifdef CONFIG_IMXRT_LPSPI_DMA
-  .rxch         = DMAMAP_LPSPI1_RX,
-  .txch         = DMAMAP_LPSPI1_TX,
+  .rxch         = DMAMAP_LPSPI4_RX,
+  .txch         = DMAMAP_LPSPI4_TX,
 #endif
 };
 #endif
@@ -1398,7 +1402,7 @@ static void imxrt_lpspi_sndblock(FAR struct spi_dev_s *dev,
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that can be received in the buffer in number
  *              of words.  The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
@@ -1553,7 +1557,7 @@ static void imxrt_lpspi_bus_initialize(struct imxrt_lpspidev_s *priv)
  *   Initialize the selected SPI bus
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure

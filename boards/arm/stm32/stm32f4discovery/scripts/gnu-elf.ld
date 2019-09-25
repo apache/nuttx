@@ -83,6 +83,7 @@ SECTIONS
       *(.data1)
       *(.data.*)
       *(.gnu.linkonce.d*)
+      . = ALIGN(4);
       _edata = . ;
     }
 
@@ -119,6 +120,7 @@ SECTIONS
       *(.sbss.*)
       *(.gnu.linkonce.b*)
       *(COMMON)
+      . = ALIGN(4);
       _ebss = . ;
     }
 

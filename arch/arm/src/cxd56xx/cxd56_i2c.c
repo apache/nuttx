@@ -771,7 +771,7 @@ static int cxd56_i2c_scurecv(int port, int addr, uint8_t *buf, ssize_t buflen)
       ret = scu_i2ctransfer(port, addr, inst, instn, buf, len0 + len1);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "I2C recieve failed. port %d addr %d\n",
+          syslog(LOG_ERR, "I2C receive failed. port %d addr %d\n",
                  port, addr);
           break;
         }

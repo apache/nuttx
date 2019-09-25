@@ -118,6 +118,7 @@ static char        g_delim         = '/';   /* Delimiter to use when forming pat
 static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
+static bool        g_skip          = false; /* Skip .config/Make.defs existence check */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */
 static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
@@ -270,6 +271,8 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    instead of Windows style paths like C:\\Program Files are used.  POSIX\n");
   fprintf(stderr, "    style paths are used by default.\n");
 #endif
+  fprintf(stderr, "  -s:\n");
+  fprintf(stderr, "    Skip the .config/Make.defs existence check\n");
   fprintf(stderr, "  [-l|m|c|u|g|n]\n");
   fprintf(stderr, "    Selects the host environment.\n");
   fprintf(stderr, "    -l Selects the Linux (l) host environment.\n");
@@ -360,7 +363,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, "a:bcdfghlmnu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdfghlmnsu")) > 0)
     {
       switch (ch)
         {
@@ -406,6 +409,10 @@ static void parse_args(int argc, char **argv)
           case 'n' :
             g_host    = HOST_WINDOWS;
             g_windows = WINDOWS_NATIVE;
+            break;
+
+          case 's' :
+            g_skip = true;
             break;
 
           case 'u' :
@@ -824,6 +831,13 @@ static void check_configdir(void)
 
 static void check_configured(void)
 {
+  /* Skip to check .config/Make.defs? */
+
+  if (g_skip)
+    {
+      return;
+    }
+
   /* If we are already configured then there will be a .config and a Make.defs
    * file in the top-level directory.
    */
@@ -1297,7 +1311,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
           disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_M32");
         }
         break;
 
@@ -1317,7 +1330,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
           disable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
-          disable_feature(destconfig, "CONFIG_SIM_M32");
         }
         break;
 
@@ -1332,8 +1344,6 @@ static void set_host(const char *destconfig)
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
           disable_feature(destconfig, "CONFIG_SIM_X8664_SYSTEMV");
-
-          disable_feature(destconfig, "CONFIG_SIM_M32");
 
           switch (g_windows)
             {

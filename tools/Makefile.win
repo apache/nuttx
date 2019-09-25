@@ -76,6 +76,8 @@ else
 BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
 endif
 
+COMMON_DIR = $(if $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common$(DELIM)Makefile),y,)
+
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ..\apps.  Ultimately, the application
 # will be built if APPDIR is defined.  APPDIR will be defined if a directory containing
@@ -167,6 +169,13 @@ else ifeq ($(CONFIG_BUILD_LOADABLE),y)
 MKEXPORT_ARGS += -u
 endif
 
+ifneq ($(APPDIR),)
+ifneq ($(shell [ -e $(APPDIR)/Makefile ] && echo yes),)
+MKEXPORT_ARGS += -a "$(APPDIR)"
+MKEXPORT_ARGS += -m "$(MAKE)"
+endif
+endif
+
 ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
@@ -205,7 +214,7 @@ endif
 
 ifeq ($(NEED_MATH_H),y)
 include\math.h: include\nuttx\math.h
-	$(Q) cp -f include\nuttx\math.h include\math.h
+	$(Q) cp -pf include\nuttx\math.h include\math.h
 else
 include\math.h:
 endif
@@ -218,7 +227,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
 include\float.h: include\nuttx\float.h
-	$(Q) cp -f include\nuttx\float.h include\float.h
+	$(Q) cp -pf include\nuttx\float.h include\float.h
 else
 include\float.h:
 endif
@@ -230,7 +239,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
 include\stdarg.h: include\nuttx\stdarg.h
-	$(Q) cp -f include\nuttx\stdarg.h include\stdarg.h
+	$(Q) cp -pf include\nuttx\stdarg.h include\stdarg.h
 else
 include\stdarg.h:
 endif
@@ -242,7 +251,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 include\setjmp.h: include\nuttx\setjmp.h
-	$(Q) cp -f include\nuttx\setjmp.h include\setjmp.h
+	$(Q) cp -pf include\nuttx\setjmp.h include\setjmp.h
 else
 include\setjmp.h:
 endif
@@ -277,7 +286,7 @@ tools\mkconfig$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig$(HOSTEXEEXT)
 
 staging:
-	$(Q) mkdir staging
+	$(Q) mkdir -p staging
 
 include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
 	$(Q) tools\mkconfig$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\config.h
@@ -330,7 +339,7 @@ endif
 # Link the boards\<arch>\<chip>\drivers dir to drivers\platform
 
 $(ARCH_SRC)\drivers: .config
-	@echo LN: drivers\platform to $(BOARD_DIR)\drivers
+	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
 else
@@ -338,6 +347,27 @@ else
 	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform .fakelnk
 endif
 
+ifeq ($(COMMON_DIR),y)
+# Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
+# Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
+
+$(ARCH_SRC)\board: .config
+	@echo "LN: $(ARCH_SRC)\board to $(BOARD_DIR)\common"
+ifeq ($(CONFIG_WINDOWS_MKLINK),y)
+	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\common
+else
+	$(Q) xcopy $(BOARD_DIR)\common $(ARCH_SRC)\board /c /q /s /e /y /i
+	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
+endif
+	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src"
+	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board
+ifeq ($(CONFIG_WINDOWS_MKLINK),y)
+	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
+else
+	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board /c /q /s /e /y /i
+	$(Q) echo FAKELNK > $(ARCH_SRC)\board\board\.fakelnk
+endif
+else
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board
 
 $(ARCH_SRC)\board: .config
@@ -347,6 +377,7 @@ ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 else
 	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board /c /q /s /e /y /i
 	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
+endif
 endif
 
 # Link arch\<arch-name>\include\<chip-name> to arch\<arch-name>\include\chip
@@ -405,6 +436,7 @@ clean_context:
 	$(call DELDIR, include\arch\board)
 	$(call DELDIR, include\arch\chip)
 	$(call DELDIR, include\arch)
+	$(call DELDIR, $(ARCH_SRC)\board\board)
 	$(call DELDIR, $(ARCH_SRC)\board)
 	$(call DELDIR, $(ARCH_SRC)\chip)
 	$(call DELDIR, $(TOPDIR)\drivers\platform)
@@ -522,7 +554,7 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 #
 # These targets depend on the kconfig-frontends packages.  To use these, you
 # must first download and install the kconfig-frontends package from this
-# location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
+# location: https://bitbucket.org/nuttx/tools/downloads/.  See
 # misc\tools\README.txt for additional information.
 
 do_config: dirlinks apps_preconfig

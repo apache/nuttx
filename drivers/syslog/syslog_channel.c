@@ -142,7 +142,7 @@ static int syslog_default_flush(void)
  *   channel - Provides the interface to the channel to be used.
  *
  * Returned Value:
- *   Zero (OK)is returned on  success.  A negated errno value is returned
+ *   Zero (OK) is returned on success.  A negated errno value is returned
  *   on any failure.
  *
  ****************************************************************************/

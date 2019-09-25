@@ -69,13 +69,13 @@ extern "C"
  * Name: lpc17_40_caninitialize
  *
  * Description:
- *   Initialize the selected can port
+ *   Initialize the selected CAN port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple can interfaces)
+ *   Port number (for hardware that has multiple CAN interfaces)
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid CAN device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

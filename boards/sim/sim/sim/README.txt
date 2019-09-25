@@ -541,7 +541,7 @@ ipforward
   forwarding logic will recognize that the received packets are not destined
   for it and will forward the logic to the other TUN network.  The
   application logic then both sends the packets on one network and receives
-  and verifies the forwarded packet recieved on the other network.  The
+  and verifies the forwarded packet received on the other network.  The
   received packets differ from the sent packets only in that the hop limit
   (TTL) has been decremented.
 
@@ -621,7 +621,7 @@ nsh
   1. This version has one builtin function:  This configuration:
      apps/examples/hello.
 
-  2. This version has password protection enable.  Here is the login:
+  2. This version has password protection enabled.  Here is the login info:
 
        USERNAME:  admin
        PASSWORD:  Administrator

@@ -64,17 +64,19 @@
 #ifdef CONFIG_CAN_PASS_STRUCTS
 FAR char *inet_ntoa(struct in_addr in)
 {
-  static char buffer[INET_ADDRSTRLEN+2];
+  static char buffer[INET_ADDRSTRLEN + 2];
   FAR unsigned char *ptr = (FAR unsigned char *)&in.s_addr;
-  sprintf(buffer, "%u.%u.%u.%u", ptr[0], ptr[1], ptr[2], ptr[3]);
+  snprintf(buffer, INET_ADDRSTRLEN + 2, "%u.%u.%u.%u",
+           ptr[0], ptr[1], ptr[2], ptr[3]);
   return buffer;
 }
 #else
 FAR char *_inet_ntoa(in_addr_t in)
 {
-  static char buffer[INET_ADDRSTRLEN+2];
+  static char buffer[INET_ADDRSTRLEN + 2];
   FAR unsigned char *ptr = (FAR unsigned char *)&in;
-  sprintf(buffer, "%u.%u.%u.%u", ptr[0], ptr[1], ptr[2], ptr[3]);
+  snprintf(buffer, INET_ADDRSTRLEN + 2, "%u.%u.%u.%u",
+           ptr[0], ptr[1], ptr[2], ptr[3]);
   return buffer;
 }
 #endif

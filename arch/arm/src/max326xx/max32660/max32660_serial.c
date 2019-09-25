@@ -570,7 +570,7 @@ static int max326_interrupt(int irq, void *context, void *arg)
       if ((intfl & UART_INT_RXERRORS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
-#warning Misssing logic
+#warning Missing logic
 
           handled = true;
         }

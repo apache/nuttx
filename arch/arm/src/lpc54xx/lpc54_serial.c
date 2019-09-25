@@ -1136,7 +1136,7 @@ static int lpc54_interrupt(int irq, void *context, FAR void *arg)
       if ((regval & CCR_ERROR_EVENTS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
-#warning Misssing logic
+#warning Missing logic
         }
 #endif
     }

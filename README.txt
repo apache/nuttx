@@ -803,12 +803,11 @@ NuttX Configuration Tool
 ------------------------
 
   An automated tool has been incorporated to support re-configuration
-  of NuttX.  This automated tool is based on the kconfig-frontends
-  application available at http://ymorin.is-a-geek.org/projects/kconfig-frontends
-  (A snapshot of this tool is also available from the tools repository at
-  https://bitbucket.org/nuttx/tools).  This application provides a tool
-  called 'kconfig-mconf' that is used by the NuttX top-level Makefile.
-  The following make target is provided:
+  of NuttX.  This tool is based on the kconfig-frontends application available
+  at https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/.  (This
+  is a snapshot of http://ymorin.is-a-geek.org/projects/kconfig-frontends.)
+  This application provides a tool called 'kconfig-mconf' that is used by the
+  NuttX top-level Makefile. The following make target is provided:
 
     make menuconfig
 
@@ -835,10 +834,8 @@ NuttX Configuration Tool
      https://bitbucket.org/nuttx/tools
 
   2. The 'kconfig-mconf' tool.  'kconfig-mconf' is part of the
-     kconfig-frontends package.  You can download that package from
-     the website http://ymorin.is-a-geek.org/projects/kconfig-frontends
-     or you can use the snapshot in the tools repository at
-     https://bitbucket.org/nuttx/tools.
+     kconfig-frontends package.  You can download that package from the
+     snapshot in the tools repository at https://bitbucket.org/nuttx/tools.
 
      Building kconfig-frontends under Linux may be as simple as
      'configure; make; make install' but there may be some build
@@ -1831,6 +1828,8 @@ nuttx/
  |   |   |   |   `- README.txt
  |   |   |   |- lpcxpresso-lpc1768/
  |   |   |   |   `- README.txt
+ |   |   |   |- lx_cpu/
+ |   |   |   |   `- README.txt
  |   |   |   |- mbed/
  |   |   |   |   `- README.txt
  |   |   |   |- mcb1700/
@@ -1919,6 +1918,8 @@ nuttx/
  |   |   |   `- sama5d4-ek/
  |   |   |       `- README.txt
  |   |   |- samd2l2/
+ |   |   |   |- arduino-m0/
+ |   |   |   |   `- README.txt
  |   |   |   |- samd20-xplained/
  |   |   |   |   `- README.txt
  |   |   |   |- samd21-xplained/
@@ -2019,6 +2020,8 @@ nuttx/
  |   |   |   |- nucleo-f072rb/
  |   |   |   |   `- README.txt
  |   |   |   |- nucleo-f091rc/
+ |   |   |   |   `- README.txt
+ |   |   |   |- nucleo-g070rb/
  |   |   |   |   `- README.txt
  |   |   |   |- nucleo-g071rb/
  |   |   |   |   `- README.txt

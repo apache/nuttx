@@ -506,7 +506,7 @@
 #define SYSCON_SYSPLLCLKSEL_MASK               (7 << SYSCON_SYSPLLCLKSEL_SHIFT)
 #  define SYSCON_SYSPLLCLKSEL_FFRO             (0 << SYSCON_SYSPLLCLKSEL_SHIFT) /* FRO 12 MHz (fro_12m) */
 #  define SYSCON_SYSPLLCLKSEL_CLKIN            (1 << SYSCON_SYSPLLCLKSEL_SHIFT) /* CLKIN (clk_in) */
-#  define SYSCON_SYSPLLCLKSEL_RTC              (3 << SYSCON_SYSPLLCLKSEL_SHIFT) /* RTC oscillator 32 KHz ouput */
+#  define SYSCON_SYSPLLCLKSEL_RTC              (3 << SYSCON_SYSPLLCLKSEL_SHIFT) /* RTC oscillator 32 KHz output */
 #  define SYSCON_SYSPLLCLKSEL_NONE             (7 << SYSCON_SYSPLLCLKSEL_SHIFT) /* None */
 
 /* Audio PLL clock source select */

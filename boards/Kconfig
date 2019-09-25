@@ -35,6 +35,14 @@ config ARCH_BOARD_ARDUINO_DUE
 		This options selects the Arduino DUE board featuring the Atmel
 		ATSAM3X8E MCU running at 84 MHz.
 
+config ARCH_BOARD_ARDUINO_M0
+	bool "Arduino M0"
+	depends on ARCH_CHIP_SAMD21G18A
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Arduino M0 board featuring the Atmel
+		ATSAMD21 MCU.
+
 config ARCH_BOARD_AVR32DEV1
 	bool "Atmel AVR32DEV1 board"
 	depends on ARCH_CHIP_AT32UC3B0256
@@ -101,7 +109,7 @@ config ARCH_BOARD_DEMOS92S12NEC64
 
 config ARCH_BOARD_DK_TM4C129X
 	bool "Tiva DK-TM4C129x Connected Development Kit"
-	depends on ARCH_CHIP_TM4C129XNC
+	depends on ARCH_CHIP_TM4C129XNCZAD
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
@@ -435,6 +443,16 @@ config ARCH_BOARD_BAMBINO_200E
 	---help---
 		Micromint Bambino board. This board is based on the LPC4330FBD144.
 
+config ARCH_BOARD_LPC1766STK
+	bool "Olimex LPC1766-STK board"
+	depends on ARCH_CHIP_LPC1766
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
+		Linux or Cygwin.  STATUS: Complete and mature.
+
 config ARCH_BOARD_LPC4088_DEVKIT
 	bool "LPC4088 Developer's Kit"
 	depends on ARCH_CHIP_LPC4088
@@ -491,6 +509,16 @@ config ARCH_BOARD_LPC4370_LINK2
 		NXP LPC4370 Link2 board.  This board is based on the
 		LPC4370FET100.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_LX_CPU
+	bool "PiKRON LX_CPU"
+	depends on ARCH_CHIP_LPC1788 || ARCH_CHIP_LPC4088
+	select ARCH_HAVE_LEDS
+	---help---
+		This port uses the PiKRON LX_CPU board. See the
+		http://pikron.com/pages/products/cpu_boards/lx_cpu.html
+		for further information.  This board features the NXP LPC4088
+		(compatible with LPC1788) and Xilinx Spartan 6 XC6SLX9
+
 config ARCH_BOARD_MAX32660_EVSYS
 	bool "Maxim Integrated MAX32660-EVSYS"
 	depends on ARCH_CHIP_MAX32660
@@ -500,6 +528,29 @@ config ARCH_BOARD_MAX32660_EVSYS
 	---help---
 		This option enables support the Maxim Integrated MAX32660-EVSYS
 		board.
+
+config ARCH_BOARD_MAKERLISP
+	bool "MakerLisp"
+	depends on ARCH_CHIP_EZ80F91
+	select ARCH_HAVE_LEDS
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the MakerLips machine
+		based on an eZ80F091 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under Windows. A
+		Windows native development environment is available but has not
+		been verified.
+
+config ARCH_BOARD_MAPLE
+	bool "maple board"
+	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		A configuration for the LeafLab's Maple and Maple Mini boards.
+		These boards are based on the STM32F103RBT6 chip for the standard
+		version and on the STM32F103CBT6 for the mini version
+		(See http://leaflabs.com/docs/hardware/maple.html)
 
 config ARCH_BOARD_MBED
 	bool "mbed LCP1768"
@@ -536,6 +587,14 @@ config ARCH_BOARD_METRO_M4
 		The Metro M4 uses a Arduino form factor and and pinout.  It's powered
 		with an ATSAMD51J19
 
+config ARCH_BOARD_MIRTOO
+	bool "Mirtoo PIC32 Module from Dimitech"
+	depends on ARCH_CHIP_PIC32MX250F128D
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
+		PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
+
 config ARCH_BOARD_MICROPENDOUS3
 	bool "Opendous Micropendous 3 board"
 	depends on ARCH_CHIP_AT90USB646 || ARCH_CHIP_AT90USB647 || ARCH_CHIP_AT90USB1286 || ARCH_CHIP_AT90USB1287
@@ -565,6 +624,12 @@ config ARCH_BOARD_MOTEINO_MEGA
 		This is placeholder for the LowPowerLab MoteinoMEGA that is based
 		on the Atmel AVR ATMega1284P MCU.  There is not much there yet and what is
 		there is untested due to tool-related issues.
+
+config ARCH_BOARD_MOXA
+	bool "Moxa board"
+	depends on ARCH_CHIP_MOXART
+	---help---
+		Moxa
 
 config ARCH_BOARD_NE64BADGE
 	bool "FEG NE64 /PoE Badge board"
@@ -614,53 +679,6 @@ config ARCH_BOARD_NRF52_GENERIC
 		the NRF PCA10040 board from Nordic Semiconductor or for the Adafruit
 		NRF52 feather and can be simply extended to other board based on the
 		NRF52832 MCU.
-
-config ARCH_BOARD_LPC1766STK
-	bool "Olimex LPC1766-STK board"
-	depends on ARCH_CHIP_LPC1766
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
-		Linux or Cygwin.  STATUS: Complete and mature.
-
-config ARCH_BOARD_MAKERLISP
-	bool "MakerLisp"
-	depends on ARCH_CHIP_EZ80F91
-	select ARCH_HAVE_LEDS
-	---help---
-		ez80Acclaim! Microcontroller.  This port use the MakerLips machine
-		based on an eZ80F091 part, and the Zilog ZDS-II Windows command line
-		tools.  The development environment is Cygwin under Windows. A
-		Windows native development environment is available but has not
-		been verified.
-
-config ARCH_BOARD_MAPLE
-	bool "maple board"
-	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		A configuration for the LeafLab's Maple and Maple Mini boards.
-		These boards are based on the STM32F103RBT6 chip for the standard
-		version and on the STM32F103CBT6 for the mini version
-		(See http://leaflabs.com/docs/hardware/maple.html)
-
-config ARCH_BOARD_MIRTOO
-	bool "Mirtoo PIC32 Module from Dimitech"
-	depends on ARCH_CHIP_PIC32MX250F128D
-	select ARCH_HAVE_LEDS
-	---help---
-		This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
-		PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
-
-config ARCH_BOARD_MOXA
-	bool "Moxa board"
-	depends on ARCH_CHIP_MOXART
-	---help---
-		Moxa
 
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
@@ -1068,6 +1086,16 @@ config ARCH_BOARD_NUCLEO_F446RE
 	---help---
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F446RE in the NuttX source tree.
+
+config ARCH_BOARD_NUCLEO_G070RB
+	bool "STM32G070 Nucleo G070RB"
+	depends on ARCH_CHIP_STM32G070RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		Nucleo G070RB in the NuttX source tree.
 
 config ARCH_BOARD_NUCLEO_G071RB
 	bool "STM32G071 Nucleo G071RB"
@@ -1886,6 +1914,7 @@ config ARCH_BOARD
 	default "amber"                    if ARCH_BOARD_AMBER
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
+	default "arduino-m0"               if ARCH_BOARD_ARDUINO_M0
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
@@ -1933,6 +1962,7 @@ config ARCH_BOARD
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
+	default "lx_cpu"                   if ARCH_BOARD_LX_CPU
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "makerlisp"                if ARCH_BOARD_MAKERLISP
 	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
@@ -1959,6 +1989,7 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
+	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"            if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
 	default "nucleo-l073rz"            if ARCH_BOARD_NUCLEO_L073RZ
@@ -2241,6 +2272,9 @@ endif
 if ARCH_BOARD_LPCXPRESSO_LPC54628
 source "boards/arm/lpc54xx/lpcxpresso-lpc54628/Kconfig"
 endif
+if ARCH_BOARD_LX_CPU
+source "boards/arm/lpc17xx_40xx/lx_cpu/Kconfig"
+endif
 if ARCH_BOARD_MAX32660_EVSYS
 source "boards/arm/max326xx/max32660-evsys/Kconfig"
 endif
@@ -2255,6 +2289,9 @@ source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_M0
+source "boards/arm/samd2l2/arduino-m0/Kconfig"
 endif
 if ARCH_BOARD_FLIPNCLICK_SAM3X
 source "boards/arm/sam34/flipnclick-sam3x/Kconfig"
@@ -2315,6 +2352,9 @@ source "boards/arm/stm32f0l0g0/nucleo-f072rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F091RC
 source "boards/arm/stm32f0l0g0/nucleo-f091rc/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_G070RB
+source "boards/arm/stm32f0l0g0/nucleo-g070rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G071RB
 source "boards/arm/stm32f0l0g0/nucleo-g071rb/Kconfig"
@@ -2776,7 +2816,7 @@ config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
 	---help---
-		Enables support for the BOARDIOC_POWEROFF boardctl() command.
+		Enables support for board-specific boardctl() commands.
 		Architecture specific logic must provide board_ioctl() interface.
 
 endif # LIB_BOARDCTL

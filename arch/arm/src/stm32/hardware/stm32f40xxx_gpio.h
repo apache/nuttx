@@ -248,7 +248,7 @@
 /* GPIO port output type register */
 
 #define GPIO_OTYPER_OD(n)          (1 << (n)) /* 1=Output open-drain */
-#define GPIO_OTYPER_PP(n)          (0)        /* 0=Ouput push-pull */
+#define GPIO_OTYPER_PP(n)          (0)        /* 0=Output push-pull */
 
 /* GPIO port output speed register */
 

@@ -252,7 +252,7 @@ void at32uc3_gpiowrite(uint16_t pinset, bool value)
   pinmask = (1 << pin);
   base    = g_portmap[port];
 
-  /* Now, set or clear the pin ouput value */
+  /* Now, set or clear the pin output value */
 
   if (value)
     {

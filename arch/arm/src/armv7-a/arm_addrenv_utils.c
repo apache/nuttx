@@ -202,7 +202,7 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
 
   binfo("listlen=%d vaddr=%08lx\n", listlen, (unsigned long)vaddr);
 
-  for (i = 0; i < listlen; vaddr += SECTION_SIZE, list++, i++)
+  for (i = 0; i < listlen; vaddr += SECTION_SIZE, i++)
     {
       /* Unhook the L2 page table from the L1 page table */
 

@@ -743,7 +743,7 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay);
  *   interrupts will be disabled.
  *
  *   NOTE: Use of this function is only meaningful for a 32-bit free-
- *   runnning, periodic timer.
+ *   running, periodic timer.
  *
  *   WARNING: For free-running timers, the relative match value should be
  *   sufficiently far in the future to avoid race conditions.
@@ -776,7 +776,7 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch);
  *   interrupts will be disabled.
  *
  *   NOTE: Use of this function is only meaningful for a 16-bit free-
- *   runnning, periodic timer.
+ *   running, periodic timer.
  *
  *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit
  *   match counter match value AND the 8-bit prescaler match value.  From

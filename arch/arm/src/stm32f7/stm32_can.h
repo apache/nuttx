@@ -82,7 +82,7 @@
 #endif
 
 #if CONFIG_STM32F7_CAN_TSEG1 < 1 || CONFIG_STM32F7_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
-#  errror "CONFIG_STM32_CAN_TSEG1 is out of range"
+#  error "CONFIG_STM32_CAN_TSEG1 is out of range"
 #endif
 
 #ifndef CONFIG_STM32F7_CAN_TSEG2
@@ -90,7 +90,7 @@
 #endif
 
 #if CONFIG_STM32F7_CAN_TSEG2 < 1 || CONFIG_STM32F7_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
-#  errror "CONFIG_STM32_CAN_TSEG2 is out of range"
+#  error "CONFIG_STM32_CAN_TSEG2 is out of range"
 #endif
 
 /************************************************************************************
@@ -123,10 +123,10 @@ extern "C"
  *   Initialize the selected CAN port
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple CAN interfaces)
+ *   Port number (for hardware that has multiple CAN interfaces)
  *
  * Returned Value:
- *   Valid CAN device structure reference on succcess; a NULL on failure
+ *   Valid CAN device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

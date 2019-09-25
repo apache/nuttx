@@ -130,9 +130,10 @@ PIN  NAME
 P112 Serial Console
 ===================
 
-The UARTs are not used on the P112 board (the UART signals are avaiable off-board through P14).
-The serial console is provided by U7 LT1133, Advanced Low Power 5V RS232 Driver/Receiver
-that connects to the P112 via the Z85230 ESCC channel A.
+The UARTs are not used on the P112 board (the UART signals are available
+off-board through P14).  The serial console is provided by U7 LT1133,
+Advanced Low Power 5V RS232 Driver/Receiver that connects to the P112 via
+the Z85230 ESCC channel A.
 
 Status
 ======

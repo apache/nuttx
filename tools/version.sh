@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # version.sh
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,12 +36,13 @@ WD=`pwd`
 
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|-h] [-b <build>] -v <major.minor> <outfile-path>"
+USAGE="USAGE: $0 [-d|-h] [-b <build>] [-s <version-string>] -v <major.minor> <outfile-path>"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
 unset BUILD
 unset OUTFILE
+unset VERSION_STRING
 
 while [ ! -z "$1" ]; do
 	case $1 in
@@ -51,6 +52,10 @@ while [ ! -z "$1" ]; do
 		;;
 	-d )
 		set -x
+		;;
+	-s )
+		shift
+		VERSION_STRING=$1
 		;;
 	-v )
 		shift
@@ -101,6 +106,12 @@ if [ -z ${OUTFILE} ] ; then
 	exit 1
 fi
 
+# If the version string was not provided, then set it to the version
+
+if [ -z "${VERSION_STRING}" ]; then
+	VERSION_STRING=${VERSION}
+fi
+
 # Get the major and minor version numbers
 
 MAJOR=`echo ${VERSION} | cut -d'.' -f1`
@@ -132,7 +143,7 @@ fi
 
 echo "#!/bin/bash" >${OUTFILE}
 echo "" >>${OUTFILE}
-echo "CONFIG_VERSION_STRING=\"${VERSION}\"" >>${OUTFILE}
+echo "CONFIG_VERSION_STRING=\"${VERSION_STRING}\"" >>${OUTFILE}
 echo "CONFIG_VERSION_MAJOR=${MAJOR}" >>${OUTFILE}
 echo "CONFIG_VERSION_MINOR=${MINOR}" >>${OUTFILE}
 echo "CONFIG_VERSION_BUILD=\"${BUILD}\"" >>${OUTFILE}

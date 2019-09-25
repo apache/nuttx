@@ -81,11 +81,11 @@
  *
  * IOCTL commands for TSC driver A would then be defined in a TSC A header file like:
  *
- *   TSCIOC_A_CMD1               _TSIOC(TSC_A_FIRST+0)
- *   TSCIOC_A_CMD2               _TSIOC(TSC_A_FIRST+1)
- *   TSCIOC_A_CMD3               _TSIOC(TSC_A_FIRST+2)
+ *   TSCIOC_A_CMD1               _TSIOC(TSC_A_FIRST + 0)
+ *   TSCIOC_A_CMD2               _TSIOC(TSC_A_FIRST + 1)
+ *   TSCIOC_A_CMD3               _TSIOC(TSC_A_FIRST + 2)
  *   ...
- *   TSCIOC_A_CMD42              _TSIOC(TSC_A_FIRST+41)
+ *   TSCIOC_A_CMD42              _TSIOC(TSC_A_FIRST + 41)
  *
  * The next reservation would look like:
  *
@@ -143,7 +143,9 @@ struct touch_sample_s
   int npoints;                   /* The number of touch points in point[] */
   struct touch_point_s point[1]; /* Actual dimension is npoints */
 };
-#define SIZEOF_TOUCH_SAMPLE_S(n) (sizeof(struct touch_sample_s) + ((n)-1)*sizeof(struct touch_point_s))
+
+#define SIZEOF_TOUCH_SAMPLE_S(n) \
+  (sizeof(struct touch_sample_s) + ((n) - 1) * sizeof(struct touch_point_s))
 
 /************************************************************************************
  * Public Function Prototypes

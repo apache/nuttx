@@ -1293,7 +1293,7 @@ static int userfs_rewinddir(FAR struct inode *mountpt,
 
   if (nrecvd != sizeof(struct userfs_rewinddir_response_s))
     {
-      ferr("ERROR: Response size incorrrect: %u\n", (unsigned int)nrecvd);
+      ferr("ERROR: Response size incorrect: %u\n", (unsigned int)nrecvd);
       return -EIO;
     }
 

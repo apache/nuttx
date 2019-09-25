@@ -455,7 +455,7 @@ FAR struct sdio_dev_s *cxd56_sdhci_finalize(int slotno);
  * Name: cxd56_sdhci_mediachange
  *
  * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   Called by board-specific logic -- possibly from an interrupt handler --
  *   in order to signal to the driver that a card has been inserted or
  *   removed from the slot
  *

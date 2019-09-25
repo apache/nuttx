@@ -87,6 +87,7 @@ SECTIONS
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
         CONSTRUCTORS
+        . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > ksram AT > kflash
 
@@ -96,6 +97,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
+        . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > ksram
 

@@ -78,6 +78,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* STM32 USB OTG FS Host Driver Support
  *
  * Pre-requisites
@@ -141,6 +142,7 @@
 #endif
 
 /* HCD Setup ****************************************************************/
+
 /* Hardware capabilities */
 
 #define STM32_NHOST_CHANNELS      8   /* Number of host channels */
@@ -383,6 +385,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
 #endif
 
 /* Interrupt handling *******************************************************/
+
 /* Lower level interrupt handlers */
 
 static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
@@ -1298,7 +1301,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
       return -ENOMEM;
     }
 
-  /* Then allocate and configure the IN/OUT channnels  */
+  /* Then allocate and configure the IN/OUT channels  */
 
   ret = stm32_ctrlchan_alloc(priv, epdesc->addr & USB_EPNO_MASK,
                              hport->funcaddr, hport->speed, ctrlep);
@@ -1520,7 +1523,8 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32_getreg(STM32_OTG_HNPTXSTS);
-            avail  = ((regval & OTG_HNPTXSTS_NPTXFSAV_MASK) >> OTG_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+            avail  = ((regval & OTG_HNPTXSTS_NPTXFSAV_MASK) >>
+                      OTG_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
           }
           break;
 
@@ -1532,7 +1536,8 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
             /* Read the Non-periodic Tx FIFO status register */
 
             regval = stm32_getreg(STM32_OTG_HPTXSTS);
-            avail  = ((regval & OTG_HPTXSTS_PTXFSAVL_MASK) >> OTG_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+            avail  = ((regval & OTG_HPTXSTS_PTXFSAVL_MASK) >>
+                      OTG_HPTXSTS_PTXFSAVL_SHIFT) << 2;
           }
           break;
 
@@ -2200,6 +2205,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
+  bool zlp;
 
   /* Loop until the transfer completes (i.e., buflen is decremented to zero)
    * or a fatal error occurs (any error other than a simple NAK)
@@ -2208,8 +2214,9 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan  = &priv->chan[chidx];
   start = clock_systimer();
   xfrd  = 0;
+  zlp   = (buflen == 0);
 
-  while (buflen > 0)
+  while (buflen > 0 || zlp)
     {
       /* Transfer one packet at a time.  The hardware is capable of queueing
        * multiple OUT packets, but I just haven't figured out how to handle
@@ -2277,7 +2284,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
            * using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20*1000);
+          nxsig_usleep(20 * 1000);
         }
       else
         {
@@ -2286,6 +2293,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           buffer += xfrlen;
           buflen -= xfrlen;
           xfrd   += chan->xfrd;
+          zlp     = false;
         }
     }
 
@@ -2666,8 +2674,8 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
        * REVISIT: This can cause a lot of interrupts!
        */
 
-      else if (chan->eptype == OTG_EPTYPE_CTRL /*||
-               chan->eptype == OTG_EPTYPE_BULK*/)
+      else if (chan->eptype == OTG_EPTYPE_CTRL /* ||
+               chan->eptype == OTG_EPTYPE_BULK */)
         {
           /* Re-activate the channel by clearing CHDIS and assuring that
            * CHENA is set
@@ -3014,6 +3022,7 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
+
 #warning "Do what?"
 
   /* Clear pending SOF interrupt */
@@ -3362,6 +3371,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
   uint32_t hcfg;
 
   usbhost_vtrace1(OTG_VTRACE1_GINT_HPRT, 0);
+
   /* Read the port status and control register (HPRT) */
 
   hprt = stm32_getreg(STM32_OTG_HPRT);
@@ -3451,7 +3461,6 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
             }
           else /* if ((hprt & OTG_HPRT_PSPD_MASK) == OTG_HPRT_PSPD_FS) */
             {
-
               usbhost_vtrace1(OTG_VTRACE1_GINT_HPRT_FSDEV, 0);
               stm32_putreg(STM32_OTG_HFIR, 48000);
 
@@ -3459,8 +3468,8 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
 
               if ((hcfg & OTG_HCFG_FSLSPCS_MASK) != OTG_HCFG_FSLSPCS_FS48MHz)
                 {
-
                   usbhost_vtrace1(OTG_VTRACE1_GINT_HPRT_LSFSSW, 0);
+
                   /* Yes... configure for FS */
 
                   hcfg &= ~OTG_HCFG_FSLSPCS_MASK;
@@ -3569,6 +3578,7 @@ static int stm32_gint_isr(int irq, FAR void *context, FAR void *arg)
         }
 
       /* Otherwise, process each pending, unmasked GINT interrupts */
+
       /* Handle the start of frame interrupt */
 
 #ifdef CONFIG_STM32F7_OTG_SOFINTR
@@ -3711,6 +3721,7 @@ static inline void stm32_hostinit_enable(void)
   stm32_putreg(STM32_OTG_GINTSTS, 0xbfffffff);
 
   /* Enable the host interrupts */
+
   /* Common interrupts:
    *
    *   OTG_GINT_WKUP     : Resume/remote wakeup detected interrupt
@@ -3946,7 +3957,7 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Reset the host port */
 
@@ -4174,8 +4185,9 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   stm32_takesem(&priv->exclsem);
 
-  /* A single channel is represent by an index in the range of 0 to STM32_MAX_TX_FIFOS.
-   * Otherwise, the ep must be a pointer to an allocated control endpoint structure.
+  /* A single channel is represent by an index in the range of 0 to
+   * STM32_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an allocated
+   * control endpoint structure.
    */
 
   if ((uintptr_t)ep < STM32_MAX_TX_FIFOS)
@@ -4441,38 +4453,36 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
           continue;
         }
 
+      /* Handle the IN data phase (if any) */
+
+      if (buflen > 0)
+        {
+          ret = stm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
+          if (ret < 0)
+            {
+              usbhost_trace1(OTG_TRACE1_RECVDATA, -ret);
+              continue;
+            }
+        }
+
       /* Get the start time.  Loop again until the timeout expires */
 
       start = clock_systimer();
       do
         {
-          /* Handle the IN data phase (if any) */
-
-          if (buflen > 0)
-            {
-              ret = stm32_ctrl_recvdata(priv, ep0info, buffer, buflen);
-              if (ret < 0)
-                {
-                  usbhost_trace1(OTG_TRACE1_RECVDATA, -ret);
-                }
-            }
-
           /* Handle the status OUT phase */
 
+          priv->chan[ep0info->outndx].outdata1 ^= true;
+          ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
           if (ret == OK)
             {
-              priv->chan[ep0info->outndx].outdata1 ^= true;
-              ret = stm32_ctrl_senddata(priv, ep0info, NULL, 0);
-              if (ret == OK)
-                {
-                  /* All success transactions exit here */
+              /* All success transactions exit here */
 
-                  stm32_givesem(&priv->exclsem);
-                  return OK;
-                }
-
-              usbhost_trace1(OTG_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
+              stm32_givesem(&priv->exclsem);
+              return OK;
             }
+
+          usbhost_trace1(OTG_TRACE1_SENDDATA, ret < 0 ? -ret : ret);
 
           /* Get the elapsed time (in frames) */
 
@@ -5089,7 +5099,10 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
   regval &= ~OTG_HCFG_FSLSS;
   stm32_putreg(STM32_OTG_HCFG, regval);
 
-  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic Tx FIFOs */
+  /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
+   * Tx FIFOs
+   */
+
   /* Configure Rx FIFO size (GRXFSIZ) */
 
   stm32_putreg(STM32_OTG_GRXFSIZ, CONFIG_STM32F7_OTG_RXFIFO_SIZE);
@@ -5097,16 +5110,18 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
 
   /* Setup the host non-periodic Tx FIFO size (HNPTXFSIZ) */
 
-  regval = (offset | (CONFIG_STM32F7_OTG_NPTXFIFO_SIZE << OTG_HNPTXFSIZ_NPTXFD_SHIFT));
+  regval = (offset |
+            (CONFIG_STM32F7_OTG_NPTXFIFO_SIZE << OTG_HNPTXFSIZ_NPTXFD_SHIFT));
   stm32_putreg(STM32_OTG_HNPTXFSIZ, regval);
   offset += CONFIG_STM32F7_OTG_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx fifo size register (HPTXFSIZ) */
 
-  regval = (offset | (CONFIG_STM32F7_OTG_PTXFIFO_SIZE << OTG_HPTXFSIZ_PTXFD_SHIFT));
+  regval = (offset |
+            (CONFIG_STM32F7_OTG_PTXFIFO_SIZE << OTG_HPTXFSIZ_PTXFD_SHIFT));
   stm32_putreg(STM32_OTG_HPTXFSIZ, regval);
 
-  /* If OTG were supported, we sould need to clear HNP enable bit in the
+  /* If OTG were supported, we would need to clear HNP enable bit in the
    * USB_OTG control register about here.
    */
 
@@ -5199,7 +5214,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
    * priority inheritance enabled.
    */
 
- nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 
@@ -5232,7 +5247,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
  * Name: stm32_hw_initialize
  *
  * Description:
- *   One-time setup of the host controller harware for normal operations.
+ *   One-time setup of the host controller hardware for normal operations.
  *
  * Input Parameters:
  *   priv -- USB host driver private data structure.

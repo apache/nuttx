@@ -72,12 +72,12 @@
  *
  * Both of these alignment limitations could be reduced by using multiple
  * regions to map the FLASH/SDRAM range or perhaps with some clever use of
- * subregions or with mutliple MPU regions per memory region.
+ * subregions or with multiple MPU regions per memory region.
  *
  * NOTE: The MPU is used in a mode where mappings are not required for
  * kernel addresses and, hence, there are not alignment issues for those
  * case.  Only the user address spaces suffer from alignment requirements.
- * However, in order to exploit this fact, we would staill need to change
+ * However, in order to exploit this fact, we would still need to change
  * the ordering of memory regions in SRAM.
  *
  * A detailed memory map for the 112KB SRAM region is as follows:
@@ -99,15 +99,15 @@
 
 MEMORY
 {
-    /* 1024Kb FLASH */
+  /* 1024Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 128K
-    uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 128K
-    xflash (rx)      : ORIGIN = 0x08040000, LENGTH = 768K
+  kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 128K
+  uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 128K
+  xflash (rx)      : ORIGIN = 0x08040000, LENGTH = 768K
 
-    /* 112Kb of contiguous SRAM */
+  /* 112Kb of contiguous SRAM */
 
-    ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 8K
-    usram (rwx)      : ORIGIN = 0x20002000, LENGTH = 8K
-    xsram (rwx)      : ORIGIN = 0x20008000, LENGTH = 96K
+  ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 8K
+  usram (rwx)      : ORIGIN = 0x20002000, LENGTH = 8K
+  xsram (rwx)      : ORIGIN = 0x20008000, LENGTH = 96K
 }

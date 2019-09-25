@@ -1,5 +1,5 @@
 ############################################################################
-# boards/lpc4088-devkit/configs/knsh/Make.defs
+# boards/arm/lpc17xx_40xx/lpc4088-devkit/configs/knsh/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

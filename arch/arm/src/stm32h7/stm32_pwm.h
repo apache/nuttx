@@ -40,9 +40,9 @@
 #define __ARCH_ARM_SRC_STM32H7_STM32_PWM_H
 
 /* The STM32 does not have dedicated PWM hardware.  Rather, pulsed output control
- * is a capabilitiy of the STM32 timers.  The logic in this file implements the
+ * is a capability of the STM32 timers.  The logic in this file implements the
  * lower half of the standard, NuttX PWM interface using the STM32 timers.  That
- * interface is described in include/nuttx/drivers/pwm.h.
+ * interface is described in include/nuttx/timers/pwm.h.
  */
 
 /************************************************************************************
@@ -51,7 +51,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 
 #include "chip.h"
 

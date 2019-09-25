@@ -85,12 +85,12 @@ SECTIONS
     *(.ARM.extab*)
   } >sram
 
-  __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
+    __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
+    __exidx_end = ABSOLUTE(.);
   } >sram
-  __exidx_end = ABSOLUTE(.);
 
   .data :
   {
@@ -98,6 +98,7 @@ SECTIONS
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
+    . = ALIGN(4);
     _edata = ABSOLUTE(.);
   } > sram
 
@@ -107,6 +108,7 @@ SECTIONS
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    . = ALIGN(4);
     _ebss = ABSOLUTE(.);
   } > sram
 

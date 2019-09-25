@@ -792,7 +792,7 @@ static int xmc4_interrupt(int irq, void *context, FAR void *arg)
 
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for error conditions */
-#warning Misssing logic
+#warning Missing logic
 #endif
     }
 

@@ -55,7 +55,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/drivers/pwm.h>
+#include <nuttx/timers/pwm.h>
 #include <nuttx/leds/rgbled.h>
 
 #include <arch/irq.h>

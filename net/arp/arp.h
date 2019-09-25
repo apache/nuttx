@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp.h
  *
- *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@
 
 #include <stdint.h>
 #include <semaphore.h>
+#include <queue.h>
 #include <errno.h>
 
 #include <netinet/in.h>
@@ -142,17 +143,6 @@ struct arp_send_s
   uint8_t   snd_ifname[IFNAMSIZ];      /* Interface name */
   int16_t   snd_result;                /* The result of the send operation */
   in_addr_t snd_ipaddr;                /* The IP address to be queried */
-};
-#endif
-
-#ifdef CONFIG_NET_ARP_SEND
-/* For symmetry with other protocols, a "connection" structure is
- * provided.  But it is a singleton for the case of ARP packet transfers.
- */
-
-struct arp_conn_s
-{
-  FAR struct devif_callback_s *list;   /* ARP callbacks */
 };
 #endif
 

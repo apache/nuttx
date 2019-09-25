@@ -1036,7 +1036,9 @@ enum spi_status_e gs2200m_hal_read(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  /* Get how many bytes we should read */
+  /* Send READ_REQUEST then receive READ_RESPONSE
+   * to get how many bytes we should read
+   */
 
   *len = _read_data_len(dev);
 
@@ -1046,7 +1048,7 @@ enum spi_status_e gs2200m_hal_read(FAR struct gs2200m_dev_s *dev,
 
   ASSERT(0 < *len);
 
-  /* Read response header */
+  /* Read data header */
 
   _read_data(dev, hdr, sizeof(hdr));
 
@@ -2310,8 +2312,8 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
   t = gs2200m_enable_dhcpc(dev, 0);
   ASSERT(TYPE_OK == t);
 
-
   /* Set static address */
+
   t = gs2200m_set_addresses(dev,
                             "10.0.0.2",
                             "255.255.255.0",
@@ -2427,6 +2429,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
   FAR struct sockaddr_in *inaddr;
   struct in_addr in[3];
   char addr[3][17];
+  bool getreq = false;
   int ret = OK;
 
   wlinfo("+++ start: cmd=%x \n", msg->cmd);
@@ -2435,6 +2438,12 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
 
   switch (msg->cmd)
     {
+      case SIOCGIFHWADDR:
+        getreq = true;
+        memcpy(&msg->ifr.ifr_hwaddr.sa_data,
+               dev->net_dev.d_mac.ether.ether_addr_octet, 6);
+        break;
+
       case SIOCSIFADDR:
         memcpy(&dev->net_dev.d_ipaddr,
                &inaddr->sin_addr, sizeof(inaddr->sin_addr)
@@ -2458,7 +2467,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
         break;
     }
 
-  if (OK == ret)
+  if (false == getreq && OK == ret)
     {
       memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
       memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
@@ -2585,7 +2594,8 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
 
       default:
-        ASSERT(false);
+        DEBUGPANIC();
+        break;
     }
 
   /* Enable gs2200m irq again */

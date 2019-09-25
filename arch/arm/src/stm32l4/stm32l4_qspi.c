@@ -496,7 +496,7 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
 
 #if 0
   /* This extra verbose output may be helpful in some cases; you'll need
-   * to make sure your syslog is large enough to accomodate the extra output.
+   * to make sure your syslog is large enough to accommodate the extra output.
    */
 
   regval = getreg32(priv->base + STM32L4_QUADSPI_CR_OFFSET);    /* Control Register */

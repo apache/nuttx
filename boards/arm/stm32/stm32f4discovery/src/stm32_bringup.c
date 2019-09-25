@@ -329,6 +329,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RTC_DS1307
+  ret = stm32_ds1307_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize DS1307 RTC driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
 

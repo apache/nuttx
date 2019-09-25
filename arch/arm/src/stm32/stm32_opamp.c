@@ -1345,7 +1345,7 @@ static int opamp_ioctl(FAR struct opamp_dev_s* dev, int cmd, unsigned long arg)
  *   intf - The OPAMP interface number.
  *
  * Returned Value:
- *   Valid OPAMP device structure reference on succcess; a NULL on failure.
+ *   Valid OPAMP device structure reference on success; a NULL on failure.
  *
  * Assumptions:
  *   1. Clock to the OPAMP block has enabled,
