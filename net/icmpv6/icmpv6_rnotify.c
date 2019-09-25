@@ -135,7 +135,7 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   ninfo("prefix=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         ntohs(prefix[0]), ntohs(prefix[1]), ntohs(prefix[2]),
-        ntohs(prefix[3]), ntohs(prefix[4]), ntohs(prefix[6]),
+        ntohs(prefix[3]), ntohs(prefix[4]), ntohs(prefix[5]),
         ntohs(prefix[6]), ntohs(prefix[7]));
   ninfo("IP address=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         ntohs(dev->d_ipv6addr[0]), ntohs(dev->d_ipv6addr[1]),
