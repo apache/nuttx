@@ -775,7 +775,7 @@ struct pthread_tcb_s
   /* Clean-up stack *************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
-  /* tos   - The index to the next avaiable entry at the top of the stack.
+  /* tos   - The index to the next available entry at the top of the stack.
    * stack - The pre-allocated clean-up stack memory.
    */
 

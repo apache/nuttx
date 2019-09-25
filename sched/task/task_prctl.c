@@ -96,7 +96,7 @@ int prctl(int option, ...)
            * pid==0 meaning "this thread")
            */
 
-          if (!pid)
+          if (pid == 0)
             {
               tcb = this_task();
             }
@@ -109,7 +109,7 @@ int prctl(int option, ...)
            * sched_gettcb()
            */
 
-          if (!tcb)
+          if (tcb == NULL)
             {
               serr("ERROR: Pid does not correspond to a task: %d\n", pid);
               errcode = ESRCH;
@@ -118,7 +118,7 @@ int prctl(int option, ...)
 
           /* A pointer to the task name storage must also be provided */
 
-          if (!name)
+          if (name == NULL)
             {
               serr("ERROR: No name provide\n");
               errcode = EFAULT;

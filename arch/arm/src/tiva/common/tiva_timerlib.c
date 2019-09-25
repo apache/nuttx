@@ -2898,7 +2898,7 @@ void tiva_rtc_setalarm(TIMER_HANDLE handle, uint32_t delay)
  *   be enabled.  A single match interrupt will be generated; further match
  *   interrupts will be disabled.
  *
- *   NOTE: Use of this function is only meaningful for a free-runnning,
+ *   NOTE: Use of this function is only meaningful for a free-running,
  *   periodic timer.
  *
  *   WARNING: For free-running timers, the relative match value should be
@@ -3003,7 +3003,7 @@ void tiva_timer32_relmatch(TIMER_HANDLE handle, uint32_t relmatch)
  *   be enabled.  A single match interrupt will be generated; further match
  *   interrupts will be disabled.
  *
- *   NOTE: Use of this function is only meaningful for a free-runnning,
+ *   NOTE: Use of this function is only meaningful for a free-running,
  *   periodic timer.
  *
  *   NOTE: The relmatch input is a really a 24-bit value; it is the 16-bit

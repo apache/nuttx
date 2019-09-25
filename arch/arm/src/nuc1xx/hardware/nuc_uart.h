@@ -123,7 +123,7 @@
 
 /* UART interrupt enable register */
 
-#define UART_IER_RDA_IEN           (1 << 0)  /* Bit 0:  Receive data avaiable interrupt enable */
+#define UART_IER_RDA_IEN           (1 << 0)  /* Bit 0:  Receive data available interrupt enable */
 #define UART_IER_THRE_IEN          (1 << 1)  /* Bit 1:  Transmit holding register empty interrupt enable */
 #define UART_IER_RLS_IEN           (1 << 2)  /* Bit 2:  Receive line status interrupt enable */
 #define UART_IER_MODEM_IEN         (1 << 3)  /* Bit 3:  Modem status interrupt enable (UART0/1) */
@@ -217,7 +217,7 @@
 #define UART_ISR_MODEM_IF          (1 << 3)  /* Bit 3:  Modem interrupt flag (UART0/1) */
 #define UART_ISR_TOUT_IF           (1 << 4)  /* Bit 4:  Timeout interrupt flag */
 #define UART_ISR_BUF_ERR_IF        (1 << 5)  /* Bit 5:  Buffer error interrupt flag */
-#define UART_ISR_RDA_INT           (1 << 8)  /* Bit 8:  Receive data avaiable interrupt indicator */
+#define UART_ISR_RDA_INT           (1 << 8)  /* Bit 8:  Receive data available interrupt indicator */
 #define UART_ISR_THRE_INT          (1 << 9)  /* Bit 9:  Transmit holding register empty interrupt indicator */
 #define UART_ISR_RLS_INT           (1 << 10) /* Bit 10: Receive line status interrupt indicator */
 #define UART_ISR_MODEM_INT         (1 << 11) /* Bit 11: Modem interrupt indicator (UART0/1) */

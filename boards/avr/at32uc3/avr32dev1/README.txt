@@ -93,7 +93,7 @@ In arch/avr/src/at32uc3/at32uc3b_pinmux.h:
   #define PINMUX_USART1_RXD_1 (GPIO_PERIPH | GPIO_FUNCD | GPIO_PORTA | 17)
   #define PINMUX_USART1_TXD_1 (GPIO_PERIPH | GPIO_FUNCA | GPIO_PORTA | 23)
 
-PA17 and PA23 are avaiable from the AVR32DEV1:
+PA17 and PA23 are available from the AVR32DEV1:
 
   FUNC GPIO  PIN   Header 16X2 (J1) MX232 Board
   ---- ----- ----- ---------------- ------------

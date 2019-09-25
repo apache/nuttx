@@ -1191,7 +1191,7 @@ static void lpc17_40_endtransfer(struct lpc17_40_dev_s *priv, sdio_eventset_t wk
 }
 
 /****************************************************************************
- * Interrrupt Handling
+ * Interrupt Handling
  ****************************************************************************/
 
 /****************************************************************************
@@ -2777,9 +2777,9 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  * Name: sdio_mediachange
  *
  * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   Called by board-specific logic -- possibly from an interrupt handler --
  *   in order to signal to the driver that a card has been inserted or
- *   removed from the slot
+ *   removed from the slot.
  *
  * Input Parameters:
  *   dev        - An instance of the SD card driver device state structure.

@@ -1,9 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32h7x3xx_rcc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
  ****************************************************************************/
 
 #include "stm32_pwr.h"
+#include "hardware/stm32_axi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,6 +70,26 @@
 #  error BOARD_FLASH_WAITSTATES is out of range
 #endif
 
+/* PLL are only enabled if the P,Q or R outputs are enabled. */
+
+#undef USE_PLL1
+#if STM32_PLLCFG_PLL1CFG & (RCC_PLLCFGR_DIVP1EN | RCC_PLLCFGR_DIVQ1EN | \
+                            RCC_PLLCFGR_DIVR1EN)
+#  define USE_PLL1
+#endif
+
+#undef USE_PLL2
+#if STM32_PLLCFG_PLL2CFG & (RCC_PLLCFGR_DIVP2EN | RCC_PLLCFGR_DIVQ2EN | \
+                            RCC_PLLCFGR_DIVR2EN)
+#  define USE_PLL2
+#endif
+
+#undef USE_PLL3
+#if STM32_PLLCFG_PLL3CFG & (RCC_PLLCFGR_DIVP3EN | RCC_PLLCFGR_DIVQ3EN | \
+                            RCC_PLLCFGR_DIVR3EN)
+#  define USE_PLL3
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -94,6 +115,14 @@ static inline void rcc_reset(void)
   regval = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;
   putreg32(regval, STM32_RCC_CR);
+
+#if defined(CONFIG_STM32H7_AXI_SRAM_CORRUPTION_WAR)
+  /* Errata 2.2.9 Enable workaround for Reading from AXI SRAM may lead to data
+   * read corruption. See ES0392 Rev 6.
+   */
+
+  putreg32(AXI_TARG_READ_ISS_OVERRIDE, STM32_AXI_TARG7_FN_MOD);
+#endif
 
   /* Reset CFGR register */
 
@@ -209,7 +238,7 @@ static inline void rcc_enableahb2(void)
 
   regval = getreg32(STM32_RCC_AHB2ENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB2ENR);   /* Enable peripherals */
 }
@@ -244,7 +273,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_SDMMC1EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
 }
@@ -379,13 +408,13 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1LENR_I2C3EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB1LENR);   /* Enable APB1L peripherals */
 
   regval = getreg32(STM32_RCC_APB1HENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB1HENR);   /* Enable APB1H peripherals */
 }
@@ -453,7 +482,7 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB3ENR);   /* Enable peripherals */
 }
@@ -494,7 +523,7 @@ static inline void rcc_enableapb4(void)
   regval |= RCC_APB4ENR_SPI6EN;
 #endif
 
-  // TODO: ...
+  /* TODO: ... */
 
   putreg32(regval, STM32_RCC_APB4ENR);   /* Enable peripherals */
 }
@@ -620,7 +649,6 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D3CFGR_D3PPRE;
       putreg32(regval, STM32_RCC_D3CFGR);
 
-
 #ifdef CONFIG_STM32H7_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
@@ -678,32 +706,48 @@ static void stm32_stdclockconfig(void)
                 STM32_PLLCFG_PLL3CFG);
       putreg32(regval, STM32_RCC_PLLCFGR);
 
+      regval = getreg32(STM32_RCC_CR);
+#if defined(USE_PLL1)
       /* Enable the PLL1 */
 
-      regval = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLL1ON;
-      putreg32(regval, STM32_RCC_CR);
+#endif
 
+#if defined(USE_PLL2)
       /* Enable the PLL2 */
 
-      regval = getreg32(STM32_RCC_CR);
       regval |= RCC_CR_PLL2ON;
+#endif
+
+#if defined(USE_PLL3)
+      /* Enable the PLL3 */
+
+      regval |= RCC_CR_PLL3ON;
+#endif
       putreg32(regval, STM32_RCC_CR);
 
-      /* TODO: Enable the PLL3 */
-
+#if defined(USE_PLL1)
       /* Wait until the PLL1 is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
         {
         }
+#endif
 
+#if defined(USE_PLL2)
       /* Wait until the PLL2 is ready */
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0)
         {
         }
+#endif
+#if defined(USE_PLL3)
+      /* Wait until the PLL3 is ready */
 
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL3RDY) == 0)
+        {
+        }
+#endif
       /* Configure FLASH wait states */
 
       regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
@@ -729,7 +773,8 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL1)
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+             RCC_CFGR_SWS_PLL1)
         {
         }
 
@@ -789,7 +834,6 @@ static void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D3CCIPR_ADCSEL;
       putreg32(regval, STM32_RCC_D3CCIPR);
 #endif
-
 
 #if defined(CONFIG_STM32H7_IWDG) || defined(CONFIG_STM32H7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */

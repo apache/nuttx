@@ -1379,7 +1379,7 @@ static int efm32_ctrlep_alloc(FAR struct efm32_usbhost_s *priv,
       return -ENOMEM;
     }
 
-  /* Then allocate and configure the IN/OUT channnels  */
+  /* Then allocate and configure the IN/OUT channels  */
 
   ret = efm32_ctrlchan_alloc(priv, epdesc->addr & USB_EPNO_MASK,
                              hport->funcaddr, hport->speed, ctrlep);

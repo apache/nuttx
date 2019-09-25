@@ -167,7 +167,7 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
     }
   else
     {
-      /* HC1 DISPATCH  maximum compresssion:
+      /* HC1 DISPATCH  maximum compression:
        * All fields in the IP header but Hop Limit are elided.  If next
        * header is UDP, we compress UDP header using HC2
        */

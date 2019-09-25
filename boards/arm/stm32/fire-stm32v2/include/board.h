@@ -278,11 +278,11 @@
  */
 
 #if defined(CONFIG_STM32_USART1) && defined(CONFIG_STM32_USART1_REMAP)
-#  errror "USART1 requires CONFIG_STM32_USART1_REMAP=n"
+#  error "USART1 requires CONFIG_STM32_USART1_REMAP=n"
 #endif
 
 #if defined(CONFIG_STM32_USART2) && defined(CONFIG_STM32_USART2_REMAP)
-#  errror "USART2 requires CONFIG_STM32_USART2_REMAP=n"
+#  error "USART2 requires CONFIG_STM32_USART2_REMAP=n"
 #endif
 
 /* 2MBit SPI FLASH

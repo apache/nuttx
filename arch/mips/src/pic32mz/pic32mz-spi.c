@@ -1291,7 +1291,7 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   else
 #endif
     {
-      spierr("ERROR: Unsuppport port: %d\n", port);
+      spierr("ERROR: Unsupported port: %d\n", port);
       return NULL;
     }
 

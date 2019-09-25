@@ -182,7 +182,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMP_STATINCR(g_netstats.ipv4.sent);
 
   ninfo("Outgoing IGMP packet length: %d (%d)\n",
-          dev->d_len, (ipv4->len[0] << 8) | ipvr->len[1]);
+        dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
   igmp_dumppkt(RA, iphdrlen + IGMP_HDRLEN);
 }
 

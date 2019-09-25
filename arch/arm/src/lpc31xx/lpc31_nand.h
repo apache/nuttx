@@ -54,7 +54,7 @@
 
 /* NAND FLASH controller register offsets (with respect to the base of the APB4 domain) *********/
 
-#define LPC31_NAND_IRQSTATUS1_OFFSET    0x00 /* Interrrupt status register (first 32-bits) */
+#define LPC31_NAND_IRQSTATUS1_OFFSET    0x00 /* Interrupt status register (first 32-bits) */
 #define LPC31_NAND_IRQMASK1_OFFSET      0x04 /* Interrupt mask register (first 32-bits) */
 #define LPC31_NAND_IRQSTATUSRAW1_OFFSET 0x08 /* Unmasked register status (first 32-bits) */
 #define LPC31_NAND_CONFIG_OFFSET        0x0c /* NAND Flash controller configuration register */
@@ -70,7 +70,7 @@
 #define LPC31_NAND_CONTROLFLOW_OFFSET   0x38 /* Commands to read and write pages */
 #define LPC31_NAND_GPIO1_OFFSET         0x40 /* Program IO pins that can be used as GPIO */
 #define LPC31_NAND_GPIO2_OFFSET         0x44 /* Program IO pins that can be used as GPIO */
-#define LPC31_NAND_IRQSTATUS2_OFFSET    0x48 /* Interrrupt status register (second 32-bits) */
+#define LPC31_NAND_IRQSTATUS2_OFFSET    0x48 /* Interrupt status register (second 32-bits) */
 #define LPC31_NAND_IRQMASK3_OFFSET      0x4c /* Interrupt mask register (second 32-bits) */
 #define LPC31_NAND_IRQSTATUSRAW2_OFFSET 0x50 /* Unmasked register status (second 32-bits) */
 #define LPC31_NAND_AESKEY1_OFFSET       0x54 /* First word of 128-bit AES key (LPC3154 only) */
@@ -408,17 +408,5 @@
 #define NAND_AESFROMAHB_MODE              (1 << 7)  /* Bit 7:  Set AES from AHB mode */
 #define NAND_AESFROMAHB_DECRYPTRAM1       (1 << 1)  /* Bit 1:  Decrypt RAM1 */
 #define NAND_AESFROMAHB_DECRYPTRAM0       (1 << 0)  /* Bit 0:  Decrypt RAM0 */
-
-/************************************************************************************************
- * Public Types
- ************************************************************************************************/
-
-/************************************************************************************************
- * Public Data
- ************************************************************************************************/
-
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_NAND_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc54628/lpc54_clockconfig.c
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Parts of this file were adapted from sample code provided for the LPC54xx
@@ -85,7 +85,12 @@ static void lpc54_setvoltage(uint32_t freq)
     }
   else
     {
-      putreg32(4, LPC54_SYSCON_PDRUNCFGCLR0);
+      putreg32(15, 0x40020000);
+      putreg32(12, 0x40020004);
+      putreg32(11, 0x40020008);
+      putreg32(15, 0x4002000c);
+      putreg32(11, 0x40020010);
+      putreg32(11, 0x40020014);
     }
 }
 
@@ -99,8 +104,9 @@ static void lpc54_setvoltage(uint32_t freq)
 
 static void lpc54_power_pll(void)
 {
-  lpc54_vd3_powerup();
-  while ((getreg32(0x40020054) & (1 << 6)) == 0)
+  putreg32(0x4000000, 0x40000630);
+
+  while ((getreg32(0x40020054) & (1 << 26)) != 0)
     {
     }
 }
@@ -170,6 +176,23 @@ static void lpc54_set_flash_waitstates(uint32_t freq)
 
 static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 {
+  uint32_t regval;
+
+  regval = getreg32(LPC54_SYSCON_SYSPLLCLKSEL);
+
+  if ((regval & SYSCON_SYSPLLCLKSEL_MASK) != 0)
+    {
+      uint32_t temp;
+
+      temp  = getreg32(LPC54_SYSCON_PDRUNCFGCLR0);
+      temp |= SYSCON_PDRUNCFG0_VD2ANA;
+      putreg32(temp, LPC54_SYSCON_PDRUNCFGCLR0);
+
+      temp  = getreg32(LPC54_SYSCON_PDRUNCFGCLR1);
+      temp |= SYSCON_PDRUNCFG1_SYSOSC;
+      putreg32(temp, LPC54_SYSCON_PDRUNCFGCLR1);
+    }
+
   /* Enable power VD3 for PLLs */
 
   lpc54_power_pll();
@@ -258,7 +281,10 @@ static void lpc54_configure_pll(FAR const struct pll_setup_s *pllsetup)
 
 void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
 {
+  uint32_t regval;
+
   /* Set up the clock sources */
+
   /* Power up the FRO 12MHz clock source */
 
   lpc54_fro_powerup();
@@ -286,6 +312,7 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
 
   /* Set up the PLL clock source as specified by PLL configuration. */
 
+  putreg32(0, LPC54_SYSCON_MAINCLKSELB);
   putreg32(pllsetup->pllclksel, LPC54_SYSCON_SYSPLLCLKSEL);
 
   /* Check if the selected PLL clock source is clk_in, the external clock
@@ -322,6 +349,10 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
 
   /* Switch System clock to SYS PLL */
 
-  putreg32(SYSCON_MAINCLKSELB_PLLCLK, LPC54_SYSCON_MAINCLKSELB);
   putreg32(SYSCON_MAINCLKSELA_FRO12, LPC54_SYSCON_MAINCLKSELA);
+  putreg32(SYSCON_MAINCLKSELB_PLLCLK, LPC54_SYSCON_MAINCLKSELB);
+
+  regval = getreg32(LPC54_SYSCON_MAINCLKSELA);
+  regval = (regval & ~SYSCON_MAINCLKSELA_MASK);
+  putreg32(regval, LPC54_SYSCON_MAINCLKSELA);
 }

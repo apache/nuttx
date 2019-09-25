@@ -2646,7 +2646,7 @@ New features and extended functionality:
       modes)
 
     * General Drivers: Added a generic "upper half" Quadrature Encoder driver.
-      The USB CDC/ACM serial driver can now be dynamically connnected or
+      The USB CDC/ACM serial driver can now be dynamically connected or
       disconnected from the host (programmatically or using NSH commands).
 
     * STM32 Drivers: Added a "lower half" Quadrature Encoder driver.
@@ -17632,7 +17632,7 @@ Additional new features and extended functionality:
       - MXRT1050-EVK:  Added support for on-board NOR FLASH boot.  From
         Ivan Ucherdzhiev.
       - IMXRT1050-EVK:  Disable LED support because pins conflict with PHY.
-        Enable device statistics.  Enable NSH ifup and ifdown commmands.
+        Enable device statistics.  Enable NSH ifup and ifdown commands.
         Added an NSH configuration for testing Ethernet.
 
     * NXP Freescale Kinetis:
@@ -18042,7 +18042,7 @@ detailed bugfix information):
         return value is required.
       - drivers/leds:  Fixes RGB LED issues caused by uninitialized memory
         with CONFIG_RGBLED_MULTICHAN.  The uninitialized pwm_info_s struct
-        caused a rogue channel to be started causing errros in the pwm
+        caused a rogue channel to be started causing errors in the pwm
         driver  From Anthony Merlino.
       - drivers/sensors/lis2dh:  Clear INT1 at SNIOC_WRITE_INT1THRESHOLD
         ioctl.  From Jussi Kivilinna.
@@ -19635,7 +19635,7 @@ detailed bugfix information):
         order.  From Xiang Xiao.
       - apps/system/ping and ping6:  Change dependency in ping and ping6
         Kconfig.  These may be implemented in users sockets and, hence,
-        may need to be avaiable even if ICMP and ICMPv6 sockets are not
+        may need to be available even if ICMP and ICMPv6 sockets are not
         support.  From Xiang Xiao.
       - apps/system/system:  Add 'const' to make function prototype
         compatible with OpenGroup.org requirement  From Xiang Xiao.

@@ -421,7 +421,6 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
  *
  * Input Parameters:
  *   dev   - The device driver structure to assign the address to
- *   psock - A pointer to a NuttX-specific, internal socket structure
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -430,8 +429,7 @@ void icmpv6_notify(net_ipv6addr_t ipaddr);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-int icmpv6_autoconfig(FAR struct net_driver_s *dev,
-                      FAR struct socket *psock);
+int icmpv6_autoconfig(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************

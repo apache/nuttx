@@ -767,7 +767,7 @@ Where <subdir> is one of the following:
 
        LCD support is already enabled in defconfig (nuttx/.config):
 
-         CONFIG_NX=y                          : Enable graphics suppport
+         CONFIG_NX=y                          : Enable graphics support
          CONFIG_PIC32MX_PMP=y                 : Enable parallel port support
          CONFIG_LCD_MIO283QT2=y               : MIO283QT2 LCD support
 

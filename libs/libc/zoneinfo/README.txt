@@ -120,7 +120,7 @@ Sample Code to Mount the ROMFS Filesystem
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_TZDIR
-#  errror CONFIG_LIBC_TZDIR is not defined
+#  error CONFIG_LIBC_TZDIR is not defined
 #endif
 
 #ifdef CONFIG_DISABLE_MOUNTPOINT

@@ -108,7 +108,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
-  DEBUGASSERT(conn != NULL);
+  DEBUGASSERT(pstate != NULL && conn != NULL);
 
   ninfo("conn: %p flags: %04x\n", conn, flags);
 
@@ -121,35 +121,43 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      /* The disconnection is complete */
-
-      /* pstate non-NULL means that we are performing a LINGERing close. */
-
-      if (pstate != NULL)
-        {
-          if (conn->tcpstateflags == TCP_CLOSED)
-            {
-              /* Wake up the waiting thread with a successful result */
-
-              pstate->cl_result = OK;
-              goto end_wait;
-            }
-        }
-
-      /* Otherwise, nothing is waiting on the close event and we can perform
-       * the completion actions here.
+      /* The disconnection is complete.  Wake up the waiting thread with an
+       * appropriate result.  Success is returned in these cases:
+       *
+       * * TCP_CLOSE indicates normal successful closure.  The TCP_CLOSE
+       *   event is sent when the remote ACKs the outgoing FIN in the
+       *   FIN_WAIT_1 state.  That is the appropriate time for the
+       *   application to close the socket.
+       *
+       *   NOTE:  The underlying connection, however, will persist, waiting
+       *   for the FIN to be returned by the remote in the TIME_WAIT state.
+       *
+       * * TCP_ABORT is less likely but still means that the socket was
+       *   closed, albeit abnormally due to a RST from the remote.
+       *
+       * * TCP_TIMEDOUT would be reported in this context if there is no
+       *   ACK response to the FIN in the FIN_WAIT_2 state.  The socket will
+       *   again be closed abnormally.
+       *
+       * This is the only true error case.
+       *
+       * * NETDEV_DOWN would indicate that the network went down before the
+       *   close completed.  A non-standard ENODEV error will be returned
+       *   in this case.  The socket will be left in a limbo state if the
+       *   network is taken down but should recover later when the
+       *   NETWORK_DOWN event is processed further.
        */
 
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          pstate->cl_result = -ENODEV;
+        }
       else
         {
-          /* Free connection resources */
-
-          tcp_free(conn);
-
-          /* Stop further callbacks */
-
-          flags = 0;
+          pstate->cl_result = OK;
         }
+
+       goto end_wait;
     }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

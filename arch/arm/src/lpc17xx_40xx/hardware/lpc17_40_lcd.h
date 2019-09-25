@@ -313,34 +313,22 @@
 #define LCD_CRSR_CRSRCLIPY_SHIFT            (8)       /* Bits 8-13: Reserved */
 #define LCD_CRSR_CRSRCLIPY_MASK             (0x3f << LCD_CRSR_CRSRCLIPY_SHIFT)
                                                       /* Bits 14-31: Reserved */
-/* LCD CRSR_INTMSK - Cursor Interrrupt Mask Register */
+/* LCD CRSR_INTMSK - Cursor Interrupt Mask Register */
 
 #define LCD_CRSR_INTMSK_CRSRIM              (1 << 0)  /* Bit 0: Cursor interrupt mask */
                                                       /* Bits 1-31: Reserved */
-/* LCD CRSR_INTCLR - Cursor Interrrupt Clear Register */
+/* LCD CRSR_INTCLR - Cursor Interrupt Clear Register */
 
 #define LCD_CRSR_INTCLR_CRSRIC              (1 << 0)  /* Bit 0: Cursor interrupt clear */
                                                       /* Bits 1-31: Reserved */
 
-/* LCD CRSR_INTRAW - Cursor Raw Interrrupt Status Register */
+/* LCD CRSR_INTRAW - Cursor Raw Interrupt Status Register */
 
 #define LCD_CRSR_INTRAW_CRSRRIS             (1 << 0)  /* Bit 0: Cursor raw interrupt status */
                                                       /* Bits 1-31: Reserved */
-/* LCD CRSR_INTSTAT - Mask Interrrupt Status Register */
+/* LCD CRSR_INTSTAT - Mask Interrupt Status Register */
 
 #define LCD_CRSR_INTSTAT_CRSRMIS            (1 << 0)  /* Bit 0: Cursor mask interrupt status */
                                                       /* Bits 1-31: Reserved */
-
-/************************************************************************************************
- * Public Types
- ************************************************************************************************/
-
-/************************************************************************************************
- * Public Data
- ************************************************************************************************/
-
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_LCD_H */

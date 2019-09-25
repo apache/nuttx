@@ -51,7 +51,7 @@ config LIBCXX
 if LIBCXX
 
 config LIBCXX_EXCEPTION
-	bool "Enable Exception Suppport"
+	bool "Enable Exception Support"
 	default y
 	select CXX_EXCEPTION
 
@@ -78,7 +78,7 @@ config UCLIBCXX
 if UCLIBCXX
 
 config UCLIBCXX_EXCEPTION
-	bool "Enable Exception Suppport"
+	bool "Enable Exception Support"
 	default y
 	select CXX_EXCEPTION
 

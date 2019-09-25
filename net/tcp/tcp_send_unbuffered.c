@@ -202,141 +202,6 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: psock_send_addrchck
- *
- * Description:
- *   Check if the destination IP address is in the IPv4 ARP or IPv6 Neighbor
- *   tables.  If not, then the send won't actually make it out... it will be
- *   replaced with an ARP request (IPv4) or a Neighbor Solicitation (IPv6).
- *
- *   NOTE 1: This could be an expensive check if there are a lot of
- *   entries in the ARP or Neighbor tables.
- *
- *   NOTE 2: If we are actually harvesting IP addresses on incoming IP
- *   packets, then this check should not be necessary; the MAC mapping
- *   should already be in the ARP table in many cases (IPv4 only).
- *
- *   NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
- *   address mapping is already in the ARP table.
- *
- * Input Parameters:
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   true - The Ethernet MAC address is in the ARP or Neighbor table (OR
- *          the network device is not Ethernet).
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ETHERNET
-static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
-{
-  /* Only Ethernet drivers are supported by this function.
-   *
-   * REVISIT: Could the MAC address not also be in a routing table?
-   */
-
-  if (conn->dev->d_lltype != NET_LL_ETHERNET)
-    {
-      /* Return true for non-Ethernet devices. */
-
-      return true;
-    }
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (conn->domain == PF_INET)
-#endif
-    {
-      /* For historical reasons, we will return true if both the ARP and the
-       * routing table are disabled.
-       */
-
-      bool ret = true;
-#ifdef CONFIG_NET_ROUTE
-      in_addr_t router;
-#endif
-#if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      if (arp_find(conn->u.ipv4.raddr, NULL) >= 0)
-        {
-          /* Return true if the address was found in the ARP table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-#ifdef CONFIG_NET_ROUTE
-      if (net_ipv4_router(conn->u.ipv4.raddr, &router) == OK)
-        {
-          /* Return true if the address was found in the routing table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-
-      return ret;
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      /* For historical reasons, we will return true if both the ICMPv6
-       * neighbor support and the routing table are disabled.
-       */
-
-      bool ret = true;
-#ifdef CONFIG_NET_ROUTE
-      net_ipv6addr_t router;
-#endif
-
-#if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      if (neighbor_lookup(conn->u.ipv6.raddr, NULL) >= 0)
-        {
-          /* Return true if the address was found in the neighbor table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-#ifdef CONFIG_NET_ROUTE
-      if (net_ipv6_router(conn->u.ipv6.raddr, router) == OK)
-        {
-          /* Return true if the address was found in the routing table */
-
-          return true;
-        }
-
-      /* Otherwise, return false */
-
-      ret = false;
-#endif
-
-      return ret;
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-
-#else /* CONFIG_NET_ETHERNET */
-#  define  psock_send_addrchck(r) (true)
-#endif /* CONFIG_NET_ETHERNET */
-
-/****************************************************************************
  * Name: tcpsend_eventhandler
  *
  * Description:
@@ -628,19 +493,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
           devif_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
 
-          /* Check if the destination IP address is in the ARP  or Neighbor
-           * table.  If not, then the send won't actually make it out... it
-           * will be replaced with an ARP request or Neighbor Solicitation.
-           */
+          /* Update the amount of data sent (but not necessarily ACKed) */
 
-          if (pstate->snd_sent != 0 || psock_send_addrchck(conn))
-            {
-              /* Update the amount of data sent (but not necessarily ACKed) */
-
-              pstate->snd_sent += sndlen;
-              ninfo("SEND: acked=%d sent=%d buflen=%d\n",
-                    pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
-            }
+          pstate->snd_sent += sndlen;
+          ninfo("SEND: acked=%d sent=%d buflen=%d\n",
+                pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
         }
     }
 
@@ -664,6 +521,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 end_wait:
+
   /* Do not allow any further callbacks */
 
   pstate->snd_cb->flags   = 0;

@@ -1124,7 +1124,7 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 #ifdef CONFIG_SAMA5_ADC_DMA
   /* Initiate DMA transfers */
 
-  priv->ready   = true;   /* Worker is avaiable */
+  priv->ready   = true;   /* Worker is available */
   priv->enabled = true;   /* Transfers are enabled */
 
   sam_adc_dmastart(priv);

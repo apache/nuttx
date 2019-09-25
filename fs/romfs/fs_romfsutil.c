@@ -843,7 +843,7 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
 
   save = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
 
-  /* Traverse hardlinks as necesssary to get to the real file header */
+  /* Traverse hardlinks as necessary to get to the real file header */
 
   ret = romfs_followhardlinks(rm, offset, poffset);
   if (ret < 0)
@@ -946,7 +946,7 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
   int16_t ndx;
   int     ret;
 
-  /* Traverse hardlinks as necesssary to get to the real file header */
+  /* Traverse hardlinks as necessary to get to the real file header */
 
   ret = romfs_followhardlinks(rm, offset, &offset);
   if (ret < 0)

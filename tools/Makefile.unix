@@ -561,8 +561,8 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 #
 # These targets depend on the kconfig-frontends packages.  To use these, you
 # must first download and install the kconfig-frontends package from this
-# location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
-# README.txt file in the NuttX tools GIT repository for additional information.
+# location: https://bitbucket.org/nuttx/tools/downloads/.  See README.txt
+# file in the NuttX tools GIT repository for additional information.
 
 do_config: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf Kconfig

@@ -58,7 +58,7 @@
  *
  * In addition, some SYSLOG device must also be enabled that will provide
  * the syslog output "channel.  As of this writing, there are two SYSLOG
- * devices avaiable:
+ * devices available:
  *
  *   1. A RAM SYSLOGing device that will log data into a circular buffer
  *      that can be dumped using the NSH dmesg command.  This device is

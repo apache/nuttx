@@ -52,7 +52,7 @@
 
 #define HAVE_MAXTOUCH    1
 #define HAVE_ILI9488_SMC 1
-#undef  HAVE_ILI9488_SPI    /* Not yet suppported */
+#undef  HAVE_ILI9488_SPI    /* Not yet supported */
 
 /* maXTouch and LCD only available if the maXTouch Xplained Pro is
  * connected

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_connnect.c
+ * net/local/local_connect.c
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

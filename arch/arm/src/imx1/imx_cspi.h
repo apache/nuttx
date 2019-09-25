@@ -114,7 +114,7 @@
 #define CSPI_CTRL_BITCOUNT_SHIFT   0
 #define CSPI_CTRL_BITCOUNT_MASK    (15 << CSPI_CTRL_BITCOUNT_SHIFT)
 
-/* CSPI Interrrupt Control/Status Register */
+/* CSPI Interrupt Control/Status Register */
 
 #define CSPI_INTCS_TE              (1 << 0)  /* Bit  0: TXFIFO Empty Status */
 #define CSPI_INTCS_TH              (1 << 1)  /* Bit  1: TXFIFO Half Status */

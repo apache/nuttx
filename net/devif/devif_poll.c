@@ -365,9 +365,13 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
   /* Traverse all of the allocated ICMPV6 connections and perform the poll action */
 
-  while (!bstop && (conn = icmpv6_nextconn(conn)) != NULL)
+  do
     {
-      /* Perform the ICMPV6 poll */
+      /* Perform the ICMPV6 poll
+       * Note: conn equal NULL in the first iteration means poll dev's callback list
+       * since icmpv6_autoconfig and icmpv6_neighbor still append it's callback into
+       * this list.
+       */
 
       icmpv6_poll(dev, conn);
 
@@ -379,6 +383,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
       bstop = callback(dev);
     }
+  while (!bstop && (conn = icmpv6_nextconn(conn)) != NULL);
 
   return bstop;
 }

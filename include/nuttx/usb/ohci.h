@@ -348,7 +348,7 @@
 
 /* Host Controller Communications Area Format (4.4.1) ***********************/
 
-/* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
+/* HccaInterruptTable: 32x32-bit pointers to interrupt EDs */
 
 #define HCCA_INTTBL_OFFSET         (0x00)
 #define HCCA_INTTBL_WSIZE          (32)
@@ -422,7 +422,7 @@ struct ohci_itd_s
 
 struct ohci_hcca_s
 {
-  /* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
+  /* HccaInterruptTable: 32x32-bit pointers to interrupt EDs */
 
   volatile uint32_t inttbl[HCCA_INTTBL_WSIZE];
 

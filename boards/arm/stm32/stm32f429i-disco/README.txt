@@ -30,6 +30,9 @@ NOTE:  Includes basic NSH command support with full 8MByte SDRAM + the
 Refer to the http://www.st.com website for further information about this
 board (search keyword: 429i-disco)
 
+NOTE:  This port was based on the original discovery kit, STM32F429I-DISCO.
+That board has been superceded by the new STM32F429I-DISC1.
+
 Contents
 ========
 

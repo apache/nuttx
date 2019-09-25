@@ -1847,7 +1847,7 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
           fat_getlfnchunk(LDIR_PTRWCHAR12_13(direntry), &lfname[11], 2);
 
           /* Ignore trailing spaces on the "last" directory entry.  The
-           * number of characters avaiable is LDIR_MAXLFNCHARS or that
+           * number of characters available is LDIR_MAXLFNCHARS or that
            * minus the number of trailing spaces on the "last" directory
            * entry.
            */

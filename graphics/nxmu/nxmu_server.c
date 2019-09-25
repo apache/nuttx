@@ -362,7 +362,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            }
            break;
 
-         case NX_SVRMSG_BLOCKED: /* Block messsages to a window */
+         case NX_SVRMSG_BLOCKED: /* Block messages to a window */
            {
              FAR struct nxsvrmsg_blocked_s *blocked = (FAR struct nxsvrmsg_blocked_s *)buffer;
              nxmu_event(blocked->wnd, NXEVENT_BLOCKED, blocked->arg);

@@ -41,5 +41,5 @@ float sqrtf(float x)
 }
 
 #else
-#  warning fabsf() not built
+#  warning sqrtf() not built
 #endif

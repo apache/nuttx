@@ -696,7 +696,7 @@ Where <subdir> is one of the following:
        defconfig (nuttx/.config):
 
        CONFIG_STM32_FSMC=y       : FSMC support is required for the LCD
-       CONFIG_NX=y               : Enable graphics suppport
+       CONFIG_NX=y               : Enable graphics support
        CONFIG_MM_REGIONS=2       : When FSMC is enabled, so is the on-board SRAM memory region
 
     10. USB OTG FS Device or Host Support

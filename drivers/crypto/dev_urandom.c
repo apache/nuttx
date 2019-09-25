@@ -162,14 +162,15 @@ static inline uint32_t do_congruential(void)
 static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
                              size_t len)
 {
+  size_t n;
+  uint32_t rnd;
+
 #ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
-  if (len)
+  if (len > 0)
     {
       getrandom(buffer, len);
     }
 #else
-  size_t n;
-  uint32_t rnd;
 
   n = len;
 
@@ -239,6 +240,7 @@ static ssize_t devurand_write(FAR struct file *filep, FAR const char *buffer,
   memcpy(&seed, buffer, len);
   srand(seed);
   return len;
+
 #elif defined(CONFIG_DEV_URANDOM_RANDOM_POOL)
   const unsigned int alignmask = sizeof(uint32_t) - 1;
   const size_t initlen = len;

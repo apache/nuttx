@@ -75,7 +75,7 @@ enum nx_initstate_e
   OSINIT_MEMORY    = 3,  /* The memory manager has been initialized */
   OSINIT_HARDWARE  = 4,  /* MCU-specific hardware is initialized.  Hardware
                           * resources such as timers and device drivers are
-                          * now avaiable.  Low-level OS services sufficient
+                          * now available.  Low-level OS services sufficient
                           * to support the hardware are also available but
                           * the OS has not yet completed its full
                           * initialization. */

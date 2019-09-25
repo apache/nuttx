@@ -177,7 +177,7 @@ void up_idle(void)
 
   up_idlepm();
 
-#if 0 /* REVISIT */
+#if 1
   /* Sleep until an interrupt occurs to save power. */
 
   BEGIN_IDLE();
