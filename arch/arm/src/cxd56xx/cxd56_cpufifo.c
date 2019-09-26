@@ -75,7 +75,7 @@ struct cfpushdata_s
 static int  cpufifo_txhandler(int irq, FAR void *context, FAR void *arg);
 static int  cpufifo_rxhandler(int irq, FAR void *context, FAR void *arg);
 static int  cpufifo_trypush(uint32_t data[2]);
-static void cpufifo_reserve(uint32_t data[2]);
+static int  cpufifo_reserve(uint32_t data[2]);
 
 /****************************************************************************
  * Private Data
@@ -148,21 +148,25 @@ static int cpufifo_trypush(uint32_t data[2])
   return OK;
 }
 
-static void cpufifo_reserve(uint32_t data[2])
+static int cpufifo_reserve(uint32_t data[2])
 {
   FAR struct cfpushdata_s *pd;
 
   pd = (FAR struct cfpushdata_s *)sq_remfirst(&g_emptyqueue);
 
-  /* This assertion indicate that need more sending buffer, it can be
+  /* This error indicates that need more sending buffer, it can be
    * configured by CONFIG_CXD56_CPUFIFO_ENTRIES.
    */
 
-  ASSERT(pd);
+  if (!pd)
+    {
+      return -EAGAIN;
+    }
 
   pd->data[0] = data[0];
   pd->data[1] = data[1];
   sq_addlast(&pd->entry, &g_pushqueue);
+  return OK;
 }
 
 /****************************************************************************
@@ -177,8 +181,8 @@ int cxd56_cfpush(uint32_t data[2])
   flags = enter_critical_section();
   if (!sq_empty(&g_pushqueue))
     {
-      cpufifo_reserve(data);
-      return OK;
+      ret = cpufifo_reserve(data);
+      return ret;
     }
 
   ret = cpufifo_trypush(data);

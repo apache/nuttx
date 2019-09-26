@@ -82,7 +82,6 @@ extern "C"
 #define CXD56_SDHCI_FEVT_OFFSET       (0x0050) /* Force Event Register */
 #define CXD56_SDHCI_ADMAES_OFFSET     (0x0054) /* ADMA Error Status Register */
 #define CXD56_SDHCI_ADSADDR_OFFSET    (0x0058) /* ADMA System Address Register */
-#define CXD56_SDHCI_HOSTVER_OFFSET    (0x00fc) /* Host Controller Version */
 #define CXD56_SDHCI_VENDSPEC_OFFSET   (0x0110) /* Vender Specific Control */
 #define CXD56_SDHCI_OTHERIOLL_OFFSET  (0x021C) /* IO Pin Control       */
 #define CXD56_SDHCI_USERDEF1CTL_OFFSET (0x0270) /* User Define1 Control Register */
@@ -112,7 +111,6 @@ extern "C"
 #define CXD56_SDHCI_FEVT              (CXD56_SDHCI_BASE+CXD56_SDHCI_FEVT_OFFSET)
 #define CXD56_SDHCI_ADMAES            (CXD56_SDHCI_BASE+CXD56_SDHCI_ADMAES_OFFSET)
 #define CXD56_SDHCI_ADSADDR           (CXD56_SDHCI_BASE+CXD56_SDHCI_ADSADDR_OFFSET)
-#define CXD56_SDHCI_HOSTVER           (CXD56_SDHCI_BASE+CXD56_SDHCI_HOSTVER_OFFSET)
 #define CXD56_SDHCI_VENDSPEC          (CXD56_SDHCI_BASE+CXD56_SDHCI_VENDSPEC_OFFSET)
 #define CXD56_SDHCI_OTHERIOLL         (CXD56_SDHCI_BASE+CXD56_SDHCI_OTHERIOLL_OFFSET)
 #define CXD56_SDHCI_USERDEF1CTL       (CXD56_SDHCI_BASE+CXD56_SDHCI_USERDEF1CTL_OFFSET)
@@ -261,8 +259,9 @@ extern "C"
 #define SDHCI_INT_CINS                   (1 << 6)  /* Bit 6:  Card Insertion */
 #define SDHCI_INT_CRM                    (1 << 7)  /* Bit 7:  Card Removal */
 #define SDHCI_INT_CINT                   (1 << 8)  /* Bit 8:  Card Interrupt */
-                                                   /* Bits 9-15: Reserved */
+                                                   /* Bits 9-14: Reserved */
 
+#define SDHCI_INT_EINT                   (1 << 15) /* Bit 15: Error Interrupt */
 #define SDHCI_INT_CTOE                   (1 << 16) /* Bit 16: Command Timeout Error */
 #define SDHCI_INT_CCE                    (1 << 17) /* Bit 17: Command CRC Error */
 #define SDHCI_INT_CEBE                   (1 << 18) /* Bit 18: Command End Bit Error */
@@ -278,6 +277,7 @@ extern "C"
 #define SDHCI_INT_DMAE                   (1 << 28) /* Bit 28: DMA Error */
                                                    /* Bits 29-31: Reserved */
 
+#define SDHCI_EINT_MASK                  0xffff0000
 #define SDHCI_INT_ALL                    0x117f01ff
 
 /* Auto CMD12 Error Status Register */

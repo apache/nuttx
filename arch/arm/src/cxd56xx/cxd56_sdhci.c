@@ -344,8 +344,7 @@ struct cxd56_sdhcregs_s
   uint32_t htcapblt;  /* Host Controller Capabilities */
   uint32_t admaes;    /* ADMA Error Status Register */
   uint32_t adsaddr;   /* ADMA System Address Register */
-  uint32_t vendor;    /* Vendor Specific Register */
-  uint32_t hostver;   /* Host Controller Version */
+  uint32_t vendspec;  /* Vendor Specific Register */
 };
 #endif
 
@@ -697,8 +696,7 @@ static void cxd56_sdhcsample(struct cxd56_sdhcregs_s *regs)
   regs->htcapblt  = getreg32(CXD56_SDHCI_HTCAPBLT);  /* Host Controller Capabilities */
   regs->admaes    = getreg32(CXD56_SDHCI_ADMAES);    /* ADMA Error Status Register */
   regs->adsaddr   = getreg32(CXD56_SDHCI_ADSADDR);   /* ADMA System Address Register */
-  regs->vendor    = getreg32(CXD56_SDHCI_VENDOR);    /* Vendor Specific Register */
-  regs->hostver   = getreg32(CXD56_SDHCI_HOSTVER);   /* Host Controller Version */
+  regs->vendspec  = getreg32(CXD56_SDHCI_VENDSPEC);  /* Vendor Specific Register */
 }
 #endif
 
@@ -748,7 +746,7 @@ static void cxd56_dumpsample(struct cxd56_sdiodev_s *priv,
   mcinfo(" HTCAPBLT[%08x]: %08x\n", CXD56_SDHCI_HTCAPBLT,  regs->htcapblt);
   mcinfo("   ADMAES[%08x]: %08x\n", CXD56_SDHCI_ADMAES,    regs->admaes);
   mcinfo("  ADSADDR[%08x]: %08x\n", CXD56_SDHCI_ADSADDR,   regs->adsaddr);
-  mcinfo("  HOSTVER[%08x]: %08x\n", CXD56_SDHCI_HOSTVER,   regs->hostver);
+  mcinfo(" VENDSPEC[%08x]: %08x\n", CXD56_SDHCI_VENDSPEC,  regs->hostver);
 }
 #endif
 
@@ -1285,6 +1283,16 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
     }
 #endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 
+  /* Handle error interrupts ************************************************/
+
+  if ((getreg32(CXD56_SDHCI_IRQSTAT) & SDHCI_INT_EINT) != 0)
+    {
+      /* Clear error interrupts */
+
+      mcerr("ERROR: Occur error interrupts: %08x\n", enabled);
+      putreg32(enabled & SDHCI_EINT_MASK, CXD56_SDHCI_IRQSTAT);
+    }
+
   /* Handle wait events *****************************************************/
 
   pending  = enabled & priv->waitints;
@@ -1342,11 +1350,17 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_SDIO_MUXBUS
 static int cxd56_sdio_lock(FAR struct sdio_dev_s *dev, bool lock)
 {
-  /* Single SDIO instance so there is only one possibility.  The multiplex
-   * bus is part of board support package.
-   */
+  /* Enable SD clock only while accessing to the SDIO. */
 
-  cxd56_muxbus_sdio_lock(lock);
+  if (lock)
+    {
+      modifyreg32(CXD56_SDHCI_SYSCTL, 0, SDHCI_SYSCTL_SDCLKEN);
+    }
+  else
+    {
+      modifyreg32(CXD56_SDHCI_SYSCTL, SDHCI_SYSCTL_SDCLKEN, 0);
+    }
+
   return OK;
 }
 #endif
@@ -1411,6 +1425,22 @@ static void cxd56_sdio_sdhci_reset(FAR struct sdio_dev_s *dev)
         getreg32(CXD56_SDHCI_SYSCTL), getreg32(CXD56_SDHCI_PRSSTAT),
         getreg32(CXD56_SDHCI_IRQSTATEN));
 
+  /* Initialize the SDHC slot structure data structure */
+  /* Initialize semaphores */
+
+  sem_init(&priv->waitsem, 0, 0);
+
+  /* The waitsem semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+
+  /* Create a watchdog timer */
+
+  priv->waitwdog = wd_create();
+  DEBUGASSERT(priv->waitwdog);
+
   /* The next phase of the hardware reset would be to set the SYSCTRL INITA
    * bit to send 80 clock ticks for card to power up and then reset the card
    * with CMD0.  This is done elsewhere.
@@ -1418,10 +1448,6 @@ static void cxd56_sdio_sdhci_reset(FAR struct sdio_dev_s *dev)
 
   /* Reset state data */
 
-  sem_init(&priv->waitsem, 0, 1);
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
-  sem_init(&priv->waitsem, 0, 1);
   priv->waitevents = 0;      /* Set of events to be waited for */
   priv->waitints   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */

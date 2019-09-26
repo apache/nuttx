@@ -234,7 +234,7 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
   if (!req)
     {
       iccerr("Receive buffer is full.\n");
-      return -ENOMEM;
+      PANIC();
     }
 
   req->word[0] = word[0];

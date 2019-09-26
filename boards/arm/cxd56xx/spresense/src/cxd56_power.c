@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 static sem_t g_ltsem = SEM_INITIALIZER(1);
-static bool g_used_lna = true;
+static bool g_used_lna = false;
 static bool g_used_tcxo = true;
 #ifdef CONFIG_BOARDCTL_RESET
 static struct pm_cpu_freqlock_s g_hv_lock =

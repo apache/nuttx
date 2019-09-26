@@ -336,15 +336,13 @@ int board_sdcard_initialize(void)
 {
   int ret = OK;
 
-  cxd56_gpio_config(SDCARD_TXS02612_SEL, false);
-
 #ifdef CONFIG_SDCARD_TXS02612_PORT0
-  /* Select port0 for SD-Card */
+  /* Select port0 for SD-Card (default) */
 
-  cxd56_gpio_write(SDCARD_TXS02612_SEL, false);
 #else
   /* Select port1 for SDIO other than SD-Card */
 
+  cxd56_gpio_config(SDCARD_TXS02612_SEL, false);
   cxd56_gpio_write(SDCARD_TXS02612_SEL, true);
 #endif
 

@@ -283,25 +283,20 @@ static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
 
   base /= 1000;
 
-  switch (frequency)
+  if (frequency <= 100000)
     {
-      case 100000:
-        tLow  = 4700000;
-        tHigh = 4000000;
-        break;
-
-      case 400000:
-        tLow  = 1300000;
-        tHigh = 600000;
-        break;
-
-      case 1000000:
-        tLow  = 500000;
-        tHigh = 260000;
-        break;
-
-      default:
-        return;
+      tLow  = 4700000;
+      tHigh = 4000000;
+    }
+  else if (frequency <= 400000)
+    {
+      tLow  = 1300000;
+      tHigh = 600000;
+    }
+  else
+    {
+      tLow  = 500000;
+      tHigh = 260000;
     }
 
   if (frequency > 100000)
