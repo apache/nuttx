@@ -3456,7 +3456,7 @@ static void sam_gmac_reset(struct sam_gmac_s *priv)
 
   /* Disable clocking to the GMAC peripheral */
 
-  sam_gmac_disableclk();
+  sam_ahb_gmac_disableperiph();
 
 #endif
 }
@@ -3598,7 +3598,7 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
 
   /* Enable clocking to the GMAC peripheral */
 
-  sam_gmac_enableclk();
+  sam_ahb_gmac_enableperiph();
 
   /* Disable TX, RX, clear statistics.  Disable all interrupts. */
 
@@ -3770,7 +3770,7 @@ int sam_gmac_initialize(void)
 
   /* Enable clocking to the GMAC peripheral (just for sam_ifdown()) */
 
-  sam_gmac_enableclk();
+  sam_ahb_gmac_enableperiph();
 
   /* Put the interface in the down state (disabling clocking again). */
 
