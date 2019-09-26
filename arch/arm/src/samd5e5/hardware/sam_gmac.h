@@ -469,7 +469,6 @@
 #define GMAC_NCFGR_MTIHEN         (1 << 6)  /* Bit 6:  Multicast Hash Enable */
 #define GMAC_NCFGR_UNIHEN         (1 << 7)  /* Bit 7:  Unicast Hash Enable */
 #define GMAC_NCFGR_MAXFS          (1 << 8)  /* Bit 8:  Receive 1536 bytes frames */
-#define GMAC_NCFGR_GBE            (1 << 10) /* Bit 10: Gigabit Mode Enable */
 #define GMAC_NCFGR_RTY            (1 << 12) /* Bit 12: Retry test */
 #define GMAC_NCFGR_PEN            (1 << 13) /* Bit 13: Pause Enable */
 #define GMAC_NCFGR_RXBUFO_SHIFT   (14)      /* Bits 14-15: Receive Buffer Offset */

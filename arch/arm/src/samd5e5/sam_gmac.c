@@ -144,7 +144,7 @@
 /* The MAC can support frame lengths up to 1536 bytes */
 
 #define GMAC_MAX_FRAMELEN       1536
-#if CONFIG_NET_ETH_PKTSIZE >GMAC_MAX_FRAMELEN
+#if CONFIG_NET_ETH_PKTSIZE > GMAC_MAX_FRAMELEN
 #  error CONFIG_NET_ETH_PKTSIZE is too large
 #endif
 
@@ -713,7 +713,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
     {
       /* Driver managed the ring buffer */
 
-      virtaddr = sam_virtramaddr(txdesc->addr);
+      virtaddr = txdesc->addr;
       memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
       up_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
     }
@@ -1042,7 +1042,7 @@ static int sam_recvframe(struct sam_gmac_s *priv)
            */
 
           physaddr = (uintptr_t)(rxdesc->addr & GMACRXD_ADDR_MASK);
-          src = (const uint8_t *)sam_virtramaddr(physaddr);
+          src = (const uint8_t *)physaddr;
 
           up_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
 
@@ -1349,7 +1349,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
 #warning REVISIT
           if (priv->txtail == 0 &&
-              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_GMAC_TBQB))
+              (uintptr_t)txdesc != sam_getreg(priv, SAM_GMAC_TBQB))
             {
               txdesc->status = (uint32_t)GMACTXD_STA_USED;
               up_clean_dcache((uintptr_t)txdesc,
@@ -2428,10 +2428,6 @@ static void sam_phydump(struct sam_gmac_s *priv)
   ninfo(" ADVERTISE: %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, GMII_LPA, &phyval);
   ninfo("       LPR: %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, GMII_1000BTCR, &phyval);
-  ninfo("  1000BTCR: %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, GMII_1000BTSR, &phyval);
-  ninfo("  1000BTSR: %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, GMII_ESTATUS, &phyval);
   ninfo("   ESTATUS: %04x\n", phyval);
 
@@ -2864,8 +2860,6 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   uint16_t phyid2;
   uint16_t advertise;
   uint16_t lpa;
-  uint16_t btcr;
-  uint16_t btsr;
   int timeout;
   int ret;
 
@@ -2938,26 +2932,6 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       goto errout;
     }
 
-  /* Modify the 1000Base-T control register to advertise 1000Base-T full
-   * and half duplex support.
-   */
-
-  ret = sam_phyread(priv, priv->phyaddr, GMII_1000BTCR, &btcr);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to read 1000BTCR register: %d\n", ret);
-      goto errout;
-    }
-
-  btcr |= GMII_1000BTCR_1000BASETFULL | GMII_1000BTCR_1000BASETHALF;
-
-  ret = sam_phywrite(priv, priv->phyaddr, GMII_1000BTCR, btcr);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to write 1000BTCR register: %d\n", ret);
-      goto errout;
-    }
-
   /* Restart Auto_negotiation */
 
   ret  = sam_phyread(priv, priv->phyaddr, GMII_MCR, &phyval);
@@ -3018,31 +2992,6 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   for (; ; )
     {
-      ret  = sam_phyread(priv, priv->phyaddr, GMII_1000BTSR, &btsr);
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to read 1000BTSR register: %d\n", ret);
-          goto errout;
-        }
-
-      /* Setup the GMAC link speed */
-
-      if ((btsr & GMII_1000BTSR_LP1000BASETFULL) != 0 &&
-          (btcr & GMII_1000BTCR_1000BASETHALF) != 0)
-        {
-          /* Set RGMII for 1000BaseTX and Full Duplex */
-
-          linkmode = (GMAC_NCFGR_FD | GMAC_NCFGR_GBE);
-          break;
-        }
-      else if ((btsr & GMII_1000BTSR_LP1000BASETHALF) != 0 &&
-               (btcr & GMII_1000BTCR_1000BASETFULL) != 0)
-        {
-          /* Set RGMII for 1000BaseT and Half Duplex */
-
-          linkmode = GMAC_NCFGR_GBE;
-          break;
-        }
 
       /* Get the Autonegotiation Link partner base page */
 
@@ -3106,7 +3055,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   /* Modify the NCFGR register based on the negotiated speed and duplex */
 
   regval  = sam_getreg(priv, SAM_GMAC_NCFGR);
-  regval &= ~(GMAC_NCFGR_SPD | GMAC_NCFGR_FD | GMAC_NCFGR_GBE);
+  regval &= ~(GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
   regval |= linkmode;
   sam_putreg(priv, SAM_GMAC_NCFGR, regval);
   sam_putreg(priv, SAM_GMAC_NCR, ncr);
@@ -3154,7 +3103,7 @@ statoc void sam_linkspeed(struct sam_gmac_s *priv)
   /* Modify the NCFGR register based on the configured speed and duplex */
 
   regval = sam_getreg(priv, SAM_GMAC_NCFGR);
-  regval &= ~(GMAC_NCFGR_SPD | GMAC_NCFGR_FD | GMAC_NCFGR_GBE);
+  regval &= ~(GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
 
 #ifdef SAMD5E5_GMAC_ETHFD
   regval |= GMAC_NCFGR_FD;
@@ -3162,8 +3111,6 @@ statoc void sam_linkspeed(struct sam_gmac_s *priv)
 
 #if defined(SAMD5E5_GMAC_ETH100MBPS)
   regval |= GMAC_NCFGR_SPD;
-#elif defined(SAMD5E5_GMAC_ETH1000MBPS) */
-  regval |= GMAC_NCFGR_GBE;
 #endif
 
   sam_puttreg(priv, SAM_GMAC_NCFGR, regval);
@@ -3371,7 +3318,7 @@ static void sam_txreset(struct sam_gmac_s *priv)
        * firmware.
        */
 
-      physaddr           = sam_physramaddr(bufaddr);
+      physaddr           = bufaddr;
       txdesc[ndx].addr   = physaddr;
       txdesc[ndx].status = (uint32_t)GMACTXD_STA_USED;
     }
@@ -3388,7 +3335,7 @@ static void sam_txreset(struct sam_gmac_s *priv)
 
   /* Set the Transmit Buffer Queue Base Register */
 
-  physaddr = sam_physramaddr((uintptr_t)txdesc);
+  physaddr = (uintptr_t)txdesc;
   sam_putreg(priv, SAM_GMAC_TBQB, physaddr);
 }
 
@@ -3435,7 +3382,7 @@ static void sam_rxreset(struct sam_gmac_s *priv)
        * GMACRXD_ADDR_WRAP.
        */
 
-      physaddr           = sam_physramaddr(bufaddr);
+      physaddr           = bufaddr;
       rxdesc[ndx].addr   = physaddr;
       rxdesc[ndx].status = 0;
     }
@@ -3452,7 +3399,7 @@ static void sam_rxreset(struct sam_gmac_s *priv)
 
   /* Set the Receive Buffer Queue Base Register */
 
-  physaddr = sam_physramaddr((uintptr_t)rxdesc);
+  physaddr = (uintptr_t)rxdesc;
   sam_putreg(priv, SAM_GMAC_RBQB, physaddr);
 }
 
@@ -3676,8 +3623,8 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
 
   /* Initial configuration:
    *
-   *   SPD = 0    : Assuming 1000Base-T full duplex
-   *   FD  = 1    : Assuming 1000Base-T full duplex
+   *   SPD = 0    : Assuming 100Base-T full duplex
+   *   FD  = 1    : Assuming 100Base-T full duplex
    *   DNVLAN = 0 : Don't discard non-VLAN frames
    *   JFRAME = 0 : Disable jumbo frames
    *   CAF        : Depends on CONFIG_NET_PROMISCUOUS
@@ -3685,7 +3632,6 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
    *   MTIHEN = 0 : Multicast hash disabled
    *   UNIHEN = 0 : Unicast hash disabled
    *   MAXFS = 0  : Disable receive 1536 byte frames
-   *   GBE = 1    : Assuming 1000Base-T full duplex
    *   RTY = 0    : Disable retry test
    *   PEN = 1    : Pause frames disabled
    *   RXBUFO = 0 : No receive buffer offset
@@ -3702,7 +3648,7 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
    *   IRXER = 0  : Disable ignore IPG GXER
    */
 
-  regval = GMAC_NCFGR_FD | GMAC_NCFGR_GBE | GMAC_NCFGR_PEN |
+  regval = GMAC_NCFGR_FD | GMAC_NCFGR_PEN |
            GMAC_NCFGR_RFCS | GMAC_NCFGR_CLK_DIV64 | GMAC_NCFGR_DBW_64;
 
 #ifdef CONFIG_NET_PROMISCUOUS

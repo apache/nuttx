@@ -338,6 +338,8 @@
 
 #define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
 
+#define BOARD_MCK_FREQUENCY     BOARD_GCLK0_FREQUENCY
+
 /* Peripheral clocking */
 
 #define BOARD_GCLK_EIC          4         /* EIC GCLK index */

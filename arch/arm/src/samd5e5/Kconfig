@@ -816,7 +816,7 @@ config SAMD5E5_GMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
 
-conig SAMD5E5_GMAC_USE_MII
+config SAMD5E5_GMAC_USE_MII
 	bool "Use MII interface for Ethernet"
 	default n
 	---help---
