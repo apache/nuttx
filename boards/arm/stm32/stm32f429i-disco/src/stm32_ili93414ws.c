@@ -55,9 +55,12 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
 
+#include "stm32_rcc.h"
+#include "stm32_spi.h"
 #include "stm32f429i-disco.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions

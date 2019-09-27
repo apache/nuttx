@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/src/stm32f429i-disco.h
  *
- *   Copyright (C) 2011-2012, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Marco Krahl <ocram.lhark@gmail.com>
  *
@@ -50,6 +50,8 @@
 #endif
 
 #include <arch/stm32/chip.h>
+
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

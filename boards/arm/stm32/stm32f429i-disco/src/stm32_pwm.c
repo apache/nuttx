@@ -39,21 +39,24 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/timers/pwm.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
 #include "stm32f429i-disco.h"
 
+#include <arch/board/board.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration *******************************************************************/
+
+/* Configuration ************************************************************/
 
 /* PWM Timer */
 
