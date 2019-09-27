@@ -389,7 +389,7 @@
 
 /* AHB2 peripheral reset register */
 
-#define RCC_AHB1ENR_GPIOEN(port)    (1 << (port))
+#define RCC_AHB2RSTR_GPIORST(n)     (1 << (n))
 #define RCC_AHB2RSTR_GPIOARST       (1 << 0)  /* Bit 0:  IO port A reset */
 #define RCC_AHB2RSTR_GPIOBRST       (1 << 1)  /* Bit 1:  IO port B reset */
 #define RCC_AHB2RSTR_GPIOCRST       (1 << 2)  /* Bit 2:  IO port C reset */
@@ -470,6 +470,7 @@
 
 /* AHB2 Peripheral Clock enable register */
 
+#define RCC_AHB2ENR_GPIOEN(n)       (1 << (n))
 #define RCC_AHB2ENR_GPIOAEN         (1 << 0)  /* Bit 0:  IO port A enable */
 #define RCC_AHB2ENR_GPIOBEN         (1 << 1)  /* Bit 1:  IO port B enable */
 #define RCC_AHB2ENR_GPIOCEN         (1 << 2)  /* Bit 2:  IO port C enable */
@@ -529,7 +530,7 @@
 /* APB2 Peripheral Clock enable register */
 
 #define RCC_APB2ENR_SYSCFGEN        (1 << 0)  /* Bit 0:  System configuration controller enable */
-#define RCC_APB2ENR_FWEN            (1 << 7)  /* Bit 7: Firewall enable */
+#define RCC_APB2ENR_FWEN            (1 << 7)  /* Bit 7:  Firewall enable */
 #define RCC_APB2ENR_SDMMCEN         (1 << 10) /* Bit 10: SDMMC enable */
 #define RCC_APB2ENR_TIM1EN          (1 << 11) /* Bit 11: TIM1 enable */
 #define RCC_APB2ENR_SPI1EN          (1 << 12) /* Bit 12: SPI1 enable */

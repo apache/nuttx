@@ -124,7 +124,7 @@ int stm32l4_dumpgpio(uint32_t pinset, const char *msg)
   _info("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
 
-  if ((getreg32(STM32L4_RCC_AHB1ENR) & RCC_AHB1ENR_GPIOEN(port)) != 0)
+  if ((getreg32(STM32L4_RCC_AHB2ENR) & RCC_AHB2ENR_GPIOEN(port)) != 0)
     {
       _info(" MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
             getreg32(base + STM32L4_GPIO_MODER_OFFSET),
@@ -142,8 +142,8 @@ int stm32l4_dumpgpio(uint32_t pinset, const char *msg)
     }
   else
     {
-      _info("  GPIO%c not enabled: AHB1ENR: %08x\n",
-            g_portchar[port], getreg32(STM32L4_RCC_AHB1ENR));
+      _info("  GPIO%c not enabled: AHB2ENR: %08x\n",
+            g_portchar[port], getreg32(STM32L4_RCC_AHB2ENR));
     }
 
   leave_critical_section(flags);
