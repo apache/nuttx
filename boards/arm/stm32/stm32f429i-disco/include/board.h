@@ -1,8 +1,7 @@
-/****************************************************************************
+/************************************************************************************
  * boards/arm/stm32/stm32f429i-disco/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
 #define __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,15 +46,12 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#include "stm32_sdio.h"
-#include "stm32.h"
-
-/****************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ************************************************************************************/
 
 /* Clocking *************************************************************************/
+
 /* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
  * for a 32kHz RTC backup crystal, but it is not stuffed.
  *
@@ -164,6 +160,7 @@
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
 /* LED definitions ******************************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
  */
@@ -196,6 +193,7 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Button definitions ***************************************************************/
+
 /* The STM32F4 Discovery supports one button: */
 
 #define BUTTON_USER        0
@@ -284,12 +282,12 @@
  * PLLSAIDIVR             : 8
  *
  * Timings
- * Horicontal Front Porch : 10  (STM32_LTDC_HFP)
- * Horicontal Back Porch  : 20  (STM32_LTDC_HBP)
+ * Horizontal Front Porch : 10  (STM32_LTDC_HFP)
+ * Horizontal Back Porch  : 20  (STM32_LTDC_HBP)
  * Vertical Front Porch   :  4  (STM32_LTDC_VFP)
  * Vertical Back Porch    :  2  (STM32_LTDC_VBP)
  *
- * Horicontal Sync        : 10  (STM32_LTDC_HSYNC)
+ * Horizontal Sync        : 10  (STM32_LTDC_HSYNC)
  * Vertical Sync          :  4  (STM32_LTDC_VSYNC)
  *
  * Active Width           : 240 (STM32_LTDC_ACTIVEW)
@@ -336,12 +334,19 @@
 #define STM32_RCC_DCKCFGR_PLLSAIDIVR    RCC_DCKCFGR_PLLSAIDIVR_DIV8
 
 /* Pixel Clock Polarity */
+
 #define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+
 /* Data Enable Polarity */
+
 #define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+
 /* Vertical Sync Polarity */
+
 #define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
+
 /* Horicontal Sync Polarity */
+
 #define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
 
 /* GPIO pinset */
@@ -396,12 +401,19 @@
 #define STM32_RCC_DCKCFGR_PLLSAIDIVR    ???
 
 /* Pixel Clock Polarity */
+
 #define BOARD_LTDC_GCR_PCPOL            ???
+
 /* Data Enable Polarity */
+
 #define BOARD_LTDC_GCR_DEPOL            ???
+
 /* Vertical Sync Polarity */
+
 #define BOARD_LTDC_GCR_VSPOL            ???
+
 /* Horicontal Sync Polarity */
+
 #define BOARD_LTDC_GCR_HSPOL            ???
 
 /* GPIO pinset */
@@ -460,7 +472,7 @@
 #endif  /* CONFIG_STM32_TIM1_PWM */
 #endif  /* CONFIG_STM32F429I_DISCO_HIGHPRI */
 
-/* DMA *************************************************************************/
+/* DMA ******************************************************************************/
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1
 
