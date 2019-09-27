@@ -184,6 +184,10 @@ config STM32H7_ADC3
 	default n
 	select STM32H7_ADC
 
+config STM32H7_CRC
+	bool "CRC"
+	default n
+
 config STM32H7_BKPSRAM
 	bool "Enable BKP RAM Domain"
 	select STM32H7_PWR
