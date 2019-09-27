@@ -127,7 +127,7 @@
  * .... .... V... ....
  */
 
-#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, inital value of output */
+#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, initial value of output */
 #define GPIO_OUTPUT_CLEAR             (0)
 
 /* This identifies the GPIO port:

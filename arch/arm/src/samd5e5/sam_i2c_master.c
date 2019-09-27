@@ -1435,7 +1435,7 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 }
 
 /*******************************************************************************
- * Name: sam_i2c_uninitalize
+ * Name: sam_i2c_uninitialize
  *
  * Description:
  *   Uninitialize an I2C device

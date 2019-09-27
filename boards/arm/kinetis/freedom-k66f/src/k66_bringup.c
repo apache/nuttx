@@ -141,7 +141,7 @@ int k66_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initalize the RTC driver: %d\n",
+             "ERROR: Failed to initialize the RTC driver: %d\n",
              ret);
     }
 #endif

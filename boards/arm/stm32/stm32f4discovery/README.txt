@@ -1533,7 +1533,7 @@ Configuration Sub-directories
 
        a. Telnet does work with IPv6 but is not enabled in this
           configuration (but could be).
-       b. The network initialization thread was enabed in the netnsh
+       b. The network initialization thread was enabled in the netnsh
           configuration on 2015-09-28, but not in the ipv6 configuration.
 
     2. This configuration can be modified to that both IPv4 and IPv6

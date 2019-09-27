@@ -40,7 +40,7 @@
 #include <signal.h>
 
 /****************************************************************************
- * Publics Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -51,12 +51,10 @@
  *   signals are included.
  *
  * Input Parameters:
- *   set - Signal set to initalize
+ *   set - Signal set to initialize
  *
  * Returned Value:
  *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
- *
- * Assumptions:
  *
  ****************************************************************************/
 

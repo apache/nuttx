@@ -214,8 +214,8 @@ int arm_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
 
   /* Now setup up the new mapping.  Get a pointer to the L2 entry
    * corresponding to the new mapping.  Then set it map to the newly
-   * allocated page address.  The inital mapping is read/write but
-   * non-cached (MMU_L2_ALLOCFLAGS)
+   * allocated page address.  The initial mapping is read/write but
+   * non-cached (MMU_L2_ALLOCFLAGS).
    */
 
   pte = arm_va2pte(vaddr);

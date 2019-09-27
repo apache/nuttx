@@ -138,7 +138,7 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
       FAR char *optchar;
       int noarg_ret = '?';
 
-      /* The inital value of optind is 1.  If getopt() is called again in the
+      /* The initial value of optind is 1.  If getopt() is called again in the
        * program, optind must be reset to some value <= 1.
        */
 

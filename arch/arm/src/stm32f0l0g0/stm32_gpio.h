@@ -176,7 +176,7 @@
  * .... .... ...V .... ....
  */
 
-#define GPIO_OUTPUT_SET               (1 << 8)                   /* Bit 8: If output, inital value of output */
+#define GPIO_OUTPUT_SET               (1 << 8)                   /* Bit 8: If output, initial value of output */
 #define GPIO_OUTPUT_CLEAR             (0)
 
 /* External interrupt selection (GPIO inputs only):

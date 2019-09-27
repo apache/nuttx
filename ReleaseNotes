@@ -12773,7 +12773,7 @@ detailed bugfix information):
         supported class and proto.  From Janne Rosberg.
       - SSD1306:  Fix errors in SPI mode configuration.  From Gong Darcy.
       - CDC/ACM Device Class:  uart_ops_s portion of cdcacm will not be
-        initalized with correct functions if CONFIG_SERIAL_DMA is selected.
+        initialized with correct functions if CONFIG_SERIAL_DMA is selected.
 
     * Networking/Network Drivers:
 
@@ -25432,8 +25432,8 @@ information):
       - STM327F Configuration:  Kconfig add depends on BBSRAM.  From David
         Sidrane.
       - STM32F7 Interrupts:  Fix overwritten IRQ enable.  System boot order
-        calls clock_initialize() then up_initalize().  clock_initialize()
-        was setting up the alarm IRQ up_initalize is initializing the NVIC.
+        calls clock_initialize() then up_initialize().  clock_initialize()
+        was setting up the alarm IRQ up_initialize is initializing the NVIC.
         This most likely worked in the past due to a bug in the NVIC
         initialization code that failed to clear the Interrupt enables.
       - STM32H7:  Rix BBSRAM name in memory map.  From David Sidrane.

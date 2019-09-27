@@ -193,7 +193,7 @@ static int up_x11untraperrors(void)
 
 static void up_x11uninitX(void)
 {
-  fprintf(stderr, "Uninitalizing X\n");
+  fprintf(stderr, "Uninitializing X\n");
   if (g_x11initialized)
     {
 #ifndef CONFIG_SIM_X11NOSHM
@@ -236,7 +236,7 @@ static void up_x11uninitX(void)
 #ifndef CONFIG_SIM_X11NOSHM
 static void up_x11uninitialize(void)
 {
-  fprintf(stderr, "Uninitalizing\n");
+  fprintf(stderr, "Uninitializing\n");
   if (g_shmcheckpoint > 1)
     {
       if (!b_useshm && g_framebuffer)

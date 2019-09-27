@@ -204,7 +204,7 @@
  *    .... .... .... .... .... ...V .... ....
  */
 
-#define GPIO_VALUE_SHIFT              8                          /* Bit 8: If output, inital value of output */
+#define GPIO_VALUE_SHIFT              8                          /* Bit 8: If output, initial value of output */
 #define GPIO_VALUE_MASK               (1 << GPIO_VALUE_SHIFT)
 #  define GPIO_VALUE_ZERO             (0 << GPIO_VALUE_SHIFT)    /*   Initial value is zero */
 #  define GPIO_VALUE_ONE              (1 << GPIO_VALUE_SHIFT)    /*   Initial value is one */

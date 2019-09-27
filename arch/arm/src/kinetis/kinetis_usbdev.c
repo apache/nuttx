@@ -621,8 +621,8 @@ static void   khci_reset(struct khci_usbdev_s *priv);
 static void   khci_attach(struct khci_usbdev_s *priv);
 static void   khci_swreset(struct khci_usbdev_s *priv);
 static void   khci_hwreset(struct khci_usbdev_s *priv);
-static void   khci_swinitalize(struct khci_usbdev_s *priv);
-static void   khci_hwinitalize(struct khci_usbdev_s *priv);
+static void   khci_swinitialize(struct khci_usbdev_s *priv);
+static void   khci_hwinitialize(struct khci_usbdev_s *priv);
 static void   khci_hwshutdown(struct khci_usbdev_s *priv);
 
 /****************************************************************************
@@ -4183,14 +4183,14 @@ static void khci_hwreset(struct khci_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: khci_hwinitalize
+ * Name: khci_hwinitialize
  *
  * Description:
  *   Reset the hardware and leave it in a known, unready state.
  *
  ****************************************************************************/
 
-static void khci_hwinitalize(struct khci_usbdev_s *priv)
+static void khci_hwinitialize(struct khci_usbdev_s *priv)
 {
   uint32_t regval;
 
@@ -4243,10 +4243,10 @@ static void khci_hwinitalize(struct khci_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: khci_swinitalize
+ * Name: khci_swinitialize
  ****************************************************************************/
 
-static void khci_swinitalize(struct khci_usbdev_s *priv)
+static void khci_swinitialize(struct khci_usbdev_s *priv)
 {
   int epno;
 
@@ -4358,7 +4358,7 @@ void up_usbinitialize(void)
 
   /* Initialize the driver state structure */
 
-  khci_swinitalize(priv);
+  khci_swinitialize(priv);
 
   /* Select clock source:
    * SIM_SOPT2[PLLFLLSEL] and SIM_CLKDIV2[USBFRAC, USBDIV] will have been
@@ -4404,7 +4404,7 @@ void up_usbinitialize(void)
       return;
     }
 
-  khci_hwinitalize(priv);
+  khci_hwinitialize(priv);
 }
 
 /****************************************************************************
@@ -4578,7 +4578,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   khci_hwshutdown(priv);
-  khci_swinitalize(priv);
+  khci_swinitialize(priv);
 
   leave_critical_section(flags);
   return OK;

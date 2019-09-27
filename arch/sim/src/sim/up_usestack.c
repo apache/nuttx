@@ -114,7 +114,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   /* This is the address of the last word in the allocation.
    * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
-   * outside of the stack.  This is okay for an inital state; the
+   * outside of the stack.  This is okay for an initial state; the
    * first pushed values will be within the stack allocation.
    */
 

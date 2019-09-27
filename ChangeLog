@@ -13417,7 +13417,7 @@
 	* STM32 F7: Fix some STM32F7 copy paste errors.  From David Sidrane
 	  (2016-12-17).
 	* CDC/ACM Device Class: uart_ops_s portion of cdcacm will not be
-	  initalized with correct functions if CONFIG_SERIAL_DMA is lit
+	  initialized with correct functions if CONFIG_SERIAL_DMA is set
 	  (2016-12-17).
 	* Xtensa ESP32: Using wrong register to disable interrupts (2016-12-17).
 	* Xtensa ESP32: Fix clobbered a9 in co-processor context save/restore
@@ -15417,8 +15417,8 @@
 	  only resets the resources within the controller that should be reset.
 	  Rework suspend and resume logic so they perform properly. Made attach
 	  and detach functions optional. As they do not make sense for a bus
-	  powered device.  Ensured the calls to up_usbinitalize
-	  up_usbuninitalize do not violate the USB spec.  From David Sidrane
+	  powered device.  Ensured the calls to up_usbinitialize
+	  up_usbuninitialize do not violate the USB spec.  From David Sidrane
 	  (2017-06-02).
 	* WIP: wireless/ieee802154: More work on association/beacon-enabled
 	  networks.  From Anthony Merlino (2017-06-02).
@@ -15464,8 +15464,8 @@
 	* teensy-3.x:Refreshed config and made board self powered.  From David
 	  Sidrane (2017-06-06).
 	* Kinetis:USB-FS driver.  Removed the notion of attached. The
-	  khci_usbattach is call early in the init either in board_initalize or
-	  in board_app_initalize. In either case it is always done prior to the
+	  khci_usbattach is call early in the init either in board_initialize or
+	  in board_app_initialize. In either case it is always done prior to the
 	  the class register.  Therefore the khci_usbattach call only set a
 	  flag, and that flag is only tested in the class register. The class
 	  register will enable the soft connect pull up.  From David Sidrane
@@ -25857,8 +25857,8 @@
 	* stm32h7 RTC and friends support
 	  - STM32H7:  Removed f7 in file path
 	  - STM32F7:  Fix overwritten IRQ enabled.  System boot order calls
-	    clock_initialize then up_initalize.  clock_initialize was setting up
-	    the alarm IRQ up_initalize is initializing the NVIC. This most likely
+	    clock_initialize then up_initialize.  clock_initialize was setting up
+	    the alarm IRQ up_initialize is initializing the NVIC. This most likely
 	    worked in the past due to a bug in the NVIC init code that failed to
 	    clear the Interrupt enables.  That was fixed in 510b0f7e
 	    arch/arm/src:  Correct all ARMv7-M architectures.  Interrupts were
