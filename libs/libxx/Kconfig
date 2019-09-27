@@ -41,6 +41,7 @@ comment "LLVM C++ Library (libcxx)"
 config LIBCXX
 	bool "Build LLVM libcxx (must be installed)"
 	default n
+	select CLOCK_MONOTONIC
 	select LIBC_WCHAR
 	select TIME_EXTENDED
 	---help---

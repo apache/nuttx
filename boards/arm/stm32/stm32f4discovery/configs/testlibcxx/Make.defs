@@ -3,6 +3,7 @@
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
+#           Daniel Pereira Volpato <dpo@certi.org.br>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -101,8 +102,7 @@ CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) \
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS  = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
             $(ARCHCPUFLAGS) $(ARCHXXINCLUDES)
-CXXFLAGS += $(ARCHDEFINES) $(EXTRADEFINES) -pipe -std=c++11 -DCLOCK_MONOTONIC \
-            -D__NuttX__
+CXXFLAGS += $(ARCHDEFINES) $(EXTRADEFINES) -pipe -std=c++11 -D__NuttX__
 CXXFLAGS += -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 CXXFLAGS += -pedantic -D_DEBUG -D_LIBCPP_BUILD_STATIC -D_LIBCPP_NO_EXCEPTIONS
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
