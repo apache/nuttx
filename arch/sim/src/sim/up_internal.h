@@ -60,7 +60,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **********************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_SIM_X11FB
 #  ifdef CONFIG_SIM_TOUCHSCREEN
@@ -104,7 +105,7 @@
 /* Context Switching Definitions ******************************************/
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+  /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
 
 #  ifdef __ASSEMBLY__
 #    define JB_RBX (0*8)
@@ -159,6 +160,7 @@
 #endif
 
 /* Simulated Heap Definitions **********************************************/
+
 /* Size of the simulated heap */
 
 #ifdef CONFIG_MM_SMALL
@@ -168,6 +170,7 @@
 #endif
 
 /* File System Definitions **************************************************/
+
 /* These definitions characterize the compressed filesystem image */
 
 #define BLOCK_COUNT         1024
@@ -181,6 +184,12 @@
 #define RESERVED_SECTORS    32
 #define SECTORS_PER_CLUSTER 4
 #define LOGICAL_SECTOR_SIZE 512
+
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR         0xdeadbeef
 
 /****************************************************************************
  * Public Types
@@ -283,7 +292,7 @@ char *up_deviceimage(void);
 /* up_netdev.c ************************************************************/
 
 #ifdef CONFIG_NET
-unsigned long up_getwalltime( void );
+unsigned long up_getwalltime(void);
 #endif
 
 /* up_x11framebuffer.c ****************************************************/
@@ -377,6 +386,12 @@ struct spi_dev_s *up_spiflashinitialize(FAR const char *name);
 #ifdef CONFIG_SIM_QSPIFLASH
 struct qspi_dev_s;
 struct qspi_dev_s *up_qspiflashinitialize(void);
+#endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

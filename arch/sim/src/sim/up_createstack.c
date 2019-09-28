@@ -107,19 +107,19 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   int ret = ERROR;
 
 #ifdef CONFIG_TLS
-   /* Add the size of the TLS information structure */
+  /* Add the size of the TLS information structure */
 
-   stack_size += sizeof(struct tls_info_s);
+  stack_size += sizeof(struct tls_info_s);
 
-   /* The allocated stack size must not exceed the maximum possible for the
-    * TLS feature.
-    */
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
 
-   DEBUGASSERT(stack_size <= TLS_MAXSTACK);
-   if (stack_size >= TLS_MAXSTACK)
-     {
-       stack_size = TLS_MAXSTACK;
-     }
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
 #endif
 
   /* Move up to next even word boundary if necessary */
@@ -129,7 +129,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   /* Allocate the memory for the stack */
 
 #ifdef CONFIG_TLS
-  stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN, adj_stack_size);
+  stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN,
+                                                 adj_stack_size);
 #else /* CONFIG_TLS */
   stack_alloc_ptr = (FAR uint8_t *)kumm_malloc(adj_stack_size);
 #endif /* CONFIG_TLS */
@@ -138,6 +139,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (stack_alloc_ptr)
     {
+#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
+      uintptr_t stack_base;
+#endif
+
       /* This is the address of the last aligned word in the allocation.
        * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
        * outside of the stack.  This is okay for an initial state; the
@@ -157,10 +162,59 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       /* Initialize the TLS data structure */
 
       memset(stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-#endif
+
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      stack_base = (uintptr_t)tcb->stack_alloc_ptr +
+                   sizeof(struct tls_info_s);
+      stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
+      up_stack_color((FAR void *)stack_base, stack_size);
+
+#endif /* CONFIG_STACK_COLORATION */
+#else /* CONFIG_TLS */
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+
+#endif /* CONFIG_STACK_COLORATION */
+#endif /* CONFIG_TLS */
 
       ret = OK;
     }
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: up_stack_color
+ *
+ * Description:
+ *   Write a well know value into the stack
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes)
+{
+  /* Take extra care that we do not write outsize the stack boundaries */
+
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
+  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
+
+  /* Set the entire stack to the coloration value */
+
+  while (nwords-- > 0)
+    {
+      *stkptr++ = STACK_COLOR;
+    }
+}
+#endif
