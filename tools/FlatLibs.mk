@@ -142,12 +142,6 @@ ifeq ($(CONFIG_LIBDSP),y)
 NUTTXLIBS += staging$(DELIM)libdsp$(LIBEXT)
 endif
 
-# Add symbol table library
-
-ifeq ($(CONFIG_EXECFUNCS_SYSTEM_SYMTAB),y)
-NUTTXLIBS += staging$(DELIM)libsymtab$(LIBEXT)
-endif
-
 # Export all libraries
 
 EXPORTLIBS = $(NUTTXLIBS)

@@ -94,6 +94,38 @@ include wchar/Make.defs
 include wctype/Make.defs
 include wqueue/Make.defs
 
+# Rule for the symbol table generation
+
+MKSYMTAB = $(TOPDIR)$(DELIM)tools$(DELIM)mksymtab$(HOSTEXEEXT)
+
+$(MKSYMTAB):
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools -f Makefile.host mksymtab
+
+# C library and math library symbols should be available in the FLAT
+# and PROTECTED builds.  KERNEL builds are separately linked and so should
+# not need symbol tables.
+
+CSVFILES  = $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)libc.csv
+CSVFILES += $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)math.csv
+
+# In the PROTECTED and KERNEL builds, the applications could link with
+# libproxy which will provide symbol-compatible access to OS functions
+# via a call gate, but the applications which link with these functions
+# directly could remove the repeat proxy code to save the space.
+
+CSVFILES += $(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv
+
+ifeq ($(CONFIG_EXECFUNCS_SYSTEM_SYMTAB),y)
+
+exec_symtab.c : $(CSVFILES) $(MKSYMTAB)
+	$(Q) cat $(CSVFILES) | LC_ALL=C sort >$@.csv
+	$(Q) $(MKSYMTAB) $@.csv $@ $(CONFIG_EXECFUNCS_SYMTAB_ARRAY) $(CONFIG_EXECFUNCS_NSYMBOLS_VAR)
+	$(Q) rm -f $@.csv
+
+CSRCS += exec_symtab.c
+
+endif
+
 # REVISIT: Backslash causes problems in $(COBJS) target
 DELIM := $(strip /)
 BINDIR ?= bin
