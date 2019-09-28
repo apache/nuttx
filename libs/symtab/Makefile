@@ -82,9 +82,7 @@ $(MKSYMTAB):
 symtab.c : $(CSVFILES) $(MKSYMTAB)
 	$(Q) rm -f tmp.csv $@
 	$(Q) cat $(CSVFILES) | LC_ALL=C sort >tmp.csv
-	$(Q) $(MKSYMTAB) tmp.csv $@
-	$(Q) echo >>$@
-	$(Q) echo >>$@ 'int g_nsymbols = NSYMBOLS;'
+	$(Q) $(MKSYMTAB) tmp.csv $@ $(CONFIG_EXECFUNCS_SYMTAB_ARRAY) $(CONFIG_EXECFUNCS_NSYMBOLS_VAR)
 
 else
 all:

@@ -52,6 +52,7 @@
 
 #define MAX_HEADER_FILES 500
 #define SYMTAB_NAME      "g_symtab"
+#define NSYMBOLS_NAME    "g_nsymbols"
 
 /****************************************************************************
  * Private Types
@@ -70,11 +71,13 @@ static int nhdrfiles;
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s <cvs-file> <symtab-file>\n\n", progname);
+  fprintf(stderr, "USAGE: %s <cvs-file> <symtab-file> [symtab-name] [nsymbols-name]\n\n", progname);
   fprintf(stderr, "Where:\n\n");
-  fprintf(stderr, "  <cvs-file>   : The path to the input CSV file\n");
-  fprintf(stderr, "  <symtab-file>: The path to the output symbol table file\n");
-  fprintf(stderr, "  -d           : Enable debug output\n");
+  fprintf(stderr, "  <cvs-file>     : The path to the input CSV file\n");
+  fprintf(stderr, "  <symtab-file>  : The path to the output symbol table file\n");
+  fprintf(stderr, "  [symtab-name]  : The name for the symbol table variable\n");
+  fprintf(stderr, "  [nsymbols-name]: The name for the symbol count variable\n");
+  fprintf(stderr, "  -d             : Enable debug output\n");
   exit(EXIT_FAILURE);
 }
 
@@ -118,7 +121,9 @@ static void add_hdrfile(const char *hdrfile)
 int main(int argc, char **argv, char **envp)
 {
   char *csvpath;
+  char *sympath;
   char *symtab;
+  char *nsymbols;
   char *nextterm;
   char *finalterm;
   char *ptr;
@@ -130,7 +135,9 @@ int main(int argc, char **argv, char **envp)
 
   /* Parse command line options */
 
-  g_debug = false;
+  symtab   = SYMTAB_NAME;
+  nsymbols = NSYMBOLS_NAME;
+  g_debug  = false;
 
   while ((ch = getopt(argc, argv, ":d")) > 0)
     {
@@ -169,8 +176,20 @@ int main(int argc, char **argv, char **envp)
        show_usage(argv[0]);
     }
 
-  symtab = argv[optind];
+  sympath = argv[optind];
   optind++;
+
+  if (optind < argc)
+    {
+       symtab = argv[optind];
+       optind++;
+    }
+
+  if (optind < argc)
+    {
+       nsymbols = argv[optind];
+       optind++;
+    }
 
   if (optind < argc)
     {
@@ -189,7 +208,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Open the Symbol table file for writing */
 
-  outstream = fopen(symtab, "w");
+  outstream = fopen(sympath, "w");
   if (!outstream)
     {
       fprintf(stderr, "open %s failed: %s\n", csvpath, strerror(errno));
@@ -220,10 +239,10 @@ int main(int argc, char **argv, char **envp)
 
   /* Output up-front file boilerplate */
 
-  fprintf(outstream, "/* %s: Auto-generated symbol table.  Do not edit */\n\n", symtab);
+  fprintf(outstream, "/* %s: Auto-generated symbol table.  Do not edit */\n\n", sympath);
   fprintf(outstream, "#include <nuttx/config.h>\n");
   fprintf(outstream, "#include <nuttx/compiler.h>\n");
-  fprintf(outstream, "#include <nuttx/binfmt/symtab.h>\n\n");
+  fprintf(outstream, "#include <nuttx/symtab.h>\n\n");
 
   /* Output all of the require header files */
 
@@ -234,7 +253,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Now the symbol table itself */
 
-  fprintf(outstream, "\nconst struct symtab_s %s[] =\n", SYMTAB_NAME);
+  fprintf(outstream, "\nconst struct symtab_s %s[] =\n", symtab);
   fprintf(outstream, "{\n");
 
   /* Parse each line in the CVS file */
@@ -280,7 +299,8 @@ int main(int argc, char **argv, char **envp)
     }
 
   fprintf(outstream, "%s};\n\n", finalterm);
-  fprintf(outstream, "#define NSYMBOLS (sizeof(%s) / sizeof (struct symtab_s))\n", SYMTAB_NAME);
+  fprintf(outstream, "#define NSYMBOLS (sizeof(%s) / sizeof (struct symtab_s))\n", symtab);
+  fprintf(outstream, "int %s = NSYMBOLS;\n", nsymbols);
 
   /* Close the CSV and symbol table files and exit */
 
