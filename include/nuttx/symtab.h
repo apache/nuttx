@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/binfmt/symtab.h
+ * include/nuttx/symtab.h
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
