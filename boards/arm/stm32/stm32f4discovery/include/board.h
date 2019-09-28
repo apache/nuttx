@@ -47,11 +47,14 @@
 #  include <stdbool.h>
 #endif
 
+/* Do not include STM32-specific header files here */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Clocking *************************************************************************/
+
 /* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
  * for a 32kHz RTC backup crystal, but it is not stuffed.
  *
@@ -190,6 +193,7 @@
 #endif
 
 /* LED definitions ******************************************************************/
+
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
  */
@@ -228,6 +232,7 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Button definitions ***************************************************************/
+
 /* The STM32F4 Discovery supports one button: */
 
 #define BUTTON_USER        0
@@ -235,6 +240,7 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
+
 /* CAN */
 
 #ifndef CONFIG_STM32_FSMC
@@ -390,6 +396,7 @@
 #endif
 
 /* DMA Channl/Stream Selections *****************************************************/
+
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *
@@ -401,3 +408,4 @@
 #define DMAMAP_SDIO DMAMAP_SDIO_1
 
 #endif  /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+
