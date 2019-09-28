@@ -185,6 +185,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
       flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
     }
 
+  UNUSED(conn);           /* May not be used */
   return flags;
 
 end_wait:
@@ -194,6 +195,7 @@ end_wait:
   nxsem_post(&pstate->cl_sem);
 
   ninfo("Resuming\n");
+  UNUSED(conn);           /* May not be used */
   return 0;
 }
 #endif /* NET_TCP_HAVE_STACK */
