@@ -43,10 +43,10 @@ pre-existing bridge device, or the initialization will fail.  The simulation
 will NOT create the bridge for you.
 
 To create the bridge, first install the bridge utilities package for your
-platform (the bridge-utils RPM in RedHat, for example).  Then execute a
+platform (the net-tools RPM in RedHat, for example).  Then execute a
 command like the following:
 
-  # brctl addbr nuttx0
+  # ip link add nuttx0 type bridge
 
 This will create the nuttx0 bridge.  Once created, the bridge may be used by
 one or more simulations.  You only need one bridge per host; if you start
@@ -63,7 +63,7 @@ that the subnet chosen should not already be in use.  For example, if
 you want to use the 172.26.23.0/24 subnet for your simluations, you
 would do something like the following:
 
-  # brctl addbr nuttx0
+  # ip link add nuttx0 type bridge
   # ifconfig nuttx0 172.26.23.1/24
 
 The standard Linux ifconfig utility will automatically add the appropriate
@@ -83,7 +83,7 @@ with NuttX.  For example, if you have a secondary eth1 interface on your host,
 you can simply connect it to the network you want your simulations to access,
 and run the following command:
 
-  # brctl addif nuttx0 eth1
+  # ip link set eth1 master nuttx0
 
 From that point on, your simulations will be directly connected to the same
 network as your eth1 interface.  Note that your bridge will generally not need
@@ -93,8 +93,8 @@ If you only have a single interface, you can configure your system so that eth0
 (or other primary interface) is on the bridge.  To do this, you would execute
 commands like the following from the system console:
 
-  # brctl addbr nuttx0
-  # brctl addif nuttx0 eth0
+  # ip link add nuttx0 type bridge
+  # ip link set eth0 master nuttx0
   # ifconfig nuttx0 <host-ip-address/netmask>
   # route add -net default gw ...
 
@@ -131,6 +131,10 @@ NOTES
 
     I don't know if VMware's consumer products have similar issues or not.
 
+  o tools/simbridge.sh could make the bridge setup easier:
+
+      # tools/simbridge.sh eth0 on
+      # tools/simbridge.sh eth0 off
 
 -- Steve <steve@floating.io>
    http://floating.io

@@ -895,6 +895,15 @@ sethost.sh
       -h will show this help test and terminate
       <config> selects configuration file.  Default: .config
 
+simbridge.sh
+------------
+
+   Helper script used to set up a bridge to support networking with the
+   simulator under Linux.  General usage:
+
+     $ tools/simbridge.sh
+     Usage: tools/simbridge.sh <interface> <on|off>
+
 showsize.sh
 -----------
 
