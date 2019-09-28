@@ -91,6 +91,10 @@ config MODLIB_NSYMBOLS_VAR
 	default "g_mod_nsymbols" if !EXECFUNCS_HAVE_SYMTAB
 	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
 
+config MODLIB_SYSTEM_SYMTAB
+	bool "Generate the system symbol table"
+	default n
+
 endif # MODLIB_HAVE_SYMTAB
 
 endmenu # Module library configuration

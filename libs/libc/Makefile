@@ -126,6 +126,17 @@ CSRCS += exec_symtab.c
 
 endif
 
+ifeq ($(CONFIG_MODLIB_SYSTEM_SYMTAB),y)
+
+modlib_symtab.c : $(CSVFILES) $(MKSYMTAB)
+	$(Q) cat $(CSVFILES) | LC_ALL=C sort >$@.csv
+	$(Q) $(MKSYMTAB) $@.csv $@ $(CONFIG_MODLIB_SYMTAB_ARRAY) $(CONFIG_MODLIB_NSYMBOLS_VAR)
+	$(Q) rm -f $@.csv
+
+CSRCS += modlib_symtab.c
+
+endif
+
 # REVISIT: Backslash causes problems in $(COBJS) target
 DELIM := $(strip /)
 BINDIR ?= bin
