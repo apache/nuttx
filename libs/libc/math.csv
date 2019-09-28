@@ -76,4 +76,3 @@
 "tanhf","math.h","defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH)","float","float"
 "tanhl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
 "tanl","math.h","defined(CONFIG_HAVE_LONG_DOUBLE) && (defined(CONFIG_LIBM) || defined(CONFIG_ARCH_MATH))","long double","long double"
-"writev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"

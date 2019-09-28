@@ -234,4 +234,5 @@
 "wmemcpy","wchar.h","defined(CONFIG_LIBC_WCHAR)","wchat_t *","wchar_t *","wchar_t *","size_t"
 "wmemmove","wchar.h","defined(CONFIG_LIBC_WCHAR)","wchat_t *","wchar_t *","wchar_t *","size_t"
 "wmemset","wchar.h","defined(CONFIG_LIBC_WCHAR)","wchat_t *","wchar_t *","wchar_t","size_t"
+"writev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
 "_warn","debug.h","!defined(CONFIG_CPP_HAVE_VARARGS) && defined(CONFIG_DEBUG_WARN)","int","FAR const char *","..."
