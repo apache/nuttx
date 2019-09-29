@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32l4/b-l475e-iot01a/src/b-l475e-iot01a.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <arch/stm32l4/chip.h>
+
+#include "stm32l4_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

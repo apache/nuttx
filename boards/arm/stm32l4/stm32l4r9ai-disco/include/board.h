@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l4r9ai-disco/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,7 +44,7 @@
 # include <stdint.h>
 #endif
 
-#include <stm32l4.h>
+/* Do not include STM32 L4 header files here */
 
 /****************************************************************************
  * Pre-processor Definitions

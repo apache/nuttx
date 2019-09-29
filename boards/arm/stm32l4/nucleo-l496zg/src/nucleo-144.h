@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/src/nucleo-144.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Mark Olsson <post@markolsson.se>
  *            David Sidrane <david_s5@nscdg.com>
@@ -44,7 +44,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
 #include <stdint.h>
+
+#include "stm32l4_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

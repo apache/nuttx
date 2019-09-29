@@ -1,7 +1,7 @@
 /*******************************************************************************
  * boards/arm/stm32l4/nucleo-l432kc/include/board.h
  *
- *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,7 @@
 # include <stdint.h>
 #endif
 
-#ifdef __KERNEL__
-#include <stm32l4.h>
-#endif
+/* Do not include STM32L4 header files here */
 
 /*******************************************************************************
  * Pre-processor Definitions

@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l476vg-disco/src/stm32l476vg-disco.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
  *            Gregory Nutt <gnutt@nuttx.org>
  *            Sebastien Lorquet <sebastien@lorquet.fr>
@@ -47,6 +47,8 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+
+#include "stm32l4_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,10 +1,10 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *           Mark Olsson <post@markolsson.se>
- *           David Sidrane <david_s5@nscdg.com>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,12 +48,7 @@
 # include <stdint.h>
 #endif
 
-#ifdef __KERNEL__
-#include "stm32l4_rcc.h"
-#ifdef CONFIG_STM32L4_SDMMC1
-#  include "stm32l4_sdmmc.h"
-#endif
-#endif
+/* Do not include STM32 L4 header files here */
 
 /****************************************************************************
  * Pre-processor Definitions
