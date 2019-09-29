@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f769i-disco/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,7 @@
 # include <stdint.h>
 #endif
 
-#include "stm32_rcc.h"
-#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
-#  include "stm32_sdmmc.h"
-#endif
+/* Do not include STM32F7 header files here */
 
 /****************************************************************************
  * Pre-processor Definitions

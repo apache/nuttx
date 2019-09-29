@@ -139,5 +139,6 @@ int stm32_bringup(void)
     }
 #endif
 
+  UNUSED(ret);  /* May not be used */
   return OK;
 }

@@ -1,11 +1,11 @@
 /****************************************************************************
  * boards/arm/stm32f7/nucleo-144/include/board.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *           Mark Olsson <post@markolsson.se>
- *           David Sidrane <david_s5@nscdg.com>
- *           Bob Feretich <bob.feretich@rafresearch.com>
+ *            Mark Olsson <post@markolsson.se>
+ *            David Sidrane <david_s5@nscdg.com>
+ *            Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,12 +49,7 @@
 # include <stdint.h>
 #endif
 
-#ifdef __KERNEL__
-#include "stm32_rcc.h"
-#ifdef CONFIG_STM32F7_SDMMC1
-#  include "stm32_sdmmc.h"
-#endif
-#endif
+/* Do not include STM32 F7 header files here */
 
 /****************************************************************************
  * Pre-processor Definitions
