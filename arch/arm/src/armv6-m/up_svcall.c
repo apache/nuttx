@@ -222,7 +222,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *
        * In this case, we do both: We save the context registers to the save
        * register area reference by the saved contents of R1 and then set
-       * CURRENT_REGS to to the save register area referenced by the saved
+       * CURRENT_REGS to the save register area referenced by the saved
        * contents of R2.
        */
 

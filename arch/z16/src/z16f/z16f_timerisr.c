@@ -148,7 +148,7 @@ void z16_timer_initialize(void)
    *  scaledfreq   = 20,000,000 / 100
    *               = 200,000
    *  divisor      = ((18,432,000 / 100) >> 16) + 1
-   *               = 3 -> 4 (need to to up to next power of two)
+   *               = 3 -> 4 (need to go up to next power of two)
    *  reload_value = 20,000,000 / 100 / 4
    *               = 56,080
    */

@@ -1582,7 +1582,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       priv->dev.d_len = pktlen - 4;
 
       /* Copy the data data from the receive buffer to priv->dev.d_buf.
-       * ERDPT should be correctly positioned from the last call to to
+       * ERDPT should be correctly positioned from the last call to
        * end_rdbuffer (above).
        */
 

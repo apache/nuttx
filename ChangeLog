@@ -3335,7 +3335,7 @@
 	  the UDP discovery utility.  Contributed by Max Holtzberg.
 	* mm/README.txt:  Add a new README file.
 	* include/nuttx/usb/usb.h, arch/*/src/*usb.c, and arch/*/src/*otg*.c:
-	  Add hooks to to use common, external DMA buffer allocation
+	  Add hooks to use common, external DMA buffer allocation
 	  implementation.
 	* net/recvfrom.c: Don't block in recvfrom if (1) read-ahead buffering
 	  is enabled and (2) some data was obtained from read-ahead buffers.
@@ -3924,7 +3924,7 @@
 	  locking up the whole system.
 	* sched/sched_waitpid.c:  Use SIGCHLD instead of a semaphore.  This
 	  is a much more spec-compliant implementation.  However, there are
-	  some issues with overruning signals because NuttX does not support
+	  some issues with overrunning signals because NuttX does not support
 	  queueing of signals (POSIX does not require it).  I think it may
 	  need to.
 	* sched/sched_waitid.c and sched_wait.c:  Add support for waitid()
@@ -4442,7 +4442,7 @@
 	  type as the second parameter (2013-03-23).
 	* arch/arm/src/lm, kinetis, lpc43, and nuc1xx:  Add kernel build
 	  support to all ARMv7-M and ARMv6-M chips.  There are no
-	  configurations in place to to verify these additions!
+	  configurations in place to verify these additions!
 	  (2013-03-24).
 	* arch/arm/src/lm/lm_gpio.h:  Correct typos in alternate function
 	  definitions (2013-03-24).
@@ -8429,7 +8429,7 @@
 	  addresses to physical addresses, and vice versa (2104-9-7).
 	* SAM3X/Arduino Due: Fix typo in sam3x_periphclks.h; add SCLK
 	  definitions to board.h header file.  From Fabien Comte (2014-9-8).
-	* Several pthread interfaces: Add const storage class to to phthread
+	* Several pthread interfaces: Add const storage class to the phthread
 	  parameters.  From Freddie Chopin (2014-9-8).
 	* libc/math: Corrected atan2 implementations from Denis Arnst (2014-9-8).
 	* sama5d4-ek/knsh:  Rename the kernel configuration to knsh to better
@@ -12026,9 +12026,9 @@
 	* STM32F7: Add SPI, I2C, and ADC drivers.  From Lok Tep (2016-06-15).
 	* err(), warn(), info(), and alert() renamed to include leading '_'.
 	  This was done to avoid some naming collisions (2-06-16
-	* STM32: Move backup domain reset to to earlier in the initialization
+	* STM32: Move backup domain reset to earlier in the initialization
 	  sequence (stm32_rcc.c() in order to avoid disabling LSE during RTC
-	  initialiation.  From Alan Carvalho de Assis (2016-06-16).
+	  initialization.  From Alan Carvalho de Assis (2016-06-16).
 	* SYSLOG: syslog() will now automatically redirect output to lowsyslog()
 	  if called from an interrupt handler (2016-06-16).
 	* STM32: When configuring a GPIO via stm32_configgpio() the function
@@ -16638,7 +16638,7 @@
 	  because current data structures do not support it (2017-08-29).
 	* Networking:  Clean up some naming that has bothered me for a long
 	  time... There are no interrupts and no interrupt handlers in the
-	  network.  There are events and event handler (there used to to be
+	  network.  There are events and event handler (there used to be
 	  interrupt logic in there years ago but that is long, long gone)
 	  (2017-08-29).
 	* configs: update STM32L4 configs for ADC changes.  From Juha Niskanen
@@ -24932,7 +24932,7 @@
 	* arch/arm/src/am335x/am335x_sysclk.c:  Add a function to return a
 	  frequency of the system clock.  From Gregory Nutt (2019-07-08).
 	* arch/arm/src/am335x/am335x_lcdc.c:  Add logic to get/set the module
-	  reference clock.  Still one more clocking interface to to.  From Gregory
+	  reference clock.  Still one more clocking interface to do.  From Gregory
 	  Nutt (2019-07-08).
 	* configs/beaglebone-black/lcd/defconfig:  Add a configuration for bringing
 	  up the LCDC driver.  From Gregory Nutt (2019-07-08).

@@ -183,8 +183,8 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
        *   R6 = restoreregs
        *
        * In this case, we save the context registers to the save register
-       * area reference by the saved contents of R5 and then set
-       * g_current_regs to to the save register area referenced by the saved
+       * area referenced by the saved contents of R5 and then set
+       * g_current_regs to the save register area referenced by the saved
        * contents of R6.
        */
 

@@ -260,7 +260,7 @@
  * Description:
  *   The EIC is initialized for use with NuttX.  This initialization does not
  *   take advantage of the high performance capabilities of the EIC.  Instead,
- *   The EIC is only used to to provide NuttX IRQ numbers.  Here is what is
+ *   The EIC is only used to provide NuttX IRQ numbers.  Here is what is
  *   done:
  *
  *     IRQs and FIQs are disabled
@@ -340,7 +340,7 @@ eicloop:
 	 */
 
 	cmp		\irqno, #STR71X_EIC_NCHANNELS
-	blt		eicloop	
+	blt		eicloop
 	.endm
 
 /*****************************************************************************

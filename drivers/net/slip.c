@@ -554,8 +554,8 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 {
   uint8_t ch;
 
-  /* Copy the data data from the hardware to to the RX buffer until we
-   * put together a whole packet. Make sure not to copy them into the
+  /* Copy the data from the hardware to the RX buffer until we put
+   * together a whole packet. Make sure not to copy them into the
    * packet if we run out of room.
    */
 

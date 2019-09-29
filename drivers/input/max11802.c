@@ -578,7 +578,7 @@ static void max11802_worker(FAR void *arg)
     {
       /* If we have not yet processed the last pen up event, then we
        * cannot handle this pen down event. We will have to discard it.
-       * That should be okay because we will set the timer to to sample
+       * That should be okay because we will set the timer to sample
        * again later.
        */
 

@@ -987,7 +987,7 @@ static char *get_html_string(void)
   pend = findchar(pbegin, '"');
   if (pend)
     {
-      /* Replace the final quote with a NUL.  g_lnptr is set to to
+      /* Replace the final quote with a NUL.  g_lnptr is set to
        * the next valid character after the terminating quote.
        */
 

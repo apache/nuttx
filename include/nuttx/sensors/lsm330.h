@@ -64,11 +64,11 @@
  *   Range = 500 dps.
  *   Low Pass Filter #1 selected.
  *
- * If the user desires a different configuration settings, the the user may
+ * If the user desires different configuration settings, then the user may
  * either provide a pointer to an array of "struct lsm330_reg_pair_s" that
- * will be applied to to the sensor upon open(); or dynamically use the
- * lseek() and write() file_operations functions to set the sensor
- * configuration as desired.
+ * will be applied to the sensor upon open(); or dynamically use the lseek()
+ * and write() file_operations functions to set the sensor configuration
+ * as desired.
  *
  * When using the sensor from the file_operations interface, the sensor is
  * accessed in Programmed I/O (PIO) mode. (i.e. When the read() function is

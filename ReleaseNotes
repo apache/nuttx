@@ -4295,8 +4295,8 @@ Additional new features and extended functionality:
     * STM32:
 
       - Added an option to conditionally disable the "wfi" sleep mode.  This
-        is needed with certain JTAG debuggers to to prevent the debug
-        session from begin disconnected (from Ken Pettit).
+        is needed with certain JTAG debuggers to prevent the debug session
+        from being disconnected (from Ken Pettit).
       - Added support for the STM32L (STM32L15X/STM32L16x) family.
       - Added STM32F103C4 and F103C8 chip support (from Laurent Latil).
       - Added a new interface function, stm32_dmacapable() that can be used
@@ -6060,7 +6060,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
     * NuttShell (NSH):
 
       - Use strncpy vs strcpy in the Telnet console logic to avoid
-        overruning the username and password buffers (from Bertold Van den
+        overrunning the username and password buffers (from Bertold Van den
         Bergh).
       - Add a newline after printing the file in the 'cat' command.  This
         prevents the NSH prompt from be in the same line as the final line
@@ -11651,7 +11651,7 @@ detailed bugfix information):
         From Konstantin Berezenko.
       - STM32 F1-F4: Correct the CAN2 RX IRQ number for stm32f10xx chips.
         From Konstantin Berezenko.
-      - STM32 F1-F4: Move backup domain reset to to earlier in the
+      - STM32 F1-F4: Move backup domain reset to earlier in the
         initialization sequence (stm32_rcc.c() in order to avoid disabling
         LSE during RTC initialiation.  From Alan Carvalho de Assis.
       - STM32 F1-F4: When configuring a GPIO via stm32_configgpio() the

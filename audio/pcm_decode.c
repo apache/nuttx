@@ -1335,7 +1335,7 @@ static void pcm_callback(FAR void *arg, uint16_t reason,
 
   DEBUGASSERT(priv && priv->export.upper);
 
-  /* The buffer belongs to to an upper level.  Just forward the event to
+  /* The buffer belongs to an upper level.  Just forward the event to
    * the next level up.
    */
 

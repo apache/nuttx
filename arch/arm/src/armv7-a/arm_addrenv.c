@@ -482,7 +482,7 @@ ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
  *
  * Description:
  *   After an address environment has been established for a task group (via
- *   up_addrenv_create().  This function may be called to to instantiate
+ *   up_addrenv_create().  This function may be called to instantiate
  *   that address environment in the virtual address space.  this might be
  *   necessary, for example, to load the code for the task group from a file or
  *   to access address environment private data.
@@ -620,7 +620,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
  *
  * Description:
  *   After an address environment has been temporarily instantiated by
- *   up_addrenv_select(), this function may be called to to restore the
+ *   up_addrenv_select(), this function may be called to restore the
  *   original address environment.
  *
  * Input Parameters:

@@ -56,7 +56,7 @@ Installing New Fonts
        ...
 
   New Add the font to the NX build system.  There are several files that
-  you have to modify to to this.  Look how the build system uses the
+  you have to modify to do this.  Look how the build system uses the
   font CONFIG_NXFONT_SANS23X27 for examaples:
 
     5. nuttx/graphics/Makefile.  This file needs logic to auto-generate

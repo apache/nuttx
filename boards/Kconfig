@@ -1871,7 +1871,7 @@ config ARCH_BOARD_CUSTOM_DIR
 		to also tell the build system where it can find the board directory
 		for the custom board.
 
-		In this case, the board directory is assume to lie outside the
+		In this case, the board directory is assumed to lie outside the
 		NuttX directory.  The provided path must then be a full, absolute
 		path to some location outside of the NuttX source tree (like
 		"~/projects/myboard").

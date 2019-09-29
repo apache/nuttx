@@ -155,7 +155,7 @@ block can be converted to an absolute address in the in-memory CROMFS image
 by simply adding that offset to the well-known address of the volume header.
 
 Each hard link, directory, and file node in the directory list includes
-such a "peer offset" to to the next node in the list.  Each node is followed
+such a "peer offset" to the next node in the list.  Each node is followed
 by the NUL-terminated name of the node.  Each node also holds an additional
 offset.  Directory nodes contain a "child offset".  That is, the offset to
 the first entry in another singly linked list of nodes comprising the sub-

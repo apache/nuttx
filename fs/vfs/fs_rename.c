@@ -263,7 +263,7 @@ next_subdir:
    *
    * Remove the old inode.  Because we hold a reference count on the
    * inode, it will not be deleted now.  It will be deleted when all of
-   * the references to to the inode have been released (perhaps when
+   * the references to the inode have been released (perhaps when
    * inode_release() is called in remove()).  inode_remove() should return
    * -EBUSY to indicate that the inode was not deleted now.
    */

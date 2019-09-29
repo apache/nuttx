@@ -199,7 +199,7 @@ int unlink(FAR const char *pathname)
 
           /* Remove the old inode.  Because we hold a reference count on the
            * inode, it will not be deleted now.  It will be deleted when all
-           * of the references to to the inode have been released (perhaps
+           * of the references to the inode have been released (perhaps
            * when inode_release() is called below).  inode_remove() will
            * return -EBUSY to indicate that the inode was not deleted now.
            */

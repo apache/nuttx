@@ -578,7 +578,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
 {
   int ret;
 
-  /* Pre-emption must be disabled when this is called to to prevent sampled
+  /* Pre-emption must be disabled when this is called to prevent sampled
    * data from changing until it has been reported.
    */
 

@@ -484,7 +484,7 @@ int task_delete(pid_t pid);
 </p>
 <p>
   The logic in this function only deletes non-running tasks.
-  If the  <code>pid</code> parameter refers to to the currently runing task, then processing is redirected to <code>exit()</code>.
+  If the <code>pid</code> parameter refers to the currently running task, then processing is redirected to <code>exit()</code>.
   This can only happen if a task calls <code>task_delete()</code> in order to delete itself.
 </p>
 <p>

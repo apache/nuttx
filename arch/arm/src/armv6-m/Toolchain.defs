@@ -186,6 +186,6 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABIW)
 endif
 
 # Individual tools may limit the optimizatin level but, by default, the
-# optimization level will be set to to -Os
+# optimization level will be set to -Os
 
 MAXOPTIMIZATION ?= -Os

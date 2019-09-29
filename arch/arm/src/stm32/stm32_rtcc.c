@@ -638,7 +638,7 @@ int up_rtc_initialize(void)
 
   /* Check if the one-time initialization of the RTC has already been
    * performed. We can determine this by checking if the magic number
-   * has been writing to to back-up date register DR0.
+   * has been written to the back-up date register DR0.
    */
 
   if (regval != RTC_MAGIC && regval != RTC_MAGIC_TIME_SET)

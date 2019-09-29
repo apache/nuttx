@@ -582,7 +582,7 @@ static void sam_tsd_bottomhalf(void *arg)
     {
       /* If we have not yet processed the last pen up event, then we
        * cannot handle this pen down event. We will have to discard it.  That
-       * should be okay because we will set the timer to to sample again
+       * should be okay because we will set the timer to sample again
        * a little later.  NOTE that pen interrupts are not re-enabled in
        * this case; we rely on the timer expiry to get us going again.
        */

@@ -870,7 +870,7 @@ static inline uint8_t *lpc43_allocbuffer(FAR struct lpc43_ethmac_s *priv)
 
 static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv, uint8_t *buffer)
 {
-  /* Free the buffer by adding it to to the end of the free buffer list */
+  /* Free the buffer by adding it to the end of the free buffer list */
 
   sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
 }

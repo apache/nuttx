@@ -993,7 +993,7 @@ static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv)
 
 static inline void stm32_freebuffer(struct stm32_ethmac_s *priv, uint8_t *buffer)
 {
-  /* Free the buffer by adding it to to the end of the free buffer list */
+  /* Free the buffer by adding it to the end of the free buffer list */
 
   sq_addlast((sq_entry_t *)buffer, &priv->freeb);
 }

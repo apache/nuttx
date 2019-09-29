@@ -63,7 +63,7 @@
  *   function.
  *
  *   The logic in this function only deletes non-running tasks.  If the
- *   'pid' parameter refers to to the currently runing task, then processing
+ *   'pid' parameter refers to the currently running task, then processing
  *   is redirected to exit().  This can only happen if a task calls
  *   task_delete()in order to delete itself.
  *

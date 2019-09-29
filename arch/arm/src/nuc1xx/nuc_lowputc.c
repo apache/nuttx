@@ -332,7 +332,7 @@ void nuc_lowputc(uint32_t ch)
 
   nuc_console_ready();
 
-  /* Then write the character to to the TX FIFO */
+  /* Then write the character to the TX FIFO */
 
   putreg32(ch, NUC_CONSOLE_BASE + NUC_UART_THR_OFFSET);
 #endif /* HAVE_SERIAL_CONSOLE */

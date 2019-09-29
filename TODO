@@ -789,7 +789,7 @@ o Signals (sched/signal, arch/)
                  up_schedule_sigaction())
                - up_sigdeliver() is a trampoline function that performs the
                  actual signal action as well as some housekeeping functions
-                 then 
+                 then
                - up_sigdeliver() performs a context switch back to the normal,
                  uninterrupted thread instead of returning to nxsig_deliver().
 
@@ -1218,7 +1218,7 @@ o C++ Support
                   one task can effect another task. There can only one
                   uClibc++ state and it will be shared by all tasks. uClibc++
                   apparently relies on global instances (at least for cin and
-                  cout) there is no way to to have any unique state for any
+                  cout) there is no way to have any unique state for any
                   "task group".
 
                   [NuttX does not support processes because in order to have

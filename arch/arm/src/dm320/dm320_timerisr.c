@@ -82,7 +82,7 @@
 /* System Timer
  *
  * Timer0 is dedicated as the system timer.  The rate of system timer
- * interrupts is assumed to to 10MS per tick / 100Hz. The following
+ * interrupts is assumed to be 10MS per tick / 100Hz. The following
  * register settings are used for timer 0
  *
  * System clock formula:

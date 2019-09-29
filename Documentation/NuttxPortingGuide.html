@@ -3717,7 +3717,7 @@ void lpwork_restorepriority(uint8_t reqprio);
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  After an address environment has been established for a task (via <code>up_addrenv_create())</code>, this function may be called to to instantiate that address environment in the virtual address space.
+  After an address environment has been established for a task (via <code>up_addrenv_create())</code>, this function may be called to instantiate that address environment in the virtual address space.
   This might be necessary, for example, to load the code for the task from a file or to access address environment private data.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -3742,7 +3742,7 @@ void lpwork_restorepriority(uint8_t reqprio);
 <p><b>Description</b>:</p>
 <ul>
   After an address environment has been temporarily instantiated by <code>up_addrenv_select</code>,
-  this function may be called to to restore the original address environment.
+  this function may be called to restore the original address environment.
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
@@ -4161,7 +4161,7 @@ void nxsched_timer_expiration(void);
 <p><b>Returned Value</b>:</p>
 <ul>
   On success zero (<code>OK</code>) is returned;
-  -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
+  -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable set to indicate the nature of the failure.
 </ul>
 
 <h4><a name="boardsmp">4.10 Symmetric Multiprocessing (SMP) Application Interface</a></h4>

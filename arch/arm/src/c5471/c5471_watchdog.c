@@ -76,7 +76,7 @@
 #define CLOCK_KHZ              47500
 #define CLOCK_MHZx2            95
 
-/* Macros to manage access to to watchdog timer macros */
+/* Macros to manage access to the watchdog timer */
 
 #define c5471_wdt_cntl  (*(volatile uint32_t*)C5471_TIMER0_CTRL)
 #define c5471_wdt_count (*(volatile uint32_t*)C5471_TIMER0_CNT)

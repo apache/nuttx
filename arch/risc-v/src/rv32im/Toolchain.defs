@@ -105,8 +105,8 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RISCY)
   ARCHCPUFLAGS = -march=rv32imcxgap8 -mPE=8 -mFC=1 -D__riscv__ -D__pulp__ -D__GAP8__
 endif
 
-# Individual tools may limit the optimizatin level but, by default, the
-# optimization level will be set to to -Os
+# Individual tools may limit the optimization level but, by default, the
+# optimization level will be set to -Os
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),)
 MAXOPTIMIZATION ?= -Os

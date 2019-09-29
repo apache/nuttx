@@ -2005,7 +2005,7 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
       else
         {
           /* Successfully received another chunk of data... add that to the
-           * runing total.  Then continue reading until we read 'buflen'
+           * running total.  Then continue reading until we read 'buflen'
            * bytes of data or until the devices NAKs (implying a short
            * packet).
            */

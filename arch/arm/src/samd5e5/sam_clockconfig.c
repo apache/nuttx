@@ -828,7 +828,7 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
     {
     }
 
-  /* Set the source of GCLK0 to to the configured source. */
+  /* Set the source of GCLK0 to the configured source. */
 
   regval32  = getreg32(SAM_GCLK_GENCTRL(0));
   regval32 &= ~GCLK_GENCTRL_SRC_MASK;

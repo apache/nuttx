@@ -1037,7 +1037,7 @@ int nxmu_start(int display, int plane);
 </p>
 <p>
   <b>Returned Value:</b>
-  On success zero (<code>OK</code) is returned; -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
+  On success zero (<code>OK</code) is returned; -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable set to indicate the nature of the failure.
 </p>
 
 <h3>2.3.4 <a name="nxcallbacks">NX Server Callbacks</a></h3>
@@ -4088,7 +4088,7 @@ enum nx_fontid_e
 </ol>
 <p>
   New Add the font to the NX build system.
-  There are several files that you have to modify to to this.
+  There are several files that you have to modify to do this.
   Look how the build system uses the font CONFIG_NXFONT_SANS23X27 for examaples:
 </p>
 <ol start="5">

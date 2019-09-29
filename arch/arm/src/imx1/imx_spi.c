@@ -395,7 +395,7 @@ static int spi_performtx(struct imx_spidev_s *priv)
                priv->txword(priv);
             }
 
-          /* Update the count of words to to transferred */
+          /* Update the count of words to be transferred */
 
           priv->ntxwords -= ntxd;
         }

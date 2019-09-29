@@ -176,9 +176,9 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
       /* A0=SYS_switch_context: This a switch context command: void
        * up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs); At this
        * point, the following values are saved in context: A0 =
-       * SYS_switch_context A1 = saveregs A2 = restoreregs In this case, we
-       * save the context registers to the save register area reference by the
-       * saved contents of R5 and then set g_current_regs to to the save
+       * SYS_switch_context A1 = saveregs A2 = restoreregs. In this case, we
+       * save the context registers to the save register area referenced by
+       * the saved contents of R5 and then set g_current_regs to the save
        * register area referenced by the saved contents of R6.
        */
 

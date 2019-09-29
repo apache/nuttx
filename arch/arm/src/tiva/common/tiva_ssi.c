@@ -699,7 +699,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
                priv->txword(priv);
             }
 
-          /* Update the count of words to to transferred */
+          /* Update the count of words to be transferred */
 
           priv->ntxwords -= ntxd;
         }

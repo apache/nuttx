@@ -1659,7 +1659,7 @@ errout:
  * Name: smartfs_shrinkfile
  *
  * Description:
- *   Shrink the size existing file to to the specified length
+ *   Shrink the size of an existing file to the specified length
  *
  ****************************************************************************/
 

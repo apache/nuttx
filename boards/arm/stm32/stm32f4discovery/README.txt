@@ -1383,7 +1383,7 @@ Configuration Sub-directories
        executable in PATH variable (see apps/examples/README.txt)
 
     5. This configuration can be extended to use the hello++4 example and to
-       build uClibc with the following additions to to the configuration file
+       build uClibc with the following additions to the configuration file
        (from Leo aloe3132):
 
        CONFIG_C99_BOOL8=y
@@ -1439,7 +1439,7 @@ Configuration Sub-directories
 
        You may also want to reconfigure the serial console to USART1.
 
-    2. The HCI UART is assume to connect to the UART3 on the following pins:
+    2. The HCI UART is assumed to connect to the UART3 on the following pins:
 
          USART3 TX :  PB10
          USART3 RX :  PB11
