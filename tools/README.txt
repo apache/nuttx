@@ -274,13 +274,17 @@ mksymtab.c, cvsparser.c, and cvsparser.h
   value (CSV) files.  This tool is not used during the NuttX build, but
   can be used as needed to generate files.
 
-  USAGE: ./mksymtab <cvs-file> <symtab-file>
+  USAGE: ./mksymtab [-d] <cvs-file> <symtab-file> [<symtab-name> [<nsymbols-name>]]
 
   Where:
 
-    <cvs-file>   : The path to the input CSV file
-    <symtab-file>: The path to the output symbol table file
-    -d           : Enable debug output
+    <cvs-file>      : The path to the input CSV file (required)
+    <symtab-file>   : The path to the output symbol table file (required)
+    <symtab-name>   : Optional name for the symbol table variable
+                      Default: "g_symtab"
+    <nsymbols-name> : Optional name for the symbol table variable
+                      Default: "g_nsymbols"
+    -d              : Enable debug output
 
   Example:
 

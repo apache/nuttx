@@ -71,7 +71,7 @@ static int nhdrfiles;
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s <cvs-file> [-d] <symtab-file> [<symtab-name> [<nsymbols-name>]]\n\n",
+  fprintf(stderr, "USAGE: %s [-d] <cvs-file> <symtab-file> [<symtab-name> [<nsymbols-name>]]\n\n",
           progname);
   fprintf(stderr, "Where:\n\n");
   fprintf(stderr, "  <cvs-file>      : The path to the input CSV file (required)\n");
