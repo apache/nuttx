@@ -34,132 +34,11 @@
 #
 ############################################################################
 
-# All add-on directories.
-#
-# NUTTX_ADDONS is the list of directories built into the NuttX kernel.
-# USER_ADDONS is the list of directories that will be built into the user
-#   application
-
-NUTTX_ADDONS :=
-USER_ADDONS :=
-
-# In the protected build, the applications in the apps/ directory will be
-# into the userspace; in the flat build, the applications will b built into
-# the kernel space.  But in the kernel build, the applications will not be
-# built at all by this Makefile.
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-USER_ADDONS += $(APPDIR)
-else
-ifneq ($(CONFIG_BUILD_KERNEL),y)
-NUTTX_ADDONS += $(APPDIR)
-endif
-endif
-
 # Lists of build directories.
 #
-# FSDIRS depend on file descriptor support; NONFSDIRS do not (except for parts
-#   of FSDIRS).  We will exclude FSDIRS from the build if file descriptor
-#   support is disabled.  NOTE that drivers, in general, depends on file
-#   descriptor support but is always built because there are other components
-#   in the drivers directory that are needed even if file descriptors are not
-#   supported.
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
 #   configuration specific files or creation of configurable symbolic links
-# USERDIRS - When NuttX is build is a monolithic kernel, this provides the
-#   list of directories that must be built
-# OTHERDIRS - These are directories that are not built but probably should
-#   be cleaned to prevent garbage from collecting in them when changing
-#   configurations.
-
-ifeq ($(CONFIG_LIBCXX),y)
-LIBXX=libcxx
-else
-LIBXX=libxx
-endif
-
-NONFSDIRS = sched drivers boards $(ARCH_SRC) $(NUTTX_ADDONS)
-FSDIRS = fs binfmt
-CONTEXTDIRS = boards $(APPDIR)
-USERDIRS =
-OTHERDIRS = pass1
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-
-USERDIRS += libs$(DELIM)libc mm $(USER_ADDONS)
-ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libs$(DELIM)libxx
-endif
-
-else
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-
-USERDIRS += libs$(DELIM)libc mm
-ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libs$(DELIM)libxx
-endif
-
-else
-
-NONFSDIRS += libs$(DELIM)libc mm
-OTHERDIRS += $(USER_ADDONS)
-ifeq ($(CONFIG_HAVE_CXX),y)
-NONFSDIRS += libs$(DELIM)libxx
-else
-OTHERDIRS += libs$(DELIM)libxx
-endif
-
-endif
-endif
-
-ifeq ($(CONFIG_LIB_SYSCALL),y)
-NONFSDIRS += syscall
-CONTEXTDIRS += syscall
-USERDIRS += syscall
-else
-OTHERDIRS += syscall
-endif
-
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-CONTEXTDIRS += libs$(DELIM)libc
-endif
-
-ifeq ($(CONFIG_NX),y)
-NONFSDIRS += graphics libs$(DELIM)libnx
-CONTEXTDIRS += graphics libs$(DELIM)libnx
-else ifeq ($(CONFIG_NXFONTS),y)
-NONFSDIRS += libs$(DELIM)libnx
-CONTEXTDIRS += libs$(DELIM)libnx
-OTHERDIRS += graphics
-else
-OTHERDIRS += graphics libs$(DELIM)libnx
-endif
-
-ifeq ($(CONFIG_AUDIO),y)
-NONFSDIRS += audio
-else
-OTHERDIRS += audio
-endif
-
-ifeq ($(CONFIG_VIDEO),y)
-NONFSDIRS += video
-else
-OTHERDIRS += video
-endif
-
-ifeq ($(CONFIG_WIRELESS),y)
-NONFSDIRS += wireless
-else
-OTHERDIRS += wireless
-endif
-
-ifeq ($(CONFIG_LIBDSP),y)
-NONFSDIRS += libs$(DELIM)libdsp
-else
-OTHERDIRS += libs$(DELIM)libdsp
-endif
-
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
@@ -170,22 +49,121 @@ endif
 #   then this holds only the directories containing user files. If
 #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
-CLEANDIRS   = $(NONFSDIRS) $(FSDIRS) $(USERDIRS) $(OTHERDIRS)
-KERNDEPDIRS = $(NONFSDIRS)
-USERDEPDIRS = $(USERDIRS)
+CLEANDIRS :=
+KERNDEPDIRS :=
+USERDEPDIRS :=
 
-# Add file system directories to KERNDEPDIRS (they are already in CLEANDIRS)
+# In the protected build, the applications in the apps/ directory will be
+# into the userspace; in the flat build, the applications will be built into
+# the kernel space.  But in the kernel build, the applications will not be
+# built at all by this Makefile.
 
-KERNDEPDIRS += $(FSDIRS)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+USERDEPDIRS += $(APPDIR)
+else
+ifneq ($(CONFIG_BUILD_KERNEL),y)
+KERNDEPDIRS += $(APPDIR)
+else
+CLEANDIRS += $(APPDIR)
+endif
+endif
+
+ifeq ($(CONFIG_LIBCXX),y)
+LIBXX=libcxx
+else
+LIBXX=libxx
+endif
+
+KERNDEPDIRS += sched drivers boards $(ARCH_SRC)
+KERNDEPDIRS += fs binfmt
+CONTEXTDIRS = boards $(APPDIR)
+CLEANDIRS += pass1
+
+ifeq ($(CONFIG_BUILD_FLAT),y)
+
+KERNDEPDIRS += libs$(DELIM)libc mm
+ifeq ($(CONFIG_HAVE_CXX),y)
+KERNDEPDIRS += libs$(DELIM)libxx
+else
+CLEANDIRS += libs$(DELIM)libxx
+endif
+
+else
+
+USERDEPDIRS += libs$(DELIM)libc mm
+ifeq ($(CONFIG_HAVE_CXX),y)
+USERDEPDIRS += libs$(DELIM)libxx
+else
+CLEANDIRS += libs$(DELIM)libxx
+endif
+
+endif
+
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+CONTEXTDIRS += syscall
+USERDEPDIRS += syscall
+else
+CLEANDIRS += syscall
+endif
+
+ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+CONTEXTDIRS += libs$(DELIM)libc
+endif
+
+ifeq ($(CONFIG_NX),y)
+KERNDEPDIRS += graphics
+CONTEXTDIRS += graphics
+else
+CLEANDIRS += graphics
+endif
+
+ifeq ($(CONFIG_NXFONTS),y)
+ifeq ($(CONFIG_BUILD_FLAT),y)
+KERNDEPDIRS += libs$(DELIM)libnx
+else
+USERDEPDIRS += libs$(DELIM)libnx
+endif
+CONTEXTDIRS += libs$(DELIM)libnx
+else
+CLEANDIRS += libs$(DELIM)libnx
+endif
+
+ifeq ($(CONFIG_AUDIO),y)
+KERNDEPDIRS += audio
+else
+CLEANDIRS += audio
+endif
+
+ifeq ($(CONFIG_VIDEO),y)
+KERNDEPDIRS += video
+else
+CLEANDIRS += video
+endif
+
+ifeq ($(CONFIG_WIRELESS),y)
+KERNDEPDIRS += wireless
+else
+CLEANDIRS += wireless
+endif
+
+ifeq ($(CONFIG_LIBDSP),y)
+KERNDEPDIRS += libs$(DELIM)libdsp
+else
+CLEANDIRS += libs$(DELIM)libdsp
+endif
 
 # Add networking directories to KERNDEPDIRS and CLEANDIRS
 
 ifeq ($(CONFIG_NET),y)
 KERNDEPDIRS += net
-endif
+else
 CLEANDIRS += net
+endif
 
 ifeq ($(CONFIG_CRYPTO),y)
 KERNDEPDIRS += crypto
-endif
+else
 CLEANDIRS += crypto
+endif
+
+CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)

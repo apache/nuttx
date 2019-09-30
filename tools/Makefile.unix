@@ -106,25 +106,9 @@ CONFIG_APPS_DIR = ../apps
 endif
 APPDIR := ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APPS_DIR)"; fi}
 
-# Add-on directories.  These may or may not be in place in the
-# NuttX source tree (they must be specifically installed)
-#
-# NUTTX_ADDONS is the list of directories built into the NuttX kernel.
-# USER_ADDONS is the list of directories that will be built into the user
-#   application
-#
-# FSDIRS depend on file descriptor support; NONFSDIRS do not (except for parts
-#   of FSDIRS).  We will exclude FSDIRS from the build if file descriptor
-#   support is disabled
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
 #   configuration specific files or creation of configurable symbolic links
-# USERDIRS - When NuttX is build is a monolithic kernel, this provides the
-#   list of directories that must be built
-# OTHERDIRS - These are directories that are not built but probably should
-#   be cleaned to prevent garbage from collecting in them when changing
-#   configurations.
-#
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
@@ -152,8 +136,6 @@ endif
 #
 # NUTTXLIBS is the list of NuttX libraries that is passed to the
 #   processor-specific Makefile to build the final NuttX target.
-#   Libraries in FSDIRS are excluded if file descriptor support
-#   is disabled.
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 # EXPORTLIBS is the list of libraries that should be exported by
@@ -374,7 +356,7 @@ $(ARCH_SRC)/drivers: .config
 	@echo "LN: $(TOPDIR)/drivers/platform to $(BOARD_DIR)/drivers"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/drivers $(TOPDIR)/drivers/platform
 
-# Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
+# Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
 
 $(ARCH_SRC)/chip: .config
 ifneq ($(CONFIG_ARCH_CHIP),)
@@ -382,7 +364,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_SRC)/$(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
 endif
 
-# Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
+# Link arch/<arch-name>/include/<chip-name> to include/arch/chip
 
 include/arch/chip: include/arch
 ifneq ($(CONFIG_ARCH_CHIP),)
