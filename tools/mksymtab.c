@@ -71,12 +71,12 @@ static int nhdrfiles;
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s <cvs-file> <symtab-file> [symtab-name] [nsymbols-name]\n\n", progname);
+  fprintf(stderr, "USAGE: %s <cvs-file> <symtab-file> [<symtab-name> [<nsymbols-name>]]\n\n", progname);
   fprintf(stderr, "Where:\n\n");
-  fprintf(stderr, "  <cvs-file>     : The path to the input CSV file\n");
-  fprintf(stderr, "  <symtab-file>  : The path to the output symbol table file\n");
-  fprintf(stderr, "  [symtab-name]  : The name for the symbol table variable\n");
-  fprintf(stderr, "  [nsymbols-name]: The name for the symbol count variable\n");
+  fprintf(stderr, "  <cvs-file>     : The path to the input CSV file (required)\n");
+  fprintf(stderr, "  <symtab-file>  : The path to the output symbol table file (required)\n");
+  fprintf(stderr, "  <symtab-name>  : Optional name for the symbol table variable\n");
+  fprintf(stderr, "  <nsymbols-name>: Optional name for the symbol count variable\n");
   fprintf(stderr, "  -d             : Enable debug output\n");
   exit(EXIT_FAILURE);
 }
