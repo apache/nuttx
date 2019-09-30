@@ -76,7 +76,7 @@ else
 BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
 endif
 
-COMMON_DIR = $(if $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common$(DELIM)Makefile),y,)
+COMMON_DIR = $(if $(wildcard $(BOARD_DIR)$(DELIM)common$(DELIM)Makefile),y,)
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ..\apps.  Ultimately, the application

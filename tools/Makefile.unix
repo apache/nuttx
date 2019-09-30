@@ -90,7 +90,7 @@ else
 BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
 endif
 
-COMMON_DIR = $(if $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)/common/Makefile),y,)
+COMMON_DIR = $(if $(wildcard $(BOARD_DIR)/common/Makefile),y,)
 
 # GIT directory present
 
