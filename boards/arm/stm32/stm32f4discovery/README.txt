@@ -2305,7 +2305,6 @@ Configuration Sub-directories
 
     2. Loadable ELF modules
 
-       CONFIG_BUILD_LOADABLE=y
        CONFIG_SYMTAB_ORDEREDBYNAME=y
        CONFIG_ELF=y
        CONFIG_EXAMPLES_HELLO=m

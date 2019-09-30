@@ -162,10 +162,8 @@ config APPS_DIR
 		or to set up include file paths.
 
 config BUILD_LOADABLE
-	bool "NuttX application loadable build"
+	bool
 	option modules
-	default n if !BUILD_KERNEL
-	default y if BUILD_KERNEL
 	---help---
 		Automatically selected if KERNEL build is selected.
 		This selection only effects the behavior of the 'make export'
@@ -202,6 +200,7 @@ config BUILD_PROTECTED
 config BUILD_KERNEL
 	bool "NuttX kernel build"
 	depends on ARCH_USE_MMU && ARCH_ADDRENV
+	select BUILD_LOADABLE
 	select LIB_SYSCALL
 	---help---
 		Builds NuttX as a separately compiled kernel.  No applications are

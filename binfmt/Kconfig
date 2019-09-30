@@ -22,6 +22,7 @@ config PATH_INITIAL
 
 config BINFMT_LOADABLE
 	bool
+	select BUILD_LOADABLE
 	default n
 	---help---
 		Automatically selected if a loadable binary format is selected.
