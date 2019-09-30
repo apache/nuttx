@@ -36,8 +36,6 @@
 
 # NUTTXLIBS is the list of NuttX libraries that is passed to the
 #   processor-specific Makefile to build the final NuttX target.
-#   Libraries in FSDIRS are excluded if file descriptor support
-#   is disabled.
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 # EXPORTLIBS is the list of libraries that should be exported by
@@ -46,9 +44,7 @@
 NUTTXLIBS = staging$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
-# Driver support.  Generally depends on file descriptor support but there
-# are some components in the drivers directory that are needed even if file
-# descriptors are not supported.
+# Driver support.
 
 NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
@@ -128,12 +124,6 @@ endif
 
 ifeq ($(CONFIG_WIRELESS),y)
 NUTTXLIBS += staging$(DELIM)libwireless$(LIBEXT)
-endif
-
-# Add C++ library
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
 # Add DSP library

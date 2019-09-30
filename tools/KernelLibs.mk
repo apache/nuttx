@@ -35,8 +35,6 @@
 
 # NUTTXLIBS is the list of NuttX libraries that is passed to the
 #   processor-specific Makefile to build the final NuttX target.
-#   Libraries in FSDIRS are excluded if file descriptor support
-#   is disabled.
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 # EXPORTLIBS is the list of libraries that should be exported by
@@ -45,9 +43,7 @@
 NUTTXLIBS = staging$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
-# Driver support.  Generally depends on file descriptor support but there
-# are some components in the drivers directory that are needed even if file
-# descriptors are not supported.
+# Driver support.
 
 NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
@@ -56,21 +52,12 @@ NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)
 
 # Add libraries for syscall support.  The C library will be needed by
-# both the kernel- and user-space builds.  For now, the memory manager (mm)
-# is placed in user space (only).
+# both the kernel- and user-space builds.
 
 NUTTXLIBS += staging$(DELIM)libstubs$(LIBEXT) staging$(DELIM)libkc$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libuc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
-
-# Add libraries for two pass build support.  The special directory pass1
-# may be populated so that application generated logic can be included into
-# the kernel build
-
-ifeq ($(CONFIG_BUILD_2PASS),y)
-NUTTXLIBS += staging$(DELIM)libpass1$(LIBEXT)
-endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
@@ -122,12 +109,6 @@ endif
 
 ifeq ($(CONFIG_WIRELESS),y)
 NUTTXLIBS += staging$(DELIM)libwireless$(LIBEXT)
-endif
-
-# Add C++ library
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
 # Add DSP library
