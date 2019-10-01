@@ -269,7 +269,7 @@ working in that environment:
 
 SMP
 ---
-  The configuration has basic support SMP testing.  The simulation supports
+  This configuration has basic support for SMP testing.  The simulation supports
   the emulation of multiple CPUs by creating multiple pthreads, each run a
   copy of the simulation in the same process address space.
 
@@ -309,11 +309,11 @@ SMP
 
     CONFIG_SMP_NCPUS=1
 
-  In this case there is, of course, no muli-CPU processing, but this does
+  In this case there is, of course, no multi-CPU processing, but this does
   verify the correctness of some the basic SMP logic.
 
   The NSH configuration can also be forced to run SMP, but suffers from
-  the same quirky behavior.  I can be made reliable if you modify
+  the same quirky behavior.  It can be made reliable if you modify
   arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0.
   Otherwise, often simuart_post() will be called from CPU1 and it will
   try to restart NSH on CPU0 and, again, the same quirkiness occurs.
