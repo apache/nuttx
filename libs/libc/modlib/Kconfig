@@ -59,7 +59,7 @@ config MODLIB_DUMPBUFFER
 
 config MODLIB_HAVE_SYMTAB
 	bool "Have symbol table"
-	default n if BUILD_KERNEL
+	default n
 	---help---
 		If you have a module library symbol table, then you may select this
 		option in order to use it.  Symbol tables are required in most
