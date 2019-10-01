@@ -1523,19 +1523,21 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
 
 #  if defined(CONFIG_ARMV7M_DCACHE) && \
      !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-  /* buffer alignment is required for DMA transfers with dcache in buffered
-   * mode (not write-through) because a) arch_invalidate_dcache could lose
-   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory if
-   * the maddr and the mend+1, the next next address are not on
-   * ARMV7M_DCACHE_LINESIZE boundaries.
+  /* buffer alignment is required for RX DMA transfers with dcache in
+   * buffered mode (not write-through) because arch_invalidate_dcache could
+   * lose buffered writes
    */
 
-  if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
-      ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
+  if ((ccr & DMA_SCR_DIR_MASK) == DMA_SCR_DIR_P2M ||
+      (ccr & DMA_SCR_DIR_MASK) == DMA_SCR_DIR_M2M)
     {
-      dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x mend:0x%08x\n",
-              cfg->maddr, mend);
-      return false;
+      if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
+          ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
+        {
+          dmainfo("stm32_dmacapable: dcache unaligned "
+                  "maddr:0x%08x mend:0x%08x\n", cfg->maddr, mend);
+          return false;
+        }
     }
 #  endif
 
