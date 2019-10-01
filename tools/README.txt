@@ -908,6 +908,8 @@ simbridge.sh
      $ tools/simbridge.sh
      Usage: tools/simbridge.sh <interface> <on|off>
 
+  See boards/sim/sim/sim/NETWORK-LINUX.txt for further information
+
 showsize.sh
 -----------
 
