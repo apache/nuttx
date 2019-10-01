@@ -161,7 +161,8 @@ rm -f "${EXPORTDIR}.tar.gz"
 mkdir "${EXPORTDIR}" || { echo "MK: 'mkdir ${EXPORTDIR}' failed"; exit 1; }
 mkdir "${EXPORTDIR}/startup" || { echo "MK: 'mkdir ${EXPORTDIR}/startup' failed"; exit 1; }
 mkdir "${EXPORTDIR}/libs" || { echo "MK: 'mkdir ${EXPORTDIR}/libs' failed"; exit 1; }
-mkdir "${EXPORTDIR}/build" || { echo "MK: 'mkdir ${EXPORTDIR}/build' failed"; exit 1; }
+mkdir "${EXPORTDIR}/scripts" || { echo "MK: 'mkdir ${EXPORTDIR}/scripts' failed"; exit 1; }
+mkdir "${EXPORTDIR}/tools" || { echo "MK: 'mkdir ${EXPORTDIR}/tools' failed"; exit 1; }
 
 if [ "X${USRONLY}" != "Xy" ]; then
   mkdir "${EXPORTDIR}/arch" || { echo "MK: 'mkdir ${EXPORTDIR}/arch' failed"; exit 1; }
@@ -190,6 +191,10 @@ if [ ! -d "${ARCHDIR}" ]; then
 	exit 1
 fi
 
+# Copy the default linker script
+
+cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+
 # Is there a linker script in this configuration?
 
 if [ "X${USRONLY}" != "Xy" ]; then
@@ -204,63 +209,63 @@ if [ "X${USRONLY}" != "Xy" ]; then
 
 		# Copy the linker script
 
-		cp -p "${LDPATH}" "${EXPORTDIR}/build/." || \
+		cp -p "${LDPATH}" "${EXPORTDIR}/scripts/." || \
 			{ echo "MK: cp ${LDPATH} failed"; exit 1; }
 
 		# Copy addtional ld scripts
 
 		LDDIR="$(dirname "${LDPATH}")"
 		for f in "${LDDIR}"/*.ld ; do
-			[ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/build/."
+			[ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/scripts/."
 		done
 	fi
 fi
 
 # Save the compilation options
 
-echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
-echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/build/Make.defs"
-echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/build/Make.defs"
-echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/build/Make.defs"
-echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/build/Make.defs"
-echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/build/Make.defs"
-echo "CC               = ${CC}" >>"${EXPORTDIR}/build/Make.defs"
-echo "CXX              = ${CXX}" >>"${EXPORTDIR}/build/Make.defs"
-echo "CPP              = ${CPP}" >>"${EXPORTDIR}/build/Make.defs"
-echo "LD               = ${LD}" >>"${EXPORTDIR}/build/Make.defs"
-echo "AR               = ${AR}" >>"${EXPORTDIR}/build/Make.defs"
-echo "NM               = ${NM}" >>"${EXPORTDIR}/build/Make.defs"
-echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/build/Make.defs"
-echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/build/Make.defs"
-echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/build/Make.defs"
-echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/build/Make.defs"
-echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/build/Make.defs"
-echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/build/Make.defs"
-echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/build/Make.defs"
-echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
-echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/build/Make.defs"
-echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/build/Make.defs"
-echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/build/Make.defs"
-echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/build/Make.defs"
-echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/build/Make.defs"
-echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/build/Make.defs"
-echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/build/Make.defs"
+echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "CC               = ${CC}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "CXX              = ${CXX}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "CPP              = ${CPP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LD               = ${LD}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "AR               = ${AR}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "NM               = ${NM}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
 
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
-	echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/build/Make.defs"
-	echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
+	echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
 fi
 
 # Copy the system map file(s)
@@ -405,6 +410,19 @@ for lib in ${LIBLIST}; do
 		rm -rf "${EXPORTDIR}/tmp"
 	fi
 done
+
+# Copy the essential build script file(s)
+
+cp -f "${TOPDIR}/tools/copydir.bat" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/copydir.sh" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/define.bat" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/define.sh" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/incdir.bat" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/incdir.sh" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/link.bat" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/link.sh" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/unlink.bat" "${EXPORTDIR}/tools/"
+cp -f "${TOPDIR}/tools/unlink.sh" "${EXPORTDIR}/tools/"
 
 # Now tar up the whole export directory
 
