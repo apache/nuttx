@@ -162,15 +162,15 @@ static inline uint32_t do_congruential(void)
 static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
                              size_t len)
 {
-  size_t n;
-  uint32_t rnd;
-
 #ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
   if (len > 0)
     {
       getrandom(buffer, len);
     }
+
 #else
+  size_t n;
+  uint32_t rnd;
 
   n = len;
 
@@ -214,7 +214,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 
       do
         {
-          *buffer++ = rnd & 0xFF;
+          *buffer++ = rnd & 0xff;
           rnd >>= 8;
         }
       while (--n > 0);
