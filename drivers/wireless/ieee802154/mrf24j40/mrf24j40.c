@@ -404,7 +404,7 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
     {
       hlen += 2; /* Source saddr */
     }
-  else if ((addrmode == IEEE802154_ADDRMODE_EXTENDED)
+  else if (addrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 8; /* Ext saddr */
     }
