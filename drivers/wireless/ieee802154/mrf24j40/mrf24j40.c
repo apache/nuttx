@@ -370,22 +370,24 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
                          uint32_t fifo_addr)
 {
 
+  uint16_t frame_ctrl;
+  uint16_t addrmode;
   int hlen = 3; /* Include frame control and seq number */
   int i;
-  uint16_t frame_ctrl;
 
   /* Analyze frame control to compute header length */
 
   frame_ctrl = buf[0];
   frame_ctrl |= (buf[1] << 8);
 
-  if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) ==
-      IEEE802154_ADDRMODE_SHORT)
+  addrmode = (frame_ctrl & IEEE802154_FRAMECTRL_DADDR) >>
+             IEEE802154_FRAMECTRL_SHIFT_DADDR;
+
+  if (addrmode == IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2 + 2; /* Destination PAN + shortaddr */
     }
-  else if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) ==
-           IEEE802154_ADDRMODE_EXTENDED)
+  else if (addrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 2 + 8; /* Destination PAN + extaddr */
     }
@@ -395,13 +397,14 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
       hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
     }
 
-  if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) ==
-      IEEE802154_ADDRMODE_SHORT)
+  addrmode = (frame_ctrl & IEEE802154_FRAMECTRL_SADDR) >>
+             IEEE802154_FRAMECTRL_SHIFT_SADDR;
+
+  if (addrmode == IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2; /* Source saddr */
     }
-  else if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) ==
-           IEEE802154_ADDRMODE_EXTENDED)
+  else if ((addrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 8; /* Ext saddr */
     }
