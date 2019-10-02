@@ -45,10 +45,11 @@ APPSDIR=../apps
 MAKE_FLAGS=-i
 MAKE=make
 unset testfile
+unset JOPTION;
 
 function showusage {
     echo ""
-    echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-a <apps-dir>] [-t <nuttx-dir><testlist-file>"
+    echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-j <ncpus>] [-a <apps-dir>] [-t <nuttx-dir><testlist-file>"
     echo "       $progname -h"
     echo ""
     echo "Where:"
@@ -58,6 +59,7 @@ function showusage {
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
     echo "  -d enables script debug output"
     echo "  -x exit on build failures"
+    echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
     echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
     echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
     echo "  -h will show this help test and terminate"
@@ -105,6 +107,10 @@ while [ ! -z "$1" ]; do
     -a )
     shift
     APPSDIR="$1"
+    ;;
+    -j )
+    shift
+    JOPTION="-j $1"
     ;;
     -t )
     shift
@@ -240,7 +246,7 @@ function build {
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
     echo "  Building NuttX..."
     echo "------------------------------------------------------------------------------------"
-    ${MAKE} ${MAKE_FLAGS} 1>/dev/null
+    ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
 }
 
 # Coordinate the steps for the next build test
