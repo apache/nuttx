@@ -34,7 +34,7 @@
 #
 ############################################################################
 
-TOPDIR := ${shell pwd | sed -e 's/ /\\ /g'}
+TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/.version
 include $(TOPDIR)/tools/Config.mk

@@ -732,9 +732,9 @@ indent.sh
   (see below and the comments at the top of the indent.sh file).
 
   USAGE:
-    ./indent.sh [-d] -o <out-file> <in-file>
-    ./indent.sh [-d] <in-file-list>
-    ./indent.sh [-d] -h
+    tools/indent.sh [-d] -o <out-file> <in-file>
+    tools/indent.sh [-d] <in-file-list>
+    tools/indent.sh [-d] -h
 
   Where:
     -<in-file>

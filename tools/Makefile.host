@@ -34,7 +34,7 @@
 #
 ############################################################################
 
-TOPDIR ?= ${shell pwd}/..
+TOPDIR ?= $(CURDIR)/..
 -include $(TOPDIR)/Make.defs
 include ${TOPDIR}/tools/Config.mk
 
