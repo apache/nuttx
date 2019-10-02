@@ -68,6 +68,7 @@
                                               /* 0x00100000-0x07ffffff: Reserved */
 #define STM32L4_FLASH_BASE     0x08000000     /* 0x08000000-0x080fffff: FLASH memory */
                                               /* 0x08100000-0x0fffffff: Reserved */
+#define STM32L4_FLASH_MASK     0xf8000000     /*                        Test if addr in FLASH */
 #define STM32L4_SRAM2_BASE     0x10000000     /* 0x10000000-0x1000ffff: 16k to 64k SRAM2 */
                                               /* 0x10010000-0x1ffeffff: Reserved */
 #define STM32L4_SRAM3_BASE     0x20040000     /* 0x20040000-0x3fffffff: SRAM3 (STM32L4R9xx only, 384k) */

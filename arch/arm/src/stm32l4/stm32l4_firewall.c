@@ -56,7 +56,7 @@ int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup)
 {
   uint32_t reg;
 
-  /* code and nvdata must be aligned to 256 bytes
+  /* Code and nvdata must be aligned to 256 bytes
    * data must be aligned to 64 bytes
    */
 
@@ -66,7 +66,7 @@ int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup)
       return -EINVAL;
     }
 
-  /* code and nvdata length must be a multiple of 256 bytes
+  /* Code and nvdata length must be a multiple of 256 bytes
    * data length must be a multiple of 64 bytes
    */
 
@@ -76,16 +76,16 @@ int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup)
       return -EINVAL;
     }
 
-  /* code and nvdata must be in flash
+  /* Code and nvdata must be in flash
    * data must be in SRAM1
    */
 
-  if ((setup->codestart & STM32L4_REGION_MASK) != STM32L4_FLASH_BASE)
+  if ((setup->codestart & STM32L4_FLASH_MASK) != STM32L4_FLASH_BASE)
     {
       return -EINVAL;
     }
 
-  if ((setup->nvdatastart & STM32L4_REGION_MASK) != STM32L4_FLASH_BASE)
+  if ((setup->nvdatastart & STM32L4_FLASH_MASK) != STM32L4_FLASH_BASE)
     {
       return -EINVAL;
     }
