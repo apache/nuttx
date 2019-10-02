@@ -101,7 +101,7 @@ ENVIRONMENTS
         MobaXterm: https://mobaxterm.mobatek.net/
         Gow: https://github.com/bmatzelle/gow/wiki
 
-      Disclaimer:  In priniple, these should work.  However, I have never
+      Disclaimer:  In principle, these should work.  However, I have never
       used any of these environments and cannot guarantee that there is
       not some less-than-obvious issues.
 
@@ -190,7 +190,7 @@ Using MSYS
 
   And possibly others depending upon your usage.  Then you will need to
   build and install kconfig-frontends per the instructions of the top-level
-  README.txt file in the tools repository.  This required the following
+  README.txt file in the tools repository.  This requires the following
   additional tools:
 
     pacman -S bison
@@ -202,9 +202,9 @@ Using MSYS
 
   Because of some versioning issues, I had to run 'aclocal' prior to
   running the kconfig-frontends configure script.  See "Configuring NuttX"
-  below for futher information.ifq
+  below for further information.
 
-  Unlike Cygwin, MSYS does not support symbolic links.  The 'ln -s' commnad
+  Unlike Cygwin, MSYS does not support symbolic links.  The 'ln -s' command
   will, in fact, copy a directory!  This means that you Make.defs file will
   have to include definitions like:
 
