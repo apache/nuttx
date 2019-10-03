@@ -154,7 +154,7 @@ function distclean {
     cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
     if [ -f .config ]; then
         echo "  Cleaning..."
-        ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+        ${MAKE} ${MAKE_FLAGS} distclean 1>/dev/null
     fi
 }
 
