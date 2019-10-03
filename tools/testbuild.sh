@@ -45,7 +45,7 @@ APPSDIR=../apps
 MAKE_FLAGS=-i
 MAKE=make
 unset testfile
-unset JOPTION;
+unset JOPTION
 
 function showusage {
     echo ""
