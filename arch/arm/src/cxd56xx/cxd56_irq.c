@@ -92,6 +92,11 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 volatile uint32_t *g_current_regs[1];
 #endif
 
+#ifdef CONFIG_SMP
+static volatile int8_t g_cpu_for_irq[CXD56_IRQ_NIRQS];
+extern void up_send_irqreq(int idx, int irq, int cpu);
+#endif
+
 /* This is the address of the  exception vector table (determined by the
  * linker script).
  */
@@ -285,6 +290,14 @@ void up_irqinitialize(void)
   uint32_t regaddr;
   int num_priority_registers;
 
+#ifdef CONFIG_SMP
+  int i;
+  for (i = 0; i < CXD56_IRQ_NIRQS; i++)
+    {
+      g_cpu_for_irq[i] = -1;
+    }
+#endif
+
   /* Disable all interrupts */
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
@@ -421,14 +434,37 @@ void up_disable_irq(int irq)
 
   if (irq >= CXD56_IRQ_EXTINT)
     {
-      irqstate_t flags = enter_critical_section();
+#ifdef CONFIG_SMP
+      /* Obtain cpu number which enabled this irq */
+
+      int8_t cpu = g_cpu_for_irq[irq];
+
+      if (-1 == cpu)
+        {
+          /* Already disabled */
+
+          return;
+        }
+
+      /* If a defferent cpu requested, send an irq request */
+
+      if (cpu != (int8_t)up_cpu_index())
+        {
+          up_send_irqreq(1, irq, cpu);
+          return;
+        }
+
+      g_cpu_for_irq[irq] = -1;
+#endif
+
+      irqstate_t flags = spin_lock_irqsave();
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval &= ~bit;
       putreg32(regval, INTC_EN(irq));
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
       putreg32(bit, NVIC_IRQ_CLEAR(irq));
     }
   else
@@ -460,14 +496,30 @@ void up_enable_irq(int irq)
 
   if (irq >= CXD56_IRQ_EXTINT)
     {
-      irqstate_t flags = enter_critical_section();
+#ifdef CONFIG_SMP
+      int cpu = up_cpu_index();
+
+      /* Set the caller cpu for this irq */
+
+      g_cpu_for_irq[irq] = (int8_t)cpu;
+
+      /* EXTINT needs to be handled on CPU0 to avoid deadlock */
+
+      if (irq > CXD56_IRQ_EXTINT && irq != CXD56_IRQ_SW_INT && 0 != cpu)
+        {
+          up_send_irqreq(0, irq, 0);
+          return;
+        }
+#endif
+
+      irqstate_t flags = spin_lock_irqsave();
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
       regval  = getreg32(INTC_EN(irq));
       regval |= bit;
       putreg32(regval, INTC_EN(irq));
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(flags);
       putreg32(bit, NVIC_IRQ_ENABLE(irq));
     }
   else

@@ -22,6 +22,11 @@ about this board.
 Configuration sub-directories
 -----------------------------
 
+  smp
+
+    This is a configuration to run Spresense in SMP mode. To use this
+    configuration, new boot loader which will be released later must be used.
+
   wifi
 
     This is a configuration for Spresense + Wi-Fi addon (Telit GS2200M) module.
