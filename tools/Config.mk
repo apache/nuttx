@@ -106,6 +106,10 @@ endif
 #
 #   CPP - The command to invoke the C pre-processor
 #   CPPFLAGS - Options to pass to the C pre-processor
+#
+# '<filename>.c_CPPFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.c (or
+# <filename>.S)
 
 define PREPROCESS
 	@echo "CPP: $1->$2"
@@ -120,6 +124,9 @@ endef
 #
 #   CC - The command to invoke the C compiler
 #   CFLAGS - Options to pass to the C compiler
+#
+# '<filename>.c_CFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.c
 
 define COMPILE
 	@echo "CC: $1"
@@ -134,6 +141,9 @@ endef
 #
 #   CXX - The command to invoke the C++ compiler
 #   CXXFLAGS - Options to pass to the C++ compiler
+#
+# '<filename>.cxx_CXXFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.cxx
 
 define COMPILEXX
 	@echo "CXX: $1"
@@ -155,6 +165,9 @@ endef
 #   CC - By default, the C compiler is used to compile assembly language
 #        files
 #   AFLAGS - Options to pass to the C+compiler
+#
+# '<filename>.s_CFLAGS += <options>' may also be used, as an example, to change
+# the options used with the single file <filename>.s
 
 define ASSEMBLE
 	@echo "AS: $1"
