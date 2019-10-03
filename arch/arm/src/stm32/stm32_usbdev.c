@@ -1747,6 +1747,11 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   ep0->stalled  = 0;
   ep0->txbusy   = 0;
 
+  value.w       = 0;
+  index.w       = 0;
+  len.w         = 0;
+  response.w    = 0;
+
   /* Check to see if called from the DATA phase of a SETUP Transfer */
 
   if (priv->ep0state != EP0STATE_SETUP_READY)
