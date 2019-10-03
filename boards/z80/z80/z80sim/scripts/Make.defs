@@ -93,7 +93,7 @@ EXEEXT = .hex
 
 define ASSEMBLE
 	@echo "AS: $1"
-	$(Q) $(AS) $(AFLAGS) $2 $1
+	$(Q) $(AS) $(AFLAGS) $($(strip $1)_AFLAGS) $2 $1
 endef
 
 # Custom CLEAN definition

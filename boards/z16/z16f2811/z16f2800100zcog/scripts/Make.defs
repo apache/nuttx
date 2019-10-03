@@ -177,15 +177,15 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
 define PREPROCESS
 	@echo CPP: $1->$2
-	$(Q) "$(CPP)" $(CPPFLAGS) $1 -o $2
+	$(Q) "$(CPP)" $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 endef
 
 define COMPILE
-	$(Q) "$(CC)" $(CFLAGS)  ${shell echo $1 | sed -e "s/\//\\/g"}
+	$(Q) "$(CC)" $(CFLAGS) $($(strip $1)_CFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
 endef
 
 define ASSEMBLE
-	$(Q) "$(AS)" $(AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
+	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
 endef
 
 define MOVEOBJ
@@ -211,15 +211,15 @@ else
 
 define PREPROCESS
 	@echo "CPP: $1->$2"
-	$(Q) "$(CPP)" $(CPPFLAGS) $1 -o $2
+	$(Q) "$(CPP)" $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 endef
 
 define COMPILE
-	$(Q) "$(CC)" $(CFLAGS) `cygpath -w "$1"`
+	$(Q) "$(CC)" $(CFLAGS) $($(strip $1)_CFLAGS) `cygpath -w "$1"`
 endef
 
 define ASSEMBLE
-	$(Q) "$(AS)" $(AFLAGS) `cygpath -w "$1"`
+	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) `cygpath -w "$1"`
 endef
 
 define MOVEOBJ

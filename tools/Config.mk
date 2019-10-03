@@ -109,7 +109,7 @@ endif
 
 define PREPROCESS
 	@echo "CPP: $1->$2"
-	$(Q) $(CPP) $(CPPFLAGS) $1 -o $2
+	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 endef
 
 # COMPILE - Default macro to compile one C file
@@ -123,7 +123,7 @@ endef
 
 define COMPILE
 	@echo "CC: $1"
-	$(Q) $(CC) -c $(CFLAGS) $1 -o $2
+	$(Q) $(CC) -c $(CFLAGS) $($(strip $1)_CFLAGS) $1 -o $2
 endef
 
 # COMPILEXX - Default macro to compile one C++ file
@@ -137,7 +137,7 @@ endef
 
 define COMPILEXX
 	@echo "CXX: $1"
-	$(Q) $(CXX) -c $(CXXFLAGS) $1 -o $2
+	$(Q) $(CXX) -c $(CXXFLAGS) $($(strip $1)_CXXFLAGS) $1 -o $2
 endef
 
 # ASSEMBLE - Default macro to assemble one assembly language file
@@ -158,7 +158,7 @@ endef
 
 define ASSEMBLE
 	@echo "AS: $1"
-	$(Q) $(CC) -c $(AFLAGS) $1 -o $2
+	$(Q) $(CC) -c $(AFLAGS) $1 $($(strip $1)_AFLAGS) -o $2
 endef
 
 # INSTALL_LIB - Install a library $1 into target $2
