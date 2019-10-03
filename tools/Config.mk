@@ -143,7 +143,8 @@ endef
 #   CXXFLAGS - Options to pass to the C++ compiler
 #
 # '<filename>.cxx_CXXFLAGS += <options>' may also be used, as an example, to
-# change the options used with the single file <filename>.cxx
+# change the options used with the single file <filename>.cxx.  The
+# extension .cpp could also be used.  The same applies mutatis mutandis.
 
 define COMPILEXX
 	@echo "CXX: $1"
@@ -166,8 +167,9 @@ endef
 #        files
 #   AFLAGS - Options to pass to the C+compiler
 #
-# '<filename>.s_CFLAGS += <options>' may also be used, as an example, to change
-# the options used with the single file <filename>.s
+# '<filename>.s_AFLAGS += <options>' may also be used, as an example, to change
+# the options used with the single file <filename>.s.  The extension .asm
+# is used by some toolchains.  The same applies mutatis mutandis.
 
 define ASSEMBLE
 	@echo "AS: $1"
