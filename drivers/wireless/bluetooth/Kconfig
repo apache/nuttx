@@ -16,6 +16,10 @@ config BLUETOOTH_UART_GENERIC
 	bool
 	default n
 
+config BLUETOOTH_UART_SHIM
+	bool
+	default n
+
 if BLUETOOTH_UART
 
 choice
@@ -26,12 +30,17 @@ config BLUETOOTH_UART_BT860
 	bool "Laird BT860"
 	select BLUETOOTH_UART_GENERIC
 
-config BLUETOOTH_UART_SHIM
-	bool "Generic shim to serial port"
-
 config BLUETOOTH_UART_CC2564
 	bool "TI CC2564"
 	depends on EXPERIMENTAL
+
+config BLUETOOTH_BCM4343X
+	bool "Broadcom (Cypress) BCM4343X device support"
+	select BLUETOOTH_UART_SHIM
+	---help---
+		Enables download support for the bluetooth component of BCM4343X devices.
+		Note that firmware needs to be provided for these devices to operate. In
+		general this firmware is available in the Cypress WICED SDK.
 
 config BLUETOOTH_UART_OTHER
 	bool "Other generic HCI UART device"

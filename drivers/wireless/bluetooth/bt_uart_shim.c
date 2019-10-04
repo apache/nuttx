@@ -60,13 +60,8 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
+#include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <termios.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define HCIUART_DEFAULT_SPEED 115200
 
 /****************************************************************************
  * Private Types
@@ -75,29 +70,29 @@
 /* This structure is the variable state of the binding to the UART */
 
 struct hciuart_state_s
-  {
-    /* Registered Rx callback */
+{
+  /* Registered Rx callback */
 
-    btuart_rxcallback_t callback;       /* Rx callback function */
-    void *arg;                  /* Rx callback argument */
+  btuart_rxcallback_t callback; /* Rx callback function */
+  FAR void *arg;                /* Rx callback argument */
 
-    int h;                      /* File handle to serial device */
-    struct file f;              /* File structure, detached */
+  int h;                        /* File handle to serial device */
+  struct file f;                /* File structure, detached */
 
-    sem_t dready;               /* Semaphore used by the poll operation */
-    bool enabled;               /* Flag indicating that reception is enabled */
+  sem_t dready;                 /* Semaphore used by the poll operation */
+  bool enabled;                 /* Flag indicating that reception is enabled */
 
-    int serialmontask;          /* The receive serial octets task handle */
-    volatile struct pollfd p;   /* Polling structure for serial monitor task */
-  };
+  int serialmontask;            /* The receive serial octets task handle */
+  volatile struct pollfd p;     /* Polling structure for serial monitor task */
+};
 
 struct hciuart_config_s
-  {
-    /* Setup the interface from the upper to the lower */
+{
+  /* Setup the interface from the upper to the lower */
 
-    struct btuart_lowerhalf_s lower;    /* Generic UART lower half */
-    struct hciuart_state_s state;       /* Variable state */
-  };
+  struct btuart_lowerhalf_s lower;    /* Generic UART lower half */
+  struct hciuart_state_s state;       /* Variable state */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -105,21 +100,25 @@ struct hciuart_config_s
 
 /* UART Lower-Half Methods */
 
-static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
-                             btuart_rxcallback_t callback, void *arg);
-static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
+static void hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
+                             btuart_rxcallback_t callback, FAR void *arg);
+static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
                              bool enable);
-static int hciuart_setbaud(const struct btuart_lowerhalf_s *lower,
+static int hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower,
                            uint32_t baud);
-static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
-                            void *buffer, size_t buflen);
-static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
-                             const void *buffer, size_t buflen);
-static ssize_t hciuart_rxdrain(const struct btuart_lowerhalf_s *lower);
+static ssize_t hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
+                            FAR void *buffer, size_t buflen);
+static ssize_t hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
+                             FAR const void *buffer, size_t buflen);
+static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* This structure is the configuration of the HCI UART shim */
 
-static struct btuart_lowerhalf_s lowerstatic =
+static struct btuart_lowerhalf_s g_lowerstatic =
 {
   .rxattach = hciuart_rxattach,
   .rxenable = hciuart_rxenable,
@@ -129,12 +128,9 @@ static struct btuart_lowerhalf_s lowerstatic =
   .rxdrain = hciuart_rxdrain
 };
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* This is held global because its inconvenient to pass to the task */
 
-static struct hciuart_config_s *g_n;    /* This is held global because its
-                                         * inconvenient to pass to the task */
+static FAR struct hciuart_config_s *g_n;
 
 /****************************************************************************
  * Private Functions
@@ -155,8 +151,8 @@ static struct hciuart_config_s *g_n;    /* This is held global because its
  ****************************************************************************/
 
 static void
-hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
-                 btuart_rxcallback_t callback, void *arg)
+hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
+                 btuart_rxcallback_t callback, FAR void *arg)
 {
   struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
   struct hciuart_state_s *state;
@@ -184,7 +180,6 @@ hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
       state->callback = callback;
     }
 
-  hciuart_setbaud(lower, HCIUART_DEFAULT_SPEED);
   spin_unlock_irqrestore(flags);
 }
 
@@ -201,23 +196,19 @@ hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
+static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
                              bool enable)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
-  struct hciuart_state_s *s = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *s = &config->state;
 
   irqstate_t flags = spin_lock_irqsave();
-  if ((enable) && (!s->enabled))
+  if (enable != s->enabled)
     {
-      wlinfo("Enable\n");
-      s->enabled = true;
+      wlinfo(enable?"Enable\n":"Disable\n");
     }
-  else
-    {
-      s->enabled = false;
-      wlinfo("Disable\n");
-    }
+
+  s->enabled = enable;
 
   spin_unlock_irqrestore(flags);
 }
@@ -237,10 +228,10 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int
-hciuart_setbaud(const struct btuart_lowerhalf_s *lower, uint32_t baud)
+hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *state = &config->state;
   int ret;
 
   struct termios tio;
@@ -289,11 +280,11 @@ hciuart_setbaud(const struct btuart_lowerhalf_s *lower, uint32_t baud)
  ****************************************************************************/
 
 static ssize_t
-hciuart_read(const struct btuart_lowerhalf_s *lower,
-             void *buffer, size_t buflen)
+hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
+             FAR void *buffer, size_t buflen)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *state = &config->state;
   size_t ntotal;
 
   wlinfo("config %p buffer %p buflen %lu\n", config, buffer, (size_t) buflen);
@@ -321,16 +312,16 @@ hciuart_read(const struct btuart_lowerhalf_s *lower,
  ****************************************************************************/
 
 static ssize_t
-hciuart_write(const struct btuart_lowerhalf_s *lower,
-              const void *buffer, size_t buflen)
+hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
+              FAR const void *buffer, size_t buflen)
 {
-  const struct hciuart_config_s *config
-    = (const struct hciuart_config_s *)lower;
-  struct hciuart_state_s *state = &config->state;
+  FAR const struct hciuart_config_s *config
+    = (FAR const struct hciuart_config_s *)lower;
+  FAR const struct hciuart_state_s *state = &config->state;
 
   wlinfo("config %p buffer %p buflen %lu\n", config, buffer, (size_t) buflen);
 
-  buflen = file_write(&state->f, buffer, buflen);
+  buflen = file_write((struct file *)&state->f, buffer, buflen);
 
   return buflen;
 }
@@ -343,10 +334,10 @@ hciuart_write(const struct btuart_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static ssize_t hciuart_rxdrain(const struct btuart_lowerhalf_s *lower)
+static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
 {
-  struct hciuart_config_s *config = (struct hciuart_config_s *)lower;
-  struct hciuart_state_s *s = &config->state;
+  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
+  FAR struct hciuart_state_s *s = &config->state;
 
   file_ioctl(&s->f, TCDRN, 0);
   return 0;
@@ -362,9 +353,9 @@ static ssize_t hciuart_rxdrain(const struct btuart_lowerhalf_s *lower)
 
 static int hcicollecttask(int argc, FAR char **argv)
 {
-  struct hciuart_state_s *s = &g_n->state;
+  FAR struct hciuart_state_s *s = &g_n->state;
 
-  file_poll(&s->f, &s->p, true);
+  file_poll(&s->f, (struct pollfd *)&s->p, true);
 
   for (; ; )
     {
@@ -423,23 +414,23 @@ static int hcicollecttask(int argc, FAR char **argv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hci_uart_getdevice
+ * Name: bt_uart_shim_getdevice
  *
  * Description:
  *   Get a pointer to the device that will be used to communicate with the
  *   regular serial port on the HCI.
  *
- * Input Paramters:
- *   Entry in filesystem hirearchy for device
+ * Input Parameters:
+ *   Entry in filesystem hierarchy for device
  *
  * Returned Value:
  *   Pointer to device interface
  *
  ****************************************************************************/
 
-void *hci_uart_getdevice(char *path)
+FAR void *bt_uart_shim_getdevice(FAR char *path)
 {
-  struct hciuart_state_s *s;
+  FAR struct hciuart_state_s *s;
   int f2;
 
   /* Get the memory for this shim instance */
@@ -468,11 +459,10 @@ void *hci_uart_getdevice(char *path)
 
   /* Hook the routines in */
 
-  memcpy(&g_n->lower, &lowerstatic, sizeof(struct btuart_lowerhalf_s));
+  memcpy(&g_n->lower, &g_lowerstatic, sizeof(struct btuart_lowerhalf_s));
 
   /* Put materials into poll structure */
 
-  nxsem_init(&s->dready, 0, 0);
   nxsem_setprotocol(&s->dready, SEM_PRIO_NONE);
 
   s->p.fd = s->h;
