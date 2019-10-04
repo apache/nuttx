@@ -60,6 +60,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_SIG_SIGUSR1_ACTION) || defined(CONFIG_SIG_SIGUSR2_ACTION) || \
+    defined(CONFIG_SIG_SIGALRM_ACTION) || defined(CONFIG_SIG_SIGPOLL_ACTION) || \
+    defined(CONFIG_SIG_SIGKILL_ACTION)
+#  define HAVE_NXSIG_ABNORMAL_TERMINANTION 1
+#endif
+
 /* Bit definitions for the struct nxsig_defaction_s 'flags' field */
 
 #define SIG_FLAG_NOCATCH (1 << 0)  /* Signal cannot be caught or ignored */
@@ -83,9 +89,13 @@ struct nxsig_defaction_s
 
 /* Default actions */
 
-static void nxsig_null_action(int signo);
+#ifdef HAVE_NXSIG_ABNORMAL_TERMINANTION
 static void nxsig_abnormal_termination(int signo);
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+static void nxsig_null_action(int signo);
 static void nxsig_stop_task(int signo);
+#endif
 
 /* Helpers */
 
@@ -168,9 +178,11 @@ static const struct nxsig_defaction_s g_defactions[] =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
 static void nxsig_null_action(int signo)
 {
 }
+#endif
 
 /****************************************************************************
  * Name: nxsig_abnormal_termination
@@ -186,6 +198,7 @@ static void nxsig_null_action(int signo)
  *
  ****************************************************************************/
 
+#ifdef HAVE_NXSIG_ABNORMAL_TERMINANTION
 static void nxsig_abnormal_termination(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
@@ -280,6 +293,7 @@ static void nxsig_abnormal_termination(int signo)
       exit(EXIT_FAILURE);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: nxsig_stop_task
@@ -295,6 +309,7 @@ static void nxsig_abnormal_termination(int signo)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
 static void nxsig_stop_task(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
@@ -362,6 +377,7 @@ static void nxsig_stop_task(int signo)
   sched_suspend(rtcb);
   sched_unlock();
 }
+#endif
 
 /****************************************************************************
  * Name: nxsig_default_action
