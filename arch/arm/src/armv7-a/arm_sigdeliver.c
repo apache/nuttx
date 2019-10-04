@@ -104,7 +104,7 @@ void up_sigdeliver(void)
    * pre-incremented irqcount.
    */
 
-  saved_irqcount       = rtcb->irqcount - 1;
+  saved_irqcount = rtcb->irqcount - 1;
   DEBUGASSERT(saved_irqcount >= 0);
 
   /* Now we need call leave_critical_section() repeatedly to get the irqcount
@@ -134,18 +134,28 @@ void up_sigdeliver(void)
    * alter errno), then disable interrupts again and restore the original
    * errno that is needed by the user logic (it is probably EINTR).
    *
-   * REVISIT: In SMP mode up_irq_save() probably only disables interrupts
-   * on the local CPU.  We do not want to call enter_critical_section()
-   * here, however, because we don't want this state to stick after the
-   * call to up_fullcontextrestore().
-   *
    * I would prefer that all interrupts are disabled when
    * up_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
 
+  /* Call enter_critical_section() to disable local interrupts before
+   * restoring local context.
+   *
+   * Here, we should not use up_irq_save() in SMP mode.
+   * For example, if we call up_irq_save() here and another CPU might
+   * have called up_cpu_pause() to this cpu, hence g_cpu_irqlock has
+   * been locked by the cpu, in this case, we would see a deadlock in
+   * later call of enter_critical_section() to restore irqcount.
+   * To avoid this situation, we need to call enter_critical_section().
+   */
+
+#ifdef CONFIG_SMP
+  (void)enter_critical_section();
+#else
   (void)up_irq_save();
+#endif
 
   /* Restore the saved errno value */
 
@@ -168,9 +178,13 @@ void up_sigdeliver(void)
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
    * spinlocks.
+   *
+   * REVISIT:  irqcount should be one from the above call to
+   * enter_critical_section().  Could the saved_irqcount be zero?  That
+   * would be a problem.
    */
 
-  DEBUGASSERT(rtcb->irqcount == 0);
+  DEBUGASSERT(rtcb->irqcount == 1);
   while (rtcb->irqcount < saved_irqcount)
     {
       (void)enter_critical_section();

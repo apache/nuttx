@@ -104,7 +104,7 @@ void up_sigdeliver(void)
    * pre-incremented irqcount.
    */
 
-  saved_irqcount       = rtcb->irqcount - 1;
+  saved_irqcount = rtcb->irqcount - 1;
   DEBUGASSERT(saved_irqcount >= 0);
 
   /* Now we need call leave_critical_section() repeatedly to get the irqcount
@@ -190,6 +190,10 @@ void up_sigdeliver(void)
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
    * spinlocks.
+   *
+   * REVISIT:  irqcount should be one from the above call to
+   * enter_critical_section().  Could the saved_irqcount be zero?  That
+   * would be a problem.
    */
 
   DEBUGASSERT(rtcb->irqcount == 1);
