@@ -905,7 +905,8 @@ static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
         /* Not possible to meet both trip points with a single RSNS value
          * For now, let's call that an error.
          */
-
+        limits->overcurrent_limit = 0;
+        limits->shortcircuit_limit = 0;
         baterr("ERROR: OCD_T and SCD_T could not agree on RSNS.\n");
         return -EINVAL;
       }
@@ -918,31 +919,37 @@ static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
      */
     if (limits->shortcircuit_delay < 68)
       {
+        limits->shortcircuit_delay = 0;
         baterr("ERROR: Short circuit delay is too short\n");
         return -EINVAL;
       }
     else if (limits->shortcircuit_delay < 100)
       {
+        limits->shortcircuit_delay = 70;
         regval |= BQ769X0_SCD_DELAY_70us;
         batinfo("Short circuit delay set to 70uS\n");
       }
     else if (limits->shortcircuit_delay < 200)
       {
+        limits->shortcircuit_delay = 100;
         regval |= BQ769X0_SCD_DELAY_100us;
         batinfo("Short circuit delay set to 100uS\n");
       }
     else if (limits->shortcircuit_delay < 400)
       {
+        limits->shortcircuit_delay = 200;
         regval |= BQ769X0_SCD_DELAY_200us;
         batinfo("Short circuit delay set to 200uS\n");
       }
     else if (limits->shortcircuit_delay < 410)
       {
+        limits->shortcircuit_delay = 400;
         regval |= BQ769X0_SCD_DELAY_400us;
         batinfo("Short circuit delay set to 400uS\n");
       }
     else
       {
+        limits->shortcircuit_delay = 0;
         baterr("ERROR: Short circuit delay is too long\n");
         return -EINVAL;
       }
@@ -963,54 +970,68 @@ static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
     regval = 0;
     if (limits->overcurrent_delay < (7 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 0;
         baterr("ERROR: Overcurrent delay is too short\n");
         return -EINVAL;
       }
     else if (limits->overcurrent_delay < (20 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 8 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_8MS;
         batinfo("Overcurrent delay set to 8mS\n");
       }
     else if (limits->overcurrent_delay < (40 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 20 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_20MS;
         batinfo("Overcurrent delay set to 20mS\n");
       }
     else if (limits->overcurrent_delay < (80 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 40 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_40MS;
         batinfo("Overcurrent delay set to 40mS\n");
       }
     else if (limits->overcurrent_delay < (160 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 80 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_80MS;
         batinfo("Overcurrent delay set to 80mS\n");
       }
     else if (limits->overcurrent_delay < (320 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 160 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_160MS;
         batinfo("Overcurrent delay set to 160mS\n");
       }
     else if (limits->overcurrent_delay < (640 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 320 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_320MS;
         batinfo("Overcurrent delay set to 320mS\n");
       }
     else if (limits->overcurrent_delay < (1280 * USEC_PER_MSEC))
       {
+        limits->overcurrent_delay = 640 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_640MS;
         batinfo("Overcurrent delay set to 640mS\n");
       }
     else if (limits->overcurrent_delay < 1300 * USEC_PER_MSEC)
       {
+        limits->overcurrent_delay = 1280 * USEC_PER_MSEC;
         regval |= BQ769X0_OCD_DELAY_1280MS;
         batinfo("Overcurrent delay set to 1280mS\n");
       }
     else
       {
+        limits->overcurrent_delay = 0;
         baterr("ERROR: Overcurrent delay is too long\n");
         return -EINVAL;
       }
+
+    /* If neither rsns_0 or rsns_1 work, we would have
+     * errored out before this point.
+     */
 
     if (rsns_0_ocd_found)
       {
@@ -1038,62 +1059,74 @@ static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
     regval = 0;
     if (limits->overvoltage_delay < (1 * USEC_PER_SEC))
       {
+        limits->overvoltage_delay = 0;
         baterr("ERROR: overvoltage delay is too short\n");
         return -EINVAL;
       }
     else if (limits->overvoltage_delay < (2 * USEC_PER_SEC))
       {
+        limits->overvoltage_delay = 1 * USEC_PER_SEC;
         regval |= BQ769X0_OV_DELAY_1S;
         batinfo("Overvoltage delay set to 1S\n");
       }
-    else if (limits->overvoltage_delay < (4 * USEC_PER_SEC) )
+    else if (limits->overvoltage_delay < (4 * USEC_PER_SEC))
       {
+        limits->overvoltage_delay = 2 * USEC_PER_SEC;
         regval |= BQ769X0_OV_DELAY_2S;
         batinfo("Overvoltage delay set to 2S\n");
       }
     else if (limits->overvoltage_delay < (8 * USEC_PER_SEC))
       {
+        limits->overvoltage_delay = 4 * USEC_PER_SEC;
         regval |= BQ769X0_OV_DELAY_4S;
         batinfo("Overvoltage delay set to 4S\n");
       }
     else if (limits->overvoltage_delay < (10 * USEC_PER_SEC))
       {
+        limits->overvoltage_delay = 8 * USEC_PER_SEC;
         regval |= BQ769X0_OV_DELAY_8S;
         batinfo("Overvoltage delay set to 8S\n");
       }
     else
       {
+        limits->overvoltage_delay = 0;
         baterr("ERROR: overvoltage delay is too long\n");
         return -EINVAL;
       }
 
     if (limits->undervoltage_delay < (1 * USEC_PER_SEC))
       {
+        limits->undervoltage_delay = 0;
         baterr("ERROR: undervoltage delay is too short\n");
         return -EINVAL;
       }
     else if (limits->undervoltage_delay < (4 * USEC_PER_SEC))
       {
+        limits->undervoltage_delay = 1 * USEC_PER_SEC;
         regval |= BQ769X0_UV_DELAY_1S;
         batinfo("Undervoltage delay set to 1S\n");
       }
-    else if (limits->undervoltage_delay < (8 * USEC_PER_SEC) )
+    else if (limits->undervoltage_delay < (8 * USEC_PER_SEC))
       {
+        limits->undervoltage_delay = 4 * USEC_PER_SEC;
         regval |= BQ769X0_UV_DELAY_4S;
         batinfo("Undervoltage delay set to 4S\n");
       }
     else if (limits->undervoltage_delay < (16 * USEC_PER_SEC))
       {
+        limits->undervoltage_delay = 8 * USEC_PER_SEC;
         regval |= BQ769X0_UV_DELAY_8S;
         batinfo("Undervoltage delay set to 8S\n");
       }
     else if (limits->undervoltage_delay < (20 * USEC_PER_SEC))
       {
+        limits->undervoltage_delay = 16 * USEC_PER_SEC;
         regval |= BQ769X0_UV_DELAY_16S;
         batinfo("Undervoltage delay set to 16S\n");
       }
     else
       {
+        limits->undervoltage_delay = 0;
         baterr("ERROR: undervoltage delay is too long\n");
         return -EINVAL;
       }
