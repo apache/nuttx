@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_start.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014, 2016, 2018 Gregory Nutt.  All
+ *   Copyright (C) 2007-2009, 2012, 2014, 2016, 2018-2019 Gregory Nutt.  All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -68,26 +68,6 @@
 #endif
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-typedef void (*wdentry0_t)(int argc);
-#if CONFIG_MAX_WDOGPARMS > 0
-typedef void (*wdentry1_t)(int argc, wdparm_t arg1);
-#endif
-#if CONFIG_MAX_WDOGPARMS > 1
-typedef void (*wdentry2_t)(int argc, wdparm_t arg1, wdparm_t arg2);
-#endif
-#if CONFIG_MAX_WDOGPARMS > 2
-typedef void (*wdentry3_t)(int argc, wdparm_t arg1, wdparm_t arg2,
-                           wdparm_t arg3);
-#endif
-#if CONFIG_MAX_WDOGPARMS > 3
-typedef void (*wdentry4_t)(int argc, wdparm_t arg1, wdparm_t arg2,
-                           wdparm_t arg3, wdparm_t arg4);
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -141,42 +121,25 @@ static inline void wd_expiration(void)
           /* Execute the watchdog function */
 
           up_setpicbase(wdog->picbase);
-          switch (wdog->argc)
-            {
-              default:
-                DEBUGPANIC();
-                break;
 
-              case 0:
-                (*((wdentry0_t)(wdog->func)))(0);
-                break;
-
-#if CONFIG_MAX_WDOGPARMS > 0
-              case 1:
-                (*((wdentry1_t)(wdog->func)))(1, wdog->parm[0]);
-                break;
+#if CONFIG_MAX_WDOGPARMS == 0
+          wdog->func(0);
+#elif CONFIG_MAX_WDOGPARMS == 1
+          wdog->func((int)wdog->argc,
+                     wdog->parm[0]);
+#elif CONFIG_MAX_WDOGPARMS == 2
+          wdog->func((int)wdog->argc,
+                     wdog->parm[0], wdog->parm[1]);
+#elif CONFIG_MAX_WDOGPARMS == 3
+          wdog->func((int)wdog->argc,
+                     wdog->parm[0], wdog->parm[1], wdog->parm[2]);
+#elif CONFIG_MAX_WDOGPARMS == 4
+          wdog->func((int)wdog->argc,
+                     wdog->parm[0], wdog->parm[1], wdog->parm[2],
+                     wdog->parm[3]);
+#else
+#  error Missing support
 #endif
-#if CONFIG_MAX_WDOGPARMS > 1
-              case 2:
-                (*((wdentry2_t)(wdog->func)))(2,
-                                wdog->parm[0], wdog->parm[1]);
-                break;
-#endif
-#if CONFIG_MAX_WDOGPARMS > 2
-              case 3:
-                (*((wdentry3_t)(wdog->func)))(3,
-                                wdog->parm[0], wdog->parm[1],
-                                wdog->parm[2]);
-                break;
-#endif
-#if CONFIG_MAX_WDOGPARMS > 3
-              case 4:
-                (*((wdentry4_t)(wdog->func)))(4,
-                                wdog->parm[0], wdog->parm[1],
-                                wdog->parm[2], wdog->parm[3]);
-                break;
-#endif
-            }
         }
     }
 }
