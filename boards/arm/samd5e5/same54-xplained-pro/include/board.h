@@ -433,6 +433,35 @@
 #define BOARD_SERCOM_SLOWLOCK        FALSE               /* Don't lock the SLOWCLOCK */
 #define BOARD_SLOWCLOCK_FREQUENCY    BOARD_GCLK3_FREQUENCY
 
+/* SERCOM2
+ *
+ * Built-in virtual COM port using the EDBG chip on the board.
+ * DTR must be asserted by your console software in order to enable this port.
+ *
+ *   ----------------- ---------
+ *   SAMD5E5           FUNCTION
+ *   ----------------- ---------
+ *   PB24 SERCOM2 PAD1 RXD
+ *   PB25 SERCOM2 PAD0 TXD
+ *
+ * NOTES:
+ *   USART_CTRLA_TXPAD0_2: TxD=PAD0 XCK=N/A RTS/TE=PAD2 CTS=PAD3
+ *   USART_CTRLA_RXPAD1:   RxD=PAD1
+ */
+
+#define BOARD_SERCOM2_MUXCONFIG      (USART_CTRLA_TXPAD0_2 | USART_CTRLA_RXPAD1)
+#define BOARD_SERCOM2_PINMAP_PAD0    PORT_SERCOM2_PAD0_4 /* PAD0: USART TX */
+#define BOARD_SERCOM2_PINMAP_PAD1    PORT_SERCOM2_PAD1_4 /* PAD1: USART RX */
+#define BOARD_SERCOM2_PINMAP_PAD2    0                   /* PAD2: (not used) */
+#define BOARD_SERCOM2_PINMAP_PAD3    0                   /* PAD3: (not used) */
+
+#define BOARD_TXIRQ_SERCOM2          SAM_IRQ_SERCOM2_0   /* INTFLAG[0] DRE */
+#define BOARD_RXIRQ_SERCOM2          SAM_IRQ_SERCOM2_2   /* INTFLAG[2] RXC */
+
+#define BOARD_SERCOM2_COREGEN        1                   /* 48MHz Core clock */
+#define BOARD_SERCOM2_CORELOCK       FALSE               /* Don't lock the CORECLOCK */
+#define BOARD_SERCOM2_FREQUENCY      BOARD_GCLK1_FREQUENCY
+
 /* SERCOM3
  *
  * An Arduino compatible serial Shield is assumed (or equivalently, an
