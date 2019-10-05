@@ -109,8 +109,6 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-  ssi_dumpgpio("tiva_ssiselect() Entry");
-  ssi_dumpgpio("tiva_ssiselect() Exit");
 
   #if defined(CONFIG_CAN_MCP2515)
   if (devid == SPIDEV_CANBUS(0))
