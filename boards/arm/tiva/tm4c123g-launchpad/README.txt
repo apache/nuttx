@@ -16,6 +16,7 @@ Contents
   I2C Tool
   Using OpenOCD and GDB with an FT2232 JTAG emulator
   TM4C123G LaunchPad Configuration Options
+  MCP2515 - SPI - CAN
   Configurations
 
 On-Board GPIO Usage
@@ -447,8 +448,35 @@ USB Device Controller Functions
     to communicate with UART0 on the TM4C123G over USB. Once the FT2232 VCP
     driver is installed, Windows assigns a COM port number to the VCP channel.
 
+MCP2515 - SPI - CAN
+===================
+
+  I like CANbus, and having an MCP2515 CAN Bus Module laying around
+  gave me the idea to implement it on the TM4C123GXL (Launchpad).
+  Nuttx already had implemented it on the STM32. So a lot of work already
+  has been done. It uses SPI and with this Launchpad we use SSI.
+
+  Here is how I have the MCP2515 Module connected. But you can change
+  this with the settings in include/board.h and src/tm4c123g-launchpad.h.
+
+  Connector pinout that I am using:
+
+    --------------------------+----------------------------------------------
+    Connector CAN Module      | Launchpad TM4C123GXL (SSI2_1)
+    --------------------------+----------------------------------------------
+    1  INT                    | PB0
+    2  SCK                    | PB4 (Clock)
+    3  SI                     | PB7 (MOSI = TX)
+    4  SO                     | PB6 (MISO = RX)
+    5  CS                     | PB5 (Chip Select)
+    6  GND                    | GND
+    7  VCC                    | VBUS (+5V)
+  --------------------------+----------------------------------------------
+
+  PS: I have to test the CS signal when adding it on a bus with multiple nodes.
+
 TM4C123G LaunchPad Configuration Options
-=======================================================
+========================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -560,6 +588,12 @@ boards/arm/tiva/tm4c123g-launchpad/configs/ and can be selected as follows:
     tools/configure.sh tm4c123g-launchpad:<subdir>
 
 Where <subdir> is one of the following:
+
+
+  mcp2515
+  =======
+    Configuration uses the MCP2515 SPI CAN part.  See the section entitled
+    "MCP2515 - SPI - CAN" above.
 
   nsh:
   ---

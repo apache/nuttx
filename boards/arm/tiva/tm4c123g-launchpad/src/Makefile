@@ -54,6 +54,10 @@ ifeq ($(CONFIG_TIVA_ADC),y)
 CSRCS += tm4c_adc.c
 endif
 
+ifeq ($(CONFIG_CAN_MCP2515),y)
+  CSRCS += tm4c_mcp2515.c
+endif
+
 ifeq ($(CONFIG_MTD_AT24XX),y)
 ifeq ($(CONFIG_TIVA_I2C0),y)
 CSRCS += tm4c_at24.c

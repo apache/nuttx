@@ -70,7 +70,7 @@
  * devices on-board the Launchpad, but an external serial EEPROM module
  * module was used.
  *
- * The Serial EEPROM was mounted on an external adaptor board and connected
+ * The Serial EEPROM was mounted on an external adapter board and connected
  * to the LaunchPad thusly:
  *
  *   - VCC -- VCC
@@ -86,7 +86,7 @@
 #  undef HAVE_AT24
 #endif
 
-/* Can't support AT25 features if mountpoints are disabled or if we were not
+/* Can't support AT25 features if mount points are disabled or if we were not
  * asked to mount the AT25 part
  */
 
@@ -178,6 +178,25 @@
                       GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
                       GPIO_PORTF | GPIO_PIN_0)
 
+#define SDCCS_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | GPIO_STRENGTH_4MA | \
+                    GPIO_VALUE_ONE | GPIO_PORTG | 1)
+
+/* MCP2551: Did not test the CS settings. GPIO_STRENGTH could be different. */
+
+#ifdef CONFIG_CAN_MCP2515
+#  define GPIO_MCP2515_IRQ (GPIO_FUNC_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                            GPIO_PORTB | GPIO_PIN_0)
+#  define GPIO_SSI2_CLK_1  (GPIO_FUNC_PFIO     | GPIO_ALT_2  | GPIO_PORTB | \
+                            GPIO_PIN_4)
+#  define GPIO_SSI2_RX_1   (GPIO_FUNC_PFIO     | GPIO_ALT_2  | GPIO_PORTB | \
+                            GPIO_PIN_6)
+#  define GPIO_SSI2_TX_1   (GPIO_FUNC_PFIO     | GPIO_ALT_2  | GPIO_PORTB | \
+                            GPIO_PIN_7)
+#  define GPIO_MCP2515_CS  (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STDWPU | \
+                            GPIO_STRENGTH_4MA | GPIO_VALUE_ONE | GPIO_PORTB | \
+                            GPIO_PIN_5)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -250,6 +269,18 @@ int tm4c_at24_automount(int minor);
 
 #ifdef CONFIG_TIVA_TIMER
 int tiva_timer_configure(void);
+#endif
+
+/****************************************************************************
+ * Name: tiva_mcp2515initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_MCP2515
+int tiva_mcp2515initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -49,14 +49,6 @@
 #include "tm4c123g-launchpad.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -73,24 +65,25 @@
 
 void tiva_boardinitialize(void)
 {
+#if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1) || \
+    defined(CONFIG_TIVA_SSI2)
   /* Configure SPI chip selects if
    * 1) SSI is not disabled, and
-   * 2) the weak function
-   * tm4c_ssidev_initialize() has been brought into the link.
+   * 2) the weak function tm4c_ssidev_initialize() has been brought into the
+   *    link.
    */
 
   /* The TM4C123G LaunchPad microSD CS and OLED are on SSI0 */
 
-#if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
   if (tm4c_ssidev_initialize)
     {
       tm4c_ssidev_initialize();
     }
 #endif
 
+#ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_ARCH_LEDS
   tm4c_led_initialize();
 #endif
 }

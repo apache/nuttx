@@ -95,6 +95,18 @@ int tm4c_bringup(void)
     }
 #endif /* CONFIG_TIVA_TIMER */
 
+#ifdef CONFIG_CAN_MCP2515
+  /* Configure and initialize the MCP2515 CAN device */
+
+  ret = tiva_mcp2515initialize("/dev/can0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   UNUSED(ret);
   return ret;
 }
+

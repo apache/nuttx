@@ -53,7 +53,7 @@
 
 /* The TM4C123G LaunchPad microSD CS is on SSI0 */
 
-#if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1)
+#if defined(CONFIG_TIVA_SSI0) || defined(CONFIG_TIVA_SSI1) || defined(CONFIG_TIVA_SSI2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,6 +79,9 @@
 
 void weak_function tm4c_ssidev_initialize(void)
 {
+  #ifdef CONFIG_CAN_MCP2515
+  (void)tiva_configgpio(GPIO_MCP2515_CS);    /* mcp2515 chip select */
+  #endif
 }
 
 /****************************************************************************
@@ -108,6 +111,13 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
           selected ? "assert" : "de-assert");
   ssi_dumpgpio("tiva_ssiselect() Entry");
   ssi_dumpgpio("tiva_ssiselect() Exit");
+
+  #if defined(CONFIG_CAN_MCP2515)
+  if (devid == SPIDEV_CANBUS(0))
+    {
+      tiva_gpiowrite(GPIO_MCP2515_CS, !selected);
+    }
+  #endif
 }
 
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -117,3 +127,4 @@ uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 
 #endif /* CONFIG_TIVA_SSI0 || CONFIG_TIVA_SSI1 */
+
