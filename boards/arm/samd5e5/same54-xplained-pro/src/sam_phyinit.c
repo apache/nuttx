@@ -1,8 +1,9 @@
 /****************************************************************************
- * boards/arm/samd5e5/same54-xplained-pro/src/same54-xplained-pro.h
+ * boards/arm/samd5e5/same54-xplained-pro/src/sam_phyinit.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Darcy Gong <darcy.gong@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,95 +34,36 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H
-#define __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include "sam_port.h"
+#include "sam_ethernet.h"
+
+#include "same54-xplained-pro.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* Metro-M4 GPIOs ***********************************************************/
-
-/* LEDs
- *
- *   The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
- *
- *   1. LED0 near the edge of the board
- *
- *
- *   ----------------- -----------
- *   SAMD5E5           FUNCTION
- *   ----------------- -----------
- *   PC18              GPIO output
- * 
- */
-
-#define PORT_LED0 (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                   PORTC | PORT_PIN18)
-/* Ethernet *****************************************************************/
-
-/* PHY pins:
- *
- *   -------- ----------------- -----------
- *   PHY      SAMD5E5           FUNCTION
- *   -------- ----------------- -----------
- *   Reset    PD12              GPIO output
- *   IRQ      PC21              GPIO input
- */
-#define PORT_PHY_RESET  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                         PORTD | PORT_PIN12)
-
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sam_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
- ****************************************************************************/
+#if defined(CONFIG_ETH0_PHY_KSZ8081) && defined(CONFIG_SAMD5E5_GMAC_PHYINIT)
+int sam_phy_boardinitialize(int intf)
+{
+  /* Configure the KSZ8081 PHY reset pin and take it out of reset */
 
-int sam_bringup(void);
-
-/****************************************************************************
- * Name: sam_led_pminitialize
- *
- * Description:
- *   Register LED power management features.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PM
-void sam_led_pminitialize(void);
+  sam_portconfig(PORT_PHY_RESET);
+  return 0;
+}
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H */

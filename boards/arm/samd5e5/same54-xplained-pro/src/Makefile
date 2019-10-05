@@ -48,4 +48,8 @@ else
 CSRCS += sam_userleds.c
 endif
 
+ifeq ($(CONFIG_SAMD5E5_GMAC_PHYINIT), y)
+CSRCS += sam_phyinit.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

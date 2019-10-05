@@ -119,7 +119,7 @@ int sam_gmac_initialize(void);
  * Description:
  *   Some boards require specialized initialization of the PHY before it can be used.
  *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
- *   CONFIG_SAMD5E5_PHYINIT is defined in the configuration then the board specific
+ *   CONFIG_SAMD5E5_GMAC_PHYINIT is defined in the configuration then the board specific
  *   logic must provide sam_phyinitialize();  The SAMD5E5 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
@@ -133,7 +133,7 @@ int sam_gmac_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMD5E5_PHYINIT
+#ifdef CONFIG_SAMD5E5_GMAC_PHYINIT
 int sam_phy_boardinitialize(int intf);
 #endif
 

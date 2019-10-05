@@ -129,7 +129,7 @@
 
 /* PHY definitions */
 
-#ifdef SAMD5E5_GMAC_PHY_KSZ90x1
+#ifdef SAMD5E5_GMAC_PHY_KSZ8081
 #  define GMII_OUI_MSB  0x0022
 #  define GMII_OUI_LSB  GMII_PHYID2_OUI(5)
 #else
@@ -3204,6 +3204,15 @@ static int sam_phyinit(struct sam_gmac_s *priv)
   /* Configure PHY clocking */
 
   sam_mdcclock(priv);
+
+#ifdef CONFIG_SAMD5E5_GMAC_PHYINIT
+  ret = sam_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Check the PHY Address */
 
