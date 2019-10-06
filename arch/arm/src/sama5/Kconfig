@@ -2120,7 +2120,7 @@ config SAMA5_EMAC1_ISETH0
 	depends on SAMA5_EMAC1
 
 config SAMA5_GMAC_ISETH0
-    bool "GMAC is ETH0"
+	bool "GMAC is ETH0"
 	depends on SAMA5_GMAC
 
 endchoice # Which device is eth0

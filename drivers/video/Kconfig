@@ -29,7 +29,7 @@ config VIDEO_STREAM
 		Enable video Stream support
 
 config VIDEO_MAX7456
-        bool "Maxim 7456 Monochrome OSD"
+	bool "Maxim 7456 Monochrome OSD"
 	default n
 	select SPI
 	---help---

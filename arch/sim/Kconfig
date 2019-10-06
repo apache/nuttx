@@ -135,7 +135,7 @@ config SIM_NET_HOST_ROUTE
 
 config SIM_NET_BRIDGE
 	bool "Attach to Linux bridge"
-	 ---help---
+	---help---
 		Add the created tap device to the specified bridge.  You will need to manually
 		configure the bridge IP address (if any) and routes that point to the bridge.
 		See boards/sim/sim/sim/NETWORK-LINUX.txt for more information.

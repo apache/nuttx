@@ -321,7 +321,7 @@ config STM32H7_SPI2
 config STM32H7_SPI3
 	bool "SPI3"
 	default n
-  depends on EXPERIMENTAL
+	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
@@ -2204,10 +2204,10 @@ config STM32H7_TIM8_CH1MODE
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32H7_TIM8_CH1OUT
-        bool "TIM8 Channel 1 Output"
-        default n
-        ---help---
-                Enables channel 1 output.
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
 
 config STM32H7_TIM8_CH1NOUT
 	bool "TIM8 Channel 1 Complementary Output"

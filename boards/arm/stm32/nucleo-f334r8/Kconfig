@@ -6,12 +6,12 @@
 if ARCH_BOARD_NUCLEO_F334R8
 
 config NUCLEOF334R8_HIGHPRI
-       bool "High priority interrupt test"
-       default n
+	bool "High priority interrupt test"
+	default n
 
 menuconfig NUCLEOF334R8_SPWM
-       bool "Sinusoidal PWM generator example"
-       default n
+	bool "Sinusoidal PWM generator example"
+	default n
 
 if NUCLEOF334R8_SPWM
 
@@ -20,30 +20,30 @@ choice
 	default NUCLEOF334R8_SPWM_USE_TIM1
 
 config NUCLEOF334R8_SPWM_USE_TIM1
-       bool "Use TIM1 as PWM source"
+	bool "Use TIM1 as PWM source"
 
 config NUCLEOF334R8_SPWM_USE_HRTIM1
-       bool "Use HRTIM as PWM source"
+	bool "Use HRTIM as PWM source"
 
 endchoice
 
 config NUCLEOF334R8_SPWM_PWM_FREQ
-       int "PWM frequency in Hz"
-       default 100000
+	int "PWM frequency in Hz"
+	default 100000
 
 config NUCLEOF334R8_SPWM_SAMPLES
-       int "Sine samples"
-       default 100
+	int "Sine samples"
+	default 100
 
 config NUCLEOF334R8_SPWM_FREQ
-       int "Waveform frequency in Hz"
-       default 60
+	int "Waveform frequency in Hz"
+	default 60
 
 config NUCLEOF334R8_SPWM_PHASE_NUM
-       int "Number of phases"
-       default 1
-       range 1 5 if NUCLEOF334R8_SPWM_USE_HRTIM1
-       range 1 4 if NUCLEOF334R8_SPWM_USE_TIM1
+	int "Number of phases"
+	default 1
+	range 1 5 if NUCLEOF334R8_SPWM_USE_HRTIM1
+	range 1 4 if NUCLEOF334R8_SPWM_USE_TIM1
 
 endif
 

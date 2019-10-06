@@ -6,14 +6,14 @@
 if ARCH_BOARD_STM32F103_MINIMUM
 
 choice
-        prompt "Board type"
-        default STM32F103MINIMUM_BLUEPILL
+	prompt "Board type"
+	default STM32F103MINIMUM_BLUEPILL
 
 config STM32F103MINIMUM_BLUEPILL
-        bool "Blue Pill/Red Pill/RoboDyn Black Pill"
+	bool "Blue Pill/Red Pill/RoboDyn Black Pill"
 
 config STM32F103MINIMUM_BLACKPILL
-        bool "Black Pill"
+	bool "Black Pill"
 
 endchoice
 

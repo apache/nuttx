@@ -28,9 +28,9 @@ config AVR_ATMEL_AVR_TOOLCHAIN
 	bool "Atmel AVR Toolchain"
 	depends on TOOLCHAIN_WINDOWS
 	---help---
-                Atmel provides GNU Toolchain for AVR development. It can
-                be obtained by installing Atmel Studio 6 and later or
-                as standalone package from Atmel.
+		Atmel provides GNU Toolchain for AVR development. It can
+		be obtained by installing Atmel Studio 6 and later or
+		as standalone package from Atmel.
 
 config AVR_LINUXGCC_TOOLCHAIN
 	bool "Linux GCC"

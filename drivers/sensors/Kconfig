@@ -63,7 +63,7 @@ config SENSORS_BMI160
 	select I2C
 	---help---
 		Enable driver support for the Bosch BMI160 Inertial
-		 Measurement sensor
+		Measurement sensor
 
 if SENSORS_BMI160
 

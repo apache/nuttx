@@ -460,8 +460,8 @@ config SAMD5E5_USB
 	default n
 
 config SAMD5E5_EIC
-  bool "External Interrupt Controller"
-  default n
+	bool "External Interrupt Controller"
+	default n
 
 config SAMD5E5_WDT
 	bool "Watchdog Timer"

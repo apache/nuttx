@@ -11,7 +11,7 @@ choice
 	default Z180_TOOLCHAIN_SDCCL if !TOOLCHAIN_WINDOWS
 
 config Z180_TOOLCHAIN_SDCCL
-        bool "SDCC for Linux, macOS, or Cygwin"
+	bool "SDCC for Linux, macOS, or Cygwin"
 	depends on !WINDOWS_NATIVE
 
 config Z180_TOOLCHAIN_SDCCW
@@ -269,40 +269,40 @@ menu "UART0 Configuration"
 config Z180_UART0_RXBUFSIZE
 	int "Receive Buffer Size"
 	default 64
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config Z180_UART0_TXBUFSIZE
 	int "Transmit Buffer Size"
 	default 64
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config Z180_UART0_BAUD
 	int "Baud Rate"
 	default 9600
-	help
-	  The configured BAUD of the SCC.
+	---help---
+		The configured BAUD of the SCC.
 
 config Z180_UART0_BITS
 	int "Character Size"
 	default 8
-	help
-	  The number of bits in one character.  Must be either 5, 6, 7, or 8.
+	---help---
+		The number of bits in one character.  Must be either 5, 6, 7, or 8.
 
 config Z180_UART0_PARITY
 	int "Parity Setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config Z180_UART0_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
 
 endmenu
 
@@ -312,40 +312,40 @@ menu "UART1 Configuration"
 config Z180_UART1_RXBUFSIZE
 	int "Receive Buffer Size"
 	default 64
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config Z180_UART1_TXBUFSIZE
 	int "Transmit Buffer Size"
 	default 64
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config Z180_UART1_BAUD
 	int "Baud Rate"
 	default 9600
-	help
-	  The configured BAUD of the SCC.
+	---help---
+		The configured BAUD of the SCC.
 
 config Z180_UART1_BITS
 	int "Character Size"
 	default 8
-	help
-	  The number of bits in one character.  Must be either 5, 6, 7, or 8.
+	---help---
+		The number of bits in one character.  Must be either 5, 6, 7, or 8.
 
 config Z180_UART1_PARITY
 	int "Parity Setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config Z180_UART1_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
 
 endmenu
 
@@ -355,40 +355,40 @@ menu "SCC Configuration"
 config Z180_SCC_RXBUFSIZE
 	int "Receive Buffer Size"
 	default 64
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config Z180_SCC_TXBUFSIZE
 	int "Transmit Buffer Size"
 	default 64
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config Z180_SCC_BAUD
 	int "Baud Rate"
 	default 9600
-	help
-	  The configured BAUD of the SCC.
+	---help---
+		The configured BAUD of the SCC.
 
 config Z180_SCC_BITS
 	int "Character Size"
 	default 8
-	help
-	  The number of bits in one character.  Must be either 5, 6, 7, or 8.
+	---help---
+		The number of bits in one character.  Must be either 5, 6, 7, or 8.
 
 config Z180_SCC_PARITY
 	int "Parity Setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config Z180_SCC_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
 
 endmenu
 
@@ -398,40 +398,40 @@ menu "ESCC Channel A Configuration"
 config Z180_ESCCA_RXBUFSIZE
 	int "Receive Buffer Size"
 	default 64
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config Z180_ESCCA_TXBUFSIZE
 	int "Transmit Buffer Size"
 	default 64
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config Z180_ESCCA_BAUD
 	int "Baud Rate"
 	default 9600
-	help
-	  The configured BAUD of the SCC.
+	---help---
+		The configured BAUD of the SCC.
 
 config Z180_ESCCA_BITS
 	int "Character Size"
 	default 8
-	help
-	  The number of bits in one character.  Must be either 5, 6, 7, or 8.
+	---help---
+		The number of bits in one character.  Must be either 5, 6, 7, or 8.
 
 config Z180_ESCCA_PARITY
 	int "Parity Setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config Z180_ESCCA_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
 
 endmenu
 
@@ -441,40 +441,40 @@ menu "ESCC Channel B Configuration"
 config Z180_ESCCB_RXBUFSIZE
 	int "Receive Buffer Size"
 	default 64
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config Z180_ESCCB_TXBUFSIZE
 	int "Transmit Buffer Size"
 	default 64
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config Z180_ESCCB_BAUD
 	int "Baud Rate"
 	default 9600
-	help
-	  The configured BAUD of the SCC.
+	---help---
+		The configured BAUD of the SCC.
 
 config Z180_ESCCB_BITS
 	int "Character Size"
 	default 8
-	help
-	  The number of bits in one character.  Must be either 5, 6, 7, or 8.
+	---help---
+		The number of bits in one character.  Must be either 5, 6, 7, or 8.
 
 config Z180_ESCCB_PARITY
 	int "Parity Setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config Z180_ESCCB_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
 
 endmenu
 endif

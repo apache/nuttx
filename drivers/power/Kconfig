@@ -77,7 +77,7 @@ config PM_COEF3
 	---help---
 		See help associated with CONFIG_PM_MEMORY
 
-		 Ignored if CONFIG_PM_MEMORY <= 3
+		Ignored if CONFIG_PM_MEMORY <= 3
 
 config PM_COEF4
 	int "PM coefficient 4"

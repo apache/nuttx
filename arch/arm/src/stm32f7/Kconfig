@@ -1371,7 +1371,7 @@ config STM32F7_DCMI
 	---help---
 		The devices embed a camera interface that can connect with camera
 		modules and CMOS sensors through an 8-bit to 14-bit parallel interface,
-		 to receive video data.
+		to receive video data.
 
 config STM32F7_DSIHOST
 	bool "DSIHOST"
@@ -1379,7 +1379,7 @@ config STM32F7_DSIHOST
 	depends on STM32F7_HAVE_DSIHOST
 	---help---
 		The DSI Host is a dedicated peripheral for interfacing with MIPI® DSI
-		 compliant displays.
+		compliant displays.
 
 config STM32F7_DMA2D
 	bool "DMA2D"
@@ -1397,7 +1397,7 @@ config STM32F7_JPEG
 	depends on STM32F7_HAVE_JPEG
 	---help---
 		The JPEG codec provides an fast and simple hardware compressor and
-		 decompressor of JPEG images with full management of JPEG headers.
+		decompressor of JPEG images with full management of JPEG headers.
 
 config STM32F7_ETHMAC
 	bool "Ethernet MAC"
@@ -2019,7 +2019,7 @@ config STM32F7_NO_ULPI
 	Select to enable the presence of an external ULPI PHY
 
 config STM32F7_EXTERNAL_ULPI
-	 bool "External ULPI"
+	bool "External ULPI"
 	depends on STM32F7_HAVE_EXTERNAL_ULPI
 	---help---
 		Select to enable the presence of an external ULPI PHY
@@ -5353,7 +5353,7 @@ config STM32F7_LTDC_FB_BASE
 config STM32F7_LTDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
 	default 0
-	 ---help---
+	---help---
 		Must be the whole size of the active LTDC layer.
 
 config STM32F7_LTDC_L1_CHROMAKEYEN

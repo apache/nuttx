@@ -293,9 +293,9 @@ config LPC43_TMR3
 	select LPC43_TIMER
 
 config LPC43_TIMER
-        bool
-        default n
-        select ARCH_HAVE_EXTCLK
+	bool
+	default n
+	select ARCH_HAVE_EXTCLK
 
 config LPC43_USART0
 	bool "USART0"
@@ -464,10 +464,10 @@ config LPC43_EXTSDRAM2_SIZE
 		Size of the external SDRAM on DYNCS2 in bytes.
 
 config LPC43_EXTSDRAM2_HEAP
-    bool "Add external SDRAM on DYNCS2 to the heap"
+	bool "Add external SDRAM on DYNCS2 to the heap"
 	default y
 	---help---
-	    Add the external SDRAM on DYNCS2 into the heap.
+		Add the external SDRAM on DYNCS2 into the heap.
 
 endif # LCP43_EXTSDRAM2
 

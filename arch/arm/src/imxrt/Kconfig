@@ -142,8 +142,8 @@ config ARCH_FAMILY_IMXRT106x
 # Peripheral support
 
 config IMXRT_USDHC
-       bool
-       default n
+	bool
+	default n
 
 config IMXRT_HAVE_LPUART
 	bool

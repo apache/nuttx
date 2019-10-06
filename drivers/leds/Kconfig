@@ -56,11 +56,11 @@ config LEDS_MAX7219
 		Enable support for the MAX7219 to control 7-segment displays.
 
 config RGBLED
-        bool "RGB LED Driver Support"
-        default n
-        ---help---
-                This selection enables building of the "upper-half" RGB LED driver.
-                See include/nuttx/rgbled.h for further PWM driver information.
+	bool "RGB LED Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" RGB LED driver.
+		See include/nuttx/rgbled.h for further PWM driver information.
 
 config RGBLED_INVERT
 	bool "Invert RGB LED Output"

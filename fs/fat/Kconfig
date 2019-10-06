@@ -47,29 +47,29 @@ config FAT_MAXFNAME
 		time.  The minimum values is 12 due to assumptions in internal logic.
 
 config FAT_LFN_ALIAS_HASH
-    bool "Use faster method for forming long filename 8.3 alias"
-    depends on FAT_LFN
-    default n
-    ---help---
-       Long filenames on FAT filesystems have associated 8.3 character alias
-       short filenames. The traditional form of these is FILENA~1.EXT with
-       a running count of the number of similar names. However creating this
-       unique count can take several seconds if there are many similarly named
-       files in the directory. Enabling FAT_LFN_ALIAS_HASH uses an alternative
-       format of FI0123~1.TXT where the four digits are a hash of the original
-       filename. This method is similar to what is used by Windows 2000 and
-       later.
+	bool "Use faster method for forming long filename 8.3 alias"
+	depends on FAT_LFN
+	default n
+	---help---
+		Long filenames on FAT filesystems have associated 8.3 character alias
+		short filenames. The traditional form of these is FILENA~1.EXT with
+		a running count of the number of similar names. However creating this
+		unique count can take several seconds if there are many similarly named
+		files in the directory. Enabling FAT_LFN_ALIAS_HASH uses an alternative
+		format of FI0123~1.TXT where the four digits are a hash of the original
+		filename. This method is similar to what is used by Windows 2000 and
+		later.
 
 config FAT_LFN_ALIAS_TRAILCHARS
-    int "Number of trailing characters to use for 8.3 alias"
-    depends on FAT_LFN
-    default 0
-    ---help---
-       Traditional format for long filename 8.3 aliases takes first 6
-       characters of long filename. If this option is set to N > 0,
-       NuttX will instead take first 6-N and last N characters to form
-       the short name. This is useful for filenames like "datafile12.txt"
-       where the first characters would always remain the same.
+	int "Number of trailing characters to use for 8.3 alias"
+	depends on FAT_LFN
+	default 0
+	---help---
+		Traditional format for long filename 8.3 aliases takes first 6
+		characters of long filename. If this option is set to N > 0,
+		NuttX will instead take first 6-N and last N characters to form
+		the short name. This is useful for filenames like "datafile12.txt"
+		where the first characters would always remain the same.
 
 config FS_FATTIME
 	bool "FAT timestamps"

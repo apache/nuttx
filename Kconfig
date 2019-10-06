@@ -499,7 +499,7 @@ config ARCH_DEBUG_H
 	bool "debug.h"
 	default n
 	---help---
-		 The debug.h contains architecture dependent debugging primitives
+		The debug.h contains architecture dependent debugging primitives
 
 endmenu # Customize Header Files
 

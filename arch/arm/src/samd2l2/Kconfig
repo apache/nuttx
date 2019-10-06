@@ -573,8 +573,8 @@ config SAMD2L2_USB
 	depends on SAMD2L2_HAVE_USB
 
 config SAMD2L2_EIC
-  bool "External Interrupt Controller"
-  default n
+	bool "External Interrupt Controller"
+	default n
 
 config SAMD2L2_WDT
 	bool "Watchdog Timer"

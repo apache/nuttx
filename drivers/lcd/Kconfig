@@ -184,7 +184,7 @@ config MAX7219_NVERTICALBLKS
 config MAX7219_INTENSITY
 	int "Default LED Matrix bright intensity"
 	default 10
-        range 0 15
+	range 0 15
 	---help---
 		Specifies the default LEDs bright intensity to use.
 
@@ -1031,7 +1031,7 @@ config LCD_ILI9341_NINTERFACES
 	int "Number of supported display driver"
 	range 1 2
 	default 1
-    depends on LCD_ILI9341
+	depends on LCD_ILI9341
 	---help---
 		Define the number of supported  displays driven by a ili9341 LCD Single
 		Chip Driver.

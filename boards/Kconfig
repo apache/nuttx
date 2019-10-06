@@ -2687,8 +2687,8 @@ config BOARD_CRASHDUMP
 		The purpose of board_crashdump is to save as much information as it can
 		about the cause of the fault and then most likely reset the system.
 
-		 N.B. There is limited system resources that can be used, who knows
-		 what memory is trashed? So all we can expect to do is save the
+		N.B. There is limited system resources that can be used, who knows
+		what memory is trashed? So all we can expect to do is save the
 		"machine state" in a place where on the next reset can write it
 		to more sophisticated storage in a sane operating environment.
 

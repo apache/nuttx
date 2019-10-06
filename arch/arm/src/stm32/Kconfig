@@ -4294,10 +4294,10 @@ config STM32_TIM8_CH1MODE
 		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH1OUT
-        bool "TIM8 Channel 1 Output"
-        default n
-        ---help---
-                Enables channel 1 output.
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
 
 config STM32_TIM8_CH1NOUT
 	bool "TIM8 Channel 1 Complementary Output"
