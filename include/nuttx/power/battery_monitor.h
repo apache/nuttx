@@ -189,7 +189,11 @@ struct battery_monitor_balance_s
 
 struct battery_monitor_limits_s
 {
-  /* All voltage limits are per-cell */
+  /* The driver may overwrite any value in this structure to indicate the
+   * actual value that was set if the exact requested value was not available.
+   *
+   * All voltage limits are per-cell.
+   */
   uint32_t overvoltage_limit;   /* Overvoltage trip threshold, in uV */
   uint32_t undervoltage_limit;  /* Undervoltage trip threshold, in uV */
   uint32_t overcurrent_limit;   /* Overcurrent trip threshold, in mA */
