@@ -203,7 +203,7 @@
 #if defined(CONFIG_STM32H7_TIM8)
 #  if defined(GPIO_TIM8_CH1OUT) ||defined(GPIO_TIM8_CH2OUT)||\
       defined(GPIO_TIM8_CH3OUT) ||defined(GPIO_TIM8_CH4OUT)||\
-      defined(GPIO_TIM1_CH5OUT) ||defined(GPIO_TIM1_CH6OUT)
+      defined(GPIO_TIM8_CH5OUT) ||defined(GPIO_TIM8_CH6OUT)
 #    define HAVE_TIM8_GPIOCONFIG 1
 #  endif
 #endif
@@ -1344,13 +1344,13 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer)
 #endif
 #ifdef CONFIG_STM32H7_TIM13
       case 13:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim12_priv;
+        dev = (struct stm32_tim_dev_s *)&stm32_tim13_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM13EN);
         break;
 #endif
 #ifdef CONFIG_STM32H7_TIM14
       case 14:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim12_priv;
+        dev = (struct stm32_tim_dev_s *)&stm32_tim14_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM14EN);
         break;
 #endif

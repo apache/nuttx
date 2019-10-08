@@ -737,9 +737,9 @@
 
 /* Alternate function option register 2 (TIMx_AF2) */
 
-#define ATIM_AF1_BK2INE           (1 << 0)  /* Bit 0: BRK2 BKIN input enable */
-#define ATIM_AF1_BK2DFBKE         (1 << 8)  /* Bit 8: BRK2 DFSDM_BREAK enable */
-#define ATIM_AF1_BK2INP           (1 << 9)  /* Bit 9: BRK2 BKIN2 input polarity */
+#define ATIM_AF2_BK2INE           (1 << 0)  /* Bit 0: BRK2 BKIN input enable */
+#define ATIM_AF2_BK2DFBKE         (1 << 8)  /* Bit 8: BRK2 DFSDM_BREAK enable */
+#define ATIM_AF2_BK2INP           (1 << 9)  /* Bit 9: BRK2 BKIN2 input polarity */
 
 /* Break and dead-time register */
 
