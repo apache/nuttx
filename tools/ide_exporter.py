@@ -241,7 +241,7 @@ class IdeProject(object):
                 self.saved_nodes[tag] = deepcopy(n)
 
             self.clear_src_nodes() # Clear all source node in template file
-        except Exception, e:
+        except Exception as e:
             print("ERR: {0}".format(str(e)))
             raise Exception("Can't init IdeProject object")
 
@@ -292,7 +292,7 @@ class IdeProject(object):
                     c = p.getparent()
                     c.remove(p)
                     p = element.find(node)
-        except Exception, e:
+        except Exception as e:
             print(str(e))
 
     def clear_src_nodes(self):
@@ -928,7 +928,7 @@ if __name__ == '__main__':
     try:
         if not os.path.exists(prj_dir):
             os.makedirs(prj_dir)
-    except Exception, e:
+    except Exception as e:
         print("ERR: {0}".format(str(e)))
         exit(1)
 
