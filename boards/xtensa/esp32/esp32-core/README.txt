@@ -696,7 +696,7 @@ NOTES:
     2. 2016-12-23: Test appears to be fully functional in the single CPU mode.
     3. 2016-12-24: But when SMP is enabled, there is a consistent, repeatable
        crash in the waitpid() test.  At the time of the crash, there is
-       extensive memory corruption and a user exception occurrs (cause=28).
+       extensive memory corruption and a user exception occurs (cause=28).
 
 Things to Do
 ============

@@ -2044,7 +2044,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
   /* Pre-allocate all endpoints... the endpoints will not be functional
    * until the SET CONFIGURATION request is processed in usbclass_setconfig.
    * This is done here because there may be calls to kmm_malloc and the SET
-   * CONFIGURATION processing probably occurrs within interrupt handling
+   * CONFIGURATION processing probably occurs within interrupt handling
    * logic where kmm_malloc calls will fail.
    */
 

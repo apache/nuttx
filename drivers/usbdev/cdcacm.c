@@ -714,7 +714,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
           /* cdcacm_recvpacket() will return OK if the entire packet was
            * successful buffered.  In the case of RX buffer overrun,
            * cdcacm_recvpacket() will return a failure (-ENOSPC) and will
-           * set the req->offset field
+           * set the req->offset field.
            */
 
           ret = cdcacm_recvpacket(priv, rdcontainer);
@@ -1350,7 +1350,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
   /* Pre-allocate all endpoints... the endpoints will not be functional
    * until the SET CONFIGURATION request is processed in cdcacm_setconfig.
    * This is done here because there may be calls to kmm_malloc and the SET
-   * CONFIGURATION processing probably occurrs within interrupt handling
+   * CONFIGURATION processing probably occurs within interrupt handling
    * logic where kmm_malloc calls will fail.
    */
 
@@ -3003,6 +3003,7 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   return OK;
 
 errout_with_class:
+  wd_delete(priv->rxfailsafe);
   kmm_free(alloc);
   return ret;
 }
@@ -3055,11 +3056,9 @@ int cdcacm_initialize(int minor, FAR void **handle)
    */
 
   devinfo.nendpoints  = CDCACM_NUM_EPS;
-#ifndef CONFIG_CDCACM_COMPOSITE
   devinfo.epno[CDCACM_EP_INTIN_IDX]   = CONFIG_CDCACM_EPINTIN;
   devinfo.epno[CDCACM_EP_BULKIN_IDX]  = CONFIG_CDCACM_EPBULKIN;
   devinfo.epno[CDCACM_EP_BULKOUT_IDX] = CONFIG_CDCACM_EPBULKOUT;
-#endif
 
   /* Get an instance of the serial driver class object */
 
@@ -3138,6 +3137,7 @@ void cdcacm_uninitialize(FAR void *handle)
        * free the memory resources.
        */
 
+      wd_delete(priv->rxfailsafe);
       kmm_free(priv);
       return;
     }
@@ -3167,8 +3167,9 @@ void cdcacm_uninitialize(FAR void *handle)
 #ifndef CONFIG_CDCACM_COMPOSITE
   usbdev_unregister(&drvr->drvr);
 
-  /* And free the driver structure */
+  /* And free the memory resources. */
 
+  wd_delete(priv->rxfailsafe);
   kmm_free(priv);
 
 #else

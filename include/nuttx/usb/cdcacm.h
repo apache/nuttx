@@ -381,7 +381,7 @@ int cdcacm_initialize(int minor, FAR void **handle);
  *
  * Description:
  *   Un-initialize the USB storage class driver.  This function is used
- *   internally by the USB composite driver to uninitialized the CDC/ACM
+ *   internally by the USB composite driver to uninitialize the CDC/ACM
  *   driver.  This same interface is available (with an untyped input
  *   parameter) when the CDC/ACM driver is used standalone.
  *
