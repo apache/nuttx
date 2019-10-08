@@ -129,7 +129,21 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
 
-/* TODO: timers */
+/* Timer clock frequencies */
+
+/* Timers driven from APB1. Frequency = PCLK1 */
+
+#define STM32_APB1_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
+
+/* Timers driven from APB2 is equal to PCLK1 */
+
+#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB2_TIM14_CLKIN  (STM32_PCLK1_FREQUENCY)
+#define STM32_APB2_TIM15_CLKIN  (STM32_PCLK1_FREQUENCY)
+#define STM32_APB2_TIM16_CLKIN  (STM32_PCLK1_FREQUENCY)
+#define STM32_APB2_TIM17_CLKIN  (STM32_PCLK1_FREQUENCY)
 
 /* LED definitions **********************************************************/
 
