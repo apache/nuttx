@@ -109,6 +109,10 @@
 #  include <arch/chip/adc.h>
 #endif
 
+#ifdef CONFIG_CXD56_SCU
+#  include <arch/chip/scu.h>
+#endif
+
 #include "spresense.h"
 
 /****************************************************************************
@@ -275,6 +279,10 @@ int cxd56_bringup(void)
   /* Setup the power of external device */
 
   board_power_setup(0);
+
+#ifdef CONFIG_CXD56_SCU
+  scu_initialize();
+#endif
 
 #ifdef CONFIG_FS_PROCFS
 
