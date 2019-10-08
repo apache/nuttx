@@ -125,3 +125,7 @@ endif
 ifeq ($(CONFIG_STM32F0L0G0_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif
+
+ifeq ($(CONFIG_STM32F0L0G0_TIM),y)
+CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
+endif

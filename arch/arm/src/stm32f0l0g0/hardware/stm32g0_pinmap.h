@@ -4,6 +4,9 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
+ *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
+ *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -80,6 +83,34 @@
 /* TODO: SPI */
 
 /* TODO: Timers */
+
+#define GPIO_TIM1_BKIN_1         (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN6)
+#define GPIO_TIM1_BKIN_2         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN12)
+#define GPIO_TIM1_BKIN_3         (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN13)
+#define GPIO_TIM1_BKIN_4         (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN5)
+#define GPIO_TIM1_BKIN2_1        (GPIO_ALT | GPIO_AF5 | GPIO_PORTA | GPIO_PIN11)
+#define GPIO_TIM1_BKIN2_2        (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN14)
+#define GPIO_TIM1_BKIN2_3        (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN9)
+#define GPIO_TIM1_CH1_1          (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN8)
+#define GPIO_TIM1_CH1_2          (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN8)
+#define GPIO_TIM1_CH1N_1         (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN7)
+#define GPIO_TIM1_CH1N_2         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN13)
+#define GPIO_TIM1_CH1N_3         (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN2)
+#define GPIO_TIM1_CH2_1          (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN9)
+#define GPIO_TIM1_CH2_2          (GPIO_ALT | GPIO_AF1 | GPIO_PORTB | GPIO_PIN3)
+#define GPIO_TIM1_CH2_3          (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN9)
+#define GPIO_TIM1_CH2N_1         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_TIM1_CH2N_2         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN14)
+#define GPIO_TIM1_CH2N_3         (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN3)
+#define GPIO_TIM1_CH3_1          (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN10)
+#define GPIO_TIM1_CH3_2          (GPIO_ALT | GPIO_AF1 | GPIO_PORTB | GPIO_PIN6)
+#define GPIO_TIM1_CH3_3          (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN10)
+#define GPIO_TIM1_CH3N_1         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN1)
+#define GPIO_TIM1_CH3N_2         (GPIO_ALT | GPIO_AF2 | GPIO_PORTB | GPIO_PIN15)
+#define GPIO_TIM1_CH3N_3         (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN4)
+#define GPIO_TIM1_CH4_1          (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN11)
+#define GPIO_TIM1_CH4_2          (GPIO_ALT | GPIO_AF2 | GPIO_PORTC | GPIO_PIN11)
+#define GPIO_TIM1_ETR            (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN12)
 
 /* TODO: USART */
 
