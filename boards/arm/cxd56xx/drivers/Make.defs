@@ -33,4 +33,5 @@
 #
 ############################################################################
 
+include platform$(DELIM)audio$(DELIM)Make.defs
 include platform$(DELIM)sensors$(DELIM)Make.defs

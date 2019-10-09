@@ -1,0 +1,429 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Audio Options"
+
+menuconfig CXD56_AUDIO
+	bool "CXD56 Audio Driver"
+	default n
+
+if CXD56_AUDIO
+
+config CXD56_I2S0
+	bool "I2S0"
+	default y
+	---help---
+		Enable I2S channel 0
+
+config CXD56_I2S1
+	bool "I2S1"
+	default n
+	---help---
+		Enable I2S channel 1
+
+menu "Audio baseband config settings"
+
+choice
+	prompt "Audio analog block selection"
+	default CXD56_AUDIO_ANALOG_CXD5247
+
+config CXD56_AUDIO_ANALOG_CXD5247
+	bool "CXD5247"
+
+config CXD56_AUDIO_ANALOG_NONE
+	bool "System does not use audio analog block"
+endchoice
+
+if CXD56_AUDIO_ANALOG_CXD5247
+menu "CXD5247 settings"
+choice
+	prompt "X'tal frequency of the CXD5247"
+	default CXD56_AUDIO_XTAL_SEL_49_152MHZ
+
+config CXD56_AUDIO_XTAL_SEL_24_576MHZ
+	bool "24.576MHz"
+
+config CXD56_AUDIO_XTAL_SEL_49_152MHZ
+	bool "49.152MHz"
+endchoice
+
+choice
+	prompt "MICBIAS voltage of the CXD5247"
+	default CXD56_AUDIO_MICBIAS_20V
+
+config CXD56_AUDIO_MICBIAS_20V
+	bool "2.0V"
+
+config CXD56_AUDIO_MICBIAS_28V
+	bool "2.8V"
+endchoice
+
+config CXD56_AUDIO_MIC_CHANNEL_SEL
+	hex "MIC channel select map"
+	default 0xFFFF4321
+	range 0 0xFFFFFFFF
+	---help---
+		This designates microphone input of the CXD5247 in matrix format.
+		One microphone can be assigned to multiple channels (CHs.)
+		(Example: When DMA transfer is performed in monaural mode,
+		AMIC1 is assigned to CH1 and CH2 and the same audio data is
+		transferred to the each channel)
+
+choice
+	prompt "Output drive strength of MCLKOUT selection"
+	default CXD56_AUDIO_MCLKOUT_WEAKEST
+
+config CXD56_AUDIO_MCLKOUT_WEAKEST
+	bool "2mA"
+
+config CXD56_AUDIO_MCLKOUT_WEAKER
+	bool "4mA"
+
+config CXD56_AUDIO_MCLKOUT_STRONGER
+	bool "6mA"
+
+config CXD56_AUDIO_MCLKOUT_STRONGEST
+	bool "8mA"
+endchoice
+
+choice
+	prompt "Output drive strength of CLKOUT_DMIC selection"
+	default CXD56_AUDIO_CLKOUT_DMIC_WEAKEST
+
+config CXD56_AUDIO_CLKOUT_DMIC_WEAKEST
+	bool "2mA"
+
+config CXD56_AUDIO_CLKOUT_DMIC_WEAKER
+	bool "4mA"
+
+config CXD56_AUDIO_CLKOUT_DMIC_STRONGER
+	bool "6mA"
+
+config CXD56_AUDIO_CLKOUT_DMIC_STRONGEST
+	bool "8mA"
+endchoice
+
+choice
+	prompt "Output drive strength of DA_DATA selection"
+	default CXD56_AUDIO_DA_DATA_WEAKEST
+
+config CXD56_AUDIO_DA_DATA_WEAKEST
+	bool "2mA"
+
+config CXD56_AUDIO_DA_DATA_WEAKER
+	bool "4mA"
+
+config CXD56_AUDIO_DA_DATA_STRONGER
+	bool "6mA"
+
+config CXD56_AUDIO_DA_DATA_STRONGEST
+	bool "8mA"
+endchoice
+
+choice
+	prompt "Output drive strength of GPO_A selection"
+	default CXD56_AUDIO_GPO_A_WEAKEST
+
+config CXD56_AUDIO_GPO_A_WEAKEST
+	bool "2mA"
+
+config CXD56_AUDIO_GPO_A_WEAKER
+	bool "4mA"
+
+config CXD56_AUDIO_GPO_A_STRONGER
+	bool "6mA"
+
+config CXD56_AUDIO_GPO_A_STRONGEST
+	bool "8mA"
+endchoice
+
+choice
+	prompt "Input source of Cascaded Integrator-Comb filter selection"
+	default CXD56_AUDIO_CIC_IN_SEL_CXD
+
+config CXD56_AUDIO_CIC_IN_SEL_CXD
+	bool "from CXD5247"
+
+config CXD56_AUDIO_CIC_IN_SEL_DMIC
+	bool "from DMIC"
+
+config CXD56_AUDIO_CIC_IN_SEL_NONE
+	bool "No Cascaded Integrator-Comb filter input"
+endchoice
+
+choice
+	prompt "Drive currents of PDM signals"
+	default CXD56_AUDIO_PDM_LOWEMI_2MA
+
+config CXD56_AUDIO_PDM_LOWEMI_2MA
+	bool "2mA"
+
+config CXD56_AUDIO_PDM_LOWEMI_4MA
+	bool "4mA"
+endchoice
+
+choice
+	prompt "HPADC mic bias selection"
+	default CXD56_AUDIO_HPADC_MIC_BIAS_OFF
+	---help---
+		This setting depends on a circuit board configration.
+		Set "Microphone bias is enabled" when a microphone connected to
+		HPADC should be applied with voltage from the CXD5247.
+		Otherwise, set "Microphone bias is disabled".
+
+config CXD56_AUDIO_HPADC_MIC_BIAS_ON
+	bool "Microphone bias is enabled"
+
+config CXD56_AUDIO_HPADC_MIC_BIAS_OFF
+	bool "Microphone bias is disabled"
+endchoice
+
+choice
+	prompt "Version of the CXD5247"
+	default CXD56_CXD5247_VER_ES4
+
+config CXD56_CXD5247_VER_ES2
+	bool "ES Version 2.0"
+
+config CXD56_CXD5247_VER_ES3
+	bool "ES Version 3.0"
+
+config CXD56_CXD5247_VER_ES4
+	bool "ES Version 4.0"
+endchoice
+
+if CXD56_CXD5247_VER_ES4
+choice
+	prompt "Speaker time split on drive selection"
+	default CXD56_AUDIO_SP_SPLIT_SHORTEST
+
+config CXD56_AUDIO_SP_SPLIT_SHORTEST
+	bool "shortest"
+
+config CXD56_AUDIO_SP_SPLIT_SHORT
+	bool "short"
+
+config CXD56_AUDIO_SP_SPLIT_LONG
+	bool "long"
+
+config CXD56_AUDIO_SP_SPLIT_LONGEST
+	bool "longest"
+endchoice
+
+choice
+	prompt "Speaker drive mode selection"
+	default CXD56_AUDIO_SP_DRV_LINEOUT
+
+config CXD56_AUDIO_SP_DRV_4DRIVERT
+	bool "4Driver(SPK)"
+
+config CXD56_AUDIO_SP_DRV_2DRIVERT
+	bool "2Driver"
+
+config CXD56_AUDIO_SP_DRV_1DRIVERT
+	bool "1Driver(HP)"
+
+config CXD56_AUDIO_SP_DRV_LINEOUT
+	bool "Lineout"
+endchoice
+endif # CXD56_CXD5247_VER_ES4
+endmenu
+endif # CXD56_AUDIO_ANALOG_CXD5247
+
+menu "I2S settings"
+
+if CXD56_I2S0
+choice
+	prompt "I2S0 device mode selection"
+	default CXD56_AUDIO_I2S_DEVICE_1_SLAVE
+	---help---
+		This designates ports and clock modes that are connected
+		as interfaces for PCM signal input and output.
+
+config CXD56_AUDIO_I2S_DEVICE_1_SLAVE
+	bool "I2S0 Slave mode"
+
+config CXD56_AUDIO_I2S_DEVICE_1_MASTER
+	bool "I2S0 Master mode"
+endchoice
+
+choice
+	prompt "I2S0 format type selection"
+	default CXD56_AUDIO_I2S_FORMAT_1_I2S
+	---help---
+		This designates the format of PCM signals on I2S.
+
+config CXD56_AUDIO_I2S_FORMAT_1_I2S
+	bool "I2S format"
+
+config CXD56_AUDIO_I2S_FORMAT_1_LEFT
+	bool "Left Justified format"
+endchoice
+
+choice
+	prompt "I2S0 bypass mode selection"
+	default CXD56_AUDIO_I2S_BYPASS_MODE_1_DISABLE
+	---help---
+		This designates the bypass mode of the sampling rate converter.
+		To improve sound quality, set it to "Enable".
+		The bypass mode can be enable when audio clk_mode is Hi-Res mode,
+		and I2S device mode is master mode and rate is 192kHz(192000).
+
+config CXD56_AUDIO_I2S_BYPASS_MODE_1_ENABLE
+	bool "Enable bypass"
+
+config CXD56_AUDIO_I2S_BYPASS_MODE_1_DISABLE
+	bool "Disable bypass"
+endchoice
+
+config CXD56_AUDIO_I2S_RATE_1
+	int "I2S0 data rate"
+	default  48000
+	range 48000 192000
+	---help---
+		This designates input and output data rate of I2S.
+		The maximum rate is 192000.
+
+endif # CXD56_I2S0
+
+if CXD56_I2S1
+choice
+	prompt "I2S1 device mode selection"
+	default CXD56_AUDIO_I2S_DEVICE_2_SLAVE
+	---help---
+		This designates ports and clock modes that are connected
+		as interfaces for PCM signal input and output.
+
+config CXD56_AUDIO_I2S_DEVICE_2_SLAVE
+	bool "I2S1 Slave mode"
+
+config CXD56_AUDIO_I2S_DEVICE_2_MASTER
+	bool "I2S1 Master mode"
+endchoice
+
+choice
+	prompt "I2S1 format type selection"
+	default CXD56_AUDIO_I2S_FORMAT_2_I2S
+	---help---
+		This designates the format of PCM signals on I2S0.
+
+config CXD56_AUDIO_I2S_FORMAT_2_I2S
+	bool "I2S format"
+
+config CXD56_AUDIO_I2S_FORMAT_2_LEFT
+	bool "Left Justified format"
+endchoice
+
+choice
+	prompt "I2S1 bypass mode selection"
+	default CXD56_AUDIO_I2S_BYPASS_MODE_2_DISABLE
+	---help---
+		This designates the bypass mode of the sampling rate converter.
+		To improve sound quality, set it to "Enable".
+		The bypass mode can be enable when audio clk_mode is Hi-Res mode,
+		and I2S device mode is master mode and rate is 192kHz(192000).
+
+config CXD56_AUDIO_I2S_BYPASS_MODE_2_ENABLE
+	bool "Enable bypass"
+
+config CXD56_AUDIO_I2S_BYPASS_MODE_2_DISABLE
+	bool "Disable bypass"
+endchoice
+
+config CXD56_AUDIO_I2S_RATE_2
+	int "I2S1 data rate"
+	default  48000
+	range 48000 192000
+	---help---
+		This designates input and output data rate of I2S1.
+		The maximum rate is 192000.
+
+endif # CXD56_I2S1
+
+choice
+	prompt "Drive currents of I2S signals"
+	default CXD56_AUDIO_I2S_LOWEMI_2MA
+
+config CXD56_AUDIO_I2S_LOWEMI_2MA
+	bool "2mA"
+
+config CXD56_AUDIO_I2S_LOWEMI_4MA
+	bool "4mA"
+endchoice
+endmenu
+
+choice
+	prompt "ON/OFF of Automatic Level Control/Sound Pressure Counter selection"
+	default CXD56_AUDIO_ALC_SPC_SEL_OFF
+
+config CXD56_AUDIO_ALC_SPC_SEL_OFF
+	bool "All OFF"
+
+config CXD56_AUDIO_ALC_SPC_SEL_ALC
+	bool "Automatic Level Control ON"
+
+config CXD56_AUDIO_ALC_SPC_SEL_SPC
+	bool "Sound Pressure Counter ON"
+endchoice
+
+if CXD56_AUDIO_ALC_SPC_SEL_ALC
+menu "Automatic Level Control setting"
+config CXD56_AUDIO_ALC_KNEE
+	int "Knee levels of Automatic Level Control.[(1/10)dB]"
+	default -40
+	range -635 0
+	---help---
+		This command sets integer values 10 times larger than knee levels of
+		Automatic Level Control. (step width: 0.5 dB) When a value within the
+		range in the table below with a number other than 0 or 5 in one's
+		place is designated, it will be regarded as a integer value round up
+		to zero or five in the one's place. For example, when "-24" is
+		designated, the value will be regarded as "-20".
+
+config CXD56_AUDIO_ALC_TARGET
+	int "Target level of Automatic Level Control.[dB]"
+	default 0
+	range -63 0
+endmenu
+endif # CXD56_AUDIO_ALC_SPC_SEL_ALC
+
+if CXD56_AUDIO_ALC_SPC_SEL_SPC
+menu "Sound Pressure Conter setting"
+config CXD56_AUDIO_SPC_LIMIT
+	int "Limit levels of Sound Pressure Counter.[(1/10)dB]"
+	default 0
+	range -250 0
+	---help---
+		This command sets integer values 10 times larger than limit levels of
+		Sound Pressure Counter. (step width: 0.5 dB) When a value within the
+		range in the table below with a number other than 0 or 5 in one's
+		place is designated, it will be regarded as a integer value round up
+		to zero or five in the one's place. For example, when "-24" is
+		designated, the value will be regarded as "-20".
+endmenu
+endif # CXD56_AUDIO_ALC_SPC_SEL_SPC
+
+choice
+	prompt "LR data format during DMA transfer"
+	default CXD56_AUDIO_DMA_DATA_FORMAT_RL
+	---help---
+		This sets the data arrangement of left channel and right channel in
+		the data format for 16 bit DMA transfer.
+
+config CXD56_AUDIO_DMA_DATA_FORMAT_LR
+	bool "allocate left channel data in most significant bit"
+
+config CXD56_AUDIO_DMA_DATA_FORMAT_RL
+	bool "allocate right channel data in most significant bit"
+endchoice
+
+config CXD56_AUDIO_MIC_BOOT_WAIT
+	int "Wait time for mic booting.[msec]"
+	default 1100
+	range 0 65535
+
+endmenu
+
+endif # CXD56_AUDIO

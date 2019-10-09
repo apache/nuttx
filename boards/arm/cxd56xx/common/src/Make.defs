@@ -34,6 +34,10 @@
 
 CSRCS += cxd56_boot.c
 
+ifeq ($(CONFIG_CXD56_AUDIO), y)
+CSRCS += cxd56_audio.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
 CSRCS += cxd56_uid.c
 endif

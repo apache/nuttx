@@ -56,6 +56,7 @@
 #include "cxd56_wdt.h"
 #include "cxd56_gpioif.h"
 
+#include "cxd56_audio.h"
 #include "cxd56_ak09912.h"
 #include "cxd56_apds9930.h"
 #include "cxd56_apds9960.h"
@@ -214,12 +215,13 @@ enum board_power_device
 
   POWER_AUDIO_DVDD      = PMIC_LSW(2),
   POWER_FLASH           = PMIC_LSW(3),
-  POWER_TCXO            = PMIC_LSW(3),
+  POWER_TCXO            = PMIC_LSW(4),
   POWER_LNA             = PMIC_LSW(4),
 
   /* GPO */
 
-  POWER_AUDIO_AVDD      = PMIC_GPO(0),
+  POWER_AUDIO_AVDD      = PMIC_GPO(1),
+  POWER_AUDIO_MUTE      = PMIC_GPO(6),
   POWER_SENSOR_18V      = PMIC_GPO(1),
   POWER_SENSOR_33V      = PMIC_GPO(2),
   POWER_BMI160          = POWER_SENSOR_18V,

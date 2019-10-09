@@ -1,0 +1,19 @@
+CSRCS += cxd56_audio.c
+CSRCS += cxd56_audio_config.c
+CSRCS += cxd56_audio_analog.c
+CSRCS += cxd56_audio_power.c
+CSRCS += cxd56_audio_filter.c
+CSRCS += cxd56_audio_mic.c
+CSRCS += cxd56_audio_volume.c
+CSRCS += cxd56_audio_digital.c
+CSRCS += cxd56_audio_beep.c
+CSRCS += cxd56_audio_irq.c
+CSRCS += cxd56_audio_dma.c
+CSRCS += cxd56_audio_ac_reg.c
+CSRCS += cxd56_audio_bca_reg.c
+CSRCS += cxd56_audio_aca.c
+CSRCS += cxd56_audio_pin.c
+
+DEPPATH += --dep-path platform$(DELIM)audio
+VPATH += :platform$(DELIM)audio
+CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)audio)
