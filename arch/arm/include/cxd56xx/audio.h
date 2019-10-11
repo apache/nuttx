@@ -939,6 +939,12 @@ CXD56_AUDIO_ECODE cxd56_audio_set_micmap(uint32_t map);
 
 uint32_t cxd56_audio_get_micmap(void);
 
+/* Tone generator
+ *
+ * Setup tone generator
+ */
+bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq);
+
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif /* __cplusplus */

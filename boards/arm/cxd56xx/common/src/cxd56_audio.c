@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/chip/audio.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -103,6 +104,75 @@ static bool check_pin_i2s_mode(uint32_t pin)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_audio_power_control
+ *
+ * Description:
+ *   Power on/off the audio device on the board.
+ *
+ ****************************************************************************/
+bool board_audio_power_control(bool en)
+{
+  if (en)
+    {
+      /* Enable I2S pin. */
+
+      cxd56_audio_en_i2s_io();
+
+      /* Enable speaker output. */
+
+      cxd56_audio_set_spout(true);
+
+      /* Power on Audio driver */
+
+      if (cxd56_audio_poweron() != 0)
+        {
+          return false;
+        }
+
+      /* Enable BaseBand driver output */
+
+      if (cxd56_audio_en_output() != 0)
+        {
+          return false;
+        }
+
+      /* Cancel output mute. */
+
+      board_external_amp_mute_control(false);
+    }
+    else
+    {
+      /* Set output mute. */
+
+      board_external_amp_mute_control(true);
+
+      /* Disable speaker output. */
+
+      cxd56_audio_set_spout(false);
+
+      /* Disable I2S pin. */
+
+      cxd56_audio_dis_i2s_io();
+
+      /* Power off Audio driver */
+
+      if (cxd56_audio_dis_output() != 0)
+        {
+          return false;
+        }
+
+      /* Disable BaseBand driver output */
+
+      if (cxd56_audio_poweroff() != 0)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
 
 /****************************************************************************
  * Name: board_aca_power_control

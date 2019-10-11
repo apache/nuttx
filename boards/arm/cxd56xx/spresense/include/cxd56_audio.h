@@ -64,6 +64,17 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: board_audio_power_control
+ *
+ * Description:
+ *   Power on/off the audio on the board.
+ *
+ ****************************************************************************/
+
+bool board_audio_power_control(bool en);
+
+
+/****************************************************************************
  * Name: board_aca_power_control
  *
  * Description:

@@ -1303,3 +1303,48 @@ uint32_t cxd56_audio_get_micmap(void)
 {
   return cxd56_audio_config_get_micmap();
 }
+
+bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq)
+{
+  if (!en)
+    {
+      /* Stop beep */
+
+      if (cxd56_audio_stop_beep() != 0)
+        {
+          return false;
+        }
+    }
+
+  if (0 != freq)
+    {
+      /* Set beep frequency parameter */
+
+      if (cxd56_audio_set_beep_freq(freq) != 0)
+        {
+          return false;
+        }
+    }
+
+  if (255 != vol)
+    {
+      /* Set beep volume parameter */
+
+      if (cxd56_audio_set_beep_vol(vol) != 0)
+        {
+          return false;
+        }
+    }
+
+  if (en)
+    {
+      /* Play beep */
+
+      if (cxd56_audio_play_beep() != 0)
+        {
+          return false;
+        }
+    }
+
+  return true;
+}
