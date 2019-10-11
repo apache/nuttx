@@ -110,6 +110,7 @@ static const struct file_operations fifo_fops =
 int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
+  int errcode;
   int ret;
 
   /* Allocate and initialize a new device structure instance */
@@ -117,16 +118,23 @@ int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
   dev = pipecommon_allocdev(bufsize);
   if (!dev)
     {
-      return -ENOMEM;
+      errcode = ENOMEM;
+      goto errout;
     }
 
   ret = register_driver(pathname, &fifo_fops, mode, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);
+      errcode = -ret;
+      goto errout;
     }
 
-  return ret;
+  return OK;
+
+errout:
+  set_errno(errcode);
+  return ERROR;
 }
 
 #endif /* CONFIG_DEV_FIFO_SIZE > 0 */
