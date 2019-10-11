@@ -171,7 +171,7 @@ static int pipe_close(FAR struct file *filep)
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
  *
- *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   NOTE: pipe2 is a special, non-standard, NuttX-only interface.  Since
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
