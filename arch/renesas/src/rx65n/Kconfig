@@ -1,0 +1,532 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RX65N
+comment "RX65N Configuration Options"
+
+menu "RX65N Peripheral Selections"
+
+config RX65N_SCI2
+	bool "SCI2"
+	default n
+	select SCI2_SERIALDRIVER
+
+config RX65N_ICU
+	bool "ICU"
+	default y
+
+config RX65N_CMT0
+	bool "CMT0"
+	default y
+
+config RX65N_CMTW0
+	bool "CMTW0"
+	default y
+
+config RX65N_CMTW1
+	bool "CMTW1"
+	default y
+
+config RX65N_CMT2
+	bool "CMT2"
+	default y
+
+config RX65N_CMT3
+	bool "CMT3"
+	default y
+
+config RX65N_PERIB
+	bool "PERIB"
+	default y
+
+config RX65N_IRQ_GROUP
+	bool "IRQ_GROUP"
+	default y
+
+endmenu # RX65N Peripheral Selections
+endif
+
+if ARCH_RX65N_RSK1MB
+comment "RX65N on RSKRX65N-1MB Configuration Options"
+
+menu "RX65N Peripheral Selections"
+
+config RX65N_SCI2
+	bool "SCI2"
+	default n
+	select SCI2_SERIALDRIVER
+
+config RX65N_ICU
+	bool "ICU"
+	default y
+
+config RX65N_CMT0
+	bool "CMT0"
+	default y
+
+config RX65N_CMT2
+	bool "CMT2"
+	default y
+
+config RX65N_CMT3
+	bool "CMT3"
+	default y
+
+config RX65N_PERIB
+	bool "PERIB"
+	default y
+
+config RX65N_IRQ_GROUP
+	bool "IRQ_GROUP"
+	default y
+
+config RX65N_EMAC
+	bool
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		NOTE that write-through caching is automatically selected.  This is
+		to work around issues with the RX and TX descriptors with are 8-bytes
+		in size.  But the D-Cache cache line size is 32-bytes.  That means
+		that you cannot reload, clean or invalidate a descriptor without also
+		effecting three neighboring descriptors.  Setting write through mode
+		eliminates the need for cleaning.  If only reloading and invalidating
+		are done, then there is no problem.
+
+config RX65N_EMAC0
+	bool "Ethernet MAC (GMAC)"
+	default n
+	select RX65N_EMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+endmenu # RX65N Peripheral Selections
+endif
+
+if ARCH_RX65N_RSK2MB
+comment "RX65N on RSKRX65N-2MB Configuration Options"
+
+menu "RX65N Peripheral Selections"
+
+config RX65N_SCI2
+	bool "SCI2"
+	select SCI2_SERIALDRIVER
+
+config RX65N_SCI8
+	bool "SCI8"
+	select SCI8_SERIALDRIVER
+
+config RX65N_SCI9
+	bool "SCI9"
+	default n
+	select SCI9_SERIALDRIVER
+
+config RX65N_SCI10
+	bool "SCI10"
+	default n
+	select SCI10_SERIALDRIVER
+
+config RX65N_SCI11
+	bool "SCI11"
+	default n
+	select SCI11_SERIALDRIVER
+
+config RX65N_SCI12
+	bool "SCI12"
+	default n
+	select SCI12_SERIALDRIVER
+
+config RX65N_ICU
+	bool "ICU"
+	default y
+
+config RX65N_CMT0
+	bool "CMT0"
+	default y
+
+config RX65N_CMT2
+	bool "CMT2"
+	default y
+
+config RX65N_CMT3
+	bool "CMT3"
+	default y
+
+config RX65N_PERIB
+	bool "PERIB"
+	default y
+
+config RX65N_IRQ_GROUP
+	bool "IRQ_GROUP"
+	default y
+
+config RX65N_EMAC
+	bool
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		NOTE that write-through caching is automatically selected.  This is
+		to work around issues with the RX and TX descriptors with are 8-bytes
+		in size.  But the D-Cache cache line size is 32-bytes.  That means
+		that you cannot reload, clean or invalidate a descriptor without also
+		effecting three neighboring descriptors.  Setting write through mode
+		eliminates the need for cleaning.  If only reloading and invalidating
+		are done, then there is no problem.
+
+config RX65N_EMAC0
+	bool "Ethernet MAC (GMAC)"
+	default n
+	select RX65N_EMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+endmenu # RX65N Peripheral Selections
+endif
+
+if ARCH_RX65N_GRROSE
+comment "RX65N on GR-ROSE Configuration Options"
+
+menu "RX65N Peripheral Selections"
+
+config RX65N_SCI0
+	bool "SCI0"
+	default n
+	select SCI0_SERIALDRIVER
+
+config RX65N_SCI1
+	bool "SCI1"
+	default y
+	select SCI1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RX65N_SCI2
+	bool "SCI2"
+	default y
+	select SCI2_SERIALDRIVER
+
+config RX65N_SCI3
+	bool "SCI3"
+	default n
+	select SCI3_SERIALDRIVER
+
+config RX65N_SCI4
+	bool "SCI4"
+	default n
+	select SCI4_SERIALDRIVER
+
+config RX65N_SCI5
+	bool "SCI5"
+	default y
+	select SCI5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config RX65N_SCI6
+	bool "SCI6"
+	default y
+	select SCI6_SERIALDRIVER
+
+config RX65N_SCI7
+	bool "SCI7"
+	default n
+	select SCI7_SERIALDRIVER
+
+config RX65N_SCI8
+	bool "SCI8"
+	default y
+	select SCI8_SERIALDRIVER
+
+config RX65N_SCI9
+	bool "SCI9"
+	default n
+	select SCI9_SERIALDRIVER
+
+config RX65N_SCI10
+	bool "SCI10"
+	default n
+	select SCI10_SERIALDRIVER
+
+config RX65N_SCI11
+	bool "SCI11"
+	default n
+	select SCI11_SERIALDRIVER
+
+config RX65N_SCI12
+	bool "SCI12"
+	default n
+	select SCI12_SERIALDRIVER
+
+config RX65N_ICU
+	bool "ICU"
+	default y
+
+config RX65N_CMT0
+	bool "CMT0"
+	default y
+
+config RX65N_CMT2
+	bool "CMT2"
+	default y
+
+config RX65N_CMT3
+	bool "CMT3"
+	default y
+
+config RX65N_PERIB
+	bool "PERIB"
+	default y
+
+config RX65N_IRQ_GROUP
+	bool "IRQ_GROUP"
+	default y
+
+config RX65N_EMAC
+	bool
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		NOTE that write-through caching is automatically selected.  This is
+		to work around issues with the RX and TX descriptors with are 8-bytes
+		in size.  But the D-Cache cache line size is 32-bytes.  That means
+		that you cannot reload, clean or invalidate a descriptor without also
+		effecting three neighboring descriptors.  Setting write through mode
+		eliminates the need for cleaning.  If only reloading and invalidating
+		are done, then there is no problem.
+
+config RX65N_EMAC0
+	bool "Ethernet MAC (GMAC)"
+	default n
+	select RX65N_EMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+endmenu # RX65N Peripheral Selections
+endif
+
+menu "EMAC device driver options"
+	depends on RX65N_EMAC0
+
+config RX65N_EMAC0_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+		NOTE that the defaut of 16 correspond to a total of only 2Kb of
+		RX buffering.  That can easily exceeded on a busy network or with
+		large packet MTUs.  You will know if this happens because you will
+		see the "Buffer Not Available (BNA)" receive error.
+
+config RX65N_EMAC0_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		CONFIG_NET_BUFSIZE bytes).  This setting provides the number of such
+		packets that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config RX65N_EMAC0_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config RX65N_EMAC0_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		RX65N_EMAC0_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The RX65N EMAC driver will call this function
+		one time before it first uses the PHY.
+
+choice
+	prompt "PHY interface"
+	default RX65N_EMAC0_MII
+
+config RX65N_EMAC0_MII
+	bool "MII"
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config RX65N_EMAC0_RMII
+	bool "RMII"
+	depends on !ARCH_CHIP_SAM4E
+	---help---
+		Support Ethernet RMII interface (vs MII).
+
+endchoice # PHY interface
+
+config RX65N_EMAC0_CLAUSE45
+	bool "Clause 45 MII"
+	depends on RX65N_EMAC0_MII
+	---help---
+		MDIO was originally defined in Clause 22 of IEEE RFC802.3. In the
+		original specification, a single MDIO interface is able to access up
+		to 32 registers in 32 different PHY devices.  To meet the needs the
+		expanding needs of 10-Gigabit Ethernet devices, Clause 45 of the
+		802.3ae specification provided the following additions to MDIO:
+
+		- Ability to access 65,536 registers in 32 different devices on
+		  32 different ports
+		- Additional OP-code and ST-code for Indirect Address register
+		  access for 10 Gigabit Ethernet
+		- End-to-end fault signaling
+		- Multiple loopback points
+		- Low voltage electrical specification
+
+		By default, Clause 22 PHYs will be supported unless this option is
+		selected.
+
+config RX65N_EMAC0_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config RX65N_EMAC0_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !RX65N_EMAC0_AUTONEG
+	---help---
+		If RX65N_EMAC0_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config RX65N_EMAC0_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !RX65N_EMAC0_AUTONEG
+	---help---
+		If RX65N_EMAC0_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config RX65N_EMAC0_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on RX65N_EMAC0_AUTONEG
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config RX65N_EMAC0_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on RX65N_EMAC0_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if RX65N_EMAC0_AUTONEG
+if RX65N_EMAC0_PHYSR_ALTCONFIG
+
+config RX65N_EMAC0_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config RX65N_EMAC0_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config RX65N_EMAC0_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config RX65N_EMAC0_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config RX65N_EMAC0_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # RX65N_EMAC0_PHYSR_ALTCONFIG
+if !RX65N_EMAC0_PHYSR_ALTCONFIG
+
+config RX65N_EMAC0_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config RX65N_EMAC0_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config RX65N_EMAC0_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This provides the
+		bit mask for isolating the full or half duplex mode bits.
+
+config RX65N_EMAC0_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if RX65N_EMAC0_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !RX65N_EMAC0_PHYSR_ALTCONFIG
+endif # RX65N_EMAC0_AUTONEG
+
+# These apply to both EMAC0 and EMAC1 (but are in the EMAC0 menu for now
+# because there is not yet any RX65N chip that supports two Ethernet MACS
+
+config RX65N_EMAC0_ISETH0
+	bool
+	default y
+
+config RX65N_EMAC_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config RX65N_EMAC_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config RX65N_EMAC_DEBUG
+	bool "Force EMAC0/1 DEBUG"
+	default n
+	depends on DEBUG_FEATURES && !DEBUG_NET
+	---help---
+		This option will force debug output from EMAC driver even without
+		network debug output enabled.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		driver and do not want to get overloaded with other
+		network-related debug output.
+
+config RX65N_EMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default y
+	depends on DEBUG_NET
+	---help---
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET.
+
+endmenu # EMAC0 device driver options

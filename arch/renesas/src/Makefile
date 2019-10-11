@@ -43,18 +43,18 @@ CXXFLAGS += $(EXTRADEFINES)
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
   NUTTX = $(TOPDIR)\nuttx$(EXEEXT)
-  CFLAGS += -I$(ARCH_SRCDIR)\chip
-  CFLAGS += -I$(ARCH_SRCDIR)\common
-  CFLAGS += -I$(ARCH_SRCDIR)\$(ARCH_SUBDIR)
-  CFLAGS += -I$(TOPDIR)\sched
+  CFLAGS += -I=$(ARCH_SRCDIR)\chip
+  CFLAGS += -I=$(ARCH_SRCDIR)\common
+  CFLAGS += -I=$(ARCH_SRCDIR)\$(ARCH_SUBDIR)
+  CFLAGS += -I=$(TOPDIR)\sched
 else
   ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  NUTTX = "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  CFLAGS += -I "${shell cygpath -w $(TOPDIR)/sched}"
+  NUTTX = ${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}
+  CFLAGS += -I ${shell cygpath -w $(ARCH_SRCDIR)/chip}
+  CFLAGS += -I ${shell cygpath -w $(ARCH_SRCDIR)/common}
+  CFLAGS += -I ${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}
+  CFLAGS += -I. -isystem ${shell cygpath -w $(TOPDIR)/sched}
 else
   NUTTX = $(TOPDIR)/nuttx$(EXEEXT)
   CFLAGS += -I$(ARCH_SRCDIR)/chip
@@ -64,13 +64,13 @@ else
 endif
 endif
 
-CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
+CFLAGS += -I=$(ARCH_SRCDIR)/chip -I=$(ARCH_SRCDIR)/common -I=$(TOPDIR)/sched
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
 STARTUP_OBJS ?= $(HEAD_OBJ)
 
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+AOBJS = $(CHIP_ASRCS:.S=$(OBJEXT))
 
 CSRCS = $(CHIP_CSRCS) $(CMN_CSRCS)
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -138,12 +138,23 @@ board/libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
+ifeq ($(WINTOOL),y)
+	$(Q) $(LD) --entry=__start  $(LDFLAGS) $(LIBPATHS) -o  ${shell cygpath -m "$(TOPDIR)"}/$@ $(HEAD_OBJ) \
+		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) "$(LIBGCC)" $(LDENDGROUP)
+	@echo "LD: nuttx"
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+	$(Q) $(NM) /cygwin64$(TOPDIR)/$@ | \
+	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+	sort > $(TOPDIR)/System.map
+endif
+else
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(TOPDIR)/$@ $(HEAD_OBJ) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
+endif
 endif
 
 # This is part of the top-level export target

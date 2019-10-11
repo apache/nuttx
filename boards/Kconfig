@@ -1159,6 +1159,41 @@ config ARCH_BOARD_QEMU_I486
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardwared (Google the Bifferboard).
 
+config ARCH_BOARD_RX65N
+	bool "RX65N renesas board"
+	depends on ARCH_CHIP_R5F565NEDDFC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This is a port of the renesas RX65N on the Renesas RX65N board.
+		STATUS:  Work has just began on this port.
+
+config ARCH_BOARD_RX65N_RSK1MB
+	bool "RX65N on RSKRX65N-1MB renesas board"
+	depends on ARCH_CHIP_R5F565NEDDFC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This is a port of the renesas RX65N on the Renesas RX65N board.
+		STATUS:  Work has just began on this port.
+
+config ARCH_BOARD_RX65N_RSK2MB
+	bool "RX65N on RSKRX65N-2MB renesas board"
+	depends on ARCH_CHIP_R5F565NEHDFC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This is a port of the renesas RX65N on the Renesas RX65N board.
+		STATUS:  Work has just began on this port.
+
+config ARCH_BOARD_RX65N_GRROSE
+	bool "RX65N on GR-ROSE renesas board"
+	depends on ARCH_CHIP_R5F565NEHDFP
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a port of the renesas RX65N on the Renesas RX65N board.
+		STATUS:  Work has just began on this port.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -2022,6 +2057,10 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
+	default "rx65n"                    if ARCH_BOARD_RX65N
+	default "rx65n"                    if ARCH_BOARD_RX65N_RSK1MB
+	default "rx65n"                    if ARCH_BOARD_RX65N_RSK2MB
+	default "rx65n"                    if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
@@ -2646,6 +2685,18 @@ source "boards/sim/sim/sim/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "boards/x86/qemu/qemu-i486/Kconfig"
+endif
+if ARCH_BOARD_RX65N
+source "boards/renesas/rx65n/rx65n/Kconfig"
+endif
+if ARCH_BOARD_RX65N_RSK1MB
+source "boards/renesas/rx65n/rx65n-rsk1mb/Kconfig"
+endif
+if ARCH_BOARD_RX65N_RSK2MB
+source "boards/renesas/rx65n/rx65n-rsk2mb/Kconfig"
+endif
+if ARCH_BOARD_RX65N_GRROSE
+source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
 if ARCH_BOARD_ESP32CORE
 source "boards/xtensa/esp32/esp32-core/Kconfig"

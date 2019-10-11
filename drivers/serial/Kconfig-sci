@@ -13,6 +13,61 @@ config SCI1_SERIALDRIVER
 	default n
 	select MCU_SERIAL
 
+config SCI2_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI3_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI4_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI5_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI6_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI7_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI8_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI9_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI10_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI11_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
+config SCI12_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
 menu "SCI0 Configuration"
 	depends on SCI0_SERIALDRIVER
 
@@ -100,3 +155,487 @@ config SCI1_2STOP
 		1=Two stop bits
 
 endmenu # SCI1 Configuration
+
+menu "SCI2 Configuration"
+	depends on SCI2_SERIALDRIVER
+
+config SCI2_RXBUFSIZE
+	int "SCI2 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI2_TXBUFSIZE
+	int "SCI2 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI2_BAUD
+	int "SCI2 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI2_BITS
+	int "SCI2 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI2_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI2_2STOP
+	int "SCI2 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI2 Configuration
+
+menu "SCI3 Configuration"
+	depends on SCI3_SERIALDRIVER
+
+config SCI3_RXBUFSIZE
+	int "SCI3 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI3_TXBUFSIZE
+	int "SCI3 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI3_BAUD
+	int "SCI3 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI3_BITS
+	int "SCI3 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI3_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI3_2STOP
+	int "SCI3 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI3 Configuration
+
+menu "SCI4 Configuration"
+	depends on SCI4_SERIALDRIVER
+
+config SCI4_RXBUFSIZE
+	int "SCI4 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI4_TXBUFSIZE
+	int "SCI4 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI4_BAUD
+	int "SCI4 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI4_BITS
+	int "SCI4 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI4_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI4_2STOP
+	int "SCI4 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI4 Configuration
+
+menu "SCI5 Configuration"
+	depends on SCI5_SERIALDRIVER
+
+config SCI5_RXBUFSIZE
+	int "SCI5 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI5_TXBUFSIZE
+	int "SCI5 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI5_BAUD
+	int "SCI5 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI5_BITS
+	int "SCI5 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI5_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI5_2STOP
+	int "SCI5 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI5 Configuration
+
+menu "SCI6 Configuration"
+	depends on SCI6_SERIALDRIVER
+
+config SCI6_RXBUFSIZE
+	int "SCI6 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI6_TXBUFSIZE
+	int "SCI6 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI6_BAUD
+	int "SCI6 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI6_BITS
+	int "SCI6 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI6_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI6_2STOP
+	int "SCI6 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI6 Configuration
+
+menu "SCI7 Configuration"
+	depends on SCI7_SERIALDRIVER
+
+config SCI7_RXBUFSIZE
+	int "SCI7 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI7_TXBUFSIZE
+	int "SCI7 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI7_BAUD
+	int "SCI7 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI7_BITS
+	int "SCI7 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI7_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI7_2STOP
+	int "SCI7 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI7 Configuration
+
+menu "SCI8 Configuration"
+	depends on SCI8_SERIALDRIVER
+
+config SCI8_RXBUFSIZE
+	int "SCI8 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI8_TXBUFSIZE
+	int "SCI8 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI8_BAUD
+	int "SCI8 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI8_BITS
+	int "SCI8 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI8_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI8_2STOP
+	int "SCI8 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI8 Configuration
+
+menu "SCI9 Configuration"
+	depends on SCI9_SERIALDRIVER
+
+config SCI9_RXBUFSIZE
+	int "SCI9 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI9_TXBUFSIZE
+	int "SCI9 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI9_BAUD
+	int "SCI9 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI9_BITS
+	int "SCI9 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI9_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI9_2STOP
+	int "SCI9 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI9 Configuration
+
+menu "SCI10 Configuration"
+	depends on SCI10_SERIALDRIVER
+
+config SCI10_RXBUFSIZE
+	int "SCI10 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI10_TXBUFSIZE
+	int "SCI10 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI10_BAUD
+	int "SCI10 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI10_BITS
+	int "SCI10 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI10_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI10_2STOP
+	int "SCI10 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI10 Configuration
+
+menu "SCI11 Configuration"
+	depends on SCI11_SERIALDRIVER
+
+config SCI11_RXBUFSIZE
+	int "SCI11 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI11_TXBUFSIZE
+	int "SCI11 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI11_BAUD
+	int "SCI11 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI11_BITS
+	int "SCI11 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI11_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI11_2STOP
+	int "SCI11 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI11 Configuration
+
+menu "SCI12 Configuration"
+	depends on SCI12_SERIALDRIVER
+
+config SCI12_RXBUFSIZE
+	int "SCI12 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI12_TXBUFSIZE
+	int "SCI12 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI12_BAUD
+	int "SCI12 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI12_BITS
+	int "SCI12 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI12_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI12_2STOP
+	int "SCI12 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI12 Configuration

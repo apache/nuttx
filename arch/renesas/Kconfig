@@ -22,9 +22,44 @@ config ARCH_CHIP_M30262F8
 	---help---
 		Renesas M30262F8 (M16C)
 
+config ARCH_CHIP_R5F565NEDDFC
+	bool "R5F565NEDDFC"
+	select ARCH_RX65N_RSK1MB
+	select ARCH_RX65N
+	---help---
+		Renesas RX65N on RSKRX65N-1MB
+
+config ARCH_CHIP_R5F565NEHDFC
+	bool "R5F565NEHDFC"
+	select ARCH_RX65N_RSK2MB
+	---help---
+		Renesas RX65N on RSKRX65N-2MB
+
+config ARCH_CHIP_R5F565NEHDFP
+	bool "R5F565NEHDFP"
+	select ARCH_RX65N_GRROSE
+	---help---
+		Renesas RX65N on GR-ROSE
+
 endchoice
 
 config ARCH_SH1
+	bool
+	default n
+
+config ARCH_RX65N
+	bool
+	default n
+
+config ARCH_RX65N_RSK1MB
+	bool
+	default n
+
+config ARCH_RX65N_RSK2MB
+	bool
+	default n
+
+config ARCH_RX65N_GRROSE
 	bool
 	default n
 
@@ -36,9 +71,14 @@ config ARCH_CHIP
 	string
 	default "sh1"		if ARCH_SH1
 	default "m16c"		if ARCH_M16C
+	default "rx65n"		if ARCH_RX65N
+	default "rx65n"		if ARCH_RX65N_RSK1MB
+	default "rx65n"		if ARCH_RX65N_RSK2MB
+	default "rx65n"		if ARCH_RX65N_GRROSE
 
 source arch/renesas/src/common/Kconfig
 source arch/renesas/src/m16c/Kconfig
 source arch/renesas/src/sh1/Kconfig
+source arch/renesas/src/rx65n/Kconfig
 
 endif # ARCH_RENESAS
