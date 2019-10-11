@@ -73,7 +73,6 @@ extern "C"
 
 bool board_audio_power_control(bool en);
 
-
 /****************************************************************************
  * Name: board_aca_power_control
  *

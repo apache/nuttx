@@ -33,9 +33,7 @@
  *
  ****************************************************************************/
 
-/* audioutils Audio Utility
- *
- */
+/* audioutils Audio Utility */
 
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
@@ -943,6 +941,7 @@ uint32_t cxd56_audio_get_micmap(void);
  *
  * Setup tone generator
  */
+
 bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq);
 
 #ifdef __cplusplus

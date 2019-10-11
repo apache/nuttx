@@ -112,6 +112,7 @@ static bool check_pin_i2s_mode(uint32_t pin)
  *   Power on/off the audio device on the board.
  *
  ****************************************************************************/
+
 bool board_audio_power_control(bool en)
 {
   if (en)
