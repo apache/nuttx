@@ -3063,7 +3063,11 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   /* Enable RGMII enable */
 
   regval  = sam_getreg(priv, SAM_GMAC_UR);
-  regval |= GMAC_UR_RGMII;
+#ifdef CONFIG_SAMD5E5_GMAC_MII
+  regval |= GMAC_UR_MII;
+#else
+  regval &= ~GMAC_UR_MII;
+#endif
   sam_putreg(priv, SAM_GMAC_UR, regval);
 
 errout:

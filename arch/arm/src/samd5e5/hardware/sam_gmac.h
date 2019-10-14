@@ -502,7 +502,7 @@
 
 /* User Register */
 
-#define GMAC_UR_RGMII             (1 << 0)  /* Bit 0:  Reduced GMII Mode */
+#define GMAC_UR_MII               (1 << 0)  /* Bit 0:  MII Mode */
 
 /* DMA Configuration Register */
 
