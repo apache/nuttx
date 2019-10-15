@@ -2919,6 +2919,13 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
 
   ret = gs2200m_spi_init(dev);
 
+  /* Reset and Unreset GS2200M */
+
+  lower->reset(true);
+  up_mdelay(1);
+  lower->reset(false);
+  up_mdelay(180);
+
   /* Attach interrupt handler */
 
   lower->attach(gs2200m_irq, dev);

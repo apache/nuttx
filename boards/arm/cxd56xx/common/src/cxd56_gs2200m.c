@@ -62,6 +62,7 @@ static int  gs2200m_irq_attach(xcpt_t, FAR void *);
 static void gs2200m_irq_enable(void);
 static void gs2200m_irq_disable(void);
 static uint32_t gs2200m_dready(int *);
+static void gs2200m_reset(bool);
 
 /****************************************************************************
  * Private Data
@@ -73,6 +74,7 @@ static const struct gs2200m_lower_s g_wifi_lower =
   .enable  = gs2200m_irq_enable,
   .disable = gs2200m_irq_disable,
   .dready  = gs2200m_dready,
+  .reset   = gs2200m_reset
 };
 
 static FAR void *g_devhandle = NULL;
@@ -144,7 +146,7 @@ static void gs2200m_irq_disable(void)
 }
 
 /****************************************************************************
- * Name: gs2200m_disable
+ * Name: gs2200m_dready
  ****************************************************************************/
 
 static uint32_t gs2200m_dready(int *ec)
@@ -162,6 +164,15 @@ static uint32_t gs2200m_dready(int *ec)
 
   spin_unlock_irqrestore(flags);
   return r;
+}
+
+/****************************************************************************
+ * Name: gs2200m_reset
+ ****************************************************************************/
+
+static void gs2200m_reset(bool reset)
+{
+  cxd56_gpio_write(PIN_UART2_RTS, !reset);
 }
 
 /****************************************************************************
@@ -221,6 +232,7 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
 
       CXD56_PIN_CONFIGS(PINCONFS_UART2_GPIO);
       (void)cxd56_gpio_config(PIN_UART2_CTS, true);
+      (void)cxd56_gpio_config(PIN_UART2_RTS, false);
 
       /* Initialize spi deivce */
 

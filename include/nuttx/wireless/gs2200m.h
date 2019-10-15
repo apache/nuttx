@@ -143,6 +143,7 @@ struct gs2200m_lower_s
   void (*enable)(void);
   void (*disable)(void);
   uint32_t (*dready)(int *);
+  void (*reset)(bool);
 };
 
 FAR void *gs2200m_register(FAR const char *devpath,
