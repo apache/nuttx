@@ -74,8 +74,8 @@
 #define DPRINTF(fmt, args...) do {} while (0)
 #endif
 
-#define CPU1_VECTOR_RESETV  0x00000000
-#define CPU1_VECTOR_ISTACK  0x00000004
+#define CPU1_VECTOR_ISTACK  0x00000000
+#define CPU1_VECTOR_RESETV  0x00000004
 
 /****************************************************************************
  * Private Data
@@ -188,10 +188,10 @@ int up_cpu_start(int cpu)
   /* create initial vectors for CPU1 */
 
   putreg32(0x1, REMAP); /* remap enable */
-  backup[0] = getreg32(CPU1_VECTOR_RESETV);
-  backup[1] = getreg32(CPU1_VECTOR_ISTACK);
-  putreg32((uint32_t)tcb->adj_stack_ptr, CPU1_VECTOR_RESETV);
-  putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_ISTACK);
+  backup[0] = getreg32(CPU1_VECTOR_ISTACK);
+  backup[1] = getreg32(CPU1_VECTOR_RESETV);
+  putreg32((uint32_t)tcb->adj_stack_ptr, CPU1_VECTOR_ISTACK);
+  putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_RESETV);
 
   spin_lock(&g_cpu_wait[0]);
 
@@ -220,8 +220,8 @@ int up_cpu_start(int cpu)
 
   /* restore : after CPU1 boot, CPU1 use normal vectors table. */
 
-  putreg32(backup[0], CPU1_VECTOR_RESETV);
-  putreg32(backup[1], CPU1_VECTOR_ISTACK);
+  putreg32(backup[0], CPU1_VECTOR_ISTACK);
+  putreg32(backup[1], CPU1_VECTOR_RESETV);
   putreg32(0x0, REMAP); /* remap disable */
 
   spin_unlock(&g_cpu_wait[0]);

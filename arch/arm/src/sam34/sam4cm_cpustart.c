@@ -72,8 +72,8 @@
 #  define DPRINTF(fmt, args...) do {} while (0)
 #endif
 
-#define CPU1_VECTOR_RESETV  (SAM_INTSRAM1_BASE)
-#define CPU1_VECTOR_ISTACK  (SAM_INTSRAM1_BASE + 4)
+#define CPU1_VECTOR_ISTACK  (SAM_INTSRAM1_BASE)
+#define CPU1_VECTOR_RESETV  (SAM_INTSRAM1_BASE + 4)
 
 /****************************************************************************
  * Public Data
@@ -215,8 +215,8 @@ int up_cpu_start(int cpu)
 
   /* Copy initial vectors for CPU1 */
 
-  putreg32((uint32_t)tcb->adj_stack_ptr, CPU1_VECTOR_RESETV);
-  putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_ISTACK);
+  putreg32((uint32_t)tcb->adj_stack_ptr, CPU1_VECTOR_ISTACK);
+  putreg32((uint32_t)cpu1_boot, CPU1_VECTOR_RESETV);
 
   spin_lock(&g_cpu1_boot);
 
