@@ -3007,7 +3007,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       if ((advertise & GMII_ADVERTISE_100BASETXFULL) != 0 &&
           (lpa & GMII_LPA_100BASETXFULL) != 0)
         {
-          /* Set RGMII for 100BaseTX and Full Duplex */
+          /* Set MII for 100BaseTX and Full Duplex */
 
           linkmode = (GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
           break;
@@ -3015,7 +3015,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       else if ((advertise & GMII_ADVERTISE_10BASETXFULL) != 0 &&
                (lpa & GMII_LPA_10BASETXFULL) != 0)
         {
-          /* Set RGMII for 10BaseT and Full Duplex */
+          /* Set MII for 10BaseT and Full Duplex */
 
           linkmode = GMAC_NCFGR_FD;
           break;
@@ -3023,7 +3023,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       else if ((advertise & GMII_ADVERTISE_100BASETXHALF) != 0 &&
                (lpa & GMII_LPA_100BASETXHALF) != 0)
         {
-          /* Set RGMII for 100BaseTX and half Duplex */
+          /* Set MII for 100BaseTX and half Duplex */
 
           linkmode = GMAC_NCFGR_SPD;
           break;
@@ -3031,7 +3031,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       else if ((advertise & GMII_ADVERTISE_10BASETXHALF) != 0 &&
                (lpa & GMII_LPA_10BASETXHALF) != 0)
         {
-          /* Set RGMII for 10BaseT and half Duplex */
+          /* Set MII for 10BaseT and half Duplex */
 
           break;
         }
@@ -3060,7 +3060,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   sam_putreg(priv, SAM_GMAC_NCFGR, regval);
   sam_putreg(priv, SAM_GMAC_NCR, ncr);
 
-  /* Enable RGMII enable */
+  /* Enable MII or RMII */
 
   regval  = sam_getreg(priv, SAM_GMAC_UR);
 #ifdef CONFIG_SAMD5E5_GMAC_MII
@@ -3252,7 +3252,7 @@ static int sam_phyinit(struct sam_gmac_s *priv)
 
 static inline void sam_ethgpioconfig(struct sam_gmac_s *priv)
 {
-  /* Configure PIO pins to support GMAC in RGMII mode */
+  /* Configure PIO pins to support GMAC in MII or RMII mode */
 
   sam_portconfig(PORT_GMAC_GTX0);
   sam_portconfig(PORT_GMAC_GTX1);
