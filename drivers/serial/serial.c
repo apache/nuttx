@@ -229,6 +229,10 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
   int nexthead;
   int ret;
 
+#ifdef CONFIG_SMP
+  flags = enter_critical_section();
+#endif
+
   /* Increment to see what the next head pointer will be.  We need to use the "next"
    * head pointer to determine when the circular buffer would overrun
    */
@@ -251,7 +255,8 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           dev->xmit.buffer[dev->xmit.head] = ch;
           dev->xmit.head = nexthead;
-          return OK;
+          ret = OK;
+          goto err_out;
         }
 
       /* The TX buffer is full.  Should be block, waiting for the hardware
@@ -325,7 +330,8 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           if (dev->disconnected)
             {
-              return -ENOTCONN;
+              ret = -ENOTCONN;
+              goto err_out;
             }
 #endif
           /* Check if we were awakened by signal. */
@@ -336,7 +342,8 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                * non-full will abort the transfer.
                */
 
-              return -EINTR;
+              ret = -EINTR;
+              goto err_out;
             }
         }
 
@@ -346,7 +353,8 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
       else
         {
-          return -EAGAIN;
+          ret = -EAGAIN;
+          goto err_out;
         }
     }
 
@@ -354,7 +362,15 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
    * unreachable.
    */
 
-  return OK;
+  ret = OK;
+
+err_out:
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
+
+  return ret;
 }
 
 /************************************************************************************
