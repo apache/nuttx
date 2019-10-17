@@ -189,7 +189,7 @@ staging$(DELIM)$(LIBXX)$(LIBEXT): libs$(DELIM)libxx$(DELIM)$(LIBXX)$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(APPDIR)$(DELIM)libapps$(LIBEXT): context
-	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" KERNEL=n
 
 staging$(DELIM)libapps$(LIBEXT): $(APPDIR)$(DELIM)libapps$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
