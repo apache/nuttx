@@ -44,7 +44,7 @@
  *
  * The PWM driver is split into two parts:
  *
- * 1) An "upper half", generic driver that provides the comman PWM interface
+ * 1) An "upper half", generic driver that provides the common PWM interface
  *    to application level code, and
  * 2) A "lower half", platform-specific driver that implements the low-level
  *    timer controls to implement the PWM functionality.
@@ -66,6 +66,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* CONFIG_PWM - Enables because PWM driver support
  * CONFIG_PWM_PULSECOUNT - Some hardware will support generation of a fixed
  *   number of pulses.  This might be used, for example to support a stepper
@@ -79,10 +80,11 @@
  */
 
 /* IOCTL Commands ***********************************************************/
+
 /* The PWM module uses a standard character driver framework.  However, since
  * the PWM driver is a device control interface and not a data transfer
  * interface, the majority of the functionality is implemented in driver
- * ioctl calls.  The PWM ioctl commands are lised below:
+ * ioctl calls.  The PWM ioctl commands are listed below:
  *
  * PWMIOC_SETCHARACTERISTICS - Set the characteristics of the next pulsed
  *   output.  This command will neither start nor stop the pulsed output.
@@ -97,7 +99,7 @@
  * PWMIOC_GETCHARACTERISTICS - Get the currently selected characteristics of
  *   the pulsed output (independent of whether the output is start or stopped).
  *
- *   ioctl argument:  A reference to struct pwm_info_s to recevie the
+ *   ioctl argument:  A reference to struct pwm_info_s to receive the
  *   characteristics of the pulsed output.
  *
  * PWMIOC_START - Start the pulsed output.  The PWMIOC_SETCHARACTERISTICS
@@ -285,7 +287,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
  *   1. The upper half driver calls the start method, providing the lower
  *      half driver with the pulse train characteristics.  If a fixed
  *      number of pulses is required, the 'count' value will be nonzero.
- *   2. The lower half driver's start() methoc must verify that it can
+ *   2. The lower half driver's start() method must verify that it can
  *      support the request pulse train (frequency, duty, AND pulse count).
  *      It it cannot, it should return an error.  If the pulse count is
  *      non-zero, it should set up the hardware for that number of pulses
