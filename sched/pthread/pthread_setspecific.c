@@ -64,7 +64,7 @@
  *   thread.
  *
  *   The effect of calling pthread_setspecific() with
- *   with a key value not obtained from pthread_create() or
+ *   a key value not obtained from pthread_key_create() or
  *   after a key has been deleted with pthread_key_delete()
  *   is undefined.
  *
@@ -80,13 +80,8 @@
  *         the value with the key.
  *      EINVAL - The key value is invalid.
  *
- * Assumptions:
- *
  * POSIX Compatibility:
- *   int pthread_setspecific(pthread_key_t key, void *value)
- *   void *pthread_getspecific(pthread_key_t key)
- *
- *   - Both calling pthread_setspecific() and pthread_getspecific()
+ *   - Both pthread_setspecific() and pthread_getspecific()
  *     may be called from a thread-specific data destructor
  *     function.
  *

@@ -83,7 +83,7 @@
  *                thread-specific data key, or the system-imposed limit on
  *                the total number of keys pers process {PTHREAD_KEYS_MAX}
  *                has been exceeded
- *      ENONMEM - Insufficient memory exists to create the key.
+ *      ENOMEM  - Insufficient memory exist to create the key.
  *
  * POSIX Compatibility:
  *   - The present implementation ignores the destructor argument.

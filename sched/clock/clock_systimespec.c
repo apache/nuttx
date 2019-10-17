@@ -63,7 +63,8 @@
  *   ts - Location to return the time
  *
  * Returned Value:
- *   Current version always returns OK
+ *   Current version almost always returns OK. Currently errors are
+ *   possible with CONFIG_RTC_HIRES only.
  *
  * Assumptions:
  *

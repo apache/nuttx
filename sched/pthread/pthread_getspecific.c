@@ -58,9 +58,9 @@
  *   The pthread_getspecific() function returns the value currently
  *   bound to the specified key on behalf of the calling thread.
  *
- *   The effect of calling pthread_getspecific() with with a key value
- *   not obtained from pthread_create() or after a key has been deleted
- *   with pthread_key_delete() is undefined.
+ *   The effect of calling pthread_getspecific() with a key value
+ *   not obtained from pthread_key_create() or after a key has been
+ *   deleted with pthread_key_delete() is undefined.
  *
  * Input Parameters:
  *   key = The data key to get or set
@@ -70,14 +70,9 @@
  *   associated with the given key.  If no thread specific data is
  *   associated with the key, then the value NULL is returned.
  *
- *      EINVAL - The key value is invalid.
- *
- * Assumptions:
- *
  * POSIX Compatibility:
- *   - Both calling pthread_setspecific() and pthread_getspecific()
- *     may be called from a thread-specific data destructor
- *     function.
+ *   - Both pthread_setspecific() and pthread_getspecific() may be
+ *     called from a thread-specific data destructor function.
  *
  ****************************************************************************/
 

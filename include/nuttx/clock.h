@@ -411,7 +411,7 @@ clock_t clock_systimer(void);
  *   ts - Location to return the time
  *
  * Returned Value:
- *   Current version always returns OK
+ *   OK (0) on success; a negated errno value on failure.
  *
  * Assumptions:
  *

@@ -151,7 +151,9 @@
 
 #define PTHREAD_ONCE_INIT             (false)
 
-/* This is returned by pthread_wait.  It must not match any errno in errno.h */
+/* This is returned by pthread_barrier_wait.  It must not match any errno
+ * in errno.h
+ */
 
 #define PTHREAD_BARRIER_SERIAL_THREAD 0x1000
 
@@ -380,11 +382,11 @@ typedef bool pthread_once_t;
 
 struct pthread_rwlock_s
 {
-    pthread_mutex_t lock;
-    pthread_cond_t  cv;
-    unsigned int num_readers;
-    unsigned int num_writers;
-    bool write_in_progress;
+  pthread_mutex_t lock;
+  pthread_cond_t  cv;
+  unsigned int num_readers;
+  unsigned int num_writers;
+  bool write_in_progress;
 };
 
 typedef struct pthread_rwlock_s pthread_rwlock_t;
@@ -402,7 +404,7 @@ typedef int pthread_rwlockattr_t;
 struct pthread_spinlock_s
 {
   volatile spinlock_t sp_lock;  /* Indicates if the spinlock is locked or
-                                 * not.  See the* values SP_LOCKED and
+                                 * not.  See the values SP_LOCKED and
                                  * SP_UNLOCKED. */
   pthread_t sp_holder;          /* ID of the thread that holds the spinlock */
 };
@@ -412,7 +414,7 @@ struct pthread_spinlock_s
 typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
 #define __PTHREAD_SPINLOCK_T_DEFINED 1
 #endif
-#endif /* JCONFIG_PTHREAD_SPINLOCKS */
+#endif /* CONFIG_PTHREAD_SPINLOCKS */
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 /* This type describes the pthread cleanup callback (non-standard) */
@@ -638,7 +640,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier);
 /* Pthread initialization */
 
 int pthread_once(FAR pthread_once_t *once_control,
-                        CODE void (*init_routine)(void));
+                 CODE void (*init_routine)(void));
 
 /* Pthread rwlock */
 

@@ -14,7 +14,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: February 24, 20189</p>
+      <p>Last Updated: October 16, 2019</p>
     </td>
   </tr>
 </table>
@@ -5799,7 +5799,7 @@ be sent.
     These interfaces can be used to create pthread <i>keys</i> and then to access thread-specific data using these keys.
     Each <i>task group</i> has its own set of pthread keys.
     NOTES: (1) pthread keys create in one <i>task group</i> are not accessible in other task groups.
-    (2) The main task thread does not had thread-specific data.
+    (2) The main task thread does not have thread-specific data.
   </p>
   <ul>
     <li><a href="#pthreadkeycreate">2.8.25 pthread_key_create</a></li>
@@ -6367,7 +6367,7 @@ No thread could be found corresponding to that specified by the given thread ID.
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.  Except:</p>
 <ul>
-<li>The thread-specific data destructor functions will be not called for thread
+<li>The thread-specific data destructor functions will not be called for the thread.
 These destructors are not currently supported.</li>
 </ul>
 
@@ -6610,22 +6610,19 @@ made available.
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li>None</li>
 </ul>
 <p>
 <b>Returned Value:</b>
 <p>
-If successful, the <code>pthread_yield()</code> function will return
-zero (<code>OK</code>).  Otherwise, an error number will be
-returned to indicate the error:
-<p>
 <ul>
-  <li><code>To be provided</code>. </li>
+  <li>None. The <code>pthread_yield()</code> function always succeeds.</li>
 </ul>
+<p>
 <b>Assumptions/Limitations:</b>
 <p>
-<b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+<b>POSIX Compatibility:</b> This call is nonstandard, but present on several
+other systems. Use the POSIX <a href="#sched_yield"><code>sched_yield()</code></a> instead.
 
 <H3><a name="pthreadself">2.8.22 pthread_self</a></H3>
 <p>
@@ -6642,22 +6639,24 @@ A thread may obtain a copy of its own thread handle.
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>To be provided</code>.</li>
+  <li>None</li>
 </ul>
 <p>
 <b>Returned Value:</b>
 <p>
 If successful, the <code>pthread_self()</code> function will return
-zero (<code>OK</code>).  Otherwise, an error number will be
-returned to indicate the error:
-<p>
-<ul>
-  <li><code>To be provided</code>. </li>
-</ul>
+copy of caller's thread handle.  Otherwise, in exceptional circumstances,
+the negated error code <code>-ESRCH</code> can be returned if the system
+cannot deduce the identity of the calling thread.
+</p>
 <b>Assumptions/Limitations:</b>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
-interface of the same name.
+interface of the same name. The <code>-ESRCH</code> return value is
+non-standard; POSIX says <code>pthread_self()</code> must always succeed.
+NuttX implements <code>pthread_self()</code> as a macro only, not as a
+function as required by POSIX.
+</p>
 
 <H3><a name="pthreadgetschedparam">2.8.23 pthread_getschedparam</a></H3>
 <p>
@@ -6851,6 +6850,7 @@ interface of the same name.
 </pre>
 <p>
 <b>Description:</b>
+</p>
 <p>
 This function creates a thread-specific data key visible
 to all threads in the system.  Although the same key value
@@ -6858,43 +6858,51 @@ may be used by different threads, the values bound to
 the key by <code>pthread_setspecific()</code> are maintained on a
 per-thread basis and persist for the life of the calling
 thread.
+</p>
 <p>
 Upon key creation, the value <code>NULL</code> will be associated with
 the new key in all active threads.  Upon thread
 creation, the value <code>NULL</code> will be associated with all
 defined keys in the new thread.
+</p>
 <p>
 <b>Input Parameters:</b>
+</p>
 <p>
 <ul>
 <li><code>key</code> is a pointer to the key to create.
-<li><code>destructor</code> is an optional destructor() function that may
+<li><code>destructor</code> is an optional destructor function that may
 be associated with each key that is invoked when a
 thread exits.  However, this argument is ignored in
 the current implementation.
 </ul>
+</p>
 <p>
 <b>Returned Value:</b>
+</p>
 <p>
 If successful, the <code>pthread_key_create()</code> function will
 store the newly created key value at <code>*key</code> and return
 zero (<code>OK</code>).  Otherwise, an error number will be
 returned to indicate the error:
-<p>
 <ul>
 <li><code>EAGAIN</code>.  The system lacked sufficient resources
 to create another thread-specific data key, or the
 system-imposed limit on the total number of keys
-per task {<code>PTHREAD_KEYS_MAX</code>} has been exceeded
-<li><code>ENONMEM</code>  Insufficient memory exists to create the key.
+per task {<code>PTHREAD_KEYS_MAX</code>} has been exceeded.
+<li><code>ENOMEM</code>  Insufficient memory exists to create the key.
 </ul>
+</p>
+<p>
 <b>Assumptions/Limitations:</b>
+</p>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <ul>
-<li>The present implementation ignores the destructor argument.
+<li>The present implementation ignores the <code>destructor</code> argument.
 </ul>
+</p>
 
 <H3><a name="pthreadsetspecific">2.8.26 pthread_setspecific</a></H3>
 <p>
@@ -6907,13 +6915,11 @@ interface of the same name.
 <p>
 <b>Description:</b>
 <p>
-The <code>pthread_setspecific()</code> function associates a thread-
-specific value with a key obtained via a previous call
-to <code>pthread_key_create()</code>.  Different threads may bind
-different values to the same key.  These values are
-typically pointers to blocks of dynamically allocated
-memory that have been reserved for use by the calling
-thread.
+The <code>pthread_setspecific()</code> function associates a thread-specific
+value with a key obtained via a previous call to <code>pthread_key_create()</code>.
+Different threads may bind different values to the same key.  These values are
+typically pointers to blocks of dynamically allocated memory that have been
+reserved for use by the calling thread.
 <p>
 The effect of calling <code>pthread_setspecific()</code> with a key value
 not obtained from <code>pthread_key_create()</code> or after a key has been
@@ -6942,7 +6948,7 @@ with the key.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <ul>
-<li>pthread_setspecific() may be called from a thread-specific data
+<li><code>pthread_setspecific()</code> may be called from a thread-specific data
 destructor function.
 </ul>
 
@@ -6973,17 +6979,16 @@ deleted with <code>pthread_key_delete()</code> is undefined.
 <p>
 <b>Returned Value:</b>
 <p>
-The function <code>pthread_getspecific()</code> returns the thread-
-specific data associated with the given key.  If no
-thread specific data is associated with the key, then
-the value <code>NULL</code> is returned.
+The function <code>pthread_getspecific()</code> returns the thread-specific
+data associated with the given key.  If no thread specific data is
+associated with the key, then the value <code>NULL</code> is returned.
 <p>
 <b>Assumptions/Limitations:</b>
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <ul>
-<li>pthread_getspecific() may be called from a thread-specific data
+<li><code>pthread_getspecific()</code> may be called from a thread-specific data
 destructor function.
 </ul>
 
@@ -6998,9 +7003,11 @@ destructor function.
 <p>
 <b>Description:</b>
 <p>
-This POSIX function should delete a thread-specific data
-key previously returned by <code>pthread_key_create()</code>.  However,
-this function does nothing in the present implementation.
+This POSIX function deletes a thread-specific data key previously
+returned by <code>pthread_key_create()</code>. No cleanup actions
+are done for data structures related to the deleted key or associated
+thread-specific data in any threads. It is undefined behavior to use
+<code>key</code> after it has been deleted.
 <p>
 <b>Input Parameters:</b>
 <p>
@@ -7010,8 +7017,12 @@ this function does nothing in the present implementation.
 <p>
 <b>Returned Value:</b>
 <p>
+If successful, the <code>pthread_key_delete()</code> function will
+return zero (<code>OK</code>).  Otherwise, an error number will be
+returned to indicate the error:
+<p>
 <ul>
-<li>Always returns <code>EINVAL</code>.
+<li><code>EINVAL</code>.  The parameter <code>key</code> is invalid.
 </ul>
 <p>
 <b>Assumptions/Limitations:</b>
@@ -7443,11 +7454,16 @@ interface of the same name.
 <p>
 <b>Description:</b>
   The <code>pthread_mutex_timedlock()</code> function will lock the mutex object referenced by <code>mutex</code>.
-  If the mutex is already locked, the calling thread will block until the mutex becomes available as in the <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code><a> function.
-  If the mutex cannot be locked without waiting for another thread to unlock the mutex, this wait will be terminated when the specified <code>abs_timeout</code> expires.
+  If the mutex is already locked, the calling thread will block until the mutex becomes available
+  as in the <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code></a> function.
+  If the mutex cannot be locked without waiting for another thread to unlock the mutex, this wait
+  will be terminated when the specified <code>abs_timeout</code> expires.
 </p>
 <p>
-  The timeout will expire when the absolute time specified by <code>abs_timeout </code> passes, as measured by the clock on which timeouts are based (that is, when the value of that clock equals or exceeds <code>abs_timeout</code>), or if the absolute time specified by  <code>abs_timeout</code> has already been passed at the time of the call.
+  The timeout will expire when the absolute time specified by <code>abs_timeout</code> passes,
+  as measured by the clock on which timeouts are based (that is, when the value of that clock
+  equals or exceeds <code>abs_timeout</code>), or if the absolute time specified by
+  <code>abs_timeout</code> has already been passed at the time of the call.
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -7989,7 +8005,7 @@ interface of the same name.
   </li>
 </ul>
 <p>
-  <b>Returned Value:</b>0 (<code>OK</code>) on success or on of the following error numbers:
+  <b>Returned Value:</b> 0 (<code>OK</code>) on success or one of the following error numbers:
 </p>
 <ul>
   <li>
@@ -7998,8 +8014,8 @@ interface of the same name.
   </li>
   <li>
     <code>EINVAL</code>.
-    The barrier reference is invalid, or the values specified by attr are invalid, or
-    the value specified by count is equal to zero.
+    The <code>barrier</code> reference is invalid, or the values specified by <code>attr</code>
+    are invalid, or the value specified by <code>count</code> is equal to zero.
   </li>
   <li>
     <code>ENOMEM</code>.
@@ -8042,7 +8058,7 @@ interface of the same name.
   <li><code>barrier</code>. The barrier to be destroyed.</li>
 </ul>
 <p>
-  <b>Returned Value:</b> 0 (<code>OK</code>) on success or on of the following error numbers:
+  <b>Returned Value:</b> 0 (<code>OK</code>) on success or one of the following error numbers:
 </p>
 <ul>
   <li>
@@ -8051,7 +8067,7 @@ interface of the same name.
   </li>
   <li>
     <code>EINVAL</code>.
-    The value specified by barrier is invalid.
+    The value specified by <code>barrier</code> is invalid.
   </li>
 </ul>
 <p>
