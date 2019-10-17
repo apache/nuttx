@@ -92,7 +92,7 @@
  *   SIGILL     A       Illegal instruction
  *   SIGINT     T (3)   Terminal interrupt signal
  *   SIGKILL    T (3)   Kill (cannot be caught or ignored)
- *   SIGPIPE    T       Write on a pipe with no one to read it
+ *   SIGPIPE    T (7)   Write on a pipe with no one to read it
  *   SIGQUIT    A       Terminal quit signal
  *   SIGSEGV    A       Invalid memory reference
  *   SIGSTOP    S (2)   Stop executing (cannot be caught or ignored)
@@ -132,6 +132,7 @@
  * (4)  The default action can be enabled with CONFIG_SIG_SIGUSR1_ACTION
  * (5)  The default action can be enabled with CONFIG_SIG_SIGUSR2_ACTION
  * (6)  The default action can be enabled with CONFIG_SIG_SIGPOLL_ACTION
+ * (7)  The default action can be enabled with CONFIG_SIG_SIGPIPE_ACTION
  */
 
 /* A few of the real time signals are used within the OS.  They have
@@ -188,6 +189,12 @@
 #ifdef CONFIG_SIG_SIGKILL_ACTION
 #  define SIGKILL     CONFIG_SIG_KILL
 #  define SIGINT      CONFIG_SIG_INT
+#endif
+
+#ifndef CONFIG_SIG_SIGPIPE
+#  define SIGPIPE       11
+#else
+#  define SIGPIPE       CONFIG_SIG_SIGPIPE
 #endif
 
 /* The following are non-standard signal definitions */

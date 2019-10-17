@@ -1414,6 +1414,12 @@ config SIG_SIGKILL_ACTION
 		Enable the default action for SIGINT and SIGKILL (terminate the
 		task).
 
+config SIG_SIGPIPE_ACTION
+	bool "SIGPIPE"
+	default y
+	---help---
+		Enable the default action for SIGPIPE (terminate the task).
+
 endif # SIG_DEFAULT
 
 menu "Signal Numbers"
@@ -1499,6 +1505,14 @@ config SIG_INT
 		SIGINT may be ignored or caught by the receiving task.
 
 endif # SIG_DEFAULT
+
+config SIG_PIPE
+	int "SIGPIPE"
+	default 11
+	---help---
+		The SIGPIPE signal is sent to a task termination event.
+		This signal is generated when write on a pipe with no one to read it.
+		SIGPIPE may be ignored.
 
 comment "Non-standard Signal Numbers"
 
