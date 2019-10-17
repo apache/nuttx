@@ -109,13 +109,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_timer_driver_setup
  *
  * Description:
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Value:

@@ -214,6 +214,13 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* TIM */
+
+#define GPIO_TIM1_CH2OUT    GPIO_TIM1_CH2OUT_2  /* PB3 - CN9 4 (D3) */
+#define GPIO_TIM3_CH1OUT    GPIO_TIM3_CH1OUT_2  /* PB4 - CN9 6 (D5) */
+#define GPIO_TIM3_CH2OUT    GPIO_TIM3_CH2OUT_3  /* PC7 - CN5 2 (D9) */
+#define GPIO_TIM3_CH3OUT    GPIO_TIM3_CH3OUT_1  /* PB0 - CN5 3 (D10) */
+
 /* USART */
 
 /* By default the USART2 is connected to STLINK Virtual COM Port:

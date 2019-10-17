@@ -112,23 +112,35 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_TIMER
-  /*Initialize basic timers */
-#  if defined(CONFIG_STM32F0L0G0_TIM6)
+  /* Initialize basic timers */
+
+#if defined(CONFIG_STM32F0L0G0_TIM6)
   syslog(LOG_ERR, "Init timer\n");
   ret = stm32_timer_driver_setup("/dev/timer0", 6);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM6: %d\n", ret);
     }
-#  endif
-#  if defined(CONFIG_STM32F0L0G0_TIM7)
+#endif
+
+#if defined(CONFIG_STM32F0L0G0_TIM7)
   ret = stm32_timer_driver_setup("/dev/timer1", 7);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM7: %d\n", ret);
     }
 
-#  endif
+#endif
+#endif
+
+#if defined(CONFIG_PWM)
+  /* Initialize PWM and register the PWM device */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
 #endif
 
   UNUSED(ret);
