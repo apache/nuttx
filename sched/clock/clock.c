@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock/clock.c
  *
- *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,11 +58,15 @@
  *   To determine the time in seconds, the value returned by clock() should
  *   be divided by the value of the macro CLOCKS_PER_SEC as defined in <time.h>.
  *
+ *   NOTE:  The current implementation does NOT return the processor time
+ *   used by the process.  NuttX currently does not keep any record of
+ *   processing time.  Instead the elapsed time since power up is returned.
+ *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   The system time in units of clock ticks is returend.  If the processor
+ *   The system time in units of clock ticks is returned.  If the processor
  *   time used is not available or its value cannot be represented, the
  *   function will return the value (clock_t)-1.
  *
