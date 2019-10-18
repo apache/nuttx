@@ -619,7 +619,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   mul    = 0;
   dl     = 0;
 
-  /* Try each mulitplier value in the valid range */
+  /* Try each multiplier value in the valid range */
 
   for (cmul = 1 ; cmul < 16; cmul++)
     {

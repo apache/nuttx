@@ -587,6 +587,10 @@ config LPC17_40_UART1_RS485_DIR_DTR
 		the GPIO_USART1_RS485_DIR pin specified in your board config. The DTR pin
 		will be used if selected, the RTS pin will be used otherwise.
 
+config LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+	bool "Use fractional divider for UART baud rate"
+	default n
+
 endmenu
 
 menu "ADC driver options"
