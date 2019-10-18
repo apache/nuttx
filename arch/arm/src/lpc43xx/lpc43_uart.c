@@ -690,7 +690,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   lcr = getreg32(uartbase + LPC43_UART_LCR_OFFSET);
   putreg32(lcr | UART_LCR_DLAB, uartbase + LPC43_UART_LCR_OFFSET);
 
-  /* Save then divider values */
+  /* Save the divider values */
 
   putreg32(dl >> 8, uartbase + LPC43_UART_DLM_OFFSET);
   putreg32(dl & 0xff, uartbase + LPC43_UART_DLL_OFFSET);

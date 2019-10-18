@@ -396,6 +396,7 @@ void lpc17_40_lowsetup(void)
   putreg32(UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8,
            CONSOLE_BASE + LPC17_40_UART_FCR_OFFSET);
 
+#ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
   /* Disable FDR (fractional divider),
    * ignored by baudrate calculation => has to be disabled
    */
@@ -403,15 +404,20 @@ void lpc17_40_lowsetup(void)
   putreg32((1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT),
            CONSOLE_BASE + LPC17_40_UART_FDR_OFFSET);
 
+#endif
   /* Set up the LCR and set DLAB=1 */
 
   putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB,
            CONSOLE_BASE + LPC17_40_UART_LCR_OFFSET);
 
+#ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+  up_setbaud(CONSOLE_BASE, CONSOLE_NUMERATOR, CONSOLE_BAUD);
+#else
   /* Set the BAUD divisor */
 
   putreg32(CONSOLE_DL >> 8, CONSOLE_BASE + LPC17_40_UART_DLM_OFFSET);
   putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE + LPC17_40_UART_DLL_OFFSET);
+#endif
 
   /* Clear DLAB */
 
