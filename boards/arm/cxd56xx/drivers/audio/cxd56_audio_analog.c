@@ -44,6 +44,8 @@
 #include <arch/board/board.h>
 #include <arch/chip/audio.h>
 
+#include <arch/board/cxd56_clock.h>
+
 #include "cxd56_audio_config.h"
 #include "cxd56_audio_analog.h"
 #include "cxd56_audio_aca.h"
