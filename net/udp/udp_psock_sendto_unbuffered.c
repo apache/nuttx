@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_psock_sendto_unbuffered.c
  *
- *   Copyright (C) 2007-2009, 2011-2016, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2011-2016, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -80,10 +80,11 @@ struct sendto_s
 #if defined(CONFIG_NET_SOCKOPTS) || defined(NEED_IPDOMAIN_SUPPORT)
   FAR struct socket *st_sock;         /* Points to the parent socket structure */
 #endif
+  FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
+  FAR struct net_driver_s *st_dev;    /* Driver that will perform the transmission */
 #ifdef CONFIG_NET_SOCKOPTS
   clock_t st_time;                    /* Last send time for determining timeout */
 #endif
-  FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   sem_t st_sem;                       /* Semaphore signals sendto completion */
   uint16_t st_buflen;                 /* Length of send buffer (error if <0) */
   const char *st_buffer;              /* Pointer to send buffer */
@@ -207,9 +208,22 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
-  ninfo("flags: %04x\n", flags);
-  if (pstate)
+  DEBUGASSERT(pstate != NULL && pstate->dev != NULL);
+  if (pstate != NULL)
     {
+      /* The TCP socket should be bound to a device.  Make sure that the
+       * polling device is the one that we are bound to.
+       */
+
+      if (dev != pstate->st_dev)
+        {
+          /* Ignore this poll.  Wait for the right device */
+
+          return flags;
+        }
+
+      ninfo("flags: %04x\n", flags);
+
       /* If the network device has gone down, then we will have terminate
        * the wait now with an error.
        */
@@ -320,7 +334,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          socklen_t tolen)
 {
   FAR struct udp_conn_s *conn;
-  FAR struct net_driver_s *dev;
   struct sendto_s state;
   int ret;
 
@@ -501,8 +514,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * should never be NULL.
    */
 
-  dev = udp_find_raddr_device(conn);
-  if (dev == NULL)
+  state.st_dev = udp_find_raddr_device(conn);
+  if (state.st_dev == NULL)
     {
       nerr("ERROR: udp_find_raddr_device failed\n");
       ret = -ENETUNREACH;
@@ -511,7 +524,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Make sure that the device is in the UP state */
 
-  if ((dev->d_flags & IFF_UP) == 0)
+  if ((state.st_dev->d_flags & IFF_UP) == 0)
     {
       nwarn("WARNING: device is DOWN\n");
       ret = -EHOSTUNREACH;
@@ -520,7 +533,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Set up the callback in the connection */
 
-  state.st_cb = udp_callback_alloc(dev, conn);
+  state.st_cb = udp_callback_alloc(state.st_dev, conn);
   if (state.st_cb)
     {
       state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
@@ -529,7 +542,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(state.st_dev);
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  net_lockedwait will also terminate if a signal
@@ -540,7 +553,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Make sure that no further events are processed */
 
-      udp_callback_free(dev, conn, state.st_cb);
+      udp_callback_free(state.st_dev, conn, state.st_cb);
     }
 
   /* The result of the sendto operation is the number of bytes transferred */
