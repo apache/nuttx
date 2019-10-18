@@ -691,7 +691,7 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
  * Name: lpc17_40_uartcclkdiv
  *
  * Description:
- *   Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
+ *   Select a CCLK divider to produce the UART PCLK.  The strategy is to select the
  *   smallest divisor that results in an solution within range of the 16-bit
  *   DLM and DLL divisor:
  *
