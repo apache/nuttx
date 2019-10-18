@@ -2,7 +2,9 @@
 # boards/arm/am335x/beaglebone-black/src/Makefile
 #
 #   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
+#   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+#           Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,7 +38,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = am335x_boot.c am335x_leds.c
+CSRCS = am335x_boot.c am335x_bringup.c am335x_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += am355x_appinit.c

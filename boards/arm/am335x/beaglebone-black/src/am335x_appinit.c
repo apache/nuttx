@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/am335x/beaglebone-black/src/am335x_boot.c
+ * boards/arm/am335x/beaglebone-black/src/am335x_appinit.c
  *
- *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
 #include <nuttx/board.h>
 
 #include "beaglebone-black.h"
@@ -49,76 +47,48 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am335x_memory_initialize
+ * Name: board_app_initialize
  *
  * Description:
- *   All AM335X architectures must provide the following entry point.  This
- *   entry point is called early in the initialization before memory has
- *   been configured.  This board-specific function is responsible for
- *   configuring any on-board memories.
- *
- *   Logic in am335x_memory_initialize must be careful to avoid using any
- *   global variables because those will be uninitialized at the time this
- *   function is called.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
  * Input Parameters:
- *   None
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void am335x_memory_initialize(void)
+int board_app_initialize(uintptr_t arg)
 {
-  /* SDRAM was initialized by a bootloader in the supported configurations. */
-}
-
-/****************************************************************************
- * Name: am335x_board_initialize
- *
- * Description:
- *   All AM335x architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void am335x_board_initialize(void)
-{
-  /* Configure on-board LEDs. */
-
-  am335x_led_initialize();
-}
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
+  /* Board initialization already performed by board_late_initialize() */
+
+  return OK;
+#else
   /* Perform board-specific initialization */
 
   return am335x_bringup();
+#endif
 }
-#endif /* CONFIG_BOARD_LATE_INITIALIZE */
