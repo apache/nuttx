@@ -698,9 +698,6 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
  *     PCLK = CCLK / divisor
  *     BAUD = PCLK / (16 * DL)
  *
- *   Ignoring the fractional divider for now. (If you want to extend this driver
- *   to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- *   the same peripheral and that logic could easily leveraged here).
  *
  *   For the LPC176x the PCLK is determined by the UART-specific divisor in
  *   PCLKSEL0 or PCLKSEL1:
@@ -979,9 +976,6 @@ static inline void lpc17_40_uart3config(void)
  *     BAUD = PCLK / (16 * DL), or
  *     DL   = PCLK / BAUD / 16
  *
- *   Ignoring the fractional divider for now. (If you want to extend this driver
- *   to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- *   the same peripheral and that logic could easily leveraged here).
  *
  ************************************************************************************/
 #ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
@@ -1081,12 +1075,14 @@ static int up_setup(struct uart_dev_s *dev)
       lcr |= (UART_LCR_PE | UART_LCR_PS_EVEN);
     }
 
+#ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
   /* Disable FDR (fractional divider),
    * ignored by baudrate calculation => has to be disabled
    */
 
   up_serialout(priv, LPC17_40_UART_FDR_OFFSET,
               (1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT));
+#endif
 
   /* Enter DLAB=1 */
 
