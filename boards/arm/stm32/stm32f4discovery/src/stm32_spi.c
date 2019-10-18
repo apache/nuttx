@@ -174,11 +174,27 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
       stm32_gpiowrite(GPIO_MAX6675_CS, !selected);
     }
 #endif
+
+#if defined(CONFIG_MMCSD_SPI)
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      stm32_gpiowrite(GPIO_MMCSD_NSS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t ret = 0;
+#if defined(CONFIG_MMCSD_SPI)
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      /* Note: SD_DET is pulled high when there's no SD card present. */
+
+      ret = stm32_gpioread(GPIO_MMCSD_NCD) ? 0 : 1;
+    }
+#endif
+  return ret;
 }
 #endif
 

@@ -233,6 +233,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+  /* Initialize the MMC/SD SPI driver (SPI2 is used) */
+
+  ret = stm32_mmcsd_initialize(2, CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDMINOR, ret);
+    }
+#endif
+
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
    * thread will monitor for USB connection and disconnection events.

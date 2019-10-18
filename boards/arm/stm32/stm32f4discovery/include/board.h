@@ -335,6 +335,11 @@
 #define GPIO_SPI2_MOSI    GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK     GPIO_SPI2_SCK_1
 
+/* SPI2 DMA -- As used for MMC/SD SPI */
+
+#define DMACHAN_SPI2_RX   DMAMAP_SPI2_RX
+#define DMACHAN_SPI2_TX   DMAMAP_SPI2_TX
+
 /* SPI3 DMA -- As used for I2S DMA transfer with the audio configuration */
 
 #define GPIO_SPI3_MISO    GPIO_SPI3_MISO_1
@@ -393,6 +398,14 @@
 #  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
 #  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
 
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+#define GPIO_MMCSD_NSS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN12)
+
+#define GPIO_MMCSD_NCD    (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                           GPIO_PORTC | GPIO_PIN1)
 #endif
 
 /* DMA Channl/Stream Selections *****************************************************/

@@ -475,6 +475,18 @@ int stm32_lis3dshinitialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: stm32_mmcsdinitialize
+ *
+ * Description:
+ *   Sets up MMC/SD interface.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SPI
+int stm32_mmcsd_initialize(int port, int minor);
+#endif
+
+/****************************************************************************
  * Name: nunchuck_initialize
  *
  * Description:
