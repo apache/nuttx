@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/udp/udp_send_buffered.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -283,7 +283,11 @@ static inline int sendto_timeout(FAR struct socket *psock,
  * Name: sendto_next_transfer
  *
  * Description:
- *   Setup for the next packet transfer
+ *   Setup for the next packet transfer.  That function is called (1)
+ *   psock_udp_sendto() by when the new UDP packet is buffered at the head of
+ *   the write queue and (2) by sendto_writebuffer_release() when that
+ *   previously queued write buffer was sent and a new write buffer lies at
+ *   the head of the write queue.
  *
  * Input Parameters:
  *   psock - Socket state structure
@@ -321,6 +325,11 @@ static int sendto_next_transfer(FAR struct socket *psock,
 
   /* Get the device that will handle the remote packet transfers.  This
    * should never be NULL.
+   *
+   * REVISIT:  There is a logical error here for the case where there are
+   * multiple network devices.  In that case, the packets may need to be sent
+   * in a different order than they were queued.  Forcing FIFO packet
+   * transmission could harm performance.
    */
 
   dev = udp_find_raddr_device(conn);
@@ -408,6 +417,24 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
+
+  DEBUGASSERT(dev != NULL && conn != NULL && psock != NULL);
+
+  /* The UDP socket should be bound to a device.  Make sure that the polling
+   * device is the one that we are bound to.
+   *
+   * REVISIT:  There is a logical error here for the case where there are
+   * multiple network devices.  In that case, the packets may need to be sent
+   * in a different order than they were queued.  The packet we may need to
+   * send on this device may not be at the head of the list.  Forcing FIFO
+   * packet transmission could degrade performance!
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
 
   ninfo("flags: %04x\n", flags);
 
@@ -539,6 +566,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_wrbuffer_s *wrb;
+  bool empty;
   int ret = OK;
 
   /* If the UDP socket was previously assigned a remote peer address via
@@ -771,21 +799,27 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * not a very common use case, however.
        */
 
+      empty = sq_empty(&conn->write_q);
+
       sq_addlast(&wrb->wb_node, &conn->write_q);
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
             wrb, wrb->wb_iob->io_pktlen,
             conn->write_q.head, conn->write_q.tail);
 
-      /* Set up for the next packet transfer by setting the connection
-       * address to the address of the next packet now at the header of the
-       * write buffer queue.
-       */
-
-      ret = sendto_next_transfer(psock, conn);
-      if (ret < 0)
+      if (empty)
         {
-          (void)sq_remlast(&conn->write_q);
-          goto errout_with_wrb;
+          /* The new write buffer lies at the head of the write queue.  Set
+           * up for the next packet transfer by setting the connection
+           * address to the address of the next packet now at the header of
+           * the write buffer queue.
+           */
+
+          ret = sendto_next_transfer(psock, conn);
+          if (ret < 0)
+            {
+              (void)sq_remlast(&conn->write_q);
+              goto errout_with_wrb;
+            }
         }
 
       net_unlock();
