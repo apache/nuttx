@@ -313,7 +313,7 @@ Configuration Sub-Directories
   udp
 
     This alternative configuration directory is similar to nettest
-    except that is use examples/upd to exercise UDP.
+    except that it uses examples/udp to exercise UDP.
 
   webserver
 

@@ -516,11 +516,8 @@ Configuration Directories
 
     NOTES:
 
-    1. Uses the older, OABI, buildroot toolchain.  But that is easily
-       reconfigured:
-
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+    1. Uses the default toolchain for the selected platform.  But that is
+       easily reconfigured.
 
     2. In this configuration, the SDRAM is not added to heap but is
        dedicated to supporting an LCD frame buffer at address 0xa0010000.

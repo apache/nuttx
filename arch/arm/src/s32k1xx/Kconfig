@@ -247,14 +247,16 @@ config S32K1XX_FLASHCFG_BACKDOOR1
 	default 0xffffffff
 	---help---
 		Refer to the S32K1xx reference manual for a description of the
-		backdoor key.
+		backdoor key.  This option selects the first 32-bit word in
+		memory.
 
 config S32K1XX_FLASHCFG_BACKDOOR2
 	hex "Backdoor comparison key 2"
 	default 0xffffffff
 	---help---
 		Refer to the S32K1xx reference manual for a description of the
-		backdoor key.
+		backdoor key.  This option selects the second 32-bit word in
+		memory
 
 config S32K1XX_FLASHCFG_FPROT
 	hex "Program flash protection bytes"
