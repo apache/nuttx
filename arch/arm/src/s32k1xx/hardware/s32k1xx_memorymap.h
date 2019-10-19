@@ -47,6 +47,7 @@
  ************************************************************************************/
 
 #define S32K1XX_AIPS_LITE_BASE   0x40000000  /* Peripheral bridge (AIPS-Lite) */
+#  define S32K1XX_FLASHCFG_BASE  0x40000400  /* FLASH Configuration bytes */
 #  define S32K1XX_MSCM_BASE      0x40001000  /* MSCM */
 #  define S32K1XX_DMAC_BASE      0x40008000  /* DMA controller */
 #  define S32K1XX_DMADESC_BASE   0x40008000  /* DMA transfer control descriptors */

@@ -239,6 +239,39 @@ config S32K1XX_PORTEINTS
 endif
 endmenu # S32K1xx GPIO Interrupt Configuration
 
+menu "S32K1xx FLASH Configuration"
+comment "CAREFUL: Bad selections may lock up your board"
+
+config S32K1XX_FLASHCFG_BACKDOOR1
+	hex "Backdoor comparison key 1"
+	default 0xffffffff
+
+config S32K1XX_FLASHCFG_BACKDOOR2
+	hex "Backdoor comparison key 2"
+	default 0xffffffff
+
+config S32K1XX_FLASHCFG_FPROT
+	hex "Program flash protection bytes"
+	default 0xffffffff
+
+config S32K1XX_FLASHCFG_FSEC
+	hex "Flash security byte"
+	default 0xff
+
+config S32K1XX_FLASHCFG_FOPT
+	hex "Flash nonvolatile option byte"
+	default 0xff
+
+config S32K1XX_FLASHCFG_FEPROT
+	hex "EEPROM protection byte"
+	default 0xff
+
+config S32K1XX_FLASHCFG_FDPROT
+	hex "Data flash protection byte"
+	default 0xff
+
+endmenu # S32K1xx FLASH Configuration
+
 menu "eDMA Configuration"
 	depends on S32K1XX_EDMA
 

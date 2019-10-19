@@ -770,7 +770,7 @@ indent.sh
     6. I also indent brackets differently on structures than does this script.
     7. I normally use no spaces in casts.  indent.sh adds spaces in casts like
       "(FAR void *)&foo" becomes "(FAR void *) & foo".
-    7. When used with header files, the initial idempotence conditional test
+    8. When used with header files, the initial idempotence conditional test
        causes all preprocessor directives to be indented in the file.  So for
        header files, you will need to substitute "^#  " with "#" in the
        converted header file.

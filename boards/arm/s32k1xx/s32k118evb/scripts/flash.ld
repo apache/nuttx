@@ -46,21 +46,32 @@
 
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
+  vflash (rx) : ORIGIN = 0x00000000, LENGTH = 1K
+  pflash (rx) : ORIGIN = 0x00000400, LENGTH = 16
+  dflash (rx) : ORIGIN = 0x00000410, LENGTH = 255K-16
   sram  (rwx) : ORIGIN = 0x1ffffc00, LENGTH = 23K
 }
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
+EXTERN(g_flashcfg)
 ENTRY(_stext)
 
 SECTIONS
 {
-  .text :
+  .vectors :
   {
     _stext = ABSOLUTE(.);
     *(.vectors)
-    . = 0x0000410;    /* Skip over flash configuration field */
+  } > vflash
+
+  .flashcfg :
+  {
+    *(.flashcfg)
+  } > pflash
+
+  .text :
+  {
     *(.text .text.*)
     *(.fixup)
     *(.gnu.warning)
@@ -72,26 +83,26 @@ SECTIONS
     *(.gcc_except_table)
     *(.gnu.linkonce.r.*)
     _etext = ABSOLUTE(.);
-  } > flash
+  } > dflash
 
   .init_section :
   {
     _sinit = ABSOLUTE(.);
     *(.init_array .init_array.*)
     _einit = ABSOLUTE(.);
-  } > flash
+  } > dflash
 
   .ARM.extab :
   {
     *(.ARM.extab*)
-  } >flash
+  } >dflash
 
   .ARM.exidx :
   {
     __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
     __exidx_end = ABSOLUTE(.);
-  } >flash
+  } >dflash
 
   .data :
   {
@@ -101,7 +112,7 @@ SECTIONS
     CONSTRUCTORS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
-  } > sram AT > flash
+  } > sram AT > dflash
 
   _eronly = LOADADDR(.data);
 
@@ -110,7 +121,7 @@ SECTIONS
     _sramfuncs = ABSOLUTE(.);
     *(.ramfunc  .ramfunc.*)
     _eramfuncs = ABSOLUTE(.);
-  } > sram AT > flash
+  } > sram AT > dflash
 
   _framfuncs = LOADADDR(.ramfunc);
 

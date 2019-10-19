@@ -57,6 +57,10 @@ CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c
 CHIP_CSRCS += s32k1xx_periphclocks.c s32k1xx_pin.c s32k1xx_pingpio.c
 CHIP_CSRCS += s32k1xx_idle.c
 
+ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+CHIP_CSRCS += s32k1xx_flashcfg.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_LPUART),y)
 CHIP_CSRCS += s32k1xx_serial.c
 endif
