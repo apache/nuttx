@@ -732,8 +732,8 @@ indent.sh
   (see below and the comments at the top of the indent.sh file).
 
   USAGE:
-    tools/indent.sh [-d] -o <out-file> <in-file>
-    tools/indent.sh [-d] <in-file-list>
+    tools/indent.sh [-d] [-p] -o <out-file> <in-file>
+    tools/indent.sh [-d] [-p] <in-file-list>
     tools/indent.sh [-d] -h
 
   Where:
@@ -746,22 +746,29 @@ indent.sh
       will not be modified.
     -d
       Enable script debug
+    -p
+      Comments are pre-formatted.  Do not reformat.
     -h
       Show this help message and exit
 
   The conversions make by the indent.sh script differs from the NuttX coding
   style in that:
 
-    1. I normally put the trailing */ of a multi-line comment on a separate
-       line.  If your C file already has properly formatted comments then
-       using -nfca instead of -fca eliminates that bad behavior
-    2. I usually align things vertically (like '=' in assignments),
-    3. indent.sh puts a bogus blank line at the top of the file,
-    4. I don't like the way it handles nested conditional compilation
+    1. The coding standard requires that the trailing */ of a multi-line
+       comment be on a separate line.  By default, indent.sh will put the
+       final */ on the same line as the last comment text.  If your C file
+       already has properly formatted comments then using the -p option will
+       eliminate that bad behavior
+    2. If your source file has highly formatted comments containing things
+       such as tables or lists, then use the -p option to preserve those
+       pre-formatted comments.
+    3. I usually align things vertically (like '=' in assignments),
+    4. indent.sh puts a bogus blank line at the top of the file,
+    5. I don't like the way it handles nested conditional compilation
        intermixed with code.  I prefer the preprocessor conditional tests
        be all right justified in that case.
-    5. I also indent brackets differently on structures than does this script.
-    6. I normally use no spaces in casts.  indent.sh adds spaces in casts like
+    6. I also indent brackets differently on structures than does this script.
+    7. I normally use no spaces in casts.  indent.sh adds spaces in casts like
       "(FAR void *)&foo" becomes "(FAR void *) & foo".
     7. When used with header files, the initial idempotence conditional test
        causes all preprocessor directives to be indented in the file.  So for
@@ -769,7 +776,9 @@ indent.sh
        converted header file.
 
    You will manually need to check for the issues listed above after
-   performing the conversions.
+   performing the conversions.  nxstyle.c provides a good test that will
+   catch most of the indent.sh screw-ups.  Together, they do a pretty good
+   job of formatting.
 
    See also nxstyle.c and uncrustify.cfg
 

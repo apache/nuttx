@@ -2,7 +2,7 @@
 ############################################################################
 # tools/indent.sh
 #
-#   Copyright (C) 2008, 2010, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010, 2016, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,6 @@
 
 # Constants
 
-options="-nbad -bap -bbb -nbbo -nbc -bl -bl2 -bls -nbs -cbi2 -ncdw -nce -ci2 -cli0 -cp40 -ncs -nbfda -nbfde -di1 -nfc1 -fca -i2 -l80 -lp -ppi2 -lps -npcs -pmt -nprs -npsl -saf -sai -sbi2 -saw -sc -sob -nss -nut"
-
 advice="Try '$0 -h' for more information"
 
 # Parse inputs
@@ -69,11 +67,15 @@ unset filelist
 unset outfile
 files=none
 mode=inplace
+fca=-fca
 
 while [ ! -z "${1}" ]; do
 	case ${1} in
 	-d )
 		set -x
+		;;
+	-p )
+		fca=-nfca
 		;;
 	-o )
 		shift
@@ -84,8 +86,8 @@ while [ ! -z "${1}" ]; do
 		echo "$0 is a tool for generation of proper version files for the NuttX build"
 		echo ""
 		echo "USAGE:"
-		echo "	$0 [-d] -o <out-file> <in-file>"
-		echo "	$0 [-d] <in-file-list>"
+		echo "	$0 [-d] [-p] -o <out-file> <in-file>"
+		echo "	$0 [-d] [-p] <in-file-list>"
 		echo "	$0 [-d] -h"
 		echo ""
 		echo "Where:"
@@ -98,6 +100,8 @@ while [ ! -z "${1}" ]; do
 		echo "		will not be modified."
 		echo "	-d"
 		echo "		Enable script debug"
+		echo "	-p"
+		echo "		Comments are pre-formatted.  Do not reformat."
 		echo "	-h"
 		echo "		Show this help message and exit"
 		exit 0
@@ -127,6 +131,10 @@ if [ "X${files}" == "Xnone" ]; then
 	echo ${advice}
 	exit 1
 fi
+
+# Options
+
+options="-nbad -bap -bbb -nbbo -nbc -bl -bl2 -bls -nbs -cbi2 -ncdw -nce -ci2 -cli0 -cp40 -ncs -nbfda -nbfde -di1 -nfc1 ${fca} -i2 -l80 -lp -ppi2 -lps -npcs -pmt -nprs -npsl -saf -sai -sbi2 -saw -sc -sob -nss -nut"
 
 # Perform the indentation
 
