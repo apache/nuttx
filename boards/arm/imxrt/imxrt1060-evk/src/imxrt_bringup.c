@@ -46,6 +46,7 @@
 
 #include <syslog.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/video/fb.h>
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
 
@@ -177,6 +178,25 @@ int imxrt_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD slot %d: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = imxrt_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
 

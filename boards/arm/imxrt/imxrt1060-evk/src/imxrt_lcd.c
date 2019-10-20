@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/imxrt1050-evk/src/imxrt_lcd.c
+ * boards/arm/imxrt/imxrt1060-evk/src/imxrt_lcd.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include "imxrt_lcd.h"
 #include "imxrt_gpio.h"
 
-#include "imxrt1050-evk.h"
+#include "imxrt1060-evk.h"
 
 /****************************************************************************
  * Public Functions

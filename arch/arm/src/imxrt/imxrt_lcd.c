@@ -51,7 +51,6 @@
 #include <nuttx/video/fb.h>
 
 #include "up_arch.h"
-#include <arch/board/board.h>
 
 #include <nuttx/board.h>
 
@@ -59,6 +58,8 @@
 #include "imxrt_iomuxc.h"
 
 #include "hardware/imxrt_pinmux.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -506,7 +507,7 @@ int up_fbinitialize(int display)
 
   /* Reset the LCD */
 
-  imxrt_lcdinitialize();
+  imxrt_lcd_initialize();
 
   imxrt_lcdreset();
 

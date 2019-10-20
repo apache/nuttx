@@ -44,13 +44,13 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/imxrt_lcd.h"
-
 #include <nuttx/config.h>
 
 #include <stdbool.h>
 
 #include <nuttx/nx/nxglib.h>
+
+#include "hardware/imxrt_lcd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -196,7 +196,7 @@ void imxrt_lcdclear(nxgl_mxpixel_t color);
  *
  ****************************************************************************/
 
-void imxrt_lcdinitialize(void);
+void imxrt_lcd_initialize(void);
 
 /****************************************************************************
  * Name: IMXRT_backlight

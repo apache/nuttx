@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/imxrt1060/include/board.h
+ * boards/arm/imxrt/imxrt1060-evk/include/board.h
  *
  *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
