@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/sim/up_tickless.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Tickless OS Support.
  *
@@ -39,8 +40,8 @@
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void sim_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the initialization sequence (by up_initialize()).
+ *   void sim_timer_initialize(void): Initializes the timer facilities.
+ *     Called early in the initialization sequence (by up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
@@ -75,12 +76,28 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-#  define TICK_USEC (USEC_PER_SEC / CLK_TCK)
-#  define TICK_SEC  (TICK_USEC / USEC_PER_SEC)
-#  define TICK_NSEC ((TICK_USEC % NSEC_PER_USEC) * NSEC_PER_USEC)
+/* TICK_USEC, the desired number of microseconds per clock tick (truncated) */
+
+#  define TICK_USEC      (USEC_PER_SEC / CLK_TCK)
+
+/* TICK_SEC, the integer number of seconds in the clock tick (truncated).
+ * Should be zero.
+ */
+
+#  define TICK_SEC       (TICK_USEC / USEC_PER_SEC)
+
+/* TICK_NSEC, the integer number of nanoseconds (in addition to the number of
+ * seconds) in the clock tick.
+ */
+
+#  define USEC_REMAINDER (TICK_USEC - (TICK_SEC * USEC_PER_SEC))
+#  define TICK_NSEC      (USEC_REMAINDER * NSEC_PER_USEC)
+
 #else
-#  define TICK_SEC  0
-#  define TICK_NSEC NSEC_PER_TICK
+
+#  define TICK_SEC       0
+#  define TICK_NSEC      NSEC_PER_TICK
+
 #endif
 
 /****************************************************************************
@@ -89,7 +106,7 @@
 
 static struct timespec g_elapsed_time;
 static struct timespec g_interval_delay;
-static bool g_timer_active;
+static bool            g_timer_active;
 
 /****************************************************************************
  * Public Functions
@@ -122,6 +139,9 @@ static bool g_timer_active;
 
 void sim_timer_initialize(void)
 {
+  g_elapsed_time.tv_sec  = 0;
+  g_elapsed_time.tv_nsec = 0;
+  g_timer_active         = false;
 }
 
 /****************************************************************************
@@ -161,6 +181,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 {
   ts->tv_sec  = g_elapsed_time.tv_sec;
   ts->tv_nsec = g_elapsed_time.tv_nsec;
+
   return OK;
 }
 
@@ -216,6 +237,8 @@ int up_timer_cancel(FAR struct timespec *ts)
   g_interval_delay.tv_sec  = 0;
   g_interval_delay.tv_nsec = 0;
   g_timer_active           = false;
+
+  return 0;
 }
 #endif
 
@@ -250,6 +273,8 @@ int up_timer_start(FAR const struct timespec *ts)
   g_interval_delay.tv_sec  = ts->tv_sec;
   g_interval_delay.tv_nsec = ts->tv_nsec;
   g_timer_active           = true;
+
+  return 0;
 }
 #endif
 
