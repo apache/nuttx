@@ -47,24 +47,24 @@
  * Public Data
  ****************************************************************************/
 
-/* Configured FLASH configuration bytes */
+/* Configured FLASH configuration bytes.  NOTE:  Little endian assumed. */
 
 uint8_t g_flashcfg[16]  __attribute__((section(".flashcfg"))) =
 {
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 24) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 16) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 8) & 0xff),
-  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 24) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 16) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 8) & 0xff),
-  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 24) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 16) & 0xff),
-  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 8) & 0xff),
-  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_FPROT & 0xff),
-  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FDPROT,
-  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FEPROT,
-  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FOPT,
-  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FSEC
+  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 & 0xff),         /* 0x0400 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 8) & 0xff),  /* 0x0401 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 16) & 0xff), /* 0x0402 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 24) & 0xff), /* 0x0403 */
+  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 & 0xff),         /* 0x0404 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 8) & 0xff),  /* 0x0405 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 16) & 0xff), /* 0x0406 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR2 >> 24) & 0xff), /* 0x0407 */
+  (uint8_t)(CONFIG_S32K1XX_FLASHCFG_FPROT & 0xff),             /* 0x0408 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 8) & 0xff),      /* 0x0409 */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 16) & 0xff),     /* 0x040a */
+  (uint8_t)((CONFIG_S32K1XX_FLASHCFG_FPROT >> 24) & 0xff),     /* 0x040b */
+  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FSEC,                       /* 0x040c */
+  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FOPT,                       /* 0x040d */
+  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FEPROT,                     /* 0x040e */
+  (uint8_t)CONFIG_S32K1XX_FLASHCFG_FDPROT                      /* 0x040f */
 };
