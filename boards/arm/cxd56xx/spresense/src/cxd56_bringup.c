@@ -389,6 +389,14 @@ int cxd56_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#ifdef CONFIG_MODEM_ALTMDM
+  ret = board_altmdm_initialize("/dev/altmdm");
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze Altair modem. \n");
+    }
+#endif
+
 #ifdef CONFIG_WL_GS2200M
   ret = board_gs2200m_initialize("/dev/gs2200m", 5);
   if (ret < 0)

@@ -57,6 +57,7 @@
 #include "cxd56_gpioif.h"
 
 #include "cxd56_audio.h"
+#include "cxd56_altmdm.h"
 #include "cxd56_ak09912.h"
 #include "cxd56_apds9930.h"
 #include "cxd56_apds9960.h"

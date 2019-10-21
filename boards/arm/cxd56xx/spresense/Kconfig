@@ -68,4 +68,47 @@ config LCD_ON_MAIN_BOARD
 
 endchoice
 endif
+comment "LTE Options"
+
+menuconfig CXD56_LTE
+        bool "LTE"
+        default n
+
+if CXD56_LTE
+
+choice
+        prompt "LTE SPI selection"
+        default CXD56_LTE_SPI4
+
+config CXD56_LTE_SPI4
+        bool "Use SPI4"
+        select CXD56_SPI4
+
+config CXD56_LTE_SPI5
+        bool "Use SPI5"
+        select CXD56_SPI5
+endchoice
+
+if CXD56_LTE_SPI4
+
+config CXD56_LTE_SPI4_DMAC
+        bool "Use DMAC for SPI4"
+        default y
+        select CXD56_DMAC_SPI4_TX
+        select CXD56_DMAC_SPI4_RX
+
+endif # CXD56_LTE_SPI4
+
+if CXD56_LTE_SPI5
+
+config CXD56_LTE_SPI5_DMAC
+        bool "Use DMAC for SPI5"
+        default y
+        select CXD56_DMAC_SPI5_TX
+        select CXD56_DMAC_SPI5_RX
+
+endif # CXD56_LTE_SPI4
+
+endif # CXD56_LTE
+
 endif

@@ -38,6 +38,11 @@ ifeq ($(CONFIG_CXD56_AUDIO), y)
 CSRCS += cxd56_audio.c
 endif
 
+ifeq ($(CONFIG_MODEM_ALTMDM),y)
+CSRCS += cxd56_altmdm.c
+CSRCS += cxd56_altmdm_spi.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
 CSRCS += cxd56_uid.c
 endif
