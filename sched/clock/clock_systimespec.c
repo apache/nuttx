@@ -173,15 +173,17 @@ int clock_systimespec(FAR struct timespec *ts)
       uint64_t msecs;
       uint64_t secs;
       uint64_t nsecs;
+#define WIDE_CAST (uint64_t)
 #else
       clock_t msecs;
       clock_t secs;
       clock_t nsecs;
+#define WIDE_CAST
 #endif
 
       /* Get the time since power-on in seconds and milliseconds */
 
-      msecs = TICK2MSEC(clock_systimer());
+      msecs = TICK2MSEC(WIDE_CAST clock_systimer());
       secs  = msecs / MSEC_PER_SEC;
 
       /* Return the elapsed time in seconds and nanoseconds */
