@@ -81,7 +81,7 @@
 #  endif
 #endif
 #else
-#error "Select LTE SPI 4 or 5"
+#  error "Select LTE SPI 4 or 5"
 #endif
 
 /****************************************************************************
@@ -120,7 +120,7 @@ static void spi_pincontrol(int bus, bool on)
           CXD56_PIN_CONFIGS(PINCONFS_SPI4_GPIO);
         }
       break;
-#endif                               /* CONFIG_CXD56_SPI4 */
+#endif  /* CONFIG_CXD56_SPI4 */
 
 #ifdef CONFIG_CXD56_SPI5
     case 5:
@@ -133,7 +133,7 @@ static void spi_pincontrol(int bus, bool on)
         {
           CXD56_PIN_CONFIGS(PINCONFS_EMMCA_GPIO);
         }
-#endif                             /* CONFIG_CXD56_SPI5_PINMAP_EMMC */
+#endif  /* CONFIG_CXD56_SPI5_PINMAP_EMMC */
 #ifdef CONFIG_CXD56_SPI5_PINMAP_SDIO
       if (on)
         {
@@ -143,9 +143,9 @@ static void spi_pincontrol(int bus, bool on)
         {
           CXD56_PIN_CONFIGS(PINCONFS_SDIOA_GPIO);
         }
-#endif                             /* CONFIG_CXD56_SPI5_PINMAP_SDIO */
+#endif  /* CONFIG_CXD56_SPI5_PINMAP_SDIO */
       break;
-#endif                               /* CONFIG_CXD56_SPI5 */
+#endif  /* CONFIG_CXD56_SPI5 */
     default:
       break;
     }

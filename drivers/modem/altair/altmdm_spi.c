@@ -232,6 +232,7 @@ static int start_svtimer(FAR struct altmdm_dev_s *priv)
     {
       return -1;
     }
+
   priv->spidev.sleep_param.sv_timerid = timerid;
 
   return 0;
@@ -338,6 +339,7 @@ static int wait_xferready(FAR struct altmdm_dev_s *priv)
           spidev->is_xferready = true;
           m_info("ready to xfer\n");
         }
+
       return -1;
     }
 
@@ -398,6 +400,7 @@ static void init_rxbuffer(FAR struct altmdm_dev_s *priv,
           l_buff->buff_size = unit_size;
         }
     }
+
   *rxbuff = l_buff;
 }
 
@@ -418,6 +421,7 @@ static void uninit_rxbuffer(FAR struct altmdm_dev_s *priv,
         {
           kmm_free(rxbuff->buff_addr);
         }
+
       kmm_free(rxbuff);
     }
 }
@@ -806,6 +810,7 @@ static int do_xferheader(FAR struct altmdm_dev_s *priv,
                                 spidev->tx_param.actual_size);
         }
     }
+
   if (!is_sleepreq)
     {
       alloc_rxbuffer(priv, &spidev->rx_param.rxbuff, MAX_PKT_SIZE);
@@ -815,6 +820,7 @@ static int do_xferheader(FAR struct altmdm_dev_s *priv,
         }
       set_txheader_possibleofrx(priv, possibleofrx);
     }
+
   show_txheader(priv);
 
   /* Wait for Receiver Ready to receive. */
@@ -882,6 +888,7 @@ static int do_receivedata(FAR struct altmdm_dev_s *priv)
 
       ret = do_dmaxfer(priv, (void *)g_tmp_txbuff, rxbuff, dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("Rcv Data Failed. ret = %d.\n", ret);
@@ -919,6 +926,7 @@ static int do_senddata(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)spidev->tx_param.buff_addr,
                        (void *)g_tmp_rxbuff, dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Snd Data Failed. ret = %d.\n", __LINE__, ret);
@@ -971,6 +979,7 @@ static int do_trxdata(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)spidev->tx_param.buff_addr, rxbuff,
                        dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Trx Data Failed. ret = %d.\n", __LINE__, ret);
@@ -1010,6 +1019,7 @@ static int do_receivedata_nobuff(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)g_tmp_txbuff, (void *)g_tmp_rxbuff,
                        dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Rcv Data Nobuff Failed. ret = %d.\n", __LINE__, ret);
@@ -1064,6 +1074,7 @@ static int do_trxdata_norxbuff(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)spidev->tx_param.buff_addr,
                        (void *)g_tmp_rxbuff, dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Trx Data Norxbuff Failed. ret = %d.\n", __LINE__, ret);
@@ -1105,6 +1116,7 @@ static int do_receivesleepdata(FAR struct altmdm_dev_s *priv, FAR int *resp)
       ret = do_dmaxfer(priv, (void *)g_tmp_txbuff, (void *)g_tmp_rxbuff,
                        dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Rcv Sleep Resp Data Failed. ret = %d.\n",
@@ -1157,6 +1169,7 @@ static int do_receivereset(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)g_tmp_txbuff, (void *)g_tmp_rxbuff,
                        dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Rcv Reset Failed. ret = %d.\n", __LINE__, ret);
@@ -1174,10 +1187,12 @@ static int do_receivereset(FAR struct altmdm_dev_s *priv)
               altmdm_pm_set_bootstatus(priv,
                                        MODEM_PM_ERR_RESET_BOOTSTAT_BOOTING);
               break;
+
             case RESET_BOOTSTAT_UPDATING:
               altmdm_pm_set_bootstatus(priv,
                                        MODEM_PM_ERR_RESET_BOOTSTAT_UPDATING);
               break;
+
             default:
               m_err
                 ("ERR:%04d Invalid payload of reset packet. %02x,%02x,%02x,%02x\n",
@@ -1241,6 +1256,7 @@ static int do_trxreset(FAR struct altmdm_dev_s *priv)
       ret = do_dmaxfer(priv, (void *)spidev->tx_param.buff_addr,
                        (void *)g_tmp_rxbuff, dma_xfer_size);
     }
+
   if (ret < 0)
     {
       m_err("ERR:%04d Trx Reset Failed. ret = %d.\n", __LINE__, ret);
@@ -1283,6 +1299,7 @@ static int do_xfersleep(FAR struct altmdm_dev_s *priv, uint32_t is_rcvrready)
           ret = resp;
         }
     }
+
   if (ret < 0)
     {
       ret = SLEEP_NG;
@@ -1296,6 +1313,7 @@ static int do_xfersleep(FAR struct altmdm_dev_s *priv, uint32_t is_rcvrready)
           m_info("ready to xfer\n");
           notify_xferready(priv);
         }
+
       altmdm_pm_notify_reset(priv);
     }
 
@@ -1328,6 +1346,7 @@ static uint32_t decide_xfermode(FAR struct altmdm_dev_s *priv,
         {
           mode = MODE_TRXHEADERFAILRXREQ;
         }
+
       if (spidev->rx_param.rxbuff != NULL)
         {
           free_rxbuffer(priv, spidev->rx_param.rxbuff);
@@ -1494,6 +1513,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
         {
           spidev->tx_param.result = (ret < 0) ? ret : TRANS_OK;
         }
+
       altmdm_sys_setflag(&spidev->tx_param.done_flag, EVENT_TX_DONE);
       break;
 
@@ -1507,6 +1527,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
         {
           spidev->tx_param.result = (ret < 0) ? ret : TRANS_OK;
         }
+
       altmdm_sys_setflag(&spidev->tx_param.done_flag, EVENT_TX_DONE);
 
       if (ret < 0)
@@ -1531,6 +1552,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
         {
           spidev->tx_param.result = (ret < 0) ? ret : TRANS_OK;
         }
+
       altmdm_sys_setflag(&spidev->tx_param.done_flag, EVENT_TX_DONE);
       break;
 
@@ -1546,6 +1568,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
           m_info("ready to xfer\n");
           notify_xferready(priv);
         }
+
       altmdm_pm_notify_reset(priv);
       break;
 
@@ -1556,6 +1579,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
           m_info("ready to xfer\n");
           notify_xferready(priv);
         }
+
       altmdm_pm_notify_reset(priv);
       if (spidev->tx_param.is_bufful)
         {
@@ -1566,6 +1590,7 @@ static void done_xfer(FAR struct altmdm_dev_s *priv, uint32_t xfer_mode,
         {
           spidev->tx_param.result = (ret < 0) ? ret : TRANS_OK;
         }
+
       altmdm_sys_setflag(&spidev->tx_param.done_flag, EVENT_TX_DONE);
       break;
 
@@ -1917,6 +1942,7 @@ int altmdm_spi_uninit(FAR struct altmdm_dev_s *priv)
         {
           break;
         }
+
       usleep(10);
     }
 
@@ -1933,6 +1959,7 @@ int altmdm_spi_uninit(FAR struct altmdm_dev_s *priv)
       free_rxbuffer(priv, priv->spidev.rx_param.rxbuff);
       priv->spidev.rx_param.rxbuff = NULL;
     }
+
   destroy_rxbufffifo(priv);
 
   /* Uninitalize modem power management driver */
@@ -2188,6 +2215,7 @@ int altmdm_spi_sleepmodem(FAR struct altmdm_dev_s *priv)
     {
       spidev->sleep_param.requested = true;
     }
+
   altmdm_sys_unlock(&spidev->sleep_param.lock);
 
   if (sleep_requested)
@@ -2213,6 +2241,7 @@ int altmdm_spi_sleepmodem(FAR struct altmdm_dev_s *priv)
           m_info("%s: sleep result: %d.\n", __func__,
                  spidev->sleep_param.result);
         }
+
       spidev->sleep_param.requested = false;
     }
 
@@ -2278,4 +2307,4 @@ int altmdm_spi_clearreceiverready(FAR struct altmdm_dev_s *priv)
 }
 #endif
 
-#endif                                 /* CONFIG_MODEM_ALTMDM */
+#endif  /* CONFIG_MODEM_ALTMDM */

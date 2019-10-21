@@ -46,9 +46,11 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/modem/altmdm.h>
+
 #if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
 #include <arch/board/board.h>
 #include <arch/board/cxd56_altmdm.h>
+
 #include "cxd56_gpio.h"
 #include "cxd56_gpioint.h"
 #include "cxd56_pinconfig.h"
@@ -76,11 +78,11 @@
 #if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
 
 struct altmdm_pincfg
-  {
-    uint32_t pin;
-    bool input_enable;
-    bool init_val;
-  };
+{
+  uint32_t pin;
+  bool input_enable;
+  bool init_val;
+};
 
 #endif
 
@@ -92,9 +94,9 @@ struct altmdm_pincfg
 
 static const struct altmdm_pincfg pincfg[] =
 {
-  {MODEM_WAKEUP, false, false}, /* out, low */
-  {MASTER_REQUEST, false, false},       /* out, low */
-  {SLAVE_REQUEST, true, false},  /* in, low */
+  {MODEM_WAKEUP, false, false},    /* out, low */
+  {MASTER_REQUEST, false, false},  /* out, low */
+  {SLAVE_REQUEST, true, false},    /* in, low */
 };
 
 #endif
@@ -117,7 +119,7 @@ void board_altmdm_poweron(void)
 {
   int i;
 
-  /* power on altair modem device */
+  /* Power on altair modem device */
 
   cxd56_gpio_config(ALTMDM_SHUTDOWN, false);
   cxd56_gpio_write(ALTMDM_SHUTDOWN, true);
@@ -262,6 +264,7 @@ void board_altmdm_gpio_irq(uint32_t pin, uint32_t polarity,
       return;
       break;
     }
+
   if (noise_filter == ALTMDM_GPIOINT_NOISE_FILTER_ENABLE)
     {
       nf = GPIOINT_NOISE_FILTER_ENABLE;
@@ -270,6 +273,7 @@ void board_altmdm_gpio_irq(uint32_t pin, uint32_t polarity,
     {
       nf = GPIOINT_NOISE_FILTER_DISABLE;
     }
+
   if (pin < NUM_OF_PINS)
     {
       if (pincfg[pin].input_enable == true)

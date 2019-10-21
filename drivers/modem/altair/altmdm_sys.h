@@ -58,25 +58,25 @@
  ****************************************************************************/
 
 struct altmdm_sys_lock_s
-  {
-    sem_t sem;
-  };
+{
+  sem_t sem;
+};
 
 struct altmdm_sys_csem_s
-  {
-    sem_t sem;
-  };
+{
+  sem_t sem;
+};
 
 struct altmdm_sys_flag_s
-  {
-    sem_t sem;
-    uint32_t flag;
-  };
+{
+  sem_t sem;
+  uint32_t flag;
+};
 
 struct altmdm_sys_flagstate_s
-  {
-    uint32_t flag_pattern;
-  };
+{
+  uint32_t flag_pattern;
+};
 
 /****************************************************************************
  * Public Function Prototypes

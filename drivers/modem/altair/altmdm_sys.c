@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#  define MY_TIMER_SIGNAL SIGUSR1
+#define MY_TIMER_SIGNAL SIGUSR1
 
 /****************************************************************************
  * Public Functions
@@ -68,9 +68,9 @@
 int altmdm_sys_initlock(FAR struct altmdm_sys_lock_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -81,13 +81,13 @@ int altmdm_sys_initlock(FAR struct altmdm_sys_lock_s *handle)
 
   ret = sem_init(&handle->sem, 0, 1);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_init() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -103,9 +103,9 @@ int altmdm_sys_initlock(FAR struct altmdm_sys_lock_s *handle)
 int altmdm_sys_deletelock(FAR struct altmdm_sys_lock_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -116,13 +116,13 @@ int altmdm_sys_deletelock(FAR struct altmdm_sys_lock_s *handle)
 
   ret = sem_destroy(&handle->sem);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_destroy() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -159,6 +159,7 @@ int altmdm_sys_lock(FAR struct altmdm_sys_lock_s *handle)
             }
           m_err("sem_wait() failed:%d\n", l_errno);
         }
+
       break;
     }
 
@@ -176,9 +177,9 @@ int altmdm_sys_lock(FAR struct altmdm_sys_lock_s *handle)
 int altmdm_sys_unlock(FAR struct altmdm_sys_lock_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -189,13 +190,13 @@ int altmdm_sys_unlock(FAR struct altmdm_sys_lock_s *handle)
 
   ret = sem_post(&handle->sem);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_post() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -211,9 +212,9 @@ int altmdm_sys_unlock(FAR struct altmdm_sys_lock_s *handle)
 int altmdm_sys_initcsem(FAR struct altmdm_sys_csem_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -224,13 +225,13 @@ int altmdm_sys_initcsem(FAR struct altmdm_sys_csem_s *handle)
 
   ret = sem_init(&handle->sem, 0, 0);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_init() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -246,9 +247,9 @@ int altmdm_sys_initcsem(FAR struct altmdm_sys_csem_s *handle)
 int altmdm_sys_deletecsem(FAR struct altmdm_sys_csem_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -259,13 +260,13 @@ int altmdm_sys_deletecsem(FAR struct altmdm_sys_csem_s *handle)
 
   ret = sem_destroy(&handle->sem);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_destroy() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -300,8 +301,10 @@ int altmdm_sys_waitcsem(FAR struct altmdm_sys_csem_s *handle)
             {
               continue;
             }
+
           m_err("sem_wait() failed:%d\n", l_errno);
         }
+
       break;
     }
 
@@ -319,9 +322,9 @@ int altmdm_sys_waitcsem(FAR struct altmdm_sys_csem_s *handle)
 int altmdm_sys_postcsem(FAR struct altmdm_sys_csem_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -332,13 +335,13 @@ int altmdm_sys_postcsem(FAR struct altmdm_sys_csem_s *handle)
 
   ret = sem_post(&handle->sem);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_post() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -355,9 +358,9 @@ int altmdm_sys_getcsemvalue(FAR struct altmdm_sys_csem_s *handle,
                             FAR int *value)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -368,13 +371,13 @@ int altmdm_sys_getcsemvalue(FAR struct altmdm_sys_csem_s *handle,
 
   ret = sem_getvalue(&handle->sem, value);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_getvalue() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -390,9 +393,9 @@ int altmdm_sys_getcsemvalue(FAR struct altmdm_sys_csem_s *handle,
 int altmdm_sys_initflag(FAR struct altmdm_sys_flag_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -404,13 +407,13 @@ int altmdm_sys_initflag(FAR struct altmdm_sys_flag_s *handle)
   handle->flag = 0;
   ret = sem_init(&handle->sem, 0, 0);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_init() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -426,9 +429,9 @@ int altmdm_sys_initflag(FAR struct altmdm_sys_flag_s *handle)
 int altmdm_sys_deleteflag(FAR struct altmdm_sys_flag_s *handle)
 {
   int ret;
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   int l_errno;
-#  endif
+#endif
 
   /* Check argument. */
 
@@ -439,13 +442,13 @@ int altmdm_sys_deleteflag(FAR struct altmdm_sys_flag_s *handle)
 
   ret = sem_destroy(&handle->sem);
 
-#  ifdef CONFIG_MODEM_ALTMDM_DEBUG
+#ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret == ERROR)
     {
       l_errno = errno;
       m_err("sem_destroy() failed:%d\n", l_errno);
     }
-#  endif
+#endif
 
   return ret;
 }
@@ -484,6 +487,7 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
     case ALTMDM_SYS_FLAG_WMODEOR:
     case ALTMDM_SYS_FLAG_WMODEAND:
       break;
+
     default:
       m_err("invalid wait mode:%d\n", wait_mode);
       return ERROR;
@@ -540,11 +544,13 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
                       break;
                     }
                 }
+
               leave_critical_section(flags);
 
               ret = OK;
               break;
             }
+
           leave_critical_section(flags);
         }
       else
@@ -569,11 +575,13 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
                       break;
                     }
                 }
+
               leave_critical_section(flags);
 
               ret = OK;
               break;
             }
+
           leave_critical_section(flags);
         }
 
@@ -589,6 +597,7 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
                 {
                   continue;
                 }
+
               m_err("sem_timedwait() failed:%d\n", l_errno);
               break;
             }
@@ -605,6 +614,7 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
                 {
                   continue;
                 }
+
               m_err("sem_wait() failed:%d\n", l_errno);
               break;
             }

@@ -40,25 +40,25 @@
  * Included Files
  ****************************************************************************/
 
-#  include <nuttx/modem/altmdm.h>
+#include <nuttx/modem/altmdm.h>
 
-#  include "altmdm_spi.h"
-#  include "altmdm_sys.h"
+#include "altmdm_spi.h"
+#include "altmdm_sys.h"
 
-#  if defined(CONFIG_MODEM_ALTMDM)
+#if defined(CONFIG_MODEM_ALTMDM)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 struct altmdm_dev_s
-  {
-    FAR char *path;             /* Registration path */
-    FAR struct spi_dev_s *spi;
-    struct altmdm_spi_dev_s spidev;
-    struct altmdm_sys_lock_s lock;
-    int poweron;
-  };
+{
+  FAR char *path;             /* Registration path */
+  FAR struct spi_dev_s *spi;
+  struct altmdm_spi_dev_s spidev;
+  struct altmdm_sys_lock_s lock;
+  int poweron;
+};
 
 /****************************************************************************
  * Public Function Prototypes

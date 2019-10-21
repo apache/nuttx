@@ -68,22 +68,22 @@
 #  define EVENT_MODEM_POWERON_REQ          EVENT_BIT(9)
 #  define EVENT_MODEM_POWEROFF_REQ         EVENT_BIT(10)
 #  define EVENT_PM_TASK_WAIT               (EVENT_D2H_DOWN | EVENT_D2H_UP | \
-                                          EVENT_MODEM_WAKEUP_REQ | \
-                                          EVENT_MODEM_RESET_NOTIF | \
-                                          EVENT_MODEM_POWERON_REQ | \
-                                          EVENT_MODEM_POWEROFF_REQ | \
-                                          EVENT_MODEM_SLEEP_REQ | EVENT_EXIT)
+                                           EVENT_MODEM_WAKEUP_REQ | \
+                                           EVENT_MODEM_RESET_NOTIF | \
+                                           EVENT_MODEM_POWERON_REQ | \
+                                           EVENT_MODEM_POWEROFF_REQ | \
+                                           EVENT_MODEM_SLEEP_REQ | EVENT_EXIT)
 #  define EVENT_STATE_CHG_WAIT             (EVENT_MODEM_SLEPT_NOTIF | \
-                                          EVENT_MODEM_GOING_TO_SLEEP_NOTIF | \
-                                          EVENT_MODEM_WAKEUP_NOTIF)
+                                           EVENT_MODEM_GOING_TO_SLEEP_NOTIF | \
+                                           EVENT_MODEM_WAKEUP_NOTIF)
 #  define EVENT_MODEM_SLEEP_REQ_DONE_OK    EVENT_BIT(0)
 #  define EVENT_MODEM_SLEEP_REQ_DONE_NG    EVENT_BIT(1)
 #  define EVENT_MODEM_SLEEP_REQ_DONE       (EVENT_MODEM_SLEEP_REQ_DONE_OK | \
-                                          EVENT_MODEM_SLEEP_REQ_DONE_NG)
+                                           EVENT_MODEM_SLEEP_REQ_DONE_NG)
 #  define EVENT_MODEM_WAKEUP_REQ_DONE_OK   EVENT_BIT(0)
 #  define EVENT_MODEM_WAKEUP_REQ_DONE_NG   EVENT_BIT(1)
 #  define EVENT_MODEM_WAKEUP_REQ_DONE      (EVENT_MODEM_WAKEUP_REQ_DONE_OK | \
-                                          EVENT_MODEM_WAKEUP_REQ_DONE_NG)
+                                           EVENT_MODEM_WAKEUP_REQ_DONE_NG)
 #  define EVENT_MODEM_POWER_ON_DONE        EVENT_BIT(0)
 #  define EVENT_MODEM_POWER_OFF_DONE       EVENT_BIT(1)
 
@@ -550,6 +550,7 @@ static int send_modem_sleep_done(FAR struct altmdm_dev_s *priv, int result)
     {
       ptn = EVENT_MODEM_SLEEP_REQ_DONE_NG;
     }
+
   ret = altmdm_sys_setflag(&g_sleep_done_flag, ptn);
   if (ret != 0)
     {
@@ -850,6 +851,7 @@ static int exe_callback(uint32_t type, uint32_t cb_event)
     {
       return -EPERM;
     }
+
   lcallback(cb_event);
 
   return 0;
@@ -886,6 +888,7 @@ static int wakeup_modem_itself(FAR struct altmdm_dev_s *priv, bool wakeupreq)
 
           send_modem_wakeup_notif(priv);
         }
+
       exe_callback(MODEM_PM_CB_TYPE_NORMAL, MODEM_PM_CB_WAKE);
     }
 
