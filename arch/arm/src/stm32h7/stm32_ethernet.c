@@ -3186,7 +3186,7 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
   volatile uint32_t timeout;
   uint32_t regval;
 
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[2:0] bits */
+  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0] bits */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ETH_MACMDIOAR_CR_MASK;
@@ -3245,7 +3245,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
   uint32_t regval;
   uint16_t value;
 
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[2:0] bits */
+  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0] bits */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ETH_MACMDIOAR_CR_MASK;
@@ -3277,7 +3277,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
             ETH_MACMDIOAR_RDA_MASK);
   regval |= (ETH_MACMDIOAR_MB | ETH_MACMDIOAR_GOC_WRITE);
 
-  /* Write the value into the MACIIDR register before setting the new
+  /* Write the value into the MACMDIODR register before setting the new
    * MACMDIOAR register value.
    */
 
@@ -3433,7 +3433,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   priv->mbps100 = 0;
   priv->fduplex = 0;
 
-  /* Setup up PHY clocking by setting the SR field in the MACMDIOAR register */
+  /* Setup up PHY clocking by setting the CR field in the MACMDIOAR register */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ~ETH_MACMDIOAR_CR_MASK;

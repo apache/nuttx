@@ -289,14 +289,14 @@
 #  define ETH_MACMDIOAR_GOC_READ      (3 << ETH_MACMDIOAR_GOC_SHIFT) /* Read */
 #define ETH_MACMDIOAR_SKAP            (1 << 4)  /* Bit 4: Skip Address Packet */
 #define ETH_MACMDIOAR_CR_SHIFT        (8)       /* Bits 8-11: Clock range */
-#define ETH_MACMDIOAR_CR_MASK         (7 << ETH_MACMDIOAR_CR_SHIFT)
+#define ETH_MACMDIOAR_CR_MASK         (15 << ETH_MACMDIOAR_CR_SHIFT)
 #  define ETH_MACMDIOAR_CR_DIV42      (0 << ETH_MACMDIOAR_CR_SHIFT) /* 60-100  MHz HCLK/42 */
 #  define ETH_MACMDIOAR_CR_DIV62      (1 << ETH_MACMDIOAR_CR_SHIFT) /* 100-150 MHz HCLK/62 */
 #  define ETH_MACMDIOAR_CR_DIV16      (2 << ETH_MACMDIOAR_CR_SHIFT) /* 20-35   MHz HCLK/16 */
 #  define ETH_MACMDIOAR_CR_DIV26      (3 << ETH_MACMDIOAR_CR_SHIFT) /* 35-60   MHz HCLK/26 */
 #  define ETH_MACMDIOAR_CR_DIV102     (4 << ETH_MACMDIOAR_CR_SHIFT) /* 150-250 MHz HCLK/102 */
 #  define ETH_MACMDIOAR_CR_DIV124     (5 << ETH_MACMDIOAR_CR_SHIFT) /* 250-300 MHz HCLK/124 */
-#define ETH_MACMDIOAR_NTC_SHIFT       (12) /* Number of Training Clocks */
+#define ETH_MACMDIOAR_NTC_SHIFT       (12)       /* Bits 12-14: Number of Training Clocks */
 #define ETH_MACMDIOAR_NTC_MASK        (7 << ETH_MACMDIOAR_NTC_SHIFT)
 #  define ETH_MACMDIOAR_NTC(n)        ((uint32_t)(n) << ETH_MACMDIOAR_NTC_SHIFT)
 #define ETH_MACMDIOAR_RDA_SHIFT       (16)       /* Bits 16-20: MII register */
