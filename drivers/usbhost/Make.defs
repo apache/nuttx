@@ -84,15 +84,6 @@ CSRCS += usbhost_trace.c
 endif
 endif
 
-# Include add-on USB host driver logic if present and selected (available in
-# the NuttX drivers GIT repository)
-
-ifeq ($(CONFIG_USBHOST_RTL8187),y)
-  RTL8187_CSRC := ${shell if [ -f usbhost$(DELIM)rtl8187x.c ]; then echo "rtl8187x.c"; fi}
-  CSRCS += $(RTL8187_CSRC)
-endif
-endif
-
 # Include USB host driver build logic
 
 DEPPATH += --dep-path usbhost

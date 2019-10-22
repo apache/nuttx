@@ -33,8 +33,8 @@ config IEEE80211_BROADCOM_FWFILES
 		This selection enables an option to load the firmware and CLM
 		files from a mounted file system.
 
-		A snapshot of file for the BCM43362 are available in the nonbsd
-		repository:  https://bitbucket.org/nuttx/nonbsd/src/master/bcm43438/
+		A snapshot of file for the BCM43362 are available in the tools` 
+		repository:  https://bitbucket.org/nuttx/tools/src/master/bcm43438/
 
 		The latest files from Cypress are available in the Linux kernel:
 		https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/brcm
