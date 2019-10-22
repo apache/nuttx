@@ -265,6 +265,9 @@
 #define GPIO_MAX7219_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
 
+#define GPIO_GS2200M_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN5)
+
 /* XEN1210 magnetic sensor */
 
 #define GPIO_XEN1210_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
@@ -863,6 +866,26 @@ int xen1210_archinitialize(int minor);
 
 #ifdef HAVE_HCIUART
 int hciuart_dev_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_gs2200m_initialize
+ *
+ * Description:
+ *   Configure the gs2200m driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the device.
+ *   bus     - The SPI bus number
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WL_GS2200M
+int stm32_gs2200m_initialize(FAR const char *devpath, int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */

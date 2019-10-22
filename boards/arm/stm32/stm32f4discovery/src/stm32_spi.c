@@ -202,6 +202,13 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_WL_GS2200M)
+  if (devid == SPIDEV_WIRELESS(0))
+    {
+      stm32_gpiowrite(GPIO_GS2200M_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)

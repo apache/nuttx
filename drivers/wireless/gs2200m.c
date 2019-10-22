@@ -817,10 +817,14 @@ static void _write_data(FAR struct gs2200m_dev_s *dev,
 {
   int i;
 
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
+
   for (i = 0; i < len; i++, buf++)
     {
       SPI_SEND(dev->spi, *buf);
     }
+
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
 /****************************************************************************
@@ -837,10 +841,14 @@ static void _read_data(FAR struct gs2200m_dev_s *dev,
 
   memset(buff, 0, len);
 
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
+
   for (i = 0; i < len; i++, buff++)
     {
       SPI_EXCHANGE(dev->spi, &req, buff, 1);
     }
+
+  SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
 /****************************************************************************

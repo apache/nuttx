@@ -220,4 +220,8 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += stm32_mmcsd.c
 endif
 
+ifeq ($(CONFIG_WL_GS2200M),y)
+CSRCS += stm32_gs2200m.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

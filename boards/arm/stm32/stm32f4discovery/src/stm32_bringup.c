@@ -458,5 +458,13 @@ int stm32_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#ifdef CONFIG_WL_GS2200M
+  ret = stm32_gs2200m_initialize("/dev/gs2200m", 3);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialze GS2200M: %d \n", ret);
+    }
+#endif
+
   return ret;
 }
