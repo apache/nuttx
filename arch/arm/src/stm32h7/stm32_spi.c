@@ -1813,7 +1813,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  FAR void * xbuffer = rxbuffer;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1928,7 +1927,13 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       if (txbuffer)
         {
-          up_flush_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+          up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+        }
+
+      if (rxbuffer)
+        {
+          up_invalidate_dcache((uintptr_t)rxbuffer,
+                               (uintptr_t)rxbuffer + nbytes);
         }
 
 #ifdef CONFIG_SPI_TRIGGER
@@ -1980,19 +1985,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;
 #endif
-
-      /* Force RAM re-read */
-
-      if (rxbuffer != NULL)
-        {
-          up_invalidate_dcache((uintptr_t)rxbuffer,
-                               (uintptr_t)rxbuffer + nbytes);
-
-          if (priv->rxbuf)
-            {
-              memcpy(xbuffer, priv->rxbuf, nbytes);
-            }
-        }
     }
 }
 #endif /* CONFIG_STM32H7_SPI_DMA */
