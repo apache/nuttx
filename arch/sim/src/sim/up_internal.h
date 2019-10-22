@@ -313,6 +313,12 @@ int up_x11cmap(unsigned short first, unsigned short len,
 int  sim_tsc_initialize(int minor);
 void sim_tsc_uninitialize(void);
 
+/* up_pminitialize.c ******************************************************/
+
+#ifdef CONFIG_PM
+void up_pminitialize(void);
+#endif
+
 /* up_eventloop.c *********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && \

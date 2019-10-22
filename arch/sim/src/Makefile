@@ -100,6 +100,10 @@ ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
 endif
 
+ifeq ($(CONFIG_PM),y)
+  CSRCS += up_pminitialize.c
+endif
+
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
   HOSTSRCS += up_critmon.c
 endif

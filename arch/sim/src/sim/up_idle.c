@@ -161,6 +161,7 @@ void up_idle(void)
         if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
           {
             state = newstate;
+            pwrinfo("IDLE: switching to new state %i\n", state);
           }
       }
   }
@@ -179,7 +180,7 @@ void up_idle(void)
   if (g_x11initialized)
     {
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-       /* Drive the X11 event loop */
+      /* Drive the X11 event loop */
 
       if (g_eventloop)
         {
