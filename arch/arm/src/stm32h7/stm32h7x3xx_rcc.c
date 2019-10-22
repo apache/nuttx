@@ -41,6 +41,7 @@
 
 #include "stm32_pwr.h"
 #include "hardware/stm32_axi.h"
+#include "hardware/stm32_syscfg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,6 +70,31 @@
 #elif BOARD_FLASH_WAITSTATES < 0 || BOARD_FLASH_WAITSTATES > 15
 #  error BOARD_FLASH_WAITSTATES is out of range
 #endif
+
+/* Voltage output scale (default to Scale 1 mode) */
+
+#ifndef STM32_PWR_VOS_SCALE
+#  define STM32_PWR_VOS_SCALE PWR_D3CR_VOS_SCALE_1
+#endif
+
+#if !defined(BOARD_FLASH_PROGDELAY)
+#  if STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1
+#    if STM32_SYSCLK_FREQUENCY <= 70000000 && BOARD_FLASH_WAITSTATES == 0
+#      define BOARD_FLASH_PROGDELAY  0
+#    elif STM32_SYSCLK_FREQUENCY <= 140000000 && BOARD_FLASH_WAITSTATES == 1
+#      define BOARD_FLASH_PROGDELAY  10
+#    elif STM32_SYSCLK_FREQUENCY <= 185000000 && BOARD_FLASH_WAITSTATES == 2
+#      define BOARD_FLASH_PROGDELAY  1
+#    elif STM32_SYSCLK_FREQUENCY <= 210000000 && BOARD_FLASH_WAITSTATES == 2
+#      define BOARD_FLASH_PROGDELAY  2
+#    elif STM32_SYSCLK_FREQUENCY <= 225000000 && BOARD_FLASH_WAITSTATES == 3
+#      define BOARD_FLASH_PROGDELAY  2
+#    else
+#      define BOARD_FLASH_PROGDELAY  2
+#    endif
+#  endif
+#endif
+
 
 /* PLL are only enabled if the P,Q or R outputs are enabled. */
 
@@ -748,19 +774,67 @@ static void stm32_stdclockconfig(void)
         {
         }
 #endif
-      /* Configure FLASH wait states */
 
-      regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
-
-#ifdef CONFIG_STM32H7_FLASH_ART_ACCELERATOR
-      /* The Flash memory interface accelerates code execution with a system of
-       * instruction prefetch and cache lines on ITCM interface (ART
-       * Accelerator™).
+      /* Ww must write the lower byte of the PWR_CR3 register is written once
+       * after POR and it shall be written before changing VOS level or ck_sys
+       * clock frequency. No limitation applies to the upper bytes.
+       *
+       * Programming data corresponding to an invalid combination of
+       * LDOEN and BYPASS bits will be ignored: data will not be written,
+       * the written-once mechanism will lock the register and any further
+       * write access will be ignored. The default supply configuration will
+       * be kept and the ACTVOSRDY bit in PWR control status register 1 (PWR_CSR1)
+       * will go on indicating invalid voltage levels.
+       *
+       * N.B. The system shall be power cycled before writing a new value.
        */
 
-      regval |= FLASH_ACR_ARTEN;
-      regval |= FLASH_ACR_PRFTEN;
-#endif
+      regval = getreg32(STM32_PWR_CR3);
+      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_LDOESCUEN;
+      putreg32(regval, STM32_PWR_CR3);
+
+      /* Set the voltage output scale */
+
+      regval = getreg32(STM32_PWR_D3CR);
+      regval &= ~STM32_PWR_D3CR_VOS_MASK;
+      regval |= STM32_PWR_VOS_SCALE;
+      putreg32(regval, STM32_PWR_D3CR);
+
+      while ((getreg32(STM32_PWR_D3CR) & STM32_PWR_D3CR_VOSRDY) == 0)
+        {
+        }
+
+      /* Over-drive is needed if
+       *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
+       *    over 400 Mhz.
+       */
+
+      if ((STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1) &&
+           STM32_SYSCLK_FREQUENCY > 400000000)
+        {
+
+          /* Enable System configuration controller clock to Enable ODEN */
+
+          regval = getreg32(STM32_RCC_APB4ENR);
+          regval |= RCC_APB4ENR_SYSCFGEN;
+          putreg32(regval, STM32_RCC_APB4ENR);
+
+          /* Enable Overdrive to extend the clock frequency up to 480 Mhz. */
+
+          regval = getreg32(STM32_SYSCFG_PWRCR);
+          regval |= SYSCFG_PWRCR_ODEN;
+          putreg32(regval, STM32_SYSCFG_PWRCR);
+
+          while ((getreg32(STM32_PWR_D3CR) & STM32_PWR_D3CR_VOSRDY) == 0)
+            {
+            }
+        }
+
+      /* Configure FLASH wait states */
+
+      regval = FLASH_ACR_WRHIGHFREQ(BOARD_FLASH_PROGDELAY) |
+               FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
+
 
       putreg32(regval, STM32_FLASH_ACR);
 

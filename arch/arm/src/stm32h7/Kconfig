@@ -39,6 +39,14 @@ config STM32H7_STM32H7X3XX
 	bool
 	default n
 
+config STM32H7_FLASH_CONFIG_B
+	bool
+	default n
+
+config STM32H7_FLASH_CONFIG_G
+	bool
+	default n
+
 config STM32H7_FLASH_CONFIG_I
 	bool
 	default n
@@ -52,6 +60,8 @@ choice
 		letter that designates the FLASH size.
 
 			Designator  Size in KiB
+				B	128
+				G	1024
 				I	2048
 
 		This configuration option defaults to using the configuration based
@@ -69,6 +79,12 @@ choice
 
 config STM32H7_FLASH_OVERRIDE_DEFAULT
 			bool "Default"
+
+config STM32H7_FLASH_OVERRIDE_B
+			bool "B 128KiB"
+
+config STM32H7_FLASH_OVERRIDE_G
+			bool "G 1048KiB"
 
 config STM32H7_FLASH_OVERRIDE_I
 			bool "I 2048KiB"
@@ -90,6 +106,13 @@ config STM32H7_AXI_SRAM_CORRUPTION_WAR
 		This workaround will set the READ_ISS_OVERRIDE bit in the
 		AXI_TARG7_FN_MOD register. This will reduce the read issuing capability
 		of the SRAM to 1 at AXI interconnect level and avoid data corruption.
+
+config STM32H7_PROGMEM
+	bool "Flash progmem support"
+	default n
+	---help---
+		Add progmem support, start block and end block options are provided to
+		obtain an uniform flash memory mapping.
 
 menu "STM32H7 Peripheral Selection"
 

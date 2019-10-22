@@ -1,9 +1,9 @@
 /****************************************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_syscfg.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,8 +45,6 @@
 #include "chip.h"
 #include "hardware/stm32_memorymap.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
@@ -64,6 +62,7 @@
 #define STM32_SYSCFG_CCSR_OFFSET      0x0020 /* Compensation cell control/status register */
 #define STM32_SYSCFG_CCVR_OFFSET      0x0024 /* Compensation cell value register */
 #define STM32_SYSCFG_CCCR_OFFSET      0x0028 /* Compensation cell code register */
+#define STM32_SYSCFG_PWRCR_OFFSET     0x002c /* Power Control register */
 
 #define STM32_SYSCFG_PKGR_OFFSET      0x0124 /* Compensation cell code register */
 
@@ -99,6 +98,7 @@
 #define STM32_SYSCFG_CCSR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCSR_OFFSET)
 #define STM32_SYSCFG_CCVR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCVR_OFFSET)
 #define STM32_SYSCFG_CCCR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCCR_OFFSET)
+#define STM32_SYSCFG_PWRCR            (STM32_SYSCFG_BASE + STM32_SYSCFG_PWRCR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 
@@ -179,18 +179,26 @@
 
 /* Compensation cell control/status register */
 /* REVISIT:  Missing bitfield definitions */
+
 #define SYSCFG_CCSR_
 
 /* Compensation cell value register */
 /* REVISIT:  Missing bitfield definitions */
+
 #define SYSCFG_CCVR_
 
 /* Compensation cell code register */
 /* REVISIT:  Missing bitfield definitions */
+
 #define SYSCFG_CCCR_
+
+/* Power control register */
+
+#define SYSCFG_PWRCR_ODEN            (1 << 0)  /* Bit 0: Overdrive enable, this bit allows to activate the LDO regulator overdrive mode */
 
 /* User registers 0-17 */
 /* REVISIT:  Missing bitfield definitions */
+
 #define SYSCFG_UR0_
 #define SYSCFG_UR2_
 #define SYSCFG_UR3_
@@ -209,5 +217,4 @@
 #define SYSCFG_UR16_
 #define SYSCFG_UR17_
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX */
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SYSCFG_H */
