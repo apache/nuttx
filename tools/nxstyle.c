@@ -105,6 +105,7 @@ int main(int argc, char **argv, char **envp)
   char *lptr;           /* Temporary pointer into line[] */
   char *ext;            /* Temporary file extension */
   bool btabs;           /* True: TAB characters found on the line */
+  bool bcrs;            /* True: Carriage return found on the line */
   bool bfunctions;      /* True: In private or public functions */
   bool bstatm;          /* True: This line is beginning of a statement */
   bool bfor;            /* True: This line is beginning of a 'for' statement */
@@ -197,6 +198,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   btabs          = false; /* True: TAB characters found on the line */
+  bcrs           = false; /* True: Carriable return found on the line */
   bfunctions     = false; /* True: In private or public functions */
   bswitch        = false; /* True: Within a switch statement */
   bstring        = false; /* True: Within a string */
@@ -309,11 +311,23 @@ int main(int argc, char **argv, char **envp)
               {
                 if (!btabs)
                   {
-                    fprintf(stderr, "TABs found.  First at line %d:%d\n", lineno, n);
+                    fprintf(stderr, "TABs found.  First detected at line %d:%d\n",
+                            lineno, n);
                     btabs = true;
                   }
 
                 indent = (indent + 4) & ~3;
+              }
+              break;
+
+            case '\r':
+              {
+                if (!bcrs)
+                  {
+                    fprintf(stderr, "Carriage returns found.  "
+                            "First detected at line %d:%d\n", lineno, n);
+                    bcrs = true;
+                  }
               }
               break;
 
@@ -571,6 +585,36 @@ int main(int argc, char **argv, char **envp)
 
       for (; line[n] != '\n' && line[n] != '\0'; n++)
         {
+          /* Report any use of non-standard white space characters */
+
+          if (isspace(line[n]))
+            {
+              if (line[n] == '\t')
+                {
+                  if (!btabs)
+                    {
+                      fprintf(stderr, "TABs found.  First detected at line %d:%d\n",
+                              lineno, n);
+                      btabs = true;
+                    }
+                }
+              else if (line[n] == '\r')
+                {
+                  if (!bcrs)
+                    {
+                      fprintf(stderr, "Carriage returns found.  "
+                              "First detected at line %d:%d\n", lineno, n);
+                      bcrs = true;
+                    }
+                }
+              else if (line[n] != ' ')
+                {
+                  fprintf(stderr,
+                          "Unexpected white space character %02x found at line %d:%d\n",
+                          line[n], lineno, n);
+                }
+            }
+
           /* Skip over identifiers */
 
           if (ncomment == 0 && !bstring && (line[n] == '_' || isalpha(line[n])))
@@ -708,10 +752,10 @@ int main(int argc, char **argv, char **envp)
                 {
                   if (line[n + 2] == '\n')
                     {
-                      fprintf(stderr, "C comment on separate line at %d:%d\n",
+                      fprintf(stderr, "C comment opening on separate line at %d:%d\n",
                               lineno, n);
                     }
-                  else if (line[n + 2] != ' ' && line[n + 2] != '*')
+                  else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
                     {
                       fprintf(stderr,
                               "Missing space after opening C comment at line %d:%d\n",
@@ -732,7 +776,7 @@ int main(int argc, char **argv, char **envp)
                       fprintf(stderr, "Closing C comment not indented at line %d:%d\n",
                               lineno, n);
                     }
-                  else if (line[n - 2] != ' ' && line[n - 2] != '*')
+                  else if (!isspace((int)line[n + 1]) && line[n - 2] != '*')
                     {
                       fprintf(stderr,
                               "Missing space before closing C comment at line %d:%d\n",
@@ -982,7 +1026,7 @@ int main(int argc, char **argv, char **envp)
                   }
                   break;
 
-                /* Handle logic with parenthese */
+                /* Handle logic with parentheses */
 
                 case '(':
                   {
@@ -1083,14 +1127,6 @@ int main(int argc, char **argv, char **envp)
                         fprintf(stderr, "Missing whitespace after comma at line %d:%d\n",
                                 lineno, n);
                       }
-                  }
-                  break;
-
-                case '\r':
-                  {
-                    fprintf(stderr,
-                            "Carriage return detected at line %d:%d\n",
-                            lineno, n);
                   }
                   break;
 
@@ -1440,9 +1476,11 @@ int main(int argc, char **argv, char **envp)
 
       if (line[n] == '\n')
         {
-          /* Check for space at the end of the line */
+          /* Check for space at the end of the line.  Except for carriage
+           * returns which we have already reported (one time) above.
+           */
 
-          if (n > 1 && isspace((int)line[n - 1]))
+          if (n > 1 && isspace((int)line[n - 1]) && line[n - 1] != '\r')
             {
               fprintf(stderr,
                       "Dangling whitespace at the end of line %d:%d\n",
