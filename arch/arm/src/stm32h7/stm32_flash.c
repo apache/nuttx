@@ -522,8 +522,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_SER);
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, FLASH_CR_SNB_MASK,
-                            FLASH_CR_SNB((block +
-                                          CONFIG_STM32H7_PROGMEM_STARTBLOCK)));
+                            FLASH_CR_SNB(block));
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_START);
 
