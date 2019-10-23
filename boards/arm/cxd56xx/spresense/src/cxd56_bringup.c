@@ -113,6 +113,14 @@
 #  include <arch/chip/scu.h>
 #endif
 
+#ifdef CONFIG_CXD56_GNSS
+#  include "cxd56_gnss.h"
+#endif
+
+#ifdef CONFIG_CXD56_GEOFENCE
+#  include "cxd56_geofence.h"
+#endif
+
 #include "spresense.h"
 
 /****************************************************************************
@@ -402,6 +410,22 @@ int cxd56_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: Failed to initialze GS2200M. \n");
+    }
+#endif
+
+#ifdef CONFIG_CXD56_GNSS
+  ret = cxd56_gnssinitialize("/dev/gps");
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze gnss. \n");
+    }
+#endif
+
+#ifdef CONFIG_CXD56_GEOFENCE
+  ret = cxd56_geofenceinitialize("/dev/geofence");
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialze geofence. \n");
     }
 #endif
 

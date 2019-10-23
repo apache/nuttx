@@ -68,6 +68,14 @@ config LCD_ON_MAIN_BOARD
 
 endchoice
 endif
+config CXD56_IMAGEPROC
+	bool "Spresense Image Processor"
+	default n
+	select CXD56_GE2D
+	---help---
+		Enable support for accelerated format convertor, rotation and so on.
+		using the CXD5602 image processing accelerator.
+
 comment "LTE Options"
 
 menuconfig CXD56_LTE
