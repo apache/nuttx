@@ -313,3 +313,22 @@ Configuration sub-directories
     configuration is focused on low level, command-line driver testing.
     Built-in applications are supported, but none are enabled.  This
     configuration does not support a network.
+
+  lvgl:
+
+    Configures the Littlev graphic library (lvgl) demo locates under 
+    examples/lvgldemo. This configuration needs the optional LCD model
+    RK043FN02H-CT from NXP. The LCD panel comes with the integrated
+    capacitive touchscreen sensor FT5336GQQ connected to the LPI2C1 bus,
+    address 0x38. Nuttx support such touchscreen device via the driver
+    ft5x06 (drivers/input/ft5x06.c). At the moment only the polling
+    method is available, the board features an interrupt line connecetd
+    to the touchscreen sensor IC.
+
+    IMXRT1062 MCU provides the integrated LCD driver.
+    
+    The LCD panel features: 
+    - size 4.3" 
+    - resolution 480×272 RGB
+    - backlight driver
+    - dimensions [mm]: 105.5 (W) x 67.2(H) x 4.35(D) Max.
