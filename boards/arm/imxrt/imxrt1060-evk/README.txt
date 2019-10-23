@@ -316,7 +316,7 @@ Configuration sub-directories
 
   lvgl:
 
-    Configures the Littlev graphic library (lvgl) demo locates under 
+    Configures the Littlev graphic library (lvgl) demo located under
     examples/lvgldemo. This configuration needs the optional LCD model
     RK043FN02H-CT from NXP. The LCD panel comes with the integrated
     capacitive touchscreen sensor FT5336GQQ connected to the LPI2C1 bus,
@@ -326,9 +326,9 @@ Configuration sub-directories
     to the touchscreen sensor IC.
 
     IMXRT1062 MCU provides the integrated LCD driver.
-    
-    The LCD panel features: 
-    - size 4.3" 
+
+    The LCD panel features:
+    - size 4.3"
     - resolution 480×272 RGB
     - backlight driver
     - dimensions [mm]: 105.5 (W) x 67.2(H) x 4.35(D) Max.
