@@ -83,6 +83,7 @@ ifeq ($(CONFIG_DEBUG_USB),y)
 CSRCS += usbhost_trace.c
 endif
 endif
+endif
 
 # Include USB host driver build logic
 

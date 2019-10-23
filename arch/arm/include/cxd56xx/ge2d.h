@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/src/spresense_main.c
+ * arch/arm/include/cxd56xx/cxd56_ge2d.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,30 +33,35 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_GE2D_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_GE2D_H
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/* This function is provided outside exported SDK, therefore here is defined
- * as weak symbol to avoid link error.
- */
+#ifndef __ASSEMBLY__
 
-int nsh_main(int argc, char *argv[]);
-
-int weak_function spresense_main(int argc, char *argv[])
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  return nsh_main(argc, argv);
-}
+#else
+#define EXTERN extern
+#endif
 
-#ifdef CONFIG_SYSTEMTICK_HOOK
-void weak_function board_timerhook(void)
-{
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int cxd56_ge2dinitialize(FAR const char *devname);
+void cxd56_ge2duninitialize(FAR const char *devname);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_GE2D_H */
