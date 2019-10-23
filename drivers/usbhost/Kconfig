@@ -266,9 +266,9 @@ if  USBHOST_HIDKBD
 
 config HIDKBD_POLLUSEC
 	int "Keyboard Poll Rate (MSEC)"
-	default 100000
+	default 40000
 	---help---
-		Device poll rate in microseconds. Default: 100,000 microseconds.
+		Device poll rate in microseconds. Default: 40,000 microseconds.
 
 config HIDKBD_DEFPRIO
 	int "Polling Thread Priority"
