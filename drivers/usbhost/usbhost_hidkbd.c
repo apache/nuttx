@@ -1118,7 +1118,12 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
               if (rpt->key[i] != USBHID_KBDUSE_NONE
 #ifndef CONFIG_HIDKBD_NODEBOUNCE
-                 && rpt->key[i] != lastkey[i]
+                 && rpt->key[i] != lastkey[0]
+                 && rpt->key[i] != lastkey[1]
+                 && rpt->key[i] != lastkey[2]
+                 && rpt->key[i] != lastkey[3]
+                 && rpt->key[i] != lastkey[4]
+                 && rpt->key[i] != lastkey[5]
 #endif
                  )
                 {
