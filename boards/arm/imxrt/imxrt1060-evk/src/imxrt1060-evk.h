@@ -58,7 +58,7 @@
 
 /* Configuration ************************************************************/
 
-/* i.MX RT 1050 GPIO Pin Definitions ****************************************/
+/* i.MX RT 1060 GPIO Pin Definitions ****************************************/
 
 /* LEDs
  *
@@ -104,6 +104,27 @@
                          _IOMUX_PULL_ENABLE)
 #define GPIO_SW8        (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
                          GPIO_PORT5 | GPIO_PIN0 | IOMUX_SW8)
+
+/* Touchscreen
+ *
+ * Interrupt line: GPIO_AD_B0_11
+ *
+ * The interrupt line coming from the touchscreen FT5336GQQ IC.
+ * The touchscreen IC is integrated into the optional RK043FN02H-CT LCD panel
+ * and it's connected to the LPI2C1 bus.
+ *
+ * Reset line: GPIO_AD_B0_02
+ *
+ * The reset line is active low.
+ */
+
+#define GPIO_FT5X06_INTR    IMXRT_IRQ_GPIO1_11
+
+#define IOMUX_FT5X06_RST    (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                             IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                             _IOMUX_PULL_ENABLE)
+#define GPIO_FT5X06_CTRSTn  (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                             GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)
 
 /* Ethernet Interrupt: GPIOAD_B0_10
  *
@@ -218,8 +239,6 @@ int imxrt_mmcsd_spi_initialize(int minor)
 void imxrt_autoled_initialize(void);
 #endif
 
-#ifdef CONFIG_DEV_GPIO
-
 /****************************************************************************
  * Name: imxrt_gpio_initialize
  *
@@ -228,7 +247,32 @@ void imxrt_autoled_initialize(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEV_GPIO
 int imxrt_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_ft5x06_register
+ *
+ * Description:
+ *   Initialize ft5x06 IC touchscreen driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_FT5X06
+int imxrt_ft5x06_register(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_backlight
+ *
+ * Description:
+ *   Initialize the backlight pins of the LCD and turn it ON
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_LCD
+void imxrt_lcd_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

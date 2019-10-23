@@ -47,22 +47,22 @@
 
 #include "imxrt1060-evk.h"
 
+#ifdef CONFIG_IMXRT_LCD
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_lcd_initialize
+ * Name: imxrt_lcd_bkl_pin_setup
  *
  * Description:
- *   Initialize the LCD.  Setup backlight (initially off)
+ *   Setup backlight pin (initially off)
  *
  ****************************************************************************/
 
-void imxrt_lcd_initialize(void)
+void imxrt_lcd_pkl_pin_setup(void)
 {
-  /* Configure the LCD backlight (and turn the backlight off) */
-
   imxrt_config_gpio(GPIO_LCD_BL);
 }
 
@@ -81,3 +81,26 @@ void imxrt_backlight(bool blon)
   imxrt_gpio_write(GPIO_LCD_BL, blon); /* High illuminates */
 }
 #endif
+
+/****************************************************************************
+ * Name: imxrt_lcd_initialize
+ *
+ * Description:
+ *   Initialization of the LCD blackligt and pin for the imxrt_bringup().
+ *
+ ****************************************************************************/
+
+void imxrt_lcd_initialize(void)
+{
+  /* Setup the backlight pin */
+
+  imxrt_lcd_pkl_pin_setup();
+
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+  /* Turn ON the backlight */
+
+  imxrt_backlight(true);
+#endif
+}
+
+#endif /* CONFIG_IMXRT_LCD */

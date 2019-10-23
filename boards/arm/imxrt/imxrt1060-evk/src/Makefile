@@ -70,6 +70,14 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += imxrt_mmcsd_spi.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += imxrt_gpio.c
+endif
+
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += imxrt_ft5x06.c
+endif
+
 ifeq ($(CONFIG_IMXRT_LCD),y)
 CSRCS += imxrt_lcd.c
 endif

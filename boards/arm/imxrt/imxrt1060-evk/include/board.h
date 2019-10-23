@@ -68,7 +68,8 @@
  *                        600Mhz  = 600Mhz / 1
  *
  *     PRE_PERIPH_CLK_SEL         = PRE_PERIPH_CLK_SEL_PLL1
- *     PERIPH_CLK_SEL             = 1 (0 select PERIPH_CLK2_PODF, 1 select PRE_PERIPH_CLK_SEL_PLL1)
+ *     PERIPH_CLK_SEL             = 1 (0 select PERIPH_CLK2_PODF,
+ *                                     1 select PRE_PERIPH_CLK_SEL_PLL1)
  *     PERIPH_CLK                 = 600Mhz
  *
  *     IPG_CLOCK_ROOT             = AHB_CLOCK_ROOT / IMXRT_IPG_PODF_DIVIDER
@@ -79,7 +80,8 @@
  *                       IMXRT_PERCLK_PODF_DIVIDER = 1
  *                       150Mhz = 150Mhz / 1
  *
- *     SEMC_CLK_ROOT              = 600Mhz / IMXRT_SEMC_PODF_DIVIDER (labeled AIX_PODF in 18.2)
+ *     SEMC_CLK_ROOT              = 600Mhz / IMXRT_SEMC_PODF_DIVIDER
+ *                                  (labeled AIX_PODF in 18.2)
  *                       IMXRT_SEMC_PODF_DIVIDER = 8
  *                       75Mhz    = 600Mhz / 8
  *
@@ -155,6 +157,17 @@
  * apparently, running normally.  If the LED is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
+
+/* Touchscreen definitions **************************************************/
+
+/* The IMXRT 1050/1060 have connectors for the LCD model RK043FN02H-CT.
+ * It comes with the FT5336GQQ (FT5X06) touchscreen chip integrated.
+ * FT5X06 is connected to the LPI2C1 bus.
+ */
+
+/* LPI2C address of the FT5336GQQ touchscreen chip */
+
+#define FT5X06_I2C_ADDRESS  0x38
 
 /* Button definitions *******************************************************/
 

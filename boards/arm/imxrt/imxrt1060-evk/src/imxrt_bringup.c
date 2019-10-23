@@ -182,12 +182,30 @@ int imxrt_bringup(void)
 #endif
 
 #ifdef CONFIG_DEV_GPIO
+  /* Initialize the GPIO driver */
+
   ret = imxrt_gpio_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
     }
+#endif
+
+#ifdef CONFIG_INPUT_FT5X06
+  /* Initialize the FT5X06 touchscreen driver */
+
+  ret = imxrt_ft5x06_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_ft5x06_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_IMXRT_LCD
+  /* Initialize the backlight pin and turn it to ON. */
+
+  imxrt_lcd_initialize();
 #endif
 
 #ifdef CONFIG_VIDEO_FB
