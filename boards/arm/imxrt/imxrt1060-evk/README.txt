@@ -332,3 +332,7 @@ Configuration sub-directories
     - resolution 480×272 RGB
     - backlight driver
     - dimensions [mm]: 105.5 (W) x 67.2(H) x 4.35(D) Max.
+
+    To run the lvgl demo please type "lvgldemo" at nsh prompt:
+
+    nsh> lvgldemo
