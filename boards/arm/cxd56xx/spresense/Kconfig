@@ -25,6 +25,7 @@ config SPRESENSE_EXTENSION
 		present, then the SPresense will need to run at a higher power mode,
 		selected by this option.
 
+if  SPRESENSE_EXTENSION
 config SDCARD_TXS02612
 	bool "SD Card TXS02612 port expander with voltage level translation"
 	default y
@@ -47,6 +48,7 @@ config SDCARD_TXS02612_PORT1
 endchoice # "TXS02612 port"
 
 endif # SDCARD_TXS02612
+endif # SPRESENSE_EXTENSION
 
 if LCD
 
