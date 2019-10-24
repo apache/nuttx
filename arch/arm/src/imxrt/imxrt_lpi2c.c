@@ -1614,8 +1614,6 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
                                 FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
-  uint32_t status = 0;
-
   int ret = 0;
 
   DEBUGASSERT(count > 0);
