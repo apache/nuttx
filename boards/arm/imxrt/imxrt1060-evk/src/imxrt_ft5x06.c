@@ -64,7 +64,7 @@
  * Pre-processor Defintions
  ****************************************************************************/
 
-#define FT5X06_FREQUENCY 400000  /* For now, will boost later */
+#define FT5X06_FREQUENCY 400000
 
 /****************************************************************************
  * Private Function Ptototypes

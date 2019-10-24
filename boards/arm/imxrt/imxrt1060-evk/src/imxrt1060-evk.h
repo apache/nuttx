@@ -120,9 +120,9 @@
 
 #define GPIO_FT5X06_INTR    IMXRT_IRQ_GPIO1_11
 
-#define IOMUX_FT5X06_RST    (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                             IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                             _IOMUX_PULL_ENABLE)
+#define IOMUX_FT5X06_RST    (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
+                             IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                             IOMUX_SLEW_SLOW)
 #define GPIO_FT5X06_CTRSTn  (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                              GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)
 
