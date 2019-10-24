@@ -582,6 +582,7 @@ void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
 }
+
 void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);

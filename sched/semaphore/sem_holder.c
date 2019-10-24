@@ -676,7 +676,6 @@ static int nxsem_restoreholderprioB(FAR struct semholder_s *pholder,
 
   if (pholder->htcb == rtcb)
     {
-
       /* The running task has given up a count on the semaphore */
 
 #if CONFIG_SEM_PREALLOCHOLDERS == 0

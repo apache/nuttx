@@ -178,6 +178,7 @@ static void clock_inittime(void)
 #ifndef CONFIG_RTC_HIRES
   clock_basetime(&g_basetime);
 #endif
+
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
   if (g_system_timer > 0)
@@ -197,6 +198,7 @@ static void clock_inittime(void)
         }
     }
 #endif /* !CONFIG_SCHED_TICKLESS */
+
 #else
   clock_inittimekeeping();
 #endif

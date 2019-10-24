@@ -122,6 +122,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
           up_rtc_settime(tp);
         }
 #endif
+
       leave_critical_section(flags);
 
       sinfo("basetime=(%ld,%lu) bias=(%ld,%lu)\n",

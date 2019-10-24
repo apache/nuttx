@@ -117,6 +117,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
               mutex->nlocks = 1;
             }
 #endif
+
           ret = OK;
         }
 

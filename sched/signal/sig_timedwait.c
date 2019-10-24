@@ -309,6 +309,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           return -ECANCELED;
         }
 #endif
+
       /* Save the set of pending signals to wait for */
 
       rtcb->sigwaitmask = *set;

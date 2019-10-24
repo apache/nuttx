@@ -308,8 +308,9 @@ try_again:
         }
       else
         {
-          /* Normal tasking environment. */
-          /* Get the TCB of the currently executing task on this CPU (avoid
+          /* Normal tasking environment.
+           *
+           * Get the TCB of the currently executing task on this CPU (avoid
            * using this_task() which can recurse.
            */
 

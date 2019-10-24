@@ -153,6 +153,7 @@ int nxsched_setscheduler(pid_t pid, int policy,
               DEBUGVERIFY(sched_sporadic_stop(tcb));
             }
 #endif
+
           /* Save the FIFO scheduling parameters */
 
           tcb->flags       |= TCB_FLAG_SCHED_FIFO;
@@ -173,6 +174,7 @@ int nxsched_setscheduler(pid_t pid, int policy,
               DEBUGVERIFY(sched_sporadic_stop(tcb));
             }
 #endif
+
           /* Save the round robin scheduling parameters */
 
           tcb->flags       |= TCB_FLAG_SCHED_RR;

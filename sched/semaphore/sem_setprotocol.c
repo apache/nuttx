@@ -96,6 +96,7 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
   switch (protocol)
     {
       case SEM_PRIO_NONE:
+
         /* Disable priority inheritance */
 
         sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
@@ -106,12 +107,14 @@ int nxsem_setprotocol(FAR sem_t *sem, int protocol)
         return OK;
 
       case SEM_PRIO_INHERIT:
+
         /* Enable priority inheritance (dangerous) */
 
         sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
         return OK;
 
       case SEM_PRIO_PROTECT:
+
         /* Not yet supported */
 
         return -ENOSYS;

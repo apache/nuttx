@@ -222,12 +222,14 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
     {
       wdog->parm[i] = va_arg(ap, wdparm_t);
     }
+
 #ifdef CONFIG_DEBUG_FEATURES
   for (; i < CONFIG_MAX_WDOGPARMS; i++)
     {
       wdog->parm[i] = 0;
     }
 #endif
+
   va_end(ap);
 
   /* Calculate delay+1, forcing the delay into a range that we can handle */

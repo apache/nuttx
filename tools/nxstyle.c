@@ -129,6 +129,7 @@ int main(int argc, char **argv, char **envp)
   int blank_lineno;     /* Line number of the last blank line */
   int noblank_lineno;   /* A blank line is not needed after this line */
   int lbrace_lineno;    /* Line number of last left brace */
+  int rbrace_lineno;    /* Last line containing a right brace */
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
   int maxline;          /* Lines longer that this generate warnings */
@@ -213,6 +214,7 @@ int main(int argc, char **argv, char **envp)
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
   lbrace_lineno  = -1;    /* Line number of last left brace */
+  rbrace_lineno  = -1;    /* Last line containine a right brace */
   externc_lineno = -1;    /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
@@ -291,6 +293,47 @@ int main(int argc, char **argv, char **envp)
               fprintf(stderr,
                       "Missing file header comment block at line 1\n");
             }
+
+           /* Check for a blank line following a right brace */
+
+          if (bfunctions && lineno == rbrace_lineno + 1)
+             {
+               /* Check if this line contains a right brace.  A right brace
+                * must be followed by 'else', 'while', 'break', a blank line,
+                * another right brace, or a pre-processor directive like #endif
+                */
+
+               if (strchr(line, '}') == NULL && line[n] != '#' &&
+                   strncmp(&line[n], "else", 4) != 0 &&
+                   strncmp(&line[n], "while", 5) != 0 &&
+                   strncmp(&line[n], "break", 5) != 0)
+                 {
+                   fprintf(stderr,
+                          "Right brace must be followed by a blank line at line %d\n",
+                          rbrace_lineno);
+                 }
+
+               /* If the right brace is followed by a pre-proceeor command
+                * like #endif (but not #else or #elif), then set the right
+                * brace line number to the line number of the pre-processor
+                * command (it then must be followed by a blank line)
+                */
+
+               if (line[n] == '#')
+                 {
+                   int ii;
+
+                   for (ii = n + 1; line[ii] != '\0' && isspace(line[ii]); ii++)
+                     {
+                     }
+
+                   if (strncmp(&line[ii], "else", 4) != 0 &&
+                       strncmp(&line[ii], "elif", 4) != 0)
+                     {
+                       rbrace_lineno = lineno;
+                     }
+                 }
+             }
         }
 
       /* STEP 1: Find the indentation level and the start of real stuff on
@@ -1023,6 +1066,8 @@ int main(int argc, char **argv, char **envp)
                                 "Blank line precedes right brace at line %d\n",
                                 lineno);
                       }
+
+                    rbrace_lineno  = lineno;
                   }
                   break;
 

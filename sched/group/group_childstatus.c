@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Note that there cannot be more that CONFIG_MAX_TASKS tasks in total.
  * However, the number of child status structures may need to be significantly
  * larger because this number includes the maximum number of tasks that are
@@ -73,6 +74,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* Globals are maintained in a structure to minimize name collisions. */
 
 struct child_pool_s

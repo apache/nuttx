@@ -615,6 +615,7 @@ errout_with_join:
   ptcb->joininfo = NULL;
 
 errout_with_tcb:
+
   /* Clear group binding */
 
   if (ptcb && !group_joined)
