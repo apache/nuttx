@@ -309,6 +309,9 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 # Dependencies
 
 .depend: Makefile $(SRCS)
+	$(Q) if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
+	fi
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
