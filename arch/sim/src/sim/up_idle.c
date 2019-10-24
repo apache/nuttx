@@ -137,6 +137,9 @@ void up_idle(void)
 
   if (g_uart_data_available)
     {
+#ifdef CONFIG_PM
+      pm_activity(PM_IDLE_DOMAIN, 100);  /* Report important activity to PM */
+#endif
       g_uart_data_available = 0;
       simuart_post();
     }
