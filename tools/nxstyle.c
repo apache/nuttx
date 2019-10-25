@@ -116,6 +116,7 @@ int main(int argc, char **argv, char **envp)
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool hdrfile;         /* True: File is a header file */
   bool bexternc;        /* True: Within 'extern "C"' */
+  bool brhcomment;      /* True: Comment to the right of code */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -205,6 +206,7 @@ int main(int argc, char **argv, char **envp)
   bstring        = false; /* True: Within a string */
   ppline         = false; /* True: Continuation of a pre-processor line */
   bexternc       = false; /* True: Within 'extern "C"' */
+  brhcomment     = false; /* True: Comment to the right of code */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
   bnest          = 0;     /* Brace nesting level on this line */
@@ -417,7 +419,7 @@ int main(int argc, char **argv, char **envp)
       if (linelen >= 5)      /* Minimum is slash, star, star, slash, newline */
         {
           lptr = strstr(line, "*/");
-          if (line[indent] == '/' && line[indent +1] == '*' &&
+          if (line[indent] == '/' && line[indent + 1] == '*' &&
               lptr - line == linelen - 3)
             {
               /* Check if there should be a blank line before the comment */
@@ -435,6 +437,7 @@ int main(int argc, char **argv, char **envp)
                 }
 
               comment_lineno = lineno;
+              brhcomment = false;
             }
         }
 
@@ -806,6 +809,7 @@ int main(int argc, char **argv, char **envp)
                     }
 
                   ncomment++;
+                  brhcomment = (n != indent);
                   n++;
                   continue;
                 }
@@ -832,7 +836,7 @@ int main(int argc, char **argv, char **envp)
                    * not blank up to the point where the comment was closed.
                    */
 
-                  if (prevncomment > 0 && !bblank)
+                  if (prevncomment > 0 && !bblank && !brhcomment)
                     {
                       fprintf(stderr,
                               "Block comment terminator must be on a separate line at line %d:%d\n",
@@ -869,11 +873,13 @@ int main(int argc, char **argv, char **envp)
 
                           comment_lineno = lineno;
 #endif
+                          brhcomment = false;
                         }
                     }
                   else
                     {
                       ncomment = 0;
+                      brhcomment = false;
                       fprintf(stderr,
                               "Closing without opening comment at line %d:%d\n",
                               lineno, n);
@@ -1605,9 +1611,14 @@ int main(int argc, char **argv, char **envp)
                    * the line if there is nothing preceding (such as the aligned
                    * comments with a structure field definition).  So disabled for
                    * comments before beginning of function definitions.
+                   *
+                   * REVISIT: We would like to suppress this error if this is a
+                   * comment to the right of code.  Those are unaligned.  However,
+                   * The logic sequence current resets brhcomment to false during
+                   * processing of the line prior to this test.
                    */
 
-                  if ((indent & 3) != 3 && bfunctions && dnest == 0)
+                  if ((indent & 3) != 3 && bfunctions && dnest == 0 /* && !brhcomment */)
                     {
                       fprintf(stderr,
                               "Bad comment block alignment at line %d:%d\n",
