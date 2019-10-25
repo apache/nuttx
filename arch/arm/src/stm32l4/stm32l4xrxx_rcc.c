@@ -144,6 +144,12 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32L4_RCC_AHB1ENR);
 
+#ifdef CONFIG_STM32L4_DMAMUX1
+  /* DMAMUX 1 clock enable */
+
+  regval |= RCC_AHB1ENR_DMAMUX1EN;
+#endif
+
 #ifdef CONFIG_STM32L4_DMA1
   /* DMA 1 clock enable */
 
@@ -762,11 +768,16 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_APB1ENR1_PWREN;
       putreg32(regval, STM32L4_RCC_APB1ENR1);
 
-      /* Switch to Range 1 boost mode to support system
-       * frequencies up to 120 MHz. Range 2 is not supported.
+      /* Switch to Range 1 boost mode to support system frequencies up to
+       * 120 MHz.
+       * If any PLL has output frequency higher than 80 Mhz, Range 1 boost
+       * mode needs to be used (RM0432, "6.2.9 Clock source frequency versus
+       * voltage scaling").
+       * Range 2 is not supported.
        */
 
-#if STM32L4_SYSCLK_FREQUENCY > 80000000
+#if STM32L4_SYSCLK_FREQUENCY > 80000000 || \
+    (defined(BOARD_MAX_PLL_FREQUENCY) && BOARD_MAX_PLL_FREQUENCY > 80000000)
       regval  = getreg32(STM32L4_PWR_CR5);
       regval &= ~PWR_CR5_R1MODE;
       putreg32(regval, STM32L4_PWR_CR5);

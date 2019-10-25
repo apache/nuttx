@@ -133,7 +133,11 @@
 
 #undef HAVE_DMA
 #ifdef CONFIG_STM32L4_DAC1_DMA
-#  if defined(CONFIG_STM32L4_DMA1)
+#  if defined(CONFIG_STM32L4_DMAMUX1) && defined(CONFIG_STM32L4_DMA1)
+#    define DAC1_DMA_CHAN   DMAMAP_DAC1_0
+#  elif defined(CONFIG_STM32L4_DMAMUX1) && defined(CONFIG_STM32L4_DMA2)
+#    define DAC1_DMA_CHAN   DMAMAP_DAC1_1
+#  elif defined(CONFIG_STM32L4_DMA1)
 #    define DAC1_DMA_CHAN   DMACHAN_DAC1_1
 #  elif defined(CONFIG_STM32L4_DMA2)
 #    define DAC1_DMA_CHAN   DMACHAN_DAC1_2
@@ -143,7 +147,11 @@
 #  define HAVE_DMA
 #endif
 #ifdef CONFIG_STM32L4_DAC2_DMA
-#  if defined(CONFIG_STM32L4_DMA1)
+#  if defined(CONFIG_STM32L4_DMAMUX1) && defined(CONFIG_STM32L4_DMA1)
+#    define DAC2_DMA_CHAN   DMAMAP_DAC2_0
+#  elif defined(CONFIG_STM32L4_DMAMUX1) && defined(CONFIG_STM32L4_DMA2)
+#    define DAC2_DMA_CHAN   DMAMAP_DAC2_1
+#  elif defined(CONFIG_STM32L4_DMA1)
 #    define DAC2_DMA_CHAN   DMACHAN_DAC2_1
 #  elif defined(CONFIG_STM32L4_DMA2)
 #    define DAC2_DMA_CHAN   DMACHAN_DAC2_2

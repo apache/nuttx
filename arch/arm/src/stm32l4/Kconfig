@@ -574,6 +574,7 @@ config STM32L4_STM32L4XR
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DFSDM1
 	select STM32L4_HAVE_HSI48
+	select STM32L4_HAVE_DMAMUX
 
 # Chip subfamilies:
 
@@ -945,6 +946,10 @@ config STM32L4_HAVE_DMA2D
 	bool
 	default n
 
+config STM32L4_HAVE_DMAMUX
+	bool
+	default n
+
 config STM32L4_HAVE_FSMC
 	bool
 	default n
@@ -1069,9 +1074,15 @@ config STM32L4_DFSDM
 	bool
 	default n
 
+config STM32L4_DMAMUX
+	bool
+	default n
+	depends on STM32L4_HAVE_DMAMUX
+
 config STM32L4_DMA
 	bool
 	default n
+	select STM32L4_DMAMUX if STM32L4_HAVE_DMAMUX
 
 config STM32L4_I2C
 	bool
@@ -1101,17 +1112,25 @@ config STM32L4_SDMMC
 
 comment "AHB1 Peripherals"
 
+config STM32L4_DMAMUX1
+	bool "DMAMUX1"
+	default n
+	depends on STM32L4_HAVE_DMAMUX
+	select STM32L4_DMAMUX
+
 config STM32L4_DMA1
 	bool "DMA1"
 	default n
 	select STM32L4_DMA
 	select ARCH_DMA
+	select STM32L4_DMAMUX1 if STM32L4_HAVE_DMAMUX
 
 config STM32L4_DMA2
 	bool "DMA2"
 	default n
 	select STM32L4_DMA
 	select ARCH_DMA
+	select STM32L4_DMAMUX1 if STM32L4_HAVE_DMAMUX
 
 config STM32L4_CRC
 	bool "CRC"
@@ -1247,13 +1266,13 @@ choice
 
 config STM32L4_QSPI_DMA_CHAN_1_5
 	bool "DMA1 Channel 5"
-	depends on STM32L4_DMA1
+	depends on STM32L4_DMA1 && !STM32L4_DMAMUX
 	---help---
 		Use DMA1 channel 5 for QSPI.
 
 config STM32L4_QSPI_DMA_CHAN_2_7
 	bool "DMA2 Channel 7"
-	depends on STM32L4_DMA2
+	depends on STM32L4_DMA2 && !STM32L4_DMAMUX
 	---help---
 		Use DMA2 channel 7 for QSPI.
 
@@ -3786,7 +3805,7 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on STM32L4_USART1 && ( STM32L4_DMA1 || STM32L4_DMA2 )
+	depends on STM32L4_USART1 && (STM32L4_DMA1 || STM32L4_DMA2 || STM32L4_DMAMUX)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -3831,7 +3850,7 @@ config USART2_RS485_DIR_POLARITY
 config USART2_RXDMA
 	bool "USART2 Rx DMA"
 	default n
-	depends on STM32L4_USART2 && STM32L4_DMA1
+	depends on STM32L4_USART2 && (STM32L4_DMA1 || STM32L4_DMAMUX)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -3876,7 +3895,7 @@ config USART3_RS485_DIR_POLARITY
 config USART3_RXDMA
 	bool "USART3 Rx DMA"
 	default n
-	depends on STM32L4_USART3 && STM32L4_DMA1
+	depends on STM32L4_USART3 && (STM32L4_DMA1 || STM32L4_DMAMUX)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -3921,7 +3940,7 @@ config UART4_RS485_DIR_POLARITY
 config UART4_RXDMA
 	bool "UART4 Rx DMA"
 	default n
-	depends on STM32L4_UART4 && STM32L4_DMA2
+	depends on STM32L4_UART4 && (STM32L4_DMA2 || STM32L4_DMAMUX)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -3966,7 +3985,7 @@ config UART5_RS485_DIR_POLARITY
 config UART5_RXDMA
 	bool "UART5 Rx DMA"
 	default n
-	depends on STM32L4_UART5 && STM32L4_DMA2
+	depends on STM32L4_UART5 && (STM32L4_DMA2 || STM32L4_DMAMUX)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 

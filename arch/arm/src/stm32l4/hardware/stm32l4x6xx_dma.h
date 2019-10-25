@@ -43,11 +43,6 @@
 
 #define DMA1 0
 #define DMA2 1
-#define DMA3 2
-#define DMA4 3
-#define DMA5 4
-#define DMA6 5
-#define DMA7 6
 
 /* Register Offsets *****************************************************************/
 

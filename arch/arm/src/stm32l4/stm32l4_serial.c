@@ -92,13 +92,13 @@
  */
 
 #  if defined(CONFIG_USART2_RXDMA) || defined(CONFIG_USART3_RXDMA)
-#    ifndef CONFIG_STM32L4_DMA1
+#    if !defined(CONFIG_STM32L4_DMA1) && !defined(CONFIG_STM32L4_DMAMUX)
 #      error STM32L4 USART2/3 receive DMA requires CONFIG_STM32L4_DMA1
 #    endif
 #  endif
 
 #  if defined(CONFIG_UART4_RXDMA) || defined(CONFIG_UART5_RXDMA)
-#    ifndef CONFIG_STM32L4_DMA2
+#    if !defined(CONFIG_STM32L4_DMA2) && !defined(CONFIG_STM32L4_DMAMUX)
 #      error STM32L4 UART4/5 receive DMA requires CONFIG_STM32L4_DMA2
 #    endif
 #  endif
@@ -124,12 +124,30 @@
 #    error "USART1 DMA channel not defined (DMAMAP_USART1_RX)"
 #  endif
 
-/* UART2-5 have no alternate channels */
+/* UART2-5 have no alternate channels without DMAMUX */
 
-#  define DMAMAP_USART2_RX  DMACHAN_USART2_RX
-#  define DMAMAP_USART3_RX  DMACHAN_USART3_RX
-#  define DMAMAP_UART4_RX   DMACHAN_UART4_RX
-#  define DMAMAP_UART5_RX   DMACHAN_UART5_RX
+#  ifndef CONFIG_STM32L4_HAVE_DMAMUX
+#    define DMAMAP_USART2_RX  DMACHAN_USART2_RX
+#    define DMAMAP_USART3_RX  DMACHAN_USART3_RX
+#    define DMAMAP_UART4_RX   DMACHAN_UART4_RX
+#    define DMAMAP_UART5_RX   DMACHAN_UART5_RX
+#  endif
+
+#  if defined(CONFIG_USART2_RXDMA) && !defined(DMAMAP_USART2_RX)
+#    error "USART2 DMA channel not defined (DMAMAP_USART2_RX)"
+#  endif
+
+#  if defined(CONFIG_USART3_RXDMA) && !defined(DMAMAP_USART3_RX)
+#    error "USART3 DMA channel not defined (DMAMAP_USART3_RX)"
+#  endif
+
+#  if defined(CONFIG_UART4_RXDMA) && !defined(DMAMAP_UART4_RX)
+#    error "UART4 DMA channel not defined (DMAMAP_UART4_RX)"
+#  endif
+
+#  if defined(CONFIG_UART5_RXDMA) && !defined(DMAMAP_UART5_RX)
+#    error "UART5 DMA channel not defined (DMAMAP_UART5_RX)"
+#  endif
 
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
  *

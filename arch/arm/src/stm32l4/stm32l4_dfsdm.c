@@ -143,7 +143,7 @@
 #endif
 
 #ifdef DFSDM_HAVE_DMA
-#  if !defined(CONFIG_STM32L4_DMA1)
+#  if !defined(CONFIG_STM32L4_DMA1) && !defined(CONFIG_STM32L4_DMAMUX)
 #    error "STM32L4 DFSDM DMA support requires CONFIG_STM32L4_DMA1"
 #  endif
 #endif

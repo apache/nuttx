@@ -57,6 +57,7 @@
 #  include "hardware/stm32l4x6xx_dma.h"
 #elif defined(CONFIG_STM32L4_STM32L4XR)
 #  include "hardware/stm32l4xrxx_dma.h"
+#  include "hardware/stm32l4xrxx_dmamux.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
@@ -87,7 +88,7 @@ typedef FAR void *DMA_HANDLE;
  *   completion of the DMA.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel
+ *   handle - Refers to the DMA channel
  *   status - A bit encoded value that provides the completion status.  See the
  *            DMASTATUS_* definitions above.
  *   arg    - A user-provided value that was provided when stm32l4_dmastart() was
@@ -100,11 +101,24 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 struct stm32l4_dmaregs_s
 {
   uint32_t isr;       /* Interrupt Status Register; each channel gets 4 bits */
-  uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
   uint32_t ccr;       /* Channel Configuration Register; determines functionality */
   uint32_t cndtr;     /* Channel Count Register; determines number of transfers */
   uint32_t cpar;      /* Channel Peripheral Address Register; determines start */
   uint32_t cmar;      /* Channel Memory Address Register; determines start */
+#ifndef CONFIG_STM32L4_HAVE_DMAMUX
+  uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
+#else
+  struct
+  {
+    uint32_t ccr;     /* Channel Configuration Register */
+    uint32_t csr;     /* Channel Status Register */
+    uint32_t rg0cr;   /* Request Generator Channel 0 Configuration Register */
+    uint32_t rg1cr;   /* Request Generator Channel 1 Configuration Register */
+    uint32_t rg2cr;   /* Request Generator Channel 2 Configuration Register */
+    uint32_t rg3cr;   /* Request Generator Channel 3 Configuration Register */
+    uint32_t rgsr;    /* Request Generator Interrupt Status Register */
+  } dmamux;
+#endif
 };
 #endif
 
@@ -126,6 +140,9 @@ extern "C"
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6)
 
 /****************************************************************************
  * Name: stm32l4_dmachannel
@@ -166,6 +183,37 @@ extern "C"
 
 DMA_HANDLE stm32l4_dmachannel(unsigned int chan);
 
+#elif defined(CONFIG_STM32L4_STM32L4XR)
+
+/****************************************************************************
+ * Name: stm32_dmachannel
+ *
+ * Description:
+ *   Allocate a DMA channel.  This function gives the caller mutually
+ *   exclusive access to the DMA channel specified by the 'dmamap' argument.
+ *   It is common for both DMA controllers (DMA1 and DMA2).
+ *
+ * Input Parameters:
+ *   dmamap - Identifies the stream/channel resource. For the STM32L4+, this
+ *     is a bit-encoded value as provided by the DMAMAP_* definitions
+ *     in hardware/stm32l4xrxx_dmamux.h
+ *
+ * Returned Value:
+ *   One success, this function returns a non-NULL, void* DMA channel
+ *   handle.  NULL is returned on any failure.  This function can fail only
+ *   if no DMA channel is available.
+ *
+ * Assumptions:
+ *   - The caller does not hold he DMA channel.
+ *   - The caller can wait for the DMA channel to be freed if it is no
+ *     available.
+ *
+ ****************************************************************************/
+
+DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap);
+
+#endif
+
 /****************************************************************************
  * Name: stm32l4_dmafree
  *
@@ -196,7 +244,7 @@ void stm32l4_dmafree(DMA_HANDLE handle);
  ****************************************************************************/
 
 void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                    size_t ntransfers, uint32_t ccr);
+                      size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
  * Name: stm32l4_dmastart
@@ -211,7 +259,7 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  ****************************************************************************/
 
 void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
-                    bool half);
+                      bool half);
 
 /****************************************************************************
  * Name: stm32l4_dmastop
@@ -276,7 +324,7 @@ bool stm32l4_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs);
 #else
-#  define stm32l4_dmasample(handle,regs)
+#  define stm32l4_dmasample(handle,regs) ((void)0)
 #endif
 
 /****************************************************************************
@@ -292,9 +340,9 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs);
 
 #ifdef CONFIG_DEBUG_DMA_INFO
 void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
-                   const char *msg);
+                     const char *msg);
 #else
-#  define stm32l4_dmadump(handle,regs,msg)
+#  define stm32l4_dmadump(handle,regs,msg) ((void)0)
 #endif
 
 #undef EXTERN
