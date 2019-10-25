@@ -1096,6 +1096,7 @@ void stm32l4_dmafree(DMA_HANDLE handle)
 
   dmainfo("Free g_dmach[%d] CTRL=%d CH=%d\n", dmachan - g_dmach, controller,
           dmachan->chan);
+  UNUSED(controller);
 
   /* Release the channel */
 
