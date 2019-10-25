@@ -51,7 +51,7 @@
 
 #if defined(CONFIG_STM32L4_STM32L4X5)
 #  include "hardware/stm32l4x5xx_otgfs.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
 #  include "hardware/stm32l4x6xx_otgfs.h"
 #else
 #  error "Unsupported STM32L4 chip"

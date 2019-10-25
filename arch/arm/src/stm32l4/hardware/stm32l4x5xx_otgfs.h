@@ -78,7 +78,7 @@
 #define STM32L4_OTGFS_CID_OFFSET          0x003c /* Core ID register  */
 #define STM32L4_OTGFS_GLPMCFG_OFFSET      0x0054 /* LPM configuration register */
 #define STM32L4_OTGFS_GPWRDN_OFFSET       0x0058 /* Power down register */
-#define STM32L4_OTGFS_GADPCTL_OFSSET      0x005c /* ADP timer, control and status register */
+#define STM32L4_OTGFS_GADPCTL_OFSSET      0x0060 /* ADP timer, control and status register */
 #define STM32L4_OTGFS_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
 
 #define STM32L4_OTGFS_DIEPTXF_OFFSET(n)   (0x0104+(((n)-1) << 2))
@@ -491,7 +491,7 @@
 #define OTGFS_GADPCTL_PRBPER_SHIFT      (4)       /* Bits 4-5: XXX */
 #define OTGFS_GADPCTL_PRBPER_MASK       (15 << OTGFS_GADPCTL_PRBPER_SHIFT)
 #define OTGFS_GADPCTL_RTIM_SHIFT        (6)       /* Bits 6-9: XXX */
-#define OTGFS_GADPCTL_RTIM_SHIFT        (6)       /* Bits 6-9: XXX */
+#define OTGFS_GADPCTL_RTIM_MASK         (0x7ff << OTGFS_GADPCTL_RTIM_SHIFT)
 #define OTGFS_GADPCTL_ENAPRB            (1 << 17) /* Bit 17: XXX */
 #define OTGFS_GADPCTL_ENASNS            (1 << 18) /* Bit 18: XXX */
 #define OTGFS_GADPCTL_ADPRST            (1 << 19) /* Bit 19: XXX */
@@ -552,7 +552,7 @@
 #define OTGFS_HPTXSTS_PTXQSAV_MASK      (0xff << OTGFS_HPTXSTS_PTXQSAV_SHIFT)
 #  define OTGFS_HPTXSTS_PTXQSAV_FULL    (0 << OTGFS_HPTXSTS_PTXQSAV_SHIFT)
 #define OTGFS_HPTXSTS_PTXQTOP_SHIFT     (24)      /* Bits 24-31: Top of the periodic transmit request queue */
-#define OTGFS_HPTXSTS_PTXQTOP_MASK      (0x7f << OTGFS_HPTXSTS_PTXQTOP_SHIFT)
+#define OTGFS_HPTXSTS_PTXQTOP_MASK      (0xff << OTGFS_HPTXSTS_PTXQTOP_SHIFT)
 #  define OTGFS_HPTXSTS_TERMINATE       (1 << 24) /* Bit 24: Terminate (last entry for selected channel/endpoint) */
 #  define OTGFS_HPTXSTS_TYPE_SHIFT      (25)      /* Bits 25-26: Type */
 #  define OTGFS_HPTXSTS_TYPE_MASK       (3 << OTGFS_HPTXSTS_TYPE_SHIFT)
@@ -563,7 +563,7 @@
 #  define OTGFS_HPTXSTS_EPNUM_MASK      (15 << OTGFS_HPTXSTS_EPNUM_SHIFT)
 #  define OTGFS_HPTXSTS_CHNUM_SHIFT     (27)      /* Bits 27-30: Channel number */
 #  define OTGFS_HPTXSTS_CHNUM_MASK      (15 << OTGFS_HPTXSTS_CHNUM_SHIFT)
-#  define OTGFS_HPTXSTS_ODD             (1 << 24) /* Bit 31: Send in odd (vs even) frame */
+#  define OTGFS_HPTXSTS_ODD             (1 << 31) /* Bit 31: Send in odd (vs even) frame */
 
 /* Host all channels interrupt and all channels interrupt mask registers */
 
