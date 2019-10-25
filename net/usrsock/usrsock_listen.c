@@ -105,6 +105,7 @@ static int do_listen_request(FAR struct usrsock_conn_s *conn, int backlog)
   struct usrsock_request_listen_s req =
   {
   };
+
   struct iovec bufs[1];
 
   if (backlog > UINT16_MAX)
@@ -160,6 +161,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
   struct usrsock_reqstate_s state =
   {
   };
+
   int ret;
 
   DEBUGASSERT(conn);

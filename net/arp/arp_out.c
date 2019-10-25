@@ -86,7 +86,8 @@ static const uint16_t g_broadcast_ipaddr[2] =
  * Well-known ethernet multicast address:
  *
  * ADDRESS           TYPE   USAGE
- * 01-00-0c-cc-cc-cc 0x0802 CDP (Cisco Discovery Protocol), VTP (Virtual Trunking Protocol)
+ * 01-00-0c-cc-cc-cc 0x0802 CDP (Cisco Discovery Protocol),
+ *                          VTP (Virtual Trunking Protocol)
  * 01-00-0c-cc-cc-cd 0x0802 Cisco Shared Spanning Tree Protocol Address
  * 01-80-c2-00-00-00 0x0802 Spanning Tree Protocol (for bridges) IEEE 802.1D
  * 01-80-c2-00-00-02 0x0809 Ethernet OAM Protocol IEEE 802.3ah

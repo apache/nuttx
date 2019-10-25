@@ -342,7 +342,8 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
         if (fragsize > CONFIG_NET_6LOWPAN_PKTSIZE)
           {
-            nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_PKTSIZE\n");
+            nwarn("WARNING:  Reassembled packet size exceeds "
+                  "CONFIG_NET_6LOWPAN_PKTSIZE\n");
             return -ENOSPC;
           }
 
@@ -448,7 +449,8 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   hc1 = fptr + g_frame_hdrlen;
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-  if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) == SIXLOWPAN_DISPATCH_IPHC)
+  if ((hc1[SIXLOWPAN_HC1_DISPATCH] & SIXLOWPAN_DISPATCH_IPHC_MASK) ==
+      SIXLOWPAN_DISPATCH_IPHC)
     {
       ninfo("IPHC Dispatch\n");
       sixlowpan_uncompresshdr_hc06(radio, metadata, fragsize, iob, fptr, bptr);

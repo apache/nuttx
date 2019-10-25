@@ -300,11 +300,12 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
            * device.
            */
 
-          if (!net_ipv4addr_maskcmp(pstate->snd_toaddr, dev->d_ipaddr, dev->d_netmask))
+          if (!net_ipv4addr_maskcmp(pstate->snd_toaddr, dev->d_ipaddr,
+                                    dev->d_netmask))
             {
-              /* Destination address was not on the local network served by this
-               * device.  If a timeout occurs, then the most likely reason is
-               * that the destination address is not reachable.
+              /* Destination address was not on the local network served by
+               * this device.  If a timeout occurs, then the most likely
+               * reason is that the destination address is not reachable.
                */
 
               nerr("ERROR:  Not reachable\n");

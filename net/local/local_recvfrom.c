@@ -369,12 +369,14 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   return readlen;
 
 errout_with_infd:
+
   /* Close the read-only file descriptor */
 
   file_close(&conn->lc_infile);
   conn->lc_infile.f_inode = NULL;
 
 errout_with_halfduplex:
+
   /* Release our reference to the half duplex FIFO */
 
   (void)local_release_halfduplex(conn);

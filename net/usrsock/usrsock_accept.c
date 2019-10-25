@@ -160,6 +160,7 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
   struct usrsock_request_accept_s req =
   {
   };
+
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -233,6 +234,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   struct usrsock_data_reqstate_s state =
   {
   };
+
   FAR struct usrsock_conn_s *newconn;
   struct iovec inbufs[2];
   socklen_t inaddrlen = 0;

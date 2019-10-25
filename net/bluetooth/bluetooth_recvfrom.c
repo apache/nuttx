@@ -240,6 +240,7 @@ static uint16_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Make sure that this is the driver to which the socket is bound. */
+
 #warning Missing logic
 
   pstate = (FAR struct bluetooth_recvfrom_s *)pvpriv;

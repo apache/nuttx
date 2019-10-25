@@ -310,6 +310,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               switch (conn->tcpstateflags & TCP_STATE_MASK)
                 {
                   case TCP_SYN_RCVD:
+
                     /* In the SYN_RCVD state, we should retransmit our
                      * SYNACK.
                      */
@@ -318,12 +319,14 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                     goto done;
 
                   case TCP_SYN_SENT:
+
                     /* In the SYN_SENT state, we retransmit out SYN. */
 
                     tcp_ack(dev, conn, TCP_SYN);
                     goto done;
 
                   case TCP_ESTABLISHED:
+
                     /* In the ESTABLISHED state, we call upon the application
                      * to do the actual retransmit after which we jump into
                      * the code for sending out the packet.
@@ -336,6 +339,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   case TCP_FIN_WAIT_1:
                   case TCP_CLOSING:
                   case TCP_LAST_ACK:
+
                     /* In all these states we should retransmit a FINACK. */
 
                     tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);
@@ -467,6 +471,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                     }
                 }
 #endif
+
               /* There was no need for a retransmission and there was no
                * need to probe the remote peer.  We poll the application for
                * new outgoing data.

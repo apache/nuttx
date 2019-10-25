@@ -79,7 +79,7 @@ struct icmpv6_recvfrom_s
   FAR uint8_t *recv_buf;        /* Location to return the response */
   uint16_t recv_buflen;         /* Size of the response */
   int16_t recv_result;          /* >=0: receive size on success;
-                                 * <0:negated errno on fail */
+                                 * <0: negated errno on fail */
 };
 
 /****************************************************************************

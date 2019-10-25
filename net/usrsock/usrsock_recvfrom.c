@@ -166,6 +166,7 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
   struct usrsock_request_recvfrom_s req =
   {
   };
+
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -221,6 +222,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   struct usrsock_data_reqstate_s state =
   {
   };
+
   struct iovec inbufs[2];
   socklen_t addrlen = 0;
   socklen_t outaddrlen = 0;

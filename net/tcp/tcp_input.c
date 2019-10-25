@@ -287,6 +287,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
                           break;
                         }
+
                       i += dev->d_buf[hdrlen + 1 + i];
                     }
                 }
@@ -703,6 +704,7 @@ found:
 
                             break;
                           }
+
                         i += dev->d_buf[hdrlen + 1 + i];
                       }
                   }

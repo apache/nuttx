@@ -91,7 +91,8 @@
  *
  ****************************************************************************/
 
-int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
+                      FAR socklen_t *addrlen)
 {
   /* Verify that the psock corresponds to valid, allocated socket */
 

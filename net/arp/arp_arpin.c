@@ -125,8 +125,10 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
             arp->ah_opcode = HTONS(ARP_REPLY);
             memcpy(arp->ah_dhwaddr, arp->ah_shwaddr, ETHER_ADDR_LEN);
-            memcpy(arp->ah_shwaddr, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
+            memcpy(arp->ah_shwaddr, dev->d_mac.ether.ether_addr_octet,
+                   ETHER_ADDR_LEN);
+            memcpy(eth->src, dev->d_mac.ether.ether_addr_octet,
+                   ETHER_ADDR_LEN);
             memcpy(eth->dest, arp->ah_dhwaddr, ETHER_ADDR_LEN);
 
             arp->ah_dipaddr[0] = arp->ah_sipaddr[0];

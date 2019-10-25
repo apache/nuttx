@@ -114,6 +114,7 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
   struct usrsock_request_setsockopt_s req =
   {
   };
+
   struct iovec bufs[2];
 
   if (level < INT16_MIN || level > INT16_MAX)
@@ -180,6 +181,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
   struct usrsock_reqstate_s state =
   {
   };
+
   ssize_t ret;
 
   DEBUGASSERT(conn);

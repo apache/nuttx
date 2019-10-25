@@ -550,6 +550,7 @@ static int netlink_close(FAR struct socket *psock)
   if (conn->crefs <= 1)
     {
       /* Yes... inform user-space daemon of socket close. */
+
 #warning Missing logic
 
       /* Free the connection structure */

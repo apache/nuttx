@@ -156,6 +156,7 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
   struct usrsock_request_sendto_s req =
   {
   };
+
   struct iovec bufs[3];
 
   if (addrlen > UINT16_MAX)
@@ -216,6 +217,7 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
   struct usrsock_reqstate_s state =
   {
   };
+
   ssize_t ret;
 #ifdef CONFIG_NET_SOCKOPTS
   struct timespec abstime;

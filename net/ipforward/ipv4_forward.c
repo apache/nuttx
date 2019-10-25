@@ -163,6 +163,7 @@ static int ipv4_decr_ttl(FAR struct ipv4_hdr_s *ipv4)
     {
 #ifdef CONFIG_NET_ICMP
       /* Return an ICMP error packet back to the sender. */
+
 #  warning Missing logic
 #endif
 
@@ -488,6 +489,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
        */
 
       /* Correct dev->d_buf by adding back the L1 header length */
+
 #endif
 
       nwarn("WARNING: Packet forwarding to same device not supportedN\n");

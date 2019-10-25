@@ -308,6 +308,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Make sure that this is the driver to which the socket is connected. */
+
 #warning Missing logic
 
   pstate = (FAR struct ieee802154_sendto_s *)pvpriv;
@@ -391,6 +392,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 errout:
+
   /* Don't allow any further call backs. */
 
   pstate->is_cb->flags    = 0;

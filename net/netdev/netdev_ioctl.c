@@ -224,7 +224,8 @@ static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
       net_ipv6addr_copy(router, in6addr_any.s6_addr16);
     }
 
-  return net_addroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16, router);
+  return net_addroute_ipv6(target->sin6_addr.s6_addr16,
+                           netmask->sin6_addr.s6_addr16, router);
 }
 #endif /* HAVE_WRITABLE_IPv6ROUTE */
 
@@ -1553,18 +1554,21 @@ ssize_t net_ioctl_arglen(int cmd)
             return sizeof(struct iwreq);
           }
 #  endif
+
 #  ifdef CONFIG_WIRELESS_IEEE802154
         if (_MAC802154IOCVALID(cmd))
           {
             return sizeof(struct ieee802154_netmac_s);
           }
 #  endif
+
 #  ifdef CONFIG_WIRELESS_PKTRADIO
         if (WL_ISPKTRADIOCMD(cmd))
           {
             return sizeof(struct pktradio_ifreq_s);
           }
 #  endif
+
 #  ifdef CONFIG_WIRELESS_BLUETOOTH
         if (WL_IBLUETOOTHCMD(cmd))
           {
@@ -1572,6 +1576,7 @@ ssize_t net_ioctl_arglen(int cmd)
           }
 #  endif
 #endif
+
         return -ENOTTY;
     }
 }

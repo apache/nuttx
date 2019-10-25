@@ -119,6 +119,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Make sure that this is the driver to which the socket is connected. */
+
 #warning Missing logic
 
   pstate = (FAR struct bluetooth_sendto_s *)pvpriv;
@@ -203,6 +204,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 errout:
+
   /* Don't allow any further call backs. */
 
   pstate->is_cb->flags    = 0;

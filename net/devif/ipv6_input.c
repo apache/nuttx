@@ -466,6 +466,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
     {
 #ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
+
         /* Forward the IPv6 TCP packet */
 
         tcp_ipv6_input(dev, iphdrlen);
@@ -502,6 +503,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
 #ifdef NET_UDP_HAVE_STACK
       case IP_PROTO_UDP:   /* UDP input */
+
         /* Forward the IPv6 UDP packet */
 
         udp_ipv6_input(dev, iphdrlen);
@@ -512,6 +514,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
 #ifdef NET_ICMPv6_HAVE_STACK
       case IP_PROTO_ICMP6: /* ICMP6 input */
+
         /* Forward the ICMPv6 packet */
 
         icmpv6_input(dev, iphdrlen);

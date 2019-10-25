@@ -425,9 +425,12 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
-            dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
-            dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
-            dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5],
+            dev->d_mac.ether.ether_addr_octet[0],
+            dev->d_mac.ether.ether_addr_octet[1],
+            dev->d_mac.ether.ether_addr_octet[2],
+            dev->d_mac.ether.ether_addr_octet[3],
+            dev->d_mac.ether.ether_addr_octet[4],
+            dev->d_mac.ether.ether_addr_octet[5],
             dev->d_ifname);
 #else
       ninfo("Registered dev: %s\n", dev->d_ifname);
@@ -437,4 +440,3 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
   return -EINVAL;
 }
-

@@ -853,7 +853,8 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_UDP_HAVE_STACK
-static inline void inet_udp_sender(struct net_driver_s *dev, struct inet_recvfrom_s *pstate)
+static inline void inet_udp_sender(FAR struct net_driver_s *dev,
+                                   FAR struct inet_recvfrom_s *pstate)
 {
   /* Get the family from the packet type, IP address from the IP header, and
    * the port number from the UDP header.

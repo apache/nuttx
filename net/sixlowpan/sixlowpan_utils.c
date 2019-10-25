@@ -704,7 +704,7 @@ int sixlowpan_extract_srcaddr(FAR struct radio_driver_s *radio,
         {
           srcaddr->nv_addrlen = NET_6LOWPAN_EADDRSIZE;
           memcpy(srcaddr->nv_addr, ind->src.eaddr, NET_6LOWPAN_EADDRSIZE);
-       }
+        }
 
       return OK;
     }

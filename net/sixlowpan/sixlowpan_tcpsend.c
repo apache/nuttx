@@ -603,6 +603,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 end_wait:
+
   /* Do not allow any further callbacks */
 
   sinfo->s_cb->flags   = 0;

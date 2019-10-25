@@ -123,6 +123,7 @@ static int do_getsockname_request(FAR struct usrsock_conn_s *conn,
   struct usrsock_request_getsockname_s req =
   {
   };
+
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -175,6 +176,7 @@ int usrsock_getsockname(FAR struct socket *psock,
   struct usrsock_data_reqstate_s state =
   {
   };
+
   struct iovec inbufs[1];
   ssize_t ret;
   socklen_t outaddrlen = 0;

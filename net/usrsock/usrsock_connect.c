@@ -112,6 +112,7 @@ static int do_connect_request(FAR struct usrsock_conn_s *conn,
   struct usrsock_request_connect_s req =
   {
   };
+
   struct iovec bufs[2];
 
   if (addrlen > UINT16_MAX)
@@ -162,6 +163,7 @@ int usrsock_connect(FAR struct socket *psock,
   struct usrsock_reqstate_s state =
   {
   };
+
   int ret;
 
   DEBUGASSERT(conn);

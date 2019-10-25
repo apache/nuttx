@@ -190,7 +190,8 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
         {
           iaddr            = (FAR struct sockaddr_ieee802154_s *)pstate->ir_from;
           iaddr->sa_family = AF_IEEE802154;
-          memcpy(&iaddr->sa_addr, &container->ic_src, sizeof(struct ieee802154_saddr_s));
+          memcpy(&iaddr->sa_addr, &container->ic_src,
+                 sizeof(struct ieee802154_saddr_s));
         }
 
       /* Free both the IOB and the container */
@@ -237,6 +238,7 @@ static uint16_t ieee802154_recvfrom_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Make sure that this is the driver to which the socket is bound. */
+
 #warning Missing logic
 
   pstate = (FAR struct ieee802154_recvfrom_s *)pvpriv;

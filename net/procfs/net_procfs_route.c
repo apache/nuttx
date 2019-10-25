@@ -638,6 +638,7 @@ static int route_opendir(FAR const char *relpath,
           return -ENOTDIR;
         }
 #endif
+
 #ifdef CONFIG_NET_IPv6
       if (strcmp(relpath, g_route_ipv6_path) == 0)
         {

@@ -241,8 +241,9 @@ static FAR struct sixlowpan_addrcontext_s *
           net_ipv6addr_prefixcmp(&g_hc06_addrcontexts[i].prefix, ipaddr, 64))
         {
           ninfo("Context found for ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x Context: %d\n",
-                ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]), ntohs(ipaddr[3]),
-                ntohs(ipaddr[4]), ntohs(ipaddr[5]), ntohs(ipaddr[6]), ntohs(ipaddr[7]),
+                ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
+                ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
+                ntohs(ipaddr[6]), ntohs(ipaddr[7]),
                 g_hc06_addrcontexts[i].number);
 
           return &g_hc06_addrcontexts[i];
@@ -1406,6 +1407,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           switch (*g_hc06ptr & SIXLOWPAN_NHC_UDP_CS_P_11)
             {
             case SIXLOWPAN_NHC_UDP_CS_P_00:
+
               /* 1 byte for NHC, 4 byte for ports, 2 bytes chksum */
 
               memcpy(&udp->srcport, g_hc06ptr + 1, 2);
@@ -1418,6 +1420,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               break;
 
             case SIXLOWPAN_NHC_UDP_CS_P_01:
+
               /* 1 byte for NHC + source 16bit inline, dest = 0xF0 + 8 bit
                * inline
                */
@@ -1435,6 +1438,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               break;
 
             case SIXLOWPAN_NHC_UDP_CS_P_10:
+
               /* 1 byte for NHC + source = 0xF0 + 8bit inline, dest = 16 bit
                * inline
                */
@@ -1452,6 +1456,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               break;
 
             case SIXLOWPAN_NHC_UDP_CS_P_11:
+
               /* 1 byte for NHC, 1 byte for ports */
 
               udp->srcport =

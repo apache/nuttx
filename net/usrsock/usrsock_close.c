@@ -111,6 +111,7 @@ static int do_close_request(FAR struct usrsock_conn_s *conn)
   struct usrsock_request_close_s req =
   {
   };
+
   struct iovec bufs[1];
 
   /* Prepare request for daemon to read. */
@@ -140,6 +141,7 @@ int usrsock_close(FAR struct usrsock_conn_s *conn)
   struct usrsock_reqstate_s state =
   {
   };
+
   int ret;
 
   net_lock();

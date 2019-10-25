@@ -159,20 +159,20 @@ int tcp_txdrain(FAR struct socket *psock,
 
       ret = tcp_disconnect_notifier_setup(txdrain_worker, conn, &waitsem);
 
-       /* Zero is a special value that means that no connection has been
-        * established.  Otherwise it is a special 'key' that can be used
-        * to teardown the notification later
-        */
+      /* Zero is a special value that means that no connection has been
+       * established.  Otherwise it is a special 'key' that can be used
+       * to teardown the notification later
+       */
 
-       if (ret > 0)
-         {
-           /* Save the disconnect key */
+      if (ret > 0)
+        {
+          /* Save the disconnect key */
 
-           int disconn_key = ret;
+          int disconn_key = ret;
 
-           /* There is pending write data and the socket is connected..
-            * wait for it to drain or be be disconnected.
-            */
+          /* There is pending write data and the socket is connected..
+           * wait for it to drain or be be disconnected.
+           */
 
           do
             {

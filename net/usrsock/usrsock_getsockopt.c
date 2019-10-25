@@ -122,6 +122,7 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
   struct usrsock_request_getsockopt_s req =
   {
   };
+
   struct iovec bufs[1];
 
   if (level < INT16_MIN || level > INT16_MAX)
@@ -189,6 +190,7 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
   struct usrsock_data_reqstate_s state =
   {
   };
+
   struct iovec inbufs[1];
   ssize_t ret;
 

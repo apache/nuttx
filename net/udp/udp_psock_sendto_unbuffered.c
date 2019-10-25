@@ -561,6 +561,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = state.st_sndlen;
 
 errout_with_lock:
+
   /* Release the semaphore */
 
   nxsem_destroy(&state.st_sem);

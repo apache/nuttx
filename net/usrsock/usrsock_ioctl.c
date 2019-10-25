@@ -122,6 +122,7 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
   struct usrsock_request_ioctl_s req =
   {
   };
+
   struct iovec bufs[2];
 
   if (arglen > UINT16_MAX)
@@ -168,6 +169,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
   struct usrsock_data_reqstate_s state =
   {
   };
+
   struct iovec inbufs[1];
   int ret;
 

@@ -142,6 +142,7 @@ static int usrsock_sockif_setup(FAR struct socket *psock, int protocol)
           return -ENETDOWN;
         }
 #endif
+
 #ifndef CONFIG_NET_USRSOCK_TCP
       if (type == SOCK_STREAM)
         {

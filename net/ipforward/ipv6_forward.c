@@ -159,6 +159,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
     {
 #ifdef CONFIG_NET_ICMPv6
       /* Return an ICMPv6 error packet back to the sender. */
+
 #  warning Missing logic
 #endif
 
@@ -635,6 +636,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
            */
 
           /* Correct dev->d_buf by adding back the L1 header length */
+
 #endif
 
           /* Nothing other 6LoWPAN forwarding is currently handled and that

@@ -299,6 +299,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
   switch (priv->entry)
     {
       case NETPROCFS_SUBDIR_DEV:
+
         /* Show device-specific statistics */
 
         nreturned = netprocfs_read_devstats(priv, buffer, buflen);
@@ -306,6 +307,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
 
 #ifdef CONFIG_NET_STATISTICS
       case NETPROCFS_SUBDIR_STAT:
+
         /* Show the network layer statistics */
 
         nreturned = netprocfs_read_netstats(priv, buffer, buflen);
@@ -313,6 +315,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
 
 #ifdef CONFIG_NET_MLD
       case NETPROCFS_SUBDIR_MLD:
+
         /* Show the MLD statistics */
 
         nreturned = netprocfs_read_mldstats(priv, buffer, buflen);
@@ -362,7 +365,8 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = (FAR struct netprocfs_file_s *)kmm_zalloc(sizeof(struct netprocfs_file_s));
+  newpriv = (FAR struct netprocfs_file_s *)
+    kmm_zalloc(sizeof(struct netprocfs_file_s));
   if (!newpriv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

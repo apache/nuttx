@@ -76,7 +76,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_READAHEAD
-static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
+static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
+                                FAR struct udp_conn_s *conn,
                                 FAR uint8_t *buffer, uint16_t buflen)
 {
   FAR struct iob_s *iob;
@@ -87,12 +88,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
     0
   };
 #endif
+
 #ifdef CONFIG_NET_IPv4
   FAR struct sockaddr_in src_addr4 =
   {
     0
   };
 #endif
+
   FAR void  *src_addr;
   uint8_t src_addr_size;
 
