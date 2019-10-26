@@ -99,7 +99,13 @@
  * CMD:           BOARDIOC_MKRD
  * DESCRIPTION:   Create a RAM disk
  * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
- * CONFIGURATION: CONFIG_DRVR_MKRD
+ * CONFIGURATION: CONFIG_BOARDCTL_MKRD
+ * DEPENDENCIES:  None
+ *
+ * CMD:           BOARDIOC_ROMDISK
+ * DESCRIPTION:   Reigster
+ * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
+ * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_APP_SYMTAB
@@ -188,15 +194,16 @@
 #define BOARDIOC_RESET             _BOARDIOC(0x0004)
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
 #define BOARDIOC_MKRD              _BOARDIOC(0x0006)
-#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0007)
-#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0008)
-#define BOARDIOC_BUILTINS          _BOARDIOC(0x0009)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x000a)
-#define BOARDIOC_NX_START          _BOARDIOC(0x000b)
-#define BOARDIOC_VNC_START         _BOARDIOC(0x000c)
-#define BOARDIOC_NXTERM            _BOARDIOC(0x000d)
-#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000e)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x000f)
+#define BOARDIOC_ROMDISK           _BOARDIOC(0x0007)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0008)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0009)
+#define BOARDIOC_BUILTINS          _BOARDIOC(0x000a)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x000b)
+#define BOARDIOC_NX_START          _BOARDIOC(0x000c)
+#define BOARDIOC_VNC_START         _BOARDIOC(0x000d)
+#define BOARDIOC_NXTERM            _BOARDIOC(0x000e)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000f)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x0010)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -205,7 +212,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0010)
+#define BOARDIOC_USER              _BOARDIOC(0x0011)
 
 /****************************************************************************
  * Public Type Definitions
@@ -213,7 +220,7 @@
 
 /* Structures used with IOCTL commands */
 
-#ifdef CONFIG_DRVR_MKRD
+#ifdef CONFIG_BOARDCTL_MKRD
 /* Describes the RAM disk to be created */
 
 struct boardioc_mkrd_s
@@ -222,6 +229,18 @@ struct boardioc_mkrd_s
   uint32_t nsectors;  /* The number of sectors in the RAM disk */
   uint16_t sectsize;  /* The size of one sector in bytes */
   uint8_t rdflags;    /* See RD_FLAGS_* definitions in include/nuttx/ramdisk.h */
+};
+#endif
+
+#ifdef CONFIG_BOARDCTL_ROMDISK
+/* Describes the ROM disk image to be registered */
+
+struct boardioc_romdisk_s
+{
+  uint8_t minor;      /* Minor device number of the RAM disk. */
+  uint32_t nsectors;  /* The number of sectors in the RAM disk */
+  uint16_t sectsize;  /* The size of one sector in bytes */
+  FAR const uint8_t *image;
 };
 #endif
 

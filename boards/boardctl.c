@@ -358,11 +358,11 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_DRVR_MKRD
+#ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
        * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
-       * CONFIGURATION: CONFIG_DRVR_MKRD
+       * CONFIGURATION: CONFIG_BOARDCTL_MKRD
        * DEPENDENCIES:  None
        */
 
@@ -379,6 +379,32 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             {
               ret = mkrd((int)desc->minor, desc->nsectors, desc->sectsize,
                          desc->rdflags);
+            }
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_ROMDISK
+      /* CMD:           BOARDIOC_ROMDISK
+       * DESCRIPTION:   Reigster
+       * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
+       * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_ROMDISK:
+        {
+          FAR const struct boardioc_romdisk_s *desc =
+            (FAR const struct boardioc_romdisk_s *)arg;
+
+          if (desc == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = romdisk_register((int)desc->minor, desc->image, desc->nsectors,
+                                     desc->sectsize);
             }
         }
         break;

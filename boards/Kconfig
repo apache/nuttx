@@ -2836,6 +2836,21 @@ config BOARDCTL_UNIQUEID_SIZE
 		Provides the size of the memory buffer that must be provided by the
 		caller of board_uniqueid() in which to receive the board unique ID.
 
+config BOARDCTL_MKRD
+	bool "Enable application space creation of RAM disks"
+	default n
+	select DRVR_MKRD
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Enables support for the BOARDIOC_MKRD boardctl() command.
+
+config BOARDCTL_ROMDISK
+	bool "Enable application space creation of ROM disks"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Enables support for the BOARDIOC_MKRD boardctl() command.
+
 config BOARDCTL_APP_SYMTAB
 	bool "Enable application symbol table interfaces"
 	default n

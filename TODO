@@ -17,7 +17,7 @@ nuttx/:
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
   (1)  Work Queues (sched/wqueue)
-  (9)  Kernel/Protected Build
+  (8)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
@@ -925,27 +925,6 @@ o Work Queues (sched/wqueue)
 
 o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       NSH PARTITIONING.
-  Description: There are issues with NSH in the NuttX kernel and protected
-               build modes (where NuttX is built as a monolithic kernel and
-               user code must trap into the protected kernel via syscalls).
-               This can cause link failures in the kernel/protected build
-               mode and must currently be disabled.
-
-               Many such issues have been fixed.  Here are the known
-               remaingin problems that must be fixed:
-
-               - apps/nshlib/nsh_romfsetc.c:  The function nsh_romfsetc()
-                 calles romdisk_register() directly in order to register
-                 the application ROMFS file system.  This logic needs to
-                 be redesigned.  The best solution would simply to be to
-                 to create the romdisk in the board start-up logic.  This
-                 would, however, have impacts to NuttX users.
-
-  Status:      Open
-  Priority:    Medium/High -- the kernel build configuration is not fully fielded
-               yet.
 
   Title:       apps/system PARTITIONING
   Description: Several of the USB device helper applications in apps/system
@@ -2859,10 +2838,10 @@ o Other Applications & Tests (apps/examples/)
                These examples are simple demos and, hence, you could argue that
                it is not so bad that they violate the interface for the purpose
                of demonstration (although they do set a bad example because of
-               this).  But there is other non-compliant logic:
+               this).
 
-                 graphics/traveler/trv_romfs.c, nshlib/nsh_romfsetc.c
-
-               The NSH issue is listed under"Kernel/Protected Build" as well.
+               These examples should, of course, use boardctl(BOARDIOC_ROMDISK)
+               to create the ROM disk instead of calling romdisk_register()
+               directly.
   Status:      Open
   Priority:    Medium.
