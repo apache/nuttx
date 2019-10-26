@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/axoloti/src/stm32_boot.c
+ * boards/arm/stm32/axoloti/src/stm32_appinit.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,76 +39,56 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "nvic.h"
-#include "itm.h"
-
-#include "stm32.h"
 #include "axoloti.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_boardinitialize
+ * Name: board_app_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void stm32_boardinitialize(void)
+int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_SCHED_CRITMONITOR
-  /* Enable ITM and DWT resources, if not left enabled by debugger. */
-
-  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
-
-  /* Make sure the high speed cycle counter is running.  It will be started
-   * automatically only if a debugger is connected.
-   */
-
-  putreg32(0xc5acce55, ITM_LAR);
-  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
-#endif
-
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
-    defined(CONFIG_STM32_SPI3)
-  stm32_spidev_initialize();
-#endif
-
-#if defined(CONFIG_STM32_OTGHS) || defined(CONFIG_STM32_OTGFS)
-  stm32_usbinitialize();
-#endif
-}
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
+  /* Board initialization already performed by board_late_initialize() */
+
+  return OK;
+#else
   /* Perform board-specific initialization */
 
-  (void)stm32_bringup();
-}
+  return stm32_bringup();
 #endif
+}

@@ -38,6 +38,10 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c
 
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
+endif
+
 ifeq ($(CONFIG_STM32_FMC),y)
 CSRCS += stm32_extmem.c
 endif
