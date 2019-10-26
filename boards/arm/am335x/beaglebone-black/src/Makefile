@@ -41,7 +41,7 @@ ASRCS =
 CSRCS = am335x_boot.c am335x_bringup.c am335x_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += am355x_appinit.c
+CSRCS += am335x_appinit.c
 endif
 
 ifeq ($(CONFIG_CAN),y)

@@ -156,7 +156,7 @@
 int am335x_bringup(void);
 
 /****************************************************************************
- * Name: am355x_led_initialize
+ * Name: am335x_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
