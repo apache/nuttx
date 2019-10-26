@@ -118,6 +118,7 @@ static int devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
           nxsem_post(fds->sem);
         }
     }
+
   return OK;
 }
 

@@ -185,7 +185,6 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
 
       rwb_resetwrbuffer(rwb);
     }
-
 }
 #endif
 
@@ -933,11 +932,12 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
 
   ret = rwb_read_(rwb, startblock, nblocks, rdbuffer);
   if (ret < 0)
-    return ret;
+    {
+      return ret;
+    }
 
   return readblocks + ret;
 }
-
 
 /****************************************************************************
  * Name: rwb_write

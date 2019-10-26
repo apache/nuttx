@@ -86,7 +86,8 @@ static const struct file_operations devnull_fops =
  * Name: devnull_read
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
+                            size_t len)
 {
   return 0; /* Return EOF */
 }
@@ -95,7 +96,8 @@ static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer, size_t len
  * Name: devnull_write
  ****************************************************************************/
 
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t len)
 {
   return len; /* Say that everything was written */
 }

@@ -49,6 +49,10 @@
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 
+#ifdef CONFIG_FS_WRITABLE
+#  include <nuttx/drivers/ramdisk.h>
+#endif
+
 #ifdef CONFIG_NX
 #  include <nuttx/nx/nxmu.h>
 #endif
@@ -350,6 +354,32 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_UNIQUEID:
         {
           ret = board_uniqueid((FAR uint8_t *)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_FS_WRITABLE
+      /* CMD:           BOARDIOC_MKRD
+       * DESCRIPTION:   Create a RAM disk
+       * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
+       * CONFIGURATION: CONFIG_FS_WRITABLE
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_MKRD:
+        {
+          FAR const struct boardioc_mkrd_s *desc =
+            (FAR const struct boardioc_mkrd_s *)arg;
+
+          if (desc == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = mkrd((int)desc->minor, desc->nsectors, desc->sectsize,
+                         desc->rdflags);
+            }
         }
         break;
 #endif

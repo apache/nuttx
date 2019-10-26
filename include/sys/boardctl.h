@@ -96,6 +96,12 @@
  *                which to receive the board unique ID.
  * DEPENDENCIES:  Board logic must provide the board_uniqueid() interface.
  *
+ * CMD:           BOARDIOC_MKRD
+ * DESCRIPTION:   Create a RAM disk
+ * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
+ * CONFIGURATION: CONFIG_FS_WRITABLE
+ * DEPENDENCIES:  None
+ *
  * CMD:           BOARDIOC_APP_SYMTAB
  * DESCRIPTION:   Select the application symbol table.  This symbol table
  *                provides the symbol definitions exported to application
@@ -181,15 +187,16 @@
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0003)
 #define BOARDIOC_RESET             _BOARDIOC(0x0004)
 #define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
-#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0006)
-#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0007)
-#define BOARDIOC_BUILTINS          _BOARDIOC(0x0008)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0009)
-#define BOARDIOC_NX_START          _BOARDIOC(0x000a)
-#define BOARDIOC_VNC_START         _BOARDIOC(0x000b)
-#define BOARDIOC_NXTERM            _BOARDIOC(0x000c)
-#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000d)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x000e)
+#define BOARDIOC_MKRD              _BOARDIOC(0x0006)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0007)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0008)
+#define BOARDIOC_BUILTINS          _BOARDIOC(0x0009)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x000a)
+#define BOARDIOC_NX_START          _BOARDIOC(0x000b)
+#define BOARDIOC_VNC_START         _BOARDIOC(0x000c)
+#define BOARDIOC_NXTERM            _BOARDIOC(0x000d)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000e)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x000f)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -198,13 +205,25 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000f)
+#define BOARDIOC_USER              _BOARDIOC(0x0010)
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 /* Structures used with IOCTL commands */
+
+#ifdef CONFIG_FS_WRITABLE
+/* Describes the RAM disk to be created */
+
+struct boardioc_mkrd_s
+{
+  uint8_t minor;      /* Minor device number of the RAM disk. */
+  uint32_t nsectors;  /* The number of sectors in the RAM disk */
+  uint16_t sectsize;  /* The size of one sector in bytes */
+  uint8_t rdflags;    /* See RD_FLAGS_* definitions in include/nuttx/ramdisk.h */
+};
+#endif
 
 /* In order to full describe a symbol table, a vector containing the address
  * of the symbol table and the number of elements in the symbol table is
