@@ -17,6 +17,7 @@ source drivers/loop/Kconfig
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n
+	select FS_READABLE
 	select FS_WRITABLE
 	---help---
 		Build the mkrd() function which serves as a wrapper to simplify
