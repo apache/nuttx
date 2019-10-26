@@ -37,7 +37,7 @@ apps/ and other Add-Ons:
   (1)  System libraries apps/system (apps/system)
   (1)  Modbus (apps/modbus)
   (1)  Pascal add-on (pcode/)
-  (4)  Other Applications & Tests (apps/examples/)
+  (5)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -927,20 +927,21 @@ o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       NSH PARTITIONING.
-  Description: There are issues with several NSH commands in the NuttX kernel
-               and protected build modes (where NuttX is built as a monolithic
-               kernel and user code must trap into the protected kernel via
-               syscalls). The current NSH implementation has several commands
-               that call  directly into kernel internal functions for which
-               there is no syscall available.  The commands cause link failures
-               in the kernel/protected build mode and must currently be disabled.
-               Here are known problems that must be fixed:
+  Description: There are issues with NSH in the NuttX kernel and protected
+               build modes (where NuttX is built as a monolithic kernel and
+               user code must trap into the protected kernel via syscalls).
+               This can cause link failures in the kernel/protected build
+               mode and must currently be disabled.
 
-               COMMAND  KERNEL INTERFACE(s)
-               -------- ----------------------------------------------
-               mkrd     ramdisk_register()
+               Many such issues have been fixed.  Here are the known
+               remaingin problems that must be fixed:
 
-               See http://www.nuttx.org/doku.php?id=wiki:howtos:protected-ramdisk
+               - apps/nshlib/nsh_romfsetc.c:  The function nsh_romfsetc()
+                 calles romdisk_register() directly in order to register
+                 the application ROMFS file system.  This logic needs to
+                 be redesigned.  The best solution would simply to be to
+                 to create the romdisk in the board start-up logic.  This
+                 would, however, have impacts to NuttX users.
 
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
@@ -2734,6 +2735,8 @@ o Network Utilities (apps/netutils/)
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  See some NHS issues under "Kernel/Protected Build" as well.
+
   Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
   Description: The ifconfig command will not behave correctly if an interface
                is provided and there are multiple interfaces.  It should only
@@ -2838,5 +2841,25 @@ o Other Applications & Tests (apps/examples/)
                tiny artifact would not be surprising (the initial window
                should like at (0,0) and be of size (1,1)), but sometimes
                the artifact is larger.
+  Status:      Open
+  Priority:    Medium.
+
+  Title:       ILLEGAL CALLS TO romdisk_register()
+  Desription:  Several examples (and other things under apps/) make illegal
+               calls to romdisk_register().  This both violates the portable
+               POSIX OS interface and makes these applications un-usable in
+               PROTECTED and KERNEL build modes.
+
+               Non-compliant examples include:
+
+                 examples/bastest, examples/elf, examples/module,
+                 examples/nxflat, examples/posix_spawn, examples/romfs,
+                 examples/sotest, examples/thttpd, examples/unionfs
+
+               Other non-compliant logic:
+
+                 graphics/traveler/trv_romfs.c, nshlib/nsh_romfsetc.c
+
+               The NSH issue is listed under"Kernel/Protected Build" as well.
   Status:      Open
   Priority:    Medium.
