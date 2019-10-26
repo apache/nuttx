@@ -90,7 +90,10 @@ endif
 CSRCS += dev_null.c dev_zero.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c mkrd.c
+  CSRCS += ramdisk.c
+ifeq ($(CONFIG_DRVR_MKRD),y)
+  CSRCS += mkrd.c
+endif
 ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
   CSRCS += rwbuffer.c
 else

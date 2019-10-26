@@ -14,6 +14,15 @@ config DEV_ZERO
 source drivers/crypto/Kconfig
 source drivers/loop/Kconfig
 
+config DRVR_MKRD
+	bool "RAM disk wrapper (mkrd)"
+	default n
+	---help---
+		Build the mkrd() function which serves as a wrapper to simplify
+		creation of RAM disks.  If the boardctrl() interface is enabled,
+		the selecting this option will also enable the BOARDIOC_MKRD
+		command that will support creation of RAM disks from applications.
+
 menu "Buffering"
 
 config DRVR_WRITEBUFFER

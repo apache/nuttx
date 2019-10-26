@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 24, 2019)
+NuttX TODO List (Last updated September 26, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -2845,7 +2845,7 @@ o Other Applications & Tests (apps/examples/)
   Priority:    Medium.
 
   Title:       ILLEGAL CALLS TO romdisk_register()
-  Desription:  Several examples (and other things under apps/) make illegal
+  Description: Several examples (and other things under apps/) make illegal
                calls to romdisk_register().  This both violates the portable
                POSIX OS interface and makes these applications un-usable in
                PROTECTED and KERNEL build modes.
@@ -2856,7 +2856,10 @@ o Other Applications & Tests (apps/examples/)
                  examples/nxflat, examples/posix_spawn, examples/romfs,
                  examples/sotest, examples/thttpd, examples/unionfs
 
-               Other non-compliant logic:
+               These examples are simple demos and, hence, you could argue that
+               it is not so bad that they violate the interface for the purpose
+               of demonstration (although they do set a bad example because of
+               this).  But there is other non-compliant logic:
 
                  graphics/traveler/trv_romfs.c, nshlib/nsh_romfsetc.c
 

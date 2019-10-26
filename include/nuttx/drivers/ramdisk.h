@@ -122,7 +122,7 @@ int romdisk_register(int minor, FAR const uint8_t *buffer, uint32_t nsectors,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
+#ifdef CONFIG_DRVR_MKRD
 int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags);
 #endif
 

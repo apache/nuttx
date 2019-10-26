@@ -42,7 +42,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/drivers/ramdisk.h>
 
-#ifdef CONFIG_FS_WRITABLE
+#ifdef CONFIG_DRVR_MKRD
 
 /****************************************************************************
  * Public Functions
@@ -99,4 +99,4 @@ int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags)
   return ret;
 }
 
-#endif /* CONFIG_FS_WRITABLE */
+#endif /* CONFIG_DRVR_MKRD */

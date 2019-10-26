@@ -358,11 +358,11 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
-#ifdef CONFIG_FS_WRITABLE
+#ifdef CONFIG_DRVR_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
        * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
-       * CONFIGURATION: CONFIG_FS_WRITABLE
+       * CONFIGURATION: CONFIG_DRVR_MKRD
        * DEPENDENCIES:  None
        */
 
