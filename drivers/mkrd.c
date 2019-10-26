@@ -39,6 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <string.h>
+#include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/drivers/ramdisk.h>
 
@@ -79,6 +83,7 @@ int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags)
   buffer = (FAR uint8_t *)kmm_malloc(sectsize * nsectors);
   if (buffer == NULL)
     {
+      ferr("ERROR: kmm_malloc() failed: %d\n", ret);
       return -ENOMEM;
     }
 
