@@ -233,7 +233,13 @@ struct boardioc_mkrd_s
 #endif
 
 #ifdef CONFIG_BOARDCTL_ROMDISK
-/* Describes the ROM disk image to be registered */
+/* Describes the ROM disk image to be registered.
+ *
+ * The image points to a image of the file system in some read-only memory.
+ * This image must conform to certain requirements:  (1) it must be
+ * accessible to the kernel code with no special address mapping, and (2)
+ * it must be virtually contiguous.
+ */
 
 struct boardioc_romdisk_s
 {
