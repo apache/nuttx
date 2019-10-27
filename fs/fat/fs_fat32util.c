@@ -151,7 +151,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   if (fs->fs_rootentcnt != 0)
     {
       notfat32       = true; /* Must be zero for FAT32 */
-      rootdirsectors = (32 * fs->fs_rootentcnt  + fs->fs_hwsectorsize - 1) / fs->fs_hwsectorsize;
+      rootdirsectors = (32 * fs->fs_rootentcnt  + fs->fs_hwsectorsize - 1) /
+                       fs->fs_hwsectorsize;
     }
 
   /* Determine the number of sectors in a FAT. */
@@ -212,7 +213,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Get the total number of data sectors */
 
-  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - ntotalfatsects - rootdirsectors;
+  ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount -
+                 ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
       fwarn("WARNING: ndatasectors %d fs_hwnsectors: %d\n",
@@ -269,7 +271,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
       fs->fs_rootbase = fs->fs_fatbase + ntotalfatsects;
     }
 
-  fs->fs_database     = fs->fs_fatbase + ntotalfatsects + fs->fs_rootentcnt / DIRSEC_NDIRS(fs);
+  fs->fs_database     = fs->fs_fatbase + ntotalfatsects + fs->fs_rootentcnt /
+                        DIRSEC_NDIRS(fs);
   fs->fs_fsifreecount = 0xffffffff;
 
   return OK;
@@ -388,7 +391,7 @@ void fat_semtake(struct fat_mountpt_s *fs)
 
 void fat_semgive(struct fat_mountpt_s *fs)
 {
-   nxsem_post(&fs->fs_sem);
+  nxsem_post(&fs->fs_sem);
 }
 
 /****************************************************************************
@@ -652,13 +655,13 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
    */
 
   if (fs->fs_type == FSTYPE_FAT32)
-  {
+    {
       ret = fat_checkfsinfo(fs);
       if (ret != OK)
-      {
-        goto errout_with_buffer;
-      }
-  }
+        {
+          goto errout_with_buffer;
+        }
+    }
 
   /* We did it! */
 
@@ -751,15 +754,15 @@ int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
       struct inode *inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->read)
         {
-          ssize_t nSectorsRead = inode->u.i_bops->read(inode, buffer,
+          ssize_t nsectorsread = inode->u.i_bops->read(inode, buffer,
                                                        sector, nsectors);
-          if (nSectorsRead == nsectors)
+          if (nsectorsread == nsectors)
             {
               ret = OK;
             }
-          else if (nSectorsRead < 0)
+          else if (nsectorsread < 0)
             {
-              ret = nSectorsRead;
+              ret = nsectorsread;
             }
         }
     }
@@ -784,16 +787,16 @@ int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
       struct inode *inode = fs->fs_blkdriver;
       if (inode && inode->u.i_bops && inode->u.i_bops->write)
         {
-          ssize_t nSectorsWritten =
+          ssize_t nsectorswritten =
               inode->u.i_bops->write(inode, buffer, sector, nsectors);
 
-          if (nSectorsWritten == nsectors)
+          if (nsectorswritten == nsectors)
             {
               ret = OK;
             }
-          else if (nSectorsWritten < 0)
+          else if (nsectorswritten < 0)
             {
-              ret = nSectorsWritten;
+              ret = nsectorswritten;
             }
         }
     }
@@ -814,8 +817,9 @@ off_t fat_cluster2sector(FAR struct fat_mountpt_s *fs,  uint32_t cluster)
   cluster -= 2;
   if (cluster >= fs->fs_nclusters - 2)
     {
-       return -EINVAL;
+      return -EINVAL;
     }
+
   return cluster * fs->fs_fatsecperclus + fs->fs_database;
 }
 
@@ -1058,7 +1062,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                 {
                   /* Save the MS four bits of the next cluster */
 
-                  value = (fs->fs_buffer[fatindex] & 0xf0) | ((nextcluster >> 8) & 0x0f);
+                  value = (fs->fs_buffer[fatindex] & 0xf0) |
+                          ((nextcluster >> 8) & 0x0f);
                 }
 
               fs->fs_buffer[fatindex] = value;
@@ -1699,13 +1704,13 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
       if (sectndx == 0 && (remaining >= fs->fs_hwsectorsize ||
           (pos + remaining) >= ff->ff_size))
         {
-           /* Flush unwritten data in the sector cache. */
+          /* Flush unwritten data in the sector cache. */
 
-           ret = fat_ffcacheflush(fs, ff);
-           if (ret < 0)
-             {
-               return ret;
-             }
+          ret = fat_ffcacheflush(fs, ff);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Now mark the clean cache buffer as the current sector. */
 
@@ -1755,7 +1760,7 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
       pos       += zerosize;
       remaining -= zerosize;
       sectndx    = pos & SEC_NDXMASK(fs);
-   }
+    }
 
   /* The truncation has completed without error.  Update the file size */
 
@@ -2060,7 +2065,6 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 
       for (sector = 2; sector < fs->fs_nclusters; sector++)
         {
-
           /* If the cluster is unassigned, then increment the count of free clusters */
 
           if ((uint16_t)fat_getcluster(fs, sector) == 0)
@@ -2111,6 +2115,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
                 {
                   nfreeclusters++;
                 }
+
               offset += 2;
             }
           else
@@ -2125,14 +2130,14 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
         }
     }
 
-    fs->fs_fsifreecount = nfreeclusters;
-    if (fs->fs_type == FSTYPE_FAT32)
-      {
-        fs->fs_fsidirty = true;
-      }
+  fs->fs_fsifreecount = nfreeclusters;
+  if (fs->fs_type == FSTYPE_FAT32)
+    {
+      fs->fs_fsidirty = true;
+    }
 
-    *pfreeclusters = nfreeclusters;
-    return OK;
+  *pfreeclusters = nfreeclusters;
+  return OK;
 }
 
 /****************************************************************************

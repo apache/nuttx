@@ -122,6 +122,7 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
 
       wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
     }
+
   return ret;
 }
 
@@ -1021,25 +1022,25 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * extension is supported.
    */
 
-   switch (oflags & (O_WROK | O_RDOK))
-     {
-       case 0:
-       default:
-         ferr("ERROR: One of O_WRONLY/O_RDONLY must be provided\n");
-         return -EINVAL;
+  switch (oflags & (O_WROK | O_RDOK))
+    {
+      case 0:
+      default:
+        ferr("ERROR: One of O_WRONLY/O_RDONLY must be provided\n");
+        return -EINVAL;
 
-       case O_WROK:
-         ret = nxffs_wropen(volume, relpath, oflags, &ofile);
-         break;
+      case O_WROK:
+        ret = nxffs_wropen(volume, relpath, oflags, &ofile);
+        break;
 
-       case O_RDOK:
-         ret = nxffs_rdopen(volume, relpath, &ofile);
-         break;
+      case O_RDOK:
+        ret = nxffs_rdopen(volume, relpath, &ofile);
+        break;
 
-       case O_WROK | O_RDOK:
-         ferr("ERROR: O_RDWR is not supported\n");
-         return -ENOSYS;
-     }
+      case O_WROK | O_RDOK:
+        ferr("ERROR: O_RDWR is not supported\n");
+        return -ENOSYS;
+    }
 
   /* Save the reference to the open-specific state in filep->f_priv */
 

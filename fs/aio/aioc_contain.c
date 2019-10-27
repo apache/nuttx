@@ -82,6 +82,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 #endif
     FAR void *ptr;
   } u;
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
   struct sched_param param;
 #endif

@@ -344,23 +344,23 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
           ret = spiffs_cache_read(fs, SPIFFS_OP_C_READ | SPIFFS_OP_T_OBJ_LU2, 0,
                                   SPIFFS_ERASE_COUNT_PADDR(fs, cur_block),
                                   sizeof(int16_t), (uint8_t *) & erase_count);
-           if (ret < 0)
-             {
-               ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
-               return ret;
-             }
+          if (ret < 0)
+            {
+              ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
+              return ret;
+            }
 
-           /* Calculate the erase age */
+          /* Calculate the erase age */
 
-           if (fs->max_erase_count > erase_count)
-             {
-               erase_age = fs->max_erase_count - erase_count;
-             }
-           else
-             {
-               erase_age =
-                 SPIFFS_OBJID_FREE - (erase_count - fs->max_erase_count);
-             }
+          if (fs->max_erase_count > erase_count)
+            {
+              erase_age = fs->max_erase_count - erase_count;
+            }
+          else
+            {
+              erase_age =
+                SPIFFS_OBJID_FREE - (erase_count - fs->max_erase_count);
+            }
 
           score =
             deleted_pages_in_block * CONFIG_SPIFFS_GC_DELWGT +
@@ -519,6 +519,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
               switch (gc.state)
                 {
                 case FIND_OBJ_DATA:
+
                   /* Find a data page. */
 
                   if (id != SPIFFS_OBJID_DELETED &&
@@ -540,6 +541,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                   break;
 
                 case MOVE_OBJ_DATA:
+
                   /* Evacuate found data pages for corresponding object index
                    * we have in memory, update memory representation
                    */
@@ -589,16 +591,18 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
                               /* Move wipes obj_lu, reload it */
 
-                              ret = spiffs_cache_read(fs,
-                                                      SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
-                                                      0,
-                                                      blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
-                                                      SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
-                                                      SPIFFS_GEO_PAGE_SIZE(fs),
-                                                      fs->lu_work);
+                              ret =
+                                spiffs_cache_read(fs,
+                                                  SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
+                                                  0,
+                                                  blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
+                                                  SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
+                                                  SPIFFS_GEO_PAGE_SIZE(fs),
+                                                  fs->lu_work);
                               if (ret < 0)
                                 {
-                                  ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
+                                  ferr("ERROR: spiffs_cache_read() failed: %d\n",
+                                       ret);
                                   return ret;
                                 }
                             }
@@ -615,7 +619,8 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                               ret = spiffs_page_delete(fs, cur_pgndx);
                               if (ret < 0)
                                 {
-                                  ferr("ERROR: spiffs_page_delete() failed: %d\n", ret);
+                                  ferr("ERROR: spiffs_page_delete() failed: %d\n",
+                                       ret);
                                   return ret;
                                 }
 
@@ -656,6 +661,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                   break;
 
                 case MOVE_OBJ_NDX:
+
                   /* Find and evacuate object index pages */
 
                   if (id != SPIFFS_OBJID_DELETED &&
@@ -705,12 +711,13 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
                           /* Move wipes obj_lu, reload it */
 
-                          ret = spiffs_cache_read(fs,
-                                                  SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
-                                                  0,
-                                                  blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
-                                                  SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
-                                                  SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
+                          ret =
+                            spiffs_cache_read(fs,
+                                              SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
+                                              0,
+                                              blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
+                                              SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
+                                              SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
                           if (ret < 0)
                             {
                               ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -1155,7 +1162,8 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
       int16_t cand;
       int32_t prev_free_pages = free_pages;
 
-      spiffs_gcinfo("#%d: run gc free_blocks=%d pfree=%d pallo=%d pdele=%d [%d] len=%d of %d\n",
+      spiffs_gcinfo("#%d: run gc free_blocks=%d pfree=%d pallo=%d pdele=%d [%d] "
+                    "len=%d of %d\n",
                     tries, fs->free_blocks, free_pages,
                     fs->alloc_pages, fs->deleted_pages,
                     (free_pages + fs->alloc_pages + fs->deleted_pages),
@@ -1218,7 +1226,6 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
           spiffs_gcinfo("Early abort, no result on gc when fs crammed\n");
           break;
         }
-
     }
   while (++tries < CONFIG_SPIFFS_GC_MAXRUNS &&
          (fs->free_blocks <= 2 ||

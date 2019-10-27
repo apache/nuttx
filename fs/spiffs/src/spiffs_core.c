@@ -1513,10 +1513,10 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
                        int16_t new_pgndx, uint32_t new_size)
 {
 #ifdef CONFIG_DEBUG_FS_INFO
-   FAR static const char *evname[] =
-   {
+  FAR static const char *evname[] =
+  {
     "UPD", "NEW", "DEL", "MOV", "HUP", "???"
-   };
+  };
 #endif
 
   FAR struct spiffs_file_s *fobj;
@@ -1581,7 +1581,8 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
                   if (fobj->cache_page &&
                       fobj->cache_page->offset > act_new_size + 1)
                     {
-                      spiffs_cacheinfo("File truncated, dropping cache page=%d, no writeback\n",
+                      spiffs_cacheinfo("File truncated, dropping cache page=%d, "
+                                       "no writeback\n",
                                        fobj->cache_page->cpndx);
 
                       spiffs_cache_page_release(fs, fobj->cache_page);
@@ -1594,7 +1595,8 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
 
               if (fobj->cache_page)
                 {
-                  spiffs_cacheinfo("File deleted, dropping cache page=%d, no writeback\n",
+                  spiffs_cacheinfo("File deleted, dropping cache page=%d, "
+                                   "no writeback\n",
                                    fobj->cache_page->cpndx);
 
                   spiffs_cache_page_release(fs, fobj->cache_page);
@@ -1781,12 +1783,13 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                           return ret;
                         }
 
-                      ret = spiffs_cache_write(fs,
-                                               SPIFFS_OP_T_OBJNDX | SPIFFS_OP_C_UPDT,
-                                               fobj->objid,
-                                               SPIFFS_PAGE_TO_PADDR(fs, cur_objndx_pgndx),
-                                               SPIFFS_GEO_PAGE_SIZE(fs),
-                                               fs->work);
+                      ret =
+                        spiffs_cache_write(fs,
+                                           SPIFFS_OP_T_OBJNDX | SPIFFS_OP_C_UPDT,
+                                           fobj->objid,
+                                           SPIFFS_PAGE_TO_PADDR(fs, cur_objndx_pgndx),
+                                           SPIFFS_GEO_PAGE_SIZE(fs),
+                                           fs->work);
                       if (ret < 0)
                         {
                           ferr("ERROR: spiffs_cache_write() failed: %d\n",
@@ -1951,10 +1954,11 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                     }
                   else
                     {
-                      ret = spiffs_objlu_find_id_and_span(fs,
-                                                          fobj->objid | SPIFFS_OBJID_NDXFLAG,
-                                                          cur_objndx_spndx, 0,
-                                                          &pgndx);
+                      ret =
+                        spiffs_objlu_find_id_and_span(fs,
+                                                      fobj->objid | SPIFFS_OBJID_NDXFLAG,
+                                                      cur_objndx_spndx, 0,
+                                                      &pgndx);
                       if (ret < 0)
                         {
                           ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n",
@@ -2331,7 +2335,8 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                                          fobj->objid, 0, cur_objndx_pgndx,
                                          &new_objndx_pgndx);
 
-                  finfo("Store previous modified objndx page, %04x:%04x, nwritten=%d\n",
+                  finfo("Store previous modified objndx page, %04x:%04x, "
+                        "nwritten=%d\n",
                         new_objndx_pgndx, objndx->phdr.spndx, nwritten);
 
                   if (ret < 0)
@@ -2390,10 +2395,11 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                 }
               else
                 {
-                  ret = spiffs_objlu_find_id_and_span(fs,
-                                                      fobj->objid | SPIFFS_OBJID_NDXFLAG,
-                                                      cur_objndx_spndx, 0,
-                                                      &pgndx);
+                  ret =
+                    spiffs_objlu_find_id_and_span(fs,
+                                                  fobj->objid | SPIFFS_OBJID_NDXFLAG,
+                                                  cur_objndx_spndx, 0,
+                                                  &pgndx);
                   if (ret < 0)
                     {
                       ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n",
@@ -2511,15 +2517,16 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
             {
               /* After modification */
 
-              ret = spiffs_phys_cpy(fs, fobj->objid,
-                                    SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
-                                    sizeof(struct spiffs_page_header_s) + page_offs +
-                                    to_write,
-                                    SPIFFS_PAGE_TO_PADDR(fs, orig_data_pgndx)
-                                    + sizeof(struct spiffs_page_header_s) + page_offs +
-                                    to_write,
-                                    SPIFFS_DATA_PAGE_SIZE(fs) -
-                                    (page_offs + to_write));
+              ret =
+                spiffs_phys_cpy(fs, fobj->objid,
+                                SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
+                                sizeof(struct spiffs_page_header_s) + page_offs +
+                                to_write,
+                                SPIFFS_PAGE_TO_PADDR(fs, orig_data_pgndx)
+                                + sizeof(struct spiffs_page_header_s) + page_offs +
+                                to_write,
+                                SPIFFS_DATA_PAGE_SIZE(fs) -
+                                (page_offs + to_write));
               if (ret < 0)
                 {
                   ferr("ERROR: spiffs_phys_cpy() failed: %d\n", ret);
@@ -2986,12 +2993,13 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           int16_t new_data_pgndx;
           uint32_t bytes_to_remove;
 
-            /* Delete last page, partially */
+          /* Delete last page, partially */
 
           bytes_to_remove =
             SPIFFS_DATA_PAGE_SIZE(fs) - (new_size % SPIFFS_DATA_PAGE_SIZE(fs));
 
-          finfo("Delete %d bytes from data page=%04x for data spndx=%04x, cur_size=%d\n",
+          finfo("Delete %d bytes from data page=%04x for data spndx=%04x, "
+                "cur_size=%d\n",
                 bytes_to_remove, data_pgndx, data_spndx, cur_size);
 
           ret = spiffs_page_data_check(fs, fobj, data_pgndx, data_spndx);
@@ -3264,10 +3272,11 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
                 }
               else
                 {
-                  ret = spiffs_objlu_find_id_and_span(fs,
-                                                      fobj->objid | SPIFFS_OBJID_NDXFLAG,
-                                                      cur_objndx_spndx, 0,
-                                                      &objndx_pgndx);
+                  ret =
+                    spiffs_objlu_find_id_and_span(fs,
+                                                  fobj->objid | SPIFFS_OBJID_NDXFLAG,
+                                                  cur_objndx_spndx, 0,
+                                                  &objndx_pgndx);
                   if (ret < 0)
                     {
                       ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n",
@@ -3505,7 +3514,8 @@ int spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs, int16_t *objid,
                   return -ENOSPC;
                 }
 
-              finfo("COMP select index=%d min_count=%d min=%04x max=%04x compact:%d\n",
+              finfo("COMP select index=%d min_count=%d min=%04x max=%04x "
+                    "compact:%d\n",
                     min_i, min_count, state.min_objid, state.max_objid,
                     state.compaction);
 

@@ -157,27 +157,27 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
    * NOTE: This will recurse to open the character driver proxy.
    */
 
-   if (INODE_IS_BLOCK(inode) || INODE_IS_MTD(inode))
-     {
-       /* Release the inode reference */
+  if (INODE_IS_BLOCK(inode) || INODE_IS_MTD(inode))
+    {
+      /* Release the inode reference */
 
-       inode_release(inode);
+      inode_release(inode);
 
-       /* Get the file descriptor of the opened character driver proxy */
+      /* Get the file descriptor of the opened character driver proxy */
 
-       fd = block_proxy(path, oflags);
-       if (fd < 0)
-         {
-           ret = fd;
-           goto errout_with_search;
-         }
+      fd = block_proxy(path, oflags);
+      if (fd < 0)
+        {
+          ret = fd;
+          goto errout_with_search;
+        }
 
-       /* Return the file descriptor */
+      /* Return the file descriptor */
 
-       RELEASE_SEARCH(&desc);
-       return fd;
-     }
-   else
+      RELEASE_SEARCH(&desc);
+      return fd;
+    }
+  else
 #endif
 
   /* Verify that the inode is either a "normal" character driver or a

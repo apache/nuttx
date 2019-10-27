@@ -160,6 +160,7 @@ next_subdir:
           goto errout;
         }
 #endif
+
       /* We found it and it appears to be a "normal" inode.  Is it a
        * directory (i.e, an operation-less inode or an inode with children)?
        */

@@ -237,7 +237,7 @@ static int rpcclnt_reply(FAR struct rpcclnt *rpc, int procid, int prog,
       if (error == EAGAIN || error == ETIMEDOUT)
         {
           rpc->rc_timeout = true;
-       }
+        }
     }
 
   /* Get the xid and check that it is an RPC replysvr */
@@ -505,8 +505,10 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   request.mountd.mount.len =  txdr_unsigned(sizeof(request.mountd.mount.rpath));
 
   error = rpcclnt_request(rpc, RPCMNT_MOUNT, RPCPROG_MNT, RPCMNT_VER3,
-                          (FAR void *)&request.mountd, sizeof(struct call_args_mount),
-                          (FAR void *)&response.mdata, sizeof(struct rpc_reply_mount));
+                          (FAR void *)&request.mountd,
+                          sizeof(struct call_args_mount),
+                          (FAR void *)&response.mdata
+                          sizeof(struct rpc_reply_mount));
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_request failed: %d\n", error);
@@ -636,8 +638,10 @@ int rpcclnt_umount(struct rpcclnt *rpc)
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
-                          (FAR void *)&request.sdata, sizeof(struct call_args_pmap),
-                          (FAR void *)&response.rdata, sizeof(struct rpc_reply_pmap));
+                          (FAR void *)&request.sdata,
+                          sizeof(struct call_args_pmap),
+                          (FAR void *)&response.rdata,
+                          sizeof(struct rpc_reply_pmap));
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_request failed: %d\n", error);
@@ -661,8 +665,10 @@ int rpcclnt_umount(struct rpcclnt *rpc)
   request.mountd.umount.len =  txdr_unsigned(sizeof(request.mountd.umount.rpath));
 
   error = rpcclnt_request(rpc, RPCMNT_UMOUNT, RPCPROG_MNT, RPCMNT_VER3,
-                          (FAR void *)&request.mountd, sizeof(struct call_args_umount),
-                          (FAR void *)&response.mdata, sizeof(struct rpc_reply_umount));
+                          (FAR void *)&request.mountd,
+                          sizeof(struct call_args_umount),
+                          (FAR void *)&response.mdata,
+                          sizeof(struct rpc_reply_umount));
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_request failed: %d\n", error);

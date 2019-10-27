@@ -171,7 +171,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   RELEASE_SEARCH(&desc);
   return OK;
 
-/* Failure conditions always set the errno appropriately */
+  /* Failure conditions always set the errno appropriately */
 
 errout_with_inode:
   inode_release(inode);

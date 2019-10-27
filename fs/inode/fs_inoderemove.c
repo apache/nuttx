@@ -156,8 +156,8 @@ int inode_remove(FAR const char *path)
            * releases the inode, we will then, finally delete the subtree
            */
 
-           node->i_flags |= FSNODEFLAG_DELETED;
-           return -EBUSY;
+          node->i_flags |= FSNODEFLAG_DELETED;
+          return -EBUSY;
         }
       else
         {

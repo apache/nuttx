@@ -638,7 +638,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               return ret;
             }
 
-            /* Test for a sub-string match (e.g. "ls /proc/fs") */
+          /* Test for a sub-string match (e.g. "ls /proc/fs") */
 
           else if (strncmp(g_procfs_entries[x].pathpattern, relpath,
                            len) == 0)
@@ -863,7 +863,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 #endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
     }
 
-    /* Are we reading an intermediate subdirectory? */
+  /* Are we reading an intermediate subdirectory? */
 
   else if (priv->level > 0 && priv->procfsentry == NULL)
     {

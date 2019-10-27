@@ -515,7 +515,7 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
- /* Locate the node for this relative path */
+  /* Locate the node for this relative path */
 
   node = NULL;
   ret  = cromfs_findnode(fs, &node, relpath);
@@ -960,7 +960,7 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
- /* Locate the node for this relative path */
+  /* Locate the node for this relative path */
 
   node = NULL;
   ret  = cromfs_findnode(fs, &node, relpath);

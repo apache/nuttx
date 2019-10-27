@@ -937,13 +937,13 @@ fat_write_restart:
           if ((sectorindex == 0) && ((buflen >= fs->fs_hwsectorsize) ||
               ((filep->f_pos + buflen) >= ff->ff_size)))
             {
-               /* Flush unwritten data in the sector cache. */
+              /* Flush unwritten data in the sector cache. */
 
-               ret = fat_ffcacheflush(fs, ff);
-               if (ret < 0)
-                 {
-                   goto errout_with_semaphore;
-                 }
+              ret = fat_ffcacheflush(fs, ff);
+              if (ret < 0)
+                {
+                  goto errout_with_semaphore;
+                }
 
               /* Now mark the clean cache buffer as the current sector. */
 
@@ -998,7 +998,7 @@ fat_write_restart:
       byteswritten += writesize;
       buflen       -= writesize;
       sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
-   }
+    }
 
   /* The transfer has completed without error.  Update the file size */
 
@@ -1604,14 +1604,14 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
         {
-           /* The entry is not a directory */
+          /* The entry is not a directory */
 
-           ret = -ENOTDIR;
-           goto errout_with_semaphore;
+          ret = -ENOTDIR;
+          goto errout_with_semaphore;
         }
       else
         {
-           /* The entry is a directory (but not the root directory) */
+          /* The entry is a directory (but not the root directory) */
 
           dir->u.fat.fd_startcluster =
               ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
@@ -2235,7 +2235,7 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = fat_checkmount(fs);
   if (ret < 0)
     {
-       goto errout_with_semaphore;
+      goto errout_with_semaphore;
     }
 
   /* Fill in the statfs info */
@@ -2392,6 +2392,7 @@ static int fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       goto errout_with_semaphore;
     }
+
   parentsector = fs->fs_currentsector;
 
   /* Allocate a cluster for new directory */

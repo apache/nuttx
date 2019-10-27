@@ -396,6 +396,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
                     }
                 }
 #endif
+
               /* Keep looking at the next level "down" */
 
               above = node;
@@ -517,7 +518,7 @@ int inode_search(FAR struct inode_search_s *desc)
 
           if (INODE_IS_MOUNTPT(node))
             {
-               /* Yes... set up for the MOUNTPOINT logic below. */
+              /* Yes... set up for the MOUNTPOINT logic below. */
 
               desc->relpath = relpath;
             }

@@ -174,7 +174,7 @@ int stat_recursive(FAR const char *path, FAR struct stat *buf)
   RELEASE_SEARCH(&desc);
   return OK;
 
-/* Failure conditions always set the errno appropriately */
+  /* Failure conditions always set the errno appropriately */
 
 errout_with_inode:
   inode_release(inode);
@@ -290,14 +290,14 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
       else
 #endif
 #if defined(CONFIG_FS_SHM)
-       if (INODE_IS_SHM(inode))
+      if (INODE_IS_SHM(inode))
         {
           buf->st_mode = S_IFSHM;
         }
       else
 #endif
 #if defined(CONFIG_MTD)
-       if (INODE_IS_MTD(inode))
+      if (INODE_IS_MTD(inode))
         {
           buf->st_mode  = S_IFMTD;
           buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;

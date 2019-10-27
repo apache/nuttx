@@ -501,18 +501,18 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            * will return immediately.
            */
 
-           ret = nxsem_tickwait(&sem, clock_systimer(), ticks);
-           if (ret < 0)
-             {
-               if (ret == -ETIMEDOUT)
-                 {
-                   /* Return zero (OK) in the event of a timeout */
+          ret = nxsem_tickwait(&sem, clock_systimer(), ticks);
+          if (ret < 0)
+            {
+              if (ret == -ETIMEDOUT)
+                {
+                  /* Return zero (OK) in the event of a timeout */
 
-                   ret = OK;
-                 }
+                  ret = OK;
+                }
 
-               /* EINTR is the only other error expected in normal operation */
-             }
+              /* EINTR is the only other error expected in normal operation */
+            }
         }
       else
         {

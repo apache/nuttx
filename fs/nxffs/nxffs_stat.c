@@ -96,7 +96,8 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   buf->f_type    = NXFFS_MAGIC;
   buf->f_bsize   = volume->geo.blocksize;
   buf->f_blocks  = volume->nblocks;
-  buf->f_namelen = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR - SIZEOF_NXFFS_INODE_HDR;
+  buf->f_namelen = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR -
+                   SIZEOF_NXFFS_INODE_HDR;
   ret            = OK;
 
   nxsem_post(&volume->exclsem);
@@ -154,7 +155,8 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* Return status information based on the directory entry */
 
-      buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
+      buf->st_blocks  = entry.datlen /
+                        (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
       buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
       buf->st_size    = entry.datlen;
       buf->st_atime   = entry.utc;
@@ -193,7 +195,6 @@ errout:
 
 int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_ofile_s *ofile;
   int ret;

@@ -214,11 +214,11 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
   volume->ioblock = 0;
   ret = nxffs_validblock(volume, &volume->ioblock);
   if (ret < 0)
-   {
-     /* No valid blocks?  Return offset zero. */
+    {
+      /* No valid blocks?  Return offset zero. */
 
-     return 0;
-   }
+      return 0;
+    }
 
   /* The offset to the free location to pack is then just after the block
    * header in this block.
@@ -234,7 +234,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
     {
       /* No valid entries on the media -- Return offset zero */
 
-     return 0;
+      return 0;
     }
 
   /* Okay.. the start block and first entry have been found */
@@ -548,7 +548,8 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
            */
 
           mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
-          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata >
+              volume->geo.blocksize)
             {
               /* No.. return an indication that we are at the end of the block
                * and try again later.
@@ -556,7 +557,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
 
               ret = -ENOSPC;
               goto errout;
-           }
+            }
 
           /* Yes.. reserve space for the data block header */
 
@@ -581,7 +582,8 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
            */
 
           mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
-          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata >
+              volume->geo.blocksize)
             {
               /* No.. return an indication that we are at the end of the block
                * and try again later.
@@ -589,7 +591,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
 
               ret = -ENOSPC;
               goto errout;
-           }
+            }
 
           /* Yes.. reserve space for the data block header */
 
@@ -762,7 +764,8 @@ static void nxffs_wrdathdr(FAR struct nxffs_volume_s *volume,
 
       /* Update the entire data block CRC (including the header) */
 
-      crc = crc32(&pack->iobuffer[iooffset], pack->dest.blklen + SIZEOF_NXFFS_DATA_HDR);
+      crc = crc32(&pack->iobuffer[iooffset],
+                  pack->dest.blklen + SIZEOF_NXFFS_DATA_HDR);
       nxffs_wrle32(dathdr->crc, crc);
     }
 
@@ -791,33 +794,36 @@ static void nxffs_wrdathdr(FAR struct nxffs_volume_s *volume,
 static void nxffs_packtransfer(FAR struct nxffs_volume_s *volume,
                                FAR struct nxffs_pack_s *pack)
 {
-   /* Determine how much data is available in the dest pack buffer */
+  /* Determine how much data is available in the dest pack buffer */
 
-   uint16_t destlen = volume->geo.blocksize - pack->iooffset;
+  uint16_t destlen = volume->geo.blocksize - pack->iooffset;
 
-   /* Dermined how much data is available in the src data block */
+  /* Dermined how much data is available in the src data block */
 
-   uint16_t srclen = pack->src.blklen - pack->src.blkpos;
+  uint16_t srclen = pack->src.blklen - pack->src.blkpos;
 
-   /* Transfer the smaller of the two amounts data */
+  /* Transfer the smaller of the two amounts data */
 
-   uint16_t xfrlen = MIN(srclen, destlen);
-   if (xfrlen > 0)
-     {
-       nxffs_ioseek(volume, pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR + pack->src.blkpos);
-       memcpy(&pack->iobuffer[pack->iooffset], &volume->cache[volume->iooffset], xfrlen);
+  uint16_t xfrlen = MIN(srclen, destlen);
+  if (xfrlen > 0)
+    {
+      nxffs_ioseek(volume,
+                  pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR +
+                  pack->src.blkpos);
+      memcpy(&pack->iobuffer[pack->iooffset],
+             &volume->cache[volume->iooffset], xfrlen);
 
-       /* Increment counts and offset for this data transfer */
+      /* Increment counts and offset for this data transfer */
 
-       pack->src.fpos    += xfrlen; /* Source data offsets */
-       pack->src.blkpos  += xfrlen;
-       pack->dest.fpos   += xfrlen; /* Destination data offsets */
-       pack->dest.blkpos += xfrlen;
-       pack->dest.blklen += xfrlen; /* Destination data block size */
-       pack->iooffset    += xfrlen; /* Destination I/O block offset */
-       volume->iooffset  += xfrlen; /* Source I/O block offset */
-       volume->froffset  += xfrlen; /* Free FLASH offset */
-     }
+      pack->src.fpos    += xfrlen; /* Source data offsets */
+      pack->src.blkpos  += xfrlen;
+      pack->dest.fpos   += xfrlen; /* Destination data offsets */
+      pack->dest.blkpos += xfrlen;
+      pack->dest.blklen += xfrlen; /* Destination data block size */
+      pack->iooffset    += xfrlen; /* Destination I/O block offset */
+      volume->iooffset  += xfrlen; /* Source I/O block offset */
+      volume->froffset  += xfrlen; /* Free FLASH offset */
+    }
 }
 
 /****************************************************************************
@@ -1031,15 +1037,15 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
             }
         }
 
-     /* Check if the destination block is full */
+      /* Check if the destination block is full */
 
-     if (pack->iooffset >= volume->geo.blocksize)
-       {
-         /* Yes.. Write the destination data block header and return success */
+      if (pack->iooffset >= volume->geo.blocksize)
+        {
+          /* Yes.. Write the destination data block header and return success */
 
-         nxffs_wrdathdr(volume, pack);
-         return OK;
-       }
+          nxffs_wrdathdr(volume, pack);
+          return OK;
+        }
     }
 
   return -ENOSYS;
@@ -1094,15 +1100,16 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
         {
           /* Initialize for the packing operation. */
 
-           memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
-           pack->dest.entry.name   = strdup(wrfile->ofile.entry.name);
-           pack->dest.entry.utc    = wrfile->ofile.entry.utc;
-           pack->dest.entry.datlen = wrfile->ofile.entry.datlen;
+          memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
+          pack->dest.entry.name   = strdup(wrfile->ofile.entry.name);
+          pack->dest.entry.utc    = wrfile->ofile.entry.utc;
+          pack->dest.entry.datlen = wrfile->ofile.entry.datlen;
 
-           memset(&pack->src, 0, sizeof(struct nxffs_packstream_s));
-           memcpy(&pack->src.entry, &wrfile->ofile.entry, sizeof(struct nxffs_entry_s));
-           pack->src.entry.name    = NULL;
-           return wrfile;
+          memset(&pack->src, 0, sizeof(struct nxffs_packstream_s));
+          memcpy(&pack->src.entry, &wrfile->ofile.entry,
+                 sizeof(struct nxffs_entry_s));
+          pack->src.entry.name    = NULL;
+          return wrfile;
         }
     }
 
@@ -1230,15 +1237,15 @@ static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
             }
         }
 
-     /* Check if the destination block is full */
+      /* Check if the destination block is full */
 
-     if (pack->iooffset >= volume->geo.blocksize)
-       {
-         /* Yes.. Write the destination data block header and return success */
+      if (pack->iooffset >= volume->geo.blocksize)
+        {
+          /* Yes.. Write the destination data block header and return success */
 
-         nxffs_wrdathdr(volume, pack);
-         return OK;
-       }
+          nxffs_wrdathdr(volume, pack);
+          return OK;
+        }
     }
 
   return -ENOSYS;

@@ -468,7 +468,8 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
               filep->f_inode->i_private != NULL);
   priv = filep->f_inode->i_private;
 
-  /* Perform multiple writes if the write length exceeds the configured maximum (mxwrite).
+  /* Perform multiple writes if the write length exceeds the configured
+   * maximum (mxwrite).
    */
 
   if (buflen > priv->mxwrite)

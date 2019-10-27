@@ -294,13 +294,13 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
       /* Yes... test if the parent directory is valid */
 
-      if (parentdirsector != 0xFFFF)
+      if (parentdirsector != 0xffff)
         {
           /* We can create in the given parent directory */
 
           ret = smartfs_createentry(fs, parentdirsector, filename,
                                     SMARTFS_DIRENT_TYPE_FILE, mode,
-                                    &sf->entry, 0xFFFF, sf);
+                                    &sf->entry, 0xffff, sf);
           if (ret != OK)
             {
               goto errout_with_buffer;
@@ -821,7 +821,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
         {
           /* First get a new chained sector */
 
-          ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
+          ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xffff);
           if (ret < 0)
             {
               ferr("ERROR: Error %d allocating new sector\n", ret);
@@ -876,7 +876,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
             {
               /* Allocate a new sector */
 
-              ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xFFFF);
+              ret = FS_IOCTL(fs, BIOC_ALLOCSECT, 0xffff);
               if (ret < 0)
                 {
                   ferr("ERROR: Error %d allocating new sector\n", ret);
@@ -1148,6 +1148,7 @@ static int smartfs_truncate(FAR struct file *filep, off_t length)
     }
 
 errout_with_semaphore:
+
   /* Relinquish exclusive access */
 
   smartfs_semgive(fs);
@@ -1201,6 +1202,7 @@ static int smartfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = OK;
 
 errout_with_semaphore:
+
   /* If space for the entry name was allocated, then free it */
 
   if (entry.name != NULL)
@@ -1482,7 +1484,7 @@ static int smartfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     }
   else
     {
-       /* Unmount ... close the block driver */
+      /* Unmount ... close the block driver */
 
       ret = smartfs_unmount(fs);
     }
@@ -1586,7 +1588,6 @@ static int smartfs_unlink(struct inode *mountpt, const char *relpath)
       /* Okay, we are clear to delete the file.  Use the deleteentry routine. */
 
       smartfs_deleteentry(fs, &entry);
-
     }
   else
     {
@@ -1656,7 +1657,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
        * the right permissions and if the parentdirsector is valid.
        */
 
-      if (parentdirsector == 0xFFFF)
+      if (parentdirsector == 0xffff)
         {
           /* Invalid entry in the path (non-existant dir segment) */
 
@@ -1668,7 +1669,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
       /* Create the directory */
 
       ret = smartfs_createentry(fs, parentdirsector, filename,
-          SMARTFS_DIRENT_TYPE_DIR, mode, &entry, 0xFFFF, NULL);
+          SMARTFS_DIRENT_TYPE_DIR, mode, &entry, 0xffff, NULL);
       if (ret != OK)
         {
           goto errout_with_semaphore;
@@ -1839,7 +1840,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
 
   /* Test if the new parent directory is valid */
 
-  if (newparentdirsector != 0xFFFF)
+  if (newparentdirsector != 0xffff)
     {
       /* We can move to the given parent directory */
 
@@ -1867,7 +1868,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
         }
 
       direntry = (struct smartfs_entry_header_s *) &fs->fs_rwbuffer[oldentry.doffset];
-#if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
+#if CONFIG_SMARTFS_ERASEDSTATE == 0xff
       direntry->flags &= ~SMARTFS_DIRENT_ACTIVE;
 #else
       direntry->flags |= SMARTFS_DIRENT_ACTIVE;

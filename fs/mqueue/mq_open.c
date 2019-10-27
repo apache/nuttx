@@ -217,12 +217,12 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 
       /* Create a message queue descriptor for the TCB */
 
-       mqdes = nxmq_create_des(NULL, msgq, oflags);
-       if (!mqdes)
-         {
-           errcode = ENOMEM;
-           goto errout_with_msgq;
-         }
+      mqdes = nxmq_create_des(NULL, msgq, oflags);
+      if (!mqdes)
+        {
+          errcode = ENOMEM;
+          goto errout_with_msgq;
+        }
 
       /* Bind the message queue and the inode structure */
 

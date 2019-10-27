@@ -106,7 +106,7 @@ static int     iobinfo_stat(FAR const char *relpath, FAR struct stat *buf);
  * logic found in the enum iob_user_e declaration found in iob.h
  */
 
-static const char* g_iob_user_names[] =
+static FAR const char *g_iob_user_names[] =
 {
 #ifdef CONFIG_SYSLOG_BUFFER
   "syslog",

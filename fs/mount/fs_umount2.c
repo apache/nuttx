@@ -156,10 +156,10 @@ int umount2(FAR const char *target, unsigned int flags)
 
   if (mountpt_inode->i_child != NULL)
     {
-       /* Just decrement the reference count (without deleting it) */
+      /* Just decrement the reference count (without deleting it) */
 
-       DEBUGASSERT(mountpt_inode->i_crefs > 0);
-       mountpt_inode->i_crefs--;
+      DEBUGASSERT(mountpt_inode->i_crefs > 0);
+      mountpt_inode->i_crefs--;
     }
   else
 #endif
@@ -180,7 +180,7 @@ int umount2(FAR const char *target, unsigned int flags)
         {
           errcode = -ret;
           goto errout_with_mountpt;
-       }
+        }
 
       /* Release the mountpoint inode and any block driver inode
        * returned by the file system unbind above.  This should cause

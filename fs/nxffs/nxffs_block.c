@@ -101,7 +101,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
   blkhdr = (FAR struct nxffs_block_s *)volume->cache;
   if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) == 0)
     {
-       /* This does appear to be a block */
+      /* This does appear to be a block */
 
       if (blkhdr->state == BLOCK_STATE_GOOD)
         {

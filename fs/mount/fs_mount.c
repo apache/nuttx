@@ -256,7 +256,7 @@ mount_findfs(FAR const struct fsmap_t *fstab, FAR const char *filesystemtype)
     {
       if (strcmp(filesystemtype, fsmap->fs_filesystemtype) == 0)
         {
-            return fsmap->fs_mops;
+          return fsmap->fs_mops;
         }
     }
 

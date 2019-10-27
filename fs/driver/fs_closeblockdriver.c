@@ -87,7 +87,7 @@ int close_blockdriver(FAR struct inode *inode)
       ferr("ERROR: inode is not a block driver\n");
       ret = -ENOTBLK;
       goto errout;
-   }
+    }
 
   /* Close the block driver.  Not that no mutually exclusive access
    * to the driver is enforced here.  That must be done in the driver

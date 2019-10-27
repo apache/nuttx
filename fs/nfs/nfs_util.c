@@ -357,6 +357,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
         {
           memcpy(obj_attributes, ptr, sizeof(struct nfs_fattr));
         }
+
       ptr += uint32_increment(sizeof(struct nfs_fattr));
     }
 
@@ -386,7 +387,8 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
  ****************************************************************************/
 
 int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
-                 FAR struct file_handle *fhandle, FAR struct nfs_fattr *obj_attributes,
+                 FAR struct file_handle *fhandle,
+                 FAR struct nfs_fattr *obj_attributes,
                  FAR struct nfs_fattr *dir_attributes)
 {
   FAR const char *path = relpath;

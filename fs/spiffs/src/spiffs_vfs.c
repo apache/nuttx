@@ -694,7 +694,8 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
               if (offset < fobj->cache_page->offset ||
                   offset > fobj->cache_page->offset + fobj->cache_page->size ||
-                  offset + buflen > fobj->cache_page->offset + SPIFFS_GEO_PAGE_SIZE(fs))
+                  offset + buflen > fobj->cache_page->offset +
+                                    SPIFFS_GEO_PAGE_SIZE(fs))
                 {
                   /* Boundary violation, write back cache first and allocate
                    * new
@@ -705,11 +706,12 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
                                    fobj->cache_page->cpndx, fobj->objid,
                                    fobj->cache_page->offset, fobj->cache_page->size);
 
-                  nwritten = spiffs_fobj_write(fs, fobj,
-                                               spiffs_get_cache_page(fs, spiffs_get_cache(fs),
-                                                                     fobj->cache_page->cpndx),
-                                               fobj->cache_page->offset,
-                                               fobj->cache_page->size);
+                  nwritten =
+                    spiffs_fobj_write(fs, fobj,
+                                      spiffs_get_cache_page(fs, spiffs_get_cache(fs),
+                                                            fobj->cache_page->cpndx),
+                                      fobj->cache_page->offset,
+                                      fobj->cache_page->size);
                   spiffs_cache_page_release(fs, fobj->cache_page);
                   if (nwritten < 0)
                     {
@@ -746,7 +748,8 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
               offset_in_cpage = offset - fobj->cache_page->offset;
 
-              spiffs_cacheinfo("Storing to cache page %d for fobj %d offset=%d:%d buflen=%d\n",
+              spiffs_cacheinfo("Storing to cache page %d for fobj %d "
+                               "offset=%d:%d buflen=%d\n",
                                fobj->cache_page->cpndx, fobj->objid, offset,
                                offset_in_cpage, buflen);
 
@@ -754,7 +757,8 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
               cpage_data = spiffs_get_cache_page(fs, cache, fobj->cache_page->cpndx);
 
               memcpy(&cpage_data[offset_in_cpage], buffer, buflen);
-              fobj->cache_page->size = MAX(fobj->cache_page->size, offset_in_cpage + buflen);
+              fobj->cache_page->size = MAX(fobj->cache_page->size,
+                                           offset_in_cpage + buflen);
 
               nwritten = buflen;
               goto success_with_lock;
@@ -768,7 +772,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
                   goto errout_with_lock;
                 }
 
-               goto success_with_lock;
+              goto success_with_lock;
             }
         }
       else
@@ -786,12 +790,13 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
                                fobj->cache_page->cpndx, fobj->objid,
                                fobj->cache_page->offset, fobj->cache_page->size);
 
-              nwritten = spiffs_fobj_write(fs, fobj,
-                                           spiffs_get_cache_page(fs,
-                                                                 spiffs_get_cache(fs),
-                                                                 fobj->cache_page->cpndx),
-                                           fobj->cache_page->offset,
-                                           fobj->cache_page->size);
+              nwritten =
+                spiffs_fobj_write(fs, fobj,
+                                  spiffs_get_cache_page(fs,
+                                                        spiffs_get_cache(fs),
+                                                        fobj->cache_page->cpndx),
+                                  fobj->cache_page->offset,
+                                  fobj->cache_page->size);
               spiffs_cache_page_release(fs, fobj->cache_page);
 
               if (nwritten < 0)
@@ -813,6 +818,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
     }
 
 success_with_lock:
+
   /* Update the file position */
 
   filep->f_pos += nwritten;
@@ -1042,6 +1048,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
       default:
+
         /* Pass through to the contained MTD driver */
 
         ret = MTD_IOCTL(fs->mtd, cmd, arg);
@@ -1529,7 +1536,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
       spiffs_fobj_free(fs, fobj, false);
     }
 
- /* Free allocated working buffers */
+  /* Free allocated working buffers */
 
   if (fs->work != NULL)
     {
@@ -1541,7 +1548,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
       kmm_free(fs->cache);
     }
 
-   /* Free the volume memory (note that the semaphore is now stale!) */
+  /* Free the volume memory (note that the semaphore is now stale!) */
 
   nxsem_destroy(&fs->exclsem.sem);
   kmm_free(fs);
@@ -1586,7 +1593,7 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   obj_lupages      = SPIFFS_OBJ_LOOKUP_PAGES(fs);
   data_pgsize      = SPIFFS_DATA_PAGE_SIZE(fs);
 
-   /* -2 for  spare blocks, +1 for emergency page */
+  /* -2 for  spare blocks, +1 for emergency page */
 
   ndata_pages      = (blocks - 2) * (pages_per_block - obj_lupages) + 1;
 

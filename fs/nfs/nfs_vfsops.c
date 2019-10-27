@@ -291,6 +291,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
     {
       *ptr++  = HTONL(NFSV3CREATE_UNCHECKED);
     }
+
   reqlen += sizeof(uint32_t);
 
   /* Mode information is not provided if EXCLUSIVE creation is used.
@@ -363,7 +364,8 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
     {
       /* Parse the returned data */
 
-      ptr = (FAR uint32_t *)&((FAR struct rpc_reply_create *)nmp->nm_iobuffer)->create;
+      ptr = (FAR uint32_t *)&((FAR struct rpc_reply_create *)
+        nmp->nm_iobuffer)->create;
 
       /* Save the file handle in the file data structure */
 
@@ -1016,7 +1018,9 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
   writesize = 0;
   for (byteswritten = 0; byteswritten < buflen; )
     {
-      /* Make sure that the attempted write size does not exceed the RPC maximum */
+      /* Make sure that the attempted write size does not exceed the RPC
+       * maximum.
+       */
 
       writesize = buflen;
       if (writesize > nmp->nm_wsize)
@@ -1024,7 +1028,9 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
           writesize = nmp->nm_wsize;
         }
 
-      /* Make sure that the attempted read size does not exceed the IO buffer size */
+      /* Make sure that the attempted read size does not exceed the IO
+       * buffer size.
+       */
 
       bufsize = SIZEOF_rpc_call_write(writesize);
       if (bufsize > nmp->nm_buflen)
@@ -1037,7 +1043,8 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
        * RPC calls in that the entry RPC calls messasge lies in the I/O buffer
        */
 
-      ptr     = (FAR uint32_t *)&((FAR struct rpc_call_write *)nmp->nm_iobuffer)->write;
+      ptr     = (FAR uint32_t *)&((FAR struct rpc_call_write *)
+                  nmp->nm_iobuffer)->write;
       reqlen  = 0;
 
       /* Copy the variable length, file handle */
@@ -1073,7 +1080,8 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
       nfs_statistics(NFSPROC_WRITE);
       error = nfs_request(nmp, NFSPROC_WRITE,
                           (FAR void *)nmp->nm_iobuffer, reqlen,
-                          (FAR void *)&nmp->nm_msgbuffer.write, sizeof(struct rpc_reply_write));
+                          (FAR void *)&nmp->nm_msgbuffer.write,
+                          sizeof(struct rpc_reply_write));
       if (error)
         {
           ferr("ERROR: nfs_request failed: %d\n", error);
@@ -1112,8 +1120,8 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
 
       if (tmp < 1 || tmp > writesize)
         {
-           error = EIO;
-           goto errout_with_semaphore;
+          error = EIO;
+          goto errout_with_semaphore;
         }
 
       writesize = tmp;
@@ -1546,9 +1554,9 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        */
 
        else
-         {
-           finfo("No data but not end of directory???\n");
-           error = EAGAIN;
+        {
+          finfo("No data but not end of directory???\n");
+          error = EAGAIN;
         }
 
       goto errout_with_semaphore;
@@ -1640,6 +1648,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       dir->fd_dir.d_type = DTYPE_CHR;
       break;
     }
+
   finfo("type: %d->%d\n", (int)tmp, dir->fd_dir.d_type);
 
 errout_with_semaphore:
@@ -1703,6 +1712,7 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
         {
           tmp = NFS_MAXTIMEO;
         }
+
       nprmt->timeo = tmp;
     }
 
@@ -2331,8 +2341,8 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
                       (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
 
 errout_with_semaphore:
-   nfs_semgive(nmp);
-   return -error;
+  nfs_semgive(nmp);
+  return -error;
 }
 
 /****************************************************************************

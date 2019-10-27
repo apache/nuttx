@@ -1818,7 +1818,9 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
                   fu->fu_eod = true;
 
-                 /* Check if have already reported something of this name in file system 1. */
+                  /* Check if have already reported something of this name
+                   * in file system 1.
+                   */
 
                   relpath = unionfs_relpath(fu->fu_relpath, um->um_prefix);
                   if (relpath)
@@ -1849,7 +1851,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                     }
 
                   return OK;
-               }
+                }
 
               /* No.. check for a normal directory access */
 
@@ -2851,9 +2853,9 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
   ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2,
                        &mpinode->i_private);
   if (ret < 0)
-   {
-     goto errout_with_mountpt;
-   }
+    {
+      goto errout_with_mountpt;
+    }
 
   inode_semgive();
   return OK;

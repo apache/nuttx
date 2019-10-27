@@ -755,7 +755,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
   *tfo = newtfo;
   return OK;
 
-/* Error exits */
+  /* Error exits */
 
 errout_with_file:
   nxsem_destroy(&newtfo->tfo_exclsem.ts_sem);
@@ -917,7 +917,7 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
 
   return OK;
 
-/* Error exits */
+  /* Error exits */
 
 errout_with_directory:
   nxsem_destroy(&newtdo->tdo_exclsem.ts_sem);
@@ -1330,6 +1330,7 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
       switch (ret)
         {
          case TMPFS_CONTINUE:    /* Continue enumeration */
+
            /* Release the object and index to the next entry */
 
            tmpfs_release_lockedobject(to);
@@ -1337,12 +1338,14 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
            break;
 
          case TMPFS_HALT:        /* Stop enumeration */
+
            /* Release the object and cancel the traversal */
 
            tmpfs_release_lockedobject(to);
            return -ECANCELED;
 
          case TMPFS_UNLINKED:    /* Only the directory entry was deleted */
+
            /* Release the object and continue with the same index */
 
            tmpfs_release_lockedobject(to);
@@ -1449,11 +1452,11 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if ((oflags & O_CREAT) == 0)
         {
-           /* No.. then we fail with -ENOENT */
+          /* No.. then we fail with -ENOENT */
 
-           ret = -ENOENT;
-           goto errout_with_fslock;
-       }
+          ret = -ENOENT;
+          goto errout_with_fslock;
+        }
 
       /* Yes.. create the file object.  There will be a reference and a lock
        * on the new file object.
@@ -1464,7 +1467,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
         {
           goto errout_with_fslock;
         }
-   }
+    }
 
   /* Some other error occurred */
 
@@ -2523,7 +2526,7 @@ static int tmpfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   ret = tmpfs_find_object(fs, oldrelpath, &to, &oldparent);
   if (ret < 0)
     {
-       goto errout_with_newparent;
+      goto errout_with_newparent;
     }
 
   /* Get the old file name from the relative path */

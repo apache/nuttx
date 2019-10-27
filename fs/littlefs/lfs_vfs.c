@@ -383,6 +383,7 @@ static ssize_t littlefs_read(FAR struct file *filep, FAR char *buffer,
     {
       filep->f_pos += ret;
     }
+
   littlefs_semgive(fs);
 
   return ret;
@@ -414,6 +415,7 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
     {
       filep->f_pos += ret;
     }
+
   littlefs_semgive(fs);
 
   return ret;
@@ -444,6 +446,7 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
     {
       filep->f_pos = ret;
     }
+
   littlefs_semgive(fs);
 
   return ret;
@@ -1060,12 +1063,12 @@ static int littlefs_unbind(FAR void *handle, FAR struct inode **driver,
 
 static int littlefs_used_block(void *arg, lfs_block_t block)
 {
-   FAR struct statfs *buf = arg;
+  FAR struct statfs *buf = arg;
 
-   buf->f_bfree--;
-   buf->f_bavail--;
+  buf->f_bfree--;
+  buf->f_bavail--;
 
-   return 0;
+  return 0;
 }
 
 /****************************************************************************

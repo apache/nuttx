@@ -393,19 +393,19 @@ static inline int fat_parsesfname(const char **path,
 #ifdef CONFIG_FAT_LCNAMES
           if (endndx == 8)
             {
-                /* Is there mixed case in the name? */
+              /* Is there mixed case in the name? */
 
 #ifdef CONFIG_FAT_LFN
-                if (namecase == FATCASE_UPPER)
-                  {
-                    /* Mixed case in the name -- use the long file name */
+              if (namecase == FATCASE_UPPER)
+                {
+                  /* Mixed case in the name -- use the long file name */
 
-                    goto errout;
-                  }
+                  goto errout;
+                }
 
-                /* So far, only lower case in the name */
+              /* So far, only lower case in the name */
 
-                namecase = FATCASE_LOWER;
+              namecase = FATCASE_LOWER;
 #endif
 
               /* Set lower case name bit */
@@ -541,8 +541,9 @@ static inline int fat_parselfname(const char **path,
     }
 
 errout:
-    dirinfo->fd_lfname[0] = '\0';
-    return -EINVAL;
+
+  dirinfo->fd_lfname[0] = '\0';
+  return -EINVAL;
 }
 #endif
 
@@ -634,13 +635,13 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 
   if (namechars < 1)
     {
-       /* Use the extension as the name */
+      /* Use the extension as the name */
 
-       DEBUGASSERT(ext && extchars > 0);
-       src       = ext;
-       ext       = NULL;
-       namechars = extchars;
-       extchars  = 0;
+      DEBUGASSERT(ext && extchars > 0);
+      src       = ext;
+      ext       = NULL;
+      namechars = extchars;
+      extchars  = 0;
     }
   else
     {
@@ -866,7 +867,7 @@ static inline int fat_uniquealias(struct fat_mountpt_s *fs,
 
       for (i = 0; i < tilde - 2; i++)
         {
-          uint8_t nibble = (hash >> (i * 4)) & 0x0F;
+          uint8_t nibble = (hash >> (i * 4)) & 0x0f;
           const char *digits = "0123456789ABCDEF";
           dirinfo->fd_name[tilde - 1 - i] = digits[nibble];
         }
@@ -1067,7 +1068,7 @@ static int fat_findsfnentry(struct fat_mountpt_s *fs,
           dirinfo->fd_seq.ds_lfnoffset   = dirinfo->fd_seq.ds_offset;
           dirinfo->fd_seq.ds_lfncluster  = dirinfo->fd_seq.ds_cluster;
 #endif
-         return OK;
+          return OK;
         }
 
       /* No... get the next directory index and try again */
@@ -1530,6 +1531,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
     {
       nentries++;
     }
+
   DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
 
   /* Plus another for short file name entry that follows the sequence of LFN
@@ -1696,6 +1698,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
           ch = tolower(ch);
         }
 #endif
+
       /* Copy the next character into the filename */
 
       *buffer++ = ch;
@@ -1736,6 +1739,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
               ch = tolower(ch);
             }
 #endif
+
           /* Copy the next character into the filename */
 
           *buffer++ = ch;
@@ -2095,7 +2099,8 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
    */
 
   startsector                 = fat_cluster2sector(fs, dirinfo->dir.fd_currcluster);
-  dirinfo->dir.fd_index      += (dirinfo->dir.fd_currsector - startsector) * DIRSEC_NDIRS(fs);
+  dirinfo->dir.fd_index      += (dirinfo->dir.fd_currsector - startsector) *
+                                DIRSEC_NDIRS(fs);
 
   /* Make sure that the alias is unique in this directory */
 
@@ -2479,7 +2484,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs,
 
       if (cluster)
         {
-         /* Cluster chain can be extended */
+          /* Cluster chain can be extended */
 
           dirinfo->dir.fd_currcluster = cluster;
           dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);

@@ -390,7 +390,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
    */
 
   for (; ; )
-   {
+    {
       /* Get the next, valid NXFFS inode entry */
 
       ret = nxffs_nextentry(volume, offset, entry);
@@ -460,7 +460,8 @@ off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
        * of the block minus the minimum number of headers: block sna data
        */
 
-      uint16_t maxsize = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR - SIZEOF_NXFFS_DATA_HDR;
+      uint16_t maxsize = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR -
+                         SIZEOF_NXFFS_DATA_HDR;
 
       /* This is the minimum number of blocks require to span all of the
        * inode data.  One additional block could possibly be required -- we

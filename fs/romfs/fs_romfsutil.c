@@ -196,7 +196,7 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
           ret = romfs_hwread(rm, rm->rm_buffer, sector, 1);
           if (ret < 0)
             {
-               return (int16_t)ret;
+              return (int16_t)ret;
             }
         }
 
@@ -306,20 +306,20 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
       ret = romfs_checkentry(rm, offset, entryname, entrylen, dirinfo);
       if (ret == OK)
         {
-           /* Its a match! Return success */
+          /* Its a match! Return success */
 
-           return OK;
+          return OK;
         }
 
       /* No match... select the offset to the next entry */
 
       offset = next;
     }
-   while (next != 0);
+  while (next != 0);
 
-   /* There is nothing in this directory with that name */
+  /* There is nothing in this directory with that name */
 
-   return -ENOENT;
+  return -ENOENT;
 }
 
 /****************************************************************************
@@ -355,7 +355,7 @@ void romfs_semtake(struct romfs_mountpt_s *rm)
 
 void romfs_semgive(struct romfs_mountpt_s *rm)
 {
-   nxsem_post(&rm->rm_sem);
+  nxsem_post(&rm->rm_sem);
 }
 
 /****************************************************************************
@@ -786,9 +786,9 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
 
       if (!terminator)
         {
-           /* Yes.. return success */
+          /* Yes.. return success */
 
-           return OK;
+          return OK;
         }
 
       /* No... If that was not the last path component, then it had
@@ -856,7 +856,7 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
    * associated name may not, however.
    */
 
-   next  = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
+  next   = romfs_devread32(rm, ndx + ROMFS_FHDR_NEXT);
   *pnext = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_ALLMODEMASK);
   *pinfo = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
   *psize = romfs_devread32(rm, ndx + ROMFS_FHDR_SIZE);

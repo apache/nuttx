@@ -263,7 +263,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
-         /* Dup the open file on the in the new file structure */
+          /* Dup the open file on the in the new file structure */
 
           ret = inode->u.i_mops->dup(filep1, filep2);
         }
@@ -290,9 +290,10 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
   return OK;
 
-/* Handler various error conditions */
+  /* Handle various error conditions */
 
 errout_with_inode:
+
   inode_release(filep2->f_inode);
   filep2->f_oflags = 0;
   filep2->f_pos    = 0;
@@ -331,12 +332,12 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
     {
       if (!list->fl_files[i].f_inode)
         {
-           list->fl_files[i].f_oflags = oflags;
-           list->fl_files[i].f_pos    = pos;
-           list->fl_files[i].f_inode  = inode;
-           list->fl_files[i].f_priv   = NULL;
-           _files_semgive(list);
-           return i;
+          list->fl_files[i].f_oflags = oflags;
+          list->fl_files[i].f_pos    = pos;
+          list->fl_files[i].f_inode  = inode;
+          list->fl_files[i].f_priv   = NULL;
+          _files_semgive(list);
+          return i;
         }
     }
 

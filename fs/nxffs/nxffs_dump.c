@@ -187,7 +187,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       /* No..  Assume that this is not an inode. */
 
-       return ERROR;
+      return ERROR;
     }
 
   /* Calculate the CRC */
@@ -200,11 +200,11 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset], inode.namlen, crc);
 
   if (crc != ecrc)
-   {
+    {
       syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "INODE", "CRC BAD", datlen);
       return ERROR;
-   }
+    }
 
   /* If must be a good header */
 
@@ -276,11 +276,11 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
   crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
 
   if (crc != ecrc)
-   {
+    {
       syslog(LOG_NOTICE, g_format,
              blkinfo->block, offset, "DATA ", "CRC BAD", datlen);
       return ERROR;
-   }
+    }
 
   /* If must be a good header */
 
@@ -323,7 +323,8 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
   else if (blkhdr->state == BLOCK_STATE_GOOD)
     {
       size_t datsize = blkinfo->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR;
-      size_t nerased = nxffs_erased(blkinfo->buffer + SIZEOF_NXFFS_BLOCK_HDR, datsize);
+      size_t nerased = nxffs_erased(blkinfo->buffer + SIZEOF_NXFFS_BLOCK_HDR,
+                                    datsize);
       if (nerased == datsize)
         {
           if (blkinfo->verbose)
@@ -459,7 +460,8 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
   syslog(LOG_NOTICE, "NXFFS Dump:\n");
   syslog(LOG_NOTICE, g_hdrformat);
 
-  blkinfo.nblocks = blkinfo.geo.erasesize * blkinfo.geo.neraseblocks / blkinfo.geo.blocksize;
+  blkinfo.nblocks = blkinfo.geo.erasesize * blkinfo.geo.neraseblocks /
+                    blkinfo.geo.blocksize;
   for (blkinfo.block = 0, blkinfo.offset = 0;
        blkinfo.block < blkinfo.nblocks;
        blkinfo.block++, blkinfo.offset += blkinfo.geo.blocksize)

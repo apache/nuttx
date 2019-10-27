@@ -200,6 +200,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   switch (ret)
     {
     case OK_EXIST:
+
       /* REVISIT: What should we do in this case?  I think that this would
        * happen only if a previous unmount failed?  I suppose that we should
        * try to unmount again because the mount might be stale.
@@ -220,6 +221,7 @@ static void automount_mount(FAR struct automounter_state_s *priv)
        */
 
     case OK_NOENT:
+
       /* If we get here, then the volume must not be mounted */
 
       DEBUGASSERT(!priv->mounted);
@@ -277,6 +279,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
   switch (ret)
     {
     case OK_EXIST:
+
       /* If we get here, then the volume must be mounted */
 
       DEBUGASSERT(priv->mounted);
@@ -321,6 +324,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
       /* Fall through */
 
     case OK_NOENT:
+
       /* The mountpoint is not present.  This is normal behavior in the
        * case where the user manually un-mounted the volume before removing
        * media.  Nice job, Mr. user.

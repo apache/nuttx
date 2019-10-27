@@ -158,6 +158,7 @@ size_t nxffs_erased(FAR const uint8_t *buffer, size_t buflen)
         {
           break;
         }
+
       buffer++;
     }
 

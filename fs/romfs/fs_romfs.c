@@ -1077,7 +1077,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     }
   else
     {
-       /* Unmount ... close the block driver */
+      /* Unmount ... close the block driver */
 
       if (rm->rm_blkdriver)
         {
