@@ -43,7 +43,7 @@
 
 #include "sama5d4-ek.h"
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -89,4 +89,4 @@ int board_app_initialize(uintptr_t arg)
 #endif
 }
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_LIB_BOARDCTL */
