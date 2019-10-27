@@ -37,6 +37,10 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_leds.c stm32_buttons.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_leds.c stm32_buttons.c
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
+endif
 
 include $(TOPDIR)/boards/Board.mk

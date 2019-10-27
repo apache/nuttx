@@ -1,9 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32vldiscovery/src/stm32vldiscovery.h
+ * boards/arm/stm32/stm32vldiscovery/src/stm32_bringup.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Freddie Chopin <freddie_chopin@op.pl>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,26 +33,28 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
-#define __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/* LED - assume it is on PC9 */
+#include <nuttx/config.h>
 
-#define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
-                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN9)
+#ifdef CONFIG_FS_PROCFS
+#  include <sys/mount.h>
+#endif
 
-/* BUTTON - assume it is on PA0 */
+#include <syslog.h>
 
-#define MIN_IRQBUTTON   BUTTON_0
-#define MAX_IRQBUTTON   BUTTON_0
-#define NUM_IRQBUTTONS  1
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
-#define GPIO_BTN_0      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN0)
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#include "stm32.h"
+#include "stm32f4discovery.h"
 
 /****************************************************************************
  * Public Functions
@@ -68,19 +69,44 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
 
-int stm32_bringup(void);
+int stm32_bringup(void)
+{
+  int ret = OK;
 
-/****************************************************************************
- * Name: stm32_led_initialize
- ****************************************************************************/
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
 
-#ifdef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void);
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
-#endif /* __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H */
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+  return ret;
+}

@@ -1,9 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32vldiscovery/src/stm32vldiscovery.h
+ * boards/arm/stm32/stm32vldiscovery/src/stm32_appinit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Freddie Chopin <freddie_chopin@op.pl>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,53 +33,62 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
-#define __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <nuttx/board.h>
+
+#include "stm32vldiscovery.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LED - assume it is on PC9 */
-
-#define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
-                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN9)
-
-/* BUTTON - assume it is on PA0 */
-
-#define MIN_IRQBUTTON   BUTTON_0
-#define MAX_IRQBUTTON   BUTTON_0
-#define NUM_IRQBUTTONS  1
-
-#define GPIO_BTN_0      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN0)
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: board_app_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int stm32_bringup(void);
+int board_app_initialize(uintptr_t arg)
+{
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-/****************************************************************************
- * Name: stm32_led_initialize
- ****************************************************************************/
+  return OK;
+#else
+  /* Perform board-specific initialization */
 
-#ifdef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void);
+  return stm32_bringup();
 #endif
-
-#endif /* __BOARDS_ARM_STM32_STM32VL_DISCOVERY_SRC_STM32VLDISCOVERY_H */
+}
