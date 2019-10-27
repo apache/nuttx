@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/dm320/ntosd-dm320/src/dm320_leds.c
+ * boards/arm/dm320/ntosd-dm320/src/dm320_appinit.c
  *
- *   Copyright (C) 2007, 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,57 +38,47 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/board.h>
 
-#include "up_internal.h"
-#include "chip.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: board_app_initialize
+ *
+ * Description:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_autoled_initialize(void)
+int board_app_initialize(uintptr_t arg)
 {
-  GIO_OUTPUT(GIO_LED_GREEN);
-  GIO_OUTPUT(GIO_LED_RED);
-  GIO_SET_OUTPUT(GIO_LED_GREEN);
-  GIO_CLEAR_OUTPUT(GIO_LED_RED);
+  return OK;
 }
-
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  if (led == GIO_LED_GREEN)
-    {
-      GIO_SET_OUTPUT(GIO_LED_GREEN);
-    }
-  else if (led == GIO_LED_RED)
-    {
-      GIO_SET_OUTPUT(GIO_LED_RED);
-    }
-}
-
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
-
-void board_autoled_off(int led)
-{
-  if (led == GIO_LED_GREEN)
-    {
-      GIO_CLEAR_OUTPUT(GIO_LED_GREEN);
-    }
-  else if (led == GIO_LED_RED)
-    {
-      GIO_CLEAR_OUTPUT(GIO_LED_RED);
-    }
-}
-#endif /* CONFIG_ARCH_LEDS */

@@ -1,7 +1,7 @@
 ############################################################################
 # boards/arm/dm320/ntosd-dm320/src/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,5 +37,13 @@
 
 ASRCS =
 CSRCS = dm320_leds.c dm320_network.c
+
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+CSRCS += dm320_boardinit.c
+endif
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += dm320_appinit.c
+endif
 
 include $(TOPDIR)/boards/Board.mk
