@@ -507,7 +507,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   error = rpcclnt_request(rpc, RPCMNT_MOUNT, RPCPROG_MNT, RPCMNT_VER3,
                           (FAR void *)&request.mountd,
                           sizeof(struct call_args_mount),
-                          (FAR void *)&response.mdata
+                          (FAR void *)&response.mdata,
                           sizeof(struct rpc_reply_mount));
   if (error != 0)
     {
@@ -545,8 +545,10 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
-                          (FAR void *)&request.sdata, sizeof(struct call_args_pmap),
-                          (FAR void *)&response.rdata, sizeof(struct rpc_reply_pmap));
+                          (FAR void *)&request.sdata,
+                          sizeof(struct call_args_pmap),
+                          (FAR void *)&response.rdata,
+                          sizeof(struct rpc_reply_pmap));
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_request failed: %d\n", error);
