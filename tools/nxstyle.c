@@ -231,6 +231,13 @@ int main(int argc, char **argv, char **envp)
       bstatm       = false;    /* True: This line is beginning of a statement */
       bfor         = false;    /* REVISIT: Implies for() is all on one line */
 
+      /* If we are not in a comment, then this certainly is not a right-hand comment. */
+
+      if (ncomment <= 0)
+        {
+          brhcomment = false;
+        }
+
       /* Check for a blank line */
 
       for (n = 0; line[n] != '\n' && isspace((int)line[n]); n++)
@@ -873,13 +880,20 @@ int main(int argc, char **argv, char **envp)
 
                           comment_lineno = lineno;
 #endif
-                          brhcomment = false;
+                          /* Note that brhcomment must persist to support a
+                           * later test for comment alignment.  We will will
+                           * fix that at the top of the loop when ncomment == 0.
+                           */
                         }
                     }
                   else
                     {
+                      /* Note that brhcomment must persist to support a later
+                       * test for comment alignment.  We will will fix that
+                       * at the top of the loop when ncomment == 0.
+                       */
+
                       ncomment = 0;
-                      brhcomment = false;
                       fprintf(stderr,
                               "Closing without opening comment at line %d:%d\n",
                               lineno, n);
@@ -889,17 +903,20 @@ int main(int argc, char **argv, char **envp)
                   continue;
                 }
 
-              /* Check for C++ style comments
-               * NOTE: Gives false alarms on URLs (http://...) embedded
-               * inside of comments.
-               */
+              /* Check for C++ style comments */
 
               else if (line[n + 1] == '/')
                 {
-                  fprintf(stderr, "C++ style comment at %d:%d\n",
-                          lineno, n);
-                  n++;
-                  continue;
+                  /* Check for "http://" or "https://" */
+
+                  if ((n < 5 || strncmp(&line[n - 5], "http://", 7) != 0) &&
+                      (n < 6 || strncmp(&line[n - 6], "https://", 8) != 0))
+                    {
+                      fprintf(stderr, "C++ style comment at %d:%d\n",
+                              lineno, n);
+                      n++;
+                      continue;
+                    }
                 }
             }
 
@@ -1292,8 +1309,15 @@ int main(int argc, char **argv, char **envp)
 
                   else if (line[n + 1] == '/')
                     {
-                      fprintf(stderr, "C++ style comment on at %d:%d\n",
-                              lineno, n);
+                      /* Check for "http://" or "https://" */
+
+                      if ((n < 5 || strncmp(&line[n - 5], "http://", 7) != 0) &&
+                          (n < 6 || strncmp(&line[n - 6], "https://", 8) != 0))
+                        {
+                          fprintf(stderr, "C++ style comment on at %d:%d\n",
+                                lineno, n);
+                        }
+
                       n++;
                     }
 
@@ -1612,13 +1636,11 @@ int main(int argc, char **argv, char **envp)
                    * comments with a structure field definition).  So disabled for
                    * comments before beginning of function definitions.
                    *
-                   * REVISIT: We would like to suppress this error if this is a
-                   * comment to the right of code.  Those are unaligned.  However,
-                   * The logic sequence current resets brhcomment to false during
-                   * processing of the line prior to this test.
+                   * Suppress this error if this is a comment to the right of code.
+                   * Those may be unaligned.
                    */
 
-                  if ((indent & 3) != 3 && bfunctions && dnest == 0 /* && !brhcomment */)
+                  if ((indent & 3) != 3 && bfunctions && dnest == 0 && !brhcomment)
                     {
                       fprintf(stderr,
                               "Bad comment block alignment at line %d:%d\n",
