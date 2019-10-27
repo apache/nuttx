@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/a1x/pcduino-a10/src/pcduino-a10.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c.
+ * include/board.h and src/a1x_leds.c.
  * The LEDs are used to encode OS-related events as follows:
  *
  *   SYMBOL            Meaning                      LED state
@@ -150,6 +150,22 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: a1x_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int a1x_bringup(void);
 
 /****************************************************************************
  * Name: a1x_led_initialize

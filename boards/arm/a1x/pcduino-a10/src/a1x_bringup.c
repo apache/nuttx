@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/a1x/pcduino-a10/src/a1x_boot.c
+ * boards/arm/a1x/pcduino-a10/src/a1x_bringup.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,19 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#ifdef CONFIG_FS_PROCFS
+#  include <sys/mount.h>
+#endif
 
-#include <nuttx/board.h>
+#include <syslog.h>
+
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 #include "pcduino_a10.h"
 
@@ -50,38 +60,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: a1x_boardinitialize
+ * Name: a1x_bringup
  *
  * Description:
- *   All A1x architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void a1x_boardinitialize(void)
+int a1x_bringup(void)
 {
-  /* Configure on-board LEDs. */
+  int ret = OK;
 
-  a1x_led_initialize();
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+  return ret;
 }
 
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  a1x_bringup();
-}
-#endif /* CONFIG_BOARD_LATE_INITIALIZE */
