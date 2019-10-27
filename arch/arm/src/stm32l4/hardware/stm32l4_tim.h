@@ -116,18 +116,6 @@
 #define STM32L4_ATIM_OR2_OFFSET     0x0050  /* Timer option register 2 */
 #define STM32L4_ATIM_OR3_OFFSET     0x0050  /* Timer option register 3 */
 
-/* Low-Power Timers - LPTIM1 and LPTIM2 */
-
-#define STM32L4_LPTIM_ISR_OFFSET    0x0000  /* Interrupt and Status register */
-#define STM32L4_LPTIM_ICR_OFFSET    0x0004  /* Interrupt clear register */
-#define STM32L4_LPTIM_IER_OFFSET    0x0008  /* Interrupt enable register */
-#define STM32L4_LPTIM_CFGR_OFFSET   0x000c  /* Configuration register */
-#define STM32L4_LPTIM_CR_OFFSET     0x0010  /* Control register */
-#define STM32L4_LPTIM_CMP_OFFSET    0x0014  /* Compare register */
-#define STM32L4_LPTIM_ARR_OFFSET    0x0018  /* Auto-reloud register (16-bit) */
-#define STM32L4_LPTIM_CNT_OFFSET    0x001c  /* Counter (16-bit) */
-#define STM32L4_LPTIM_OR_OFFSET     0x001c  /* Options Register */
-
 /* Register Addresses ***************************************************************/
 
 /* Advanced Timers - TIM1 and TIM8 */
@@ -715,40 +703,40 @@
 #define ATIM_BDTR_MOE             (1 << 15) /* Bit 15: Main Output enable */
 #define ATIM_BDTR_BKF_SHIFT       (16)      /* Bits 16-19: Break filter */
 #define ATIM_BDTR_BKF_MASK        (15 << ATIM_BDTR_BKF_SHIFT)
-#  define ATIM_BDTR_BKF_NOFILT      (0 << ATIM_BDTR_BKF_SHIFT)   /* 0000: No filter, BRK acts asynchronously */
-#  define ATIM_BDTR_BKF_FCKINT2     (1 << ATIM_BDTR_BKF_SHIFT)   /* 0001: fSAMPLING=fCK_INT, N=2 */
-#  define ATIM_BDTR_BKF_FCKINT4     (2 << ATIM_BDTR_BKF_SHIFT)   /* 0010: fSAMPLING=fCK_INT, N=4 */
-#  define ATIM_BDTR_BKF_FCKINT8     (3 << ATIM_BDTR_BKF_SHIFT)   /* 0011: fSAMPLING=fCK_INT, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd26     (4 << ATIM_BDTR_BKF_SHIFT)   /* 0100: fSAMPLING=fDTS/2, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd28     (5 << ATIM_BDTR_BKF_SHIFT)   /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd36     (6 << ATIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd38     (7 << ATIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd86     (8 << ATIM_BDTR_BKF_SHIFT)   /* 1000: fSAMPLING=fDTS/8, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd88     (9 << ATIM_BDTR_BKF_SHIFT)   /* 1001: fSAMPLING=fDTS/8, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd165    (10 << ATIM_BDTR_BKF_SHIFT)  /* 1010: fSAMPLING=fDTS/16, N=5 */
-#  define ATIM_BDTR_BKF_FDTSd166    (11 << ATIM_BDTR_BKF_SHIFT)  /* 1011: fSAMPLING=fDTS/16, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd168    (12 << ATIM_BDTR_BKF_SHIFT)  /* 1100: fSAMPLING=fDTS/16, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd325    (13 << ATIM_BDTR_BKF_SHIFT)  /* 1101: fSAMPLING=fDTS/32, N=5 */
-#  define ATIM_BDTR_BKF_FDTSd326    (14 << ATIM_BDTR_BKF_SHIFT)  /* 1110: fSAMPLING=fDTS/32, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd328    (15 << ATIM_BDTR_BKF_SHIFT)  /* 1111: fSAMPLING=fDTS/32, N=8 */
+#  define ATIM_BDTR_BKF_NOFILT    (0 << ATIM_BDTR_BKF_SHIFT)   /* 0000: No filter, BRK acts asynchronously */
+#  define ATIM_BDTR_BKF_FCKINT2   (1 << ATIM_BDTR_BKF_SHIFT)   /* 0001: fSAMPLING=fCK_INT, N=2 */
+#  define ATIM_BDTR_BKF_FCKINT4   (2 << ATIM_BDTR_BKF_SHIFT)   /* 0010: fSAMPLING=fCK_INT, N=4 */
+#  define ATIM_BDTR_BKF_FCKINT8   (3 << ATIM_BDTR_BKF_SHIFT)   /* 0011: fSAMPLING=fCK_INT, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd26   (4 << ATIM_BDTR_BKF_SHIFT)   /* 0100: fSAMPLING=fDTS/2, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd28   (5 << ATIM_BDTR_BKF_SHIFT)   /* 0101: fSAMPLING=fDTS/2, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd36   (6 << ATIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd38   (7 << ATIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd86   (8 << ATIM_BDTR_BKF_SHIFT)   /* 1000: fSAMPLING=fDTS/8, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd88   (9 << ATIM_BDTR_BKF_SHIFT)   /* 1001: fSAMPLING=fDTS/8, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd165  (10 << ATIM_BDTR_BKF_SHIFT)  /* 1010: fSAMPLING=fDTS/16, N=5 */
+#  define ATIM_BDTR_BKF_FDTSd166  (11 << ATIM_BDTR_BKF_SHIFT)  /* 1011: fSAMPLING=fDTS/16, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd168  (12 << ATIM_BDTR_BKF_SHIFT)  /* 1100: fSAMPLING=fDTS/16, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd325  (13 << ATIM_BDTR_BKF_SHIFT)  /* 1101: fSAMPLING=fDTS/32, N=5 */
+#  define ATIM_BDTR_BKF_FDTSd326  (14 << ATIM_BDTR_BKF_SHIFT)  /* 1110: fSAMPLING=fDTS/32, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd328  (15 << ATIM_BDTR_BKF_SHIFT)  /* 1111: fSAMPLING=fDTS/32, N=8 */
 #define ATIM_BDTR_BK2F_SHIFT      (20)      /* Bits 20-23: Break 2 filter */
 #define ATIM_BDTR_BK2F_MASK       (15 << ATIM_BDTR_BK2F_SHIFT)
-#  define ATIM_BDTR_BK2F_NOFILT     (0 << ATIM_BDTR_BK2F_SHIFT)  /* 0000: No filter, BRK 2 acts asynchronously */
-#  define ATIM_BDTR_BK2F_FCKINT2    (1 << ATIM_BDTR_BK2F_SHIFT)  /* 0001: fSAMPLING=fCK_INT, N=2 */
-#  define ATIM_BDTR_BK2F_FCKINT4    (2 << ATIM_BDTR_BK2F_SHIFT)  /* 0010: fSAMPLING=fCK_INT, N=4 */
-#  define ATIM_BDTR_BK2F_FCKINT8    (3 << ATIM_BDTR_BK2F_SHIFT)  /* 0011: fSAMPLING=fCK_INT, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd26    (4 << ATIM_BDTR_BK2F_SHIFT)  /* 0100: fSAMPLING=fDTS/2, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd28    (5 << ATIM_BDTR_BK2F_SHIFT)  /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd36    (6 << ATIM_BDTR_BK2F_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd38    (7 << ATIM_BDTR_BK2F_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd86    (8 << ATIM_BDTR_BK2F_SHIFT)  /* 1000: fSAMPLING=fDTS/8, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd88    (9 << ATIM_BDTR_BK2F_SHIFT)  /* 1001: fSAMPLING=fDTS/8, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd165   (10 << ATIM_BDTR_BK2F_SHIFT) /* 1010: fSAMPLING=fDTS/16, N=5 */
-#  define ATIM_BDTR_BK2F_FDTSd166   (11 << ATIM_BDTR_BK2F_SHIFT) /* 1011: fSAMPLING=fDTS/16, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd168   (12 << ATIM_BDTR_BK2F_SHIFT) /* 1100: fSAMPLING=fDTS/16, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd325   (13 << ATIM_BDTR_BK2F_SHIFT) /* 1101: fSAMPLING=fDTS/32, N=5 */
-#  define ATIM_BDTR_BK2F_FDTSd326   (14 << ATIM_BDTR_BK2F_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd328   (15 << ATIM_BDTR_BK2F_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
+#  define ATIM_BDTR_BK2F_NOFILT   (0 << ATIM_BDTR_BK2F_SHIFT)  /* 0000: No filter, BRK 2 acts asynchronously */
+#  define ATIM_BDTR_BK2F_FCKINT2  (1 << ATIM_BDTR_BK2F_SHIFT)  /* 0001: fSAMPLING=fCK_INT, N=2 */
+#  define ATIM_BDTR_BK2F_FCKINT4  (2 << ATIM_BDTR_BK2F_SHIFT)  /* 0010: fSAMPLING=fCK_INT, N=4 */
+#  define ATIM_BDTR_BK2F_FCKINT8  (3 << ATIM_BDTR_BK2F_SHIFT)  /* 0011: fSAMPLING=fCK_INT, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd26  (4 << ATIM_BDTR_BK2F_SHIFT)  /* 0100: fSAMPLING=fDTS/2, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd28  (5 << ATIM_BDTR_BK2F_SHIFT)  /* 0101: fSAMPLING=fDTS/2, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd36  (6 << ATIM_BDTR_BK2F_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd38  (7 << ATIM_BDTR_BK2F_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd86  (8 << ATIM_BDTR_BK2F_SHIFT)  /* 1000: fSAMPLING=fDTS/8, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd88  (9 << ATIM_BDTR_BK2F_SHIFT)  /* 1001: fSAMPLING=fDTS/8, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd165 (10 << ATIM_BDTR_BK2F_SHIFT) /* 1010: fSAMPLING=fDTS/16, N=5 */
+#  define ATIM_BDTR_BK2F_FDTSd166 (11 << ATIM_BDTR_BK2F_SHIFT) /* 1011: fSAMPLING=fDTS/16, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd168 (12 << ATIM_BDTR_BK2F_SHIFT) /* 1100: fSAMPLING=fDTS/16, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd325 (13 << ATIM_BDTR_BK2F_SHIFT) /* 1101: fSAMPLING=fDTS/32, N=5 */
+#  define ATIM_BDTR_BK2F_FDTSd326 (14 << ATIM_BDTR_BK2F_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd328 (15 << ATIM_BDTR_BK2F_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
 #define ATIM_BDTR_BK2E            (1 << 24) /* Bit 24: Break 2 enable */
 #define ATIM_BDTR_BK2P            (1 << 1525 /* Bit 25:Break 2 polarity */
 

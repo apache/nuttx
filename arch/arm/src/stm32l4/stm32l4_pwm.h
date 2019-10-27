@@ -55,11 +55,14 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* Timer devices may be used for different purposes.  One special purpose is
- * to generate modulated outputs for such things as motor control.  If CONFIG_STM32L4_TIMn
- * is defined then the CONFIG_STM32L4_TIMn_PWM must also be defined to indicate that
- * timer "n" is intended to be used for pulsed output signal generation.
+ * to generate modulated outputs for such things as motor control.  If
+ * CONFIG_STM32L4_TIMn is defined then the CONFIG_STM32L4_TIMn_PWM must also be
+ * defined to indicate that timer "n" is intended to be used for pulsed output
+ * signal generation.
  */
 
 #ifndef CONFIG_STM32L4_TIM1
@@ -97,14 +100,16 @@
 
 /* Check if PWM support for any channel is enabled. */
 
-#if defined(CONFIG_STM32L4_TIM1_PWM)  || defined(CONFIG_STM32L4_TIM2_PWM)  || \
-    defined(CONFIG_STM32L4_TIM3_PWM)  || defined(CONFIG_STM32L4_TIM4_PWM)  || \
-    defined(CONFIG_STM32L4_TIM5_PWM)  || defined(CONFIG_STM32L4_TIM8_PWM)  || \
-    defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM16_PWM) || \
-    defined(CONFIG_STM32L4_TIM17_PWM)
+#if defined(CONFIG_STM32L4_TIM1_PWM)  || defined(CONFIG_STM32L4_TIM2_PWM)   || \
+    defined(CONFIG_STM32L4_TIM3_PWM)  || defined(CONFIG_STM32L4_TIM4_PWM)   || \
+    defined(CONFIG_STM32L4_TIM5_PWM)  || defined(CONFIG_STM32L4_TIM8_PWM)   || \
+    defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM16_PWM)  || \
+    defined(CONFIG_STM32L4_TIM17_PWM) || defined(CONFIG_STM32L4_LPTIM1_PWM) || \
+    defined(CONFIG_STM32L4_LPTIM2_PWM)
 
 #include <arch/board/board.h>
 #include "hardware/stm32l4_tim.h"
+#include "hardware/stm32l4_lptim.h"
 
 #ifdef CONFIG_PWM_MULTICHAN
 
@@ -677,6 +682,40 @@
 #  endif
 #endif
 
+/* REVISIT: any other LPTIM implementations have more than one channel? */
+
+#define CONFIG_STM32L4_LPTIM1_CHANNEL 1
+
+#ifdef CONFIG_STM32L4_LPTIM1_PWM
+#  if !defined(CONFIG_STM32L4_LPTIM1_CHANNEL)
+#    error "CONFIG_STM32L4_LPTIM1_CHANNEL must be provided"
+#  elif CONFIG_STM32L4_LPTIM1_CHANNEL == 1
+#    define CONFIG_STM32L4_LPTIM1_CHANNEL1  1
+#    define CONFIG_STM32L4_LPTIM1_CH1MODE   CONFIG_STM32L4_LPTIM1_CHMODE
+#    define PWM_LPTIM1_CH1CFG               GPIO_LPTIM1_CH1OUT
+#    define PWM_LPTIM1_CH1NCFG              0
+#  else
+#    error "Unsupported value of CONFIG_STM32L4_LPTIM1_CHANNEL"
+#  endif
+#endif
+
+/* REVISIT: any other LPTIM implementations have more than one channel? */
+
+#define CONFIG_STM32L4_LPTIM2_CHANNEL 1
+
+#ifdef CONFIG_STM32L4_LPTIM2_PWM
+#  if !defined(CONFIG_STM32L4_LPTIM2_CHANNEL)
+#    error "CONFIG_STM32L4_LPTIM2_CHANNEL must be provided"
+#  elif CONFIG_STM32L4_LPTIM2_CHANNEL == 1
+#    define CONFIG_STM32L4_LPTIM2_CHANNEL1  1
+#    define CONFIG_STM32L4_LPTIM2_CH1MODE   CONFIG_STM32L4_LPTIM2_CHMODE
+#    define PWM_LPTIM2_CH1CFG               GPIO_LPTIM2_CH1OUT
+#    define PWM_LPTIM2_CH1NCFG              0
+#  else
+#    error "Unsupported value of CONFIG_STM32L4_LPTIM2_CHANNEL"
+#  endif
+#endif
+
 #define PWM_NCHANNELS 1
 
 #endif
@@ -722,6 +761,25 @@ extern "C"
  ************************************************************************************/
 
 FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
+
+/****************************************************************************
+ * Name: stm32l4_lp_pwminitialize
+ *
+ * Description:
+ *   Initialize one low-power timer for use with the upper_level PWM driver.
+ *
+ * Input Parameters:
+ *   timer - A number identifying the timer use.  The number of valid timer
+ *     IDs varies with the STM32 MCU and MCU family but is somewhere in
+ *     the range of {1,..,2}.
+ *
+ * Returned Value:
+ *   On success, a pointer to the STM32 lower half PWM driver is returned.
+ *   NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct pwm_lowerhalf_s *stm32l4_lp_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

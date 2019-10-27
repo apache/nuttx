@@ -1810,6 +1810,74 @@ config STM32L4_ONESHOT_MAXTIMERS
 		of the timers and places an upper limit on the number of oneshot
 		timers that you can use.
 
+config STM32L4_LPTIM1_PWM
+	bool "LPTIM1 PWM"
+	default n
+	depends on STM32L4_LPTIM1
+	select PWM
+	---help---
+		Reserve low-power timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32L4_LPTIM1_PWM
+
+choice
+	prompt "LPTIM1 clock source"
+	default STM32L4_LPTIM1_CLK_APB1
+
+config STM32L4_LPTIM1_CLK_APB1
+	bool "Clock LPTIM1 from APB1"
+
+config STM32L4_LPTIM1_CLK_LSE
+	bool "Clock LPTIM1 from LSE"
+
+config STM32L4_LPTIM1_CLK_LSI
+	bool "Clock LPTIM1 from LSI"
+
+config STM32L4_LPTIM1_CLK_HSI
+	bool "Clock LPTIM1 from HSI"
+endchoice
+
+endif # STM32L4_LPTIM1_PWM
+
+config STM32L4_LPTIM2_PWM
+	bool "LPTIM2 PWM"
+	default n
+	depends on STM32L4_LPTIM2
+	select PWM
+	---help---
+		Reserve low-power timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32L4_LPTIM2_PWM
+
+choice
+	prompt "LPTIM2 clock source"
+	default STM32L4_LPTIM2_CLK_APB1
+
+config STM32L4_LPTIM2_CLK_APB1
+	bool "Clock LPTIM2 from APB1"
+
+config STM32L4_LPTIM2_CLK_LSE
+	bool "Clock LPTIM2 from LSE"
+
+config STM32L4_LPTIM2_CLK_LSI
+	bool "Clock LPTIM2 from LSI"
+
+config STM32L4_LPTIM2_CLK_HSI
+	bool "Clock LPTIM2 from HSI"
+endchoice
+
+endif # STM32L4_LPTIM2_PWM
+
 config STM32L4_TIM1_PWM
 	bool "TIM1 PWM"
 	default n

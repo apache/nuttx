@@ -202,8 +202,9 @@
  * DFSDM
  */
 
-/* prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
- as per comment above HSI) */
+/* Prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
+ * as per comment above HSI) .
+ */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
@@ -271,24 +272,26 @@
 /* APB1 clock (PCLK1) is HCLK/1 (80MHz) */
 
 #define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
-#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY / 1)
 
 /* Timers driven from APB1 will be twice PCLK1 */
+
 /* REVISIT : this can be configured */
 
-#define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM3_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM4_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM5_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM2_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM3_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM4_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM5_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM6_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM7_CLKIN   (2 * STM32L4_PCLK1_FREQUENCY)
 
 /* APB2 clock (PCLK2) is HCLK (80MHz) */
 
 #define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
-#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
+#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY / 1)
 
 /* Timers driven from APB2 will be twice PCLK2 */
+
 /* REVISIT : this can be configured */
 
 #define STM32L4_APB2_TIM1_CLKIN   (2*STM32L4_PCLK2_FREQUENCY)
@@ -301,6 +304,7 @@
  * otherwise frequency is 2xAPBx.
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
+
 /* REVISIT : this can be configured */
 
 /* TODO SDMMC */
@@ -488,8 +492,8 @@
 #define BOARD_TIM15_FREQUENCY   STM32L4_HCLK_FREQUENCY
 #define BOARD_TIM16_FREQUENCY   STM32L4_HCLK_FREQUENCY
 #define BOARD_TIM17_FREQUENCY   STM32L4_HCLK_FREQUENCY
-#define BOARD_LPTIM1_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
-#define BOARD_LPTIM2_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
+#define STM32L4_LPTIM1_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
+#define STM32L4_LPTIM2_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
 
 /****************************************************************************
  * Public Data

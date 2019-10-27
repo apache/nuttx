@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -262,6 +263,43 @@ int stm32l4_pwm_setup(void)
           return ret;
         }
 #endif
+
+#if defined(CONFIG_STM32L4_LPTIM1_PWM)
+      pwm = stm32l4_lp_pwminitialize(1);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/lppwm1" */
+
+      ret = pwm_register("/dev/lppwm1", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
+#if defined(CONFIG_STM32L4_LPTIM2_PWM)
+      pwm = stm32l4_lp_pwminitialize(2);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/lppwm2" */
+
+      ret = pwm_register("/dev/lppwm2", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+#endif
+
       /* Now we are initialized */
 
       initialized = true;

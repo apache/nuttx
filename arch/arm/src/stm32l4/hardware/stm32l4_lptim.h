@@ -114,4 +114,12 @@
 #define LPTIM_CR_SNGSTRT          (1 << 1)   /* Bit 1: Single Mode */
 #define LPTIM_CR_CNTSTRT          (1 << 2)   /* Bit 2: Continuous Mode */
 
+#define LPTIM_ISR_CMPM            (1 << 0)   /* Bit 0: Compare match */
+#define LPTIM_ISR_ARRM            (1 << 1)   /* Bit 1: Autoreload match */
+#define LPTIM_ISR_EXTTRIG         (1 << 2)   /* Bit 2: External trigger edge event */
+#define LPTIM_ISR_CMPOK           (1 << 3)   /* Bit 3: Compare register update OK */
+#define LPTIM_ISR_ARROK           (1 << 4)   /* Bit 4: Autoreload register update OK */
+#define LPTIM_ISR_UP              (1 << 5)   /* Bit 5: Counter direction change down to up */
+#define LPTIM_ISR_DOWN            (1 << 6)   /* Bit 6: Counter direction change up to down */
+
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_LPTIM_H */
