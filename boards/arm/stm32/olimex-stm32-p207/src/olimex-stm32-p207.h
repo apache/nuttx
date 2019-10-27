@@ -84,7 +84,7 @@
 #define GPIO_OTGFS_VBUS  (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN9)
 #define GPIO_OTGFS_PWRON (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN2)
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 #  define GPIO_OTGFS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTB|GPIO_PIN10)
 
 #else
@@ -120,7 +120,7 @@ void weak_function stm32_usbinitialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_STM32_USBHOST)
 int stm32_usbhost_initialize(void);
 #endif
 

@@ -2514,13 +2514,13 @@ config STM32_OTGFS
 	bool "OTG FS"
 	default n
 	depends on STM32_HAVE_OTGFS
-	select USBHOST_HAVE_ASYNCH if USBHOST
+	select USBHOST_HAVE_ASYNCH if STM32_USBHOST
 
 config STM32_OTGHS
 	bool "OTG HS"
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F4XXX
-	select USBHOST_HAVE_ASYNCH if USBHOST
+	select USBHOST_HAVE_ASYNCH if STM32_USBHOST
 
 config STM32_PWR
 	bool "PWR"
@@ -9255,6 +9255,7 @@ config STM32_USBHOST
 	bool "Enable USB Host Support"
 	depends on STM32_OTGFS || STM32_OTGHS
 	default n
+	select USBHOST
 
 menu "USB FS Host Configuration"
 	depends on STM32_OTGFS && STM32_USBHOST

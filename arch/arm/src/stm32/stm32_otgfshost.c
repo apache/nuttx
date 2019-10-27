@@ -70,7 +70,7 @@
 #include "stm32_gpio.h"
 #include "stm32_usbhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGFS)
+#if defined(CONFIG_STM32_USBHOST) && defined(CONFIG_STM32_OTGFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,9 +82,10 @@
  *
  * Pre-requisites
  *
- *  CONFIG_USBHOST      - Enable general USB host support
- *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32_SYSCFG - Needed
+ *  CONFIG_STM32_USBHOST - Enable STM32 USB host support
+ *  CONFIG_USBHOST       - Enable general USB host support
+ *  CONFIG_STM32_OTGFS   - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32_SYSCFG  - Needed
  *
  * Options:
  *
@@ -5442,4 +5443,4 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
   return &g_usbconn;
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_STM32_OTGFS */
+#endif /* CONFIG_STM32_USBHOST && CONFIG_STM32_OTGFS */

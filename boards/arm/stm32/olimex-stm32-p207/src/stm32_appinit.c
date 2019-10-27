@@ -84,7 +84,8 @@
 
 /* Can't support USB host is USB host is not enabled */
 
-#ifndef CONFIG_USBHOST
+#ifndef CONFIG_STM32_USBHOST
+#  undef CONFIG_USBHOST
 #  undef HAVE_USBHOST
 #endif
 

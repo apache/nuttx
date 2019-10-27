@@ -90,7 +90,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 struct usbhost_connection_s;
 FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 #endif

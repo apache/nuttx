@@ -85,7 +85,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 static struct usbhost_connection_s *g_usbconn;
 #endif
 
@@ -101,7 +101,7 @@ static struct usbhost_connection_s *g_usbconn;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 static int usbhost_waiter(int argc, char *argv[])
 {
   struct usbhost_hubport_s *hport;
@@ -166,7 +166,7 @@ void stm32_usbinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 int stm32_usbhost_initialize(void)
 {
   int pid;
@@ -247,7 +247,7 @@ int stm32_usbhost_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
   return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
@@ -280,7 +280,7 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_STM32_USBHOST
 void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);

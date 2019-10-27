@@ -49,7 +49,7 @@
 #include "hardware/stm32fxxxxx_otgfs.h"
 #include "hardware/stm32_otghs.h"
 
-#if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
+#if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_STM32_USBHOST)
 
 /************************************************************************************
  * Public Types
@@ -209,11 +209,12 @@ enum usbhost_trace1codes_e
  *
  * Pre-requisites
  *
- *  CONFIG_USBHOST      - Enable general USB host support
- *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32_USBHOST - Enable general USB host support
+ *  CONFIG_USBHOST       - Enable general USB host support
+ *  CONFIG_STM32_OTGFS   - Enable the STM32 USB OTG FS block
  *     or
- *  CONFIG_STM32_OTGHS  - Enable the STM32 USB OTG HS block
- *  CONFIG_STM32_SYSCFG - Needed
+ *  CONFIG_STM32_OTGHS   - Enable the STM32 USB OTG HS block
+ *  CONFIG_STM32_SYSCFG  - Needed
  *
  * Options:
  *
@@ -290,5 +291,5 @@ void stm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32_OTGFS && CONFIG_USBHOST */
+#endif /* CONFIG_STM32_OTGFS && CONFIG_STM32_USBHOST */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_USBHOST_H */
