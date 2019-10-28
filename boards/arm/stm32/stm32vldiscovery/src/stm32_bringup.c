@@ -54,7 +54,7 @@
 #endif
 
 #include "stm32.h"
-#include "stm32f4discovery.h"
+#include "stm32vldiscovery.h"
 
 /****************************************************************************
  * Public Functions
