@@ -100,12 +100,14 @@
 
 /* We expect to receive GPIO interrupts for card insertion events */
 
-#ifndef CONFIG_KINETIS_GPIOIRQ
-#  error "CONFIG_KINETIS_GPIOIRQ required for card detect interrupt"
-#endif
+#ifdef NSH_HAVEMMCSD
+#  ifndef CONFIG_KINETIS_GPIOIRQ
+#    error "CONFIG_KINETIS_GPIOIRQ required for card detect interrupt"
+#  endif
 
-#ifndef CONFIG_KINETIS_PORTEINTS
-#  error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
+#  ifndef CONFIG_KINETIS_PORTEINTS
+#    error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
+#  endif
 #endif
 
 /****************************************************************************
@@ -272,3 +274,4 @@ int board_app_initialize(uintptr_t arg)
 #endif
   return OK;
 }
+
