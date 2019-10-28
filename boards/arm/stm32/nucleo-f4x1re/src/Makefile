@@ -59,6 +59,10 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
+ifeq ($(CONFIG_CAN_MCP2515),y)
+  CSRCS += stm32_mcp2515.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif

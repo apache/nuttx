@@ -4,6 +4,7 @@
  *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Modfied: Ben <disruptivesolutionsnl@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -484,7 +485,7 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
                               uint8_t mask, uint8_t value)
 {
   FAR struct mcp2515_config_s *config = priv->config;
-  uint8_t wr[4]=
+  uint8_t wr[4] =
   {
     MCP2515_BITMOD, regaddr, mask, value
   };
@@ -659,6 +660,7 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
                 break;
 
               case CAN_FILTER_RANGE:
+
                 /* Not supported */
 
                 break;
@@ -855,14 +857,14 @@ static int mcp2515_del_extfilter(FAR struct mcp2515_can_s *priv, int ndx)
    * maskN   = RXM0reg + offset
    */
 
-   if (ndx < 3)
-     {
-       offset = 0;
-     }
-   else
-     {
-       offset = 4;
-     }
+  if (ndx < 3)
+    {
+      offset = 0;
+    }
+  else
+    {
+      offset = 4;
+    }
 
   /* Setup the CONFIG Mode */
 
@@ -987,6 +989,7 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
                 break;
 
               case CAN_FILTER_RANGE:
+
                 /* Not supported */
 
                 break;
@@ -1127,14 +1130,14 @@ static int mcp2515_del_stdfilter(FAR struct mcp2515_can_s *priv, int ndx)
    * maskN   = RXM0reg + offset
    */
 
-   if (ndx < 3)
-     {
-       offset = 0;
-     }
-   else
-     {
-       offset = 4;
-     }
+  if (ndx < 3)
+    {
+      offset = 0;
+    }
+  else
+    {
+      offset = 4;
+    }
 
   /* Setup the CONFIG Mode */
 
@@ -1463,14 +1466,18 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           mcp2515_readregs(priv, MCP2515_CNF1, &regval, 1);
           bt->bt_sjw    = ((regval & CNF1_SJW_MASK) >> CNF1_SJW_SHIFT) + 1;
-          brp           = (((regval & CNF1_BRP_MASK) >> CNF1_BRP_SHIFT) + 1) * 2;
+          brp           = (((regval & CNF1_BRP_MASK) >>
+                                      CNF1_BRP_SHIFT) + 1) * 2;
 
           mcp2515_readregs(priv, MCP2515_CNF2, &regval, 1);
-          bt->bt_tseg1  = ((regval & CNF2_PRSEG_MASK) >> CNF2_PRSEG_SHIFT) + 1;
-          bt->bt_tseg1 += ((regval & CNF2_PHSEG1_MASK) >> CNF2_PHSEG1_SHIFT) + 1;
+          bt->bt_tseg1  = ((regval & CNF2_PRSEG_MASK) >>
+                                     CNF2_PRSEG_SHIFT) + 1;
+          bt->bt_tseg1 += ((regval & CNF2_PHSEG1_MASK) >>
+                                     CNF2_PHSEG1_SHIFT) + 1;
 
           mcp2515_readregs(priv, MCP2515_CNF3, &regval, 1);
-          bt->bt_tseg2  = ((regval & CNF3_PHSEG2_MASK) >> CNF3_PHSEG2_SHIFT) + 1;
+          bt->bt_tseg2  = ((regval & CNF3_PHSEG2_MASK) >>
+                                     CNF3_PHSEG2_SHIFT) + 1;
 
           bt->bt_baud   = MCP2515_CANCLK_FREQUENCY / brp /
                           (bt->bt_tseg1 + bt->bt_tseg2 + 1);
@@ -2440,6 +2447,27 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
   /* Select TX-related interrupts */
 
   priv->txints = MCP2515_TXBUFFER_INTS;
+
+  /* In this option we set a special receive mode in the
+   * RXM[1:0] bits (RXBnCTRL[6:5]). In both registers:
+   * RXB0CTRL and RXB1CTRL.
+   * 11 = Turns mask/filters off; receives any message.
+   *
+   * In this mode it is tested that it receives both
+   * extended and standard id messages.
+   */
+
+#ifdef CONFIG_CAN_EXTID
+  mcp2515_readregs(priv, MCP2515_RXB0CTRL, &regval, 1);
+  regval &= ~RXBCTRL_RXM_ALLMSG;
+  regval |= RXBCTRL_RXM_ALLMSG;
+  mcp2515_writeregs(priv, MCP2515_RXB0CTRL, &regval, 1);
+
+  mcp2515_readregs(priv, MCP2515_RXB1CTRL, &regval, 1);
+  regval &= ~RXBCTRL_RXM_ALLMSG;
+  regval |= RXBCTRL_RXM_ALLMSG;
+  mcp2515_writeregs(priv, MCP2515_RXB1CTRL, &regval, 1);
+#endif
 
   return OK;
 }

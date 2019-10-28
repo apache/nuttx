@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ********************************************************************/
 
 #define HAVE_MMCSD 1
@@ -58,7 +59,8 @@
 #endif
 
 /* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
+ * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the
+ * STM32
  * target.
  *
  * - When the I/O is HIGH value, the LED is on.
@@ -111,6 +113,13 @@
                             GPIO_PORTA | GPIO_PIN6)
 #define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTA | GPIO_PIN5)
+
+/* MCP2551 */
+
+#define GPIO_MCP2515_CS   (GPIO_OUTPUT|GPIO_OTYPER_PP(0)|GPIO_SPEED_2MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define GPIO_MCP2515_IRQ  (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN1)
 
 #ifdef HAVE_MMCSD
 #  define GPIO_SPI_CS_SD_CARD_OFF \
@@ -301,6 +310,18 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 
 #ifdef CONFIG_AJOYSTICK
 int board_ajoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_mcp2515initialize
+ *
+ * Description:
+ *   Initialize and register the MCP2515 CAN driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_MCP2515
+int stm32_mcp2515initialize(FAR const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F401RE_SRC_NUCLEO_F401RE_H */

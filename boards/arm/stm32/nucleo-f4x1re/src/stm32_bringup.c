@@ -77,6 +77,35 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
+  /* Configure SPI-based devices */
+
+#ifdef CONFIG_STM32_SPI1
+  /* Get the SPI port */
+
+  struct spi_dev_s *spi;
+
+  spi = stm32_spibus_initialize(1);
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 1\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_CAN_MCP2515
+#ifdef CONFIG_STM32_SPI1
+  (void)stm32_configgpio(GPIO_MCP2515_CS);    /* MEMS chip select */
+#endif
+
+  /* Configure and initialize the MCP2515 CAN device */
+
+  ret = stm32_mcp2515initialize("/dev/can0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
+    }
+#endif
+#endif
+
 #ifdef HAVE_MMCSD
   /* First, get an instance of the SDIO interface */
 
