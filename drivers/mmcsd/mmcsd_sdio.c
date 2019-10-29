@@ -1823,12 +1823,6 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       SDIO_SENDSETUP(priv->dev, buffer, priv->blocksize);
     }
 
-  /* Flag that a write transfer is pending that we will have to check for
-   * write complete at the beginning of the next transfer.
-   */
-
-  priv->wrbusy = true;
-
   /* If Controller needs DMA setup before write then only send CMD24 now. */
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
@@ -1853,6 +1847,12 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       ferr("ERROR: CMD24 transfer failed: %d\n", ret);
       return ret;
     }
+
+  /* Flag that a write transfer is pending that we will have to check for
+   * write complete at the beginning of the next transfer.
+   */
+
+  priv->wrbusy = true;
 
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   /* Arm the write complete detection with timeout */
@@ -2026,12 +2026,6 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       SDIO_SENDSETUP(priv->dev, buffer, nbytes);
     }
 
-  /* Flag that a write transfer is pending that we will have to check for
-   * write complete at the beginning of the next transfer.
-   */
-
-  priv->wrbusy = true;
-
   /* If Controller needs DMA setup before write then only send CMD25 now. */
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
@@ -2077,6 +2071,12 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
       return ret;
     }
+
+  /* Flag that a write transfer is pending that we will have to check for
+   * write complete at the beginning of the next transfer.
+   */
+
+  priv->wrbusy = true;
 
   /* On success, return the number of blocks written */
 
@@ -3493,9 +3493,10 @@ static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
 
   priv->capacity     = 0; /* Capacity=0 sometimes means no media */
   priv->blocksize    = 0;
-  priv->mediachanged = false;
-  priv->type         = MMCSD_CARDTYPE_UNKNOWN;
   priv->probed       = false;
+  priv->mediachanged = false;
+  priv->wrbusy       = false;
+  priv->type         = MMCSD_CARDTYPE_UNKNOWN;
   priv->rca          = 0;
   priv->selblocklen  = 0;
 
