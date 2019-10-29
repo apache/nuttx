@@ -84,7 +84,7 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio =
   /* TODO find something smarter than using image_len references */
 
   .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len
+  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len,
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
   .firmware_image      = (FAR uint8_t *)bcm43362_firmware_image,
