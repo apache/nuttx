@@ -125,4 +125,11 @@ errout_with_search:
   return ret;
 }
 
+#else
+
+int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode)
+{
+  return -ENODEV;
+}
+
 #endif /* CONFIG_MTD */
