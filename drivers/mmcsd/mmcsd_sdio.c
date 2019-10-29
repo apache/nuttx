@@ -1252,7 +1252,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           ferr("ERROR: mmcsd_getR1 failed: %d\n", ret);
-          return ret;
+          goto errorout;
         }
 
       /* Now check if the card is in the expected transfer state. */
@@ -1282,7 +1282,8 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
            */
 
           ferr("ERROR: Unexpected R1 state: %08x\n", r1);
-          return -EINVAL;
+          ret = -EINVAL;
+          goto errorout;
         }
 
       /* We are still in the programming state. Calculate the elapsed
@@ -1294,6 +1295,10 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
   while (elapsed < TICK_PER_SEC);
 
   return -ETIMEDOUT;
+
+errorout:
+  mmcsd_removed(priv);
+  return ret;
 }
 
 /****************************************************************************
