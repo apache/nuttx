@@ -484,9 +484,9 @@ int bcmf_sdio_find_block_size(unsigned int size)
     {
       size_copy >>= 1;
       ret++;
-   }
+    }
 
-  if (size & (size-1))
+  if (size & (size - 1))
     {
       return 1 << ret;
     }
@@ -515,8 +515,10 @@ static int bcmf_sdio_sr_init(FAR struct bcmf_sdio_dev_s *sbus)
        * even though module won't decode cmd or respond
        */
 
-      bcmf_write_reg(sbus, 0, SDIO_CCCR_BRCM_CARDCAP, SDIO_CCCR_BRCM_CARDCAP_CMD_NODEC);
-      bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, SBSDIO_FORCE_HT);
+      bcmf_write_reg(sbus, 0, SDIO_CCCR_BRCM_CARDCAP,
+                     SDIO_CCCR_BRCM_CARDCAP_CMD_NODEC);
+      bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR,
+                     SBSDIO_FORCE_HT);
 
       /* Enable KeepSdioOn (KSO) bit for normal operation */
 
@@ -587,25 +589,25 @@ int bcmf_transfer_bytes(FAR struct bcmf_sdio_dev_s *sbus, bool write,
                                function, address, 0, buf);
     }
 
-    /* Find best block settings for transfer */
+  /* Find best block settings for transfer */
 
-    if (len >= 64)
-      {
-        /* Use block mode */
+  if (len >= 64)
+    {
+      /* Use block mode */
 
-        blocklen = 64;
-        nblocks = (len + 63) / 64;
-      }
-    else
-      {
-        /* Use byte mode */
+      blocklen = 64;
+      nblocks = (len + 63) / 64;
+    }
+  else
+    {
+      /* Use byte mode */
 
-        blocklen = bcmf_sdio_find_block_size(len);
-        nblocks = 0;
-      }
+      blocklen = bcmf_sdio_find_block_size(len);
+      nblocks = 0;
+    }
 
-    return sdio_io_rw_extended(sbus->sdio_dev, write,
-                               function, address, true, buf, blocklen, nblocks);
+  return sdio_io_rw_extended(sbus->sdio_dev, write,
+                             function, address, true, buf, blocklen, nblocks);
 }
 
 /****************************************************************************
@@ -674,6 +676,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
   sq_init(&sbus->free_queue);
 
   /* Setup free buffer list */
+
   /* FIXME this should be static to driver */
 
   for (ret = 0; ret < BCMF_PKT_POOL_SIZE; ret++)
@@ -953,7 +956,7 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
         }
 
 #if 0
-      if (!tx || sbus->tx_queue_count < BCMF_PKT_POOL_SIZE-1)
+      if (!tx || sbus->tx_queue_count < BCMF_PKT_POOL_SIZE - 1)
 #endif
         {
           if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)

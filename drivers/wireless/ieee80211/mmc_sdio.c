@@ -466,6 +466,7 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
           return OK;
         }
     }
+
   return -ETIMEDOUT;
 }
 

@@ -106,6 +106,7 @@ struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
   struct bcmf_frame_s *frame;
 
   /* Allocate data frame */
+
   /* TODO check for integer overflow */
 
   frame = priv->bus->allocate_frame(priv,
@@ -190,11 +191,11 @@ int bcmf_event_register(FAR struct bcmf_dev_s *priv, event_handler_t handler,
                         unsigned int event_id)
 {
   if (event_id >= BCMF_EVENT_COUNT)
-  {
-    /* Invalid event id */
+    {
+      /* Invalid event id */
 
-    return -EINVAL;
-  }
+      return -EINVAL;
+    }
 
   priv->event_handlers[event_id] = handler;
   return OK;

@@ -504,13 +504,15 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 {
   uint32_t value = 0;
+  uint32_t base;
 
   if (core >= MAX_CORE_ID)
     {
       wlerr("Invalid core id %d\n", core);
       return false;
     }
-  uint32_t base = sbus->chip->core_base[core];
+
+  base = sbus->chip->core_base[core];
 
   bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
 
@@ -566,13 +568,15 @@ void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 {
   uint32_t value;
+  uint32_t base;
 
   if (core >= MAX_CORE_ID)
     {
       wlerr("Invalid core id %d\n", core);
       return;
     }
-  uint32_t base = sbus->chip->core_base[core];
+
+  base = sbus->chip->core_base[core];
 
   /* Put core in reset state */
 

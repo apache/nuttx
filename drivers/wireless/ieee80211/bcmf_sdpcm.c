@@ -73,16 +73,17 @@
  * Private Types
  ****************************************************************************/
 
-struct __attribute__((packed)) bcmf_sdpcm_header {
-    uint16_t size;
-    uint16_t checksum;
-    uint8_t  sequence;
-    uint8_t  channel;
-    uint8_t  next_length;
-    uint8_t  data_offset;
-    uint8_t  flow_control;
-    uint8_t  credit;
-    uint16_t padding;
+struct __attribute__((packed)) bcmf_sdpcm_header
+{
+  uint16_t size;
+  uint16_t checksum;
+  uint8_t  sequence;
+  uint8_t  channel;
+  uint8_t  next_length;
+  uint8_t  data_offset;
+  uint8_t  flow_control;
+  uint8_t  credit;
+  uint16_t padding;
 };
 
 /****************************************************************************
@@ -149,7 +150,8 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
 int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
-  uint16_t len, checksum;
+  uint16_t len;
+  uint16_t checksum;
   struct bcmf_sdpcm_header *header;
   struct bcmf_sdio_frame *sframe;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
@@ -250,6 +252,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
           {
             ret = bcmf_bdc_process_event_frame(priv, &sframe->header);
           }
+
         goto exit_free_frame;
 
       case SDPCM_DATA_CHANNEL:
@@ -309,7 +312,6 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       wlerr("No credit to send frame\n");
       return -EAGAIN;
     }
-
 
   if (nxsem_wait(&sbus->queue_mutex) < 0)
     {
@@ -442,7 +444,6 @@ struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
   sframe->header.data += header_len;
   return &sframe->header;
 }
-
 
 void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
                      struct bcmf_frame_s *frame)

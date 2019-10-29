@@ -69,11 +69,12 @@
  * Private Types
  ****************************************************************************/
 
-struct __attribute__((packed)) bcmf_cdc_header {
-    uint32_t cmd;    /* Command to be sent */
-    uint32_t len;    /* Size of command data */
-    uint32_t flags;  /* cdc request flags, see above */
-    uint32_t status; /* Returned status code from chip */
+struct __attribute__((packed)) bcmf_cdc_header
+{
+  uint32_t cmd;    /* Command to be sent */
+  uint32_t len;    /* Size of command data */
+  uint32_t flags;  /* cdc request flags, see above */
+  uint32_t status; /* Returned status code from chip */
 };
 
 /****************************************************************************
@@ -150,20 +151,22 @@ int bcmf_cdc_sendframe(FAR struct bcmf_dev_s *priv, uint32_t cmd,
 {
   struct bcmf_cdc_header *header =
                   (struct bcmf_cdc_header *)frame->data;
+  uint32_t cdc_data_len;
 
   /* Setup control frame header */
 
-  uint32_t cdc_data_len = frame->len - (uint32_t)(frame->data-frame->base);
+  cdc_data_len = frame->len - (uint32_t)(frame->data - frame->base);
+
   header->cmd = cmd;
-  header->len = cdc_data_len-sizeof(struct bcmf_cdc_header);
+  header->len = cdc_data_len - sizeof(struct bcmf_cdc_header);
   header->status = 0;
   header->flags = ++priv->control_reqid << BCMF_CONTROL_REQID_SHIFT;
   header->flags |= ifidx << BCMF_CONTROL_INTERFACE_SHIFT;
 
   if (set)
-  {
-    header->flags |= BCMF_CONTROL_SET;
-  }
+    {
+      header->flags |= BCMF_CONTROL_SET;
+    }
 
   /* Send frame */
 

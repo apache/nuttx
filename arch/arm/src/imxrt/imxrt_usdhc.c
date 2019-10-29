@@ -1425,9 +1425,9 @@ static sdio_capset_t imxrt_capabilities(FAR struct sdio_dev_s *dev)
     }
 
 #ifdef CONFIG_IMXRT_USDHC_DMA
-        caps |= SDIO_CAPS_DMASUPPORTED;
+  caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
-      caps |= SDIO_CAPS_DMABEFOREWRITE;
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 
   return caps;
 }
@@ -2017,7 +2017,8 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & USDHC_RESPERR_INTS) != 0)
     {
-      modifyreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET, 0, USDHC_SYSCTL_RSTC);
+      modifyreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET, 0,
+                  USDHC_SYSCTL_RSTC);
       while ((getreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET) &
              USDHC_SYSCTL_RSTC) != 0)
         {
