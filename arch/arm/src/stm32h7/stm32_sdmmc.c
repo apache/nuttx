@@ -725,14 +725,16 @@ static inline void stm32_setclkcr(struct stm32_dev_s *priv, uint32_t clkcr)
   regval &= ~(STM32_SDMMC_CLKCR_CLKDIV_MASK | STM32_SDMMC_CLKCR_PWRSAV      |
               STM32_SDMMC_CLKCR_WIDBUS_MASK | STM32_SDMMC_CLKCR_NEGEDGE     |
               STM32_SDMMC_CLKCR_HWFC_EN     | STM32_SDMMC_CLKCR_DDR         |
-              STM32_SDMMC_CLKCR_BUS_SPEED   | STM32_SDMMC_CLKCR_SELCLKRX_MASK);
+              STM32_SDMMC_CLKCR_BUS_SPEED   |
+              STM32_SDMMC_CLKCR_SELCLKRX_MASK);
 
   /* Replace with user provided settings */
 
   clkcr  &=  (STM32_SDMMC_CLKCR_CLKDIV_MASK | STM32_SDMMC_CLKCR_PWRSAV      |
               STM32_SDMMC_CLKCR_WIDBUS_MASK | STM32_SDMMC_CLKCR_NEGEDGE     |
               STM32_SDMMC_CLKCR_HWFC_EN     | STM32_SDMMC_CLKCR_DDR         |
-              STM32_SDMMC_CLKCR_BUS_SPEED   | STM32_SDMMC_CLKCR_SELCLKRX_MASK);
+              STM32_SDMMC_CLKCR_BUS_SPEED   |
+              STM32_SDMMC_CLKCR_SELCLKRX_MASK);
 
   regval |=  clkcr | STM32_SDMMC_CLKCR_HWFC_EN;
 
@@ -1545,11 +1547,13 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
               if (priv->remaining == 0)
                 {
                   sdmmc_putreg32(priv, ~STM32_SDMMC_MASK_TXFIFOHEIE &
-                                 sdmmc_getreg32(priv, STM32_SDMMC_MASK_OFFSET),
+                                 sdmmc_getreg32(priv,
+                                                STM32_SDMMC_MASK_OFFSET),
                                  STM32_SDMMC_MASK_OFFSET);
                 }
             }
 #endif
+
           /* Handle data end events */
 
           if ((pending & STM32_SDMMC_STA_DATAEND) != 0)
@@ -1668,6 +1672,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                 }
             }
         }
+
 #if defined(HAVE_SDMMC_SDIO_MODE)
       if (priv->sdiomode == true)
         {
@@ -1696,6 +1701,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
         }
 #endif
     }
+
   return OK;
 }
 
@@ -1762,6 +1768,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
       restval    = RCC_AHB3RSTR_SDMMC1RST;
     }
 #endif
+
 #if defined CONFIG_STM32H7_SDMMC2
   if (priv->base == STM32_SDMMC2_BASE)
     {
@@ -2102,8 +2109,8 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
  *
  ****************************************************************************/
 
-static void stm32_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocksize,
-                             unsigned int nblocks)
+static void stm32_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocksize, unsigned int nblocks)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
@@ -2160,7 +2167,8 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) <<
+             STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
                    nbytes, dblksize | STM32_SDMMC_DCTRL_DTDIR);
 
@@ -2235,7 +2243,8 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
 
   /* Then set up the SDIO data path */
 
-  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) <<
+             STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
                    nbytes, dblksize);
 
@@ -2688,7 +2697,21 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
    */
 
   flags = enter_critical_section();
+
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  /* A card ejected while in SDIOWAIT_WRCOMPLETE can lead to a
+   * condition where there is no waitevents set and no wkupevent
+   */
+
+  if (priv->waitevents == 0 && priv->wkupevent == 0)
+    {
+      wkupevent = SDIOWAIT_ERROR;
+      goto erroutdisable;
+    }
+
+#else
   DEBUGASSERT(priv->waitevents != 0 || priv->wkupevent != 0);
+#endif
 
   /* Check if the timeout event is specified in the event set */
 
@@ -2742,16 +2765,17 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 
   for (; ; )
     {
-      /* Wait for an event in event set to occur.  If this the event has already
-       * occurred, then the semaphore will already have been incremented and
-       * there will be no wait.
+      /* Wait for an event in event set to occur.  If this the event has
+       * already occurred, then the semaphore will already have been
+       * incremented and there will be no wait.
        */
 
       stm32_takesem(priv);
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
-       * evenset will be set to 0 and wkupevent will be set to a nonzero value.
+       * evenset will be set to 0 and wkupevent will be set to a nonzero
+       * value.
        */
 
       if (wkupevent != 0)
@@ -2763,6 +2787,10 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
     }
 
   /* Disable event-related interrupts */
+
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+erroutdisable:
+#endif
 
   stm32_configwaitints(priv, 0, 0, 0);
 
@@ -2882,7 +2910,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
       (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
       ((uintptr_t)(buffer + buflen) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0))
     {
-      dmainfo("stm32_dmapreflight: dcache unaligned buffer:0x%08x end:0x%08x\n",
+      dmainfo("stm32_dmapreflight: dcache unaligned "
+              "buffer:0x%08x end:0x%08x\n",
               buffer, buffer + buflen - 1);
       return -EFAULT;
     }
@@ -2955,7 +2984,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) <<
+             STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
                    buflen, dblksize | STM32_SDMMC_DCTRL_DTDIR);
 
@@ -3058,7 +3088,8 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  dblksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
+  dblksize = stm32_log2(priv->blocksize) <<
+             STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
   stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
                    buflen, dblksize);
 
