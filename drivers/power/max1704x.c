@@ -69,7 +69,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /*   CONFIG_I2C_MAX17040 or CONFIG_I2C_MAX17041 - The driver must know which
  *     chip is on the board in order to scale the voltage correctly.
  */
@@ -80,6 +82,7 @@
 #endif
 
 /* MAX1704x Register Definitions ********************************************/
+
 /* "All host interaction with the MAX17040/MAX17041 is handled by writing to
  *  and reading from register locations. The MAX17040/MAX17041 have six 16-bit
  *  registers: SOC, VCELL, MODE, VERSION, RCOMP, and COMMAND. Register reads
@@ -190,6 +193,7 @@ struct max1704x_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C support */
 
 static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
@@ -328,8 +332,9 @@ static inline int max1704x_getvcell(FAR struct max1704x_dev_s *priv,
   ret = max1704x_getreg16(priv, MAX1407X_VCELL_ADDR, &regval);
   if (ret == OK)
     {
-     *vcell = MAX1407X_VCELL(regval);
+      *vcell = MAX1407X_VCELL(regval);
     }
+
   return ret;
 }
 
@@ -350,8 +355,9 @@ static inline int max1704x_getsoc(FAR struct max1704x_dev_s *priv,
   ret = max1704x_getreg16(priv, MAX1407X_VCELL_ADDR, &regval);
   if (ret == OK)
     {
-     *soc = MAX1407X_SOC(regval);
+      *soc = MAX1407X_SOC(regval);
     }
+
   return ret;
 }
 
@@ -560,6 +566,7 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
         }
 #endif
     }
+
   return (FAR struct battery_gauge_dev_s *)priv;
 }
 

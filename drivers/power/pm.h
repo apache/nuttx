@@ -55,6 +55,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Convert the time slice interval into system clock ticks.
@@ -126,7 +127,7 @@ struct pm_domain_s
    * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
    */
 
-  int16_t memory[CONFIG_PM_MEMORY-1];
+  int16_t memory[CONFIG_PM_MEMORY - 1];
 #endif
 
   /* stime - The time (in ticks) at the start of the current time slice */

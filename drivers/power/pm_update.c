@@ -58,7 +58,7 @@
  */
 
 #if CONFIG_PM_MEMORY > 1
-static const int16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
+static const int16_t g_pmcoeffs[CONFIG_PM_MEMORY - 1] =
 {
   CONFIG_PM_COEF1
 #if CONFIG_PM_MEMORY > 2
@@ -159,7 +159,7 @@ void pm_update(int domain, int16_t accum)
    * CONFIG_PM_MEMORY-1 samples.
    */
 
-  if (pdom->mcnt < CONFIG_PM_MEMORY-1)
+  if (pdom->mcnt < CONFIG_PM_MEMORY - 1)
     {
       index               = pdom->mcnt++;
       pdom->memory[index] = accum;
@@ -185,10 +185,10 @@ void pm_update(int domain, int16_t accum)
    */
 
   for (i = 0, j = pdom->mndx;
-       i < CONFIG_PM_MEMORY-1;
+       i < CONFIG_PM_MEMORY - 1;
        i++, j++)
     {
-      if (j >= CONFIG_PM_MEMORY-1)
+      if (j >= CONFIG_PM_MEMORY - 1)
         {
           j = 0;
         }
@@ -203,7 +203,7 @@ void pm_update(int domain, int16_t accum)
 
   index = pdom->mndx++;
   pdom->memory[index] = Y;
-  if (pdom->mndx >= CONFIG_PM_MEMORY-1)
+  if (pdom->mndx >= CONFIG_PM_MEMORY - 1)
     {
       pdom->mndx = 0;
     }

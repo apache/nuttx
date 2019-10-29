@@ -205,7 +205,7 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
 {
   FAR dq_entry_t *entry;
 
-if (newstate <= g_pmglobals.domain[domain].state)
+  if (newstate <= g_pmglobals.domain[domain].state)
     {
       /* Visit each registered callback structure in normal order. */
 
@@ -226,7 +226,7 @@ if (newstate <= g_pmglobals.domain[domain].state)
     {
       /* Visit each registered callback structure in reverse order. */
 
-    for (entry = dq_tail(&g_pmglobals.registry); entry; entry = dq_prev(entry))
+      for (entry = dq_tail(&g_pmglobals.registry); entry; entry = dq_prev(entry))
         {
           /* Is the notification callback supported? */
 
@@ -278,9 +278,9 @@ int pm_changestate(int domain, enum pm_state_e newstate)
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(domain >=0 && domain < CONFIG_PM_NDOMAINS);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  /* Disable interrupts throught this operation... changing driver states
+  /* Disable interrupts throughout this operation... changing driver states
    * could cause additional driver activity that might interfere with the
    * state change.  When the state change is complete, interrupts will be
    * re-enabled.

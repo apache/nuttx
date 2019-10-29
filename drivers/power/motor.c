@@ -207,14 +207,15 @@ static ssize_t motor_read(FAR struct file *filep, FAR char *buffer, size_t bufle
  * Name: motor_write
  ****************************************************************************/
 
-static ssize_t motor_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t motor_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen)
 {
   return 1;
 }
 
 /****************************************************************************
  * Name: motor_ioctl
-****************************************************************************/
+ ****************************************************************************/
 
 static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -359,7 +360,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_GET_FAULT:
         {
-          uint8_t *fault = ((uint8_t*)arg);
+          FAR uint8_t *fault = ((FAR uint8_t *)arg);
 
           ret = dev->ops->fault_get(dev, fault);
           if (ret != OK)

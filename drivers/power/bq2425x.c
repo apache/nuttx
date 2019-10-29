@@ -112,30 +112,42 @@ struct bq2425x_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C support */
 
 static int bq2425x_getreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
-                             FAR uint8_t *regval);
+                           FAR uint8_t *regval);
 static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
-                             uint8_t regval);
+                           uint8_t regval);
 
 static inline int bq2425x_getreport(FAR struct bq2425x_dev_s *priv,
                                     uint8_t *report);
 static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv);
-static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable);
-static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int current);
-static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts);
-static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current);
+static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv,
+                                   bool enable);
+static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv,
+                                      int current);
+static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv,
+                                  int volts);
+static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv,
+                                  int current);
 
 /* Battery driver lower half methods */
 
-static int bq2425x_state(struct battery_charger_dev_s *dev, int *status);
-static int bq2425x_health(struct battery_charger_dev_s *dev, int *health);
-static int bq2425x_online(struct battery_charger_dev_s *dev, bool *status);
-static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value);
-static int bq2425x_current(struct battery_charger_dev_s *dev, int value);
-static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value);
-static int bq2425x_operate(struct battery_charger_dev_s *dev, uintptr_t param);
+static int bq2425x_state(FAR struct battery_charger_dev_s *dev,
+                         FAR int *status);
+static int bq2425x_health(FAR struct battery_charger_dev_s *dev,
+                          FAR int *health);
+static int bq2425x_online(FAR struct battery_charger_dev_s *dev,
+                          FAR bool *status);
+static int bq2425x_voltage(FAR struct battery_charger_dev_s *dev,
+                           int value);
+static int bq2425x_current(FAR struct battery_charger_dev_s *dev,
+                           int value);
+static int bq2425x_input_current(FAR struct battery_charger_dev_s *dev,
+                                 int value);
+static int bq2425x_operate(FAR struct battery_charger_dev_s *dev,
+                           uintptr_t param);
 
 /****************************************************************************
  * Private Data
@@ -247,7 +259,7 @@ static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 static inline int bq2425x_getreport(FAR struct bq2425x_dev_s *priv,
-                                    uint8_t *report)
+                                    FAR uint8_t *report)
 {
   uint8_t regval = 0;
   int ret;
@@ -318,7 +330,8 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
  *
  ****************************************************************************/
 
-static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
+static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv,
+                                   bool enable)
 {
   int ret;
   uint8_t regval;
@@ -357,7 +370,8 @@ static inline int bq2425x_watchdog(FAR struct bq2425x_dev_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int bq2425x_state(struct battery_charger_dev_s *dev, int *status)
+static int bq2425x_state(FAR struct battery_charger_dev_s *dev,
+                         FAR int *status)
 {
   FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
   uint8_t regval = 0;
@@ -414,7 +428,8 @@ static int bq2425x_state(struct battery_charger_dev_s *dev, int *status)
  *
  ****************************************************************************/
 
-static int bq2425x_health(struct battery_charger_dev_s *dev, int *health)
+static int bq2425x_health(FAR struct battery_charger_dev_s *dev,
+                          FAR int *health)
 {
   FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
   uint8_t regval = 0;
@@ -476,7 +491,8 @@ static int bq2425x_health(struct battery_charger_dev_s *dev, int *health)
  *
  ****************************************************************************/
 
-static int bq2425x_online(struct battery_charger_dev_s *dev, bool *status)
+static int bq2425x_online(FAR struct battery_charger_dev_s *dev,
+                          FAR bool *status)
 {
   /* There is no concept of online/offline in this driver */
 
@@ -492,10 +508,12 @@ static int bq2425x_online(struct battery_charger_dev_s *dev, bool *status)
  *
  ****************************************************************************/
 
-static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int current)
+static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv,
+                                      int current)
 {
   uint8_t regval;
-  int ret, idx;
+  int idx;
+  int ret;
 
   switch (current)
   {
@@ -572,7 +590,8 @@ static inline int bq2425x_powersupply(FAR struct bq2425x_dev_s *priv, int curren
 static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
 {
   uint8_t regval;
-  int ret, idx;
+  int idx;
+  int ret;
 
   /* Verify if voltage is in the acceptable range */
 
@@ -620,7 +639,8 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
 static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
 {
   uint8_t regval;
-  int ret, idx;
+  int idx;
+  int ret;
 
   /* Verify if voltage is in the acceptable range */
 
@@ -657,7 +677,6 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
   return OK;
 }
 
-
 /****************************************************************************
  * Name: bq2425x_voltage
  *
@@ -666,7 +685,7 @@ static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
  *
  ****************************************************************************/
 
-static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value)
+static int bq2425x_voltage(FAR struct battery_charger_dev_s *dev, int value)
 {
   FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
   int ret;
@@ -691,7 +710,7 @@ static int bq2425x_voltage(struct battery_charger_dev_s *dev, int value)
  *
  ****************************************************************************/
 
-static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
+static int bq2425x_current(FAR struct battery_charger_dev_s *dev, int value)
 {
   FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
   int ret;
@@ -716,7 +735,8 @@ static int bq2425x_current(struct battery_charger_dev_s *dev, int value)
  *
  ****************************************************************************/
 
-static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value)
+static int bq2425x_input_current(FAR struct battery_charger_dev_s *dev,
+                                 int value)
 {
   FAR struct bq2425x_dev_s *priv = (FAR struct bq2425x_dev_s *)dev;
   int ret;
@@ -739,7 +759,8 @@ static int bq2425x_input_current(struct battery_charger_dev_s *dev, int value)
  *
  ****************************************************************************/
 
-static int bq2425x_operate(struct battery_charger_dev_s *dev, uintptr_t param)
+static int bq2425x_operate(FAR struct battery_charger_dev_s *dev,
+                           uintptr_t param)
 {
   return -ENOSYS;
 }

@@ -135,6 +135,7 @@ struct bq2429x_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C support */
 
 static int bq2429x_getreg8(FAR struct bq2429x_dev_s *priv, uint8_t regaddr,
@@ -840,7 +841,8 @@ static int bq2429x_online(FAR struct battery_charger_dev_s *dev,
 
 static int bq2429x_powersupply(FAR struct bq2429x_dev_s *priv, int current)
 {
-  uint8_t regval, idx;
+  uint8_t regval;
+  uint8_t idx;
   int ret;
 
   switch (current)
@@ -918,7 +920,8 @@ static int bq2429x_powersupply(FAR struct bq2429x_dev_s *priv, int current)
 static inline int bq2429x_setvolt(FAR struct bq2429x_dev_s *priv, int req_volts)
 {
   uint8_t regval;
-  int ret, idx;
+  int idx;
+  int ret;
 
   /* Verify if voltage is in the acceptable range */
 
@@ -967,8 +970,9 @@ static inline int bq2429x_setcurr(FAR struct bq2429x_dev_s *priv,
                                   int req_current)
 {
   uint8_t regval;
-  int ret, idx;
   bool force_20pct = false;
+  int idx;
+  int ret;
 
   /* If requested current is below the minimum for fast charge,
    * configure for trickle charging. Trickle charging uses 20%
@@ -1164,8 +1168,9 @@ static int bq2429x_operate(FAR struct battery_charger_dev_s *dev,
                            uintptr_t param)
 {
   FAR struct bq2429x_dev_s *priv = (FAR struct bq2429x_dev_s *)dev;
-  struct batio_operate_msg_s *msg = (struct batio_operate_msg_s *)param;
-  int op, value;
+  FAR struct batio_operate_msg_s *msg = (FAR struct batio_operate_msg_s *)param;
+  int op;
+  int value;
   int ret = OK;
 
   bq2429x_dump_regs(priv);

@@ -208,14 +208,15 @@ static ssize_t smps_read(FAR struct file *filep, FAR char *buffer, size_t buflen
  * Name: smps_write
  ****************************************************************************/
 
-static ssize_t smps_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t smps_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
 {
   return 1;
 }
 
 /****************************************************************************
  * Name: smps_ioctl
-****************************************************************************/
+ ****************************************************************************/
 
 static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -236,7 +237,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if ((smps->limits.lock == false) ||
               (smps->limits.v_in <= 0 && smps->limits.v_out <= 0 &&
                smps->limits.i_in <= 0 && smps->limits.i_out <= 0 &&
-               smps->limits.p_in <= 0 && smps->limits.p_out <= 0 ))
+               smps->limits.p_in <= 0 && smps->limits.p_out <= 0))
             {
               pwrerr("ERROR: SMPS limits data must be set"
                      " and locked before SMPS start\n");
@@ -369,7 +370,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_GET_FAULT:
         {
-          uint8_t *fault = ((uint8_t*)arg);
+          FAR uint8_t *fault = ((FAR uint8_t *)arg);
 
           ret = dev->ops->fault_get(dev, fault);
           if (ret != OK)
@@ -407,7 +408,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if ((smps->limits.lock == false) ||
               (smps->limits.v_in <= 0 && smps->limits.v_out <= 0 &&
                smps->limits.i_in <= 0 && smps->limits.i_out <= 0 &&
-               smps->limits.p_in <= 0 && smps->limits.p_out <= 0 ))
+               smps->limits.p_in <= 0 && smps->limits.p_out <= 0))
             {
               pwrerr("ERROR: limits must be set prior to params!\n");
 

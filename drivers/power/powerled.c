@@ -193,7 +193,7 @@ static int powerled_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: powerled_ioctl
-****************************************************************************/
+ ****************************************************************************/
 
 static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -206,7 +206,6 @@ static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case PWRIOC_START:
         {
-
           /* Allow powerled start only when limits set and structure is locked */
 
           if (powerled->limits.lock == false ||
@@ -312,7 +311,7 @@ static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWRIOC_GET_FAULT:
         {
-          uint8_t *fault = ((uint8_t*)arg);
+          FAR uint8_t *fault = ((FAR uint8_t *)arg);
 
           ret = dev->ops->fault_get(dev, fault);
           if (ret != OK)
@@ -385,7 +384,8 @@ errout:
  * Name: powerled_register
  ****************************************************************************/
 
-int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev, FAR void *lower)
+int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev,
+                      FAR void *lower)
 {
   int ret;
 
