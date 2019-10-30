@@ -396,6 +396,9 @@ config ETH0_PHY_KSZ90x1
 config ETH0_PHY_DP83848C
 	bool "National Semiconductor DP83848C PHY"
 
+config ETH0_PHY_TJA1100
+	bool "NXP TJA1100 PHY"
+
 config ETH0_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
 
@@ -444,6 +447,9 @@ config ETH1_PHY_KSZ90x1
 config ETH1_PHY_DP83848C
 	bool "National Semiconductor DP83848C PHY"
 
+config ETH1_PHY_TJA1100
+	bool "NXP TJA1100 PHY"
+
 config ETH1_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
 
@@ -451,6 +457,25 @@ config ETH1_PHY_DM9161
 	bool "Davicom DM9161 PHY"
 
 endchoice
+
+if (ETH0_PHY_TJA1100 || ETH1_PHY_TJA1100)
+
+choice
+	prompt "Automotive Ethernet 100BASE-T1 master/slave mode"
+	default PHY_100BASE_T1_SLAVE
+    ---help---
+		Automotive Ethernet 100BASE-T1 requires the PHY to be configured
+		in either master or slave mode.
+
+config PHY_100BASE_T1_MASTER
+	bool "Master"
+
+config PHY_100BASE_T1_SLAVE
+	bool "Slave"
+
+endchoice # 100BASE-T1 master/slave mode
+
+endif
 
 config NETDEV_PHY_DEBUG
 	bool "PHY debug"
