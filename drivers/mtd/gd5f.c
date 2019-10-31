@@ -165,11 +165,11 @@ struct gd5f_dev_s
 {
   struct mtd_dev_s     mtd;             /* MTD interface */
   FAR struct spi_dev_s *dev;            /* Saved SPI interface instance */
-  uint8_t              sectorshift;     /* 17 */
+  uint32_t             spi_devid;       /* Chip select inputs */
   uint16_t             nsectors;        /* 1024 or 2048 */
+  uint8_t              sectorshift;     /* 17 */
   uint8_t              pageshift;       /* 11 */
   uint8_t              eccstatus;       /* Internal ECC status */
-  uint32_t             spi_devid;       /* Chip select inputs */
 };
 
 /************************************************************************************

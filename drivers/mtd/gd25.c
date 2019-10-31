@@ -153,9 +153,9 @@ struct gd25_dev_s
 {
   struct mtd_dev_s      mtd;         /* MTD interface */
   FAR struct spi_dev_s *spi;         /* Saved SPI interface instance */
+  uint32_t              spi_devid;   /* Chip select inputs */
   uint16_t              nsectors;    /* Number of erase sectors */
   uint8_t               prev_instr;  /* Previous instruction given to GD25 device */
-  uint32_t              spi_devid;   /* Chip select inputs */
   bool                  addr_4byte;  /* True: Use Four-byte address */
 };
 
@@ -975,6 +975,7 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
 #endif
       priv->mtd.name   = "gd25";
       priv->spi        = spi;
+      priv->spi_devid  = spi_devid;
 
       /* Deselect the FLASH */
 
