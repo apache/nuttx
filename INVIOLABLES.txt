@@ -55,6 +55,9 @@ Clear, Consistent, Standardized Coding Style
   o Nothing can come into NuttX that does not follow the coding standard.
   o Expediency is not a justification for violating the coding standard.
 
+  The NuttX coding standard can be found here:
+  http://www.nuttx.org/doku.php?id=documentation:codingstandard
+
 Open and Unencumbered License
 -----------------------------
 
