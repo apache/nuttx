@@ -2750,14 +2750,14 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
  *   the correct number of blocks and capacity. Returns OK if ext CSD is read
  *       correctly or error in not.
  *
- *   Note: buffer[] alignment must correspond with MBURST size
+ *   Note:  For some MCU architectures, buffer[] must be aligned.
  *
  ****************************************************************************/
 
 static int mmcsd_mmcreadextCSD (FAR struct mmcsd_state_s *priv)
 {
+  uint8_t buffer[512] aligned_data(16);
   int ret;
-  uint8_t buffer[512] __attribute__ ((aligned(16)));
 
   DEBUGASSERT(priv != NULL);
 

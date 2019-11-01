@@ -1,7 +1,7 @@
 The Inviolable Principles of Nuttx
 ==================================
 
-These are properties of NuttX that can be certain of for all time 
+These are properties of NuttX that can be certain of for all time
 
 Definition
 ----------
@@ -74,7 +74,7 @@ All Users Matter
   o Inclusive rather than exclusive
   o Hobbyists are valued users of the OS including retro computing hobbyists
     * and DIY “Maker” hobbyists.
-  o Supported toolchains:  GCC, Clang, SDCC, ZiLOG ZDS-II (c89), IAR. 
+  o Supported toolchains:  GCC, Clang, SDCC, ZiLOG ZDS-II (c89), IAR.
     Others?
   o No changes to build system should limit use of NuttX by any user.
   o Simplifying things for one user does not justify excluding another user.
