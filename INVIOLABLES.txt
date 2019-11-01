@@ -1,7 +1,7 @@
 The Inviolable Principles of Nuttx
 ==================================
 
-These are properties of NuttX that can be certain of for all time
+These are properties of NuttX that we can be certain of for all time:
 
 Definition
 ----------
@@ -70,7 +70,7 @@ All Users Matter
 ----------------
 
   o All support must apply equally to all supported platforms.  At present
-    this includes Linux, Windows MSYS, Windows Cygwin, Windows Unbuntu,
+    this includes Linux, Windows MSYS, Windows Cygwin, Windows Ubuntu,
     Windows native, macOS, Solaris, and FreeBSD.  No tool/environment
     solutions will be considered that limit the usage of NuttX on any of
     the supported platforms.
