@@ -44,6 +44,10 @@
 
 #include <stddef.h>
 
+/* Non-standard support for cases where CHAR_BIT != 8 carried in strings.h
+ * only for convenience.  See include/nuttx/b2c.h.
+ */
+
 #include <nuttx/b2c.h>
 
 /****************************************************************************
