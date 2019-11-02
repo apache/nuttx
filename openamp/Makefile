@@ -1,8 +1,8 @@
 ############################################################################
-# drivers/serial/Make.defs
+# openamp/Makefile
 #
-#   Copyright (C) 2009, 2011, 2017 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2017 Pinecone Inc. All rights reserved.
+#   Author: Pinecone <pinecone@pinecone.net>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,41 +33,52 @@
 #
 ############################################################################
 
-# Include serial drivers
+-include $(TOPDIR)/Make.defs
 
-CSRCS += serial.c serial_io.c lowconsole.c
+ASRCS =
+CSRCS =
 
-ifeq ($(CONFIG_SERIAL_RXDMA),y)
-  CSRCS += serial_dma.c
-else ifeq ($(CONFIG_SERIAL_TXDMA),y)
-  CSRCS += serial_dma.c
-endif
+VPATH := $(SRCDIR)
+DEPPATH = --dep-path .
 
-ifeq ($(CONFIG_16550_UART),y)
-  CSRCS += uart_16550.c
-endif
+include libmetal/Make.defs
+include open-amp/Make.defs
 
-ifeq ($(CONFIG_RPMSG_UART),y)
-  CSRCS += uart_rpmsg.c
-endif
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-# termios support
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ifeq ($(CONFIG_SERIAL_TERMIOS),y)
-  CSRCS += tcdrain.c
-endif
+BIN = libopenamp$(LIBEXT)
 
-# Pseudo-terminal support
+all: $(BIN)
+.PHONY: context depend clean distclean dirlinks
 
-ifeq ($(CONFIG_PSEUDOTERM),y)
-  CSRCS += pty.c
-ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
-  CSRCS += ptmx.c
-endif
-endif
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
 
-# Include serial build support
+$(COBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
 
-DEPPATH += --dep-path serial
-VPATH += :serial
+$(BIN): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
+dirlinks::
+
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $^ >Make.dep
+	$(Q) touch $@
+
+depend: .depend
+
+clean:
+	$(foreach obj,$(OBJS),$(call DELFILE, $(obj)))
+	$(call DELFILE, $(BIN))
+	$(call CLEAN)
+
+distclean:: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep

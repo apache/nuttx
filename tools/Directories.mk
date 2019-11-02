@@ -166,4 +166,10 @@ else
 CLEANDIRS += crypto
 endif
 
+ifeq ($(CONFIG_OPENAMP),y)
+KERNDEPDIRS += openamp
+else
+CLEANDIRS += openamp
+endif
+
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)

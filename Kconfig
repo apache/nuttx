@@ -1799,6 +1799,11 @@ source libs/libxx/Kconfig
 source libs/libdsp/Kconfig
 endmenu
 
+menu "Open Asymmetric Multi Processing"
+source openamp/Kconfig
+endmenu
+
 menu "Application Configuration"
 source "$APPSDIR/Kconfig"
 endmenu
+

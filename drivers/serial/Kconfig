@@ -56,6 +56,21 @@ config MCU_SERIAL
 	bool
 	default n
 
+config RPMSG_UART
+	bool "UART rpmsg support"
+	default n
+	depends on OPENAMP
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	select SERIAL_REMOVABLE
+	select SERIAL_IFLOWCONTROL
+
+config RPMSG_SERIALINIT
+	bool "Add dummy up_serialinit for UART rpmsg"
+	default !16550_UART && !CMSDK_UART && !MCU_SERIAL
+	depends on RPMSG_UART
+
 #
 # Standard serial driver configuration
 #

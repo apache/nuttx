@@ -148,6 +148,12 @@ libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): context
 staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+openamp$(DELIM)libopenamp$(LIBEXT): context
+	$(Q) $(MAKE) -C openamp TOPDIR="$(TOPDIR)" libopenamp$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+staging$(DELIM)libopenamp$(LIBEXT): openamp$(DELIM)libopenamp$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 # Special case
 
 syscall$(DELIM)libstubs$(LIBEXT): context

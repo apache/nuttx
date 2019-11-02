@@ -388,6 +388,7 @@ endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip $(ARCH_SRC)\drivers
 	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C openamp dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
 
 # context

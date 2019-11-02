@@ -1,0 +1,14 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config OPENAMP
+	bool "Open Asymmetric Multi Processing support"
+	default n
+	---help---
+		Enable or disable Open Asymmetric Multi Processing features
+
+if OPENAMP
+
+endif # OPENAMP

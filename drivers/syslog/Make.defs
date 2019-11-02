@@ -84,6 +84,14 @@ ifeq ($(CONFIG_SYSLOG_CHARDEV),y)
 CSRCS += syslog_chardev.c
 endif
 
+ifeq ($(CONFIG_SYSLOG_RPMSG),y)
+  CSRCS += syslog_rpmsg.c
+endif
+
+ifeq ($(CONFIG_SYSLOG_RPMSG_SERVER),y)
+  CSRCS += syslog_rpmsg_server.c
+endif
+
 ifeq ($(CONFIG_CONSOLE_SYSLOG),y)
   CSRCS += syslog_console.c
 endif

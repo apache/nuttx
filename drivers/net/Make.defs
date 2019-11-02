@@ -43,6 +43,10 @@ ifeq ($(CONFIG_NETDEV_LOOPBACK),y)
   CSRCS += loopback.c
 endif
 
+ifeq ($(CONFIG_NET_RPMSG_DRV),y)
+  CSRCS += rpmsgdrv.c
+endif
+
 ifeq ($(CONFIG_NETDEV_TELNET),y)
   CSRCS += telnet.c
 endif

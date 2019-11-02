@@ -21,3 +21,19 @@ config FS_HOSTFS
 		be passed to the 'mount()' routine using the optional 'void *data'
 		parameter.
 
+config FS_HOSTFS_RPMSG
+	bool "Host File System Rpmsg"
+	default n
+	depends on FS_HOSTFS
+	depends on OPENAMP
+	---help---
+		Use Host file system to mount directories through rpmsg.
+		This is the driver that sending the message.
+
+config FS_HOSTFS_RPMSG_SERVER
+	bool "Host File System Rpmsg Server"
+	default n
+	depends on OPENAMP
+	---help---
+		Use Host file system to mount directories through rpmsg.
+		This is the driver that receiving the message.

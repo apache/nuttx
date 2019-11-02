@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if RPTUN
+
+config RPTUN_PRIORITY
+	int "rpturn thread priority"
+	default 224
+
+config RPTUN_STACKSIZE
+	int "rptun stack size"
+	default 2048
+
+endif

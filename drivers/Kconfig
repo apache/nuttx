@@ -312,6 +312,17 @@ endif # PIPES
 
 source drivers/power/Kconfig
 
+menuconfig RPTUN
+	bool "Remote Proc Tunnel Driver Support"
+	default n
+	depends on OPENAMP
+	---help---
+		RPTUN driver is used for multi-cores' communication.
+
+if RPTUN
+source drivers/rptun/Kconfig
+endif # RPTUN
+
 menuconfig SENSORS
 	bool "Sensor Device Support"
 	default n

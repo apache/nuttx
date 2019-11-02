@@ -16,6 +16,29 @@ config NETDEV_LOOPBACK
 if NETDEV_LOOPBACK
 endif # NETDEV_LOOPBACK
 
+config NET_RPMSG_DRV
+	bool "RPMSG net driver"
+	depends on NET && OPENAMP
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		Use the rpmsg as net device, transfer packet between remoteproc.
+
+if NET_RPMSG_DRV
+
+config NET_RPMSG_PRIORITY
+	int "net prmsg priority"
+	default 100
+	---help---
+		The priority for net rmpsg task.
+
+config NET_RPMSG_STACKSIZE
+	int "net rpmsg stack size"
+	default 2048
+	---help---
+		The stack size allocated for the net rpmsg task.
+
+endif # NET_RPMSG_DRV
+
 config NETDEV_TELNET
 	bool "Telnet driver"
 	default n

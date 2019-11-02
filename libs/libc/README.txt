@@ -50,7 +50,7 @@ we have:
   semaphore - semaphore.h
   stdio     - stdio.h
   stdlib    - stdlib.h
-  string    - string.h (and legacy strings.h)
+  string    - string.h (and legacy strings.h and non-standard nuttx/b2c.h)
   time      - time.h
   uio       - sys/uio.h
   unistd    - unistd.h
