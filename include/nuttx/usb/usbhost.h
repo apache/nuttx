@@ -653,7 +653,7 @@ struct usbhost_registry_s
    * provide those instances in write-able memory (RAM).
    */
 
-  struct usbhost_registry_s *flink;
+  FAR struct usbhost_registry_s *flink;
 
   /* This is a callback into the class implementation.  It is used to (1) create
    * a new instance of the USB host class state and to (2) bind a USB host driver
@@ -662,8 +662,8 @@ struct usbhost_registry_s
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
 
-  FAR struct usbhost_class_s *(*create)(FAR struct usbhost_hubport_s *hub,
-                                        FAR const struct usbhost_id_s *id);
+  CODE FAR struct usbhost_class_s *(*create)(FAR struct usbhost_hubport_s *hub,
+                                             FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.
@@ -741,13 +741,13 @@ struct usbhost_class_s
    * initialize properly (such as endpoint selections).
    */
 
-  int (*connect)(FAR struct usbhost_class_s *devclass,
-                 FAR const uint8_t *configdesc,
-                 int desclen);
+  CODE int (*connect)(FAR struct usbhost_class_s *devclass,
+                      FAR const uint8_t *configdesc,
+                      int desclen);
 
   /* This method informs the class that the USB device has been disconnected. */
 
-  int (*disconnected)(FAR struct usbhost_class_s *devclass);
+  CODE int (*disconnected)(FAR struct usbhost_class_s *devclass);
 };
 
 /* This structure describes one endpoint.  It is used as an input to the
@@ -774,8 +774,8 @@ struct usbhost_connection_s
 {
   /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_connection_s *conn,
-              FAR struct usbhost_hubport_s **hport);
+  CODE int (*wait)(FAR struct usbhost_connection_s *conn,
+                   FAR struct usbhost_hubport_s **hport);
 
   /* Enumerate the device connected on a hub port.  As part of this
    * enumeration process, the driver will (1) get the device's configuration
@@ -787,8 +787,8 @@ struct usbhost_connection_s
    * in charge of the sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_connection_s *conn,
-                   FAR struct usbhost_hubport_s *hport);
+  CODE int (*enumerate)(FAR struct usbhost_connection_s *conn,
+                        FAR struct usbhost_hubport_s *hport);
 };
 
 /* Callback type used with asynchronous transfers.  The result of the
@@ -810,15 +810,17 @@ struct usbhost_driver_s
    * an external implementation of the enumeration logic.
    */
 
-  int (*ep0configure)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                      uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize);
+  CODE int (*ep0configure)(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep0, uint8_t funcaddr,
+                           uint8_t speed, uint16_t maxpacketsize);
 
   /* Allocate and configure an endpoint. */
 
-  int (*epalloc)(FAR struct usbhost_driver_s *drvr,
-                 FAR const struct usbhost_epdesc_s *epdesc,
-                 FAR usbhost_ep_t *ep);
-  int (*epfree)(FAR struct usbhost_driver_s *drvr, FAR usbhost_ep_t ep);
+  CODE int (*epalloc)(FAR struct usbhost_driver_s *drvr,
+                      FAR const struct usbhost_epdesc_s *epdesc,
+                      FAR usbhost_ep_t *ep);
+  CODE int (*epfree)(FAR struct usbhost_driver_s *drvr,
+                     FAR usbhost_ep_t ep);
 
   /* Some hardware supports special memory in which transfer descriptors can
    * be accessed more efficiently.  The following methods provide a mechanism
@@ -832,9 +834,9 @@ struct usbhost_driver_s
    * pre-allocated buffer is returned.
    */
 
-  int (*alloc)(FAR struct usbhost_driver_s *drvr,
-               FAR uint8_t **buffer, FAR size_t *maxlen);
-  int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+  CODE int (*alloc)(FAR struct usbhost_driver_s *drvr,
+                    FAR uint8_t **buffer, FAR size_t *maxlen);
+  CODE int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
   /*   Some hardware supports special memory in which larger IO buffers can
    *   be accessed more efficiently.  This method provides a mechanism to allocate
@@ -844,9 +846,10 @@ struct usbhost_driver_s
    *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
    */
 
-  int (*ioalloc)(FAR struct usbhost_driver_s *drvr,
-                 FAR uint8_t **buffer, size_t buflen);
-  int (*iofree)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+  CODE int (*ioalloc)(FAR struct usbhost_driver_s *drvr,
+                      FAR uint8_t **buffer, size_t buflen);
+  CODE int (*iofree)(FAR struct usbhost_driver_s *drvr,
+                     FAR uint8_t *buffer);
 
   /* Process a IN or OUT request on the control endpoint.  These methods
    * will enqueue the request and wait for it to complete.  Only one transfer may
@@ -857,10 +860,10 @@ struct usbhost_driver_s
    * control transfer has completed.
    */
 
-  int (*ctrlin)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+  CODE int (*ctrlin)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                 FAR const struct usb_ctrlreq_s *req,
                 FAR uint8_t *buffer);
-  int (*ctrlout)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+  CODE int (*ctrlout)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                  FAR const struct usb_ctrlreq_s *req,
                  FAR const uint8_t *buffer);
 
@@ -873,8 +876,9 @@ struct usbhost_driver_s
    * transfer has completed.
    */
 
-  ssize_t (*transfer)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                      FAR uint8_t *buffer, size_t buflen);
+  CODE ssize_t (*transfer)(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep, FAR uint8_t *buffer,
+                           size_t buflen);
 
   /* Process a request to handle a transfer asynchronously.  This method
    * will enqueue the transfer request and return immediately.  Only one
@@ -888,14 +892,14 @@ struct usbhost_driver_s
    */
 
 #ifdef CONFIG_USBHOST_ASYNCH
-  int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+  CODE int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                 FAR uint8_t *buffer, size_t buflen,
                 usbhost_asynch_t callback, FAR void *arg);
 #endif
 
   /* Cancel any pending syncrhonous or asynchronous transfer on an endpoint */
 
-  int (*cancel)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+  CODE int (*cancel)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 
 #ifdef CONFIG_USBHOST_HUB
   /* New connections may be detected by an attached hub.  This method is the
@@ -903,7 +907,7 @@ struct usbhost_driver_s
    * and port description to the system.
    */
 
-  int (*connect)(FAR struct usbhost_driver_s *drvr,
+  CODE int (*connect)(FAR struct usbhost_driver_s *drvr,
                  FAR struct usbhost_hubport_s *hport,
                  bool connected);
 #endif
@@ -914,7 +918,7 @@ struct usbhost_driver_s
    * (until a new instance is received from the create() method).
    */
 
-  void (*disconnect)(FAR struct usbhost_driver_s *drvr,
+  CODE void (*disconnect)(FAR struct usbhost_driver_s *drvr,
                      FAR struct usbhost_hubport_s *hport);
 };
 
@@ -955,7 +959,7 @@ extern "C"
  *
  ************************************************************************************/
 
-int usbhost_registerclass(struct usbhost_registry_s *devclass);
+int usbhost_registerclass(FAR struct usbhost_registry_s *devclass);
 
 /************************************************************************************
  * Name: usbhost_findclass
@@ -977,7 +981,8 @@ int usbhost_registerclass(struct usbhost_registry_s *devclass);
  *
  ************************************************************************************/
 
-const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
+const struct usbhost_registry_s *
+  usbhost_findclass(FAR const struct usbhost_id_s *id);
 
 #ifdef CONFIG_USBHOST_HUB
  /****************************************************************************

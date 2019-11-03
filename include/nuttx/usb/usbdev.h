@@ -256,8 +256,8 @@ struct usbdev_req_s
 
   /* Callback when the transfer completes */
 
-  void   (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
-  void    *priv;    /* Used only by callee */
+  CODE void (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
+  FAR void  *priv; /* Used only by callee */
 };
 
 /* Endpoint-specific interface to USB controller hardware. */
@@ -266,40 +266,43 @@ struct usbdev_epops_s
 {
   /* Configure/enable and disable endpoint */
 
-  int (*configure)(FAR struct usbdev_ep_s *ep, FAR const struct usb_epdesc_s *desc,
-                   bool last);
-  int (*disable)(FAR struct usbdev_ep_s *ep);
+  CODE int (*configure)(FAR struct usbdev_ep_s *ep,
+          FAR const struct usb_epdesc_s *desc, bool last);
+  CODE int (*disable)(FAR struct usbdev_ep_s *ep);
 
   /* Allocate and free I/O requests */
 
-  FAR struct usbdev_req_s *(*allocreq)(FAR struct usbdev_ep_s *ep);
-  void (*freereq)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
+  CODE FAR struct usbdev_req_s *(*allocreq)(FAR struct usbdev_ep_s *ep);
+  CODE void (*freereq)(FAR struct usbdev_ep_s *ep,
+          FAR struct usbdev_req_s *req);
 
   /* Allocate and free I/O buffers */
 
 #ifdef CONFIG_USBDEV_DMA
-  FAR void *(*allocbuffer)(FAR struct usbdev_ep_s *ep, uint16_t nbytes);
-  void (*freebuffer)(FAR struct usbdev_ep_s *ep, FAR void *buf);
+  CODE FAR void *(*allocbuffer)(FAR struct usbdev_ep_s *ep, uint16_t nbytes);
+  CODE void (*freebuffer)(FAR struct usbdev_ep_s *ep, FAR void *buf);
 #endif
 
   /* Submit and cancel I/O requests */
 
-  int (*submit)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
-  int (*cancel)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
+  CODE int (*submit)(FAR struct usbdev_ep_s *ep,i
+          FAR struct usbdev_req_s *req);
+  CODE int (*cancel)(FAR struct usbdev_ep_s *ep
+          FAR struct usbdev_req_s *req);
 
   /* Stall or resume an endpoint */
 
-  int (*stall)(FAR struct usbdev_ep_s *ep, bool resume);
+  CODE int (*stall)(FAR struct usbdev_ep_s *ep, bool resume);
 };
 
 /* Representation of one USB endpoint */
 
 struct usbdev_ep_s
 {
-  const struct usbdev_epops_s *ops; /* Endpoint operations */
-  uint8_t  eplog;                   /* Logical endpoint address */
-  uint16_t maxpacket;               /* Maximum packet size for this endpoint */
-  void    *priv;                    /* For use by class driver */
+  FAR const struct usbdev_epops_s *ops; /* Endpoint operations */
+  uint8_t  eplog;                       /* Logical endpoint address */
+  uint16_t maxpacket;                   /* Maximum packet size for this endpoint */
+  FAR void *priv;                       /* For use by class driver */
 };
 
 /* struct usbdev_s represents a usb device */
@@ -309,31 +312,32 @@ struct usbdev_ops_s
 {
   /* Allocate and free endpoints */
 
-  FAR struct usbdev_ep_s *(*allocep)(FAR struct usbdev_s *dev, uint8_t epphy,
-                                     bool in, uint8_t eptype);
-  void (*freeep)(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
+  CODE FAR struct usbdev_ep_s *(*allocep)(FAR struct usbdev_s *dev,
+          uint8_t epphy, bool in, uint8_t eptype);
+  CODE void (*freeep)(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
 
   /* Get the frame number from the last SOF */
 
-  int (*getframe)(FAR struct usbdev_s *dev);
+  CODE int (*getframe)(FAR struct usbdev_s *dev);
 
   /* Hardware specific features */
 
-  int (*wakeup)(FAR struct usbdev_s *dev);
-  int (*selfpowered)(FAR struct usbdev_s *dev, bool selfpowered);
-  int (*pullup)(FAR struct usbdev_s *dev,  bool enable);
+  CODE int (*wakeup)(FAR struct usbdev_s *dev);
+  CODE int (*selfpowered)(FAR struct usbdev_s *dev, bool selfpowered);
+  CODE int (*pullup)(FAR struct usbdev_s *dev,  bool enable);
 
   /* Device-specific I/O command support */
 
-  int (*ioctl)(FAR struct usbdev_s *dev, unsigned code, unsigned long param);
+ CODE int (*ioctl)(FAR struct usbdev_s *dev, unsigned code,
+          unsigned long param);
 };
 
 struct usbdev_s
 {
-  const struct usbdev_ops_s *ops; /* Access to hardware specific features */
-  struct usbdev_ep_s *ep0;        /* Endpoint zero */
-  uint8_t speed;                  /* Current speed of the host connection */
-  uint8_t dualspeed:1;            /* 1:supports high and full speed operation */
+  FAR const struct usbdev_ops_s *ops; /* Access to hardware specific features */
+  FAR struct usbdev_ep_s *ep0;        /* Endpoint zero */
+  uint8_t speed;                      /* Current speed of the host connection */
+  uint8_t dualspeed:1;                /* 1:supports high and full speed operation */
 };
 
 /* USB Device Class Implementations *************************************************/
@@ -341,19 +345,24 @@ struct usbdev_s
 struct usbdevclass_driver_s;
 struct usbdevclass_driverops_s
 {
-  int  (*bind)(FAR struct usbdevclass_driver_s *driver, FAR struct usbdev_s *dev);
-  void (*unbind)(FAR struct usbdevclass_driver_s *driver, FAR struct usbdev_s *dev);
-  int  (*setup)(FAR struct usbdevclass_driver_s *driver, FAR struct usbdev_s *dev,
-          FAR const struct usb_ctrlreq_s *ctrl, FAR uint8_t *dataout, size_t outlen);
-  void (*disconnect)(FAR struct usbdevclass_driver_s *driver,
+  CODE int  (*bind)(FAR struct usbdevclass_driver_s *driver,
           FAR struct usbdev_s *dev);
-  void (*suspend)(FAR struct usbdevclass_driver_s *driver, FAR struct usbdev_s *dev);
-  void (*resume)(FAR struct usbdevclass_driver_s *driver, FAR struct usbdev_s *dev);
+  CODE void (*unbind)(FAR struct usbdevclass_driver_s *driver,
+          FAR struct usbdev_s *dev);
+  CODE int  (*setup)(FAR struct usbdevclass_driver_s *driver,
+          FAR struct usbdev_s *dev, FAR const struct usb_ctrlreq_s *ctrl,
+          FAR uint8_t *dataout, size_t outlen);
+  CODE void (*disconnect)(FAR struct usbdevclass_driver_s *driver,
+          FAR struct usbdev_s *dev);
+  CODE void (*suspend)(FAR struct usbdevclass_driver_s *driver,
+          FAR struct usbdev_s *dev);
+  CODE void (*resume)(FAR struct usbdevclass_driver_s *driver,
+          FAR struct usbdev_s *dev);
 };
 
 struct usbdevclass_driver_s
 {
-  const struct usbdevclass_driverops_s *ops;
+  FAR const struct usbdevclass_driverops_s *ops;
   uint8_t speed;                  /* Highest speed that the driver handles */
 };
 
