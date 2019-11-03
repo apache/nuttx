@@ -554,7 +554,7 @@ FAR void *host_opendir(FAR const char *name)
   ret = hostfs_rpmsg_send_recv(HOSTFS_RPMSG_OPENDIR, false,
           (struct hostfs_rpmsg_header_s *)msg, len, NULL);
 
-  return ret < 0 ? NULL : (FAR void *)ret;
+  return ret < 0 ? NULL : (FAR void *)((uintptr_t)ret);
 }
 
 int host_readdir(FAR void *dirp, FAR struct dirent *entry)

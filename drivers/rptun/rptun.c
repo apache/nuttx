@@ -39,6 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
+#include <stdio.h>
+#include <fcntl.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
@@ -47,8 +51,9 @@
 #include <nuttx/signal.h>
 #include <metal/utilities.h>
 
-#include <stdio.h>
-#include <fcntl.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #ifndef MAX
 #  define MAX(a,b)              ((a) > (b) ? (a) : (b))
@@ -176,7 +181,7 @@ static int rptun_thread(int argc, FAR char *argv[])
   sigset_t set;
   int ret;
 
-  priv = (FAR struct rptun_priv_s *)atoi(argv[1]);
+  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[1], NULL, 0));
 
   sigemptyset(&set);
   sigaddset(&set, SIGUSR1);
@@ -785,7 +790,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
-  char str[16];
+  char arg1[16];
   char name[16];
   FAR char *argv[2];
   int ret;
@@ -802,10 +807,10 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       return -ENOMEM;
     }
 
-  sprintf(name, "rptun%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(name, 16, "rptun%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
 
-  itoa((int)priv, str, 10);
-  argv[0] = str;
+  argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create(name,
                        CONFIG_RPTUN_PRIORITY,
