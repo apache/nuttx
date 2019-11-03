@@ -229,23 +229,34 @@
 #define NLM_F_CAPPED         0x0100  /* request was capped */
 #define NLM_F_ACK_TLVS       0x0200  /* extended ACK TVLs were included */
 
+/* Definitions for struct nlmsghdr ******************************************/
+
+#define NLMSG_MASK        (sizeof(uint32_t) - 1)
+#define NLMSG_ALIGN(n)    (((n) + NLMSG_MASK) & ~NLMSG_MASK)
+#define NLMSG_HDRLEN      sizeof(struct nlmsghdr)
+#define NLMSG_LENGTH(n)   (NLMSG_HDRLEN + (n))
+#define NLMSG_DATA(hdr)   ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN)
+#define NLMSG_NEXT(hdr,n) \
+  ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
+   (FAR struct nlmsghdr*)(((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+
 /* Definitions for struct rtattr ********************************************/
 
 /* Macros to handle rtattributes */
 
-#define RTA_ALIGNTO          4
-#define RTA_ALIGN(len)       (((len)+RTA_ALIGNTO-1) & ~(RTA_ALIGNTO-1))
-#define RTA_OK(rta,len) \
-  ((len) >= (int)sizeof(struct rtattr) && \
+#define RTA_MASK          (sizeof(uint32_t) - 1)
+#define RTA_ALIGN(n)      (((n) + RTA_MASK) & ~RTA_MASK)
+#define RTA_OK(rta,n) \
+  ((n) >= (int)sizeof(struct rtattr) && \
    (rta)->rta_len >= sizeof(struct rtattr) && \
-   (rta)->rta_len <= (len))
+   (rta)->rta_len <= (n))
 #define RTA_NEXT(rta,attrlen) \
   ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
    (struct rtattr*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
-#define RTA_LENGTH(len)      (RTA_ALIGN(sizeof(struct rtattr)) + (len))
-#define RTA_SPACE(len)       RTA_ALIGN(RTA_LENGTH(len))
-#define RTA_DATA(rta)        ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
-#define RTA_PAYLOAD(rta)     ((int)((rta)->rta_len) - RTA_LENGTH(0))
+#define RTA_LENGTH(n)     (RTA_ALIGN(sizeof(struct rtattr)) + (n))
+#define RTA_SPACE(n)      RTA_ALIGN(RTA_LENGTH(n))
+#define RTA_DATA(rta)     ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
+#define RTA_PAYLOAD(rta)  ((int)((rta)->rta_len) - RTA_LENGTH(0))
 
 /* Definitions for struct ifaddrmsg  ****************************************/
 
@@ -256,17 +267,6 @@
 
 #define IFA_F_SECONDARY      0x01
 #define IFA_F_PERMANENT      0x02
-
-/* Common message helper macros ********************************************/
-
-#define NLMSG_MASK       (sizeof(uint32_t) - 1)
-#define NLMSG_ALIGN(n)   (((n) + NLMSG_MASK) & ~NLMSG_MASK)
-#define NLMSG_HDRLEN     sizeof(struct nlmsghdr)
-#define NLMSG_LENGTH(n)  (NLMSG_HDRLEN + (n))
-#define NLMSG_DATA(hdr)  ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN)
-#define NLMSG_NEXT(hdr,n) \
-  ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
-   (FAR struct nlmsghdr*)(((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
 
 /****************************************************************************
  * Public Type Definitions
