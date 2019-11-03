@@ -285,7 +285,7 @@ struct usbdev_epops_s
 
   /* Submit and cancel I/O requests */
 
-  CODE int (*submit)(FAR struct usbdev_ep_s *ep,i
+  CODE int (*submit)(FAR struct usbdev_ep_s *ep,
           FAR struct usbdev_req_s *req);
   CODE int (*cancel)(FAR struct usbdev_ep_s *ep
           FAR struct usbdev_req_s *req);
