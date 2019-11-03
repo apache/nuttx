@@ -1291,7 +1291,7 @@ nsh&gt; addroute 11.0.0.0/24 10.0.0.2
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-arp [-a &lt;ipaddr&gt; |-d &lt;ipaddr&gt; |-s &lt;ipaddr&gt; &lt;hwaddr&gt;]
+arp [-t|-a &lt;ipaddr&gt; |-d &lt;ipaddr&gt; |-s &lt;ipaddr&gt; &lt;hwaddr&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -1306,6 +1306,9 @@ arp [-a &lt;ipaddr&gt; |-d &lt;ipaddr&gt; |-s &lt;ipaddr&gt; &lt;hwaddr&gt;]
 
   <dt>-s &lt;ipaddr&gt; &lt;hwaddr&gt;
      <dd>Will set (or replace) the mapping of the IP address &lt;ipaddr&gt; to the hardware address &lt;hwaddr&gt;.
+
+  <dt>-t
+     <dd>Will dump the entire content of the ARP table.  This option is only available if <code>CONFIG_NETLINK_ROUTE</code> is enabled.
 </dl></ul>
 <p>
   <b>Example:</b>
