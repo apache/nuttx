@@ -208,7 +208,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
-  DEBUGASSERT(pstate != NULL && pstate->dev != NULL);
+  DEBUGASSERT(pstate != NULL && pstate->st_dev != NULL);
   if (pstate != NULL)
     {
       /* The TCP socket should be bound to a device.  Make sure that the

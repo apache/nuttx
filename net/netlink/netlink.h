@@ -46,6 +46,8 @@
 #include <queue.h>
 #include <semaphore.h>
 
+#include <netpacket/netlink.h>
+
 #include "devif/devif.h"
 #include "socket/socket.h"
 
@@ -58,6 +60,25 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* Netlink uses a two step, request-get, referenced by a user managed
+ * sequence number.  This means that the requested data must be buffered
+ * until it is gotten by the client.  This structure holds that buffered
+ * data.
+ *
+ * REVISIT:  There really should be a timestamp on this so that we can
+ * someday weed out un-claimed responses.
+ */
+
+struct netlink_response_s
+{
+  FAR struct netlink_response_s *flink;
+  FAR struct nlmsghdr msg;
+};
+
+#define SIZEOF_NETLINK_RESPONSE_S(n) (sizeof(struct netlink_response_s) + (n) - 1)
+
+/* This "connection" structure describes the underlying state of the socket. */
 
 struct netlink_conn_s
 {
@@ -74,7 +95,14 @@ struct netlink_conn_s
 
   /* Netlink-specific content follows */
 
+  uint32_t pid;                      /* Port ID (if bound) */
+  uint32_t groups;                   /* Multicast groups mask (if bound) */
   uint8_t crefs;                     /* Reference counts on this instance */
+  uint8_t protocol;                  /* See NETLINK_* definitions */
+
+  /* Buffered response data */
+
+  FAR struct netlink_response_s *resplist;
 };
 
 /****************************************************************************
@@ -94,6 +122,8 @@ EXTERN const struct sock_intf_s g_netlink_sockif;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+struct sockaddr_nl;  /* Forward reference */
 
 /****************************************************************************
  * Name: netlink_initialize()
@@ -148,12 +178,71 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
  *   Find a connection structure that is the appropriate connection for the
  *   provided netlink address
  *
+ ****************************************************************************/
+
+FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
+
+/****************************************************************************
+ * Name: netlink_add_response
+ *
+ * Description:
+ *   Add response data at the head of the pending response list.
+ *
  * Assumptions:
+ *   The caller has the network locked to prevent concurrent access to the
+ *   socket.
  *
  ****************************************************************************/
 
-struct sockaddr_nl;  /* Forward reference */
-FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
+void netlink_add_response(FAR struct socket *psock,
+                          FAR struct netlink_response_s *resp);
+
+/****************************************************************************
+ * Name: netlink_get_response
+ *
+ * Description:
+ *   Find the response matching the request.  Remove it from the list of
+ *   pending responses and return the response data.
+ *
+ * Assumptions:
+ *   The caller has the network locked to prevent concurrent access to the
+ *   socket.
+ *
+ ****************************************************************************/
+
+FAR struct netlink_response_s *
+  netlink_get_response(FAR struct socket *psock, FAR struct nlmsghdr *nlmsg);
+
+/****************************************************************************
+ * Name: netlink_route_sendto()
+ *
+ * Description:
+ *   Perform the sendto() operation for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+ssize_t netlink_route_sendto(FAR struct socket *psock,
+                             FAR const struct nlmsghdr *nlmsg,
+                             size_t len, int flags,
+                             FAR const struct sockaddr_nl *to,
+                             socklen_t tolen);
+#endif
+
+/****************************************************************************
+ * Name: netlink_route_recvfrom()
+ *
+ * Description:
+ *   Perform the recvfrom() operation for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+ssize_t netlink_route_recvfrom(FAR struct socket *psock,
+                               FAR struct nlmsghdr *nlmsg,
+                               size_t len, int flags,
+                               FAR struct sockaddr_nl *from);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

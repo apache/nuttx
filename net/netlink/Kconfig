@@ -17,10 +17,19 @@ config NET_NETLINK
 
 if NET_NETLINK
 
-config NET_NETLINK_CONNS
+config NETLINK_CONNS
 	int "Number of netlink connections"
 	default 4
 	---help---
 		Maximum number of netlink connections (all tasks).
 
+menu "Netlink Protocols"
+
+config NETLINK_ROUTE
+	bool "Netlink Route protocol"
+	default n
+	---help---
+		Support the NETLINK_ROUTE protocol option.
+
+endmenu # Netlink Protocols
 endif # NET_NETLINK

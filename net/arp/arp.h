@@ -417,6 +417,31 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr);
 void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
 
 /****************************************************************************
+ * Name: arp_snapshot
+ *
+ * Description:
+ *   Take a snapshot of the current state of the ARP table.
+ *
+ * Input Parameters:
+ *   snapshot  - Location to return the ARP table copy
+ *   nentries  - The size of the user provided 'dest' in entries, each of
+ *               size sizeof(struct arp_entry_s)
+ *
+ * Returned Value:
+ *   On success, the number of entries actually copied is returned.  Unused
+ *   entries are not returned.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
+                          unsigned int nentries);
+#endif
+
+/****************************************************************************
  * Name: arp_dump
  *
  * Description:

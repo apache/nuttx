@@ -48,6 +48,7 @@
  ****************************************************************************/
 
 /* Netlink socket protocols *************************************************/
+
 /* The AF_NETLINK family offers multiple protocol subsets. Each interfaces
  * to a different kernel component and has a different messaging subset. The
  * subset is referenced by the protocol field in the socket call:
@@ -55,25 +56,36 @@
  *   int socket(AF_NETLINK, SOCK_DGRAM or SOCK_RAW, protocol)
  *
  * Ref. Wikipedia.org
+ *
+ * Namespace is Linux compatible.
  */
 
-#define NETLINK_ROUTE        0       /* Routing/device hook for user-space
-                                      * routing daemons */
-#define NETLINK_FIREWALL     1       /* Interface to receive packets from
-                                      * the firewall */
-#define NETLINK_NFLOG        2       /* netfilter/iptables ULOG */
-#define NETLINK_ARPD         3       /* Interface to manage the ARP table */
-#define NETLINK_AUDIT        4       /* Interface to auditing sub-system */
-#define NETLINK_IP6_FW       5       /* Interface to transport packets from
-                                      * netfilter to user-space. */
-#define NETLINK_ROUTE6       6
-#define NETLINK_TAPBASE      7
-#define NETLINK_NETFILTER    8
-#define NETLINK_TCPDIAG      9
-#define NETLINK_XFRM         10      /*  Interface to IPsec security databases
-                                      * for key-manager daemons using the Internet
-                                      * Key Exchange protocol. */
-#define NETLINK_USERSOCK     11      /* Reserved for user mode socket protocols */
+#define NETLINK_ROUTE          0       /* Routing/device hook for user-space
+                                        * routing daemons (default) */
+#define NETLINK_USERSOCK       1       /* Reserved for user mode socket protocols */
+#define NETLINK_FIREWALL       2       /* Interface to receive packets from
+                                        * the firewall */
+#define NETLINK_SOCK_DIAG      3       /* Socket monitoring */
+#define NETLINK_NFLOG          4       /* netfilter/iptables ULOG */
+#define NETLINK_XFRM           5       /* Interface to IPsec security databases
+                                        * for key-manager daemons using the Internet
+                                        * Key Exchange protocol. */
+#define NETLINK_ISCSI          6       /* Open-iSCSI */
+#define NETLINK_AUDIT          7       /* Interface to auditing sub-system */
+#define NETLINK_FIB_LOOKUP     8
+#define NETLINK_CONNECTOR      9
+#define NETLINK_NETFILTER      10      /* netfilter subsystem */
+#define NETLINK_IP6_FW         11      /* Interface to transport packets from
+                                        * netfilter to user-space. */
+#define NETLINK_DNRTMSG        12      /* DECnet routing messages */
+#define NETLINK_KOBJECT_UEVENT 13      /* Kernel messages to userspace */
+#define NETLINK_GENERIC        14
+                                       /* NETLINK_DM (DM Events) */
+#define NETLINK_SCSITRANSPORT  16      /* SCSI Transports */
+#define NETLINK_ECRYPTFS       17
+#define NETLINK_RDMA           18
+#define NETLINK_CRYPTO         19      /* Crypto layer */
+#define NETLINK_SMC            20      /* SMC monitoring */
 
 /* NETLINK_ROUTE protocol message types *************************************/
 /* Link layer:
@@ -218,6 +230,7 @@
 #define NLM_F_ACK_TLVS       0x0200  /* extended ACK TVLs were included */
 
 /* Definitions for struct rtattr ********************************************/
+
 /* Macros to handle rtattributes */
 
 #define RTA_ALIGNTO          4
@@ -235,6 +248,7 @@
 #define RTA_PAYLOAD(rta)     ((int)((rta)->rta_len) - RTA_LENGTH(0))
 
 /* Definitions for struct ifaddrmsg  ****************************************/
+
 /* ifa_flags definitions:  ifa_flags is a flag word of IFA_F_SECONDARY for
  * secondary address (old alias interface), IFA_F_PERMANENT for a permanent
  * address set by the user and other undocumented flags.
@@ -242,6 +256,17 @@
 
 #define IFA_F_SECONDARY      0x01
 #define IFA_F_PERMANENT      0x02
+
+/* Common message helper macros ********************************************/
+
+#define NLMSG_MASK       (sizeof(uint32_t) - 1)
+#define NLMSG_ALIGN(n)   (((n) + NLMSG_MASK) & ~NLMSG_MASK)
+#define NLMSG_HDRLEN     sizeof(struct nlmsghdr)
+#define NLMSG_LENGTH(n)  (NLMSG_HDRLEN + (n))
+#define NLMSG_DATA(hdr)  ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN)
+#define NLMSG_NEXT(hdr,n) \
+  ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
+   (FAR struct nlmsghdr*)(((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
 
 /****************************************************************************
  * Public Type Definitions
@@ -314,6 +339,22 @@ struct ifaddrmsg
   uint8_t ifa_flags;     /* Address flags.  See IFA_F_* definitions */
   uint8_t ifa_scope;     /* Address scope */
   int16_t ifa_index;     /* Unique interface index */
+};
+
+/* RTM_NEWNEIGH, RTM_DELNEIGH, RTM_GETNEIGH
+ *   Add, remove or receive information about a neighbor table entry (e.g.,
+ *   an ARP entry).  The message contains an ndmsg structure.
+ */
+
+struct ndmsg
+{
+  uint8_t   ndm_family;
+  uint8_t   ndm_pad1;
+  uint16_t  ndm_pad2;
+  int32_t   ndm_ifindex;
+  uint16_t  ndm_state;
+  uint8_t   ndm_flags;
+  uint8_t   ndm_type;
 };
 
 /****************************************************************************

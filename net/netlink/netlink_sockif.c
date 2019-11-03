@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -120,8 +121,9 @@ const struct sock_intf_s g_netlink_sockif =
  *   specific socket fields.
  *
  * Input Parameters:
- *   psock    A pointer to a user allocated socket structure to be initialized.
- *   protocol (see sys/socket.h)
+ *   psock    - A pointer to a user allocated socket structure to be
+ *              initialized.
+ *   protocol - Netlink socket protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -133,19 +135,56 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
 {
   int domain = psock->s_domain;
   int type = psock->s_type;
-  int ret;
+
+  /* Verify that the protocol is supported */
+
+  DEBUGASSERT((unsigned int)protocol <= UINT8_MAX);
+
+  switch (protocol)
+    {
+#ifdef CONFIG_NETLINK_ROUTE
+      case NETLINK_ROUTE:
+        break;
+#endif
+
+      default:
+        return -EPROTONOSUPPORT;
+    }
+
+  /* Verify the socket type (domain should always be PF_NETLINK here) */
 
   if (domain == PF_NETLINK && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
-      ret = OK;
-    }
-  else
-    {
-      return -ENETDOWN;
+      /* Allocate the netlink socket connection structure and save it in the
+       * new socket instance.
+       */
+
+      FAR struct netlink_conn_s *conn = netlink_alloc();
+      if (conn == NULL)
+        {
+          /* Failed to reserve a connection structure */
+
+          return -ENOMEM;
+        }
+
+      /* Initialize the connection instance */
+
+      conn->protocol = (uint8_t)protocol;
+
+      /* Set the reference count on the connection structure.  This
+       * reference count will be incremented only if the socket is
+       * dup'ed
+       */
+
+      conn->crefs = 1;
+
+      /* Attach the connection instance to the socket */
+
+      psock->s_conn = conn;
+      return OK;
     }
 
-  psock->s_conn = NULL;
-  return ret;
+  return -EPROTONOSUPPORT;
 }
 
 /****************************************************************************
@@ -227,8 +266,22 @@ static void netlink_addref(FAR struct socket *psock)
 static int netlink_bind(FAR struct socket *psock,
                         FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-#warning Missing logic for NETLINK bind
-  return -EOPNOTSUPP;
+  FAR struct sockaddr_nl *nladdr;
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
+              addrlen >= sizeof(struct sockaddr_nl));
+
+  /* Save the address information in the connection structure */
+
+  nladdr          = (FAR struct sockaddr_nl *)addr;
+  conn            = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  conn->pid       = nladdr->nl_pid;
+  conn->groups    = nladdr->nl_groups;
+
+  psock->s_flags |= _SF_BOUND;
+  return OK;
 }
 
 /****************************************************************************
@@ -257,8 +310,29 @@ static int netlink_getsockname(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen)
 {
-#warning Missing logic for NETLINK getsockname
-  return -EOPNOTSUPP;
+  FAR struct sockaddr_nl *nladdr;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
+              addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
+
+  /* Return the address information in the address structure */
+
+  nladdr = (FAR struct sockaddr_nl *)addr;
+  memset(nladdr, 0, sizeof(struct sockaddr_nl));
+
+  nladdr->nl_family     = AF_NETLINK;
+
+  if (_SS_ISBOUND(psock->s_flags))
+    {
+      FAR struct netlink_conn_s *conn;
+
+      conn              = (FAR struct netlink_conn_s *)psock->s_conn;
+      nladdr->nl_pid    = conn->pid;
+      nladdr->nl_groups = conn->groups;
+    }
+
+  *addrlen = sizeof(struct sockaddr_nl);
+  return OK;
 }
 
 /****************************************************************************
@@ -449,12 +523,41 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-static ssize_t netlink_send(FAR struct socket *psock,
-                                   FAR const void *buf,
-                                   size_t len, int flags)
+static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
+                            size_t len, int flags)
 {
-#warning Missing logic for NETLINK send
-  return -EOPNOTSUPP;
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+
+  /* The socket must be connected in order to use send */
+
+  if (_SS_ISBOUND(psock->s_flags))
+    {
+      FAR struct netlink_conn_s *conn;
+      struct sockaddr_nl nladdr;
+
+      /* Get the underlying connection structure */
+
+      conn             = (FAR struct netlink_conn_s *)psock->s_conn;
+
+      /* Format the address */
+
+      nladdr.nl_family = AF_NETLINK;
+      nladdr.nl_pad    = 0;
+      nladdr.nl_pid    = conn->pid;
+      nladdr.nl_groups = conn->groups;
+
+      /* Then let sendto() perform the actual send operation */
+
+      return netlink_sendto(psock, buf, len, flags,
+                            (FAR const struct sockaddr *)&nladdr,
+                            sizeof(struct sockaddr_nl));
+    }
+
+  /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and no
+   * peer address is set.
+   */
+
+  return -EDESTADDRREQ;
 }
 
 /****************************************************************************
@@ -482,11 +585,40 @@ static ssize_t netlink_send(FAR struct socket *psock,
  ****************************************************************************/
 
 static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
-                             size_t len, int flags,
-                             FAR const struct sockaddr *to, socklen_t tolen)
+                              size_t len, int flags,
+                              FAR const struct sockaddr *to, socklen_t tolen)
 {
-#warning Missing logic for NETLINK sendto
-  return -EOPNOTSUPP;
+  FAR struct netlink_conn_s *conn;
+  FAR struct nlmsghdr *nlmsg;
+  int ret;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
+              to != NULL && tolen >= sizeof(struct nlmsghdr));
+
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Get a reference to the netlink message */
+
+  nlmsg = (FAR struct nlmsghdr *)buf;
+  DEBUGASSERT(nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
+              tolen >= nlmsg->nlmsg_len);
+
+  switch (conn->protocol)
+    {
+#ifdef CONFIG_NETLINK_ROUTE
+      case NETLINK_ROUTE:
+        ret = netlink_route_sendto(psock, nlmsg, len, flags,
+                                   (FAR struct sockaddr_nl *)to,
+                                   tolen);
+        break;
+#endif
+
+      default:
+       ret= -EOPNOTSUPP;
+       break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -516,8 +648,35 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
                                 FAR struct sockaddr *from,
                                 FAR socklen_t *fromlen)
 {
-#warning Missing logic for NETLINK recvfrom
-  return -EOPNOTSUPP;
+  FAR struct netlink_conn_s *conn;
+  FAR struct nlmsghdr *nlmsg;
+  int ret;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
+              from != NULL && *fromlen >= sizeof(struct nlmsghdr));
+
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Get a reference to the netlink message */
+
+  nlmsg = (FAR struct nlmsghdr *)buf;
+
+  switch (conn->protocol)
+    {
+#ifdef CONFIG_NETLINK_ROUTE
+      case NETLINK_ROUTE:
+        ret = netlink_route_recvfrom(psock, nlmsg, len, flags,
+                                     (FAR struct sockaddr_nl *)from);
+        *fromlen = sizeof(struct sockaddr_nl);
+        break;
+#endif
+
+      default:
+       ret= -EOPNOTSUPP;
+       break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -539,7 +698,7 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
 static int netlink_close(FAR struct socket *psock)
 {
   FAR struct netlink_conn_s *conn = psock->s_conn;
-  int ret;
+  int ret = OK;
 
   /* Perform some pre-close operations for the NETLINK socket type. */
 
@@ -573,7 +732,7 @@ static int netlink_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_NET_NETLINK */

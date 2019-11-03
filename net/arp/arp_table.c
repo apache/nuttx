@@ -393,6 +393,56 @@ void arp_delete(in_addr_t ipaddr)
     }
 }
 
+/****************************************************************************
+ * Name: arp_snapshot
+ *
+ * Description:
+ *   Take a snapshot of the current state of the ARP table.
+ *
+ * Input Parameters:
+ *   snapshot  - Location to return the ARP table copy
+ *   nentries  - The size of the user provided 'dest' in entries, each of
+ *               size sizeof(struct arp_entry_s)
+ *
+ * Returned Value:
+ *   On success, the number of entries actually copied is returned.  Unused
+ *   entries are not returned.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
+                          unsigned int nentries)
+{
+  FAR struct arp_entry_s *tabptr;
+  clock_t now;
+  unsigned int ncopied;
+  int i;
+
+  /* Copy all non-empty, non-expired entries in the ARP table. */
+
+  for (i = 0, now = clock_systimer(), ncopied = 0;
+       nentries > ncopied && i < CONFIG_NET_ARPTAB_SIZE;
+       i++)
+    {
+      tabptr = &g_arptable[i];
+      if (tabptr->at_ipaddr == 0 &&
+          now - tabptr->at_time <= ARP_MAXAGE_TICK)
+        {
+          memcpy(&snapshot[ncopied], tabptr, sizeof(struct arp_entry_s));
+          ncopied++;
+        }
+    }
+
+  /* Not found */
+
+  return ncopied;
+}
+#endif
+
 #endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */
 

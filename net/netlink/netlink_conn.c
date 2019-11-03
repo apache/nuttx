@@ -61,7 +61,7 @@
 
 /* The array containing all netlink connections. */
 
-static struct netlink_conn_s g_netlink_connections[CONFIG_NET_NETLINK_CONNS];
+static struct netlink_conn_s g_netlink_connections[CONFIG_NETLINK_CONNS];
 
 /* A list of all free netlink connections */
 
@@ -128,7 +128,7 @@ void netlink_initialize(void)
   dq_init(&g_active_netlink_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
-  for (i = 0; i < CONFIG_NET_NETLINK_CONNS; i++)
+  for (i = 0; i < CONFIG_NETLINK_CONNS; i++)
     {
       FAR struct netlink_conn_s *conn = &g_netlink_connections[i];
 
@@ -226,7 +226,7 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: netlink_active()
+ * Name: netlink_active
  *
  * Description:
  *   Find a connection structure that is the appropriate connection for the
@@ -240,6 +240,91 @@ FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr)
 {
   FAR struct netlink_conn_s *conn = NULL;
 #warning "Missing logic for NETLINK active"
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: netlink_add_response
+ *
+ * Description:
+ *   Add response data at the head of the pending response list.
+ *
+ * Assumptions:
+ *   The caller has the network locked to prevent concurrent access to the
+ *   socket.
+ *
+ ****************************************************************************/
+
+void netlink_add_response(FAR struct socket *psock,
+                          FAR struct netlink_response_s *resp)
+{
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && resp != NULL);
+
+  conn           = (FAR struct netlink_conn_s *)psock->s_conn;
+  resp->flink    = conn->resplist;
+  conn->resplist = resp;
+}
+
+/****************************************************************************
+ * Name: netlink_get_response
+ *
+ * Description:
+ *   Find the response matching the request.  Remove it from the list of
+ *   pending responses and return the response data.
+ *
+ * Assumptions:
+ *   The caller has the network locked to prevent concurrent access to the
+ *   socket.
+ *
+ ****************************************************************************/
+
+FAR struct netlink_response_s *
+  netlink_get_response(FAR struct socket *psock, FAR struct nlmsghdr *nlmsg)
+{
+  FAR struct netlink_conn_s *conn;
+  FAR struct netlink_response_s *curr;
+  FAR struct netlink_response_s *prev;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && nlmsg != NULL);
+
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Search the pending response data for this socket and find the entry
+   * with the matching sequence.  Here is is assumed that the sequence
+   * number is unique and, hence, it is not necessary to verify other
+   * information.
+   */
+
+  for (prev = NULL, curr = conn->resplist;
+       curr != NULL;
+       prev = curr, curr = curr->flink)
+    {
+      /* Check for a matching sequence number */
+
+      if (curr->msg.nlmsg_seq == nlmsg->nlmsg_seq)
+        {
+          /* We have a match */
+
+          DEBUGASSERT(curr->msg.nlmsg_type == nlmsg->nlmsg_type);
+
+          /* Remove the entry from the list and return it */
+
+          if (prev != NULL)
+            {
+              prev->flink = curr->flink;
+            }
+          else
+            {
+              conn->resplist = curr->flink;
+            }
+
+          curr->flink = NULL;
+          return curr;
+        }
+    }
+
   return NULL;
 }
 

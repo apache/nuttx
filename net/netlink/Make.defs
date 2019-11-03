@@ -37,7 +37,12 @@
 
 ifeq ($(CONFIG_NET_NETLINK),y)
 
-SOCK_CSRCS += netlink_sockif.c netlink_conn.c
+SOCK_CSRCS += netlink_sockif.c
+NET_CSRCS += netlink_conn.c
+
+ifeq ($(CONFIG_NETLINK_ROUTE),y)
+NET_CSRCS += netlink_route.c
+endif
 
 # Include netlink build support
 
