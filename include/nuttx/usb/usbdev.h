@@ -287,7 +287,7 @@ struct usbdev_epops_s
 
   CODE int (*submit)(FAR struct usbdev_ep_s *ep,
           FAR struct usbdev_req_s *req);
-  CODE int (*cancel)(FAR struct usbdev_ep_s *ep
+  CODE int (*cancel)(FAR struct usbdev_ep_s *ep,
           FAR struct usbdev_req_s *req);
 
   /* Stall or resume an endpoint */
