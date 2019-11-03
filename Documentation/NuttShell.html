@@ -418,103 +418,109 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdset">2.57 Set a Variable (set)</a>
+    <a href="#cmdrptun">2.57 Start/Stop the OpenAMP RPC Tunnel (rptun)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsh">2.58 Execute an NSH Script (sh)</a>
+    <a href="#cmdset">2.58 Set a Variable (set)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdshutdown">2.59 Shut the system down (shutdown)</a>
+    <a href="#cmdsh">2.59 Execute an NSH Script (sh)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdsleep">2.60 Wait for Seconds (sleep)</a>
+    <a href="#cmdshutdown">2.60 Shut the system down (shutdown)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtelnetd">2.61 Start the Telnet Daemon (telnetd)</a>
+    <a href="#cmdsleep">2.61 Wait for Seconds (sleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtime">2.62 Time execution of another command (time)</a>
+    <a href="#cmdtelnetd">2.62 Start the Telnet Daemon (telnetd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdtruncate">2.63 Set the Size of a File (truncate)</a>
+    <a href="#cmdtime">2.63 Time execution of another command (time)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunmount">2.64 Unmount a File System (umount)</a>
+    <a href="#cmdtruncate">2.64 Set the Size of a File (truncate)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduname">2.65 Print system information (uname)</a>
+    <a href="#cmdunmount">2.65 Unmount a File System (umount)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdunset">2.66 Unset an Environment Variable (unset)</a>
+    <a href="#cmduname">2.66 Print system information (uname)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurldec">2.67 URL Decode (urldecode)</a>
+    <a href="#cmdunset">2.67 Unset an Environment Variable (unset)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdurlencode">2.68 URL Encode (urlencode)</a>
+    <a href="#cmdurldec">2.68 URL Decode (urldecode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduseradd">2.69 Add a New User (useradd)</a>
+    <a href="#cmdurlencode">2.69 URL Encode (urlencode)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmduserdel">2.70 Delete a user (userdel)</a>
+    <a href="#cmduseradd">2.70 Add a New User (useradd)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdusleep">2.71 Wait for Microseconds (usleep)</a>
+    <a href="#cmduserdel">2.71 Delete a user (userdel)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdwget">2.72 Get File Via HTTP (wget)</a>
+    <a href="#cmdusleep">2.72 Wait for Microseconds (usleep)</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#cmdxd">2.73 Hexadecimal Dump of Memory (xd)</a>
+    <a href="#cmdwget">2.73 Get File Via HTTP (wget)</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#cmdxd">2.74 Hexadecimal Dump of Memory (xd)</a>
   </td>
 </tr>
 <tr>
@@ -628,7 +634,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  August 8, 2019</p>
+      <p>Last Updated:  November 3, 2019</p>
     </td>
   </tr>
 </table>
@@ -2971,9 +2977,27 @@ route ipv4|ipv6
 </p>
 
 <table width ="100%">
+<tr>
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdset"><h2>2.57 Set a Variable (set)</h2></a>
+    <a name="cmdrptun"><h2>2.57 Start/Stop the OpenAMP RPC Tunnel (rptun)</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p><b>Command Syntax:</b></p>
+<ul><pre>
+rptun start|stop &lt;dev-path&gt;
+</pre></ul>
+<p>
+  <b>Synopsis</b>.
+  Start or stop the OpenAMP RPC tunnel device at &lt;dev-path&gt;.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="cmdset"><h2>2.58 Set a Variable (set)</h2></a>
   </td>
   </tr>
 </table>
@@ -3062,7 +3086,7 @@ foovalue
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsh"><h2>2.58 Execute an NSH Script (sh)</h2></a>
+    <a name="cmdsh"><h2>2.59 Execute an NSH Script (sh)</h2></a>
   </td>
   </tr>
 </table>
@@ -3080,7 +3104,7 @@ sh &lt;script-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdshutdown"><h2>2.59 Shut the system down (shutdown)</h2></a>
+    <a name="cmdshutdown"><h2>2.60 Shut the system down (shutdown)</h2></a>
   </td>
   </tr>
 </table>
@@ -3101,7 +3125,7 @@ shutdown [--reboot]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdsleep"><h2>2.60 Wait for Seconds (sleep)</h2></a>
+    <a name="cmdsleep"><h2>2.61 Wait for Seconds (sleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -3118,7 +3142,7 @@ sleep &lt;sec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtelnetd"><h2>2.61 Time Start the Telnet Daemon (telnetd)</h2></a>
+    <a name="cmdtelnetd"><h2>2.62 Time Start the Telnet Daemon (telnetd)</h2></a>
   </td>
 </tr>
 </table>
@@ -3144,7 +3168,7 @@ telnetd
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtime"><h2>2.62 Time execution of another command (time)</h2></a>
+    <a name="cmdtime"><h2>2.63 Time execution of another command (time)</h2></a>
   </td>
 </tr>
 </table>
@@ -3202,7 +3226,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdtruncate"><h2>2.63 Set the Size of a File (truncate)</h2></a>
+    <a name="cmdtruncate"><h2>2.64 Set the Size of a File (truncate)</h2></a>
   </td>
 </tr>
 </table>
@@ -3230,7 +3254,7 @@ truncate -s &lt;length&gt; &lt;file-path&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunmount"><h2>2.64 Unmount a File System (umount)</h2></a>
+    <a name="cmdunmount"><h2>2.65 Unmount a File System (umount)</h2></a>
   </td>
 </tr>
 </table>
@@ -3260,7 +3284,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduname"><h2>2.65 Print system information (uname)</h2></a>
+    <a name="cmduname"><h2>2.66 Print system information (uname)</h2></a>
   </td>
   </tr>
 </table>
@@ -3327,7 +3351,7 @@ uname [-a | -imnoprsv]
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdunset"><h2>2.66 Unset an Environment Variable (unset)</h2></a>
+    <a name="cmdunset"><h2>2.67 Unset an Environment Variable (unset)</h2></a>
   </td>
   </tr>
 </table>
@@ -3353,7 +3377,7 @@ nsh&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurldec"><h2>2.67 URL Decode (urldecode)</h2></a>
+    <a name="cmdurldec"><h2>2.68 URL Decode (urldecode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3370,7 +3394,7 @@ urldecode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdurlencode"><h2>2.68 URL Encode (urlencode)</h2></a>
+    <a name="cmdurlencode"><h2>2.69 URL Encode (urlencode)</h2></a>
   </td>
   </tr>
 </table>
@@ -3387,7 +3411,7 @@ urlencode [-f] &lt;string or filepath&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduseradd"><h2>2.69 Add a New User (useradd)</h2></a>
+    <a name="cmduseradd"><h2>2.70 Add a New User (useradd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3404,7 +3428,7 @@ useradd &lt;username&gt; &lt;password&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmduserdel"><h2>2.70 Delete a user (userdel)</h2></a>
+    <a name="cmduserdel"><h2>2.71 Delete a user (userdel)</h2></a>
   </td>
   </tr>
 </table>
@@ -3421,7 +3445,7 @@ userdel &lt;username&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdusleep"><h2>2.71 Wait for Microseconds (usleep)</h2></a>
+    <a name="cmdusleep"><h2>2.72 Wait for Microseconds (usleep)</h2></a>
   </td>
   </tr>
 </table>
@@ -3438,7 +3462,7 @@ usleep &lt;usec&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdwget"><h2>2.72 Get File Via HTTP (wget)</h2></a>
+    <a name="cmdwget"><h2>2.73 Get File Via HTTP (wget)</h2></a>
   </td>
   </tr>
 </table>
@@ -3465,7 +3489,7 @@ wget [-o &lt;local-path&gt;] &lt;url&gt;
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="cmdxd"><h2>2.73 Hexadecimal Dump of Memory (xd)</h2></a>
+    <a name="cmdxd"><h2>2.74 Hexadecimal Dump of Memory (xd)</h2></a>
   </td>
   </tr>
 </table>
@@ -3870,6 +3894,11 @@ nsh&gt;
     <td><b><code>route</code></b></td>
     <td><code><code>CONFIG_FS_PROCFS</code> &amp;&amp; <code>CONFIG_FS_PROCFS_EXCLUDE_NET</code> &amp;&amp; !<code>CONFIG_FS_PROCFS_EXCLUDE_ROUTE</code> &amp;&amp; <code>CONFIG_NET_ROUTE</code> &amp;&amp; !<code>CONFIG_NSH_DISABLE_ROUTE</code> &amp;&amp; (<code>CONFIG_NET_IPv4</code> || <code>CONFIG_NET_IPv6</code>)</code></td>
     <td><code>CONFIG_NSH_DISABLE_ROUTE</code></td>
+  </tr>
+  <tr>
+    <td><b><code>rptun</code></b></td>
+    <td><code><code>CONFIG_RPTUN</code>
+    <td><code>CONFIG_NSH_DISABLE_RPTUN</code></td>
   </tr>
   <tr>
     <td><b><code>set</code></b></td>
@@ -5886,6 +5915,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custinit">ROMFS, modifying the ROMFS image</a></li>
   <li><a href="#passwdromfs">ROMFS, password File</a></li>
   <li><a href="#cmdroute"><code>route</code></a></li>
+  <li><a href="#cmdrptun"><code>rptun</code></a></li>
   <li><a href="#cmdset"><code>set</code></a></li>
   <li><a href="#cmdsh"><code>sh</code></a></li>
   <li><a href="#cmdshutdown"><code>shutdown</code></a></li>
