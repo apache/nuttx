@@ -132,6 +132,87 @@ void spin_lock_wo_note(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
+ * Name: spin_trylock
+ *
+ * Description:
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+spinlock_t spin_trylock(FAR volatile spinlock_t *lock)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we are waiting for a spinlock */
+
+  sched_note_spinlock(this_task(), lock);
+#endif
+
+  if (up_testset(lock) == SP_LOCKED)
+    {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+      /* Notify that we abort for a spinlock */
+
+      sched_note_spinabort(this_task(), &lock);
+#endif
+      SP_DSB();
+      return SP_LOCKED;
+    }
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  /* Notify that we have the spinlock */
+
+  sched_note_spinlocked(this_task(), lock);
+#endif
+  SP_DMB();
+  return SP_UNLOCKED;
+}
+
+/****************************************************************************
+ * Name: spin_trylock_wo_note
+ *
+ * Description:
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
+ *
+ *   This implementation is the same as the above spin_trylock() except that
+ *   it does not perform instrumentation logic.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+spinlock_t spin_trylock_wo_note(FAR volatile spinlock_t *lock)
+{
+  if (up_testset(lock) == SP_LOCKED)
+    {
+      SP_DSB();
+      return SP_LOCKED;
+    }
+
+  SP_DMB();
+  return SP_UNLOCKED;
+}
+
+/****************************************************************************
  * Name: spin_unlock
  *
  * Description:

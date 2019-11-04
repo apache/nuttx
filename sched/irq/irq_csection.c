@@ -134,7 +134,7 @@ static inline bool irq_waitlock(int cpu)
    * for the deadlock condition.
    */
 
-  while (spin_trylock(&g_cpu_irqlock) == SP_LOCKED)
+  while (spin_trylock_wo_note(&g_cpu_irqlock) == SP_LOCKED)
     {
       /* Is a pause request pending? */
 
@@ -152,8 +152,6 @@ static inline bool irq_waitlock(int cpu)
 
           return false;
         }
-
-      SP_DSB();
     }
 
   /* We have g_cpu_irqlock! */
@@ -164,7 +162,6 @@ static inline bool irq_waitlock(int cpu)
   sched_note_spinlocked(tcb, &g_cpu_irqlock);
 #endif
 
-  SP_DMB();
   return true;
 }
 #endif

@@ -208,7 +208,31 @@ void spin_lock_wo_note(FAR volatile spinlock_t *lock);
  *
  ****************************************************************************/
 
-#define spin_trylock(l) up_testset(l)
+spinlock_t spin_trylock(FAR volatile spinlock_t *lock);
+
+/****************************************************************************
+ * Name: spin_trylock_wo_note
+ *
+ * Description:
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
+ *
+ *   This implementation is the same as the above spin_trylock() except that
+ *   it does not perform instrumentation logic.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to lock.
+ *
+ * Returned Value:
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+spinlock_t spin_trylock_wo_note(FAR volatile spinlock_t *lock);
 
 /****************************************************************************
  * Name: spin_unlock
