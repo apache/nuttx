@@ -42,12 +42,12 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_RPTUN
+
 #include <nuttx/fs/ioctl.h>
 #include <openamp/open_amp.h>
 
 #include <string.h>
-
-#ifdef CONFIG_RPTUN
 
 /****************************************************************************
  * Pre-processor Definitions
