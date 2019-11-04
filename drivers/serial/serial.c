@@ -1696,7 +1696,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
 
   uart_pollnotify(dev, POLLIN);
 
-#ifdef CONFIG_PM
+#if defined(CONFIG_PM) && defined(CONFIG_SERIAL_CONSOLE)
   /* Call pm_activity when characters are received on the console device */
 
   if (dev->isconsole)
