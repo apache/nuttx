@@ -235,6 +235,56 @@ static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 #endif
 
 /****************************************************************************
+ * Name: boardctl_pmctrl
+ *
+ * Description:
+ *   Handle power state transition and query command.
+ *
+ * Input Parameters:
+ *   ctrl - Described the power state transition and query command.
+ *
+ * Returned Value:
+ *   On success zero (OK) is returned; -1 (ERROR) is returned on failure
+ *   with the errno variable to to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static inline int boardctl_pmctrl(FAR struct boardioc_pm_ctrl_s *ctrl)
+{
+  int ret = OK;
+
+  switch (ctrl->action)
+    {
+      case BOARDIOC_PM_ACTIVITY:
+        pm_activity(ctrl->domain, ctrl->priority);
+        break;
+
+      case BOARDIOC_PM_STAY:
+        pm_stay(ctrl->domain, ctrl->state);
+        break;
+
+      case BOARDIOC_PM_RELAX:
+        pm_relax(ctrl->domain, ctrl->state);
+        break;
+
+      case BOARDIOC_PM_STAYCOUNT:
+        ctrl->count = pm_stay(ctrl->domain, ctrl->state);
+        break;
+
+      case BOARDIOC_PM_QUERYSTATE:
+        ctrl->state = pm_querystate(ctrl->domain);
+        break;
+
+      default:
+        ret = -EINVAL;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -337,6 +387,25 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_RESET:
         {
           ret = board_reset((int)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_PM
+      /* CMD:           BOARDIOC_PM_CONTROL
+       * DESCRIPTION:   anage power state transition and query
+       * ARG:           A pointer to an instance of struct boardioc_pm_ctrl_s
+       * CONFIGURATION: CONFIG_PM
+       * DEPENDENCIES:  None
+       */
+
+      case BOARDIOC_PM_CONTROL:
+        {
+          FAR struct boardioc_pm_ctrl_s *ctrl =
+            (FAR struct boardioc_pm_ctrl_s *)arg;
+
+          DEBUGASSERT(ctrl != NULL);
+          ret = boardctl_pmctrl(ctrl);
         }
         break;
 #endif

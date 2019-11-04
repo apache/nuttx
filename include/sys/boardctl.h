@@ -45,6 +45,10 @@
 
 #include <nuttx/fs/ioctl.h>
 
+#ifdef CONFIG_PM
+#  include <nuttx/pm.h>
+#endif
+
 #ifdef CONFIG_VNCSERVER
 #  include <nuttx/nx/nx.h>
 #endif
@@ -88,6 +92,12 @@
  * ARG:           Integer value providing power off status information
  * CONFIGURATION: CONFIG_BOARDCTL_RESET
  * DEPENDENCIES:  Board logic must provide the board_reset() interface.
+ *
+ * CMD:           BOARDIOC_PM_CONTROL
+ * DESCRIPTION:   Manage power state transition and query
+ * ARG:           A pointer to an instance of struct boardioc_pm_ctrl_s
+ * CONFIGURATION: CONFIG_PM
+ * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_UNIQUEID
  * DESCRIPTION:   Return a unique ID associated with the board (such as a
@@ -192,18 +202,19 @@
 #define BOARDIOC_FINALINIT         _BOARDIOC(0x0002)
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0003)
 #define BOARDIOC_RESET             _BOARDIOC(0x0004)
-#define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
-#define BOARDIOC_MKRD              _BOARDIOC(0x0006)
-#define BOARDIOC_ROMDISK           _BOARDIOC(0x0007)
-#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0008)
-#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0009)
-#define BOARDIOC_BUILTINS          _BOARDIOC(0x000a)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x000b)
-#define BOARDIOC_NX_START          _BOARDIOC(0x000c)
-#define BOARDIOC_VNC_START         _BOARDIOC(0x000d)
-#define BOARDIOC_NXTERM            _BOARDIOC(0x000e)
-#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000f)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x0010)
+#define BOARDIOC_PM_CONTROL        _BOARDIOC(0x0005)
+#define BOARDIOC_UNIQUEID          _BOARDIOC(0x0006)
+#define BOARDIOC_MKRD              _BOARDIOC(0x0007)
+#define BOARDIOC_ROMDISK           _BOARDIOC(0x0008)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0009)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x000a)
+#define BOARDIOC_BUILTINS          _BOARDIOC(0x000b)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x000c)
+#define BOARDIOC_NX_START          _BOARDIOC(0x000d)
+#define BOARDIOC_VNC_START         _BOARDIOC(0x000e)
+#define BOARDIOC_NXTERM            _BOARDIOC(0x000f)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x0010)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x0011)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -212,13 +223,35 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0011)
+#define BOARDIOC_USER              _BOARDIOC(0x0012)
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 /* Structures used with IOCTL commands */
+
+#ifdef CONFIG_PM
+/* Arguments passed with the BOARDIOC_PM_CONTROL command */
+
+enum boardioc_action_e
+{
+  BOARDIOC_PM_ACTIVITY = 0,
+  BOARDIOC_PM_STAY,
+  BOARDIOC_PM_RELAX,
+  BOARDIOC_PM_STAYCOUNT,
+  BOARDIOC_PM_QUERYSTATE
+};
+
+struct boardioc_pm_ctrl_s
+{
+  uint32_t action;
+  uint32_t domain;
+  uint32_t state;
+  uint32_t count;
+  uint32_t priority;
+};
+#endif
 
 #ifdef CONFIG_BOARDCTL_MKRD
 /* Describes the RAM disk to be created */
