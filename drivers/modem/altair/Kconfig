@@ -6,7 +6,7 @@
 menuconfig MODEM_ALTMDM
 	bool "Altair modem support"
 	default n
-	depends on SPI_EXCHANGE
+	select SPI
 	---help---
 		Enable driver for the Altair modem.
 
