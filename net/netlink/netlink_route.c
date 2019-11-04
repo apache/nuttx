@@ -86,7 +86,6 @@ struct nlroute_sendto_request_s
 
 struct nlroute_recvfrom_response_s
 {
-  FAR struct netlink_reqdata_s *flink;
   struct nlmsghdr hdr;
   struct ndmsg msg;
   struct rtattr attr;
@@ -95,6 +94,15 @@ struct nlroute_recvfrom_response_s
 
 #define SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(n) \
   (sizeof(struct nlroute_recvfrom_response_s) + (n) - 1)
+
+struct nlroute_recvfrom_rsplist_s
+{
+  FAR struct netlink_reqdata_s *flink;
+  struct nlroute_recvfrom_response_s payload;
+};
+
+#define SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(n) \
+  (sizeof(struct nlroute_recvfrom_rsplist_s) + (n) - 1)
 
 /****************************************************************************
  * Public Functions
@@ -131,11 +139,11 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
   if (req->hdr.nlmsg_type == RTM_GETNEIGH && req->msg.ndm_family == AF_INET)
     {
-      FAR struct nlroute_recvfrom_response_s *entry;
+      FAR struct nlroute_recvfrom_rsplist_s *entry;
       unsigned int ncopied;
       size_t tabsize;
-      size_t paysize;
-      size_t entsize;
+      size_t rspsize;
+      size_t allocsize;
 
       /* Preallocate memory to hold the maximum sized ARP table
        * REVISIT:  This is probably excessively large and could cause false
@@ -143,11 +151,11 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
        * the number of valid entries in the ARP table.
        */
 
-      tabsize = CONFIG_NET_ARPTAB_SIZE * sizeof( struct arp_entry_s);
-      paysize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-      entsize = SIZEOF_NETLINK_RESPONSE_S(paysize);
+      tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof( struct arp_entry_s);
+      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-      entry   = (FAR struct nlroute_recvfrom_response_s *)kmm_malloc(entsize);
+      entry     = (FAR struct nlroute_recvfrom_rsplist_s *)kmm_malloc(allocsize);
       if (entry == NULL)
         {
           return -ENOMEM;
@@ -155,18 +163,18 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
       /* Populate the entry */
 
-      memcpy(&entry->hdr, &req->hdr, sizeof(struct nlmsghdr));
-      entry->hdr.nlmsg_len = paysize;
-      memcpy(&entry->msg, &req->msg, sizeof(struct ndmsg));
-      entry->attr.rta_len  = tabsize;
-      entry->attr.rta_type = 0;
+      memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
+      entry->payload.hdr.nlmsg_len = rspsize;
+      memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
+      entry->payload.attr.rta_len  = tabsize;
+      entry->payload.attr.rta_type = 0;
 
       /* Lock the network so that the ARP table will be stable, then copy
        * the ARP table into the allocated memory.
        */
 
       net_lock();
-      ncopied = arp_snapshot((FAR struct arp_entry_s *)entry->data,
+      ncopied = arp_snapshot((FAR struct arp_entry_s *)entry->payload.data,
                              CONFIG_NET_ARPTAB_SIZE);
       net_unlock();
 
@@ -176,28 +184,28 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
       if (ncopied < CONFIG_NET_ARPTAB_SIZE)
         {
-          FAR struct nlroute_recvfrom_response_s *newentry;
+          FAR struct nlroute_recvfrom_rsplist_s *newentry;
 
           tabsize = ncopied * sizeof( struct arp_entry_s);
-          paysize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-          entsize = SIZEOF_NETLINK_RESPONSE_S(paysize);
+          rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+          allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-          newentry = (FAR struct nlroute_recvfrom_response_s *)
-            kmm_realloc(entry, entsize);
+          newentry = (FAR struct nlroute_recvfrom_rsplist_s *)
+            kmm_realloc(entry, allocsize);
 
           if (newentry != NULL)
             {
                entry = newentry;
             }
 
-          entry->hdr.nlmsg_len = paysize;
-          entry->attr.rta_len  = tabsize;
+          entry->payload.hdr.nlmsg_len = rspsize;
+          entry->payload.attr.rta_len  = tabsize;
         }
 
       /* Finally, add the data to the list of pending responses */
 
       netlink_add_response(psock, (FAR struct netlink_response_s *)entry);
-      return OK;
+      return len;
     }
 
 #else
@@ -222,41 +230,46 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
                                size_t len, int flags,
                                FAR struct sockaddr_nl *from)
 {
-  FAR struct nlroute_recvfrom_response_s *resp;
+  FAR struct nlroute_recvfrom_rsplist_s *entry;
+  ssize_t ret;
 
   DEBUGASSERT(psock != NULL && nlmsg != NULL &&
               nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
-              len >= sizeof(struct nlmsghdr) &&
-              from != NULL);
+              len >= sizeof(struct nlmsghdr));
 
   /* Find the response to this message */
 
   net_lock();
-  resp = (FAR struct nlroute_recvfrom_response_s *)
+  entry = (FAR struct nlroute_recvfrom_rsplist_s *)
     netlink_get_response(psock, nlmsg);
   net_unlock();
 
-  if (resp == NULL)
+  if (entry == NULL)
     {
       return -ENOENT;
     }
 
-  if (len < resp->hdr.nlmsg_len)
+  if (len < entry->payload.hdr.nlmsg_len)
     {
-      kmm_free(resp);
+      kmm_free(entry);
       return -EMSGSIZE;
     }
 
-  memcpy(nlmsg, resp, resp->hdr.nlmsg_len);
+  memcpy(nlmsg, &entry->payload, entry->payload.hdr.nlmsg_len);
 
   /* Return address.  REVISIT... this is just a guess. */
 
-  from->nl_family = resp->msg.ndm_family;
-  from->nl_pad    = 0;
-  from->nl_pid    = resp->hdr.nlmsg_pid;
-  from->nl_groups = resp->hdr.nlmsg_type;
+  if (from != NULL)
+    {
+      from->nl_family = entry->payload.msg.ndm_family;
+      from->nl_pad    = 0;
+      from->nl_pid    = entry->payload.hdr.nlmsg_pid;
+      from->nl_groups = entry->payload.hdr.nlmsg_type;
+    }
 
-  return resp->hdr.nlmsg_len;
+  ret = entry->payload.hdr.nlmsg_len;
+  kmm_free(entry);
+  return ret;
 }
 
 #endif /* CONFIG_NETLINK_ROUTE */

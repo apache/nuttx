@@ -593,15 +593,14 @@ static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
-              to != NULL && tolen >= sizeof(struct nlmsghdr));
+              to != NULL && tolen >= sizeof(struct sockaddr_nl));
 
   conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
   /* Get a reference to the netlink message */
 
   nlmsg = (FAR struct nlmsghdr *)buf;
-  DEBUGASSERT(nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
-              tolen >= nlmsg->nlmsg_len);
+  DEBUGASSERT(nlmsg->nlmsg_len >= sizeof(struct nlmsghdr));
 
   switch (conn->protocol)
     {
@@ -652,8 +651,9 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
   FAR struct nlmsghdr *nlmsg;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
-              from != NULL && *fromlen >= sizeof(struct nlmsghdr));
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+  DEBUGASSERT(from == NULL ||
+              (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
 
   conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
@@ -667,7 +667,11 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
       case NETLINK_ROUTE:
         ret = netlink_route_recvfrom(psock, nlmsg, len, flags,
                                      (FAR struct sockaddr_nl *)from);
-        *fromlen = sizeof(struct sockaddr_nl);
+        if (ret >= 0 && fromlen != NULL)
+          {
+            *fromlen = sizeof(struct sockaddr_nl);
+          }
+
         break;
 #endif
 

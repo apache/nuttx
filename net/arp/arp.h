@@ -439,6 +439,8 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
 #ifdef CONFIG_NETLINK_ROUTE
 unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
                           unsigned int nentries);
+#else
+#  define arp_snapshot(s,n) (0)
 #endif
 
 /****************************************************************************
@@ -476,6 +478,7 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 #  define arp_delete(i)
 #  define arp_update(i,m);
 #  define arp_hdr_update(i,m);
+#  define arp_snapshot(s,n) (0)
 #  define arp_dump(arp)
 
 #endif /* CONFIG_NET_ARP */
