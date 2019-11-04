@@ -429,7 +429,7 @@ unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
        i++)
     {
       tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr == 0 &&
+      if (tabptr->at_ipaddr != 0 &&
           now - tabptr->at_time <= ARP_MAXAGE_TICK)
         {
           memcpy(&snapshot[ncopied], tabptr, sizeof(struct arp_entry_s));

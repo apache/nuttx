@@ -97,7 +97,7 @@ struct nlroute_recvfrom_response_s
 
 struct nlroute_recvfrom_rsplist_s
 {
-  FAR struct netlink_reqdata_s *flink;
+  sq_entry_t flink;
   struct nlroute_recvfrom_response_s payload;
 };
 
@@ -234,14 +234,13 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
   ssize_t ret;
 
   DEBUGASSERT(psock != NULL && nlmsg != NULL &&
-              nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
               len >= sizeof(struct nlmsghdr));
 
   /* Find the response to this message */
 
   net_lock();
   entry = (FAR struct nlroute_recvfrom_rsplist_s *)
-    netlink_get_response(psock, nlmsg);
+    netlink_get_response(psock);
   net_unlock();
 
   if (entry == NULL)

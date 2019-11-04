@@ -72,7 +72,7 @@
 
 struct netlink_response_s
 {
-  FAR struct netlink_response_s *flink;
+  sq_entry_t flink;
   FAR struct nlmsghdr msg;
 };
 
@@ -102,7 +102,7 @@ struct netlink_conn_s
 
   /* Buffered response data */
 
-  FAR struct netlink_response_s *resplist;
+  sq_queue_t resplist;               /* Singly linked list of responses*/
 };
 
 /****************************************************************************
@@ -186,7 +186,7 @@ FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
  * Name: netlink_add_response
  *
  * Description:
- *   Add response data at the head of the pending response list.
+ *   Add response data at the tail of the pending response list.
  *
  * Assumptions:
  *   The caller has the network locked to prevent concurrent access to the
@@ -201,8 +201,8 @@ void netlink_add_response(FAR struct socket *psock,
  * Name: netlink_get_response
  *
  * Description:
- *   Find the response matching the request.  Remove it from the list of
- *   pending responses and return the response data.
+ *   Return the next response from the head of the pending response list.
+ *   Responses are returned one-at-a-time in FIFO order.
  *
  * Assumptions:
  *   The caller has the network locked to prevent concurrent access to the
@@ -210,8 +210,7 @@ void netlink_add_response(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-FAR struct netlink_response_s *
-  netlink_get_response(FAR struct socket *psock, FAR struct nlmsghdr *nlmsg);
+FAR struct netlink_response_s *netlink_get_response(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_route_sendto()
