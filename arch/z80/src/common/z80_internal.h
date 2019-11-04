@@ -138,6 +138,12 @@ void z80_serial_initialize(void);
 # define z80_serial_initialize()
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE

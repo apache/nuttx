@@ -307,6 +307,12 @@ void up_earlyserialinit(void);
 #  define up_earlyserialinit()
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE

@@ -240,6 +240,10 @@ void up_initialize(void)
   up_serialinit();
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
   /* Initialize the console device driver (if it is other than the standard
    * serial driver).
    */

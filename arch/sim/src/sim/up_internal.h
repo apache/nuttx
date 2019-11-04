@@ -266,6 +266,14 @@ void sim_smp_hook(void);
 void up_timer_update(void);
 #endif
 
+/* rpmsg_serialinit *******************************************************/
+
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 /* up_devconsole.c ********************************************************/
 
 void up_devconsole(void);

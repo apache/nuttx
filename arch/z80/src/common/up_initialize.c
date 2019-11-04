@@ -169,6 +169,10 @@ void up_initialize(void)
   z80_serial_initialize();
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
   /* Initialize the console device driver (if it is other than the standard
    * serial driver).
    */

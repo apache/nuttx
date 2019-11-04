@@ -239,6 +239,8 @@ void up_lowputc(char ch);
 void up_earlyserialinit(void);
 void up_serialinit(void);
 
+void rpmsg_serialinit(void);
+
 /* System timer */
 
 void mips_timer_initialize(void);

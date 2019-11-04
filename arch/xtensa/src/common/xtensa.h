@@ -332,6 +332,8 @@ void up_lowputc(char ch);
 void xtensa_early_serial_initialize(void);
 void xtensa_serial_initialize(void);
 
+void rpmsg_serialinit(void);
+
 /* System timer */
 
 void xtensa_timer_initialize(void);

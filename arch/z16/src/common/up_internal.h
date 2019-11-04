@@ -158,6 +158,12 @@ void up_earlyserialinit(void);
 void up_serialinit(void);
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 #ifdef USE_LOWCONSOLE
 void lowconsole_init(void);
 #endif

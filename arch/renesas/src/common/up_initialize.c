@@ -145,6 +145,10 @@ void up_initialize(void)
   up_serialinit();
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
   /* Initialize the console device driver (if it is other than the standard
    * serial driver). NOTE that the naming implies that the console is a serial
    * driver.  That is usually the case, however, if no UARTs are enabled, the

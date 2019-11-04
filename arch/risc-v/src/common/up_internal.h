@@ -151,6 +151,8 @@ void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
 
+void rpmsg_serialinit(void);
+
 /* The OS start routine    **************************************************/
 
 void nx_start(void);

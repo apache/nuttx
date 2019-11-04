@@ -453,6 +453,12 @@ void up_earlyserialinit(void);
 #  define up_earlyserialinit()
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 #ifdef CONFIG_ARM_LWL_CONSOLE
 
 /* Defined in src/common/up_lwl_console.c */

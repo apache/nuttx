@@ -141,6 +141,14 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs);
 
 int minerva_swint(int irq, FAR void *context, FAR void *arg);
 
+/* Rpmsg serial *************************************************************/
+
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 /* System timer *************************************************************/
 
 void minerva_timer_initialize(void);

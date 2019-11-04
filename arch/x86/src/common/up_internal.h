@@ -205,6 +205,12 @@ void up_addregion(void);
 void up_earlyserialinit(void);
 void up_serialinit(void);
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
+
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE

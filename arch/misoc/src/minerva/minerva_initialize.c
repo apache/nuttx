@@ -75,6 +75,10 @@ void up_initialize(void)
 
   misoc_serial_initialize();
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
   /* Initialize the system timer */
 
   misoc_timer_initialize();

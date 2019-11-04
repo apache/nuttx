@@ -234,6 +234,10 @@ void up_initialize(void)
   note_register();          /* Non-standard /dev/note */
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
 #if defined(USE_DEVCONSOLE)
   /* Start the simulated UART device */
 
