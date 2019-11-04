@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netlink/netlink_conn.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,16 +61,16 @@
  * Private Data
  ****************************************************************************/
 
-/* The array containing all netlink connections. */
+/* The array containing all NetLink connections. */
 
 static struct netlink_conn_s g_netlink_connections[CONFIG_NETLINK_CONNS];
 
-/* A list of all free netlink connections */
+/* A list of all free NetLink connections */
 
 static dq_queue_t g_free_netlink_connections;
 static sem_t g_free_sem;
 
-/* A list of all allocated netlink connections */
+/* A list of all allocated NetLink connections */
 
 static dq_queue_t g_active_netlink_connections;
 
@@ -145,7 +145,7 @@ void netlink_initialize(void)
  * Name: netlink_alloc()
  *
  * Description:
- *   Allocate a new, uninitialized netlink connection structure.  This is
+ *   Allocate a new, uninitialized NetLink connection structure.  This is
  *   normally something done by the implementation of the socket() API
  *
  ****************************************************************************/
@@ -177,7 +177,7 @@ FAR struct netlink_conn_s *netlink_alloc(void)
  * Name: netlink_free()
  *
  * Description:
- *   Free a netlink connection structure that is no longer in use. This should
+ *   Free a NetLink connection structure that is no longer in use. This should
  *   be done by the implementation of close().
  *
  ****************************************************************************/
@@ -217,10 +217,10 @@ void netlink_free(FAR struct netlink_conn_s *conn)
  * Name: netlink_nextconn()
  *
  * Description:
- *   Traverse the list of allocated netlink connections
+ *   Traverse the list of allocated NetLink connections
  *
  * Assumptions:
- *   This function is called from netlink device logic.
+ *   This function is called from NetLink device logic.
  *
  ****************************************************************************/
 
@@ -241,7 +241,7 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn)
  *
  * Description:
  *   Find a connection structure that is the appropriate connection for the
- *   provided netlink address
+ *   provided NetLink address
  *
  * Assumptions:
  *

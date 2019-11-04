@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netlink/netlink_sockif.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ const struct sock_intf_s g_netlink_sockif =
  * Input Parameters:
  *   psock    - A pointer to a user allocated socket structure to be
  *              initialized.
- *   protocol - Netlink socket protocol (see sys/socket.h)
+ *   protocol - NetLink socket protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -155,7 +155,7 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
 
   if (domain == PF_NETLINK && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
-      /* Allocate the netlink socket connection structure and save it in the
+      /* Allocate the NetLink socket connection structure and save it in the
        * new socket instance.
        */
 
@@ -243,7 +243,7 @@ static void netlink_addref(FAR struct socket *psock)
  *   space (address family) but has no name assigned.
  *
  * Input Parameters:
- *   conn     netlink socket connection structure
+ *   conn     NetLink socket connection structure
  *   addr     Socket local address
  *   addrlen  Length of 'addr'
  *
@@ -300,7 +300,7 @@ static int netlink_bind(FAR struct socket *psock,
  *   the object pointed to by address is unspecified.
  *
  * Input Parameters:
- *   conn     netlink socket connection structure
+ *   conn     NetLink socket connection structure
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]
  *
@@ -460,12 +460,13 @@ static int netlink_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input:  Allocated size of 'addr'
+ *            Return: Actual size returned size of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the approriate error value.
+ *   value.  See accept() for a description of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -489,7 +490,7 @@ static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   fds   - The structure describing the events to be monitored.
- *   setup - true: Setup up the poll; false: Teardown the poll
+ *   setup - true: Setup up the poll; false: Tear down the poll
  *
  * Returned Value:
  *  0: Success; Negated errno on failure
@@ -628,7 +629,7 @@ static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
  *   data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument fromlen
+ *   address, this source address is filled in. The argument 'fromlen'
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
@@ -657,7 +658,7 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
-  /* Get a reference to the netlink message */
+  /* Get a reference to the NetLink message */
 
   nlmsg = (FAR struct nlmsghdr *)buf;
 
@@ -687,7 +688,7 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
  * Name: netlink_close
  *
  * Description:
- *   Performs the close operation on an NETLINK socket instance
+ *   Performs the close operation on a NetLink socket instance
  *
  * Input Parameters:
  *   psock   Socket instance

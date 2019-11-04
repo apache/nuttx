@@ -66,7 +66,7 @@
  * until it is gotten by the client.  This structure holds that buffered
  * data.
  *
- * REVISIT:  There really should be a timestamp on this so that we can
+ * REVISIT:  There really should be a time stamp on this so that we can
  * someday weed out un-claimed responses.
  */
 
@@ -74,6 +74,8 @@ struct netlink_response_s
 {
   sq_entry_t flink;
   FAR struct nlmsghdr msg;
+
+  /* Message-specific data may follow */
 };
 
 #define SIZEOF_NETLINK_RESPONSE_S(n) (sizeof(struct netlink_response_s) + (n) - 1)
@@ -86,14 +88,14 @@ struct netlink_conn_s
 
   dq_entry_t node;                   /* Supports a doubly linked list */
 
-  /* This is a list of Netlink connection callbacks.  Each callback
+  /* This is a list of NetLink connection callbacks.  Each callback
    * represents a thread that is stalled, waiting for a device-specific
    * event.
    */
 
-  FAR struct devif_callback_s *list; /* Netlink callbacks */
+  FAR struct devif_callback_s *list; /* NetLink callbacks */
 
-  /* Netlink-specific content follows */
+  /* NetLink-specific content follows */
 
   uint32_t pid;                      /* Port ID (if bound) */
   uint32_t groups;                   /* Multicast groups mask (if bound) */
@@ -140,7 +142,7 @@ void netlink_initialize(void);
  * Name: netlink_alloc()
  *
  * Description:
- *   Allocate a new, uninitialized netlink connection structure.  This is
+ *   Allocate a new, uninitialized NetLink connection structure.  This is
  *   normally something done by the implementation of the socket() API
  *
  ****************************************************************************/
@@ -151,7 +153,7 @@ FAR struct netlink_conn_s *netlink_alloc(void);
  * Name: netlink_free()
  *
  * Description:
- *   Free a netlink connection structure that is no longer in use. This should
+ *   Free a NetLink connection structure that is no longer in use. This should
  *   be done by the implementation of close().
  *
  ****************************************************************************/
@@ -162,10 +164,10 @@ void netlink_free(FAR struct netlink_conn_s *conn);
  * Name: netlink_nextconn()
  *
  * Description:
- *   Traverse the list of allocated netlink connections
+ *   Traverse the list of allocated NetLink connections
  *
  * Assumptions:
- *   This function is called from netlink device logic.
+ *   This function is called from NetLink device logic.
  *
  ****************************************************************************/
 
@@ -176,7 +178,7 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
  *
  * Description:
  *   Find a connection structure that is the appropriate connection for the
- *   provided netlink address
+ *   provided NetLink address
  *
  ****************************************************************************/
 

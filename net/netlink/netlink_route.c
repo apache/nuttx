@@ -71,18 +71,14 @@
 
 /* RTM_NEWNEIGH, RTM_DELNEIGH, RTM_GETNEIGH
  *   Add, remove or receive information about a neighbor table entry (e.g.,
- *   an ARP entry).  The message contains an ndmsg structure.
+ *   an ARP entry).  The message contains an 'ndmsg' structure.
  */
 
 struct nlroute_sendto_request_s
 {
   struct nlmsghdr hdr;
   struct ndmsg msg;
-  uint8_t data[1];
 };
-
-#define SIZEOF_NLROUTE_SENDTO_REQUEST_S(n) \
-  (sizeof(struct nlroute_sendto_request_s) + (n) - 1)
 
 struct nlroute_recvfrom_response_s
 {
