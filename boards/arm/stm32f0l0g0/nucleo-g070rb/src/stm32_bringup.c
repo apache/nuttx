@@ -46,6 +46,7 @@
 #include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
 
 #include "nucleo-g070rb.h"
@@ -97,6 +98,27 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  /* Register the GPIO driver */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
     }
 #endif

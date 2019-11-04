@@ -100,6 +100,24 @@
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | \
                         GPIO_PIN13)
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* Input pins */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN4)
+
+/* Interrupt pins */
+
+#define GPIO_INT1         GPIO_BTN_USER
+
+/* Output pins */
+
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN7)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -107,6 +125,10 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_pwm_setup
