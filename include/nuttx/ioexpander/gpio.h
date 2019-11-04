@@ -49,6 +49,8 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 
+#ifdef CONFIG_DEV_GPIO
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -246,4 +248,5 @@ int gpio_lower_half(FAR struct ioexpander_dev_s *ioe, unsigned int pin,
 }
 #endif
 
+#endif /* CONFIG_DEV_GPIO */
 #endif /* __INCLUDE_NUTTX_IOEXPANDER_GPIO_H */
