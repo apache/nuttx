@@ -1034,7 +1034,7 @@ static void imxrt_detach(struct uart_dev_s *dev)
  * Name: imxrt_interrupt (and front-ends)
  *
  * Description:
- *   This is the common UART interrupt handler.  It should cal
+ *   This is the common UART interrupt handler.  It should call
  *   uart_transmitchars or uart_receivechar to perform the appropriate data
  *   transfers.
  *
@@ -1071,7 +1071,7 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
        */
 
       usr  = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
-      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TC | LPUART_STAT_OR |
+      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TDRE | LPUART_STAT_OR |
               LPUART_STAT_FE);
 
       /* Clear serial overrun and framing errors */
@@ -1097,8 +1097,8 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((usr & LPUART_STAT_TC) != 0 &&
-          (priv->ie & LPUART_CTRL_TCIE) != 0)
+      if ((usr & LPUART_STAT_TDRE) != 0 &&
+          (priv->ie & LPUART_CTRL_TIE) != 0)
         {
           uart_xmitchars(dev);
           handled = true;
@@ -1473,12 +1473,12 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ie |= LPUART_CTRL_TCIE;
+      priv->ie |= LPUART_CTRL_TIE;
 #endif
     }
   else
     {
-      priv->ie &= ~LPUART_CTRL_TCIE;
+      priv->ie &= ~LPUART_CTRL_TIE;
     }
 
   regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);

@@ -556,6 +556,9 @@ int imxrt_lpuart_configure(uint32_t base,
       return ERROR;
     }
 
+  putreg32(LPUART_FIFO_RXFE | LPUART_FIFO_RXIDEN_1 | LPUART_FIFO_TXFE ,
+           base + IMXRT_LPUART_FIFO_OFFSET);
+
   regval |= LPUART_CTRL_RE | LPUART_CTRL_TE;
   putreg32(regval, base + IMXRT_LPUART_CTRL_OFFSET);
 
