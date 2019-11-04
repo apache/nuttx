@@ -761,6 +761,39 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 }
 
 /****************************************************************************
+ * Name: audio_message
+ *
+ * Description:
+ *   Send an custom message to the client to indicate that the
+ *   active message has delivered.  The lower-half driver initiates this
+ *   call via its callback pointer to our upper-half driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_message(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_message(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s *msg = (FAR struct audio_msg_s *)apb;
+
+  /* Send a message to the user if a message queue is registered */
+
+  if (upper->usermq != NULL)
+    {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      (void)nxmq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
+                      CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
  * Name: audio_callback
  *
  * Description:
@@ -827,6 +860,16 @@ static void audio_callback(FAR void *handle, uint16_t reason,
           audio_complete(upper, apb, status, session);
 #else
           audio_complete(upper, apb, status);
+#endif
+        }
+        break;
+
+      case AUDIO_CALLBACK_MESSAGE:
+        {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_message(upper, apb, status, session);
+#else
+          audio_message(upper, apb, status);
 #endif
         }
         break;

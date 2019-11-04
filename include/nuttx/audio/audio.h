@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/audio/audio.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
@@ -283,6 +283,7 @@
 /* Extension Unit controls **************************************************/
 
 #define AUDIO_EU_HW_FORMAT          0x0001
+#define AUDIO_EU_LOAD_MODULE        0x0002
 
 /* Audio Callback Reasons ***************************************************/
 
@@ -290,6 +291,7 @@
 #define AUDIO_CALLBACK_DEQUEUE      0x01
 #define AUDIO_CALLBACK_IOERR        0x02
 #define AUDIO_CALLBACK_COMPLETE     0x03
+#define AUDIO_CALLBACK_MESSAGE      0x04
 
 /* Audio Pipeline Buffer (AP Buffer) flags **********************************/
 
@@ -316,6 +318,9 @@
 #define AUDIO_MSG_DATA_REQUEST      6
 #define AUDIO_MSG_ENQUEUE           7
 #define AUDIO_MSG_COMPLETE          8
+#define AUDIO_MSG_WAKEUP            9
+#define AUDIO_MSG_COMMAND          10
+#define AUDIO_MSG_SLIENCE          11
 #define AUDIO_MSG_USER             64
 
 /* Audio Pipeline Buffer flags */
@@ -357,6 +362,9 @@ struct audio_caps_s
     uint8_t  b[4];          /*   by this lower-half driver. */
     uint16_t hw[2];
     uint32_t w;
+ifdef CONFIG_HAVE_LONG_LONG
+    uint64_t qw;
+endif
   } ac_controls;
 };
 
