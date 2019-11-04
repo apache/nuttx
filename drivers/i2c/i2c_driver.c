@@ -409,6 +409,7 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
            */
 
           kmm_free(priv);
+          return ret;
         }
 
       /* Return the result of the registration */

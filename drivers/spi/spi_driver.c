@@ -398,6 +398,7 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
            */
 
           kmm_free(priv);
+          return ret;
         }
 
       /* Return the result of the registration */

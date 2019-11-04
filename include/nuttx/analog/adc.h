@@ -128,7 +128,7 @@ struct adc_fifo_s
 
 /* This structure defines all of the operations providd by the architecture specific
  * logic.  All fields must be provided with non-NULL function pointers by the
- * caller of can_register().
+ * caller of adc_register().
  */
 
 struct adc_dev_s;

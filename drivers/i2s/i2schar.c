@@ -439,6 +439,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
            */
 
           kmm_free(priv);
+          return ret;
         }
 
       /* Return the result of the registration */
