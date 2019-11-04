@@ -88,6 +88,10 @@ ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 include platform$(DELIM)Make.defs
 endif
 
+ifeq ($(CONFIG_DEV_SIMPLE_ADDRENV),y)
+  CSRCS += addrenv.c
+endif
+
 CSRCS += dev_null.c dev_zero.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
