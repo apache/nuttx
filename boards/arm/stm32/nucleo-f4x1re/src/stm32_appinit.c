@@ -76,7 +76,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  return OK;
+#else
   /* Perform board initialization here */
 
   return stm32_bringup();
+#endif
 }
