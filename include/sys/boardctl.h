@@ -46,7 +46,7 @@
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_PM
-#  include <nuttx/pm.h>
+#  include <nuttx/power/pm.h>
 #endif
 
 #ifdef CONFIG_VNCSERVER
