@@ -362,9 +362,9 @@ struct audio_caps_s
     uint8_t  b[4];          /*   by this lower-half driver. */
     uint16_t hw[2];
     uint32_t w;
-ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_HAVE_LONG_LONG
     uint64_t qw;
-endif
+#endif
   } ac_controls;
 };
 
