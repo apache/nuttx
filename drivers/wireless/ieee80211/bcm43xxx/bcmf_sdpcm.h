@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_bdc.h
+ * drivers/wireless/bcm43xxx/ieee80211/bcmf_sdpcm.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDPCM_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDPCM_H
 
 /****************************************************************************
  * Included Files
@@ -43,58 +43,22 @@
 #include "bcmf_driver.h"
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Event frame content */
-
-struct __attribute__((packed)) bcmf_event_s
-{
-  uint16_t version;       /* Vendor specific type */
-  uint16_t flags;
-  uint32_t type;          /* Id of received event */
-  uint32_t status;        /* Event status code */
-  uint32_t reason;        /* Reason code */
-  uint32_t auth_type;
-  uint32_t len;           /* Data size following this header */
-  struct ether_addr addr; /* AP MAC address */
-  char     src_name[16];  /* Event source interface name */
-  uint8_t  dst_id;        /* Event destination interface id */
-  uint8_t  bss_cfg_id;
-};
-
-/* Event callback handler */
-
-typedef void (*event_handler_t)(FAR struct bcmf_dev_s *priv,
-                                struct bcmf_event_s *event, unsigned int len);
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Function called from lower layer */
+int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv);
 
-int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
-                                 struct bcmf_frame_s *frame);
+int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv);
 
-/* Function called from upper layer */
+int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
+                           struct bcmf_frame_s *frame, bool control);
 
-struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                             uint32_t len, bool block);
+void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
 
-int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
-                            struct bcmf_frame_s *frame);
+struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
+                                            unsigned int len, bool block,
+                                            bool control);
 
-struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv);
+struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv);
 
-/* Event frames API */
-
-int bcmf_event_register(FAR struct bcmf_dev_s *priv, event_handler_t handler,
-                        unsigned int event_id);
-
-int bcmf_event_unregister(FAR struct bcmf_dev_s *priv,
-                          unsigned int event_id);
-
-int bcmf_event_push_config(FAR struct bcmf_dev_s *priv);
-
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_BDC_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDPCM_H */

@@ -1,8 +1,8 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_chip_43438.c
+ * drivers/wireless/bcm43xxx/ieee80211/bcmf_cdc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Simon Piriou <spiriou31@gmail.com>
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,62 +37,33 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
+
+#include "bcmf_driver.h"
+#include <stdbool.h>
 #include <stdint.h>
 
-#include "bcmf_sdio.h"
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#define WRAPPER_REGISTER_OFFSET  0x100000
+/* Send safe cdc request */
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+int bcmf_cdc_iovar_request(FAR struct bcmf_dev_s *priv, uint32_t ifidx,
+                           bool set, char *name, uint8_t *data, uint32_t *len);
 
-extern const char ap6212_nvram_image[];
-extern const unsigned int ap6212_nvram_image_len;
+int bcmf_cdc_ioctl(FAR struct bcmf_dev_s *priv, uint32_t ifidx, bool set,
+                   uint32_t cmd, uint8_t *data, uint32_t *len);
 
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t ap6212_firmware_image[];
-extern const unsigned int ap6212_firmware_len;
+/* Send cdc request without locking control_mutex */
 
-extern const uint8_t ap6212_clm_blob[];
-extern const unsigned int ap6212_clm_blob_len;
-#endif
+int bcmf_cdc_iovar_request_unsafe(FAR struct bcmf_dev_s *priv, uint32_t ifidx,
+                           bool set, char *name, uint8_t *data, uint32_t *len);
 
-const struct bcmf_sdio_chip bcmf_43438_config_sdio =
-{
-  /* General chip stats */
+/* Callback used by bus layer to notify cdc response frame is available */
 
-  .ram_size = 512*1024,
+int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
+                                   struct bcmf_frame_s *frame);
 
-  /* Backplane architecture */
-
-  .core_base =
-  {
-    [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
-    [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
-    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
-    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
-                            WRAPPER_REGISTER_OFFSET,
-    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
-                            WRAPPER_REGISTER_OFFSET
-  },
-
-  /* Firmware images */
-  /* TODO find something smarter than using image_len references */
-
-  .nvram_image         = (FAR uint8_t *)ap6212_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&ap6212_nvram_image_len,
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)ap6212_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&ap6212_firmware_len,
-
-  .clm_blob_image      = (FAR uint8_t *)ap6212_clm_blob,
-  .clm_blob_image_size = (FAR unsigned int *)&ap6212_clm_blob_len,
-#endif
-};
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H */

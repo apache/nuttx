@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_bdc.c
+ * drivers/wireless/bcm43xxx/ieee80211/bcmf_bdc.c
  *
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>

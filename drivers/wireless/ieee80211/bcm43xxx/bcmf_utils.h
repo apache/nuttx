@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcmf_core.h
+ * drivers/wireless/bcm43xxx/ieee80211/bcmf_utils.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -33,50 +33,49 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <semaphore.h>
+#include <queue.h>
 
-#include "bcmf_sdio.h"
+#define container_of(ptr, type, member) \
+        (type *)((uint8_t *)(ptr) - offsetof(type, member))
 
-int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
-                          uint8_t *reg, unsigned int len);
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
-int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
-                          uint8_t *reg, unsigned int len);
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
 
-bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
+void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
 
-void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
+int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
 
-int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus);
+dq_entry_t *bcmf_dqueue_pop_tail(dq_queue_t *queue);
+void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry);
 
-static inline int bcmf_read_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
-                                   uint32_t address, uint8_t *reg)
+static inline uint16_t bcmf_getle16(uint16_t *val)
 {
-    return bcmf_read_sbreg(sbus, address, reg, 1);
+  uint8_t *valb = (uint8_t *)val;
+  return (uint16_t)valb[0] << 8 | (uint16_t)valb[1];
 }
 
-static inline int bcmf_read_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
-                                   uint32_t address, uint32_t *reg)
+static inline uint16_t bcmf_getle32(uint32_t *val)
 {
-    return bcmf_read_sbreg(sbus, address, (uint8_t *)reg, 4);
+  uint16_t *valw = (uint16_t *)val;
+  return (uint32_t)bcmf_getle16(valw) << 16 | bcmf_getle16(valw + 1);
 }
 
-static inline int bcmf_write_sbregb(FAR struct bcmf_sdio_dev_s *sbus,
-                                    uint32_t address, uint8_t reg)
-{
-    return bcmf_write_sbreg(sbus, address, &reg, 1);
-}
-
-static inline int bcmf_write_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
-                                    uint32_t address, uint32_t reg)
-{
-    return bcmf_write_sbreg(sbus, address, (uint8_t *)&reg, 4);
-}
-
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H */

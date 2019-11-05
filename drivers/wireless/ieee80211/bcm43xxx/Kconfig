@@ -1,0 +1,104 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config IEEE80211_BROADCOM_FULLMAC
+	bool
+	default n
+
+config IEEE80211_BROADCOM_HAVE_CLM
+	bool
+	default n
+
+config IEEE80211_BROADCOM_BCM43362
+	bool "Broadcom 43362 chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+
+config IEEE80211_BROADCOM_BCM43438
+	bool "Broadcom 43438 chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+	select IEEE80211_BROADCOM_HAVE_CLM
+
+config IEEE80211_BROADCOM_FWFILES
+	bool "Firmware files"
+	default y
+	depends on IEEE80211_BROADCOM_BCM43362 || IEEE80211_BROADCOM_BCM43438
+	---help---
+		By default, firmware and CLM files are provided in memory.
+		This selection enables an option to load the firmware and CLM
+		files from a mounted file system.
+
+		A snapshot of file for the BCM43362 are available in the tools
+		repository:  https://bitbucket.org/nuttx/tools/src/master/bcm43438/
+
+		The latest files from Cypress are available in the Linux kernel:
+		https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/brcm
+		The 43438 is a variant of the 43430 and will even identify itself as
+		such.  The calibration file used in the past is called:
+		brcmfmac43430-sdio.AP6212.txt. The firmware is brcmfmac43430-sdio.bin
+
+		If not defined, then your board support logic will have to
+		to provide the firmware files (and CLM files for the CBM43438)
+		in board/src directory.  For the BCM43362, the following would
+		need to be provided:
+
+		  const uint8_t bcm43362_firmware_image[];
+		  const unsigned int bcm43362_firmware_image_len;
+
+		For the BCM43438, the following would need to be provided.
+
+		  const uint8_t ap6212_firmware_image[];
+		  const unsigned int ap6212_firmware_len;
+
+		  const uint8_t ap6212_clm_blob[];
+		  const unsigned int ap6212_clm_blob_len;
+
+		NVRAM files are currently only supported from memory.  The following
+		must be provided all configurations.  For the BCM43362:
+
+		  const char bcm43362_nvram_image[];
+		  const unsigned int bcm43362_nvram_image_len;
+
+		And for the BCM43438:
+
+		  const char ap6212_nvram_image[];
+		  const unsigned int ap6212_nvram_image_len;
+
+config IEEE80211_BROADCOM_FWFILENAME
+	string "Firmware file"
+	default "/mnt/sdcard/firmware.bin"
+	depends on IEEE80211_BROADCOM_FWFILES
+	---help---
+		If firmware files are provided on a file system, then this option
+		provides the full path to the file on a mounted file system where
+		the firmware can be found.
+
+config IEEE80211_BROADCOM_FWCLMNAME
+	string "CLM file"
+	default "/mnt/sdcard/blob.bin"
+	depends on IEEE80211_BROADCOM_FWFILES && IEEE80211_BROADCOM_HAVE_CLM
+	---help---
+		If firmware files are provided on a file system, then this option
+		provides the full path to the file on a mounted file system where
+		the CLM blob can be found.
+
+config IEEE80211_BROADCOM_FULLMAC_SDIO
+	bool "Broadcom FullMAC driver on SDIO bus"
+	depends on ARCH_HAVE_SDIO
+	select IEEE80211_BROADCOM_FULLMAC
+	default n
+	---help---
+		This selection enables support for broadcom
+		FullMAC-compliant devices using SDIO bus.
+
+if IEEE80211_BROADCOM_FULLMAC
+
+config IEEE80211_BROADCOM_NINTERFACES
+	int "Number of Broadcom FullMAC interfaces"
+	default 1
+	depends on EXPERIMENTAL
+
+endif # IEEE80211_BROADCOM_FULLMAC

@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/wireless/ieee80211/Make.defs
+# drivers/wireless/ieee80211/bcm43xxx/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #
@@ -32,14 +32,34 @@
 #
 ############################################################################
 
-# Include nothing if IEEE 802.11 is disabled
+# Include BCM43xxx drivers into the build
 
-ifeq ($(CONFIG_DRIVERS_IEEE80211),y)
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC),y)
+  CSRCS += bcmf_driver.c
+  CSRCS += bcmf_cdc.c
+  CSRCS += bcmf_bdc.c
+  CSRCS += bcmf_utils.c
+  CSRCS += bcmf_netdev.c
 
-# Include common IEEE 802.11 files into the build
+ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
+  CSRCS += mmc_sdio.c
+  CSRCS += bcmf_sdio.c
+  CSRCS += bcmf_core.c
+  CSRCS += bcmf_sdpcm.c
+endif
 
-# Include IEEE 802.11 drivers into the build
+ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43362),y)
+CSRCS += bcmf_chip_43362.c
+endif
 
-include wireless$(DELIM)ieee80211$(DELIM)bcm43xxx$(DELIM)Make.defs
+ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43438),y)
+CSRCS += bcmf_chip_43438.c
+endif
 
-endif # CONFIG_DRIVERS_IEEE80211
+# Include BCM43xxx build support
+
+DEPPATH += --dep-path wireless$(DELIM)ieee80211$(DELIM)bcm43xxx
+VPATH += :wireless$(DELIM)ieee80211$(DELIM)bcm43xxx
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)ieee80211$(DELIM)bcm43xxx}
+
+endif # CONFIG_IEEE80211_BROADCOM_FULLMAC
