@@ -750,12 +750,13 @@ config ARCH_BOARD_OLIMEX_STM32H407
 
 config ARCH_BOARD_OLIMEX_STM32E407
 	bool "Olimex STM32 E407 board"
-	depends on ARCH_CHIP_STM32F407ZG
+	depends on ARCH_CHIP_STM32F407ZG || ARCH_CHIP_STM32F407ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins).
+		Olimex STM32 E407 board based on the STMicro STM32F407ZGT6 (144pins)
+		or STM32F407ZE on newer boards.
 
 config ARCH_BOARD_OLIMEX_STM32P107
 	bool "Olimex STM32 P107 board"
