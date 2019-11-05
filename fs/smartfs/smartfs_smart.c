@@ -673,6 +673,20 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
       goto errout_with_semaphore;
     }
 
+  /* Test if we opened for APPEND mode.  If we did, then seek to the
+   * end of the file.
+   */
+
+  if (sf->oflags & O_APPEND)
+    {
+      ret = smartfs_seek_internal(fs, sf, 0, SEEK_END);
+      if (ret < 0)
+        {
+          ret = -EIO;
+          goto errout_with_semaphore;
+        }
+    }
+
   /* First test if we are overwriting an existing location or writing to
    * a new one.
    */

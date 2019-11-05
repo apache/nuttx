@@ -131,6 +131,12 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  *   end-of-file condition, or -1 on failure with errno set appropriately.
  *   See write() return values
  *
+ * Assumptions/Limitations:
+ *   POSIX requires that opening a file with the O_APPEND flag should have no
+ *   effect on the location at which pwrite() writes data.  However, on NuttX
+ *   like on Linux, if a file is opened with O_APPEND, pwrite() appends data
+ *   to the end of the file, regardless of the value of offset.
+ *
  ****************************************************************************/
 
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)

@@ -1901,7 +1901,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
 
   /* Loop until either (1) the file has been fully extended with zeroed data
    * or (2) an error occurs.  We assume we start with the current sector in
-   * cache (ff_currentsector)
+   * cache (ff_currentsector).
    */
 
   oldsize   = sf->entry.datlen;
@@ -1909,7 +1909,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
   DEBUGASSERT(length > oldsize);
 
   /* Seek to the end of the file for the append/write operation, remembering
-   * the current file position.  It will be retored before returneding; the
+   * the current file position.  It will be restored before returning; the
    * truncate operation must not alter the file position.
    */
 
