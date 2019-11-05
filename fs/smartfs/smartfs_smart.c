@@ -260,23 +260,19 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
       /* TODO: Test open mode based on the file mode */
 
-      /* The file exists.  Check if we are opening it for O_CREAT or
-       * O_TRUNC mode and delete the sector chain if we are.
+      /* If O_TRUNC is specified and the file is opened for writing,
+       * then truncate the file.  This operation requires that the file
+       * is writeable. O_TRUNC without write access is ignored.
        */
 
-      if ((oflags & (O_CREAT | O_TRUNC)) != 0)
+      if ((oflags & (O_TRUNC | O_WROK)) == (O_TRUNC | O_WROK))
         {
-          /* Don't truncate if open for APPEND */
+          /* Truncate the file as part of the open */
 
-          if (!(oflags & O_APPEND))
+          ret = smartfs_shrinkfile(fs, sf, 0);
+          if (ret < 0)
             {
-              /* Truncate the file as part of the open */
-
-              ret = smartfs_shrinkfile(fs, sf, 0);
-              if (ret < 0)
-                {
-                  goto errout_with_buffer;
-                }
+              goto errout_with_buffer;
             }
         }
     }
