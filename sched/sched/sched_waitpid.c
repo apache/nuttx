@@ -547,10 +547,13 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
               child = group_exitchild(rtcb->group);
               DEBUGASSERT(child != NULL);
 
-              /* Discard the child entry */
+              /* Discard the child entry, if we have one */
 
-              (void)group_removechild(rtcb->group, child->ch_pid);
-              group_freechild(child);
+              if (child != NULL)
+                {
+                  (void)group_removechild(rtcb->group, child->ch_pid);
+                  group_freechild(child);
+                }
             }
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
