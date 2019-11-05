@@ -71,17 +71,17 @@
 
 /* LED
  *
- * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a
- * Blue LED and LD3 a Red LED, that can be controlled by software. The following
- * definitions assume the default Solder Bridges are installed.
+ * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software. The
+ * following definitions assume the default Solder Bridges are installed.
  */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN0)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN7)
-#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
-                        GPIO_PORTB | GPIO_PIN14)
+#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN7)
+#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN14)
 
 #define GPIO_LED_GREEN GPIO_LD1
 #define GPIO_LED_BLUE  GPIO_LD2
@@ -91,12 +91,13 @@
 
 /* BUTTONS
  *
- * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.  A high value
- * will be sensed when the button is depressed.
+ * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.
+ * A high value will be sensed when the button is depressed.
  * Note:
- *    1) That the EXTI is included in the definition to enable an interrupt on this
- *       IO.
- *    2) The following definitions assume the default Solder Bridges are installed.
+ *    1) That the EXTI is included in the definition to enable an interrupt
+ *       on this IO.
+ *    2) The following definitions assume the default Solder Bridges are
+ *       installed.
  */
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
@@ -118,11 +119,23 @@
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT| \
                            GPIO_SPEED_100MHz|GPIO_PUSHPULL| \
                            GPIO_PORTG|GPIO_PIN7)
-
 #else
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz| \
                            GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN7)
 #endif
+
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* Example, used free Ports on the board */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN2)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN4)
+#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN5)
 
 /* X-NUCLEO IKS01A2 */
 
@@ -179,7 +192,8 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
+ *   Called to configure SPI chip select GPIO pins for the
+ *   Nucleo-H743ZI board.
  *
  ****************************************************************************/
 
@@ -200,11 +214,23 @@ int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO-Driver.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
+int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the nucleo-144 board.
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/
 

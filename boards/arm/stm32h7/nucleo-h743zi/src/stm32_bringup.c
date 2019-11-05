@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi/src/stm32_bringup.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,8 @@
 #  include "stm32_rtc.h"
 #endif
 
+#include "stm32_gpio.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -70,7 +72,7 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2c_register(int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = stm32_i2cbus_initialize(bus);
@@ -139,7 +141,7 @@ int stm32_bringup(void)
 {
   int ret = OK;
 #ifdef HAVE_RTC_DRIVER
-  FAR struct rtc_lowerhalf_s *lower;
+  struct rtc_lowerhalf_s *lower;
 #endif
 
   UNUSED(ret);
@@ -213,6 +215,17 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif  /* CONFIG_ADC */
+
+#ifdef CONFIG_DEV_GPIO
+  /* Register the GPIO driver */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_SENSORS_LSM6DSL
   ret = stm32_lsm6dsl_initialize("/dev/lsm6dsl0");

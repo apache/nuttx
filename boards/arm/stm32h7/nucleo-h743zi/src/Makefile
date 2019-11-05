@@ -92,4 +92,8 @@ ifeq ($(CONFIG_WL_NRF24L01),y)
 CSRCS += stm32_nrf24l01.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
