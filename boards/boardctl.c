@@ -269,7 +269,7 @@ static inline int boardctl_pmctrl(FAR struct boardioc_pm_ctrl_s *ctrl)
         break;
 
       case BOARDIOC_PM_STAYCOUNT:
-        ctrl->count = pm_stay(ctrl->domain, ctrl->state);
+        ctrl->count = pm_staycount(ctrl->domain, ctrl->state);
         break;
 
       case BOARDIOC_PM_QUERYSTATE:
