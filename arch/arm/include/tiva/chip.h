@@ -296,6 +296,30 @@
 #  define TIVA_NAES            0  /* No AES module */
 #  define TIVA_NDES            0  /* No DES module */
 #  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
+#elif defined(CONFIG_ARCH_CHIP_TM4C129ENCPDT)
+#  undef  LM3S                    /* Not LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  define TM4C                 1  /* TM4C family */
+#  undef  SIMPLELINK              /* Not SimpleLink family */
+#  define TIVA_NTIMERS         8  /* Eight Dual 16/32-bit timers A/B */
+#  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
+#  define TIVA_NWDT            2  /* Two watchdog timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One 10/100Mbit Ethernet controller */
+#  define TIVA_NLCD            1  /* One LCD controller */
+#  define TIVA_NSSI            4  /* Four SSI modules */
+#  define TIVA_NUARTS          8  /* Eight UART modules */
+#  define TIVA_NI2C            10 /* Ten I2C modules */
+#  define TIVA_NADC            2  /* Two ADC modules */
+#  define TIVA_NPWM            4  /* Four PWM generator modules */
+#  define TIVA_NQEI            1  /* One quadrature encoders */
+#  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
+#  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
+#  define TIVA_NUSBOTGHS       1  /* One USB 2.0 OTG HS */
+#  define TIVA_NCRC            1  /* One CRC module */
+#  define TIVA_NAES            0  /* No AES module */
+#  define TIVA_NDES            0  /* No DES module */
+#  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
 #elif defined(CONFIG_ARCH_CHIP_TM4C129XNCZAD)
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
