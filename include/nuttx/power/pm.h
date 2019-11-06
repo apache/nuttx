@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* Definition of terms.  Various "sleep" and low power consumption states
  * have various names and are sometimes used in conflicting ways.  In the
  * PM logic, we will use the following terminology:
@@ -77,7 +78,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_PM_NDOMAINS. Defines the number of "domains" that activity may be
  * monitored on.  For example, you may want to separately manage the power
  * from the Network domain, shutting down the network when it is not be used,
@@ -238,7 +241,8 @@ enum pm_state_e
 {
   PM_RESTORE = -1, /* PM_RESTORE is not a low power state.
                     *
-                    * PM_RESTORE is used to notify for restore from low power state.
+                    * PM_RESTORE is used to notify for restore from low power
+                    * state.
                     */
   PM_NORMAL = 0,   /* Normal full power operating mode.  If the driver is in
                     * a reduced power usage mode, it should immediately re-
@@ -248,9 +252,9 @@ enum pm_state_e
                     */
   PM_IDLE,         /* Drivers will receive this state change if it is
                     * appropriate to enter a simple IDLE power state.  This
-                    * would include simple things such as reducing display back-
-                    * lighting.  The driver should be ready to resume normal
-                    * activity instantly.
+                    * would include simple things such as reducing display
+                    * back-lighting.  The driver should be ready to resume
+                    * normal activity instantly.
                     *
                     * PM_IDLE may be followed by PM_STANDBY or PM_NORMAL.
                     */
@@ -263,11 +267,11 @@ enum pm_state_e
                     *
                     * PM_STANDBY may be followed PM_SLEEP or by PM_NORMAL
                     */
-  PM_SLEEP,        /* The system is entering deep sleep mode.  The most drastic
-                    * power reduction measures possible should be taken in this
-                    * state. It may require some time to get back to normal
-                    * operation from SLEEP (some MCUs may even require going
-                    * through reset).
+  PM_SLEEP,        /* The system is entering deep sleep mode.  The most
+                    * drastic power reduction measures possible should be
+                    * taken in this state. It may require some time to get
+                    * back to normal operation from SLEEP (some MCUs may
+                    * even require going through reset).
                     *
                     * PM_SLEEP may be following by PM_NORMAL
                     */

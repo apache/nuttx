@@ -398,8 +398,8 @@ struct boardioc_nxterm_create_s
 
 struct boardioc_nxterm_ioctl_s
 {
- int cmd;                         /* IOCTL command */
- uintptr_t arg;                   /* IOCTL argument */
+  int cmd;                         /* IOCTL command */
+  uintptr_t arg;                   /* IOCTL argument */
 };
 #endif /* CONFIG_NXTERM */
 

@@ -1,7 +1,8 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/serial/serial_io.c
  *
- *   Copyright (C) 2007-2009, 2011, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,20 +52,21 @@
 
 #include <nuttx/serial/serial.h>
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_xmitchars
  *
  * Description:
- *   This function is called from the UART interrupt handler when an interrupt
- *   is received indicating that there is more space in the transmit FIFO.  This
- *   function will send characters from the tail of the xmit buffer while the driver
- *   write() logic adds data to the head of the xmit buffer.
+ *   This function is called from the UART interrupt handler when an
+ *   interrupt is received indicating that there is more space in the
+ *   transmit FIFO.  This function will send characters from the tail of
+ *   the xmit buffer while the driver write() logic adds data to the head
+ *   of the xmit buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_xmitchars(FAR uart_dev_t *dev)
 {
@@ -105,8 +107,8 @@ void uart_xmitchars(FAR uart_dev_t *dev)
       uart_disabletxint(dev);
     }
 
-  /* If any bytes were removed from the buffer, inform any waiters there there is
-   * space available.
+  /* If any bytes were removed from the buffer, inform any waiters that
+   * there is space available.
    */
 
   if (nbytes)
@@ -119,16 +121,16 @@ void uart_xmitchars(FAR uart_dev_t *dev)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: uart_receivechars
  *
  * Description:
- *   This function is called from the UART interrupt handler when an interrupt
- *   is received indicating that are bytes available in the receive fifo.  This
- *   function will add chars to head of receive buffer.  Driver read() logic will
- *   take characters from the tail of the buffer.
+ *   This function is called from the UART interrupt handler when an
+ *   interrupt is received indicating that are bytes available in the
+ *   receive fifo.  This function will add chars to head of receive buffer.
+ *   Driver read() logic will take characters from the tail of the buffer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void uart_recvchars(FAR uart_dev_t *dev)
 {
@@ -151,11 +153,12 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* Pre-calculate the watermark level that we will need to test against. */
 
-  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) / 100;
+  watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) /
+              100;
 #endif
 
-  /* Loop putting characters into the receive buffer until there are no further
-   * characters to available.
+  /* Loop putting characters into the receive buffer until there are no
+   * further characters to available.
    */
 
   while (uart_rxavailable(dev))
@@ -248,12 +251,13 @@ void uart_recvchars(FAR uart_dev_t *dev)
       else
 #endif
 
-      /* If the RX buffer becomes full, then the serial data is discarded.  This is
-       * necessary because on most serial hardware, you must read the data in order
-       * to clear the RX interrupt. An option on some hardware might be to simply
-       * disable RX interrupts until the RX buffer becomes non-FULL.  However, that
-       * would probably just cause the overrun to occur in hardware (unless it has
-       * some large internal buffering).
+      /* If the RX buffer becomes full, then the serial data is discarded.
+       * This is necessary because on most serial hardware, you must read
+       * the data in order to clear the RX interrupt. An option on some
+       * hardware might be to simply disable RX interrupts until the RX
+       * buffer becomes non-FULL.  However, that would probably just cause
+       * the overrun to occur in hardware (unless it has some large internal
+       * buffering).
        */
 
       if (!is_full)

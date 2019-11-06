@@ -117,10 +117,10 @@ void pm_activity(int domain, int priority)
 
       /* Check the elapsed time.  In periods of low activity, time slicing is
        * controlled by IDLE loop polling; in periods of higher activity, time
-       * slicing is controlled by driver activity.  In either case, the duration
-       * of the time slice is only approximate; during times of heavy activity,
-       * time slices may be become longer and the activity level may be over-
-       * estimated.
+       * slicing is controlled by driver activity.  In either case, the
+       * duration of the time slice is only approximate; during times of
+       * heavy activity, time slices may be become longer and the activity
+       * level may be over-estimated.
        */
 
       now     = clock_systimer();
