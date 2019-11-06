@@ -76,11 +76,10 @@
  * CONFIG_STM32H7_FMC=y         : Enables the FMC
  * CONFIG_STM32H7_FMC_S[D]RAM=y : SRAM and/or SDRAM is available via the FMC.
  *                                Either of these autoselects
- *                                    CONFIG_ARCH_HAVE_HEAP2
- *                                which is what we are interested in here.
+ *                                CONFIG_ARCH_HAVE_HEAP2 which is what we
+ *                                are interested in here.
  * CONFIG_HEAP2_BASE            : The base address of the external RAM in
- *                                 the FMC
- *                                address space
+ *                                the FMC address space
  * CONFIG_HEAP2_SIZE            : The size of the external RAM in the FMC
  *                                address space
  * CONFIG_MM_REGIONS            : Must be set to a large enough value to
@@ -184,15 +183,16 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  *   The following memory map is assumed for the kernel build:
  *
- *     Kernel .data region.  Size determined at link time.
- *     Kernel .bss  region  Size determined at link time.
+ *     Kernel .data region.       Size determined at link time.
+ *     Kernel .bss  region        Size determined at link time.
  *     Kernel IDLE thread stack.  Size determined by
- *     CONFIG_IDLETHREAD_STACKSIZE.
+ *                                CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
- *     User .data region.  Size determined at link time.
- *     User .bss region  Size determined at link time.
- *     Kernel heap.  Size determined by CONFIG_MM_KERNEL_HEAPSIZE.
- *     User heap.  Extends to the end of SRAM.
+ *     User .data region.         Size determined at link time.
+ *     User .bss region           Size determined at link time.
+ *     Kernel heap.               Size determined by
+ *                                CONFIG_MM_KERNEL_HEAPSIZE.
+ *     User heap.                 Extends to the end of SRAM.
  *
  ****************************************************************************/
 
