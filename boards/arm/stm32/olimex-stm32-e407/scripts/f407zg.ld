@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/olimex-stm32-e407/scripts/ld.script
+ * boards/arm/stm32/olimex-stm32-e407/scripts/f407zg.ld
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
