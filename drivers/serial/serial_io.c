@@ -127,7 +127,7 @@ void uart_xmitchars(FAR uart_dev_t *dev)
  * Description:
  *   This function is called from the UART interrupt handler when an
  *   interrupt is received indicating that are bytes available in the
- *   receive fifo.  This function will add chars to head of receive buffer.
+ *   receive FIFO.  This function will add chars to head of receive buffer.
  *   Driver read() logic will take characters from the tail of the buffer.
  *
  ****************************************************************************/
