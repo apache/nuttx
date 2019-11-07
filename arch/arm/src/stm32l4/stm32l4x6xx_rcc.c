@@ -968,6 +968,14 @@ static void stm32l4_stdclockconfig(void)
       stm32l4_rcc_enablelsi();
 #endif
 
+#if defined(STM32L4_BOARD_USEHSI)
+      /* Enable wake-up to HSI from Stop modes */
+
+      regval  = getreg32(STM32L4_RCC_CFGR);
+      regval |= RCC_CFGR_STOPWUCK_HSI;
+      putreg32(regval, STM32L4_RCC_CFGR);
+#endif
+
 #if defined(STM32L4_USE_LSE)
       /* Low speed external clock source LSE
        *
