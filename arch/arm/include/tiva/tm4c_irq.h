@@ -788,7 +788,7 @@
 
 #  define TIVA_RESERVED_110   (110) /* Vector 110: Reserved */
 #  define TIVA_RESERVED_111   (111) /* Vector 111: Reserved */
-#  define TIVA_RESERVED_112   (113) /* Vector 112: Reserved */
+#  define TIVA_RESERVED_112   (112) /* Vector 112: Reserved */
 #  define TIVA_RESERVED_113   (113) /* Vector 113: Reserved */
 #  define TIVA_IRQ_TIMER6A    (114) /* Vector 114: 16/32-Bit Timer 6 A */
 #  define TIVA_IRQ_TIMER6B    (115) /* Vector 115: 16/32-Bit Timer 6 B */
