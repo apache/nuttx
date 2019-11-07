@@ -61,13 +61,13 @@
  * CFGDIOC_GETCONFIG - Get a specified Config Data item.
  *
  *   ioctl argument:  Pointer to a config_data_s structure to receive the
- *                    config data.  All fields of the strucure must be
+ *                    config data.  All fields of the structure must be
  *                    specified (i.e. id, instance, pointer and len).
  *
  * CFGDIOC_SETCONFIG - Set a specified Config Data Item
  *
  *   ioctl argument:  Pointer to a config_data_s structure to receive the
- *                    config data.  All fields of the strucure must be
+ *                    config data.  All fields of the structure must be
  *                    specified (i.e. id, instance, pointer and len).
  */
 
