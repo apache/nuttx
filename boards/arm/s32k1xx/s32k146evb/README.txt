@@ -10,6 +10,7 @@ Contents
   o Serial Console
   o LEDs and Buttons
   o OpenSDA Notes
+  o Thread-Aware Debugging with Eclipse
   o Configurations
 
 Status
@@ -107,6 +108,29 @@ OpenSDA Notes
   - Using Segger J-Link:  Easy... but remember to use the SWD J14 connector
     in the center of the board and not the OpenSDA connector closer to the
     OpenSDA USB connector J7.
+
+Thread-Aware Debugging with Eclipse
+===================================
+
+  Based on correspondence with Han Raaijmakers <han.raaijmakers@nxp.com>
+
+  OpenOCD-nuttx build on Linux (NXW00504) making use of S32DS for ARM 2018R1. Nuttx is built with debug symbols.
+
+  Resulting debug window gives nuttx threads.  The full stack details can be viewed.
+
+  HOW TO GET THERE:
+
+  First we build openocd as described in:
+    https://micro-ros.github.io/docs/tutorials/advanced/debugging_gdb_openocd/
+
+  The nuttx parameters where exactly the same as found on this page
+
+  I've added a s32k146.cfg file in the scripts/ folder
+
+  Start openocd with following command (adapt the path info)
+
+    /usr/local/bin/openocd -f /usr/share/openocd/scripts/interface/jlink.cfg \
+    -f /home/han/data1Ta/s32k146/openocd-nuttx/tcl/target/s32k146.cfg -c init -c "reset halt"
 
 Configurations
 ==============
