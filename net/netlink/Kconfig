@@ -3,25 +3,28 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menu "Netlink Socket Support"
+
 config NET_NETLINK
 	bool "Netlink socket support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
-		Enable support for Nelink-like IPC sockets that will permit user-
+		Enable support for Netlink-like IPC sockets that will permit user-
 		space applications to interact with network services.
 
-		This logic is a WIP.  Currenlty only fragmentary support is
-		available, not enough to actually do antything of consequence.
-		Hence, the feature depends on EXPERIMENTAL.
+		This logic is a WIP.  Currently only fragmentary support is
+		available, not enough to actually do anything of consequence.
+		Only the following features are implemented at this time:
+
+		  NETLINK_ROUTE capability to read the ARP table.
 
 if NET_NETLINK
 
 config NETLINK_CONNS
-	int "Number of netlink connections"
+	int "Number of Netlink connections"
 	default 4
 	---help---
-		Maximum number of netlink connections (all tasks).
+		Maximum number of Netlink connections (all tasks).
 
 menu "Netlink Protocols"
 
@@ -33,3 +36,5 @@ config NETLINK_ROUTE
 
 endmenu # Netlink Protocols
 endif # NET_NETLINK
+endmenu # Netlink Socket Support
+
