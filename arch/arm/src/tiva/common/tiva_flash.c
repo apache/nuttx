@@ -2,7 +2,7 @@
  * arch/arm/src/tiva/common/tiva_flash.c
  *
  *   Copyright (c) 2013 Max Holtzberg. All rights reserved.
- *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018-2019 Gregory Nutt. All rights reserved.
  *
  *   Authors: Max Holtzberg <mh@uvc.de>
  *            Gregory Nutt <gnutt@nuttx.org>
@@ -176,7 +176,7 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
       if (regval != 0)
         {
-           return -EACCES;
+          return -EACCES;
         }
     }
 
@@ -264,8 +264,16 @@ static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
  * Name: tiva_write
  *
  * Description:
- *   Some FLASH parts have the ability to write an arbitrary number of
- *   bytes to an arbitrary offset on the device.
+ *   Write a block of data to FLASH memory.
+ *
+ * Input Parameters:
+ *   dev: Device representing Tiva FLASH.
+ *   offset: Destination offset in FLASH memory.
+ *   nbytes: Number of bytes to write.
+ *   buf: Source buffer containing data to be written.
+ *
+ * Returned Value:
+ *   Number of bytes written to FLASH.
  *
  ****************************************************************************/
 
@@ -273,30 +281,39 @@ static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
 static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes, FAR const uint8_t *buf)
 {
+  /* WARNING and REVISIT:
+   * Because this function exports a byte write interface and
+   * is conditioned upon CONFIG_MTD_BYTE_WRITE, it is supposed
+   * to support unaligned writes and writes of arbitrary byte
+   * counts. But it doesn't. This needs to be fixed!
+   */
+
   FAR const uint32_t *src = (uint32_t *)((uintptr_t)buf & ~3);
   ssize_t remaining;
   uint32_t regval;
 
   DEBUGASSERT(dev != NULL && buf != NULL);
   DEBUGASSERT(((uintptr_t)buf & 3) == 0 && (offset & 3) == 0 &&
-              (nbytes && 3) == 0);
+              (nbytes & 3) == 0);
 
   /* Clear the flash access and error interrupts. */
 
-   putreg32(FLASH_FCMISC_AMISC | FLASH_FCMISC_VOLTMISC | FLASH_FCMISC_ERMISC,
-            TIVA_FLASH_FCMISC);
+  putreg32(FLASH_FCMISC_AMISC | FLASH_FCMISC_VOLTMISC | FLASH_FCMISC_ERMISC,
+           TIVA_FLASH_FCMISC);
 
-  /* Adjust the offset to the start of the partition.
-   * REVISIT:  If we really wanted to gracefully handle unaligned addresses,
-   * offsets, and sizes we would have to do a little more than this.
-   */
+  /* Adjust the offset to the start of the partition. */
 
   offset   &= ~3;
   offset   += TIVA_VIRTUAL_OFFSET;
   nbytes   &= ~3;
   remaining = nbytes;
 
-#if defined(CONFIG_ARCH_CHIP_TM4C1294NCPDT)
+#if defined (CONFIG_ARCH_CHIP_TM4C123) || defined (CONFIG_ARCH_CHIP_TM4C129)
+  /* TM4C123x and TM4C129x parts have a 32-word FLASH memory write buffer,
+   * allowing faster writes by writing 32 words in the time it would take
+   * to write 16.
+   */
+
   while (remaining > 0)
     {
       /* Set the address of this block of words. */
@@ -319,30 +336,34 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
 
        putreg32(FLASH_FMC_WRKEY | FLASH_FMC2_WRBUF, TIVA_FLASH_FMC2);
 
-       /* Wait until the write buffer has been programmed. */
+      /* Wait until the write buffer has been programmed. */
 
-       while (getreg32(TIVA_FLASH_FMC2) & FLASH_FMC2_WRBUF)
-         {
-         }
-     }
+      while (getreg32(TIVA_FLASH_FMC2) & FLASH_FMC2_WRBUF)
+        {
+        }
+    }
 #else
+  /* These parts do not have the 32-word FLASH memory write buffer, so
+   * we must do the slower 1-word-at-a-time write.
+   */
+
   while (remaining > 0)
     {
       /* Program the next word. */
 
-       putreg32(offset, TIVA_FLASH_FMA);
-       putreg32(*src, TIVA_FLASH_FMD);
-       putreg32(FLASH_FMC_WRKEY | FLASH_FMC_WRITE, TIVA_FLASH_FMC);
+      putreg32(offset, TIVA_FLASH_FMA);
+      putreg32(*src, TIVA_FLASH_FMD);
+      putreg32(FLASH_FMC_WRKEY | FLASH_FMC_WRITE, TIVA_FLASH_FMC);
 
-       /* Wait until the word has been programmed. */
+      /* Wait until the word has been programmed. */
 
-       while (getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
+      while (getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
 
-       /* Increment to the next word. */
+      /* Increment to the next word. */
 
-       src++;
-       offset    += 4;
-       remaining -= 4;
+      src++;
+      offset    += 4;
+      remaining -= 4;
     }
 #endif
 
@@ -354,7 +375,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
 
   if (regval != 0)
     {
-       return -EACCES;
+      return -EACCES;
     }
 
   return nbytes;
