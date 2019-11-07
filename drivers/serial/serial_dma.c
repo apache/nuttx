@@ -206,9 +206,12 @@ void uart_xmitchars_done(FAR uart_dev_t *dev)
       /* Move tail for nbytes. */
 
       txbuf->tail  = (txbuf->tail + nbytes) % txbuf->size;
-      xfer->nbytes = 0;
-      xfer->length = xfer->nlength = 0;
     }
+
+  /* Reset xmit buffer. */
+
+  xfer->nbytes = 0;
+  xfer->length = xfer->nlength = 0;
 
   /* If any bytes were removed from the buffer, inform any waiters there
    * there is space available.
