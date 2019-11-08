@@ -259,7 +259,6 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
   putreg32(regval, MPU_CTRL);
 }
 
-
 /****************************************************************************
  * Name: mpu_priv_stronglyordered
  *
@@ -538,7 +537,7 @@ static inline void mpu_priv_extsram(uintptr_t base, size_t size)
  * Name: mpu_peripheral
  *
  * Description:
- *   Configure a region as privileged periperal address space
+ *   Configure a region as privileged peripheral address space
  *
  ****************************************************************************/
 
@@ -570,6 +569,47 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
            MPU_RASR_S                                   | /* Shareable     */
            MPU_RASR_B                                   | /* Bufferable    */
            MPU_RASR_AP_RWNO                             | /* P:RW   U:None */
+           MPU_RASR_XN;                                   /* Instruction access disable */
+
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_user_peripheral
+ *
+ * Description:
+ *   Configure a region as user peripheral address space
+ *
+ ****************************************************************************/
+
+static inline void mpu_user_peripheral(uintptr_t base, size_t size)
+{
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionceil(size);
+  subregions = mpu_subregion(base, size, l2size);
+
+  /* Then configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_B                                   | /* Bufferable    */
+           MPU_RASR_AP_RWRW                             | /* P:RW   U:RW */
            MPU_RASR_XN;                                   /* Instruction access disable */
 
   putreg32(regval, MPU_RASR);

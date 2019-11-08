@@ -59,6 +59,7 @@
 
 #include "stm32_bbsram.h"
 #include "chip.h"
+#include "mpu.h"
 #include "stm32_pwr.h"
 
 #ifdef CONFIG_STM32H7_BBSRAM
@@ -805,6 +806,19 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
     {
       return -EINVAL;
     }
+
+#if defined(CONFIG_ARMV7M_DCACHE)
+  /* ST placed the H7's BBSRAM in the default region for SRAM so we need to
+   * make it not cacheable
+   */
+
+#  if defined(CONFIG_BUILD_PROTECTED)
+  mpu_peripheral(STM32_BBSRAM_BASE, STM32H7_BBSRAM_SIZE);
+#  else
+  mpu_user_peripheral(STM32_BBSRAM_BASE, STM32H7_BBSRAM_SIZE);
+  mpu_control(true, true, true);
+#  endif
+#endif
 
   memset(g_bbsram, 0, sizeof(g_bbsram));
 
