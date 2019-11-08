@@ -162,7 +162,7 @@ config RAMLOG_SYSLOG
 		Use the RAM logging device for the syslogging interface.  If this
 		feature is enabled (along with SYSLOG), then all debug output (only)
 		will be re-directed to the circular buffer in RAM.  This RAM log can
-		be viewed from NSH using the 'dmesg'command.
+		be viewed from NSH using the 'dmesg' command.
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"

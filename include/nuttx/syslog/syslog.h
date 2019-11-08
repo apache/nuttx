@@ -50,14 +50,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_SYSLOG_INTBUFFER - Enables an interrupt buffer that will be used
  *   to serialize debug output from interrupt handlers.
  * CONFIG_SYSLOG_INTBUFSIZE - The size of the interrupt buffer in bytes.
  * CONFIG_SYSLOG_DEVPATH - The full path to the system logging device
  *
  * In addition, some SYSLOG device must also be enabled that will provide
- * the syslog output "channel.  As of this writing, there are two SYSLOG
+ * the syslog output channel.  As of this writing, there are two SYSLOG
  * devices available:
  *
  *   1. A RAM SYSLOGing device that will log data into a circular buffer
@@ -99,7 +101,7 @@
 
 enum syslog_init_e
 {
-  SYSLOG_INIT_RESET = 0, /* Power on SYSLOG initializaton phase */
+  SYSLOG_INIT_RESET = 0, /* Power on SYSLOG initialization phase */
   SYSLOG_INIT_EARLY,     /* Early initialization in up_initialize() */
   SYSLOG_INIT_LATE       /* Late initialization in nx_start(). */
 };

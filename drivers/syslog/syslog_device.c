@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/syslog/syslog_device.c
  *
- *   Copyright (C) 2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,9 +232,9 @@ static int syslog_dev_outputready(void)
 
       if (g_syslog_dev.sl_state == SYSLOG_UNINITIALIZED ||
           g_syslog_dev.sl_state == SYSLOG_INITIALIZING)
-       {
-         return -EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
-       }
+        {
+          return -EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
+        }
 
       /* Case (6) */
 
@@ -259,7 +259,7 @@ static int syslog_dev_outputready(void)
         {
           /* Try again to initialize the device.  We may do this repeatedly
            * because the log device might be something that was not ready
-           * the first time that syslog_dev_initializee() was called (such as a
+           * the first time that syslog_dev_initialize() was called (such as a
            * USB serial device that has not yet been connected or a file in
            * an NFS mounted file system that has not yet been mounted).
            */
@@ -332,24 +332,36 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
   if (g_syslog_dev.sl_state == SYSLOG_REOPEN)
     {
       /* Re-opening: Then we should already have a copy of the path to the
-       * device.
+       * device. But that may be for a different device if we revert back
+       * to old syslog destination after the previous attempt failed.
        */
 
-      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL &&
-                  strcmp(g_syslog_dev.sl_devpath, devpath) == 0);
+      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
     }
   else
     {
-      /* Initializing.  Copy the device path so that we can use it if we
-       * have to re-open the file.
-       */
+      /* Initializing. We do not have the device path yet. */
 
       DEBUGASSERT(g_syslog_dev.sl_devpath == NULL);
-      g_syslog_dev.sl_oflags  = oflags;
-      g_syslog_dev.sl_mode    = mode;
-      g_syslog_dev.sl_devpath = strdup(devpath);
-      DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
     }
+
+  /* Copy the device path so that we can use it if we
+   * have to re-open the file.
+   */
+
+  g_syslog_dev.sl_oflags  = oflags;
+  g_syslog_dev.sl_mode    = mode;
+  if (g_syslog_dev.sl_devpath != devpath)
+    {
+      if (g_syslog_dev.sl_devpath != NULL)
+        {
+          kmm_free(g_syslog_dev.sl_devpath);
+        }
+
+      g_syslog_dev.sl_devpath = strdup(devpath);
+    }
+
+  DEBUGASSERT(g_syslog_dev.sl_devpath != NULL);
 
   g_syslog_dev.sl_state = SYSLOG_INITIALIZING;
 
@@ -508,8 +520,8 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen)
                * - endptr points to the special character.
                */
 
-               writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
-               if (writelen > 0)
+              writelen = (size_t)((uintptr_t)endptr - (uintptr_t)buffer);
+              if (writelen > 0)
                 {
                   nwritten = file_write(&g_syslog_dev.sl_file, buffer, writelen);
                   if (nwritten < 0)

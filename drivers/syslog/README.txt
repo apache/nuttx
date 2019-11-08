@@ -116,7 +116,7 @@ SYSLOG Channels
   SYSLOG Channel Interfaces
   -------------------------
   In the NuttX SYSLOG implementation, the underlying device logic the
-  supports the SYSLOG output is referred to as a SYSLOG channel//.  Each
+  supports the SYSLOG output is referred to as a SYSLOG channel.  Each
   SYSLOG channel is represented by an interface defined in
   include/nuttx/syslog/syslog.h:
 
@@ -196,7 +196,7 @@ SYSLOG Channels
 
   Description:
 
-    One power up, the SYSLOG facility is non-existent or limited to very
+    On power up, the SYSLOG facility is non-existent or limited to very
     low-level output.  This function is called later in the initialization
     sequence after full driver support has been initialized.  It installs
     the configured SYSLOG drivers and enables full SYSLOGing capability.
@@ -354,7 +354,7 @@ SYSLOG Channel Options
   /dev/ttyS0.
 
   This SYSLOG device channel is selected with CONFIG_SYSLOG_CHAR and has no
-  other dependencies.  Differences fromthe SYSLOG console channel include:
+  other dependencies.  Differences from the SYSLOG console channel include:
 
     * CONFIG_SYSLOG_DEVPATH.  This configuration option string must be set
       provide the full path to the character device to be used.
@@ -399,8 +399,8 @@ SYSLOG Channel Options
 
     This tiny function is simply a wrapper around syslog_dev_initialize()
     and syslog_channel().  It calls syslog_dev_initialize() to configure
-    the character file at 'devpath then calls syslog_channel() to use that
-    device as the SYSLOG output channel.
+    the character file at 'devpath' and then calls syslog_channel() to use
+    that device as the SYSLOG output channel.
 
     File SYSLOG channels differ from other SYSLOG channels in that they
     cannot be established until after fully booting and mounting the target
