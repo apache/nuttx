@@ -106,6 +106,7 @@ uint8_t board_buttons(void)
     {
       ret |= BUTTON_WAKE_BIT;
     }
+
   return ret;
 }
 

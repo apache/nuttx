@@ -78,7 +78,7 @@
  *                       IMXRT_PERCLK_PODF_DIVIDER = 2
  *                        62.5Mhz = 125Mhz / 2
  *
- *     SEMC_CLK_ROOT              = PERIPH_CLK / IMXRT_SEMC_PODF_DIVIDER 
+ *     SEMC_CLK_ROOT              = PERIPH_CLK / IMXRT_SEMC_PODF_DIVIDER
  *                       IMXRT_SEMC_PODF_DIVIDER = 4
  *                       125Mhz   = 500 / 4
  *
@@ -132,7 +132,8 @@
  *
  *   -------------------- ----------------------------- ----
  *   SYMBOL                   Meaning                   LED1
- *   -------------------- ----------------------------- ---- */
+ *   -------------------- ----------------------------- ----
+ */
 
 #define LED_STARTED       0  /* NuttX has been started  OFF    */
 #define LED_HEAPALLOCATE  1  /* Heap has been allocated OFF    */
@@ -144,8 +145,7 @@
 #define LED_PANIC         7  /* The system has crashed  FLASH  */
 #undef  LED_IDLE             /* Not used                       */
 
-/*
- * The intention is that if the LED is statically on, NuttX has successfully
+/* The intention is that if the LED is statically on, NuttX has successfully
  * booted and is, apparently, running normally.  If the LED is flashing at
  * approximately 2Hz, then a fatal error has been detected and the system has
  * halted.
@@ -194,9 +194,7 @@
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
-/****************************************************************************/
-/*********************************** PINNING ********************************/
-/****************************************************************************/
+/* Pinning ******************************************************************/
 
 /* LEDs *********************************************************************/
 
@@ -207,7 +205,7 @@
 
 #define GPIO_SWWAKE      (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | | IOMUX_SWWAKE_DEFAULT \
                           GPIO_PORT5 | GPIO_PIN0 )                      /* WAKE */
- 
+
 /* ETH Disambiguation ********************************************************/
 
 #define GPIO_ENET_INT   (IOMUX_ENET_INT_DEFAULT | GPIO_INTERRUPT | \
@@ -215,11 +213,13 @@
 #define GPIO_ENET_IRQ   IMXRT_IRQ_GPIO1_12
 
 /* Make sure these entries match to allow interrupts to be present */
+
 #define GPIO_ENET_GRP   IMXRT_GPIO1_16_31_IRQ
-#ifndef GPIO_ENET_GRP
-#ifdef CONFIG_IMXRT_ENET
-#error GPIO_ENET_IRQ Host IRQ not defined!
-#endif
+#
+ifndef GPIO_ENET_GRP
+#  ifdef CONFIG_IMXRT_ENET
+#    error GPIO_ENET_IRQ Host IRQ not defined!
+#  endif
 #endif
 
 #define GPIO_ENET_MDIO                  GPIO_ENET_MDIO_1|IOMUX_ENET_MDIO_DEFAULT
@@ -231,8 +231,8 @@
 #define GPIO_ENET_RX_DATA01             GPIO_ENET_RX_DATA01_2|IOMUX_ENET_DATA_DEFAULT
 #define GPIO_ENET_TX_DATA00             GPIO_ENET_TX_DATA00_2|IOMUX_ENET_DATA_DEFAULT
 #define GPIO_ENET_TX_DATA01             GPIO_ENET_TX_DATA01_2|IOMUX_ENET_DATA_DEFAULT
-#define GPIO_ENET_RST   (GPIO_OUTPUT | IOMUX_ENET_RST_DEFAULT | GPIO_OUTPUT_ZERO | \
-			 GPIO_PORT1 | GPIO_PIN4 )  /* AD_B0_04, Inverted logic */
+#define GPIO_ENET_RST    (GPIO_OUTPUT | IOMUX_ENET_RST_DEFAULT | GPIO_OUTPUT_ZERO | \
+                          GPIO_PORT1 | GPIO_PIN4 )  /* AD_B0_04, Inverted logic */
 
 /* LPI2Cs *******************************************************************/
 
@@ -263,8 +263,8 @@
 #define PIN_USDHC1_D3       (GPIO_USDHC1_DATA3_1 | IOMUX_USDHC1_DATAX_DEFAULT) /* SD_B0_01 */
 #define PIN_USDHC1_DCLK     (GPIO_USDHC1_CLK_1   | IOMUX_USDHC1_CLK_DEFAULT)   /* SD_B0_03 */
 #define PIN_USDHC1_CMD      (GPIO_USDHC1_CMD_1   | IOMUX_USDHC1_CMD_DEFAULT)   /* SD_B0_02 */
-#define PIN_USDHC1_CD       ( IOMUX_VSD_DEFAULT | \
-			      GPIO_PORT3 | GPIO_PIN19 )                        /* SD_B0_06 */
+#define PIN_USDHC1_CD       (IOMUX_VSD_DEFAULT | \
+                             GPIO_PORT3 | GPIO_PIN19 )                        /* SD_B0_06 */
 #define GPIO_VSDHIGH        (GPIO_OUTPUT | IOMUX_VSD_DEFAULT | GPIO_OUTPUT_ONE | \
                              GPIO_PORT1 | GPIO_PIN22)                          /* AD_B1_07 */
 #define PIN_USDHC1_PWREN    (GPIO_OUTPUT | IOMUX_VSD_DEFAULT | GPIO_OUTPUT_ONE | \
@@ -296,7 +296,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #undef EXTERN

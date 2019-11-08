@@ -139,6 +139,7 @@ static int nsh_sdmmc_initialize(void)
                  ret);
         }
     }
+
   return OK;
 }
 

@@ -42,6 +42,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 __attribute__((section(".boot_hdr.ivt")))
 const struct ivt_s g_image_vector_table =
 {
@@ -63,4 +64,3 @@ const struct boot_data_s g_boot_data =
   PLUGIN_FLAG,                        /* Plugin flag */
   0xffffffff                          /* empty - extra data word */
 };
-
