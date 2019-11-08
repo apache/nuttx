@@ -307,6 +307,16 @@ config ARCH_BOARD_HYMINI_STM32V
 		A configuration for the HY-Mini STM32v board.  This board is based on the
 		STM32F103VCT6 chip.
 
+config ARCH_BOARD_IMXRT1020_EVK
+	bool "NXP i.MX RT 1020 EVK"
+	depends on ARCH_CHIP_MIMXRT1021DAG5A
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the NXP i.MXRT
+		evaluation kit, MIMXRT1020-EVKB.  This board features the MIMXRT1021DAG5A MCU.
+
 config ARCH_BOARD_IMXRT1050_EVK
 	bool "NXP i.MX RT 1050 EVK"
 	depends on ARCH_CHIP_MIMXRT1052DVL6A
@@ -1978,6 +1988,7 @@ config ARCH_BOARD
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "gapuino"                  if ARCH_BOARD_GAPUINO
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
+	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
@@ -2203,6 +2214,9 @@ source "boards/arm/s32k1xx/s32k148evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_IMXRT1020_EVK
+source "boards/arm/imxrt/imxrt1020-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1050_EVK
 source "boards/arm/imxrt/imxrt1050-evk/Kconfig"

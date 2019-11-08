@@ -399,7 +399,7 @@
 /* Pad Control Register Offsets */
 
 #define IMXRT_PADCTL_OFFSET(n)                      (0x0188 + ((unsigned int)(n) << 2))
-#define IMXRT_PADCTL_OFFSET_SNVS(n)                 (0x18 + ((unsigned int)(n-IMXRT_PADCTL_WAKEUP_INDEX) << 2))
+#define IMXRT_PADCTL_OFFSET_SNVS(n)                 (0x18 + ((unsigned int)(n) << 2))
 
 #define IMXRT_PADCTL_GPIO_EMC_00_OFFSET             0x0188
 #define IMXRT_PADCTL_GPIO_EMC_01_OFFSET             0x018c
