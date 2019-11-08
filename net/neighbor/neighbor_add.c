@@ -88,7 +88,11 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
 
   DEBUGASSERT(dev != NULL && addr != NULL);
 
-  /* Find the first unused entry or the oldest used entry. */
+  /* Find the matching entry, first unused entry, or the oldest used entry.
+   * The unused entry will have ne_time == 0 and should generate the oldest
+   * time.  REVISIT:  Could this fail on clock wraparound?  A more explicit
+   * check might be to compare ne_ipaddr with the IPv6 unspecified address.
+   */
 
   oldest_time = g_neighbors[0].ne_time;
   oldest_ndx  = 0;
