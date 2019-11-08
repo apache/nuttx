@@ -48,6 +48,7 @@
 #include <string.h>
 
 #include <nuttx/net/ip.h>
+#include <nuttx/net/neighbor.h>
 
 #include "netdev/netdev.h"
 #include "neighbor/neighbor.h"
@@ -130,7 +131,7 @@ static int neighbor_match(FAR struct net_driver_s *dev, FAR void *arg)
 int neighbor_lookup(FAR const net_ipv6addr_t ipaddr,
                     FAR struct neighbor_addr_s *laddr)
 {
-  FAR struct neighbor_entry *neighbor;
+  FAR struct neighbor_entry_s *neighbor;
   struct neighbor_table_info_s info;
 
   /* Check if the IPv6 address is already in the neighbor table. */

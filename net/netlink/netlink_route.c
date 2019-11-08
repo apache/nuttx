@@ -49,8 +49,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/neighbor.h>
 
 #include "arp/arp.h"
+#include "neighbor/neighbor.h"
 #include "netlink/netlink.h"
 
 #ifdef CONFIG_NETLINK_ROUTE
@@ -128,6 +130,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
   req = (FAR const struct nlroute_sendto_request_s *)nlmsg;
 
+#if defined(CONFIG_NET_ARP) || defined(CONFIG_NET_IPv6)
 #ifdef CONFIG_NET_ARP
   /* REVISIT:  Currently, the only operation supported is retrieving the
    * ARP table in its entirety.
@@ -147,7 +150,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
        * the number of valid entries in the ARP table.
        */
 
-      tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof( struct arp_entry_s);
+      tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof(struct arp_entry_s);
       rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
       allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
@@ -182,7 +185,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
         {
           FAR struct nlroute_recvfrom_rsplist_s *newentry;
 
-          tabsize = ncopied * sizeof( struct arp_entry_s);
+          tabsize = ncopied * sizeof(struct arp_entry_s);
           rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
           allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
@@ -203,6 +206,88 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
       netlink_add_response(psock, (FAR struct netlink_response_s *)entry);
       return len;
     }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_ARP
+  else
+#endif
+  /* REVISIT:  Currently, the only operation supported is retrieving the
+   * Neighbor table in its entirety.
+   */
+
+  if (req->hdr.nlmsg_type == RTM_GETNEIGH && req->msg.ndm_family == AF_INET6)
+    {
+      FAR struct nlroute_recvfrom_rsplist_s *entry;
+      unsigned int ncopied;
+      size_t tabsize;
+      size_t rspsize;
+      size_t allocsize;
+
+      /* Preallocate memory to hold the maximum sized Neighbor table
+       * REVISIT:  This is probably excessively large and could cause false
+       * memory out conditions.  A better approach would be to actually count
+       * the number of valid entries in the Neighbor table.
+       */
+
+      tabsize   = CONFIG_NET_IPv6_NCONF_ENTRIES *
+                  sizeof(struct neighbor_entry_s);
+      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+      entry     = (FAR struct nlroute_recvfrom_rsplist_s *)kmm_malloc(allocsize);
+      if (entry == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      /* Populate the entry */
+
+      memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
+      entry->payload.hdr.nlmsg_len = rspsize;
+      memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
+      entry->payload.attr.rta_len  = tabsize;
+      entry->payload.attr.rta_type = 0;
+
+      /* Lock the network so that the Neighbor table will be stable, then
+       * copy the Neighbor table into the allocated memory.
+       */
+
+      net_lock();
+      ncopied = neighbor_snapshot((FAR struct neighbor_entry_s *)entry->payload.data,
+                                  CONFIG_NET_IPv6_NCONF_ENTRIES);
+      net_unlock();
+
+      /* Now we have the real number of valid entries in the Neighbor table
+       * and we can trim the allocation.
+       */
+
+      if (ncopied < CONFIG_NET_IPv6_NCONF_ENTRIES)
+        {
+          FAR struct nlroute_recvfrom_rsplist_s *newentry;
+
+          tabsize   = ncopied * sizeof(struct neighbor_entry_s);
+          rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+          allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+          newentry = (FAR struct nlroute_recvfrom_rsplist_s *)
+            kmm_realloc(entry, allocsize);
+
+          if (newentry != NULL)
+            {
+               entry = newentry;
+            }
+
+          entry->payload.hdr.nlmsg_len = rspsize;
+          entry->payload.attr.rta_len  = tabsize;
+        }
+
+      /* Finally, add the data to the list of pending responses */
+
+      netlink_add_response(psock, (FAR struct netlink_response_s *)entry);
+      return len;
+    }
+#endif
 
 #else
   UNUSED(req);

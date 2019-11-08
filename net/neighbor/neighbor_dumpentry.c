@@ -41,6 +41,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/neighbor.h>
 
 #include "neighbor/neighbor.h"
 
@@ -130,7 +131,7 @@ static void neighbor_dump_address(FAR const void *buf, unsigned int buflen)
  ****************************************************************************/
 
 void neighbor_dumpentry(FAR const char *msg,
-                        FAR struct neighbor_entry *neighbor)
+                        FAR struct neighbor_entry_s *neighbor)
 {
   ninfo("%s: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         msg,

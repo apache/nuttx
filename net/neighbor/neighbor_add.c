@@ -52,6 +52,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/neighbor.h>
 
 #include "netdev/netdev.h"
 #include "neighbor/neighbor.h"

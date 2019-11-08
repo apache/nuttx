@@ -54,5 +54,5 @@
  * this table.
  */
 
-struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
+struct neighbor_entry_s g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
 

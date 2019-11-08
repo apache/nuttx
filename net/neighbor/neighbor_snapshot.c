@@ -1,14 +1,8 @@
 /****************************************************************************
- * net/neighbor/neighbor_update.c
+ * net/neighbor/neighbor_snapshot.c
  *
- *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * A leverage of logic from uIP which also has a BSD style license
- *
- *   Copyright (c) 2006, Swedish Institute of Computer Science.  All rights
- *     reserved.
- *   Author: Adam Dunkels <adam@sics.se>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,35 +37,70 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <debug.h>
+
+#include <nuttx/net/ip.h>
+
+#include "inet/inet.h"
 #include "neighbor/neighbor.h"
+
+#ifdef CONFIG_NETLINK_ROUTE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: neighbor_update
+ * Name: neighbor_snapshot
  *
  * Description:
- *   Reset time on the Neighbor Table entry associated with the IPv6 address.
- *   This makes the associated entry the most recently used and not a
- *   candidate for removal.
+ *   Take a snapshot of the current state of the Neighbor table.
  *
  * Input Parameters:
- *   ipaddr - The IPv6 address of the entry to be updated
+ *   snapshot  - Location to return the Neighbor table copy
+ *   nentries  - The size of the user provided 'dest' in entries, each of
+ *               size sizeof(struct arp_entry_s)
  *
  * Returned Value:
- *   None
+ *   On success, the number of entries actually copied is returned.  Unused
+ *   entries are not returned.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
  *
  ****************************************************************************/
 
-void neighbor_update(const net_ipv6addr_t ipaddr)
+unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
+                               unsigned int nentries)
 {
-  struct neighbor_entry_s *neighbor;
+  unsigned int ncopied;
+  int i;
 
-  neighbor = neighbor_findentry(ipaddr);
-  if (neighbor != NULL)
+  /* Copy all non-empty entries in the Neighbor table. */
+
+  for (i = 0, ncopied = 0;
+       nentries > ncopied && i < CONFIG_NET_IPv6_NCONF_ENTRIES;
+       i++)
     {
-      neighbor->ne_time = clock_systimer();
+      FAR struct neighbor_entry_s *neighbor = &g_neighbors[i];
+
+      /* An unused entry table entry will be nullified.  In particularly,
+       * the Neighbor IP address will be all zero (i.e., the unspecified
+       * IPv6 address).
+       */
+
+      if (!net_ipv6addr_cmp(neighbor->ne_ipaddr, g_ipv6_unspecaddr))
+        {
+          memcpy(&snapshot[ncopied], neighbor, sizeof(struct neighbor_entry_s));
+          ncopied++;
+        }
     }
+
+  /* Return the number of entries copied into the user buffer */
+
+  return ncopied;
 }
+
+#endif  /* CONFIG_NETLINK_ROUTE */
+

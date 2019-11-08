@@ -437,7 +437,7 @@ unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
         }
     }
 
-  /* Not found */
+  /* Return the number of entries copied into the user buffer */
 
   return ncopied;
 }

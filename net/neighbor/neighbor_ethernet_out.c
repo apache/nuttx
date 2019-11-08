@@ -45,6 +45,7 @@
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/neighbor.h>
 
 #include "route/route.h"
 #include "icmpv6/icmpv6.h"

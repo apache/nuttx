@@ -53,49 +53,9 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/sixlowpan.h>
+#include <nuttx/net/neighbor.h>
 
 #ifdef CONFIG_NET_IPv6
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_NET_IPv6_NCONF_ENTRIES
-#  define CONFIG_NET_IPv6_NCONF_ENTRIES 8
-#endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Describes the link layer address */
-
-struct neighbor_addr_s
-{
-  uint8_t                    na_lltype;
-  uint8_t                    na_llsize;
-
-  union
-  {
-#ifdef CONFIG_NET_ETHERNET
-    struct ether_addr        na_ethernet;
-#endif
-#ifdef CONFIG_NET_6LOWPAN
-    struct netdev_maxaddr_s  na_sixlowpan;
-#endif
-  } u;
-};
-
-/* This structure describes on entry in the neighbor table.  This is intended
- * for internal use within the Neighbor implementation.
- */
-
-struct neighbor_entry
-{
-  net_ipv6addr_t         ne_ipaddr;  /* IPv6 address of the Neighbor */
-  struct neighbor_addr_s ne_addr;    /* Link layer address of the Neighbor */
-  clock_t                ne_time;    /* For aging, units of tick */
-};
 
 /****************************************************************************
  * Public Data
@@ -105,7 +65,7 @@ struct neighbor_entry
  * this table.
  */
 
-extern struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
+extern struct neighbor_entry_s g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -129,7 +89,7 @@ struct net_driver_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct neighbor_entry *neighbor_findentry(const net_ipv6addr_t ipaddr);
+FAR struct neighbor_entry_s *neighbor_findentry(const net_ipv6addr_t ipaddr);
 
 /****************************************************************************
  * Name: neighbor_add
@@ -222,6 +182,31 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
+ * Name: neighbor_snapshot
+ *
+ * Description:
+ *   Take a snapshot of the current state of the Neighbor table.
+ *
+ * Input Parameters:
+ *   snapshot  - Location to return the Neighbor table copy
+ *   nentries  - The size of the user provided 'dest' in entries, each of
+ *               size sizeof(struct arp_entry_s)
+ *
+ * Returned Value:
+ *   On success, the number of entries actually copied is returned.  Unused
+ *   entries are not returned.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
+                               unsigned int nentries);
+#endif
+
+/****************************************************************************
  * Name: neighbor_dumpentry
  *
  * Description:
@@ -238,7 +223,7 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_DEBUG_NET_INFO
 void neighbor_dumpentry(FAR const char *msg,
-                        FAR struct neighbor_entry *neighbor);
+                        FAR struct neighbor_entry_s *neighbor);
 #else
 #  define neighbor_dumpentry(msg,neighbor)
 #endif
