@@ -247,6 +247,7 @@
 #define NVIC_DCCSW_OFFSET               0x0f6c /* D-Cache Clean by Set-way (Cortex-M7) */
 #define NVIC_DCCIMVAC_OFFSET            0x0f70 /* D-Cache Clean and Invalidate by MVA to PoC (Cortex-M7) */
 #define NVIC_DCCISW_OFFSET              0x0f74 /* D-Cache Clean and Invalidate by Set-way (Cortex-M7) */
+#define NVIC_BPIALL_OFFSET              0x0f78 /* Branch predictor invalidate all (Cortex-M7) */
 #define NVIC_ITCMCR_OFFSET              0x0f90 /* Instruction Tightly-Coupled Memory Control Register */
 #define NVIC_DTCMCR_OFFSET              0x0f94 /* Data Tightly-Coupled Memory Control Registers */
 #define NVIC_AHBPCR_OFFSET              0x0f98 /* AHBP Control Register */
@@ -436,6 +437,7 @@
 #define NVIC_DCCSW                      (ARMV7M_NVIC_BASE + NVIC_DCCSW_OFFSET)
 #define NVIC_DCCIMVAC                   (ARMV7M_NVIC_BASE + NVIC_DCCIMVAC_OFFSET)
 #define NVIC_DCCISW                     (ARMV7M_NVIC_BASE + NVIC_DCCISW_OFFSET)
+#define NVIC_BPIALL                     (ARMV7M_NVIC_BASE + NVIC_BPIALL_OFFSET)
 #define NVIC_ITCMCR                     (ARMV7M_NVIC_BASE + NVIC_ITCMCR_OFFSET)
 #define NVIC_DTCMCR                     (ARMV7M_NVIC_BASE + NVIC_DTCMCR_OFFSET)
 #define NVIC_AHBPCR                     (ARMV7M_NVIC_BASE + NVIC_AHBPCR_OFFSET)
