@@ -121,4 +121,64 @@
 #  define PADCTL_PUS_UP_22K                   (3 << PADCTL_PUS_SHIFT) /*  22K Ohm Pull Up */
 #define PADCTL_HYS                            (1 << 16) /* Bit 16: Hysteresis Enable Field */
 
+/* Defaults for drive conditions for each set of pins. These are a good
+ * starting point but should be updated once you've got real hardware
+ * to measure.
+ */
+
+#define IOMUX_UART_DEFAULT                    (IOMUX_PULL_UP_22K | IOMUX_DRIVE_40OHM | \
+                                               IOMUX_SLEW_SLOW | IOMUX_SPEED_LOW | IOMUX_SCHMITT_TRIGGER)
+
+#define IOMUX_LPSPI_DEFAULT                   (IOMUX_PULL_UP_100K | IOMUX_DRIVE_40OHM | \
+                                               IOMUX_SLEW_FAST | IOMUX_SPEED_MEDIUM)
+
+#define IOMUX_LPI2C_DEFAULT                   (GPIO_SION_ENABLE | IOMUX_OPENDRAIN | \
+                                               IOMUX_SPEED_MEDIUM | IOMUX_DRIVE_33OHM)
+
+#define IOMUX_LCD_DEFAULT                     (IOMUX_PULL_UP_100K | IOMUX_DRIVE_40OHM | \
+                                               IOMUX_SLEW_SLOW | IOMUX_SPEED_MEDIUM | IOMUX_SCHMITT_TRIGGER)
+#define IOMUX_LCD_BL_DEFAULT                  (IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                                               IOMUX_SLEW_SLOW)
+#define IOMUX_LED_DEFAULT                     (IOMUX_SLEW_SLOW | \
+                                               IOMUX_DRIVE_50OHM | IOMUX_SPEED_LOW )
+
+#define IOMUX_ENET_MDIO_DEFAULT               (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_OPENDRAIN | \
+                                               IOMUX_SPEED_LOW | IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_MDC_DEFAULT                (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_SPEED_MAX | \
+                                               IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_EN_DEFAULT                 (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_SPEED_MAX | \
+                                               IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_RXERR_DEFAULT              (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_SPEED_MAX | \
+                                               IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_DATA_DEFAULT               (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_SPEED_MAX | \
+                                               IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_INT_DEFAULT                (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                                               IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                                               IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K)
+#define IOMUX_ENET_RST_DEFAULT                (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | IOMUX_SPEED_MEDIUM | \
+                                               IOMUX_PULL_UP_100K )
+#define IOMUX_ENET_TX_CLK_DEFAULT             (IOMUX_SLEW_FAST | IOMUX_DRIVE_40OHM | IOMUX_SPEED_LOW | \
+                                               IOMUX_PULL_DOWN_100K | IOMUX_PULL_KEEP | GPIO_SION_ENABLE )
+
+#define IOMUX_USDHC1_DATAX_DEFAULT            (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
+                                               IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
+#define IOMUX_USDHC1_CMD_DEFAULT              (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
+                                               IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
+#define IOMUX_USDHC1_CLK_DEFAULT              (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
+                                               IOMUX_SPEED_MAX)
+#define IOMUX_USDHC1_CD_DEFAULT               (IOMUX_PULL_UP_100K)
+#define IOMUX_VSD_DEFAULT                     (IOMUX_SLEW_SLOW | IOMUX_DRIVE_90OHM | \
+                                               IOMUX_SPEED_MEDIUM)
+
+#define IOMUX_SW_DEFAULT                      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                                               IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K )
+
+#define IOMUX_GOUT_DEFAULT                    (IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                                               IOMUX_SLEW_SLOW)
+
+#define IOMUX_USBOTG_ID_DEFAULT               (IOMUX_PULL_UP_100K)
+#define IOMUX_USBOTG_PWR_DEFAULT              (IOMUX_SLEW_SLOW | IOMUX_DRIVE_50OHM | \
+                                               IOMUX_SPEED_LOW )
+#define IOMUX_USBOTG_OC_DEFAULT               (IOMUX_PULL_UP_100K)
+
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_IOMUXC_H */

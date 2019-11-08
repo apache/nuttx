@@ -61,6 +61,8 @@
 
 #include "imxrt1050-evk.h"
 
+#include <arch/board/board.h>
+
 #ifdef CONFIG_IMXRT_ENET
 
 /****************************************************************************
@@ -147,6 +149,10 @@ int imxrt_phy_boardinitialize(int intf)
    * The #RST uses inverted logic.  The initial value of zero will put the
    * PHY into the reset state.
    */
+#ifdef GPIO_ENET_RST
+  /* On the EVK the RST pin is combined with LED, so sometimes can't be
+   * accessed. Only stress about it if we've got a definition.
+   */
 
   phyinfo("Configuring reset: %08x\n", GPIO_ENET_RST);
   imxrt_config_gpio(GPIO_ENET_RST);
@@ -154,6 +160,7 @@ int imxrt_phy_boardinitialize(int intf)
   /* Take the PHY out of reset. */
 
   imxrt_gpio_write(GPIO_ENET_RST, true);
+#endif
   return OK;
 }
 

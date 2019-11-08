@@ -59,7 +59,7 @@
 
 #include <arch/board/board.h>
 
-#ifndef CONFIG_ARCH_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && defined(GPIO_LED)
 
 /****************************************************************************
  * Public Functions
