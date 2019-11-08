@@ -2477,10 +2477,10 @@ int imxrt_netinitialize(int intf)
   imxrt_config_gpio(GPIO_ENET_MDIO);
   imxrt_config_gpio(GPIO_ENET_MDC);
   imxrt_config_gpio(GPIO_ENET_RX_EN);
-  imxrt_config_gpio(GPIO_ENET_RDATA00);
-  imxrt_config_gpio(GPIO_ENET_RDATA01);
-  imxrt_config_gpio(GPIO_ENET_TDATA00);
-  imxrt_config_gpio(GPIO_ENET_TDATA01);
+  imxrt_config_gpio(GPIO_ENET_RX_DATA00);
+  imxrt_config_gpio(GPIO_ENET_RX_DATA01);
+  imxrt_config_gpio(GPIO_ENET_TX_DATA00);
+  imxrt_config_gpio(GPIO_ENET_TX_DATA01);
   imxrt_config_gpio(GPIO_ENET_TX_CLK);
   imxrt_config_gpio(GPIO_ENET_TX_EN);
 #ifdef GPIO_ENET_RX_ER
