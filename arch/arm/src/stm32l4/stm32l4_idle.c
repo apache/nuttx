@@ -48,6 +48,7 @@
 
 #include "chip.h"
 #include "stm32l4_pm.h"
+#include "stm32l4_rcc.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -129,7 +130,25 @@ static void up_idlepm(void)
           break;
 
         case PM_STANDBY:
+
+          /* Enter STOP mode */
+
+          BEGIN_IDLE();
           stm32l4_pmstop(true);
+          END_IDLE();
+
+          /* Set correct clock again after returning from STOP */
+
+          stm32l4_clockenable();
+
+          /* Inform of all drivers of the new state */
+
+          ret = pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
+          if (ret >= 0)
+            {
+              oldstate = PM_NORMAL;
+            }
+
           break;
 
         case PM_SLEEP:
