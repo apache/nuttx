@@ -29,6 +29,7 @@ fwrite         NXfwrite
 fsync          NXfsync
 fstat          NXfstat
 ftell          NXftell
+ftruncate      NXftruncate
 getenv         NXgetenv
 getopt         NXgetopt
 getpid         NXgetpid
