@@ -339,6 +339,39 @@
 #define GPIO_MMCSD_EN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                          GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
 
+/* LCD */
+
+#ifdef CONFIG_IMXRT_LCD
+#  define GPIO_LCD_DATA23    GPIO_LCD_DATA23_1
+#  define GPIO_LCD_DATA22    GPIO_LCD_DATA22_1
+#  define GPIO_LCD_DATA21    GPIO_LCD_DATA21_1
+#  define GPIO_LCD_DATA20    GPIO_LCD_DATA20_1
+#  define GPIO_LCD_DATA19    GPIO_LCD_DATA19_1
+#  define GPIO_LCD_DATA18    GPIO_LCD_DATA18_1
+#  define GPIO_LCD_DATA17    GPIO_LCD_DATA17_1
+#  define GPIO_LCD_DATA16    GPIO_LCD_DATA16_1
+#  define GPIO_LCD_DATA15    GPIO_LCD_DATA15_1
+#  define GPIO_LCD_DATA14    GPIO_LCD_DATA14_1
+#  define GPIO_LCD_DATA13    GPIO_LCD_DATA13_1
+#  define GPIO_LCD_DATA12    GPIO_LCD_DATA12_1
+#  define GPIO_LCD_DATA11    GPIO_LCD_DATA11_1
+#  define GPIO_LCD_DATA10    GPIO_LCD_DATA10_1
+#  define GPIO_LCD_DATA09    GPIO_LCD_DATA09_1
+#  define GPIO_LCD_DATA08    GPIO_LCD_DATA08_1
+#  define GPIO_LCD_DATA07    GPIO_LCD_DATA07_1
+#  define GPIO_LCD_DATA06    GPIO_LCD_DATA06_1
+#  define GPIO_LCD_DATA05    GPIO_LCD_DATA05_1
+#  define GPIO_LCD_DATA04    GPIO_LCD_DATA04_1
+#  define GPIO_LCD_DATA03    GPIO_LCD_DATA03_1
+#  define GPIO_LCD_DATA02    GPIO_LCD_DATA02_1
+#  define GPIO_LCD_DATA01    GPIO_LCD_DATA01_1
+#  define GPIO_LCD_DATA00    GPIO_LCD_DATA00_1
+#  define GPIO_LCD_ENABLE    GPIO_LCD_ENABLE_1
+#  define GPIO_LCD_HSYNC     GPIO_LCD_HSYNC_1
+#  define GPIO_LCD_VSYNC     GPIO_LCD_VSYNC_1
+#  define GPIO_LCD_CLK       GPIO_LCD_CLK_1
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
