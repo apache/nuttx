@@ -331,6 +331,7 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
  * there is one TCB per CPU.  NOTE: The system boots on CPU0 into the IDLE

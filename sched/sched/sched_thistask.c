@@ -90,6 +90,7 @@ FAR struct tcb_s *this_task(void)
    * enter_critical section are not viable options here (because both depend
    * on this_task()).
    */
+
 #  warning "Missing critical section"
 #endif
 

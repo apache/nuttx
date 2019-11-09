@@ -52,6 +52,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* This variable holds the group ID of the current task group.  This ID is
  * zero if the current task is a kernel thread that has no address
  * environment (other than the kernel context).

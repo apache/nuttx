@@ -126,7 +126,7 @@ int main(int argc, char **argv, char **envp)
   int dnest;            /* Data declaration nesting level on this line */
   int prevdnest;        /* Data declaration nesting level on the previous line */
   int pnest;            /* Parenthesis nesting level on this line */
-  int comment_lineno;   /* Line on which the last one line comment was closed */
+  int comment_lineno;   /* Line on which the last comment was closed */
   int blank_lineno;     /* Line number of the last blank line */
   int noblank_lineno;   /* A blank line is not needed after this line */
   int lbrace_lineno;    /* Line number of last left brace */
@@ -212,11 +212,11 @@ int main(int argc, char **argv, char **envp)
   bnest          = 0;     /* Brace nesting level on this line */
   dnest          = 0;     /* Data declaration nesting level on this line */
   pnest          = 0;     /* Parenthesis nesting level on this line */
-  comment_lineno = -1;    /* Line on which the last one line comment was closed */
+  comment_lineno = -1;    /* Line on which the last comment was closed */
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
   lbrace_lineno  = -1;    /* Line number of last left brace */
-  rbrace_lineno  = -1;    /* Last line containine a right brace */
+  rbrace_lineno  = -1;    /* Last line containing a right brace */
   externc_lineno = -1;    /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
@@ -873,16 +873,23 @@ int main(int argc, char **argv, char **envp)
 
                       if (--ncomment == 0)
                         {
-#if 0
-                          /* REVISIT: causes false alarms when comment appears to
-                           * the right of a statement.
+                          /* 'comment_lineno 'holds the line number of the
+                           * last closing comment.  It is used only to
+                           * verify that the comment is followed by a blank
+                           * line.  'comment_lineno' is NOT set here if this
+                           * comment is to the right of the code.  In that
+                           * case, no blank link is required following the
+                           * comment
                            */
 
-                          comment_lineno = lineno;
-#endif
+                          if (!brhcomment)
+                            {
+                              comment_lineno = lineno;
+                            }
+
                           /* Note that brhcomment must persist to support a
-                           * later test for comment alignment.  We will will
-                           * fix that at the top of the loop when ncomment == 0.
+                           * later test for comment alignment.  We will fix
+                           * that at the top of the loop when ncomment == 0.
                            */
                         }
                     }

@@ -366,6 +366,7 @@ static inline bool pg_startfill(void)
        * the nature of the architecture-specific up_fillpage() function -- Is it
        * a blocking or a non-blocking call?
        */
+
 #ifdef CONFIG_PAGING_BLOCKINGFILL
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is blocking
        * call. In this case, up_fillpage() will accept only (1) a reference to
@@ -410,6 +411,7 @@ static inline bool pg_startfill(void)
        * the case where all tasks are blocked waiting for a page fill, the IDLE
        * task must still be available to run.
        */
+
 #endif /* CONFIG_PAGING_BLOCKINGFILL */
 
       return true;
