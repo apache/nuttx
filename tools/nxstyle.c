@@ -1659,9 +1659,10 @@ int main(int argc, char **argv, char **envp)
                               lineno, indent);
                     }
 
-                  if (line[indent+1] != ' ' &&
-                      line[indent+1] != '\n' &&
-                      line[indent+1] != '/')
+                  if (line[indent + 1] != ' ' &&
+                      line[indent + 1] != '*' &&
+                      line[indent + 1] != '\n' &&
+                      line[indent + 1] != '/')
                     {
                       fprintf(stderr,
                               "Invalid character after asterisk in comment block at line %d:%d\n",
