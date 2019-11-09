@@ -54,16 +54,17 @@
 
 /* Supported Protocol Families */
 
-#define PF_UNSPEC      0 /* Protocol family unspecified */
-#define PF_UNIX        1 /* Local communication */
-#define PF_LOCAL       1 /* Local communication */
-#define PF_INET        2 /* IPv4 Internet protocols */
-#define PF_INET6      10 /* IPv6 Internet protocols */
-#define PF_NETLINK    16 /* Netlink IPC socket */
-#define PF_PACKET     17 /* Low level packet interface */
-#define PF_BLUETOOTH  31 /* Bluetooth sockets */
-#define PF_IEEE802154 36 /* Low level IEEE 802.15.4 radio frame interface */
-#define PF_PKTRADIO   64 /* Low level packet radio interface */
+#define PF_UNSPEC      0         /* Protocol family unspecified */
+#define PF_UNIX        1         /* Local communication */
+#define PF_LOCAL       1         /* Local communication */
+#define PF_INET        2         /* IPv4 Internet protocols */
+#define PF_INET6      10         /* IPv6 Internet protocols */
+#define PF_NETLINK    16         /* Netlink IPC socket */
+#define PF_ROUTE      PF_NETLINK /* 4.4BSD Compatibility*/
+#define PF_PACKET     17         /* Low level packet interface */
+#define PF_BLUETOOTH  31         /* Bluetooth sockets */
+#define PF_IEEE802154 36         /* Low level IEEE 802.15.4 radio frame interface */
+#define PF_PKTRADIO   64         /* Low level packet radio interface */
 
 /* Supported Address Families. Opengroup.org requires only AF_UNSPEC,
  * AF_UNIX, AF_INET and AF_INET6.
@@ -75,6 +76,7 @@
 #define AF_INET        PF_INET
 #define AF_INET6       PF_INET6
 #define AF_NETLINK     PF_NETLINK
+#define AF_ROUTE       PF_ROUTE
 #define AF_PACKET      PF_PACKET
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154

@@ -235,10 +235,16 @@
 #define NLMSG_ALIGN(n)    (((n) + NLMSG_MASK) & ~NLMSG_MASK)
 #define NLMSG_HDRLEN      sizeof(struct nlmsghdr)
 #define NLMSG_LENGTH(n)   (NLMSG_HDRLEN + (n))
-#define NLMSG_DATA(hdr)   ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN)
+#define NLMSG_DATA(hdr)   ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN))
 #define NLMSG_NEXT(hdr,n) \
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
    (FAR struct nlmsghdr*)(((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+
+#define NLMSG_NOOP         1   /* Nothing */
+#define NLMSG_ERROR        2   /* Error */
+#define NLMSG_DONE         3   /* End of a dump */
+#define NLMSG_OVERRUN      4   /* Data lost */
+#define NLMSG_MIN_TYPE     16  /* < 16:  Reserved control messages */
 
 /* Definitions for struct rtattr ********************************************/
 
@@ -265,8 +271,19 @@
  * address set by the user and other undocumented flags.
  */
 
-#define IFA_F_SECONDARY      0x01
-#define IFA_F_PERMANENT      0x02
+#define IFA_F_SECONDARY   0x01
+#define IFA_F_PERMANENT   0x02
+
+/* Definitions for struct ifinfomsg *****************************************/
+
+#define IFLA_RTA(r)       ((FAR struct rtattr *) \
+                           (((FAR char *)(r)) + \
+                            NLMSG_ALIGN(sizeof(struct ifinfomsg))))
+#define IFLA_PAYLOAD(n)   NLMSG_PAYLOAD(n, sizeof(struct ifinfomsg))
+
+/* Values for rta_type */
+
+#define IFLA_IFNAME       1
 
 /****************************************************************************
  * Public Type Definitions
@@ -318,11 +335,19 @@ struct rtattr
 
 struct ifinfomsg
 {
-  uint8_t ifi_family;    /* AF_UNSPEC */
-  uint16_t ifi_type;     /* Device type */
-  int16_t ifi_index;     /* Unique interface index */
-  uint32_t ifi_flags;    /* Device flags  */
+  uint8_t  ifi_family;   /* AF_UNSPEC */
+  uint8_t  ifi_pid;
+  uint16_t ifi_type;     /* Device type (ARPHRD) */
+  int16_t  ifi_index;    /* Unique interface index */
+  uint32_t ifi_flags;    /* Device IFF_* flags  */
   uint32_t ifi_change;   /* Change mask, must always be 0xffffffff */
+};
+
+/* General form of address family dependent message. */
+
+struct rtgenmsg
+{
+  unsigned char rtgen_family;
 };
 
 /* RTM_NEWADDR, RTM_DELADDR, RTM_GETADDR
