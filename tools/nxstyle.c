@@ -443,6 +443,11 @@ int main(int argc, char **argv, char **envp)
                           lineno);
                 }
 
+              /* 'comment_lineno 'holds the line number of the last closing
+               * comment.  It is used only to verify that the comment is
+               * followed by a blank line.
+               */
+
               comment_lineno = lineno;
               brhcomment = false;
             }

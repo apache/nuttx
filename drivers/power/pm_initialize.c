@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2011-2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,6 +47,12 @@
 
 #include "pm.h"
 
+#if defined(CONFIG_PM_GOVERNOR_ACTIVITY)
+#  include "activity_governor.h"
+#elif defined(CONFIG_PM_GOVERNOR_GREEDY)
+#  include "greedy_governor.h"
+#endif
+
 #ifdef CONFIG_PM
 
 /****************************************************************************
@@ -62,7 +69,7 @@
 
 struct pm_global_s g_pmglobals =
 {
-  SEM_INITIALIZER(1)
+  .regsem = SEM_INITIALIZER(1)
 };
 
 /****************************************************************************
@@ -89,18 +96,23 @@ struct pm_global_s g_pmglobals =
 
 void pm_initialize(void)
 {
-  FAR struct pm_domain_s *pdom;
-  int i;
+  /* Select governor */
 
-  /* Init saved time slice */
+#if defined(CONFIG_PM_GOVERNOR_ACTIVITY)
+  g_pmglobals.governor = pm_activity_governor_initialize();
+#elif defined(CONFIG_PM_GOVERNOR_GREEDY)
+  g_pmglobals.governor = pm_greedy_governor_initialize();
+#elif defined(CONFIG_PM_GOVERNOR_CUSTOM)
+  /* TODO: call to board function to retrieve custom governor,
+   * such as board_pm_governor_initialize()
+   */
 
-  for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
-    {
-      pdom = &g_pmglobals.domain[i];
-      pdom->stime = clock_systimer();
-      pdom->btime = clock_systimer();
-    }
+#  error "Not supported yet"
+#endif
+
+  /* Initialize selected governor */
+
+  g_pmglobals.governor->initialize();
 }
 
 #endif /* CONFIG_PM */
-

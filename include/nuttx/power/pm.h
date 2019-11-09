@@ -4,6 +4,7 @@
  *
  *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -100,135 +101,6 @@
  * own, custom idle loop to support board-specific IDLE time power management
  */
 
-/* CONFIG_PM_SLICEMS.  The power management module collects activity counts
- * in time slices.  At the end of the time slice, the count accumulated
- * during that interval is applied to an averaging algorithm to determine
- * the activity level.
- *
- * CONFIG_PM_SLICEMS provides the duration of that time slice in
- * milliseconds.  Default: 100 Milliseconds
- */
-
-#ifndef CONFIG_PM_SLICEMS
-#  define CONFIG_PM_SLICEMS  100 /* Default is 100 msec */
-#endif
-
-#if CONFIG_PM_SLICEMS < 1
-#  error CONFIG_PM_SLICEMS invalid
-#endif
-
-/* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
- * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
- * weight applied to each value, and X is the current activity.  These weights
- * may be negative and a limited to the range of int16_t.
- *
- * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
- * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
- *
- * Setting CONFIG_PM_MEMORY=1 disables all smoothing.
- */
-
-#ifndef CONFIG_PM_MEMORY
-#  define CONFIG_PM_MEMORY 2
-#endif
-
-#if CONFIG_PM_MEMORY < 1
-#  error "CONFIG_PM_MEMORY must be >= 1"
-#endif
-
-#ifndef CONFIG_PM_COEFN
-#  define CONFIG_PM_COEFN 1
-#endif
-
-#if CONFIG_PM_MEMORY > 1 && !defined(CONFIG_PM_COEF1)
-#  define CONFIG_PM_COEF1 1
-#endif
-
-#if CONFIG_PM_MEMORY > 2 && !defined(CONFIG_PM_COEF2)
-#  define CONFIG_PM_COEF2 1
-#endif
-
-#if CONFIG_PM_MEMORY > 3 && !defined(CONFIG_PM_COEF3)
-#  define CONFIG_PM_COEF3 1
-#endif
-
-#if CONFIG_PM_MEMORY > 4 && !defined(CONFIG_PM_COEF4)
-#  define CONFIG_PM_COEF4 1
-#endif
-
-#if CONFIG_PM_MEMORY > 5 && !defined(CONFIG_PM_COEF5)
-#  define CONFIG_PM_COEF5 1
-#endif
-
-#if CONFIG_PM_MEMORY > 6
-#  warning "This logic needs to be extended"
-#endif
-
-/* State changes then occur when the weight activity account crosses
- * threshold values for certain periods of time (time slice count).
- *
- * CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
- * CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
- *
- * Resuming to normal state, on the other hand, is usually immediate and
- * controlled by wakeup conditions established by the platform.  The PM
- * module only recommends reduced power states.
- */
-
-#ifndef CONFIG_PM_IDLEENTER_THRESH
-#  define CONFIG_PM_IDLEENTER_THRESH    1   /* <=1: Essentially no activity */
-#endif
-
-#ifndef CONFIG_PM_IDLEEXIT_THRESH
-#  define CONFIG_PM_IDLEEXIT_THRESH     2   /* >=2: Active */
-#endif
-
-#if CONFIG_PM_IDLEENTER_THRESH >= CONFIG_PM_IDLEEXIT_THRESH
-#  error "Must have CONFIG_PM_IDLEENTER_THRESH < CONFIG_PM_IDLEEXIT_THRESH"
-#endif
-
-#ifndef CONFIG_PM_IDLEENTER_COUNT
-#  define CONFIG_PM_IDLEENTER_COUNT     30  /* Thirty IDLE slices to enter
-                                             * IDLE mode from normal
-                                             */
-#endif
-
-#ifndef CONFIG_PM_STANDBYENTER_THRESH
-#  define CONFIG_PM_STANDBYENTER_THRESH 1   /*  <=1: Essentially no activity */
-#endif
-
-#ifndef CONFIG_PM_STANDBYEXIT_THRESH
-#  define CONFIG_PM_STANDBYEXIT_THRESH  2   /* >=2: Active */
-#endif
-
-#if CONFIG_PM_STANDBYENTER_THRESH >= CONFIG_PM_STANDBYEXIT_THRESH
-#  error "Must have CONFIG_PM_STANDBYENTER_THRESH < CONFIG_PM_STANDBYEXIT_THRESH"
-#endif
-
-#ifndef CONFIG_PM_STANDBYENTER_COUNT
-#  define CONFIG_PM_STANDBYENTER_COUNT  50  /* Fifty IDLE slices to enter
-                                             * STANDBY mode from IDLE
-                                             */
-#endif
-
-#ifndef CONFIG_PM_SLEEPENTER_THRESH
-#  define CONFIG_PM_SLEEPENTER_THRESH   1   /*  <=1: Essentially no activity */
-#endif
-
-#ifndef CONFIG_PM_SLEEPEXIT_THRESH
-#  define CONFIG_PM_SLEEPEXIT_THRESH    2   /* >=2: Active */
-#endif
-
-#if CONFIG_PM_SLEEPENTER_THRESH >= CONFIG_PM_SLEEPEXIT_THRESH
-#  error "Must have CONFIG_PM_SLEEPENTER_THRESH < CONFIG_PM_SLEEPEXIT_THRESH"
-#endif
-
-#ifndef CONFIG_PM_SLEEPENTER_COUNT
-#  define CONFIG_PM_SLEEPENTER_COUNT    70  /* 70 IDLE slices to enter SLEEP
-                                             * mode from STANDBY
-                                             */
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -316,8 +188,8 @@ struct pm_callback_s
    *
    **************************************************************************/
 
-  int (*prepare)(FAR struct pm_callback_s *cb, int domain,
-                 enum pm_state_e pmstate);
+  CODE int (*prepare)(FAR struct pm_callback_s *cb, int domain,
+                      enum pm_state_e pmstate);
 
   /**************************************************************************
    * Name: notify
@@ -342,8 +214,81 @@ struct pm_callback_s
    *
    **************************************************************************/
 
-  void (*notify)(FAR struct pm_callback_s *cb, int domain,
-                 enum pm_state_e pmstate);
+  CODE void (*notify)(FAR struct pm_callback_s *cb, int domain,
+                      enum pm_state_e pmstate);
+};
+
+/* An instance of a given PM governor */
+
+struct pm_governor_s
+{
+  /**************************************************************************
+   * Name: initialize
+   *
+   * Description:
+   *   Invoked by the PM system during initialization, to allow the governor
+   *   to initialize its internal data. This can be left to NULL if not needed
+   *   by the governor.
+   *
+   *   NOTE: since this will be called from pm_initialize(), the system
+   *   is in very early boot state when this callback is invoked. Thus,
+   *   only ver basic initialization should be performed (e.g. no memory
+   *   should be allocated).
+   *
+   **************************************************************************/
+
+  CODE void (*initialize)(void);
+
+  /**************************************************************************
+   * Name: statechanged
+   *
+   * Description:
+   *   Invoked by the PM system when the power state is changed. This can be
+   *   left to NULL if this notification is not needed by the governor.
+   *
+   **************************************************************************/
+
+  CODE void (*statechanged)(int domain, enum pm_state_e newstate);
+
+  /**************************************************************************
+   * Name: checkstate
+   *
+   * Description:
+   *   Invoked by the PM system to obtain the governor's suggestion for the
+   *   power level to set. Implementing this callback is mandatory for a
+   *   governor since recommending power levels is its main responsibility.
+   *
+   *   NOTE: the governor should consider the "stay" count in order to hold
+   *   off the recommendation of a lower-power level.
+   *
+   **************************************************************************/
+
+  CODE enum pm_state_e (*checkstate)(int domain);
+
+  /**************************************************************************
+   * Name: activity
+   *
+   * Description:
+   *   Invoked by the PM system when a driver reports activity via
+   *   pm_activity(). This may or may not be useful to the governor to
+   *   recommend power levels.
+   *   It can be left NULL, in which case it will not be invoked.
+   *
+   **************************************************************************/
+
+  CODE void (*activity)(int domain, int count);
+
+  /* Private data for governor's internal use */
+
+  FAR void *priv;
+};
+
+/* To be used for accessing the user governor via ioctl calls */
+
+struct pm_user_governor_state_s
+{
+  int domain;
+  enum pm_state_e state;
 };
 
 /****************************************************************************
@@ -363,6 +308,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: pm_initialize
  *
@@ -424,9 +370,8 @@ int pm_unregister(FAR struct pm_callback_s *callbacks);
  *
  * Description:
  *   This function is called by a device driver to indicate that it is
- *   performing meaningful activities (non-idle).  This increment an activity
- *   count and/or will restart a idle timer and prevent entering reduced
- *   power states.
+ *   performing meaningful activities (non-idle).  This is reported to
+ *   the PM governor, which may be used to suggest power states.
  *
  * Input Parameters:
  *   domain - The domain of the PM activity
@@ -454,7 +399,7 @@ void pm_activity(int domain, int priority);
  * Description:
  *   This function is called by a device driver to indicate that it is
  *   performing meaningful activities (non-idle), needs the power kept at
- *   last the specified level.
+ *   least the specified level.
  *
  * Input Parameters:
  *   domain - The domain of the PM activity
@@ -615,8 +560,6 @@ enum pm_state_e pm_querystate(int domain);
 #  define pm_register(cb)              (0)
 #  define pm_unregister(cb)            (0)
 #  define pm_activity(domain,prio)
-#  define pm_stay(domain,state)
-#  define pm_relax(domain,state)
 #  define pm_checkstate(domain)        (0)
 #  define pm_changestate(domain,state) (0)
 #  define pm_querystate(domain)        (0)

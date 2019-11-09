@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,10 +60,10 @@
  * Description:
  *   This function is called from the MCU-specific IDLE loop to monitor the
  *   the power management conditions.  This function returns the "recommended"
- *   power management state based on the PM configuration and activity
- *   reported in the last sampling periods.  The power management state is
- *   not automatically changed, however.  The IDLE loop must call
- *   pm_changestate() in order to make the state change.
+ *   power management state based on the PM policy applied by the currently
+ *   chosen governor. The IDLE loop must call pm_changestate() in order to
+ *   make the state change, which will interact with all drivers registered
+ *   with the PM system.
  *
  *   These two steps are separated because the plaform-specific IDLE loop may
  *   have additional situational information that is not available to the
@@ -86,63 +87,10 @@
 
 enum pm_state_e pm_checkstate(int domain)
 {
-  FAR struct pm_domain_s *pdom;
-  clock_t now, elapsed;
-  irqstate_t flags;
-  int index;
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS &&
+              g_pmglobals.governor->checkstate);
 
-  /* Get a convenience pointer to minimize all of the indexing */
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
-
-  /* Check for the end of the current time slice.  This must be performed
-   * with interrupts disabled so that it does not conflict with the similar
-   * logic in pm_activity().
-   */
-
-  flags = enter_critical_section();
-
-  /* Check the elapsed time.  In periods of low activity, time slicing is
-   * controlled by IDLE loop polling; in periods of higher activity, time
-   * slicing is controlled by driver activity.  In either case, the duration
-   * of the time slice is only approximate; during times of heavy activity,
-   * time slices may be become longer and the activity level may be over-
-   * estimated.
-   */
-
-  now     = clock_systimer();
-  elapsed = now - pdom->stime;
-  if (elapsed >= TIME_SLICE_TICKS)
-    {
-      int16_t accum;
-
-      /* Sample the count, reset the time and count, and assess the PM
-       * state.  This is an atomic operation because interrupts are
-       * still disabled.
-       */
-
-      accum       = pdom->accum;
-      pdom->stime = now;
-      pdom->accum = 0;
-
-      (void)pm_update(domain, accum);
-    }
-
-  /* Consider the possible power state lock here */
-
-  for (index = 0; index < pdom->recommended; index++)
-    {
-      if (pdom->stay[index] != 0)
-        {
-          pdom->recommended = index;
-          break;
-        }
-    }
-
-  leave_critical_section(flags);
-
-  return pdom->recommended;
+  return g_pmglobals.governor->checkstate(domain);
 }
 
 #endif /* CONFIG_PM */

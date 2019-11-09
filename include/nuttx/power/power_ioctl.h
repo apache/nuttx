@@ -2,7 +2,7 @@
  * include/nuttx/power/power_ioctl.h
  * NuttX Power-Related IOCTLs definitions
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,9 +58,10 @@
 #define PWRIOC_SET_MODE       _PWRIOC(3)
 #define PWRIOC_SET_LIMITS     _PWRIOC(4)
 #define PWRIOC_GET_STATE      _PWRIOC(5)
-#define PWRIOC_GET_FAULT      _PWRIOC(6)
-#define PWRIOC_SET_FAULT      _PWRIOC(7)
-#define PWRIOC_CLEAN_FAULT    _PWRIOC(8)
-#define PWRIOC_SET_PARAMS     _PWRIOC(9)
+#define PWRIOC_SET_STATE      _PWRIOC(6)
+#define PWRIOC_GET_FAULT      _PWRIOC(7)
+#define PWRIOC_SET_FAULT      _PWRIOC(8)
+#define PWRIOC_CLEAN_FAULT    _PWRIOC(9)
+#define PWRIOC_SET_PARAMS     _PWRIOC(10)
 
 #endif /* __INCLUDE_NUTTX_POWER_POWER_IOCTL_H */

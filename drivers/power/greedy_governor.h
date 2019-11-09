@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/sim/src/sim/up_head.c
+ * user_governor/user_governor.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Matias Nitsche. All rights reserved.
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,129 +33,58 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_POWER_GREEDY_GOVERNER_H
+#define __DRIVERS_POWER_GREEDY_GOVERNER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <assert.h>
-
-#include <nuttx/init.h>
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <nuttx/input/ioctl.h>
 #include <nuttx/power/pm.h>
 
-#include "up_internal.h"
-
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static jmp_buf g_simabort;
-static int g_exitcode = EXIT_SUCCESS;
-
-/****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: main
- *
- * Description:
- *   This is the main entry point into the simulation.
- *
+ * Type Definitions
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef CONFIG_SMP
-  /* In the SMP case, configure the main thread as CPU 0 */
-
-  sim_cpu0_initialize();
-#endif
-
-  /* Then start NuttX */
-
-  if (setjmp(g_simabort) == 0)
-    {
-#ifdef CONFIG_SMP
-      /* Start the CPU0 emulation.  This should not return. */
-
-      sim_cpu0_start();
 #else
-      /* Start the Nuttx emulation.  This should not return. */
-
-      nx_start();
+#define EXTERN extern
 #endif
-    }
-
-  /* Restore the original terminal mode and return the exit code */
-
-  simuart_terminate();
-  return g_exitcode;
-}
 
 /****************************************************************************
- * Name: up_assert
- *
- * Description:
- *   Called to terminate the simulation abnormally in the event of a failed
- *   assertion.
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int line)
-{
-  /* Show the location of the failed assertion */
-
-#ifdef CONFIG_SMP
-  fprintf(stderr, "CPU%d: Assertion failed at file:%s line: %d\n",
-          up_cpu_index(), filename, line);
-#else
-  fprintf(stderr, "Assertion failed at file:%s line: %d\n",
-          filename, line);
-#endif
-
-  /* Allow for any board/configuration specific crash information */
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), this_task(), filename, line);
-#endif
-
-  /* Exit the simulation */
-
-  g_exitcode = EXIT_FAILURE;
-  longjmp(g_simabort, 1);
-}
-
 /****************************************************************************
- * Name: board_power_off
+ * Name: pm_greedy_governor_register
  *
  * Description:
- *   Power off the board.  This function may or may not be supported by a
- *   particular board architecture.
- *
- * Input Parameters:
- *   status - Status information provided with the power off event.
+ *   Return the greedy governor instance.
  *
  * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARDCTL_POWEROFF
-int board_power_off(int status)
-{
-  /* Save the return code and exit the simulation */
+FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
 
-  g_exitcode = status;
-  longjmp(g_simabort, 1);
+#undef EXTERN
+#ifdef __cplusplus
 }
 #endif
+
+#endif  /* __DRIVERS_POWER_GREEDY_GOVERNER_H */
+

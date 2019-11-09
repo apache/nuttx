@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2011-2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,19 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* Convert the time slice interval into system clock ticks.
- *
- * CONFIG_PM_SLICEMS provides the duration of one time slice in milliseconds.
- * CLOCKS_PER_SEC provides the number of timer ticks in one second.
- *
- * slice ticks = (CONFIG_PM_SLICEMS msec / 1000 msec/sec) /
- *               (CLOCKS_PER_SEC ticks/sec)
- */
-
-#define TIME_SLICE_TICKS ((CONFIG_PM_SLICEMS * CLOCKS_PER_SEC) /  1000)
-
 /****************************************************************************
  * Name: pm_lock
  *
@@ -98,56 +86,18 @@
 
 struct pm_domain_s
 {
-  /* state       - The current state for this PM domain (as determined by an
-   *               explicit call to pm_changestate())
-   * recommended - The recommended state based on the PM algorithm in
-   *               function pm_update().
-   * mndex       - The index to the next slot in the memory[] array to use.
-   * mcnt        - A tiny counter used only at start up.  The actual
-   *               algorithm cannot be applied until CONFIG_PM_MEMORY
-   *               samples have been collected.
+  /* The current state for this PM domain (as determined by an
+   * explicit call to pm_changestate())
    */
 
   uint8_t state;
-  uint8_t recommended;
-  uint8_t mndx;
-  uint8_t mcnt;
-
-  /* accum - The accumulated counts in this time interval */
-
-  int16_t accum;
-
-#if CONFIG_PM_MEMORY > 1
-  /* This is the averaging "memory."  The averaging algorithm is simply:
-   * Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where i = 1..n-1 and j= 1..n, n is the
-   * length of the "memory", Ai is the weight applied to each value, and X is
-   * the current activity.
-   *
-   * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
-   * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
-   */
-
-  int16_t memory[CONFIG_PM_MEMORY - 1];
-#endif
-
-  /* stime - The time (in ticks) at the start of the current time slice */
-
-  clock_t stime;
-
-  /* btime - The time (in ticks) at the start of the current state */
-
-  clock_t btime;
 
   /* The power state lock count */
 
   uint16_t stay[PM_COUNT];
-
-  /* Timer to decrease state */
-
-  WDOG_ID wdog;
 };
 
-/* This structure encapsulates all of the global data used by the PM module */
+/* This structure encapsulates all of the global data used by the PM system */
 
 struct pm_global_s
 {
@@ -164,9 +114,13 @@ struct pm_global_s
 
   dq_queue_t registry;
 
-  /* The activity/state information for each PM domain */
+  /* The state information for each PM domain */
 
   struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
+
+  /* A pointer to the PM governor instance */
+
+  FAR const struct pm_governor_s *governor;
 };
 
 /****************************************************************************
@@ -186,33 +140,9 @@ extern "C"
 
 EXTERN struct pm_global_s g_pmglobals;
 
-/************************************************************************************
+/*****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
-
-/****************************************************************************
- * Name: pm_update
- *
- * Description:
- *   This internal function is called at the end of a time slice in order to
- *   update driver activity metrics and recommended states.
- *
- * Input Parameters:
- *   domain - The domain associated with the accumulator.
- *   accum - The value of the activity accumulator at the end of the time
- *     slice.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   This function may be called from a driver, perhaps even at the interrupt
- *   level.  It may also be called from the IDLE loop at the lowest possible
- *   priority level.
- *
- ****************************************************************************/
-
-void pm_update(int domain, int16_t accum);
+ *****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

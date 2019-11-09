@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -83,65 +84,9 @@
 
 void pm_activity(int domain, int priority)
 {
-  FAR struct pm_domain_s *pdom;
-  clock_t now, elapsed;
-  uint32_t accum;
-  irqstate_t flags;
-
-  /* Get a convenience pointer to minimize all of the indexing */
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
-
-  /* Just increment the activity count in the current time slice. The priority
-   * is simply the number of counts that are added.
-   */
-
-  if (priority > 0)
+  if (g_pmglobals.governor->activity)
     {
-      /* Add the priority to the accumulated counts in a critical section. */
-
-      flags = enter_critical_section();
-      accum = (uint32_t)pdom->accum + priority;
-
-      /* Make sure that we do not overflow the underlying uint16_t representation */
-
-      if (accum > INT16_MAX)
-        {
-          accum = INT16_MAX;
-        }
-
-      /* Save the updated count */
-
-      pdom->accum = (int16_t)accum;
-
-      /* Check the elapsed time.  In periods of low activity, time slicing is
-       * controlled by IDLE loop polling; in periods of higher activity, time
-       * slicing is controlled by driver activity.  In either case, the
-       * duration of the time slice is only approximate; during times of
-       * heavy activity, time slices may be become longer and the activity
-       * level may be over-estimated.
-       */
-
-      now     = clock_systimer();
-      elapsed = now - pdom->stime;
-      if (elapsed >= TIME_SLICE_TICKS)
-        {
-          int16_t tmp;
-
-          /* Sample the count, reset the time and count, and assess the PM
-           * state.  This is an atomic operation because interrupts are
-           * still disabled.
-           */
-
-          tmp         = pdom->accum;
-          pdom->stime = now;
-          pdom->accum = 0;
-
-          (void)pm_update(domain, tmp);
-        }
-
-      leave_critical_section(flags);
+      g_pmglobals.governor->activity(domain, priority);
     }
 }
 
