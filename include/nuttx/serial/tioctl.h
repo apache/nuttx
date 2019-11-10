@@ -184,8 +184,12 @@
 #define TIOCSSINGLEWIRE _TIOC(0x0030)  /* Set single-wire mode */
 #define TIOCGSINGLEWIRE _TIOC(0x0031)  /* Get single-wire mode */
 
-#  define SER_SINGLEWIRE_ENABLED   (1 << 0) /* Enable/disable single-wire support */
-#  define SER_SINGLEWIRE_PULLUP    (1 << 1) /* Enable Pull-up on TX (Open-Drain otherwise) */
+#  define SER_SINGLEWIRE_ENABLED      (1 << 0) /* Enable/disable single-wire support */
+#  define SER_SINGLEWIRE_PULL_SHIFT   (1)      /* RX/TX Line Pullup/down control */
+#  define SER_SINGLEWIRE_PULL_MASK    (3 << SER_SINGLEWIRE_PULL_SHIFT)
+#  define SER_SINGLEWIRE_PULL_DISABLE (0 << SER_SINGLEWIRE_PULL_SHIFT) /* Float RX/TX Line */
+#  define SER_SINGLEWIRE_PULLUP       (1 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull up the RX/TX Line */
+#  define SER_SINGLEWIRE_PULLDOWN     (2 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull down the RX/TX Line */
 
 /* Debugging */
 
