@@ -206,6 +206,12 @@ struct getroute_recvfrom_ipv6resplist_s
   struct getroute_recvfrom_ipv6response_s payload;
 };
 
+struct getroute_rsplist_terminator_s
+{
+  sq_entry_t flink;
+  struct nlmsghdr  hdr;
+};
+
 /* netdev_foreach() callabck */
 
 struct nlroute_devinfo_s
@@ -644,6 +650,51 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 #endif
 
 /****************************************************************************
+ * Name: netlink_route_terminator
+ *
+ * Description:
+ *   Dump a list of all network devices of the specified type.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ROUTE) && (defined(CONFIG_NET_IPv4) || \
+    defined(CONFIG_NET_IPv6))
+static int netlink_route_terminator(FAR struct socket *psock,
+                                    FAR const struct getroute_sendto_request_s *req)
+{
+  FAR struct getroute_rsplist_terminator_s *alloc;
+  FAR struct nlmsghdr *resp;
+
+  /* Allocate the list terminator */
+
+  alloc = (FAR struct getroute_rsplist_terminator_s *)
+    kmm_malloc(sizeof(struct getroute_rsplist_terminator_s));
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate response terminator.\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize and send the list terminator */
+
+  resp                    = &alloc->hdr;
+  resp->nlmsg_len         = sizeof(struct nlmsghdr);
+  resp->nlmsg_type        = NLMSG_DONE;
+  resp->nlmsg_flags       = req->hdr.nlmsg_flags;
+  resp->nlmsg_seq         = req->hdr.nlmsg_seq;
+  resp->nlmsg_pid         = req->hdr.nlmsg_pid;
+
+  /* Finally, add the response to the list of pending responses */
+
+  net_lock();
+  netlink_add_response(psock, (FAR struct netlink_response_s *)alloc);
+  net_unlock();
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: netlink_ipv4_route
  *
  * Description:
@@ -727,14 +778,16 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 
   net_lock();
   ret = net_foreachroute_ipv4(netlink_ipv4_route, &routeinfo);
-  net_unlock();
-
   if (ret < 0)
     {
       return ret;
     }
 
-  return OK;
+  /* Terminate the routing table */
+
+  ret = netlink_route_terminator(psock, req);
+  net_unlock();
+  return ret;
 }
 #endif
 
@@ -822,14 +875,16 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
 
   net_lock();
   ret = net_foreachroute_ipv6(netlink_ipv6_route, &routeinfo);
-  net_unlock();
-
   if (ret < 0)
     {
       return ret;
     }
 
-  return OK;
+  /* Terminate the routing table */
+
+  ret = netlink_route_terminator(psock, req);
+  net_unlock();
+  return ret;
 }
 #endif
 
