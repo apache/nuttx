@@ -74,8 +74,8 @@ int delroute(int sockfd, FAR struct sockaddr_storage *target,
   /* Set up the rtentry structure */
 
   memset(&entry, 0, sizeof(struct rtentry));
-  entry.rt_target  = target;  /* Target address */
-  entry.rt_netmask = netmask; /* Network mask defining the sub-net */
+  memcpy(&entry.rt_dst, target, sizeof(struct sockaddr_storage));
+  memcpy(&entry.rt_genmask, netmask, sizeof(struct sockaddr_storage));
 
   /* Then perform the ioctl */
 

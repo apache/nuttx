@@ -168,23 +168,14 @@ static int ioctl_add_ipv4route(FAR struct rtentry *rtentry)
   in_addr_t netmask;
   in_addr_t router;
 
-  addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
+  addr    = (FAR struct sockaddr_in *)&rtentry->rt_dst;
   target  = (in_addr_t)addr->sin_addr.s_addr;
 
-  addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
+  addr    = (FAR struct sockaddr_in *)&rtentry->rt_genmask;
   netmask = (in_addr_t)addr->sin_addr.s_addr;
 
-  /* The router is an optional argument */
-
-  if (rtentry->rt_router)
-    {
-      addr   = (FAR struct sockaddr_in *)rtentry->rt_router;
-      router = (in_addr_t)addr->sin_addr.s_addr;
-    }
-  else
-    {
-      router = 0;
-    }
+  addr    = (FAR struct sockaddr_in *)&rtentry->rt_gateway;
+  router  = (in_addr_t)addr->sin_addr.s_addr;
 
   return net_addroute_ipv4(target, netmask, router);
 }
@@ -206,23 +197,16 @@ static int ioctl_add_ipv6route(FAR struct rtentry *rtentry)
 {
   FAR struct sockaddr_in6 *target;
   FAR struct sockaddr_in6 *netmask;
+  FAR struct sockaddr_in6 *gateway;
   net_ipv6addr_t router;
 
-  target    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-  netmask    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
+  target  = (FAR struct sockaddr_in6 *)&rtentry->rt_dst;
+  netmask = (FAR struct sockaddr_in6 *)&rtentry->rt_genmask;
 
   /* The router is an optional argument */
 
-  if (rtentry->rt_router)
-    {
-      FAR struct sockaddr_in6 *addr;
-      addr = (FAR struct sockaddr_in6 *)rtentry->rt_router;
-      net_ipv6addr_copy(router, addr->sin6_addr.s6_addr16);
-    }
-  else
-    {
-      net_ipv6addr_copy(router, in6addr_any.s6_addr16);
-    }
+  gateway = (FAR struct sockaddr_in6 *)&rtentry->rt_gateway;
+  net_ipv6addr_copy(router, gateway->sin6_addr.s6_addr16);
 
   return net_addroute_ipv6(target->sin6_addr.s6_addr16,
                            netmask->sin6_addr.s6_addr16, router);
@@ -247,10 +231,10 @@ static int ioctl_del_ipv4route(FAR struct rtentry *rtentry)
   in_addr_t target;
   in_addr_t netmask;
 
-  addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
+  addr    = (FAR struct sockaddr_in *)&rtentry->rt_dst;
   target  = (in_addr_t)addr->sin_addr.s_addr;
 
-  addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
+  addr    = (FAR struct sockaddr_in *)&rtentry->rt_genmask;
   netmask = (in_addr_t)addr->sin_addr.s_addr;
 
   return net_delroute_ipv4(target, netmask);
@@ -274,10 +258,11 @@ static int ioctl_del_ipv6route(FAR struct rtentry *rtentry)
   FAR struct sockaddr_in6 *target;
   FAR struct sockaddr_in6 *netmask;
 
-  target    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-  netmask    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
+  target  = (FAR struct sockaddr_in6 *)&rtentry->rt_dst;
+  netmask = (FAR struct sockaddr_in6 *)&rtentry->rt_genmask;
 
-  return net_delroute_ipv6(target->sin6_addr.s6_addr16, netmask->sin6_addr.s6_addr16);
+  return net_delroute_ipv6(target->sin6_addr.s6_addr16,
+                           netmask->sin6_addr.s6_addr16);
 }
 #endif /* HAVE_WRITABLE_IPv6ROUTE */
 
@@ -1347,14 +1332,14 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
         {
           /* The target address and the netmask are required values */
 
-          if (!rtentry || !rtentry->rt_target || !rtentry->rt_netmask)
+          if (rtentry == NULL)
             {
               return -EINVAL;
             }
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-          if (rtentry->rt_target->ss_family == AF_INET)
+          if (rtentry->rt_dst.ss_family == AF_INET)
 #endif
             {
 #ifdef HAVE_WRITABLE_IPv4ROUTE
@@ -1384,14 +1369,14 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
         {
           /* The target address and the netmask are required values */
 
-          if (!rtentry || !rtentry->rt_target || !rtentry->rt_netmask)
+          if (rtentry == 0)
             {
               return -EINVAL;
             }
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-          if (rtentry->rt_target->ss_family == AF_INET)
+          if (rtentry->rt_dst.ss_family == AF_INET)
 #endif
             {
 #ifdef HAVE_WRITABLE_IPv4ROUTE

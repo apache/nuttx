@@ -235,10 +235,14 @@
 #define NLMSG_ALIGN(n)    (((n) + NLMSG_MASK) & ~NLMSG_MASK)
 #define NLMSG_HDRLEN      sizeof(struct nlmsghdr)
 #define NLMSG_LENGTH(n)   (NLMSG_HDRLEN + (n))
+#define NLMSG_SPACE(len)  NLMSG_ALIGN(NLMSG_LENGTH(len))
 #define NLMSG_DATA(hdr)   ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN))
 #define NLMSG_NEXT(hdr,n) \
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
-   (FAR struct nlmsghdr*)(((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+   (FAR struct nlmsghdr*) \
+   (((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+#define NLMSG_PAYLOAD(hdr, len) \
+  ((hdr)->nlmsg_len - NLMSG_SPACE((len)))
 
 #define NLMSG_NOOP         1   /* Nothing */
 #define NLMSG_ERROR        2   /* Error */
@@ -284,6 +288,58 @@
 /* Values for rta_type */
 
 #define IFLA_IFNAME       1
+
+/* Definitions for struct rtmsg *********************************************/
+
+#define RTM_RTA(r)       ((FAR struct rtattr *)\
+                          (((FAR char *)(r)) + \
+                          NLMSG_ALIGN(sizeof(struct rtmsg))))
+#define RTM_PAYLOAD(n)    NLMSG_PAYLOAD(n, sizeof(struct rtmsg))
+
+/* rtm_table.  Routing table identifiers */
+
+#define RT_TABLE_UNSPEC   0
+                              /* 1-251: User defined values */
+#define RT_TABLE_MAIN     254
+#define RT_TABLE_MAX      0xffffffff
+
+/* rtm_type */
+
+#define RTN_UNSPEC        0
+#define RTN_UNICAST       1   /* Gateway or direct route  */
+#define RTN_LOCAL         2   /* Accept locally */
+#define RTN_BROADCAST     3   /* Accept locally as broadcast;
+                               * send as broadcast */
+#define RTN_ANYCAST       4   /* Accept locally as broadcast
+                               * but send as unicast */
+#define RTN_MULTICAST     5   /* Multicast route */
+
+/* rtm_protocol */
+
+#define RTPROT_UNSPEC     0
+#define RTPROT_REDIRECT   1   /* Route installed by ICMP redirects */
+#define RTPROT_KERNEL     2   /* Route installed by kernel */
+#define RTPROT_BOOT       3   /* Route installed during boot */
+#define RTPROT_STATIC     4   /* Route installed by administrator */
+#define RTPROT_RA         5   /* RDISC/ND router advertisements */
+#define RTPROT_DHCP       6   /* DHCP client */
+
+/* rtm_scope */
+
+#define  RT_SCOPE_UNIVERSE 0
+                              /* 1-199: User defined values */
+#define  RT_SCOPE_SITE     200
+#define  RT_SCOPE_LINK     253
+#define  RT_SCOPE_HOST     254
+#define  RT_SCOPE_NOWHERE  255
+
+/* Routing table attributes  */
+
+#define RTA_UNSPEC        0
+#define RTA_DST           1
+#define RTA_SRC           2
+#define RTA_GENMASK       3
+#define RTA_GATEWAY       5
 
 /****************************************************************************
  * Public Type Definitions
@@ -347,7 +403,7 @@ struct ifinfomsg
 
 struct rtgenmsg
 {
-  unsigned char rtgen_family;
+  uint8_t  rtgen_family;
 };
 
 /* RTM_NEWADDR, RTM_DELADDR, RTM_GETADDR
@@ -380,6 +436,21 @@ struct ndmsg
   uint16_t  ndm_state;
   uint8_t   ndm_flags;
   uint8_t   ndm_type;
+};
+
+/* Structures used in routing table administration. */
+
+struct rtmsg
+{
+  uint8_t   rtm_family;
+  uint8_t   rtm_dst_len;
+  uint8_t   rtm_src_len;
+  uint8_t   rtm_tos;
+  uint8_t   rtm_table;     /* Routing table id */
+  uint8_t   rtm_protocol;  /* Routing protocol; See RTPROT_ definitions. */
+  uint8_t   rtm_scope;     /* See RT_SCOPE_* definitions */
+  uint8_t   rtm_type;      /* See RTN_* definitions */
+  uint32_t  rtm_flags;
 };
 
 /****************************************************************************

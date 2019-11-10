@@ -42,6 +42,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <string.h>
 #include <net/route.h>
 
 /****************************************************************************
@@ -75,9 +76,10 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
 
   /* Set up the rtentry structure */
 
-  entry.rt_target  = target;  /* Target address */
-  entry.rt_netmask = netmask; /* Network mask defining the sub-net */
-  entry.rt_router  = router;  /* Router address associated with the hop */
+  memset(&entry, 0, sizeof(struct rtentry));
+  memcpy(&entry.rt_dst, target, sizeof(struct sockaddr_storage));
+  memcpy(&entry.rt_genmask, netmask, sizeof(struct sockaddr_storage));
+  memcpy(&entry.rt_gateway, router, sizeof(struct sockaddr_storage));
 
   /* Then perform the ioctl */
 

@@ -324,7 +324,7 @@ int netlink_device_callback(FAR struct net_driver_s *dev, FAR void *arg)
   resp->iface.ifi_flags  = devcb->req->hdr.nlmsg_flags;
   resp->iface.ifi_change = 0xffffffff;
 
-  resp->attr.rta_len     = strnlen(dev->d_ifname, IFNAMSIZ);
+  resp->attr.rta_len     = RTA_LENGTH(0) + strnlen(dev->d_ifname, IFNAMSIZ);
   resp->attr.rta_type    = IFLA_IFNAME;
 
   strncpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
@@ -390,7 +390,7 @@ int netlink_get_devlist(FAR struct socket *psock,
   resp->iface.ifi_flags  = req->hdr.nlmsg_flags;
   resp->iface.ifi_change = 0xffffffff;
 
-  resp->attr.rta_len     = 0;
+  resp->attr.rta_len     = RTA_LENGTH(0);
   resp->attr.rta_type    = NLMSG_DONE;
 
   /* Finally, add the data to the list of pending responses */
@@ -440,7 +440,7 @@ int netlink_get_arptable(FAR struct socket *psock,
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
   entry->payload.hdr.nlmsg_len = rspsize;
   memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = tabsize;
+  entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
   entry->payload.attr.rta_type = 0;
 
   /* Lock the network so that the ARP table will be stable, then copy
@@ -473,7 +473,7 @@ int netlink_get_arptable(FAR struct socket *psock,
         }
 
       entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = tabsize;
+      entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
     }
 
   /* Finally, add the data to the list of pending responses */
@@ -524,7 +524,7 @@ int netlink_get_nbtable(FAR struct socket *psock,
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
   entry->payload.hdr.nlmsg_len = rspsize;
   memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = tabsize;
+  entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
   entry->payload.attr.rta_type = 0;
 
   /* Lock the network so that the Neighbor table will be stable, then
@@ -557,7 +557,7 @@ int netlink_get_nbtable(FAR struct socket *psock,
         }
 
       entry->payload.hdr.nlmsg_len = rspsize;
-          entry->payload.attr.rta_len  = tabsize;
+      entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
     }
 
   /* Finally, add the data to the list of pending responses */

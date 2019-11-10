@@ -259,6 +259,8 @@
   * aligned at an appropriate boundary so that pointers to it can be cast
   * as pointers to protocol-specific address structures and used to access
   * the fields of those structures without alignment problems.
+  *
+  * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
   */
 
 #ifdef CONFIG_NET_IPv6
