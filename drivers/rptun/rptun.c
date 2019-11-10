@@ -181,7 +181,7 @@ static int rptun_thread(int argc, FAR char *argv[])
   sigset_t set;
   int ret;
 
-  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[1], NULL, 0));
+  priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
 
   sigemptyset(&set);
   sigaddset(&set, SIGUSR1);
@@ -791,9 +791,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
+  FAR char *argv[3];
   char arg1[16];
-  char name[16];
-  FAR char *argv[2];
+  char name[32];
   int ret;
 
   ret = metal_init(&params);
@@ -808,12 +808,13 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       return -ENOMEM;
     }
 
-  snprintf(name, 16, "rptun%s", RPTUN_GET_CPUNAME(dev));
   snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
 
-  argv[0] = arg1;
-  argv[1] = NULL;
-  ret = kthread_create(name,
+  argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
+  argv[1] = arg1;
+  argv[2] = NULL;
+
+  ret = kthread_create("rptun",
                        CONFIG_RPTUN_PRIORITY,
                        CONFIG_RPTUN_STACKSIZE,
                        rptun_thread,
@@ -837,14 +838,14 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       rptun_dev_start(&priv->rproc);
     }
 
-  sprintf(name, "/dev/rptun%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
   return register_driver(name, &g_rptun_devops, 0666, priv);
 }
 
 int rptun_boot(FAR const char *cpuname)
 {
   struct file file;
-  char name[16];
+  char name[32];
   int ret;
 
   if (!cpuname)
@@ -852,8 +853,7 @@ int rptun_boot(FAR const char *cpuname)
       return -EINVAL;
     }
 
-  sprintf(name, "/dev/rptun%s", cpuname);
-
+  snprintf(name, 32, "/dev/rptun/%s", cpuname);
   ret = file_open(&file, name, 0, 0);
   if (ret)
     {
