@@ -70,6 +70,7 @@ config ARCH_SIM
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET
+	select ARCH_NOINTC
 	select SERIAL_CONSOLE
 	---help---
 		Linux/Cywgin user-mode simulation.

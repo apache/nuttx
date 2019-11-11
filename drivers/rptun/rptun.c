@@ -76,7 +76,6 @@ struct rptun_priv_s
   struct metal_list            bind;
   struct metal_list            node;
   int                          pid;
-  bool                         started;
 };
 
 struct rptun_bind_s
@@ -369,6 +368,12 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
   unsigned int role = RPMSG_REMOTE;
   int ret;
 
+  ret = remoteproc_config(&priv->rproc, NULL);
+  if (ret)
+    {
+      return ret;
+    }
+
   if (RPTUN_GET_FIRMWARE(priv->dev))
     {
       struct rptun_store_s store =
@@ -492,7 +497,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 
-  priv->started = true;
   return 0;
 }
 
@@ -525,9 +529,9 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   nxsem_post(&g_rptun_sem);
 
-  /* Remote proc stop */
+  /* Remote proc stop and shutdown */
 
-  remoteproc_stop(rproc);
+  remoteproc_shutdown(rproc);
 
   /* Remote proc remove */
 
@@ -544,7 +548,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
       kmm_free(bind);
     }
 
-  priv->started = false;
   return 0;
 }
 
@@ -557,14 +560,14 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       case RPTUNIOC_START:
-        if (!priv->started)
+        if (priv->rproc.state == RPROC_OFFLINE)
           {
             ret = rptun_dev_start(&priv->rproc);
           }
         break;
 
       case RPTUNIOC_STOP:
-        if (priv->started)
+        if (priv->rproc.state != RPROC_OFFLINE)
           {
             ret = rptun_dev_stop(&priv->rproc);
           }
@@ -829,9 +832,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   priv->dev = dev;
 
   metal_list_init(&priv->bind);
-
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
-  remoteproc_config(&priv->rproc, NULL);
 
   if (RPTUN_IS_AUTOSTART(dev))
     {
