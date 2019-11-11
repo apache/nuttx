@@ -40,40 +40,39 @@ Serial Console
 LEDs and Buttons
 ================
 
- There is one user accessible LED status indicator located on the 1020-EVK.
- The function of the LEDs include:
+  There is one user accessible LED status indicator located on the 1020-EVK,
+  USERLED.  The function of the LEDs include:
 
- D3: Power (Green) & Overpower (Red)
- D5: User LED (Green) GPIO_AD_B0_05
- D15: RST LED (Red)
+    D3: Power (Green) & Overpower (Red)
+    D5: User LED (Green) GPIO_AD_B0_05
+    D15: RST LED (Red)
 
- This LED is not used by the board port unless CONFIG_ARCH_LEDS is
- defined.  In that case, the usage by the board port is defined in
- include/board.h and src/imxrt_autoleds.c. The LED is used to encode
- OS-related events as documented in board.h
+  This LED is not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/imxrt_autoleds.c. The LED is used to encode
+  OS-related events as documented in board.h
 
- -------------------------------------------------
- SYMBOL                    Meaning           LED1
- -------------------------------------------------
+     ---------------------------------------------------
+     SYMBOL                    Meaning           USERLED
+    ---------------------------------------------------
 
-LED_STARTED          NuttX has been started  OFF
-LED_HEAPALLOCATE     Heap has been allocated OFF
-LED_IRQSENABLED      Interrupts enabled      OFF
-LED_STACKCREATED     Idle stack created      ON
-LED_INIRQ            In an interrupt         N/C
-LED_SIGNAL           In a signal handler     N/C
-LED_ASSERTION        An assertion failed     N/C
-LED_PANIC            The system has crashed  FLASH
-LED_IDLE             Not used
+    LED_STARTED          NuttX has been started  OFF
+    LED_HEAPALLOCATE     Heap has been allocated OFF
+    LED_IRQSENABLED      Interrupts enabled      OFF
+    LED_STACKCREATED     Idle stack created      ON
+    LED_INIRQ            In an interrupt         N/C
+    LED_SIGNAL           In a signal handler     N/C
+    LED_ASSERTION        An assertion failed     N/C
+    LED_PANIC            The system has crashed  FLASH
+    LED_IDLE             Not used
 
-In addition the LED is illuminated during an interrupt.
+  In addition the LED is illuminated during an interrupt.
 
-This IMXRT board has three external buttons
+  This IMXRT board has three external buttons
 
-1. SW2 (IRQ88, ONOFF)  Not on a GPIO, No muxing
-2. SW3 (IRQ88, POR)    Not on a GPIO, No muxing
-2. SW4 (IRQ88, USER)   Wakeup, GPIO5-0
-
+    1. SW2 (IRQ88, ONOFF)  Not on a GPIO, No muxing
+    2. SW3 (IRQ88, POR)    Not on a GPIO, No muxing
+    3. SW4 (IRQ88, USER)   Wakeup, GPIO5-0
 
 Configurations
 ==============

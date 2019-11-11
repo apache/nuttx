@@ -130,9 +130,9 @@
  * include/board.h and src/imxrt_autoleds.c. The LED is used to encode
  * OS-related events as documented in board.h
  *
- *   -------------------- ----------------------------- ----
- *   SYMBOL                   Meaning                   LED1
- *   -------------------- ----------------------------- ----
+ *   -------------------- ----------------------------- --------
+ *   SYMBOL                   Meaning                   USERLED
+ *   -------------------- ----------------------------- --------
  */
 
 #define LED_STARTED       0  /* NuttX has been started  OFF    */
@@ -153,12 +153,12 @@
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_USERLED1     0
+#define BOARD_USERLED      0
 #define BOARD_NLEDS        1
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_USERLED1_BIT (1 << BOARD_USERLED1)
+#define BOARD_USERLED_BIT  (1 << BOARD_USERLED)
 
 /* Which device the SD card appears on */
 
@@ -198,13 +198,13 @@
 
 /* LEDs *********************************************************************/
 
-#define GPIO_LED1  (IOMUX_LED_DEFAULT | GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                    GPIO_PORT1 | GPIO_PIN5 )                            /* AD_B0_05 */
+#define GPIO_USERLED    (IOMUX_LED_DEFAULT | GPIO_OUTPUT | \
+                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN5)  /* AD_B0_05 */
 
 /* Buttons ******************************************************************/
 
-#define GPIO_SWWAKE      (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | | IOMUX_SWWAKE_DEFAULT \
-                          GPIO_PORT5 | GPIO_PIN0 )                      /* WAKE */
+#define GPIO_SWWAKE     (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                         IOMUX_SWWAKE_DEFAULT | GPIO_PORT5 | GPIO_PIN0)  /* WAKE */
 
 /* ETH Disambiguation ********************************************************/
 

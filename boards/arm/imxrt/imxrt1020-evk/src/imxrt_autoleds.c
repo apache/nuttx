@@ -88,7 +88,7 @@ void imxrt_autoled_initialize(void)
 {
   /* Configure LED GPIO for output */
 
-  imxrt_config_gpio(GPIO_LED1);
+  imxrt_config_gpio(GPIO_USERLED);
 }
 
 /****************************************************************************
@@ -124,7 +124,7 @@ void board_autoled_on(int led)
         break;
     }
 
-  imxrt_gpio_write(GPIO_LED1, ledoff); /* Low illuminates */
+  imxrt_gpio_write(GPIO_USERLED, ledoff); /* Low illuminates */
 }
 
 /****************************************************************************
@@ -155,7 +155,7 @@ void board_autoled_off(int led)
         return;
     }
 
-  imxrt_gpio_write(GPIO_LED1, true); /* Low illuminates */
+  imxrt_gpio_write(GPIO_USERLED, true); /* Low illuminates */
 }
 
 #endif /* CONFIG_ARCH_LEDS */
