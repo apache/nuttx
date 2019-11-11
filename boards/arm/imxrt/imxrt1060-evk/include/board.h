@@ -194,13 +194,13 @@
  * sure shapes are square with minimal ringing.
  */
 
-#define PIN_USDHC1_D0       (GPIO_USDHC1_DATA0 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D1       (GPIO_USDHC1_DATA1 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D2       (GPIO_USDHC1_DATA2 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_D3       (GPIO_USDHC1_DATA3 | IOMUX_USDHC1_DATAX_DEFAULT)
-#define PIN_USDHC1_DCLK     (GPIO_USDHC1_CLK   | IOMUX_USDHC1_CLK_DEFAULT)
-#define PIN_USDHC1_CMD      (GPIO_USDHC1_CMD   | IOMUX_USDHC1_CMD_DEFAULT)
-#define PIN_USDHC1_CD       (GPIO_USDHC1_CD_2  | IOMUX_USDHC1_CLK_DEFAULT)
+#define PIN_USDHC1_D0     (GPIO_USDHC1_DATA0 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D1     (GPIO_USDHC1_DATA1 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D2     (GPIO_USDHC1_DATA2 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_D3     (GPIO_USDHC1_DATA3 | IOMUX_USDHC1_DATAX_DEFAULT)
+#define PIN_USDHC1_DCLK   (GPIO_USDHC1_CLK   | IOMUX_USDHC1_CLK_DEFAULT)
+#define PIN_USDHC1_CMD    (GPIO_USDHC1_CMD   | IOMUX_USDHC1_CMD_DEFAULT)
+#define PIN_USDHC1_CD     (GPIO_USDHC1_CD_2  | IOMUX_USDHC1_CLK_DEFAULT)
 
 /* 386 KHz for initial inquiry stuff */
 
@@ -246,7 +246,7 @@
 
 #ifdef CONFIG_ARCH_LEDS
 #define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
-                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)       /* AD_BO_09 */
+                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)  /* AD_BO_09 */
 #endif
 
 /* LCD *********************************************************************/
@@ -310,12 +310,12 @@
                               GPIO_PORT1 | GPIO_PIN10)                    /* AD_B0_10 */
 #define GPIO_ENET_IRQ         IMXRT_IRQ_GPIO1_10
 #define GPIO_ENET_RST        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                              GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST_DEFAULT)
+                              GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST_DEFAULT) /* AD_B0_09 */
 
 #ifdef CONFIG_ETH0_PHY_KSZ8081
-#ifdef GPIO_LED
-#warning LED interferes with ETH reset unless R323 is removed.
-#endif
+#  ifdef GPIO_LED
+#    warning LED interferes with ETH reset unless R323 is removed.
+#  endif
 #endif
 
 /* PIO Disambiguation *******************************************************/
@@ -327,20 +327,20 @@
  *
  */
 
-#define GPIO_LPUART1_RX   (GPIO_LPUART1_RX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B0_13 */
-#define GPIO_LPUART1_TX   (GPIO_LPUART1_TX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B0_12 */
-#define GPIO_LPUART3_RX   (GPIO_LPUART3_RX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B1_07 */
-#define GPIO_LPUART3_TX   (GPIO_LPUART3_TX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B1_06 */
+#define GPIO_LPUART1_RX      (GPIO_LPUART1_RX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B0_13 */
+#define GPIO_LPUART1_TX      (GPIO_LPUART1_TX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B0_12 */
+#define GPIO_LPUART3_RX      (GPIO_LPUART3_RX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B1_07 */
+#define GPIO_LPUART3_TX      (GPIO_LPUART3_TX_1|IOMUX_UART_DEFAULT) /* GPIO_AD_B1_06 */
 
 /* LPI2Cs
  *
  * Arduino Connector LPI2C1 and audio/gyro IO on LPI2C3.
  */
 
-#define GPIO_LPI2C1_SDA   (GPIO_LPI2C1_SDA_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_01 */
-#define GPIO_LPI2C1_SCL   (GPIO_LPI2C1_SCL_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_00 */
-#define GPIO_LPI2C3_SDA   (GPIO_LPI2C3_SDA_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_01 */
-#define GPIO_LPI2C3_SCL   (GPIO_LPI2C3_SCL_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_00 */
+#define GPIO_LPI2C1_SDA      (GPIO_LPI2C1_SDA_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_01 */
+#define GPIO_LPI2C1_SCL      (GPIO_LPI2C1_SCL_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_00 */
+#define GPIO_LPI2C3_SDA      (GPIO_LPI2C3_SDA_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_01 */
+#define GPIO_LPI2C3_SCL      (GPIO_LPI2C3_SCL_2|IOMUX_LPI2C_DEFAULT) /* GPIO_AD_B1_00 */
 
 /* LPSPI
  *
@@ -351,28 +351,36 @@
  *   J24 D15   GPIO_AD_B0_00  LPSPI3_SCK
  */
 
-#define GPIO_LPSPI3_SCK   (GPIO_LPSPI3_SCK_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_00 */
-#define GPIO_LPSPI3_MISO  (GPIO_LPSPI3_SDI_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_02 */
-#define GPIO_LPSPI3_MOSI  (GPIO_LPSPI3_SDO_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_01 */
-#define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                         _IOMUX_PULL_ENABLE)
-#define GPIO_LPSPI3_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
-                         GPIO_PORT1 | GPIO_PIN3 | IOMUX_LPSPI3_CS) /* GPIO_AD_B0_03 */
+#define GPIO_LPSPI3_SCK      (GPIO_LPSPI3_SCK_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_00 */
+#define GPIO_LPSPI3_MISO     (GPIO_LPSPI3_SDI_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_02 */
+#define GPIO_LPSPI3_MOSI     (GPIO_LPSPI3_SDO_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_01 */
+#define IOMUX_LPSPI3_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                              _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI3_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                              GPIO_PORT1 | GPIO_PIN3 | IOMUX_LPSPI3_CS) /* GPIO_AD_B0_03 */
 
 /* LPSPI1 CS:  GPIO_SD_B0_01 */
 
-#define IOMUX_LPSPI1_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                         _IOMUX_PULL_ENABLE)
-#define GPIO_LPSPI1_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
-                         GPIO_PORT3 | GPIO_PIN13 | IOMUX_LPSPI1_CS)
+#define IOMUX_LPSPI1_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                              _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI1_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                              GPIO_PORT3 | GPIO_PIN13 | IOMUX_LPSPI1_CS)
 
-#define IOMUX_MMCSD_EN  (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                         _IOMUX_PULL_ENABLE)
-#define GPIO_MMCSD_EN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                         GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
+#define IOMUX_MMCSD_EN       (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                              _IOMUX_PULL_ENABLE)
+#define GPIO_MMCSD_EN        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                              GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
+
+#define GPIO_FT5X06_INTR     IMXRT_IRQ_GPIO1_11
+
+#define IOMUX_FT5X06_RST     (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
+                              IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                              IOMUX_SLEW_SLOW)                            /* AD_B0_11 */
+#define GPIO_FT5X06_CTRSTn   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                              GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)  /* AD_B0_02 */
 
 /****************************************************************************
  * Public Types
