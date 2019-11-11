@@ -95,9 +95,12 @@ int main(int argc, char **argv, char **envp)
 #endif
     }
 
+#ifdef USE_DEVCONSOLE
   /* Restore the original terminal mode and return the exit code */
 
   simuart_terminate();
+#endif
+
   return g_exitcode;
 }
 

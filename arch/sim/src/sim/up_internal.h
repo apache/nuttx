@@ -204,7 +204,7 @@ extern volatile int g_eventloop;
 #endif
 #endif
 
-#ifdef CONFIG_DEV_CONSOLE
+#ifdef USE_DEVCONSOLE
 extern volatile int g_uart_data_available;
 #endif
 

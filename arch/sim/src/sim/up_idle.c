@@ -132,7 +132,7 @@ void up_idle(void)
   nxsched_process_timer();
 #endif
 
-#ifdef CONFIG_DEV_CONSOLE
+#ifdef USE_DEVCONSOLE
   /* Handle UART data availability */
 
   if (g_uart_data_available)
