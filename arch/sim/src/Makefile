@@ -82,6 +82,7 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
+  HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -157,10 +158,6 @@ else # HOSTOS != Cygwin
 endif # HOSTOS != Cygwin
 endif # CONFIG_NET_ETHERNET
 endif # CONFIG_SIM_NETDEV
-
-ifeq ($(CONFIG_SMP),y)
-  HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
-endif
 
 ifeq ($(CONFIG_FS_HOSTFS),y)
   HOSTSRCS += up_hostfs.c
