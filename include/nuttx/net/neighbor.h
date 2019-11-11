@@ -82,6 +82,7 @@ struct neighbor_addr_s
 #ifdef CONFIG_NET_6LOWPAN
     struct netdev_maxaddr_s  na_sixlowpan;
 #endif
+    uint8_t                  na_addr[1];
   } u;
 };
 

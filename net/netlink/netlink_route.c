@@ -75,6 +75,22 @@
  * Private Types
  ****************************************************************************/
 
+/* Used to send message done.  gen is tacked on to provide the address
+ * family.  It is discarded before returning the struct nlmsghdr payload.
+ */
+
+struct nlroute_msgdone_response_s
+{
+  struct nlmsghdr  hdr;
+  struct rtgenmsg  gen;
+};
+
+struct nlroute_msgdone_rsplist_s
+{
+  sq_entry_t flink;
+  struct nlroute_msgdone_response_s payload;
+};
+
 /* RTM_GETLINK:  Enumerate network devices .  The message contains the
  * 'rtgenmsg' structure.
  */
@@ -97,19 +113,6 @@ struct getlink_recvfrom_rsplist_s
 {
   sq_entry_t flink;
   struct getlink_recvfrom_response_s payload;
-};
-
-struct getlink_response_terminator_s
-{
-  struct nlmsghdr  hdr;
-  struct ifinfomsg iface;
-  struct rtattr    attr;
-};
-
-struct getlink_rsplist_terminator_s
-{
-  sq_entry_t flink;
-  struct getlink_response_terminator_s payload;
 };
 
 /* RTM_GETNEIGH:  Get neighbor table entry.  The message contains an 'ndmsg'
@@ -204,12 +207,6 @@ struct getroute_recvfrom_ipv6resplist_s
 {
   sq_entry_t flink;
   struct getroute_recvfrom_ipv6response_s payload;
-};
-
-struct getroute_rsplist_terminator_s
-{
-  sq_entry_t flink;
-  struct nlmsghdr  hdr;
 };
 
 /* netdev_foreach() callabck */
@@ -390,7 +387,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp                   = &alloc->payload;
 
   resp->hdr.nlmsg_len    = sizeof(struct getlink_recvfrom_response_s);
-  resp->hdr.nlmsg_type   = devinfo->req->hdr.nlmsg_type;
+  resp->hdr.nlmsg_type   = RTM_NEWLINK;
   resp->hdr.nlmsg_flags  = devinfo->req->hdr.nlmsg_flags;
   resp->hdr.nlmsg_seq    = devinfo->req->hdr.nlmsg_seq;
   resp->hdr.nlmsg_pid    = devinfo->req->hdr.nlmsg_pid;
@@ -406,7 +403,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp->iface.ifi_flags  = devinfo->req->hdr.nlmsg_flags;
   resp->iface.ifi_change = 0xffffffff;
 
-  resp->attr.rta_len     = RTA_LENGTH(0) + strnlen(dev->d_ifname, IFNAMSIZ);
+  resp->attr.rta_len     = RTA_LENGTH(strnlen(dev->d_ifname, IFNAMSIZ));
   resp->attr.rta_type    = IFLA_IFNAME;
 
   strncpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
@@ -429,14 +426,14 @@ static int netlink_get_devlist(FAR struct socket *psock,
                                FAR const struct getlink_sendto_request_s *req)
 {
   struct nlroute_devinfo_s devinfo;
-  FAR struct getlink_rsplist_terminator_s *alloc;
-  FAR struct getlink_response_terminator_s *resp;
+  FAR struct nlroute_msgdone_rsplist_s *alloc;
+  FAR struct nlroute_msgdone_response_s *resp;
   int ret;
 
   /* Pre-allocate the list terminator */
 
-  alloc = (FAR struct getlink_rsplist_terminator_s *)
-    kmm_malloc(sizeof(struct getlink_rsplist_terminator_s));
+  alloc = (FAR struct nlroute_msgdone_rsplist_s *)
+    kmm_malloc(sizeof(struct nlroute_msgdone_rsplist_s));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response terminator.\n");
@@ -459,21 +456,12 @@ static int netlink_get_devlist(FAR struct socket *psock,
   /* Initialize and send the list terminator */
 
   resp                   = &alloc->payload;
-  resp->hdr.nlmsg_len    = sizeof(struct getlink_response_terminator_s);
-  resp->hdr.nlmsg_type   = req->hdr.nlmsg_type;
+  resp->hdr.nlmsg_len    = sizeof(struct nlroute_msgdone_response_s);
+  resp->hdr.nlmsg_type   = NLMSG_DONE;
   resp->hdr.nlmsg_flags  = req->hdr.nlmsg_flags;
   resp->hdr.nlmsg_seq    = req->hdr.nlmsg_seq;
   resp->hdr.nlmsg_pid    = req->hdr.nlmsg_pid;
-
-  resp->iface.ifi_family = req->gen.rtgen_family;
-  resp->iface.ifi_pid    = req->hdr.nlmsg_pid;
-  resp->iface.ifi_type   = req->hdr.nlmsg_type;
-  resp->iface.ifi_index  = 0;
-  resp->iface.ifi_flags  = req->hdr.nlmsg_flags;
-  resp->iface.ifi_change = 0xffffffff;
-
-  resp->attr.rta_len     = RTA_LENGTH(0);
-  resp->attr.rta_type    = NLMSG_DONE;
+  resp->gen.rtgen_family = req->gen.rtgen_family;
 
   /* Finally, add the data to the list of pending responses */
 
@@ -522,7 +510,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
   entry->payload.hdr.nlmsg_len = rspsize;
   memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
+  entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
   entry->payload.attr.rta_type = 0;
 
   /* Lock the network so that the ARP table will be stable, then copy
@@ -555,7 +543,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
         }
 
       entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
+      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
     }
 
   /* Finally, add the data to the list of pending responses */
@@ -606,7 +594,7 @@ static int netlink_get_nbtable(FAR struct socket *psock,
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
   entry->payload.hdr.nlmsg_len = rspsize;
   memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
+  entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
   entry->payload.attr.rta_type = 0;
 
   /* Lock the network so that the Neighbor table will be stable, then
@@ -639,7 +627,7 @@ static int netlink_get_nbtable(FAR struct socket *psock,
         }
 
       entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(0) + tabsize;
+      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
     }
 
   /* Finally, add the response to the list of pending responses */
@@ -662,13 +650,13 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 static int netlink_route_terminator(FAR struct socket *psock,
                                     FAR const struct getroute_sendto_request_s *req)
 {
-  FAR struct getroute_rsplist_terminator_s *alloc;
-  FAR struct nlmsghdr *resp;
+  FAR struct nlroute_msgdone_rsplist_s *alloc;
+  FAR struct nlroute_msgdone_response_s *resp;
 
   /* Allocate the list terminator */
 
-  alloc = (FAR struct getroute_rsplist_terminator_s *)
-    kmm_malloc(sizeof(struct getroute_rsplist_terminator_s));
+  alloc = (FAR struct nlroute_msgdone_rsplist_s *)
+    kmm_malloc(sizeof(struct nlroute_msgdone_rsplist_s));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response terminator.\n");
@@ -677,12 +665,13 @@ static int netlink_route_terminator(FAR struct socket *psock,
 
   /* Initialize and send the list terminator */
 
-  resp                    = &alloc->hdr;
-  resp->nlmsg_len         = sizeof(struct nlmsghdr);
-  resp->nlmsg_type        = NLMSG_DONE;
-  resp->nlmsg_flags       = req->hdr.nlmsg_flags;
-  resp->nlmsg_seq         = req->hdr.nlmsg_seq;
-  resp->nlmsg_pid         = req->hdr.nlmsg_pid;
+  resp                   = &alloc->payload;
+  resp->hdr.nlmsg_len    = sizeof(struct nlroute_msgdone_response_s);
+  resp->hdr.nlmsg_type   = NLMSG_DONE;
+  resp->hdr.nlmsg_flags  = req->hdr.nlmsg_flags;
+  resp->hdr.nlmsg_seq    = req->hdr.nlmsg_seq;
+  resp->hdr.nlmsg_pid    = req->hdr.nlmsg_pid;
+  resp->gen.rtgen_family = req->gen.rtgen_family;
 
   /* Finally, add the response to the list of pending responses */
 
@@ -726,26 +715,26 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
 
   resp                        = &alloc->payload;
   resp->hdr.nlmsg_len         = sizeof(struct getroute_recvfrom_ipv4response_s);
-  resp->hdr.nlmsg_type        = routeinfo->req->hdr.nlmsg_type;
+  resp->hdr.nlmsg_type        = RTM_NEWROUTE;
   resp->hdr.nlmsg_flags       = routeinfo->req->hdr.nlmsg_flags;
   resp->hdr.nlmsg_seq         = routeinfo->req->hdr.nlmsg_seq;
   resp->hdr.nlmsg_pid         = routeinfo->req->hdr.nlmsg_pid;
 
-  memset(&resp, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
+  memset(&resp->rte, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
   resp->rte.rtm_family        = routeinfo->req->gen.rtgen_family;
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
   
-  resp->dst.attr.rta_len      = sizeof(in_addr_t);
+  resp->dst.attr.rta_len      = RTA_LENGTH(sizeof(in_addr_t));
   resp->dst.attr.rta_type     = RTA_DST;
   resp->dst.addr              = route->target;
 
-  resp->genmask.attr.rta_len  = sizeof(in_addr_t);
+  resp->genmask.attr.rta_len  = RTA_LENGTH(sizeof(in_addr_t));
   resp->genmask.attr.rta_type = RTA_GENMASK;
   resp->genmask.addr          = route->netmask;
 
-  resp->gateway.attr.rta_len  = sizeof(in_addr_t);
+  resp->gateway.attr.rta_len  = RTA_LENGTH(sizeof(in_addr_t));
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   resp->gateway.addr          = route->router;
 
@@ -823,26 +812,26 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
 
   resp                        = &alloc->payload;
   resp->hdr.nlmsg_len         = sizeof(struct getroute_recvfrom_ipv6response_s);
-  resp->hdr.nlmsg_type        = routeinfo->req->hdr.nlmsg_type;
+  resp->hdr.nlmsg_type        = RTM_NEWROUTE;
   resp->hdr.nlmsg_flags       = routeinfo->req->hdr.nlmsg_flags;
   resp->hdr.nlmsg_seq         = routeinfo->req->hdr.nlmsg_seq;
   resp->hdr.nlmsg_pid         = routeinfo->req->hdr.nlmsg_pid;
 
-  memset(&resp, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
+  memset(&resp->rte, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
   resp->rte.rtm_family        = routeinfo->req->gen.rtgen_family;
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
   
-  resp->dst.attr.rta_len      = sizeof(net_ipv6addr_t);
+  resp->dst.attr.rta_len      = RTA_LENGTH(sizeof(net_ipv6addr_t));
   resp->dst.attr.rta_type     = RTA_DST;
   net_ipv6addr_copy(resp->dst.addr, route->target);
 
-  resp->genmask.attr.rta_len  = sizeof(net_ipv6addr_t);
+  resp->genmask.attr.rta_len  = RTA_LENGTH(sizeof(net_ipv6addr_t));
   resp->genmask.attr.rta_type = RTA_GENMASK;
   net_ipv6addr_copy(resp->genmask.addr, route->netmask);
 
-  resp->gateway.attr.rta_len  = sizeof(net_ipv6addr_t);
+  resp->gateway.attr.rta_len  = RTA_LENGTH(sizeof(net_ipv6addr_t));
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   net_ipv6addr_copy(resp->gateway.addr, route->router);
 
@@ -1027,7 +1016,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
 
   switch (entry->msg.nlmsg_type)
     {
-      case RTM_GETLINK:
+      case RTM_NEWLINK:
         {
           FAR struct getlink_recvfrom_rsplist_s *resp =
             (FAR struct getlink_recvfrom_rsplist_s *)entry;
@@ -1080,7 +1069,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
 #endif
 
 #ifdef CONFIG_NET_ROUTE
-      case RTM_GETROUTE:
+      case RTM_NEWROUTE:
         {
           FAR struct getroute_recvfrom_resplist_s *resp =
             (FAR struct getroute_recvfrom_resplist_s *)entry;
@@ -1105,6 +1094,32 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
         }
         break;
 #endif
+
+      case NLMSG_DONE:
+        {
+          FAR struct nlroute_msgdone_rsplist_s *resp =
+            (FAR struct nlroute_msgdone_rsplist_s *)entry;
+
+          /* Copy the payload to the user buffer */
+
+          resp->payload.hdr.nlmsg_len = sizeof(struct nlmsghdr);
+          memcpy(nlmsg, &resp->payload, sizeof(struct nlmsghdr));
+
+          /* Return address.  REVISIT... this is just a guess. */
+
+          if (from != NULL)
+            {
+              from->nl_family = resp->payload.gen.rtgen_family;
+              from->nl_pad    = 0;
+              from->nl_pid    = resp->payload.hdr.nlmsg_pid;
+              from->nl_groups = 0;
+            }
+
+          /* The return value is the payload size */
+
+          ret = sizeof(struct nlmsghdr);
+        }
+        break;
 
       default:
         nerr("ERROR: Unrecognized message type: %u\n",

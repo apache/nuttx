@@ -260,9 +260,9 @@
   ((n) >= (int)sizeof(struct rtattr) && \
    (rta)->rta_len >= sizeof(struct rtattr) && \
    (rta)->rta_len <= (n))
-#define RTA_NEXT(rta,attrlen) \
+#define RTA_NEXT(rta, attrlen) \
   ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
-   (struct rtattr*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
+   (FAR struct rtattr*)(((FAR char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
 #define RTA_LENGTH(n)     (RTA_ALIGN(sizeof(struct rtattr)) + (n))
 #define RTA_SPACE(n)      RTA_ALIGN(RTA_LENGTH(n))
 #define RTA_DATA(rta)     ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
