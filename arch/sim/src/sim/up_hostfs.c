@@ -115,7 +115,7 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 
 int host_open(const char *pathname, int flags, int mode)
 {
-  int mapflags;
+  int mapflags = 0;
 
   /* Perform flag mapping */
 
