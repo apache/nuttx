@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
-#define __CONFIGS_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
+#ifndef __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
+#define __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
 
 /****************************************************************************
  * Included Files
@@ -146,4 +146,4 @@ struct boot_data_s
 
 extern const struct boot_data_s g_boot_data;
 
-#endif /* __CONFIGS_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H */
+#endif /* __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H */
