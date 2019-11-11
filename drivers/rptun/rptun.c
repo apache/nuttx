@@ -426,8 +426,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       align1 = B2C(rsc->rpmsg_vring1.align);
 
       tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
-      v0sz = vring_size(rsc->rpmsg_vring0.num, align0);
-      v1sz = vring_size(rsc->rpmsg_vring1.num, align1);
+      v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
+      v1sz = ALIGN_UP(vring_size(rsc->rpmsg_vring1.num, align1), align1);
 
       va0 = (char *)rsc + tbsz;
       va1 = (char *)rsc + tbsz + v0sz;
