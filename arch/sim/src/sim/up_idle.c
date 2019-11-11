@@ -132,7 +132,7 @@ void up_idle(void)
   nxsched_process_timer();
 #endif
 
-#if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_SIM_UART_DATAPOST)
+#ifdef CONFIG_DEV_CONSOLE
   /* Handle UART data availability */
 
   if (g_uart_data_available)

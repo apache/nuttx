@@ -98,10 +98,6 @@
 #  endif
 #endif
 
-/* The design for how we signal UART data availability is up in the air */
-
-#undef CONFIG_SIM_UART_DATAPOST
-
 /* Context Switching Definitions ******************************************/
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
@@ -208,7 +204,7 @@ extern volatile int g_eventloop;
 #endif
 #endif
 
-#if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_SIM_UART_DATAPOST)
+#ifdef CONFIG_DEV_CONSOLE
 extern volatile int g_uart_data_available;
 #endif
 
