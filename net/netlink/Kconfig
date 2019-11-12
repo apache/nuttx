@@ -34,6 +34,27 @@ config NETLINK_ROUTE
 	---help---
 		Support the NETLINK_ROUTE protocol option.
 
+if NETLINK_ROUTE
+
+config NETLINK_DISABLE_GETLINK
+	bool "Disable RTM_GETLINK support"
+	default n
+	---help---
+		RTM_GETLINK is used to enumerate network devices.
+
+config NETLINK_DISABLE_GETNEIGH
+	bool "Disable RTM_GETNEIGH support"
+	default n
+	---help---
+		RTM_GETNEIGH is used to retrieve Neighbor/ARP tables.
+
+config NETLINK_DISABLE_GETROUTE
+	bool "Disable RTM_GETROUTE support"
+	default n
+	---help---
+		RTM_GETROUTE is used to retrieve routing tables.
+
+endif # NETLINK_ROUTE
 endmenu # Netlink Protocols
 endif # NET_NETLINK
 endmenu # Netlink Socket Support

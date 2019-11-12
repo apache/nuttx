@@ -62,8 +62,29 @@
 #ifdef CONFIG_NETLINK_ROUTE
 
 /****************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#if !defined(CONFIG_NET_ARP) && !defined(CONFIG_NET_IPv6)
+#  undef CONFIG_NETLINK_DISABLE_GETNEIGH
+#  define CONFIG_NETLINK_DISABLE_GETNEIGH 1
+#endif
+
+#if !defined(CONFIG_NET_ROUTE) || (!defined(CONFIG_NET_IPv4) && \
+    !defined(CONFIG_NET_IPv6))
+#  undef CONFIG_NETLINK_DISABLE_GETROUTE
+#  define CONFIG_NETLINK_DISABLE_GETROUTE 1
+#endif
+
+#undef NETLINK_DISABLE_NLMSGDONE
+#if defined(CONFIG_NETLINK_DISABLE_GETLINK) && \
+    defined(CONFIG_NETLINK_DISABLE_GETROUTE)
+#  define NETLINK_DISABLE_NLMSGDONE 1
+#endif
+
+/* Helpers ******************************************************************/
 
 #define IFA_RTA(r)  \
   ((FAR struct rtattr *)(((FAR char *)(r)) + \
@@ -235,6 +256,7 @@ struct nlroute_routeinfo_s
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
 static int netlink_device_callback(FAR struct net_driver_s *dev,
                                    FAR void *arg)
 {
@@ -413,6 +435,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   netlink_add_response(devinfo->psock, (FAR struct netlink_response_s *)alloc);
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: netlink_get_devlist
@@ -422,6 +445,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
 static int netlink_get_devlist(FAR struct socket *psock,
                                FAR const struct getlink_sendto_request_s *req)
 {
@@ -469,6 +493,7 @@ static int netlink_get_devlist(FAR struct socket *psock,
   net_unlock();
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: netlink_get_arptable()
@@ -478,7 +503,7 @@ static int netlink_get_devlist(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ARP
+#if defined(CONFIG_NET_ARP) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
 static int netlink_get_arptable(FAR struct socket *psock,
                                 FAR const struct getneigh_sendto_request_s *req)
 {
@@ -561,7 +586,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
 static int netlink_get_nbtable(FAR struct socket *psock,
                                FAR const struct getneigh_sendto_request_s *req)
 {
@@ -645,8 +670,7 @@ static int netlink_get_nbtable(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && (defined(CONFIG_NET_IPv4) || \
-    defined(CONFIG_NET_IPv6))
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
 static int netlink_route_terminator(FAR struct socket *psock,
                                     FAR const struct getroute_sendto_request_s *req)
 {
@@ -691,7 +715,7 @@ static int netlink_route_terminator(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+#if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
                               FAR void *arg)
 {
@@ -753,7 +777,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv4)
+#if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_get_ipv4route(FAR struct socket *psock,
                                  FAR const struct getroute_sendto_request_s *req)
 {
@@ -788,7 +812,7 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
                               FAR void *arg)
 {
@@ -850,7 +874,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_ROUTE) && defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_get_ip6vroute(FAR struct socket *psock,
                                  FAR const struct getroute_sendto_request_s *req)
 {
@@ -897,6 +921,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 {
   FAR const struct getneigh_sendto_request_s *gnreq =
     (FAR const struct getneigh_sendto_request_s *)nlmsg;
+  int ret;
 
   DEBUGASSERT(psock != NULL && nlmsg != NULL &&
               nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
@@ -904,76 +929,98 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
               len >= nlmsg->nlmsg_len && to != NULL &&
               tolen >= sizeof(struct sockaddr_nl));
 
-  /* Dump a list of all devices */
+  /* Handle according to the message type */
 
-  if (gnreq->hdr.nlmsg_type == RTM_GETLINK)
+  switch (gnreq->hdr.nlmsg_type)
     {
-      FAR const struct getlink_sendto_request_s *glreq =
-        (FAR const struct getlink_sendto_request_s *)nlmsg;
-      int ret;
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
+      /* Dump a list of all devices */
 
-      ret = netlink_get_devlist(psock, glreq);
-      return ret < 0 ? ret : len;
-    }
+      case RTM_GETLINK:
+        {
+          FAR const struct getlink_sendto_request_s *glreq =
+            (FAR const struct getlink_sendto_request_s *)nlmsg;
 
+          /* Generate the response */
+
+          ret = netlink_get_devlist(psock, glreq);
+        }
+        break;
+#endif
+
+#ifndef CONFIG_NETLINK_DISABLE_GETNEIGH
+      /* Retrieve ARP/Neighbor Tables */
+
+      case RTM_GETNEIGH:
+        {
 #ifdef CONFIG_NET_ARP
-  /* Retrieve the ARP table in its entirety. */
+          /* Retrieve the ARP table in its entirety. */
 
-  else if (gnreq->hdr.nlmsg_type == RTM_GETNEIGH &&
-           gnreq->msg.ndm_family == AF_INET)
-    {
-      int ret = netlink_get_arptable(psock, gnreq);
-      return ret < 0 ? ret : len;
-    }
+          if (gnreq->msg.ndm_family == AF_INET)
+            {
+              ret = netlink_get_arptable(psock, gnreq);
+            }
+          else
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  /* Retrieve the IPv6 neighbor table in its entirety. */
+          /* Retrieve the IPv6 neighbor table in its entirety. */
 
-  else if (gnreq->hdr.nlmsg_type == RTM_GETNEIGH &&
-           gnreq->msg.ndm_family == AF_INET6)
-    {
-      int ret = netlink_get_nbtable(psock, gnreq);
-      return ret < 0 ? ret : len;
-    }
+          if (gnreq->msg.ndm_family == AF_INET6)
+            {
+               ret = netlink_get_nbtable(psock, gnreq);
+            }
+          else
 #endif
+            {
+              ret = -EAFNOSUPPORT;
+            }
+        }
+        break;
+#endif /* !CONFIG_NETLINK_DISABLE_GETNEIGH */
 
-#ifdef CONFIG_NET_ROUTE
-  /* Retrieve the IPv4 or IPv6 routing table */
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
+      /* Retrieve the IPv4 or IPv6 routing table */
 
-  else if (gnreq->hdr.nlmsg_type == RTM_GETROUTE)
-    {
-      FAR const struct getroute_sendto_request_s *grreq =
-        (FAR const struct getroute_sendto_request_s *)nlmsg;
-      int ret;
+      case RTM_GETROUTE:
+        {
+          FAR const struct getroute_sendto_request_s *grreq =
+            (FAR const struct getroute_sendto_request_s *)nlmsg;
 
 #ifdef CONFIG_NET_IPv4
-      if (grreq->gen.rtgen_family == AF_INET)
-        {
-          ret = netlink_get_ipv4route(psock, grreq);
-        }
+          if (grreq->gen.rtgen_family == AF_INET)
+            {
+              ret = netlink_get_ipv4route(psock, grreq);
+            }
+          else
 #endif
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
+          if (grreq->gen.rtgen_family == AF_INET6)
+            {
+              ret = netlink_get_ip6vroute(psock, grreq);
+            }
+          else
 #endif
-      if (grreq->gen.rtgen_family == AF_INET6)
-        {
-          ret = netlink_get_ip6vroute(psock, grreq);
+            {
+              ret = -EAFNOSUPPORT;
+            }
         }
+        break;
 #endif
-      else
-        {
-          ret = -EAFNOSUPPORT;
-        }
 
-      return ret < 0 ? ret : len;
+      default:
+        ret = -ENOSYS;
+        break;
     }
-#endif
 
-  /* REVISIT:  Not implemented */
+  /* On success, return the size of the request that was processed */
 
-  return -ENOSYS;
+  if (ret >= 0)
+    {
+      ret = len;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1022,6 +1069,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
 
   switch (entry->msg.nlmsg_type)
     {
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
       case RTM_NEWLINK:
         {
           FAR struct getlink_recvfrom_rsplist_s *resp =
@@ -1046,8 +1094,9 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
           ret = resp->payload.hdr.nlmsg_len;
         }
         break;
+#endif
 
-#if defined(CONFIG_NET_ARP) || defined(CONFIG_NET_IPv6)
+#ifndef CONFIG_NETLINK_DISABLE_GETNEIGH
       case RTM_GETNEIGH:
         {
           FAR struct getneigh_recvfrom_rsplist_s *resp =
@@ -1074,7 +1123,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
         break;
 #endif
 
-#ifdef CONFIG_NET_ROUTE
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
       case RTM_NEWROUTE:
         {
           FAR struct getroute_recvfrom_resplist_s *resp =
@@ -1101,6 +1150,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
         break;
 #endif
 
+#ifndef NETLINK_DISABLE_NLMSGDONE
       case NLMSG_DONE:
         {
           FAR struct nlroute_msgdone_rsplist_s *resp =
@@ -1126,6 +1176,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
           ret = sizeof(struct nlmsghdr);
         }
         break;
+#endif
 
       default:
         nerr("ERROR: Unrecognized message type: %u\n",
