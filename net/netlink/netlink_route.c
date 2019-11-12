@@ -1003,6 +1003,12 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
 
   if (entry == NULL)
     {
+      /* REVISIT:  The correct behavior here for a blocking socket would be
+       * to wait until the data becomes available.  This is not an issue for
+       * the currently supported operations since they are fully synchronous
+       * but will become an issue in the future.
+       */
+
       return -ENOENT;
     }
 
