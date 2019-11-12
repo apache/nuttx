@@ -177,7 +177,15 @@ void up_idle(void)
 
   up_idlepm();
 
-#if 1
+/* This code is disabled due to fact CPU cannot recover from low
+ * power mode via SYSTICK according to:
+ *
+ *   https://github.com/zephyrproject-rtos/zephyr/pull/8535/commits
+ *
+ * For further investigation post release of 8.2.
+ */
+
+#if 0
   /* Sleep until an interrupt occurs to save power. */
 
   BEGIN_IDLE();
