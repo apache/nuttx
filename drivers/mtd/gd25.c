@@ -240,6 +240,7 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
   uint16_t manufacturer;
   uint16_t memory;
   uint16_t capacity;
+  int ret = -ENODEV;
 
   /* Lock and configure the SPI bus */
 
@@ -259,7 +260,6 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
   /* Deselect the FLASH and unlock the bus */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
-  gd25_unlock(priv->spi);
 
   finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
         manufacturer, memory, capacity);
@@ -297,7 +297,7 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
         }
       else
         {
-          return -ENODEV;
+          goto out;
         }
 
       /* Capacity greater than 16MB, Enable four-byte address */
@@ -310,18 +310,24 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
             {
               ferr("ERROR: capacity %02x: Can't enable 4-byte mode!\n",
                    capacity);
-              return -EBUSY;
+              ret = -EBUSY;
+              goto out;
             }
 
           priv->addr_4byte = true;
         }
 
-      return OK;
+      ret = OK;
     }
 
-  /* We don't understand the manufacturer or the memory type */
+out:
+  /* We don't understand the manufacturer or the memory type.
+   * Or enable four-byte address failed.
+   * Or success.
+   */
 
-  return -ENODEV;
+  gd25_unlock(priv->spi);
+  return ret;
 }
 
 /**************************************************************************
