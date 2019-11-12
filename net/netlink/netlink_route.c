@@ -430,6 +430,13 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   strncpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
 
+  /* REVISIT:  Another response should be provided with nlmsg_type =
+   * RTM_NEWROUTE.  That response should include struct rtmsg followed by a
+   * number of attributes.  This response provides routing information for
+   * the device including address (RTA_DST) and gateway (RTA_GATEWAY)
+   * attributes.
+   */
+
   /* Finally, add the data to the list of pending responses */
 
   netlink_add_response(devinfo->psock, (FAR struct netlink_response_s *)alloc);
