@@ -369,12 +369,12 @@ struct sockaddr_nl
 
 struct nlmsghdr
 {
-  uint32_t nlmsg_len;    /* Length of message including header */
-  uint16_t nlmsg_type;   /* Message content */
-  uint16_t nlmsg_flags;  /* Additional flags */
-  uint32_t nlmsg_seq;    /* Sequence number */
-  uint32_t nlmsg_pid;    /* Sending process port ID */
-                         /* Data follows */
+  uint32_t nlmsg_len;     /* Length of message including header */
+  uint16_t nlmsg_type;    /* Message content */
+  uint16_t nlmsg_flags;   /* Additional flags */
+  uint32_t nlmsg_seq;     /* Sequence number */
+  uint32_t nlmsg_pid;     /* Sending process port ID */
+                          /* Data follows */
 };
 
 /* RTM_NEWLINK, RTM_DELLINK, RTM_GETLINK
@@ -388,19 +388,19 @@ struct nlmsghdr
 
 struct rtattr
 {
-  uint16_t rta_len;      /* Length of option */
-  uint16_t rta_type;     /* Type of option */
-                         /* Data follows */
+  uint16_t rta_len;       /* Length of option */
+  uint16_t rta_type;      /* Type of option */
+                          /* Data follows */
 };
 
 struct ifinfomsg
 {
-  uint8_t  ifi_family;   /* AF_UNSPEC */
+  uint8_t  ifi_family;    /* AF_UNSPEC */
   uint8_t  ifi_pid;
-  uint16_t ifi_type;     /* Device type (ARPHRD) */
-  int16_t  ifi_index;    /* Unique interface index */
-  uint32_t ifi_flags;    /* Device IFF_* flags  */
-  uint32_t ifi_change;   /* Change mask, must always be 0xffffffff */
+  uint16_t ifi_type;      /* Device type (ARPHRD) */
+  int16_t  ifi_index;     /* Unique interface index */
+  uint32_t ifi_flags;     /* Device IFF_* flags  */
+  uint32_t ifi_change;    /* Change mask, must always be 0xffffffff */
 };
 
 /* General form of address family dependent message. */
@@ -419,11 +419,11 @@ struct rtgenmsg
 
 struct ifaddrmsg
 {
-  uint8_t ifa_family;    /* Address type:  AF_INET or AF_INET6 */
-  uint8_t ifa_prefixlen; /* Prefix length of address */
-  uint8_t ifa_flags;     /* Address flags.  See IFA_F_* definitions */
-  uint8_t ifa_scope;     /* Address scope */
-  int16_t ifa_index;     /* Unique interface index */
+  uint8_t  ifa_family;    /* Address type:  AF_INET or AF_INET6 */
+  uint8_t  ifa_prefixlen; /* Prefix length of address */
+  uint8_t  ifa_flags;     /* Address flags.  See IFA_F_* definitions */
+  uint8_t  ifa_scope;     /* Address scope */
+  int16_t  ifa_index;     /* Unique interface index */
 };
 
 /* RTM_NEWNEIGH, RTM_DELNEIGH, RTM_GETNEIGH
@@ -433,28 +433,28 @@ struct ifaddrmsg
 
 struct ndmsg
 {
-  uint8_t   ndm_family;
-  uint8_t   ndm_pad1;
-  uint16_t  ndm_pad2;
-  int32_t   ndm_ifindex;
-  uint16_t  ndm_state;
-  uint8_t   ndm_flags;
-  uint8_t   ndm_type;
+  uint8_t  ndm_family;
+  uint8_t  ndm_pad1;
+  uint16_t ndm_pad2;
+  int32_t  ndm_ifindex;
+  uint16_t ndm_state;
+  uint8_t  ndm_flags;
+  uint8_t  ndm_type;
 };
 
 /* Structures used in routing table administration. */
 
 struct rtmsg
 {
-  uint8_t   rtm_family;
-  uint8_t   rtm_dst_len;
-  uint8_t   rtm_src_len;
-  uint8_t   rtm_tos;
-  uint8_t   rtm_table;     /* Routing table id */
-  uint8_t   rtm_protocol;  /* Routing protocol; See RTPROT_ definitions. */
-  uint8_t   rtm_scope;     /* See RT_SCOPE_* definitions */
-  uint8_t   rtm_type;      /* See RTN_* definitions */
-  uint32_t  rtm_flags;
+  uint8_t  rtm_family;
+  uint8_t  rtm_dst_len;
+  uint8_t  rtm_src_len;
+  uint8_t  rtm_tos;
+  uint8_t  rtm_table;     /* Routing table id */
+  uint8_t  rtm_protocol;  /* Routing protocol; See RTPROT_ definitions. */
+  uint8_t  rtm_scope;     /* See RT_SCOPE_* definitions */
+  uint8_t  rtm_type;      /* See RTN_* definitions */
+  uint32_t rtm_flags;
 };
 
 /****************************************************************************
