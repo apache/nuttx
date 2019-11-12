@@ -594,11 +594,15 @@ static void governor_timer(int domain)
       pdomstate->wdog = wd_create();
     }
 
-  if (state < PM_SLEEP && !pdom->stay[pdom->state] &&
-      pmtick[state])
+  if (state < PM_SLEEP && !pdom->stay[pdom->state])
     {
       int delay = pmtick[state] + pdomstate->btime - clock_systimer();
       int left  = wd_gettime(pdomstate->wdog);
+
+      if (delay <= 0)
+        {
+          delay = 1;
+        }
 
       if (!WDOG_ISACTIVE(pdomstate->wdog) || abs(delay - left) > PM_TIMER_GAP)
         {
