@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_LINCOLN60_SRC_LINCOLN60_H
-#define _CONFIGS_LINCOLN60_SRC_LINCOLN60_H
+#ifndef _BOARDS_ARM_LPC17XX_40XX_LINCOLN60_SRC_LINCOLN60_H
+#define _BOARDS_ARM_LPC17XX_40XX_LINCOLN60_SRC_LINCOLN60_H
 
 /****************************************************************************
  * Included Files
@@ -113,4 +113,4 @@
 void weak_function lincoln60_sspdev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_LINCOLN60_SRC_LINCOLN60_H */
+#endif /* _BOARDS_ARM_LPC17XX_40XX_LINCOLN60_SRC_LINCOLN60_H */
