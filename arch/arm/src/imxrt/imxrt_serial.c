@@ -1492,7 +1492,7 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
  * Name: imxrt_txready
  *
  * Description:
- *   Return true if the transmit is completed
+ *   Return true if the transmit register is available to be written to
  *
  ****************************************************************************/
 
@@ -1502,14 +1502,14 @@ static bool imxrt_txready(struct uart_dev_s *dev)
   uint32_t regval;
 
   regval = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TC) != 0);
+  return ((regval & LPUART_STAT_TDRE) != 0);
 }
 
 /****************************************************************************
  * Name: imxrt_txempty
  *
  * Description:
- *   Return true if the transmit reg is empty
+ *   Return true if the transmission has completed and been sent to line.
  *
  ****************************************************************************/
 
@@ -1519,7 +1519,7 @@ static bool imxrt_txempty(struct uart_dev_s *dev)
   uint32_t regval;
 
   regval = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TDRE) != 0);
+  return ((regval & LPUART_STAT_TC) != 0);
 }
 
 /****************************************************************************
