@@ -91,7 +91,7 @@
 #  undef USE_DEVCONSOLE
 #  undef CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
+#  if defined(CONFIG_RAMLOG_CONSOLE) ||  defined(CONFIG_SYSLOG_RPMSG)
 #    undef USE_DEVCONSOLE
 #  else
 #    define USE_DEVCONSOLE 1
@@ -235,6 +235,10 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 int  up_setjmp(xcpt_reg_t *jb);
 void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
+
+/* up_hostusleep.c ********************************************************/
+
+int up_hostusleep(unsigned int usec);
 
 /* up_simsmp.c ************************************************************/
 
@@ -386,6 +390,20 @@ void wpcap_send(unsigned char *buf, unsigned int buflen);
 int netdriver_init(void);
 int netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);
+#endif
+
+#ifdef CONFIG_RPTUN
+
+/* up_shmem.c *************************************************************/
+
+void *shmem_open(const char *name, size_t size, int master);
+void shmem_close(void *mem);
+
+/* up_rptun.c *************************************************************/
+
+int up_rptun_init(void);
+void up_rptun_loop(void);
+
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH

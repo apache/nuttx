@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/sim/sim/sim/src/sim_appinit.c
+ * arch/sim/src/sim/up_shmem.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Xiaomi Inc. All rights reserved.
+ *   Author: Chao An <anchao@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,52 +37,74 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/board.h>
+#define _GNU_SOURCE 1
 
-#include "sim.h"
-#include "up_internal.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_BOARDCTL
-int board_app_initialize(uintptr_t arg)
+void *shmem_open(const char *name, size_t size, int master)
 {
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
-  sim_bringup();
-#endif
+  void *mem;
+  int oflag;
+  int ret;
+  int fd;
 
-#ifdef CONFIG_RPTUN
-  up_rptun_init();
-#endif
+  oflag = O_RDWR;
+  if (master)
+    {
+      oflag |= O_CREAT | O_TRUNC;
+    }
 
-  return 0;
+  while (1)
+    {
+      fd = shm_open(name, oflag, S_IRUSR | S_IWUSR);
+      if (fd >= 0)
+        {
+          if (!master)
+            {
+              /* Avoid the second slave instance open successfully */
+
+              shm_unlink(name);
+            }
+          break;
+        }
+
+      if (master || errno != ENOENT)
+        {
+          return NULL;
+        }
+
+      /* Master isn't ready, sleep and try again */
+
+      usleep(1000);
+    }
+
+  ret = ftruncate(fd, size);
+  if (ret < 0)
+    {
+      close(fd);
+      return NULL;
+    }
+
+  mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  close(fd); /* Don't need keep fd any more once the memory get mapped */
+  if (mem == MAP_FAILED)
+    {
+      return NULL;
+    }
+
+  return mem;
 }
-#endif /* CONFIG_LIB_BOARDCTL */
+
+void shmem_close(void *mem)
+{
+  munmap(mem, 0);
+}

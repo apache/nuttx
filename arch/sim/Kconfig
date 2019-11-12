@@ -153,6 +153,10 @@ config SIM_NET_BRIDGE_DEVICE
 
 endif
 
+config SIM_RPTUN_MASTER
+	bool "Remote Processer Tunneling Role"
+	depends on RPTUN
+
 config SIM_LCDDRIVER
 	bool "Build a simulated LCD driver"
 	default y

@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
 
@@ -59,6 +60,10 @@
 
 static jmp_buf g_simabort;
 static int g_exitcode = EXIT_SUCCESS;
+
+#ifdef CONFIG_SYSLOG_RPMSG
+static char g_logbuffer[4096];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -74,6 +79,10 @@ static int g_exitcode = EXIT_SUCCESS;
 
 int main(int argc, char **argv, char **envp)
 {
+#ifdef CONFIG_SYSLOG_RPMSG
+  syslog_rpmsg_init_early("server", g_logbuffer, sizeof(g_logbuffer));
+#endif
+
 #ifdef CONFIG_SMP
   /* In the SMP case, configure the main thread as CPU 0 */
 

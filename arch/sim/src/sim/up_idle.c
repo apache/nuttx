@@ -72,11 +72,8 @@ static int g_x11refresh = 0;
  * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-extern int up_hostusleep(unsigned int usec);
 #ifdef CONFIG_SIM_X11FB
 extern void up_x11update(void);
-#endif
 #endif
 
 /****************************************************************************
@@ -149,6 +146,10 @@ void up_idle(void)
   /* Run the network if enabled */
 
   netdriver_loop();
+#endif
+
+#ifdef CONFIG_RPTUN
+  up_rptun_loop();
 #endif
 
 #ifdef CONFIG_PM

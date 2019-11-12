@@ -885,6 +885,194 @@ pktradio
   described below EXCEPT that is uses the generic packet radio
   loopback network device.
 
+rpproxy
+rpserver
+
+  This is an example implementation for OpenAMP based on the share memory.
+
+  rpproxy:  Remote slave(client) proxy process.
+            rpproxy created a proxy between client and server to allow
+            the client to access the hardware resources on different
+            process.
+
+  rpserver: Remote master(host) server process.
+            rpserver contains all the real hardware configuration, such as:
+              1.Universal Asynchronous Receiver/Transmitter (UART).
+              2.Specific File System.
+              3.Network protocol stack and real network card device.
+              4....
+
+  Rpmsg driver used in this example include:
+
+  1.Rpmsg Syslog
+    Source:
+      include/nuttx/syslog/syslog_rpmsg.h
+      drivers/syslog/syslog_rpmsg_server.c
+      drivers/syslog/syslog_rpmsg.c
+    Describe:
+      1>Redirect log to master core
+        Linux kernel, NuttX, Freertos ...
+      2>Work as early as possible
+        Two phase initialization
+      3>Never lost the log
+        Hang during boot or runtime
+        Full system crash(panic, watchdog ...)
+
+  2.Rpmsg TTY(UART)
+    Source:
+      include/nuttx/serial/uart_rpmsg.h
+      drivers/serial/uart_rpmsg.c
+    Describe:
+      1>Like pseudo terminal but between two CPU
+      2>No different from real tty(open/read/write/close)
+      3>Full duplex communication
+      4>Support multiple channels as need
+        1)Connect RTOS shell
+        2)Make integrated GPS like external(NMEA)
+        3)Make integrated modem like external(ATCMD)
+
+  3.Rpmsg HostFS
+    Source:
+      include/nuttx/fs/hostfs_rpmsg.h
+      fs/hostfs/hostfs_rpmsg_server.c
+      fs/hostfs/hostfs_rpmsg.c
+    Describe:
+      1.Like NFS but between two CPU
+      2.Fully access Host(Linux/NuttX) File system
+        1)Save the tuning parameter during manufacture
+        2)Load the tuning parameter file in production
+        3)Save audio dump to file for tuning/debugging
+        4)Dynamic loading module from host
+
+  4.Rpmsg Net
+    Source:
+      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg.h
+      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg_server.c
+      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg_client.c
+      include/nuttx/net/rpmsg.h
+      include/nuttx/net/rpmsgdrv.h
+      drivers/net/rpmsgdrv.c
+    Describe:
+      1)Rpmsg UsrSock client
+      2)Rpmsg UsrSock server
+      3)Rpmsg Net driver
+      4)Rpmsg MAC/PHY adapter
+
+  To use this example:
+
+  1.Build images
+    1>Build rpserver and backup the image:
+      ./tools/configure.sh sim:rpserver
+      make
+      cp nuttx ~/rpserver
+
+    2>Distclean the build environment:
+      make distclean
+
+    3>Build rpproxy:
+      ./tools/configure.sh sim:rpproxy
+      make
+      cp nuttx ~/rpproxy
+
+  2.Test the Rpmsg driver
+    1>Rpmsg Syslog:
+      Start rpserver:
+
+      $ sudo ~/rpserver
+      [    0.000000] server: SIM: Initializing
+
+      NuttShell (NSH)
+      server>
+
+      Start rpproxy:
+
+      $ sudo ~/rpproxy
+
+      Check the syslog from rpproxy in rpserver terminal:
+
+      server> [    0.000000] proxy: SIM: Initializing
+
+    2>Rpmsg TTY(UART):
+      Use cu switch the current CONSOLE to the proxy:
+
+      server> ps
+        PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK COMMAND
+          0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
+          1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
+          2     1 100 FIFO     Task    --- Running            00000000 004080 init
+          3     3 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun proxy 0x56634fa0
+      server> cu /dev/ttyproxy
+      proxy> ps
+        PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK COMMAND
+          0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
+          1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
+          3     3 100 FIFO     Task    --- Running            00000000 004080 init
+          4     4 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun server 0x5671e900
+
+    3>Rpmsg HostFS:
+      Mount the remote file system via RPMSG Hostfs, cu to proxy first:
+
+      server> cu
+      proxy> mount -t hostfs -o fs=/proc proc_server
+      proxy> ls
+      /:
+        dev/
+        etc/
+        proc/
+        proc_server/
+        tmp/
+
+      Check the uptime:
+
+      proxy> cat proc/uptime
+        833.21
+      proxy> cat proc_server/uptime
+        821.72
+
+    4>Rpmsg UsrSock:
+      Start the usrsock server on rpserver:
+
+      server> usrsock &
+        usrsock [12:80]
+      server> ps
+        PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK COMMAND
+          0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
+          1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
+          2     1 100 FIFO     Task    --- Running            00000000 004080 init
+          3     3 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun proxy 0x56634fa0
+         12     3  80 FIFO     Task    --- Waiting  Semaphore 00000000 002032 usrsock
+
+      cu to proxy and start the rpmsg ursock client:
+
+      server> cu
+      proxy> usrsock server &
+        usrsock [5:80]
+      proxy> ps
+        PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK COMMAND
+          0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
+          1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
+          3     3 100 FIFO     Task    --- Running            00000000 004080 init
+          4     4 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun server 0x5671e900
+          5     4  80 FIFO     Task    --- Waiting  Semaphore 00000000 002016 usrsock server
+
+      send ICMP ping to network server via rpmsg usrsock:
+
+      proxy> ping 127.0.0.1
+      PING 127.0.0.1 56 bytes of data
+      56 bytes from 127.0.0.1: icmp_seq=0 time=20 ms
+      56 bytes from 127.0.0.1: icmp_seq=1 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=2 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=3 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=4 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=5 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=6 time=20 ms
+      56 bytes from 127.0.0.1: icmp_seq=7 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=8 time=10 ms
+      56 bytes from 127.0.0.1: icmp_seq=9 time=10 ms
+      10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+      Please read NETWORK-LINUX.txt if you want to try the real address.
+
 sixlowpan
 
   This configuration was intended only for unit-level testing of the

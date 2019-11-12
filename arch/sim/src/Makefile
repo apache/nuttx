@@ -93,8 +93,10 @@ endif
 endif
 
 ifeq ($(CONFIG_DEV_CONSOLE),y)
+ifneq ($(CONFIG_SYSLOG_RPMSG),y)
   CSRCS += up_devconsole.c up_uartwait.c
   HOSTSRCS += up_simuart.c
+endif
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)
@@ -159,7 +161,14 @@ endif # HOSTOS != Cygwin
 endif # CONFIG_NET_ETHERNET
 endif # CONFIG_SIM_NETDEV
 
+ifeq ($(CONFIG_RPTUN),y)
+  CSRCS += up_rptun.c
+  HOSTSRCS += up_shmem.c
+  STDLIBS += -lrt
+endif
+
 ifeq ($(CONFIG_FS_HOSTFS),y)
+ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
   HOSTSRCS += up_hostfs.c
 
 up_hostfs.c: hostfs.h
@@ -167,6 +176,7 @@ up_hostfs.c: hostfs.h
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
 	$(Q) cp $< $@
+endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -207,7 +217,9 @@ LINKOBJS = up_head$(OBJEXT)
 REQUIREDOBJS = $(LINKOBJS)
 
 ifeq ($(CONFIG_DEV_CONSOLE),y)
+ifneq ($(CONFIG_SYSLOG_RPMSG),y)
   REQUIREDOBJS += up_uartwait$(OBJEXT)
+endif
 endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
