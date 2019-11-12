@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/src/imxrt1020-evk.h
+ * boards/arm/imxrt/imxrt1020-evk/src/imxrt1020-evk.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_IMXRT1020_EVK_SRC_IMXRT1020_H
-#define __CONFIGS_IMXRT1020_EVK_SRC_IMXRT1020_H
+#ifndef __BOARDS_ARM_IMXRT_IMXRT1020_EVK_SRC_IMXRT1020_EVK_H
+#define __BOARDS_ARM_IMXRT_IMXRT1020_EVK_SRC_IMXRT1020_EVK_H
 
 /****************************************************************************
  * Included Files
@@ -136,4 +136,4 @@ int imxrt_gpio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_IMXRT1020_EVK_SRC_IMXRT1020_H */
+#endif /* __BOARDS_ARM_IMXRT_IMXRT1020_EVK_SRC_IMXRT1020_EVK_H */
