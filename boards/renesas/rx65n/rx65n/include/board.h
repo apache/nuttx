@@ -1,5 +1,5 @@
 /***************************************************************************
- * configs/rx65n/include/board.h
+ * boards/renesas/rx65n/rx65n/include/board.h
  *
  *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
  *   Author: Anjana <anjana@tataelxsi.co.in>
@@ -33,8 +33,8 @@
  *
  ***************************************************************************/
 
-#ifndef _CONFIGS_RX65N_BOARD_H
-#define _CONFIGS_RX65N_BOARD_H
+#ifndef __BOARDS_RENESAS_RX65N_RX65N_INCLUDE_BOARD_H
+#define __BOARDS_RENESAS_RX65N_RX65N_INCLUDE_BOARD_H
 
 /***************************************************************************
  * Included Files
@@ -147,4 +147,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* _CONFIGS_RX65N_BOARD_H */
+#endif  /* __BOARDS_RENESAS_RX65N_RX65N_INCLUDE_BOARD_H */
