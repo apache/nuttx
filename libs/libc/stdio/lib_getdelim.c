@@ -61,6 +61,7 @@
 #  define EOLCH        '/n'
 #endif
 
+#define BUFSIZE_INIT   64
 #define BUFSIZE_INCR   32
 
 /****************************************************************************
@@ -94,6 +95,17 @@
  *   read, including any delimiter, will be stored in the object, and a
  *   terminating NUL added when the delimiter or end-of-file is encountered.
  *
+ * Returned Value:
+ *  Upon successful completion, the getline() and getdelim() functions will
+ *  return the number of bytes written into the buffer, including the
+ *  delimiter character if one was encountered before EOF, but excluding
+ *  the terminating NUL character.  If the end-of-file indicator for the
+ *  stream is set, or if no characters were read and the stream is at
+ *  end-of-file, the end-of-file indicator for the stream will be set and
+ *  the function will return -1. If an error occurs, the error indicator for
+ *  the stream will be set, and the function will return -1 and set errno to
+ *  indicate the error.
+ *
  ****************************************************************************/
 
 ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
@@ -121,8 +133,8 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
     {
       /* Pick an initial buffer size */
 
-      bufsize = BUFSIZE_INCR;
-      *n      = BUFSIZE_INCR;
+      bufsize = BUFSIZE_INIT;
+      *n      = BUFSIZE_INIT;
 
       /* Free any mystery buffer. It will be reallocated below. */
 
@@ -166,6 +178,11 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       if (ncopied >= maxcopy)
         {
           FAR char *newbuffer;
+
+          /* This function should fail with EOVERFLOW if bufize exeeds
+           * SSIZE_MAX.  However, I think we will have crashed long before
+           * that occurs.
+           */
 
           bufsize  += BUFSIZE_INCR;
           newbuffer = (FAR char *)lib_realloc(*lineptr, bufsize);
