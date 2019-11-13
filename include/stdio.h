@@ -164,6 +164,9 @@ int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 long   ftell(FAR FILE *stream);
 size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
          FAR FILE *stream);
+ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
+         FAR FILE *stream);
+ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
 void   setbuf(FAR FILE *stream, FAR char *buf);
