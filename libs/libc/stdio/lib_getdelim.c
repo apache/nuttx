@@ -61,6 +61,8 @@
 #  define EOLCH        '/n'
 #endif
 
+#define BUFSIZE_INCR   32
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -86,7 +88,7 @@
  *   by malloc() or the object will be reallocated as if by realloc(),
  *   respectively, such that the object is large enough to hold the
  *   characters to be written to it, including the terminating NUL, and
- *   *n will be set to the new size. If the object was allocated, or if
+ *   *n will be set to the new size.  If the object was allocated, or if
  *   the reallocation operation moved the object, *lineptr will be
  *   updated to point to the new object or new location.  The characters
  *   read, including any delimiter, will be stored in the object, and a
@@ -99,6 +101,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
 {
   FAR char *dest;
   size_t bufsize;
+  size_t maxcopy;
   ssize_t ncopied;
   int ch;
   int ret;
@@ -116,7 +119,18 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
   bufsize = *n;
   if (bufsize == 0)
     {
-      return 0;
+      /* Pick an initial buffer size */
+
+      bufsize = BUFSIZE_INCR;
+      *n      = BUFSIZE_INCR;
+
+      /* Free any mystery buffer. It will be reallocated below. */
+
+      if (*lineptr != NULL)
+        {
+          lib_free(*lineptr);
+          *lineptr = NULL;
+        }
     }
 
   /* If *lineptr is a NULL pointer, then allocate *lineptr with size *n */
@@ -134,29 +148,51 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       *lineptr = dest;
     }
 
-  /* *lineptr must be point to an object of size at least bufsize bytes.  If
-   * the size of the buffer pointer to lineptr is less than bufsize, then
-   * reallocate lineptr to bufsize.
-   *
-   * REVISIT:  How do you get the size of lineptr?  Isn't it just plain
-   * uninitialized memory?
-   */
-
   /* Transfer characters until either bufsize characters have been transfer
    * or until the delimiter is encountered.
    */
 
-  ncopied = 0; /* No bytes have been transferred yet */
-  bufsize--;   /* Reserve a byte for the NUL terminator */
+  ncopied  = 0;             /* No bytes have been transferred yet */
+  maxcopy  = bufsize - 1;   /* Reserve a byte for the NUL terminator */
 
   do
     {
+      /* If the object pointed to by *lineptr is of insufficient size, the
+       * object will be reallocated such that the object is large enough to
+       * hold the characters to be written to it, including the terminating
+       * NUL, and *n will be set to the new size.
+       */
+
+      if (ncopied >= maxcopy)
+        {
+          FAR char *newbuffer;
+
+          bufsize  += BUFSIZE_INCR;
+          newbuffer = (FAR char *)lib_realloc(*lineptr, bufsize);
+          if (newbuffer == NULL)
+            {
+              ret = -ENOMEM;
+              goto errout;
+            }
+
+          *lineptr = newbuffer;
+          *n       = bufsize;
+          dest     = &newbuffer[ncopied];
+          maxcopy  = bufsize - 1;
+        }
+
       /* Get the next character and test for EOF */
 
       ch = fgetc(stream);
       if (ch == EOF)
         {
-          break;
+#ifdef __KERNEL_
+          return -ENODATA;
+#else
+          /* errno is not set in this case */
+
+          return -1;
+#endif
         }
 
       /* Save the character in the user buffer and increment the number of
@@ -170,7 +206,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
        * end of the buffer (reserving a byte for the NUL terminator)
        */
     }
-  while (ch != delimiter && ncopied  < bufsize);
+  while (ch != delimiter);
 
   /* Add a NUL terminator character (but don't report this in the number of
    * bytes transferred).
