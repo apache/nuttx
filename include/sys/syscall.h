@@ -255,11 +255,13 @@
 #define SYS_clock_getres               (__SYS_clock + 1)
 #define SYS_clock_gettime              (__SYS_clock + 2)
 #define SYS_clock_settime              (__SYS_clock + 3)
+#define SYS_getitime                   (__SYS_clock + 4)
+#define SYS_setitime                   (__SYS_clock + 5)
 #ifdef CONFIG_CLOCK_TIMEKEEPING
-#  define SYS_adjtime                  (__SYS_clock + 4)
-#  define __SYS_timers                 (__SYS_clock + 5)
+#  define SYS_adjtime                  (__SYS_clock + 6)
+#  define __SYS_timers                 (__SYS_clock + 7)
 #else
-#  define __SYS_timers                 (__SYS_clock + 4)
+#  define __SYS_timers                 (__SYS_clock + 6)
 #endif
 
 /* The following are defined only if POSIX timers are supported */
@@ -560,7 +562,8 @@
 #endif
 
 /* The following is defined only if entropy pool random number generator
- * is enabled. */
+ * is enabled.
+ */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
 #  define SYS_getrandom                (SYS_prctl + 1)

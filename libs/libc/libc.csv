@@ -4,6 +4,7 @@
 "aio_error","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *"
 "aio_return","aio.h","defined(CONFIG_FS_AIO)","ssize_t","FAR struct aiocb *"
 "aio_suspend","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *const []|FAR struct aiocb *const *","int","FAR const struct timespec *"
+"alarm","unistd.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","unsigned int","unsigned int"
 "asprintf","stdio.h","","int","FAR char **","FAR const char *","..."
 "vasprintf","stdio.h","","int","FAR char **","FAR const char *","va_list"
 "b16atan2","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","b16_t","b16_t","b16_t"

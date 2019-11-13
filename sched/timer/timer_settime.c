@@ -248,7 +248,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
  *   flags - Specifies characteristics of the timer (see above)
  *   value - Specifies the timer value to set
  *   ovalue - A location in which to return the time remaining from the
- *     previous timer setting. (ignored)
+ *     previous timer setting.
  *
  * Returned Value:
  *   If the timer_settime() succeeds, a value of 0 (OK) will be returned.
@@ -280,6 +280,18 @@ int timer_settime(timer_t timerid, int flags,
     {
       set_errno(EINVAL);
       return ERROR;
+    }
+
+  if (ovalue)
+    {
+      /* Get the number of ticks before the underlying watchdog expires */
+
+      delay = wd_gettime(timer->pt_wdog);
+
+      /* Convert that to a struct timespec and return it */
+
+      clock_ticks2time(delay, &ovalue->it_value);
+      clock_ticks2time(timer->pt_last, &ovalue->it_interval);
     }
 
   /* Disarm the timer (in case the timer was already armed when timer_settime()

@@ -49,6 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ITIMER_REAL    0 /* Timers run in real time. */
+#define ITIMER_VIRTUAL 1 /* Timers run only when the process is executing. */
+#define ITIMER_PROF    2 /* Timers run when the process is executing and when
+                          * the system is executing on behalf of the process.
+                          */
+
 /* The following are non-standard interfaces in the sense that they are not
  * in POSIX.1-2001 nor are they specified at OpenGroup.org. These interfaces
  * are present on most BSD derivatives, however, including Linux.
@@ -110,6 +116,24 @@
    ((tvp)->tv_usec cmp (uvp)->tv_usec) : \
    ((tvp)->tv_sec cmp (uvp)->tv_sec))
 
+/* Macros for converting between `struct timeval' and `struct timespec'.  */
+
+#define TIMEVAL_TO_TIMESPEC(tv, ts) \
+  do \
+    { \
+      (ts)->tv_sec = (tv)->tv_sec; \
+      (ts)->tv_nsec = (tv)->tv_usec * 1000; \
+    } \
+  while (0)
+
+#define TIMESPEC_TO_TIMEVAL(tv, ts) \
+  do \
+    { \
+      (tv)->tv_sec = (ts)->tv_sec; \
+      (tv)->tv_usec = (ts)->tv_nsec / 1000; \
+    } \
+  while (0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -120,6 +144,16 @@ struct timeval
 {
   time_t tv_sec;         /* Seconds */
   long tv_usec;          /* Microseconds */
+};
+
+/* Type of the second argument to `getitimer' and
+ * the second and third arguments `setitimer'.
+ */
+
+struct itimerval
+{
+  struct timeval it_interval; /* Interval for periodic timer */
+  struct timeval it_value;    /* Time until next expiration */
 };
 
 /* The use of the struct timezone  is obsolete; the tz argument should
@@ -231,6 +265,89 @@ int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz);
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta);
 #endif
+
+/****************************************************************************
+ * Name: getitimer
+ *
+ * Description:
+ *   The getitimer() function will store the amount of time until the
+ *   specified timer, which, expires and the reload value of the timer
+ *   into the space pointed to by the value argument. The it_value member
+ *   of this structure will contain the amount of time before the timer
+ *   expires, or zero if the timer is disarmed. This value is returned as
+ *   the interval until timer expiration. The it_interval member of value
+ *   will contain the reload value last set by setitime().
+ *
+ * Input Parameters:
+ *   which - The predefined timer id
+ *   value - The current timer value
+ *
+ * Returned Value:
+ *   If the getitimer() succeeds, a value of 0 (OK) will be returned.
+ *   If an error occurs, the value -1 (ERROR) will be returned, and errno
+ *   set to indicate the error.
+ *
+ *   EINVAL - The which argument does not correspond to an predefined ID.
+ *
+ * Assumptions/Limitations:
+ *   Due to the asynchronous operation of this function, the time reported
+ *   by this function could be significantly more than that actual time
+ *   remaining on the timer at any time.
+ *
+ ****************************************************************************/
+
+int getitimer(int which, FAR struct itimerval *value);
+
+/****************************************************************************
+ * Name: setitimer
+ *
+ * Description:
+ *   The setitimer() function sets the time until the next expiration of
+ *   the timer specified by which from the it_value member of the value
+ *   argument and arm the timer if the it_value member of value is non-zero.
+ *   If the specified timer was already armed when setitimer() is
+ *   called, this call will reset the time until next expiration to the
+ *   value specified. If the it_value member of value is zero, the timer
+ *   will be disarmed. The effect of disarming or resetting a timer with
+ *   pending expiration notifications is unspecified.
+ *
+ *   The reload value of the timer will be set to the value specified by the
+ *   it_interval member of value.  When a timer is armed with a non-zero
+ *   it_interval, a periodic (or repetitive) timer is specified.
+ *
+ *   Time values that are between two consecutive non-negative integer
+ *   multiples of the resolution of the specified timer will be rounded up
+ *   to the larger multiple of the resolution. Quantization error will not
+ *   cause the timer to expire earlier than the rounded time value.
+ *
+ *   If the argument ovalue is not NULL, the setitimer() function will
+ *   store, in the location referenced by ovalue, a value representing the
+ *   previous amount of time before the timer would have expired, or zero if
+ *   the timer was disarmed, together with the previous timer reload value.
+ *   Timers will not expire before their scheduled time.
+ *
+ * Input Parameters:
+ *   which - The predefined timer id
+ *   value - Specifies the timer value to set
+ *   ovalue - A location in which to return the time remaining from the
+ *     previous timer setting.
+ *
+ * Returned Value:
+ *   If the setitimer() succeeds, a value of 0 (OK) will be returned.
+ *   If an error occurs, the value -1 (ERROR) will be returned, and errno set
+ *   to indicate the error.
+ *
+ *   EINVAL - The which argument does not correspond to an predefined ID.
+ *   EINVAL - A value structure specified a microsecond value less than zero or
+ *     greater than or equal to 1000 million, and the it_value member of that
+ *     structure did not specify zero seconds and nanoseconds.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int setitimer(int which, FAR const struct itimerval *value,
+              FAR struct itimerval *ovalue);
 
 #undef EXTERN
 #if defined(__cplusplus)

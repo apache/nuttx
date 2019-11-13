@@ -320,6 +320,10 @@ FAR void *sbrk(intptr_t incr);
 
 int     pipe(int fd[2]);
 
+/* Schedule an alarm */
+
+unsigned int alarm(unsigned int seconds);
+
 /* Working directory operations */
 
 int     chdir(FAR const char *path);

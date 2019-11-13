@@ -541,6 +541,12 @@ struct task_group_s
   FAR char  *tg_envp;               /* Allocated environment strings            */
 #endif
 
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
+  /* Interval timer *************************************************************/
+
+  timer_t itimer;
+#endif
+
   /* PIC data space and address environments ************************************/
 
   /* Logically the PIC data space belongs here (see struct dspace_s).  The
