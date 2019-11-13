@@ -65,8 +65,6 @@ namespace std
   using ::timer_settime;
   using ::timer_gettime;
   using ::timer_getoverrun;
-  using ::getitimer;
-  using ::setitimer;
 }
 
 #endif // __INCLUDE_CXX_CTIME

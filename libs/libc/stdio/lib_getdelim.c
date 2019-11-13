@@ -179,9 +179,9 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
         {
           FAR char *newbuffer;
 
-          /* This function should fail with EOVERFLOW if bufize exeeds
-           * SSIZE_MAX.  However, I think we will have crashed long before
-           * that occurs.
+          /* This function should fail with EOVERFLOW if ncopied exceeds
+           * SSIZE_MAX.  However, I think we will have failed a memory
+           * allocation or crashed long before that could occur.
            */
 
           bufsize  += BUFSIZE_INCR;
@@ -250,7 +250,7 @@ errout:
  *
  *   NOTE: Because of this functional definition, getline() will not work
  *   with on systems where multiple characters are used to denote the end
- *   of line such a CR-LF sequences.  In that case, the CR will be
+ *   of line such a CR-LF sequences.  In that case, the CR would be
  *   transferred into the user buffer.
  *
  ****************************************************************************/
