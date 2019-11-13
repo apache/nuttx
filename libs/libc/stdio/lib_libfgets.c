@@ -52,6 +52,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some environments may return CR as end-of-line, others LF, and others
  * both.  If not specified, the logic here assumes either (but not both) as
  * the default.

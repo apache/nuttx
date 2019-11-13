@@ -44,6 +44,24 @@
 #include "libc.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Some environments may return CR as end-of-line, others LF, and others
+ * both.  Because of the definition of the getline() function, it can handle
+ * only single character line terminators.
+ */
+
+#undef HAVE_GETLINE
+#if defined(CONFIG_EOL_IS_CR)
+#  define HAVE_GETLINE 1
+#  define EOLCH        '/r'
+#elif defined(CONFIG_EOL_IS_LF)
+#  define HAVE_GETLINE 1
+#  define EOLCH        '/n'
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -184,7 +202,9 @@ errout:
  *
  ****************************************************************************/
 
+#ifdef HAVE_GETLINE
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream)
 {
-  return getdelim(lineptr, n, '\n', stream);
+  return getdelim(lineptr, n, EOLCH, stream);
 }
+#endif
