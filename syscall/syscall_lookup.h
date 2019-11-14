@@ -178,8 +178,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(clock_getres,             2, STUB_clock_getres)
   SYSCALL_LOOKUP(clock_gettime,            2, STUB_clock_gettime)
   SYSCALL_LOOKUP(clock_settime,            2, STUB_clock_settime)
-  SYSCALL_LOOKUP(getitimer,                2, STUB_getitimer)
-  SYSCALL_LOOKUP(setitimer,                3, STUB_setitimer)
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   SYSCALL_LOOKUP(adjtime,                  2, STUB_adjtime)
 #endif
@@ -192,6 +190,8 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(timer_getoverrun,         1, STUB_timer_getoverrun)
   SYSCALL_LOOKUP(timer_gettime,            2, STUB_timer_gettime)
   SYSCALL_LOOKUP(timer_settime,            4, STUB_timer_settime)
+  SYSCALL_LOOKUP(getitimer,                2, STUB_getitimer)
+  SYSCALL_LOOKUP(setitimer,                3, STUB_setitimer)
 #endif
 
 /* System logging */

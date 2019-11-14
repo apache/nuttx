@@ -255,13 +255,11 @@
 #define SYS_clock_getres               (__SYS_clock + 1)
 #define SYS_clock_gettime              (__SYS_clock + 2)
 #define SYS_clock_settime              (__SYS_clock + 3)
-#define SYS_getitimer                  (__SYS_clock + 4)
-#define SYS_setitimer                  (__SYS_clock + 5)
 #ifdef CONFIG_CLOCK_TIMEKEEPING
-#  define SYS_adjtime                  (__SYS_clock + 6)
-#  define __SYS_timers                 (__SYS_clock + 7)
+#  define SYS_adjtime                  (__SYS_clock + 4)
+#  define __SYS_timers                 (__SYS_clock + 5)
 #else
-#  define __SYS_timers                 (__SYS_clock + 6)
+#  define __SYS_timers                 (__SYS_clock + 4)
 #endif
 
 /* The following are defined only if POSIX timers are supported */
@@ -272,7 +270,9 @@
 #  define SYS_timer_getoverrun         (__SYS_timers + 2)
 #  define SYS_timer_gettime            (__SYS_timers + 3)
 #  define SYS_timer_settime            (__SYS_timers + 4)
-#  define __SYS_syslog                 (__SYS_timers + 5)
+#  define SYS_getitimer                (__SYS_timers + 5)
+#  define SYS_setitimer                (__SYS_timers + 6)
+#  define __SYS_syslog                 (__SYS_timers + 7)
 #else
 #  define __SYS_syslog                 __SYS_timers
 #endif
