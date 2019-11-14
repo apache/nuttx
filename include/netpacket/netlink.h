@@ -91,44 +91,44 @@
 
 /* Flags values */
 
-#define NLM_F_REQUEST        0x0001  /* It is request message.   */
-#define NLM_F_MULTI          0x0002  /* Multipart message, terminated by NLMSG_DONE */
-#define NLM_F_ACK            0x0004  /* Reply with ack, with zero or error code */
-#define NLM_F_ECHO           0x0008  /* Echo this request     */
-#define NLM_F_DUMP_INTR      0x0010  /* Dump was inconsistent due to sequence change */
-#define NLM_F_DUMP_FILTERED  0x0020  /* Dump was filtered as requested */
+#define NLM_F_REQUEST          0x0001  /* It is request message.   */
+#define NLM_F_MULTI            0x0002  /* Multipart message, terminated by NLMSG_DONE */
+#define NLM_F_ACK              0x0004  /* Reply with ack, with zero or error code */
+#define NLM_F_ECHO             0x0008  /* Echo this request     */
+#define NLM_F_DUMP_INTR        0x0010  /* Dump was inconsistent due to sequence change */
+#define NLM_F_DUMP_FILTERED    0x0020  /* Dump was filtered as requested */
 
 /* Modifiers to GET request */
 
-#define NLM_F_ROOT           0x0100  /* specify tree  root  */
-#define NLM_F_MATCH          0x0200  /* return all matching  */
-#define NLM_F_ATOMIC         0x0400  /* atomic GET    */
-#define NLM_F_DUMP           (NLM_F_ROOT | NLM_F_MATCH)
+#define NLM_F_ROOT             0x0100  /* specify tree  root  */
+#define NLM_F_MATCH            0x0200  /* return all matching  */
+#define NLM_F_ATOMIC           0x0400  /* atomic GET    */
+#define NLM_F_DUMP             (NLM_F_ROOT | NLM_F_MATCH)
 
 /* Modifiers to NEW request */
 
-#define NLM_F_REPLACE        0x0100  /* Override existing    */
-#define NLM_F_EXCL           0x0200  /* Do not touch, if it exists  */
-#define NLM_F_CREATE         0x0400  /* Create, if it does not exist  */
-#define NLM_F_APPEND         0x0800  /* Add to end of list    */
+#define NLM_F_REPLACE          0x0100  /* Override existing    */
+#define NLM_F_EXCL             0x0200  /* Do not touch, if it exists  */
+#define NLM_F_CREATE           0x0400  /* Create, if it does not exist  */
+#define NLM_F_APPEND           0x0800  /* Add to end of list    */
 
 /* Modifiers to DELETE request */
 
-#define NLM_F_NONREC         0x0100  /* Do not delete recursively  */
+#define NLM_F_NONREC           0x0100  /* Do not delete recursively  */
 
 /* Flags for ACK message */
 
-#define NLM_F_CAPPED         0x0100  /* request was capped */
-#define NLM_F_ACK_TLVS       0x0200  /* extended ACK TVLs were included */
+#define NLM_F_CAPPED           0x0100  /* request was capped */
+#define NLM_F_ACK_TLVS        0x0200  /* extended ACK TVLs were included */
 
 /* Definitions for struct nlmsghdr ******************************************/
 
-#define NLMSG_MASK         (sizeof(uint32_t) - 1)
-#define NLMSG_ALIGN(n)     (((n) + NLMSG_MASK) & ~NLMSG_MASK)
-#define NLMSG_HDRLEN       sizeof(struct nlmsghdr)
-#define NLMSG_LENGTH(n)    (NLMSG_HDRLEN + (n))
-#define NLMSG_SPACE(len)   NLMSG_ALIGN(NLMSG_LENGTH(len))
-#define NLMSG_DATA(hdr)    ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN))
+#define NLMSG_MASK            (sizeof(uint32_t) - 1)
+#define NLMSG_ALIGN(n)        (((n) + NLMSG_MASK) & ~NLMSG_MASK)
+#define NLMSG_HDRLEN          sizeof(struct nlmsghdr)
+#define NLMSG_LENGTH(n)       (NLMSG_HDRLEN + (n))
+#define NLMSG_SPACE(len)      NLMSG_ALIGN(NLMSG_LENGTH(len))
+#define NLMSG_DATA(hdr)       ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN))
 #define NLMSG_NEXT(hdr,n) \
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
    (FAR struct nlmsghdr*) \
@@ -136,18 +136,18 @@
 #define NLMSG_PAYLOAD(hdr, len) \
   ((hdr)->nlmsg_len - NLMSG_SPACE((len)))
 
-#define NLMSG_NOOP          1    /* Nothing */
-#define NLMSG_ERROR         2    /* Error */
-#define NLMSG_DONE          3    /* End of a dump */
-#define NLMSG_OVERRUN       4    /* Data lost */
-#define NLMSG_MIN_TYPE      16   /* < 16:  Reserved control messages */
+#define NLMSG_NOOP            1    /* Nothing */
+#define NLMSG_ERROR           2    /* Error */
+#define NLMSG_DONE            3    /* End of a dump */
+#define NLMSG_OVERRUN         4    /* Data lost */
+#define NLMSG_MIN_TYPE        16   /* < 16:  Reserved control messages */
 
 /* Attribute definitions for struct rtattr **********************************/
 
 /* Macros to handle attribute lists */
 
-#define RTA_MASK           (sizeof(uint32_t) - 1)
-#define RTA_ALIGN(n)       (((n) + RTA_MASK) & ~RTA_MASK)
+#define RTA_MASK              (sizeof(uint32_t) - 1)
+#define RTA_ALIGN(n)          (((n) + RTA_MASK) & ~RTA_MASK)
 #define RTA_OK(rta,n) \
   ((n) >= (int)sizeof(struct rtattr) && \
    (rta)->rta_len >= sizeof(struct rtattr) && \
@@ -155,20 +155,20 @@
 #define RTA_NEXT(rta, attrlen) \
   ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
    (FAR struct rtattr*)(((FAR char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
-#define RTA_LENGTH(n)      (RTA_ALIGN(sizeof(struct rtattr)) + (n))
-#define RTA_SPACE(n)       RTA_ALIGN(RTA_LENGTH(n))
-#define RTA_DATA(rta)      ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
-#define RTA_PAYLOAD(rta)   ((int)((rta)->rta_len) - RTA_LENGTH(0))
+#define RTA_LENGTH(n)         (RTA_ALIGN(sizeof(struct rtattr)) + (n))
+#define RTA_SPACE(n)          RTA_ALIGN(RTA_LENGTH(n))
+#define RTA_DATA(rta)         ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
+#define RTA_PAYLOAD(rta)      ((int)((rta)->rta_len) - RTA_LENGTH(0))
 
 /* NETLINK_ROUTE: Routing table attributes */
 
-#define RTA_UNSPEC         0    /* Inored */
-#define RTA_DST            1    /* Argument:  Route destination address */
-#define RTA_SRC            2    /* Argument:  Route source address */
-#define RTA_IIF            3    /* Argument:  Input interface index */
-#define RTA_OIF            4    /* Argument:  Output interface index */
-#define RTA_GENMASK        5    /* Argument:  Network address mask of sub-net */
-#define RTA_GATEWAY        6    /* Argument:  Gateway address of the route */
+#define RTA_UNSPEC            0    /* Inored */
+#define RTA_DST               1    /* Argument:  Route destination address */
+#define RTA_SRC               2    /* Argument:  Route source address */
+#define RTA_IIF               3    /* Argument:  Input interface index */
+#define RTA_OIF               4    /* Argument:  Output interface index */
+#define RTA_GENMASK           5    /* Argument:  Network address mask of sub-net */
+#define RTA_GATEWAY           6    /* Argument:  Gateway address of the route */
 
 /* NETLINK_ROUTE protocol message types *************************************/
 
@@ -180,10 +180,10 @@
  *   of rtattr structures.
  */
 
-#define RTM_NEWLINK          0
-#define RTM_DELLINK          1
-#define RTM_GETLINK          2
-#define RTM_SETLINK          3
+#define RTM_NEWLINK           0
+#define RTM_DELLINK           1
+#define RTM_GETLINK           2
+#define RTM_SETLINK           3
 
 /* Address settings:
  *
@@ -193,9 +193,9 @@
  *   followed by rtattr routing attributes.
  */
 
-#define RTM_NEWADDR          4
-#define RTM_DELADDR          5
-#define RTM_GETADDR          6
+#define RTM_NEWADDR           4
+#define RTM_DELADDR           5
+#define RTM_GETADDR           6
 
 /* Routing tables:
  *
@@ -287,63 +287,90 @@
  * address set by the user and other undocumented flags.
  */
 
-#define IFA_F_SECONDARY    0x01
-#define IFA_F_PERMANENT    0x02
+#define IFA_F_SECONDARY      0x01
+#define IFA_F_PERMANENT      0x02
 
 /* Definitions for struct ifinfomsg *****************************************/
 
-#define IFLA_RTA(r)        ((FAR struct rtattr *) \
-                            (((FAR char *)(r)) + \
-                             NLMSG_ALIGN(sizeof(struct ifinfomsg))))
-#define IFLA_PAYLOAD(n)    NLMSG_PAYLOAD(n, sizeof(struct ifinfomsg))
+#define IFLA_RTA(r)          ((FAR struct rtattr *) \
+                              (((FAR char *)(r)) + \
+                               NLMSG_ALIGN(sizeof(struct ifinfomsg))))
+#define IFLA_PAYLOAD(n)      NLMSG_PAYLOAD(n, sizeof(struct ifinfomsg))
 
 /* Values for rta_type */
 
-#define IFLA_IFNAME       1
+#define IFLA_IFNAME          1
 
 /* Definitions for struct rtmsg *********************************************/
 
-#define RTM_RTA(r)        ((FAR struct rtattr *)\
-                           (((FAR char *)(r)) + \
-                           NLMSG_ALIGN(sizeof(struct rtmsg))))
-#define RTM_PAYLOAD(n)     NLMSG_PAYLOAD(n, sizeof(struct rtmsg))
+#define RTM_RTA(r)           ((FAR struct rtattr *)\
+                              (((FAR char *)(r)) + \
+                              NLMSG_ALIGN(sizeof(struct rtmsg))))
+#define RTM_PAYLOAD(n)        NLMSG_PAYLOAD(n, sizeof(struct rtmsg))
 
 /* rtm_table.  Routing table identifiers */
 
-#define RT_TABLE_UNSPEC    0
-                               /* 1-251: User defined values */
-#define RT_TABLE_MAIN      254
-#define RT_TABLE_MAX       0xffffffff
+#define RT_TABLE_UNSPEC       0
+                                 /* 1-251: User defined values */
+#define RT_TABLE_MAIN         254
+#define RT_TABLE_MAX          0xffffffff
 
 /* rtm_type */
 
-#define RTN_UNSPEC         0
-#define RTN_UNICAST        1    /* Gateway or direct route  */
-#define RTN_LOCAL          2    /* Accept locally */
-#define RTN_BROADCAST      3    /* Accept locally as broadcast;
-                                 * send as broadcast */
-#define RTN_ANYCAST        4    /* Accept locally as broadcast
-                                 * but send as unicast */
-#define RTN_MULTICAST      5    /* Multicast route */
+#define RTN_UNSPEC            0
+#define RTN_UNICAST           1    /* Gateway or direct route  */
+#define RTN_LOCAL             2    /* Accept locally */
+#define RTN_BROADCAST         3    /* Accept locally as broadcast;
+                                    * send as broadcast */
+#define RTN_ANYCAST           4    /* Accept locally as broadcast
+                                    * but send as unicast */
+#define RTN_MULTICAST         5    /* Multicast route */
 
 /* rtm_protocol */
 
-#define RTPROT_UNSPEC      0
-#define RTPROT_REDIRECT    1    /* Route installed by ICMP redirects */
-#define RTPROT_KERNEL      2    /* Route installed by kernel */
-#define RTPROT_BOOT        3    /* Route installed during boot */
-#define RTPROT_STATIC      4    /* Route installed by administrator */
-#define RTPROT_RA          5    /* RDISC/ND router advertisements */
-#define RTPROT_DHCP        6    /* DHCP client */
+#define RTPROT_UNSPEC         0
+#define RTPROT_REDIRECT       1    /* Route installed by ICMP redirects */
+#define RTPROT_KERNEL         2    /* Route installed by kernel */
+#define RTPROT_BOOT           3    /* Route installed during boot */
+#define RTPROT_STATIC         4    /* Route installed by administrator */
+#define RTPROT_RA             5    /* RDISC/ND router advertisements */
+#define RTPROT_DHCP           6    /* DHCP client */
 
 /* rtm_scope */
 
-#define  RT_SCOPE_UNIVERSE 0    /* Global route */
-                                /* 1-199: User defined values */
-#define  RT_SCOPE_SITE     200  /* Interior route in local system */
-#define  RT_SCOPE_LINK     253  /* Route on this link */
-#define  RT_SCOPE_HOST     254  /* Route on local host */
-#define  RT_SCOPE_NOWHERE  255  /* Destination does not exist */
+#define  RT_SCOPE_UNIVERSE    0    /* Global route */
+                                   /* 1-199: User defined values */
+#define  RT_SCOPE_SITE        200  /* Interior route in local system */
+#define  RT_SCOPE_LINK        253  /* Route on this link */
+#define  RT_SCOPE_HOST        254  /* Route on local host */
+#define  RT_SCOPE_NOWHERE     255  /* Destination does not exist */
+
+/* NETLINK_CRYPTO protocol message types ************************************/
+
+#define CRYPTO_MSG_NEWALG     1
+#define CRYPTO_MSG_DELALG     2
+#define CRYPTO_MSG_UPDATEALG  3
+#define CRYPTO_MSG_GETALG     4
+
+/* Netlink message attributes. */
+
+#define CRYPTOCFGA_UNSPEC           0
+#define CRYPTOCFGA_PRIORITY_VAL     1  /* Argument: uint32_t */
+#define CRYPTOCFGA_REPORT_LARVAL    2  /* Argument: struct crypto_report_larval */
+#define CRYPTOCFGA_REPORT_HASH      3  /* Argument: struct crypto_report_hash */
+#define CRYPTOCFGA_REPORT_BLKCIPHER 4  /* Argument: struct crypto_report_blkcipher */
+#define CRYPTOCFGA_REPORT_AEAD      5  /* Argument: struct crypto_report_aead */
+#define CRYPTOCFGA_REPORT_COMPRESS  6  /* Argument: struct crypto_report_comp */
+#define CRYPTOCFGA_REPORT_RNG       7  /* Argument: struct crypto_report_rng */
+#define CRYPTOCFGA_REPORT_CIPHER    8  /* Argument: struct crypto_report_cipher */
+
+/* Max size of names.  No magic here.  These can be extended as necessary. */
+
+#define CRYPTO_MAX_ALG_NAME   32
+#define CRYPTO_MAX_NAME       32
+
+#define CRYPTO_REPORT_MAXSIZE \
+  (sizeof(struct crypto_user_alg) + sizeof(struct crypto_report_blkcipher))
 
 /****************************************************************************
  * Public Type Definitions
@@ -376,6 +403,8 @@ struct nlmsghdr
   uint32_t nlmsg_pid;     /* Sending process port ID */
                           /* Data follows */
 };
+
+/* NETLINK_ROUTE Message Structures *****************************************/
 
 /* RTM_NEWLINK, RTM_DELLINK, RTM_GETLINK
  *
@@ -455,6 +484,69 @@ struct rtmsg
   uint8_t  rtm_scope;     /* See RT_SCOPE_* definitions */
   uint8_t  rtm_type;      /* See RTN_* definitions */
   uint32_t rtm_flags;
+};
+
+/* NETLINK_CRYPTO Message Structures ***********\*****************************/
+
+struct crypto_user_alg
+{
+  char cru_name[CRYPTO_MAX_ALG_NAME];
+  char cru_driver_name[CRYPTO_MAX_ALG_NAME];
+  char cru_module_name[CRYPTO_MAX_ALG_NAME];
+  uint32_t cru_type;
+  uint32_t cru_mask;
+  uint32_t cru_refcnt;
+  uint32_t cru_flags;
+};
+
+struct crypto_report_larval
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+struct crypto_report_hash
+{
+  char type[CRYPTO_MAX_NAME];
+  size_t blocksize;
+  size_t digestsize;
+};
+
+struct crypto_report_cipher
+{
+  char type[CRYPTO_MAX_ALG_NAME];
+  size_t blocksize;
+  size_t min_keysize;
+  size_t max_keysize;
+};
+
+struct crypto_report_blkcipher
+{
+  char type[CRYPTO_MAX_NAME];
+  char geniv[CRYPTO_MAX_NAME];
+  size_t blocksize;
+  size_t min_keysize;
+  size_t max_keysize;
+  size_t ivsize;
+};
+
+struct crypto_report_aead
+{
+  char type[CRYPTO_MAX_NAME];
+  char geniv[CRYPTO_MAX_NAME];
+  size_t blocksize;
+  size_t maxauthsize;
+  size_t ivsize;
+};
+
+struct crypto_report_comp
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+struct crypto_report_rng
+{
+  char type[CRYPTO_MAX_NAME];
+  size_t seedsize;
 };
 
 /****************************************************************************

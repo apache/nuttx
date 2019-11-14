@@ -55,6 +55,17 @@ config NETLINK_DISABLE_GETROUTE
 		RTM_GETROUTE is used to retrieve routing tables.
 
 endif # NETLINK_ROUTE
+
+config NETLINK_CRYPTO
+	bool "Netlink Crypto protocol"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Support the NETLINK_CRYPTO protocol option.
+
+if NETLINK_CRYPTO
+
+endif # NETLINK_CRYPTO
 endmenu # Netlink Protocols
 endif # NET_NETLINK
 endmenu # Netlink Socket Support
