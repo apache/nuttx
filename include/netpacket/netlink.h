@@ -283,7 +283,7 @@
 #define RTM_GETNEIGHTBL      33
 #define RTM_SETNEIGHTBL      34
 
-#define RTM_LASTMSG          34
+#define RTM_LASTMSG          34  /* NETLINK_ROUTE messages followd by NETLINK_CRYPTO */
 
 /* Definitions for struct ifaddrmsg  ****************************************/
 
