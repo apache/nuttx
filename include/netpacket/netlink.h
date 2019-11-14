@@ -40,6 +40,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <sys/socket.h>
 #include <stdint.h>
 
@@ -351,11 +354,14 @@
 #define CRYPTO_MSG_DELALG     2
 #define CRYPTO_MSG_UPDATEALG  3
 #define CRYPTO_MSG_GETALG     4
+#define CRYPTO_MSG_DELRNG     5
+#define CRYPTO_MSG_GETSTAT    6
 
 /* Netlink message attributes. */
 
 #define CRYPTOCFGA_UNSPEC           0
 #define CRYPTOCFGA_PRIORITY_VAL     1  /* Argument: uint32_t */
+
 #define CRYPTOCFGA_REPORT_LARVAL    2  /* Argument: struct crypto_report_larval */
 #define CRYPTOCFGA_REPORT_HASH      3  /* Argument: struct crypto_report_hash */
 #define CRYPTOCFGA_REPORT_BLKCIPHER 4  /* Argument: struct crypto_report_blkcipher */
@@ -363,6 +369,20 @@
 #define CRYPTOCFGA_REPORT_COMPRESS  6  /* Argument: struct crypto_report_comp */
 #define CRYPTOCFGA_REPORT_RNG       7  /* Argument: struct crypto_report_rng */
 #define CRYPTOCFGA_REPORT_CIPHER    8  /* Argument: struct crypto_report_cipher */
+#define CRYPTOCFGA_REPORT_AKCIPHER  9  /* Argument: struct crypto_report_akcipher */
+#define CRYPTOCFGA_REPORT_KPP       0  /* Argument: struct crypto_report_kpp */
+#define CRYPTOCFGA_REPORT_ACOMP     1  /* Argument: struct crypto_report_acomp */
+
+#define CRYPTOCFGA_STAT_LARVAL      2  /* Argument: struct crypto_stat_larval */
+#define CRYPTOCFGA_STAT_HASH        3  /* Argument: struct crypto_stat_hash */
+#define CRYPTOCFGA_STAT_BLKCIPHER   4  /* Argument: struct crypto_stat_blkcipher */
+#define CRYPTOCFGA_STAT_AEAD        5  /* Argument: struct crypto_stat_aead */
+#define CRYPTOCFGA_STAT_COMPRESS    6  /* Argument: struct crypto_stat_comp */
+#define CRYPTOCFGA_STAT_RNG         7  /* Argument: struct crypto_stat_rng */
+#define CRYPTOCFGA_STAT_CIPHER      8  /* Argument: struct crypto_stat_cipher */
+#define CRYPTOCFGA_STAT_AKCIPHER    9  /* Argument: struct crypto_stat_akcipher */
+#define CRYPTOCFGA_STAT_KPP         10 /* Argument: struct crypto_stat_kpp */
+#define CRYPTOCFGA_STAT_ACOMP       11 /* Argument: struct crypto_stat_acomp */
 
 /* Max size of names.  No magic here.  These can be extended as necessary. */
 
@@ -547,6 +567,100 @@ struct crypto_report_rng
 {
   char type[CRYPTO_MAX_NAME];
   size_t seedsize;
+};
+
+struct crypto_report_akcipher
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+struct crypto_report_kpp
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+struct crypto_report_acomp
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+struct crypto_stat_larval
+{
+  char type[CRYPTO_MAX_NAME];
+};
+
+#ifdef CONFIG_HAVE_LONG_LONG
+typedef uint64_t crypto_stat_t;
+#else
+typedef uint32_t crypto_stat_t;
+#endif
+
+struct crypto_stat_aead
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_encrypt_cnt;
+  crypto_stat_t stat_encrypt_tlen;
+  crypto_stat_t stat_decrypt_cnt;
+  crypto_stat_t stat_decrypt_tlen;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_akcipher
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_encrypt_cnt;
+  crypto_stat_t stat_encrypt_tlen;
+  crypto_stat_t stat_decrypt_cnt;
+  crypto_stat_t stat_decrypt_tlen;
+  crypto_stat_t stat_verify_cnt;
+  crypto_stat_t stat_sign_cnt;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_cipher
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_encrypt_cnt;
+  crypto_stat_t stat_encrypt_tlen;
+  crypto_stat_t stat_decrypt_cnt;
+  crypto_stat_t stat_decrypt_tlen;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_compress
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_compress_cnt;
+  crypto_stat_t stat_compress_tlen;
+  crypto_stat_t stat_decompress_cnt;
+  crypto_stat_t stat_decompress_tlen;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_hash
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_hash_cnt;
+  crypto_stat_t stat_hash_tlen;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_kpp
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_setsecret_cnt;
+  crypto_stat_t stat_generate_public_key_cnt;
+  crypto_stat_t stat_compute_shared_secret_cnt;
+  crypto_stat_t stat_err_cnt;
+};
+
+struct crypto_stat_rng
+{
+  char type[CRYPTO_MAX_NAME];
+  crypto_stat_t stat_generate_cnt;
+  crypto_stat_t stat_generate_tlen;
+  crypto_stat_t stat_seed_cnt;
+  crypto_stat_t stat_err_cnt;
 };
 
 /****************************************************************************
