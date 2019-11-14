@@ -2,7 +2,7 @@
  * include/nuttx/syslog/ramlog.h
  * The RAM logging driver
  *
- *   Copyright (C) 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014-2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The RAM logging driver is a driver that was intended to support debugging
  * output (syslogging) when the normal serial output is not available.  For
  * example, if you are using a Telnet or USB serial console, the debug
@@ -61,7 +62,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_RAMLOG - Enables the RAM logging feature
  * CONFIG_RAMLOG_CONSOLE - Use the RAM logging device as a system console.
  *   If this feature is enabled (along with CONFIG_DEV_CONSOLE), then all
@@ -72,7 +75,7 @@
  * CONFIG_RAMLOG_SYSLOG - Use the RAM logging device for the syslogging
  *   interface.  If this feature is enabled then all debug output (only)
  *   will be re-directed to the circular buffer in RAM.  This RAM log can
- *   be viewied from NSH using the 'dmesg' command.  NOTE:  Unlike the
+ *   be viewed from NSH using the 'dmesg' command.  NOTE:  Unlike the
  *   limited, generic character driver SYSLOG device, the RAMLOG *can* be
  *   used to generate debug output from interrupt level handlers.
  * CONFIG_RAMLOG_NPOLLWAITERS - The number of threads than can be waiting
@@ -100,15 +103,6 @@
 #  define CONFIG_RAMLOG_BUFSIZE 1024
 #endif
 
-/* When used as a console or syslogging device, the RAM log will pre-pend
- * line-feeds with carriage returns.
- */
-
-#if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
-#  undef CONFIG_RAMLOG_CRLF
-#  define CONFIG_RAMLOG_CRLF 1
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -126,6 +120,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: ramlog_register
  *

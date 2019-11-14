@@ -59,10 +59,10 @@
  * works by preventing context switches from the currently executing tasks.
  * This prevents other tasks from running (without disabling interrupts) and
  * gives the currently executing task exclusive access to the (single) CPU
- * resources. Thus, sched_lock() and its companion, sched_unlcok(), are
+ * resources. Thus, sched_lock() and its companion, sched_unlock(), are
  * used to implement some critical sections.
  *
- * In the single CPU case, Pre-emption is disabled using a simple lockcount
+ * In the single CPU case, pre-emption is disabled using a simple lockcount
  * in the TCB. When the scheduling is locked, the lockcount is incremented;
  * when the scheduler is unlocked, the lockcount is decremented. If the
  * lockcount for the task at the head of the g_readytorun list has a
@@ -181,7 +181,7 @@ int sched_lock(void)
   (void)up_fetchadd16(&g_global_lockcount, 1);
 #endif
 
-  /* This operation is save if CONFIG_ARCH_HAVE_FETCHADD is defined.  NOTE
+  /* This operation is safe if CONFIG_ARCH_HAVE_FETCHADD is defined.  NOTE
    * we cannot use this_task() because it calls sched_lock().
    */
 

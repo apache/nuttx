@@ -322,11 +322,12 @@ extern volatile uint32_t g_cpuload_total;
 #endif
 
 /* Declared in sched_lock.c *************************************************/
+
 /* Pre-emption is disabled via the interface sched_lock(). sched_lock()
  * works by preventing context switches from the currently executing tasks.
  * This prevents other tasks from running (without disabling interrupts) and
  * gives the currently executing task exclusive access to the (single) CPU
- * resources. Thus, sched_lock() and its companion, sched_unlcok(), are
+ * resources. Thus, sched_lock() and its companion, sched_unlock(), are
  * used to implement some critical sections.
  *
  * In the single CPU case, Pre-emption is disabled using a simple lockcount
