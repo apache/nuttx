@@ -47,6 +47,8 @@
 
 #include "imxrt1060-evk.h"
 
+#include <arch/board/board.h>
+
 #ifdef CONFIG_IMXRT_LCD
 
 /****************************************************************************
