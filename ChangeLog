@@ -26488,4 +26488,1128 @@
 	  default, these registers are disabled.  Suggested by Juha Niskanen.
 	  From Gregory Nutt (2019-09-13).
 
-8.2 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
+8.2 2019-11-16 Gregory Nutt <gnutt@nuttx.org>
+
+	* drivers/mtd/gd25.c:  Add support for a new FLASH vendor.  From zhangbo_a
+	  (2019-09-15).
+	* drivers/mtd/gd25.c:  Add support for GD25 device with 256-Mbit
+	  capacity.  From YanLin Zhu (2019-09-15).
+	* drivers/mtd/gd5f.c:  Add gigadevice SPI NAND FLASH driver.  From
+	  YanLin Zhu  (2019-09-15).
+	* tools/Config.mk:  Eliminate use of the built-in implicit rules.  From
+	  anchao (2019-09-15).
+	* tools/Config.mk and Makefile.unix:  Support the incremental build for
+	  configuration change.  From Xiang Xiao (2019-09-15).
+	* All linker scripts:  Preface all _ebss definitions with . = ALIGN(4).
+	  Otherwise, the last bytes in the .bss section will not be initialized
+	  properly.  Also convert all linker scripts that use TABs to spaces.
+	  From Gregory Nutt
+	  (2019-09-15).
+	* All linker scripts:  Preface all _edata definitions with . = ALIGN(4).
+	  Otherwise, the last bytes in the .data section may not be initialized
+	  properly.  Also convert all linker scripts indent in units of 8-spaces
+	  to units of 4-spaces.  From Gregory Nutt (2019-09-15).
+	* tools/configure.*: Add -s option to skip .config/Make.defs existence
+	  check.  From Xiang Xiao (2019-09-16).
+	* tools/Makefile.unix:  Fix build error when issue 'make -B'.  mkdir:
+	  cannot create directory 'staging': File exists:
+	  tools/Makefile.unix:269: recipe for target 'staging' failed'  From
+	  Xiang Xiao (2019-09-16).
+	* drivers/syslog:  syslog_force does not set errno so do not test
+	  against it.  Some changes to comments.  From Juha Niskanen (2019-09-16).
+	* Large Ethernet packet can leads network halt  From Bazooka Joe
+	  (2019-09-16).
+	* boards/mips Linker Scripts:  The PIC32M* start-up code initializes
+	  .bss by writing 16 bytes at a time in a loop.  The start (_sbss)
+	  alignment is only required to be 4 bytes since the write is done with
+	  4 store instructions.  In a previous change, the end address, _ebss,
+	  was aligned to 16 byte to prevent initializing past the end off the
+	  .bss region.  However, that does not work unless the start address,
+	  _sbss, is also aligned to 16 bytes.  From Gregory Nutt
+	  (2019-09-16).
+	* arch/arm/src/stm32h7/stm32_ethernet.c:  Bazooka Joe's fix to the STM32
+	  F7 Ethernet driver (ec4a7be5c2540207042669e10cc4134e108dae02) should
+	  be applied to the H7 as well.  The other STM32 Ethernet driver already
+	  has the change.  From Gregory Nutt (2019-09-16).
+	* Kconfig and arch/Kconfig:  Add some protection so that you cannot
+	  select an architecture-specific header file if the architecture does
+	  not provide the header file.  From Gregory Nutt (2019-09-16).
+	* libs/libc/math/Kconfig:  Should select the NuttX float.h file
+	  automatically if the NuttX math library is selected.  From Gregory
+	  Nutt (2019-09-16).
+	* boards/arm/cxd56xx/spresense/include/board_pinconfig.h:  Add board
+	  specific pin configurations of CXD5602 pins to fit Spresense board. 
+	  From Takayoshi Koizumi (2019-09-16).
+	* boards/arm/cxd56xx/spresense/Kconfig:  Add a configuration to select
+	  if an extension board is attached to the SPresence.  If there is no
+	  extension board attached, the SPresense may run in a low-power mode by
+	  default (as determined by the CONFIG_CXD56_CUSTOM_PINCONFIG option).
+	  If an extension board is present, then the SPresense will need to run
+	  at a higher power mode, selected by the new CONFIG_SPRESENSE_EXTENSION
+	  option.  From Gregory Nutt (2019-09-17).
+	* boards: spresense:  Add isx012 camera initialization and config  From
+	  Alin Jerpelea (2019-09-17).
+	* Add support for STM32G070xx:
+	  arch/arm/include/stm32f0l0g0: add support for STM32G070CB, STM32G070KB,
+	  STM32G070RB
+	  arch/arm/src/stm32f0l0g0: add support for STM32G070CB, STM32G070KB, STM32G070RB
+	  From Daniel Pereira Volpato (2019-09-17).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb:  Initial support for board STM32
+	  NUCLEO-G070RB, including NSH config  From Daniel Pereira Volpato
+	  (2019-09-17).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb/scripts/ld.script:  Fix
+	  .ARM.exidx section overlap with .data  From Daniel Pereira Volpato
+	  (2019-09-17).
+	* arch/arm/src/stm32f0l0g0/stm32*_pwr.c and stm32g0_rcc.c:  Scale
+	  dynamic voltage and flash wait states properly on STM32G0 chips.
+	  arch/arm/src/stm32f0l0g0/stm32g0_rcc.c: Set VOS and flash wait states
+	  properly
+	  arch/arm/src/stm32f0l0g0/stm32f0l0_pwr.c: Renamed from
+	  arch/arm/src/stm32f0l0g0/stm32_pwr.c
+	  arch/arm/src/stm32f0l0g0/stm32g0_pwr.c: Preliminary implementation of
+	  PWR module  for STM32G0 (stm32_pwr_setvos() only)
+	  From Daniel Pereira Volpato (2019-09-17).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb/include/board.h:  Enable PWR
+	  peripheral and increase sysclk to max. frequency.  SYSCLK can be
+	  increased now that VOS and flash wait states are properly configured.
+	  From Daniel Pereira Volpato (2019-09-17).
+	* arch/arm/src/lpc17xx_40xx/lpc17_40_i2c.c: Respect the I2C_M_NOSTART
+	  flag.  Sending a restart condition when not requested will break other
+	  drivers that depend on this behavior.  From Augusto Fraga Giachero
+	  (2019-09-17).
+	* boards: spresense: Add board initialization for isx012  From Alin
+	  Jerpelea (2019-09-18).
+	* include/nuttx/sensors/ioctl.h: Commands for the VL53L1X did not follow
+	  the sequence.  Noted by Daniel Pereira de Carvalho.  From Gregory Nutt
+	  (2019-09-18).
+	* net/ipforward, tcp, and udp:  Fix a chicken and egg problem by
+	  eliminating the check of the arp/neighbor tables before packet
+	  transmission
+	  1. For buffered tcp/udp case, if
+	     CONFIG_NET_ARP_SEND/CONFIG_NET_ARP_IPIN / CONFIG_NET_ICMPv6_NEIGHBOR
+	     isn't enabled and the table doesn't contain ip<->ethaddr mapping
+	     yet, the logic will skip the realtransmission and then arp/neighbor
+	     can't steal the final buffer to generate arp/icmpv6 packet.
+	  2. For all other cases, the tcp layer or user program should already
+	     contain the retransmit logic, the check is redundancy and may
+	     generate many duplicated packets if arp/icmpv6 response is too slow
+	     because the cursor stop forward. If user still concern about the
+	     very first packet lost, he could fix the issue by
+	     enabling CONFIG_NET_ARP_SEND/CONFIG_NET_ICMPv6_NEIGHBOR at begin.
+	  From Xiang Xiao (2019-09-18).
+	* stm32h7 SDMMC support IDMA, Interrupt driven, pullups and SDIO
+	  - stm32h7: Supports ARMV7M Stack check
+	  - stm32h7: sdmmc bug fix writting address 0
+	  - stm32h7: sdmmc Clean up timming
+	  - stm32f7: Kconfig typos, formating
+	  - stm32f7: sdmmc use binary not
+	  - stm32f7: nxstyle formatting
+	  - stm32h7: SDMMC Kconfig add Block Setup, Preflight, Delayed Invalidate
+	  - stm32h7: Correct value of ICR reset
+	  - stm32h7: SDMMC support IDMA, Interrupt driven, pullups and SDIO
+	  - stm32h7: Add AXI
+	  - stm32h7: Workaround for Errata 2.2.9 Reading from AXI SRAM may lead
+	    to data read corruption
+	  From David Sidrane (2019-09-19).
+	* tools/configure.sh and configure.c:  Do not remove CONFIG_SIM_M32 if
+	  host is specified.  From anchao (2019-09-19).
+	* libs/libc/unistd/lib_getcwd.c: remove stray sched_unlock().  Also
+	  fixes several typos.  From Juha Niskanen (2019-09-19).
+	* Dispatch ICMP_POLL to device's callback list too since icmpv6_neighbor
+	  still append the callback into this list.  From Gregory Nutt
+	  (2019-09-20).
+	* Fix portability issue with date, hostname  From David Alessio
+	  (2019-09-20).
+	* net/:  Decouple autoconfig and icmpv6 socket to avoid the invalid
+	  kconfig combination.  From Xiang Xiao (2019-09-20).
+	* net/icmpv6/icmpv6_autoconfig.c:  cmpv6_autoconfig() error handling
+	  must not overwrite overwrite the error code.  From Xiang Xiao
+	  (2019-09-20).
+	* Add support for the BCM43438A1 Bluetooth capability.  It also adds a
+	  serial 'shim' to allow any regular serial port that can support a
+	  Bluetooth H4 interface (i.e. it has RTS/CTS) to be used to drive a
+	  Bluetooth device (Get a handle to it via hci_uart_getdevice
+	  ("/dev/xxx") and then pass it to the btuart_register function.  From
+	  Dave Marples (2019-09-21).
+	* boards/arm/stm32/stm32f4discovery/src:  Add support for external
+	  DS1307 module. From Alan Carvalho de Assis (2019-09-22).
+	* boards/arm/samd2l2/arduino-m0:  Add initial board support for the
+	  Arduino M0.  From Alan Carvalho de Assis (2019-09-22).
+	* arch/arm/src/lpc54xx/lpc54_clockconfig.c:  Fix PLL settings.  For the
+	  lpc54628 Rev. E board the PLL was not configured properly and the
+	  board wouldn't boot correctly. I checked the startup files from the
+	  official IDE and inspected the assembly instructions for the libraries
+	  used.  From Andrei Stefanescu (2019-09-22).
+	* boards/arm/samd2l2/arduino-m0/src/sam_usb.c:  Add usbnsh board
+	  configuration.  From Alan Carvalho de Assis (2019-09-22).
+	* sched/signal/sig_initialize.c:  Add some checks for allocation
+	  failures.  From Gregory Nutt (2019-09-23).
+	* arch/arm/src/stm32h7/hardware/stm32_adc.h:  Fix typos in ADC register
+	  definitions.  From Markus Bernet (2019-09-24).
+	* stm32h7: RCC Add PLL3 Support and only enable PLLs if used  From David
+	  Sidrane (2019-09-24).
+	* Direct users to our kconfig-frontends snapshot instead of upstream.
+	  It appears Yann Morin's kconfig-frontends project has gone offline and
+	  the website at http://ymorin.is-a-geek.org/projects/kconfig-frontends
+	  is not responding. Until we can identify a "proper" upstream project,
+	  use the snapshot in NuttX tools repository.
+	  Replace (almost) all links to Yann Morin's kconfig-frontends in the
+	  docs to point to the NuttX tools snapshot instead.  From Nathan
+	  Hartman (2019-09-24).
+	* drivers/net and net/:  Use ntoh() when printing IPv6 addresses so that
+	  the addresses appear in friendlier host order vs. network order.  From
+	  Bernd Walter (2019-09-24).
+	* net/icmpv6/icmpv6_rnotify.c:  Correct a bad index in debug output.
+	  From Bernd Walter (2019-09-25).
+	* net/inet/inet_close.c:  Fixes two problems, both noted by Bernd Walter:
+	  1) Prior to this change the 'pstate' variable was non-NULL only when
+	     doing a lingering close.  Comments to this effect as well as tests
+	     of pstate should also have been updated.  These are confusing and
+	     inappropriate, but do not lead to incorrect behavior.
+	  2) Eliminate an incomplete test when a disconnection event. When a
+	     disconnection event occurs, the close logic MUST always terminate
+	     the wait.  The conditional test was not incorrect, however, it
+	     lacked 'else' logic and would simply ignore that disconnection
+	     event in some cases.  That is bad because there may not be another
+	     disconnection event and that can lead to hangs (or
+	     at least very, very long delays).  From Gregory Nutt (2019-09-25).
+	* cxd56xx: various fixes
+	  - arch: arm: cxd56xx: Support to set any i2c frequency. This change
+	    supports to be able to set the i2c frequency other than just 100 or
+	    400 Hz.
+	  - arch: arm: cxd56xx: Enable SD clock during access to SD card
+	  - Improve GNSS low sensitivity with SD card inserted
+	  - Reduce power consumption by stopping SD clock
+	  - arch: arm: cxd56xx: Do PANIC() when cpu rx FIFO is overflow.  If CPU
+	    Rx FIFO is overflow, it's fatal error for system. In such a case, this
+	    change changes to allow the user to notice by calling PANIC() for
+	    debuggability enhancement.
+	  - arch: arm: cxd56xx: Fix compile error in sdhci debug code
+	  - arch: arm: cxd56xx: Remove assertion in cpu tx queue.  When CPU Tx
+	    queue is overflow, it returns -EAGAIN instead of assertion to be
+	    able to retry.
+	  - arch: arm: cxd56xx: Add configurations for cpu fifo elements
+	  - arch: arm: cxd56xx: Fix LPADC configuration.  LPADC options defined
+	    in the same symbol name, so kconfig tool couldn't process
+	    them correctly.
+	  - arch: arm: cxd56xx: Update loader and gnssfw ver.17660
+	  - arch: arm: cxd56xx: Fix hang-up when error interrupt occurs.  Fix a
+	    problem that error interrupts are not cleared.
+	  - arch: arm: cxd56xx: Fix sdhci semaphore.  Fix initial value of
+	    semaphore in sdhci drive.r
+	  - boards: cxd56xx: Treat the initial value of LNA power as off.  LNA
+	    is always turned power on when GNSS is started. So it is desirable
+	    that the initial value of the LNA power is off by default.
+	  - boards: cxd56xx: Remove initial setting of PIN_AP_CLK. PIN_AP_CLK is
+	    used as a port selector of SDIO expander on the extension board,
+	    and is set output low in initalizing. Therefore, this pin cannot be
+	    used for other board. To avoid this restriction, remove this initial
+	    operation because this pin is pulled down by default on the
+	    extension board.  From Alin Jerpelea (2019-09-26).
+	* arch\arm\src\stm32h7\Kconfig:  Add the CRC option in KConfig.  From
+	  Eduard Niesner (2019-09-27).
+	* arch/arm/src/stm32l4/stm32l4_dumpgpio.c: Fix using wrong GPIO enable register. 
+	  From Juha Niskanen (2019-09-27).
+	* boards/arm/stm32/stm32f429i-disco/include/board.h:  Remove forbidden STM32
+	  header file inclusions.  Fix some coding standard issues.  From Gregory Nutt
+	  (2019-09-27).
+	* libs/libxx/Kconfig: Automatically select CONFIG_CLOCK_MONOTONIC when
+	  CONFIG_LIBCXX is selected.
+	  Remove hardcoded -DCLOCK_MONOTONIC from CFLAGS in Make.defs of several
+	  configurations.  That definition is now automatically adding this define when
+	  CONFIG_LIBCXX=y.  From Daniel Pereira Volpato (2019-09-27).
+	* arch/sim:  Add stack color feature for ps command.  From ligd (2019-09-28).
+	* tools/simbridge.sh:  Add simbridge.sh to simplify the simulator bridge
+	  creation.  From Xiang Xiao (2019-09-28).
+	* libs/libc: move writev from math.csv to libc.csv  From Xiang Xiao (2019-09-28).
+	* libs/symtab/Makefile and tools/mksymtab.c:  Ensure that the generated symbol
+	  table name same as the configuration option.  From Xiang Xiao (2019-09-28).
+	* ibs/libc, libs/symtab, tools/ build system:  Move symbol table generation into
+	  libc since the address in symbol table should come from userspace binary for
+	  protect build, not kernel binary.  From Xiang Xiao (2019-09-28).
+	* libs/libc:  Add CONFIG_MODLIB_SYSTEM_SYMTAB to generate the symbol table for
+	  dlopen/insmod.  From Xiang Xiao (2019-09-28).
+	* boards/arm/stm32f7:  Remove inclusion of STM32 F7 header files from
+	  all board.h header files.  From Gregory Nutt (2019-09-29).
+	* boards/arm/stm32rl4:  Remove inclusion of STM32 L4 header files from
+	  all board.h header files.  From Gregory Nutt (2019-09-29).
+	* tools/Makefile.unix:  Make COMMON_DIR work with
+	  CONFIG_ARCH_BOARD_CUSTOM.  From Xiang Xiao (2019-09-30).
+	* Configuration:  Auto-select CONFIG_BUILD_LOADABLE when either
+	  CONFIG_BUILD_KERNEL or CONFIG_BINFMT_LOADABLE is selected.  From Xiang
+	  Xiao (2019-09-30).
+	* tools/ Make fragments:  Fix the various minor issue for
+	  NUTTXLIBS/USERLIBS
+	  1. Remove libcxx duplication in FlatLibs.mk and from kernel space
+	  2. Remove libpass1 from KernelLibs.mk since kernel build doesn't
+	     support the two pass mode
+	  3. Remove FSDIR related comment since file system cannot be disabled
+	     now
+	  From Xiang Xiao (2019-09-30).
+	* tools/Directories.mk:  Remove FSDIRS/NOFSDIRS related logic/comments
+	  since the file system can no longer be disabled now.  From Xiang Xiao
+	  (2019-09-30).
+	* tools/Makefile.host:  Add missing binaries from clean target  From
+	  Gregory Nutt (2019-09-30).
+	* tools/mksymtab.c:  Clean up syntax of help text.  From Gregory Nutt
+	  (2019-09-30).
+	* tools/README.txt:  Update to show new usage of mksymtab.  From Gregory
+	  Nutt (2019-09-30).
+	* Fix cxd56 ostest:
+	  - boards: spresense: Fix config names in cxd56_ostest.c
+	  - boards: spresense: Enable ostest in rndis/defconfig
+	  - boards: spresense: Enable ostest in wifi/defconfig
+	  From Masayuki Ishikawa (2019-10-01).
+	* boards: spresense: Add --gc-sections to LDFLAGS in scripts/Make.defs
+	  Also, add -ffunction-sections -fdata-sections to ARCHCFLAGS  From
+	  Masayuki Ishikawa (2019-10-01).
+	* drivers/crypto/dev_urandom.c:  Revert part of a previous change.  That
+	  change was ill informed and introduced warnings when
+	  CONFIG_DEV_URANDOM_RANDOM_POOL is selected.  As noted by Juha
+	  Niskanen.  From Gregory Nutt (2019-10-01).
+	* libs/libc/ Kconfig files:  Disable EXECFUNCS_HAVE_SYMTAB for kernel
+	  build.  The symbol table don't have any meaning for kernel build since
+	  all executable binary should be self contained.  From Xiang Xiao
+	  (2019-10-01).
+	* tools/mkexport.sh:  Copy the essential build script files too and move
+	  Make.defs/gnu-elf.ld into scripts like board folder layout.  From
+	  Xiang Xiao (2019-10-01).
+	* Makefiles: change ${shell pwd} to $(CURDIR) since pwd doesn't exist on
+	  Windows  From Xiang Xiao (2019-10-02).
+	* drivers/wireless/ieee802154/mrf24j40/mrf24j40.c:  Correct erroneous
+	  isolation of address mode field and subsequent bad comparison.  From
+	  Gregory Nutt (2019-10-02).
+	* arch/arm/src/stm32l4/stm32l4_firewall.c:  Correct a test to determine
+	  if an address lies in FLASH or not.  Improper mask caused test to
+	  always fail.  From Gregory Nutt (2019-10-02).
+	* tools/testbuild.sh:  Add an option to select the number of CPUs to use
+	  with 'make'  From Gregory Nutt (2019-10-02).
+	* tools/testbuild.sh:  Use CPU option on 'make distclean' too, but not
+	  'make olddefconfig.  From Gregory Nutt (2019-10-02).
+	* tools/Config.mk:  Support the ability to change the CFLAGS for the
+	  compilation of a single file.  Set special compiler options as follows
+	  the rule: sourcefile + fixed suffix "_[A|C|CPP|CXX]FLAGS"
+	  apps/examples/hello/Makefile: $(SRCDIR)/hello_main.c_CFLAGS = -DTEST
+	  From Xiang Xiao (2019-10-03).
+	* Spresense smp
+	  - arch: arm: Add ARCH_GLOBAL_IRQDISABLE to ARCH_CHIP_CXD56XX in Kconfig
+	  - arch: arm: cxd56xx: Make fpuconfg() public in cxd56_start.c.  NOTE:
+	    fpuconfig() is called in both cxd56_start.c and cxd56_cpustart.c
+	  - arch: arm: cxd56xx: Add support for SMP.  NOTE: To run cxd56xx in
+	    SMP mode, new boot loader which will be released later must be used.
+	  - arch: arm: cxd56xx: Add irq routing for SMP in cxd56_irq.c. NOTE: In
+	    cxd56xx, each external interrupt controller can be accessed from a
+	    local APP_DSP (Cortex-M4F) only.  This change supports IRQ routing
+	    for SMP by calling up_send_irqreq() in both up_enable_irq() and
+	    up_disable_irq().
+	  - boards: spresense: Add smp configuration
+	  From Masayuki Ishikawa (2019-10-03).
+	* boards: cxd56xx: common: Add .gitignore not to show untracked files.
+	  From Masayuki Ishikawa (2019-10-03).
+	* tools/mkexport.sh:  Should export full content for flat build even
+	  with CONFIG_BUILD_LOADABLE.  From Xiang Xiao (2019-10-03).
+	* arch/arm/src/stm32/stm32_usbdev.c:  Fix some new warnings reported by
+	  gcc 8.3.1 in build tests.  From Gregory Nutt (2019-10-03).
+	* sched/signal/sig_default.c: fix undefined reference to sched_suspend
+	  if CONFIG_SIG_SIGSTOP_ACTIO not defined and eliminate compilation
+	  warnings  From raiden00pl (2019-10-04).
+	* arch: armv7-m:  Fix a deadlock in up_sigdeliver() in SMP mode.  In
+	  previous implementation, up_disable_irq() was called before recovering
+	  local context. However, I noticed a deadlock happens in the following
+	  situation. For example, if up_sigdevliver() is in progress on CPU0 and
+	  CPU1 has called up_cpu_paused to CPU0, hence g_cpu_irqlock has been
+	  locked by CPU1, in this case, we would see a deadlock in later call of
+	  enter_critical_section() to restore irqcount.
+	  To avoid this situation, we need to call enter_critical_section() to
+	  break the deadlock.  From Masayuki Ishikawa (2019-10-04).
+	* armv7-a and xtensa:  Apply Masayuki Ishakawa's change to these these
+	  other SMP architectures as well.  From Gregory Nutt (2019-10-04).
+	* sched/wdog/wd_start.c:  Back out a kludge-workaround for an SDCC
+	  compiler problem fix back in Feb 2017.  That workaround now appears to
+	  conflict with newer GCC versions using unsupport warning options. 
+	  From Gregory Nutt (2019-10-04).
+	* drivers/wireless/bluetooth/bt_uart_bcm4343x.c:  BCM4343x HCIUART
+	  support.  From Dave Marples (2019-10-04).
+	* arch/arm/src/lpc17xx_40xx/lpc17_40_ethernet.c: Use usleep() instead of
+	  up_delay() for large wait times.  From Augusto Fraga Giachero
+	  (2019-10-04).
+	* boards/arm/tiva/tm4c123g-launchpad/: SPI CAN functionality on
+	  TM4C123GXL - ek-tm4c123gxl_spi_can.  From DisruptiveNL (2019-10-05).
+	* arch/sim/src/sim/up_hostfs.c:   hostfs skip '.' and '..' in readdir' 
+	  From Xiang Xiao (2019-10-07).
+	* tools/mkromfsimg.sh:  Use sed to add const to ROMFS declarations so
+	  that they like in FLASH not RAM.  From Bernd Walter (2019-10-07).
+	* arch/arm/src/stm32h7/hardware/stm32_tim.h: Fix ATIM_BDTR_BK2P define
+	  arch/arm/src/stm32h7/hardware/stm32_tim.h: Fix ATIM_AF2 bitfields
+	  wrongly allocated to ATIM_AF1
+	  arch/arm/src/stm32f7/hardware/stm32f76xx77xx_tim.h: Fix ATIM_AF2
+	  bitfields wrongly allocated to ATIM_AF1
+	  arch/arm/src/stm32h7/stm32_tim.c: Fix some copy'n'paste errors on
+	  defines
+	  From Daniel Pereira Volpato (2019-10-07).
+	* arch/arm/src/stm32f0l0g0: Support timers available on STM32G070
+	  arch/arm/src/stm32f0l0g0: Pinmap TIM1 GPIOs available for STM32G0
+	  arch/arm/src/stm32f0l0g0: Add TIM driver lowerhalf
+	  arch/arm/src/stm32f0l0g0/stm32_tim_lowerhalf.c:  Handle 32-bit
+	    overflow on some calculations.
+	  From Daniel Pereira Volpato (2019-10-07).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb/include/board.h: Add TIMx clock
+	  frequencies boards/arm/stm32f0l0g0/nucleo-g070rb: Enable basic timers 
+	  From Daniel Pereira Volpato (2019-10-07).
+	* drivers/wireless/bluetooth/bt_uart_bcm4343x.c:  Fix small a small bug
+	  found during testing.
+	  drivers/wireless/bluetooth/bt_uart_shim.c:  Change the task name for
+	  the HCI receiver task to bring it into line with the transmitter
+	  task.  From Dave Marples (2019-10-08).
+	* drivers/usbdev/cdcacm.c:  Fix memory leak of RX failsafe timer.  From
+	  Juha Niskanen (2019-10-08).
+	* boards: arm: cxd56xx: different updates
+	  - boards: cxd56xx: spresense: initialize SCU at boot.  The SCU has to
+	    be initialized at bootup on spresense board because several
+	    functions depend on it.
+	  - boards: arm: cxd56xx: add audio control definitions.  Add audio
+	    control definitions for the audio implementation.
+	  - boards: arm: cxd56xx: add audio defconfig.  Add defconfig for the
+	    audio implementation
+	  From Alin Jerpelea (2019-10-08).
+	* Old style exceptions --> new style for Python 3  From Christian Clauss
+	  (2019-10-08).
+	* boards: spresense: add audio implementation
+	  - boards: arm: cxd56xx: add audio implementation.  Add the board audio
+	    control implemantation
+	  - boards: arm: cxd56xx: update audio defconfig.  Small updates to
+	    build the platforms specific audio driver
+	  - boards: arm: cxd56xx: drivers: add audio implementation.  Add the
+	    audio implementation for CXD56XX chip
+	  - boards: arm: cxd56xx: fix Load switch GPIO.  During the initial
+	    bringup the grong GPIO was set.
+	  From Alin Jerpelea (2019-10-09).
+	* drivers/pipes/fifo.c: mkfifo should return -1 and set errno on
+	  failure  From raiden00pl (2019-10-11).
+	* We have ported NuttX on Renesas RX65N Micro-controller. This port
+	  includes following interfaces: (1) Serial (UART) driver (13 ports) and
+	  (2) Ethernet driver.  This port is provided on two boards: (1) RSK
+	  RX65N-2MB and (2) GR-Rose.  The port is built on Cygwin environment.
+	  As part of this port, we have created two documents:  (1) Readme.txt
+	  for each board, and (2) User manual to provide information about
+	  development environment setup.  Both these documents are placed under
+	  (1) /boards/renesas/rx65n/rx65n-grrose and (2)
+	  boards/renesas/rx65n/rx65n-rsk2mb.  From Anjana (2019-10-11).
+	* boards: arm: cxd56xx: audio: add power_control and audio_tone_generator
+	  - boards: arm: cxd56xx: audio: add power_control.  Add a simple way to
+	    control the audio power for userspace apps
+	  - boards: arm: cxd56xx: audio: add audio_tone_generator.  Add a simple
+	    way to control the audio buzzer with defined frequency for userspace
+	    apps.
+	  From Alin Jerpelea (2019-10-11).
+	* libs/libxx/Kconfig:  CONFIG_LIBC_LOCALE is needed to build libcxx.  A
+	  math library is also needed, however, here are various ways to provide
+	  a math library so CONFIG_LIBM is not now set.
+	  boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs:  Add required
+	  definitiions if libcxx is enabled.
+	  From Matias N (2019-10-12).
+	* Fix posix spawn
+	  - boards: lc823450-xgevk: Fix build error for posix_spawn
+	  - boards: stm32f4discovery: Fix build error for posix_spawn
+	  From Masayuki Ishikawa (2019-10-13).
+	* Gs2200m with reset
+	  - include: wireless: Add reset handler to struct gs2200m_lower_s
+	  - drivers: wireless: Add reset and unreset sequence in gs2200m.c
+	  - boards: cxd56xx: Add reset handler to cxd56_gs2200m.c
+	  From Masayuki Ishikawa (2019-10-15).
+	* Fix cpustart for Cortex-M SMP
+	  - arch: lc823450: Fix lc823450_cpustart.c.  In Cortex-M, offset 0 in
+	    vector table stores initial stack pointer and offset 4 stores reset
+	    vector.
+	  - arch: sam34: Fix sam4cm_cpustart.c.  In Cortex-M, offset 0 in vector
+	    table stores initial stack pointer and offset 4 stores reset vector.
+	  From Masayuki Ishikawa (2019-10-16).
+	* drivers: serial: Fix data corruption when outputting data in SMP mode
+	  From Masayuki Ishikawa (2019-10-16).
+	* sched/pthread, Documentation: fix pthread_key_delete, pthread_self and
+	  pthread_yield documentation and some comments.  From Juha Niskanen
+	  (2019-10-17).
+	* arch/arm/src/stm32l4/Kconfig:  Add STM32L4R5ZI chip type.  From Jussi
+	  Kivilinna (2019-10-17).
+	* include/sys/time.h: include sys/select.h to compatible with earlier
+	  standards.  According to earlier standards, usage of select(), FD_CLR,
+	  FD_ISSET, FD_SET and FD_ZERO just need include headers: sys/time.h,
+	  sys/types.h and unistd.h. So include sys/select.h in time.h to
+	  compatible with it. Or mbedtls library would build break in calling
+	  select() and FD_* related functions.
+	  https://pubs.opengroup.org/onlinepubs/007908799/xsh/select.html
+	  From liuhaitao (2019-10-17).
+	* sched/signal:  Add support for SIGPIPE.  SIGPIPE uses
+	  SIG_SIGPIPE_ACTION which terminates process by default.  It also could
+	  be ignored.  From liuhaitao (2019-10-17).
+	* tools/LibTargets.mk:  Make libapps.a by the default target.  From
+	  Xiang Xiao (2019-10-17).
+	* include/nuttx/timers/pwm.h:  Correct some typos. 
+	  arch/arm/src/stm32f0l0g0: Add PWM support.  From Daniel Pereira
+	  Volpato (2019-10-17).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb: Add PWM support and GPIO_TIM3_*
+	  mappings
+	  boards/arm/stm32f0l0g0/nucleo-g070rb/configs/nsh: Enable PWM example
+	  From Daniel Pereira Volpato (2019-10-17).
+	* boards: stm32f4discovery: Add support for MMCSD_SPI.  This change
+	  works with STM32F4 Discovery Shield plus microSD click  From Masayuki
+	  Ishikawa (2019-10-18).
+	* boards: spresense: audio: add missing header.  Add the missing header
+	  to silence compiler warnings  From Alin Jerpelea (2019-10-18).
+	* boards/arm/am335x/beaglebone-black/src/:  Use the same bring-up
+	  structure as is used with other boards.  From Gregory Nutt (2019-10-18).
+	* arch/arm/src/stm32/hardware/stm32f40xxx_pinmap.h: ETH_RMII_REF_CLK is
+	  an input.  From Gregory Nutt (2019-10-18).
+	* net/udp/udp_psock_sendto_unbuffered.c:  Add a check for the device
+	  that is polling.  In the multiple network device case, this check is
+	  necessary to prevent sending the UDP packet to the wrong device.  This
+	  change addresses only the unbuffered case.  The buffered case is more
+	  complex.  See patch attached to issue 172.  From Gregory Nutt
+	  (2019-10-18).
+	* net/udp/udp_psock_sendto_buffered.c:  Add a check for the device that
+	  is polling.  In the multiple network device case, this check is
+	  necessary to prevent sending the UDP packet to the wrong device.  This
+	  change addresses the buffered case.  From Gregory Nutt (2019-10-18).
+	* boards/sim/sim/sim/configs::  Add -m32 to HOSTLDFLAGS if enable
+	  CONFIG_SIM_M32.  Fixes the following link errors:
+	  /usr/bin/ld: i386 architecture of input file `nettest_host.hobj' is
+	  incompatible with i386:x86-64 output
+	  /usr/bin/ld: i386 architecture of input file `nettest_server.hobj' is
+	  incompatible with i386:x86-64 output
+	  From Xiang Xiao (2019-10-19).
+	* tools/indent.sh:  Add a command line option to suppress reformatting
+	  of comments.  This is useful when comments are already correct and/or
+	  contain formatted data such as tables or lists.  From Gregory Nutt
+	  (2019-10-19).
+	* arch/arm/src/s32k1xx:  Support configuration and initialization of the
+	  flash configuration bytes.  In
+	  boards/arm/s32k1xx/s32k1**evb/scripts/flash.ld:  Create a special
+	  FLASH section to hold the FLASH configuration bytes.  From Gregory
+	  Nutt (2019-10-19).
+	* arch/arm/src/s32k1xx/Kconfig:  Add some help text for the flash
+	  configuration fields.  From Gregory Nutt (2019-10-19).
+	* boards/arm/imxrt/imxrt1060-evk/src/imxrt_lcd.c:  Add support for LCD.
+	  Clean up some LCD-related interfaces.  From Fabio Balzano (2019-10-20).
+	* arch/sim/src/sim/up_tickless.c:  Correct the calculation of the timer
+	  period.  Fix some missing initialization of globals and missing return
+	  values.  From Matias N (2019-10-20).
+	* fix early timespec overflow if using 32 bit system timer  From Jens
+	  Gräf (2019-10-21).
+	* STM32H7 Ethernet:  Fix ETH_MACMDIOAR_CR_MASK bit mask.  From Markus
+	  Bernet (2019-10-21).
+	* boards: cxd56xx: add board support for LTE modem and modem driver
+	  - drivers: modem: add altair modem driver.  Add modem driver for the
+	    altair modem.
+	  - boards: cxd56xx: add board support for LTE modem.  Add the Altair
+	    LTE modem support on the Spresense board.
+	  - boards: cxd56xx: spresense: add LTE defconfig.  Add the Altair LTE
+	    modem defconfig for spresense board
+	  From Alin Jerpelea (2019-10-21).
+	* arch/sim/src/sim: Fixes compilation for sim target when enabling power
+	  management.  From Matias N (2019-10-22).
+	* stm32f4dis with gs2200m:
+	  - drivers: wireless: Add SPI_SELECT() to _read/write_data() in gs2200m.c
+	  - boards: stm32f4discovery: Add support for gs2200m.  NOTE: GS2200M
+	    for Spresense works with mikroe STM32F4 Discovery Shield (slot3) 
+	    From Masayuki Ishikawa (2019-10-22).
+	* STM32H7:  Flash driver and Serious BUG fixes:
+	  - arch/arm/Kconfig:Add ARCH_HAVE_PROGMEM for STM32H7
+	  - stm32h7:Add FLASH progmem support
+	  - stm32h7:pwr add CPUCR & D3CR
+	  - stm32h7:syscfg Add PWRCR
+	  - stm32h7:rcc Properly configure VOS and Flash
+	  From David Sidrane (2019-10-22).
+	* arch/arm/src/s32k1xx/s32k1xx_flashcfg.c:  Flash configuration array
+	  should be const (although it really does not matter in this context).
+	  From Gregory Nutt (2019-10-22).
+	* drivers/usbhost:  Remove all traces of support for the installable GPL
+	  RTL8187 USB host driver.  From Gregory Nutt (2019-10-22).
+	* boards: cxd56xx: spresense: add board_timerhook function
+	  - boards: cxd56xx: spresense: add board_timerhook function.  In
+	    preparation for SDK we muts have a weak board_timerhook function
+	  - drivers: usbhost: add missing endif.  By accident an endif was
+	    missing.
+	  - boards: cxd56xx: audio: add build barrier.  The audio implementation
+	    should not be bebuilt if the config CONFIG_CXD56_AUDIO is not set.
+	  - arch:arm:cxd56xx: add ge2d.h header.  The header is used by
+	    imageproc.
+	  From Alin Jerpelea (2019-10-23).
+	* drivers/usbhost/usbhost_hidkbd.c:  Fix keyboard debounce algorithm
+	  used when CONFIG_HIDKBD_NODEBOUNCE is undefined.  From Jeff Theusch
+	  (2019-10-23).
+	* boards: cxd56xx: spresense: add Spresense Image Processor.  Enable
+	  support for accelerated format convertor, rotation and so on.using the
+	  CXD5602 image processing accelerator.
+	  boards:cxd56xx:spresense: initalize GNSS and GEOFENCE at boot.  Add
+	  the optional initialization of  GNSS and GEOFENCE at bootif the
+	  drivers are enabled.
+	  From Alin Jerpelea (2019-10-23).
+	* drivers/usbhost/Kconfig:  Change default for CONFIG_HIDKBD_POLLUSEC
+	  per recommendation of Jeff Theusch.  From Gregory Nutt (2019-10-23).
+	* tools/nxstyle.c:  Add detection of carriage returns.  Improve
+	  reporting of TABs.  From Gregory Nutt (2019-10-23).
+	* i.MXRT1060-EVK (mostly):  Add basic LCD support for the board
+	  IMXRT1060-EVK.  From Fabio Balzano (2019-10-23).
+	* boards/arm/imxrt/imxrt1060-evk:  Added Littlevgl demo configuration
+	  into imxrt1060-evk board directory.  From Fabio Balzano (2019-10-23).
+	* boards/arm/imxrt/imxrt1060-evk/README.txt:  Fix typos and whitspace
+	  problems in README file.  From Fabio Balzano (2019-10-23).
+	* boards/arm/imxrt/imxrt1060-evk/README.txt:  Added instructions to run
+	  the LVGL demo.  From Gregory Nutt (2019-10-23).
+	* arch/sim/src/Makefile:  Fixes missing recursion into sim board
+	  directory for dependency generation.  From Matias N (2019-10-24).
+	* arch/sim/src/sim/up_idle.c: Report activity on simulated UART.  From
+	  Matias Nitsche (2019-10-24).
+	* boards/arm/imxrt/imxrt1060-evk: Fix FT5X06 CTRSTn pin configuration,
+	  increased number of pollwaiters for the FT5X06, tuned resolution
+	  during pointer dragging.  From Fabio Balzano (2019-10-24).
+	* boards: cxd56xx: spresense: cleanup and new defconfig
+	  - arch: cxd56xx: remove NVIC_SYSH redefinition.  The NVIC_SYSH is
+	    already defined in nvicpri.h
+	  - boards: cxd56xx: spresense: configs: enable SPRESENSE_EXTENSION.
+	    Enable high current mode for the Spresense Extension board on all
+	    examples that have SDCARD support
+	  - boards: cxd56xx: spresense: ifdef SDCARD_TXS02612.  The SD Card
+	    TXS02612 port expander is hosted on the Extension board and should
+	    not be enabled if the extension board is not prezent.
+	  - boards: cxd56xx: spresense: configs: increase MQ_MAXMSGSIZE.  This
+	    change is needed by the display driver on spresense platform
+	  - boards: cxd56xx: spresense: config: add lcd examples defconfig.
+	    This is a configuration for the basic nx examples.
+	  From Alin Jerpelea (2019-10-24).
+	* tools/nxstyle.c:  Add logic to detect if there is a blank line
+	  following the final right brace.  sched/:  Applied the modified
+	  nxstyle to all C file as a test.  From Gregory Nutt (2019-10-24).
+	* arch/arm/src/imxrt/imxrt_lpi2c.c:  Fix a warning about an unused local
+	  variable.  Found in build testing.  From Gregory Nutt (2019-10-24).
+	* Add DMA support for STM32L4+ series
+	  - Add DMA support for STM32L4+
+	  - stm32l4xrxx_rcc: enable "Range 1 boost" mode if any PLL freq above
+	    80 Mhz
+	  From Jussi Kivilinna (2019-10-25).
+	* stm32l4_otgfs: enable OTGFS for STM32L4+ series.  The OTGFS peripheral
+	  on stm32l4x6 and stm32l4rxxx reference manual is exactly the same.
+	  This change also adds missing bits and fixes errors in stm32l4x5xx and
+	  stm32l4x6xx OTGFS register maps.  From Jussi Kivilinna (2019-10-25).
+	* drivers/mtd/gd25.c:  Add 4byte address operation for capacity larger
+	  than 128Mbit.  From YanLin Zhu (2019-10-25).
+	* tools/nxstyle.c:  Eliminate false alarm errors on comments that are to
+	  the right of code when the comment terminator is on the same line as
+	  the last of the comment.  From Gregory Nutt (2019-10-25).
+	* drivers/modem/altair/Kconfig: Default for CONFIG_MODEM_ALTMDM should
+	  be 'n' and it must depend on CONFIG_SPI_EXCHANGE.  From Gregory Nutt
+	  (2019-10-25).
+	* This change corrects a problem with NSH:  NSH was calling the OS
+	  internal function ramdisk_register() in violation of the portable
+	  POSIX interface.  This change solves the problem by introducing a new
+	  boardctl() function BOARDIOC_MKRD which moves the RAM disk creation
+	  into the OS.  From Gregory Nutt (2019-10-26).
+	* drivers/Kconfig:  Add an option, CONFIG_DRVR_MKRD, to control whether
+	  or not the mkrd() implementation is build.  Otherwise, if mkrd() is
+	  built unconditionally, it will be drawn into every build whether it is
+	  used or not and will increase the build size.  From Gregory Nutt
+	  (2019-10-26).
+	* board/boarctl.c:  Add support for the new BOARDIOC_ROMDISK command.
+	  This allows applications to create ROMFS block drivers without illegal
+	  direct calls to romdisk_register.
+	  include/sys/boardctl.h:  Add basic definitions to support a ROM disk
+	  creation boardctl() command.
+	  From Gregory Nutt (2019-10-26).
+	* drivers/Kconfig:  If CONFIG_DRVR_MKRD is selected, then we must
+	  auto-select CONFIG_FS_WRITABLE and CONFIG_FS_READABLE.  From Gregory
+	  Nutt (2019-10-26).
+	* boards/arm/stm32/axoloti:  Every BSP must provide boot
+	  board_late_initialize() AND board_app_initialize().  That is because
+	  you never now how the configuration will be set.  CONFIG_LIB_BOARDCTL
+	  may be auto-selected by applications that need boardctl() support...
+	  requiring the existence of board_app_initialize().  From Gregory Nutt
+	  (2019-10-26).
+	* tools/nxstyle.c:  Eliminate false alarms when checking for alignment
+	  of comments to the right of code.  Fix check for C++ style comments so
+	  that strings like http:// and https:// do not generate false alarms. 
+	  From Gregory Nutt (2019-10-27).
+	* boards/arm/sama5/sama5d4-ek/src/sam_appinit.c:  Fix error found in
+	  build testing.  Bad conditional compilation for
+	  board_app_initialize().  Should depend only on CONFIG_LIB_BOARDCTL,
+	  CONFIG_BUILD_KERNEL is irrelevant.  From Gregory Nutt (2019-10-27).
+	* boards/arm/dm320/ntosd-dm320/src/:  Fix error found in build testing.
+	  All configurations must provide boar_app_initialize() which is
+	  required if CONFIG_LIB_BOARDCTL is enabled.  From Gregory Nutt
+	  (2019-10-27).
+	* arch/arm/src/stm32 and boards/arm/stm32/olimex-stm32-p207/src:  Fix an
+	  error found in build testing.  There is not relationship be
+	  CONFIG_STM32_USBHOST and CONFIG_USBHOST, yet they they are used
+	  interchangeably.  This means that can (and did) get out of synch
+	  causing link time failures.  This change adds logic to select
+	  CONFIG_USBHOST when CONFIG_STM32_USBHOST is selected, keeping the two
+	  settings synchronized.  Furthermore, since CONFIG_STM32_USBHOST is the
+	  authoritative setting, all occurrences of CONFIG_USBHOST were replaced
+	  with CONFIG_STM32_USBHOST in the architecture code and in this one
+	  board code that was producing the error in build testing.  From
+	  Gregory Nutt (2019-10-27).
+	* boards/arm/a1x/pcdueno-a10/src/:  Fix error found in build testing.
+	  All configurations must provide boar_app_initialize() which is
+	  required if CONFIG_LIB_BOARDCTL is enabled.  From Gregory Nutt
+	  (2019-10-27).
+	* boards/arm/stm32/stm32vldiscvoery/src/:  Fix error found in build
+	  testing.  All configurations must provide boar_app_initialize() which
+	  is required if CONFIG_LIB_BOARDCTL is enabled.  From Gregory Nutt
+	  (2019-10-27).
+	* arch/arm/src/stm32l4 and boards/arm/stm32l4/nucleo-l476rg:  Add
+	  support for LPTIM timers on the STM32L4 as PWM outputs.  From Matias N
+	  (2019-10-27).
+	* boards/arm/kinetis/twr-k60n512/src/k60_appinit.c:  Suppress errors
+	  related to card detect GPIO configuration if SDHC support is not
+	  enabled.  From Gregory Nutt (2019-10-27).
+	* drivers/can/mcp2515.c and  boards/arm/stm32/nucleo-f4x1re:  MCP2525
+	  SPI STD-EXT ID fixes.  Verified on MCP2525 tested on nucleo-f4x1re.
+	  From DisruptiveNL (2019-10-28).
+	* drivers/mtd/gd25.c and gd5f.c:  Missed in previous change.  Without
+	  this change, the compiler will complain that spi_devid cannot be
+	  found.  From Xiang Xiao (2019-10-29).
+	* drivers/wireless/ieee80211/bcmf_chip_43362.c:  Fix bcmf_chip_43362
+	  compile error.  From Xiang Xiao (2019-10-29).
+	* fs/driver/fs_findmtddriver.c: Fix compile failed if NO CONFIG_MTD.
+	  From ligd (2019-10-29).
+	* arch/arm/src/stm32/stm32_sdio.c:  SDIO Fix system hang on card eject.
+	  From David Sidrane (2019-10-29).
+	* arch/arm/src/stm32f7/stm32_sdmmc.c: SDMMC Fix system hang on card
+	  eject.  From David Sidrane (2019-10-29).
+	* arch/arm/src/stm32h7/stm32_sdmmc.c: SDMMC Fix system hang on card
+	  eject.  From Gregory Nutt (2019-10-29).
+	* arch/arm/src/stm32l4/stm32l4_sdmmc.c:  SDMMC Fix system hang on card
+	  eject.  From David Sidrane (2019-10-29).
+	* drivers/mmcsd/mmcsd_sdio.c:  Set wrbusy after success of all the
+	  operations.  Any failure could leave wrbusy set when it should not be
+	  if the operation failed.  From David Sidrane (2019-10-29).
+	* drivers/mmcsd/mmcsd_sdio.c:  Enter a removed card state On a failure.
+	  If we fail to read cardstatus in mmcsd_transferready consider this a
+	  hard error and set the card to removed.  From David Sidrane
+	  (2019-10-29).
+	* arch/arm/src/stm32f7/stm32_otghost.c:  OTGFS_EPTYPE_INTR should be
+	  OTG_EPTYPE_INTR.  From Gregory Nutt (2019-10-29).
+	* drivers/wireless/ieee80211/mmc_sdio.c:  In sdio_io_rw_extended(), the
+	  behavior of the DMA setup differs, depending on the hardware
+	  capability SDIO_CAPS_DMABEFOREWRITE.  If this capability is set, then
+	  the DMA setup much be done before the transfer setup.  Dave Marples
+	  modified this file for the i.MXRT USDHC which does have the
+	  SDIO_CAPS_DMABEFOREWRITE.  Xiao Xiang reports that this change breaks
+	  the Wifi on the Photon which does not report the
+	  SDIO_CAPS_DMABEFOREWRITE and suggests reverting the change.  In
+	  reality both changes are correct but must be conditioned on the DMA
+	  capability of the underlying SDIO device.  From Gregory Nutt
+	  (2019-10-29).
+	* drivers/wireless/ieee80211:  Add tools/nxstyle to all of the C files
+	  in this directory.  From Gregory Nutt (2019-10-29).
+	* NXP k66 Ethernet
+	  - Kinetis:Add TJA1100 Phy
+	  - Kinetis:enet.c formated with nxstyle
+	  - net:mii Cleanup TJA1100 Support.  Formating and adding mask and
+	    shifts.
+	  - net:Kconfig Cleanup formatting.
+	  From David Sidrane (2019-10-30).
+	* drivers/mmcsd/mmcsd_sdio.c: Align DMA buffer for MBURST size.  From
+	  David S. Alessio (2019-10-31).
+	* drivers/mtd/gd25.c:  spi_devid argument was not used in
+	  initialization.  GD25 driver was always using priv->spi_devid
+	  initialized to zero by kmm_zalloc(). This change initializes it from
+	  the supplied function argument.  From Juha Niskanen (2019-10-31).
+	* Add INVIOLABLES.txt file.  From Gregory Nutt (2019-10-31).
+	* This change brings in the drivers needed to support OpenAMP.  These
+	  changes were ported from https://github.com/FishsemiCode/nuttx.  The
+	  current state:  Most drivers do now compile but are not yet verified.
+	  This port was effort of a number of people, I rather arbitrarily gave
+	  authorship to Guiding Li because he has the largest number of
+	  fundamental quashed commits from the Xiamoi repository.  From Guiding
+	  Li (2019-11-02).
+	* include/nuttx/usb/usbdev.h and usbhost.h:  Add CODE qualifier to
+	  function pointers.  From Gregory Nutt (2019-11-02).
+	* drivers/rptun/rptun.c and fs/hostfs/hostfs_rpmsg.c:  Fix 64-bit build
+	  issue in rpmsg driver.  From Xiang Xiao (2019-11-03).
+	* drivers/rptun/rptun.c:  Switch open/close/seek/read to file_*
+	  version.  From Xiang Xiao (2019-11-03).
+	* Documentation/NuttShell.html:  Update to include the new rptun
+	  command.  From Gregory Nutt (2019-11-03).
+	* net/netlink/netlink_route.c (mostly):  This completes a minimal
+	  netlink implementation that will retrieve the ARP table.
+	  net/netlink:  Add basic hooks (only) to support the NETLINK_ROUTE
+	  protocol.  From Gregory Nutt (2019-11-03).
+	* Documentation/NuttShell.html:  Document the new -t option for the
+	  'arp' command.  From Gregory Nutt (2019-11-03).
+	* net/netlink/:  Misc bugfixes from initial testing using NSH 'arp -t'
+	  command.  From Gregory Nutt (2019-11-03).
+	* Various drivers: Cloned logic.  On error, memory was freed, but the
+	  error was not returned.  It just continued as though no error
+	  happened.  From Petro Karashchenko (2019-11-03).
+	* sched/semaphore/spinlock.c:  Remove support for re-entrant spinlocks.
+	  They seem like a good idea, but they are never used.  From Xiang Xiao
+	  (2019-11-03).
+	* sched/semaphore/spinlock.c:  spin_trylock handle memory barrier and
+	  instrumentation correctly.  From Xiang Xiao (2019-11-03).
+	* drivers/addrenv.c:  Move up_addrenv_ implementation to common folder.
+	  From Xiang Xiao (2019-11-03).
+	* include/nuttx/ioexpander/gpio.h:  Add guards so that file content will
+	  not compile unless CONFIG_DEV_GPIO is selected.  From ligd (2019-11-03).
+	* audio/audio.c:  Add message type to support audio trigger.  From
+	  anchao (2019-11-03).
+	* include/nuttx/mm/mm.h:  Remove the assumption that one character
+	  equals eight bits.  From Xiang Xiao (2019-11-03).
+	* drivers/serial/serial.c:  Only real uart will call pm_activity().
+	  From ligd (2019-11-03).
+	* include/nuttx/rptun/rptun.h:  openamp/open_amp.h must not be included
+	  unless CONFIG_RPTUN (and heance CONFIG_OPENAMP) are selected.  From
+	  Alin Jerpelea (2019-11-04).
+	* boards/arm/cxd56xx/spresense/configs/lte/defconfig:  Select
+	  CONFIG_MODEM_ALTMDM.  From Alin Jerpelea (2019-11-04).
+	* boards/boardctl.c:  Expose power manager function through boardctl
+	  interface.  From Xiang Xiao (2019-11-04).
+	* Documentation/NuttShell.html:  Update document to at least mention the
+	  new pmconfig command.  From Gregory Nutt (2019-11-04).
+	* arch/:  Add rpmsg_serialinit() call to every implementation of
+	  up_initialize() for rpmsg uart initialization.  From Xiang Xiao
+	  (2019-11-04).
+	* drivers: modem: altair: auto select SPI.  The Altair hardware is
+	  connected to SPI and will not work without SPI support.  The
+	  SPI_EXCHANGE is automatically enabled (default y) when SPI is
+	  selected.  Since SPI is mandatory it should be auto selected.  From
+	  Alin Jerpelea (2019-11-04).
+	* net/netlink:  The NETLINK_ROUTE logic needs to return the first queued
+	  response and not attempt to match up reponses with requests.  That is
+	  the Linux compatible way.  Also, use queue.h functions for list
+	  management and fix an error in arp_snapshot().  From Gregory Nutt
+	  (2019-11-04).
+	* arch/arm/src/imxrt/imxrt_serial.c:  This change improves the
+	  performance of UART serial ports on the IMXRT by enabling the RX & TX
+	  FIFOS and transmission on the holding register being empty (TDRE)
+	  rather than transmission being complete (TC).  From Dave Marples
+	  (2019-11-04).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb:  Add button driver support, Add
+	  driver support. Add GPIO example.  Includes fixes to the GPIO driver
+	  support from Guillherme Amaral <gvr@certi.org.br>.  From Daniel
+	  Pereira Volpato (2019-11-04).
+	* boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_boot.c:  Fix some
+	  erroneous conditional compilation in board_late_initialize().  From
+	  Gregory Nutt (2019-11-04).
+	* boards/arm/stm32/nucleo-f4x1re/src/stm32_boot.c:  Fix some erroneous
+	  conditional compilation in board_late_initialize().  From Gregory Nutt
+	  (2019-11-04).
+	* libs/libc/string/Make.defs:  Need to include build support for files
+	  needed when CHAR_BIT != 8.  From Gregory Nutt (2019-11-02).
+	* drivers/serial/serial_io.c:  Uses signal numbers, but does not include
+	  signal.h.  This has not problems but missing signal definitions have
+	  been seen in certain cases.  From David Sidrane (2019-11-04).
+	* include/sys/boardctl.h:  pm.h is in include/nuttx/power/pm.h, not
+	  include/nuttx/pm.h.  From Gregory Nutt (2019-11-04).
+	* boards/boardctl.c:  pm_stay() was used were pm_staycount() was
+	  intended.  The caused an error:  void value not ignored as it ought to
+	  be.  From Gregory Nutt (2019-11-04).
+	* boards/Kconfig:  Newer Olimex E407 boards are populated with
+	  STM32407ZE chips.  From David Alessio (2019-11-05).
+	* fs/smartfs/smartfs_smart.c:  Fix O_CREAT without O_TRUNC truncating
+	  existing file.  Also nothing in POSIX says that O_APPEND should
+	  prevent O_TRUNC.  From Juha Niskanen (2019-11-05).
+	* fs/smartfs/smartfs_smart.c:  Honor O_APPEND on writes.  Also document
+	  pwrite() bug/limitation.  From Juha Niskanen (2019-11-05).
+	* sched/sched/sched_waitpid.c: Fix null pointer derefence on race
+	  without DEBUG_ASSERT.  From David Alessio (2019-11-05).
+	* boards/arm/stm32h7/nucleo-h743zi/src:  Added gpio-device-driver for
+	  userspace apps.  From Heiko Demlang (2019-11-05).
+	* drivers/wireless/ieee80211/bcm43xxx:  Move drivers/wireless/ieee80211/
+	  to drivers/wireless/ieee80211/bcm43xxx/ since the directory only
+	  contains only BCM43362 and BCM43438 related code.  From Xiang Xiao
+	  (2019-11-05).
+	* boards/arm/stm32/olimex-stm32-e407/scripts/:  Individual linker
+	  scripts for F407ZE and F407ZG chips.  From David S. Alessio
+	  (2019-11-05).
+	* drivers/serial/serial_dma.c:  Avoid uart_xmitchars_done() move the
+	  tail bigger then head.  If ioctl(TCOFLUSH) occurs between
+	  uart_xmitchars_dma() and uart_xmitchars_done(), TCOFLUSH will reset
+	  xmit buffer, then uart_xmitchars_done() will move the 'tail' ahead of
+	  'head', then sends lots of wrong data.  From ligd (2019-11-06).
+	* stm32h7: allocateheap SRAM and SRAM1 are not continuous  From David
+	  Sidrane (2019-11-06).
+	* arch/arm/src/tiva, arch/arm/include:  Add support for Tiva
+	  TM4C129ENCPDT.  From Nathan Hartman (2019-11-06).
+	* arch/arm/src/tiva/common/tiva_flash.c:  Improve tiva_write().
+	  arch/arm/src/tiva/common/tiva_flash.c:  Fix several mistakes in
+	  tiva_write() but note that this function needs more work. (1) Fix
+	  wrong use of && when & was intended. (2) Add compile- time warning
+	  directive because according to this function's interface, it is
+	  supposed to support unaligned writes and/or writes of arbitrary
+	  numbers of bytes to FLASH. However, this function does NOT support
+	  that at this time.  This needs to be fixed. (3) Fix wrong preprocessor
+	  conditional. Was written to use the 32-word write buffer only for
+	  TM4C1294NCPDT.  This buffer is available on all TM4C123 and TM4C129
+	  parts. Now conditioned upon CONFIG_ARCH_CHIP_TM4C123 or
+	  CONFIG_ARCH_CHIP_TM4C129. (4) Add comments to document the intent of
+	  the above preprocessor logic.  From Nathan Hartman (2019-11-06).
+	* arch/arm/include/tiva/tm4c_irq.h:  Fix wrong IRQ vector number.  From
+	  Nathan Hartman (2019-11-06).
+	* drivers/serial/serial_dma.c:  Still need reset xmit buffer when meet
+	  TCOFLUSH.  From ligd (2019-11-07).
+	* boards/arm/s32k1xx/s32k146evb/scripts/s32k146.cfg and
+	  boards/arm/s32k1xx/s32k146evb/README.txt:  Added configuration script
+	  and instructions for using Thread-Aware OpenOCD for the S32K146 with
+	  Eclipse.  From Han Raaijmakers (2019-11-07).
+	* net/netlink/Kconfig:  Remove dependency on EXPERIMENTAL.  Although the
+	  Netlink implementation is still only fragmentary, there is no usable
+	  functionality there and no reason for it to depend on EXPERIMENTAL.
+	  Also minor changes to the menu organization so that the Netlink
+	  options appear the same was as do other network options.  From Gregory
+	  Nutt (2019-11-07).
+	* arch/arm/src/stm32l4/stm32l4x6xx_rcc.c:  This fix is needed if HSI
+	  clock is selected.  Otherwise when waking up from STOP mode, the MSI
+	  clock is selected instead of the HSI clock.  From Matias N (2019-11-07).
+	* drivers/syslog/syslog_device.c:  Fix assert that assumes re-opened
+	  syslog file is the same.  Logic in syslog_file_channel() is calling
+	  syslog_initialize() for the default syslog device as a recovery action
+	  after failed syslog_dev_initialize().  From Juha Niskanen (2019-11-08).
+	* arch/arm/src/armv7-m/nvic.h:  Add BPIALL register address.  From Dave
+	  Marples (2019-11-08).
+	* STM32H7:  Set the BBSRAM memory range to non-cacheable.
+	  - armv7-m: mpu add user peripheral helper
+	  - stm32h7: BBSRAM Exclude BBSRAM from cacheable when
+	    CONFIG_ARMV7M_DCACHE.  ST placed the STM32H7 BBSRAM in the SRAM
+	    default memory region which is cacheable.  This change sets the
+	    BBSRAM memory range to non-cacheable.
+	  From David Sidrane (2019-11-08).
+	* net/netlink/netlink_route.c:  Add Netlink socket NETLINK_ROUTE support
+	  for getting a snopshot of the Neighbor table.
+	  net/neighbor/neighbor_snapshot.c:  Add neighbor_snapshot() that will
+	  eventually be used by the Netlink sockets.  Also fixed naming
+	  violation 'struct neighbor_entry' -> 'struct neighbor_entry_s'.
+	  include/nuttx/net/neighbor.h:  Expose format of the IPv6 neighbor
+	  table for use with Netlink sockets.
+	  From Gregory Nutt (2019-11-08).
+	* arch/arm/src/stm32l4/stm32l4_idle.c:  (1) Added BEGIN_IDLE() /
+	  END_IDLE() to stop call so that we also get notification via LED of
+	  the STOP mode, (2) Added the stm32l4_clockenable call as previously
+	  discussed, and (3) Added call to pm_changestate() to inform drivers
+	  we're back to running after the call to stm32l4_stop() returns.  From
+	  Matias N (2019-11-08).
+	* This change, initially for the imxrt1050, separates out the pinmux and
+	  iomux functions cleanly. For ease of conversion default IOMUX
+	  definitions have been added into imxrt_iomux.h. The change effectively
+	  does two things;
+	  (1) Unifies the iomux definitions - previously some pins had them, and
+	      some didn't. This effectively made it impossible to use the
+	      pinmuxes without editing the header file in the standard
+	      distribution tree.
+	  (2) Unifies the pin definitions so that every pin now has a suffix.
+	      This makes it *much* easier to see when a pin is in use in your
+	      code, because it will always have a definition in your board.h file.
+	  For anyone who is already using this CPU, a couple of small changes
+	  are needed to existing code;
+	    - In respect of (1) add IOMUX decorators to your pin definitions.
+	      You will find defaults in haardware/imxrt_iomux.h.  Every pin
+	      should have a IOMUX decorator and in general the defaults should
+	      be OK.
+	    - In respect of (2) you will need to add selectors for any function
+	      that previously only had one pinning option. There aren't many of
+	      those but LPUART1 is a good example. That just means adding into
+	      your board.h something like;  From Dave Marples (2019-11-08).
+	* boards/arm/imxrt/imxrt1020-evk:  Add support for the MIMXRT1021-EVK
+	  board. It features nsh, netnsh and usdhc sample configurations.  From
+	  Dave Marples (2019-11-08).
+	* arch/arm/src/imxrt/imxrt_enet.c: Improve naming of Ethernet pins.
+	  From Dave Marples (2019-11-08).
+	* i.MXRT 106x:  pinmux changes of the 1060's.  From Dave Marples
+	  (2019-11-08).
+	* tools/nxstyle.c:  Correct detection of missing blank line following a
+	  block comment.  From Gregory Nutt (2019-11-09).
+	* drivers/power/pm:  Historically, the NuttX PM subsystem has consisted
+	  of two functional components:  (1) an "Upper" part that detects state
+	  changes based on a random walk driven by activity levels, and (2) and
+	  "lower" part that implements the state changes.
+	  This change decouples that upper activity-based logic from the lower
+	  random walk logic and allows use of other upper state detection logic
+	  (such as a custom, application-specific state machine).
+	  From Matias Nitsche (2019-11-09).
+	* boards/arm/imxrt/imxrt1020-evk/include/board.h:  Fix an error that I
+	  introduced with code review.  From Gregory Nutt (2019-11-09).
+	* arch/sim/src/nuttx-names.dat:  Add host ftruncate() support.  From
+	  chao.an (2019-11-09).
+	* tools/nxstyle.c:  Eliminate false positive 'Invalid character after
+	  asterisk in comment block'.  From Gregory Nutt (2019-11-09).
+	* net/netlink/netlink_route.c:  Add support for the NETLINK_ROUTE
+	  RTM_GETLINK command that is used to obtain a list of all devices in
+	  the UP state.  From Gregory Nutt (2019-11-09).
+	* single wire Allow selection of pull{up|down|none}:
+	  - tioctl: Allow selection of pull{up|down|none}
+	  - stm32: Single Wire add pull{up|down|none} tioctl
+	  - stm32f0l0g0: Single Wire add pull{up|down|none} tioctl
+	  - stm32f7: Single Wire add pull{up|down|none} tioctl
+	  - stm32h7: Single Wire add pull{up|down|none} tioctl
+	  - stm32l4: Single Wire add pull{up|down|none} tioctl
+	  From David Sidrane (2019-11-10).
+	* openamp/:  Add Makefile defines.  From hao.an (2019-11-10).
+	* openamp/Makefile:  Linker input file unused because linking not done.
+	  From Xiang Xiao (2019-11-10).
+	* drivers/rptun/rptun.c:  Refine the rptun naming.  From Xiang Xiao
+	  (2019-11-10).
+	* net/netlink:  Fix offset in rtattr. include/net/route.h:  Correct form
+	  and naming of sruct rtentry.  include/netpacket/netlink.h:  Add some
+	  definitions that will be needed to access routing tables.  From
+	  Gregory Nutt (2019-11-10).
+	* net/netlink/netlink_route.c:  Add support for obtaining the entire
+	  routing table.  From Gregory Nutt (2019-11-10).
+	* net/netlink/netlink_route.c:  Add missing routing table list
+	  terminating response.  From Gregory Nutt (2019-11-10).
+	* boards/arm/imxrt/imxrt1060-evk:  An update to the configuration on
+	  imx1060-evk to remove compilation warnings about duplicated
+	  definitions. No functional changes.  From Dave Marples (2019-11-10).
+	* arch/sim/src/sim/up_simuart.c:  Remove CONFIG_SIM_UART_DATAPOST for
+	  arch/sim.  It's very dangerous to call NuttX API from simuart_thread. 
+	  From Xiang Xiao (2019-11-10).
+	* arch/sim/src/sim:  Replace all CONFIG_DEV_CONSOLE with USE_DEVCONSOLE
+	  for arch/sim and compile up_devconsole.c conditionally.  From Xiang
+	  Xiao (2019-11-10).
+	* arch/sim/src/Makefile:   Move all SMP stuff into one place for
+	  arch/sim.  From Xiang Xiao (2019-11-10).
+	* arch/sim/src/sim/up_hostfs.c:  Fix warning: 'mapflags' may be used
+	  uninitialized in this function.  From Xiang Xiao (2019-11-11).
+	* drivers/rptun/rptun.c:  Refine the start/stop flow to support the
+	  repeat boot.  From Xiang Xiao (2019-11-11).
+	* drivers/rptun/rptun.c:  vring size should also be aligned.  From ligd
+	  (2019-11-11).
+	* boards/arm/imxrt/imxrt1020-evk: Fix ifdef string.  The old configs
+	  folder was migrated to Boards/<arch> and we should fix the ifdef.
+	  From Alin Jerpelea (2019-11-11).
+	* boards/arm/imxrt/imxrt1020-evk:  Make naming of the LED consistent.
+	  In most places it is referred to as LED1.  In board.h it is referred
+	  to as USERLED1.  The i.MXRT1020-EVK hardware user guide (HUG) uses the
+	  name USERLED.  This command makes all names internally consistent and
+	  consistent with the HUG.  Noted by Alin Jerpelea.  From Gregory Nutt
+	  (2019-11-11).
+	* arch/sim/ and boards/sim/sim/sim:  Support OpenAMP between two
+	  simulator instances.  Please read rpserver/rpproxy section in
+	  boards/sim/sim/sim/README.txt for more information.  From chao.an
+	  (2019-11-12).
+	* boards/renesas/rx65n:  Fix ifdef string in header files.  The old
+	  configs folder was migrated to Boards/<arch> and we should fix the
+	  ifdef.  From Alin Jerpelea (2019-11-12).
+	* boards/arm/imxrt/imxrt1020-evk/src/imxrt1020-evk.h:  Fix ifdef
+	  string.  The old configs folder was migrated to Boards/<arch> and we
+	  should fix the ifdef.  From Alin Jerpelea (2019-11-12).
+	* boards/arm/lpc17xx_40xx/lincoln60/src/lincoln60.h:  Fix ifdef
+	  string.  The old configs folder was migrated to Boards/<arch> and we
+	  should fix the ifdef.  From Alin Jerpelea (2019-11-12).
+	* drivers/power/activity_governor.c:  Fix timer can't start when meet
+	  very small pmtick.  From ligd (2019-11-12).
+	* arch/arm/src/imxrt/imxrt_idle.c:  Y'all remember that conversation we
+	  had about why WFI might have been disabled on imxrt? Well, looks like
+	  we found the reason:
+	  - https://github.com/zephyrproject-rtos/zephyr/pull/8535/commits: 
+	    "The imxrt1050 is configured to use SYSTICK for the kernel timer, but
+	    SYSTICK cannot wake up the soc from low-power modes. Disable
+	    low-power modes on this soc until we have support for an alternative
+	    timer."
+	    "This fixes k_sleep on the EVKB version of the mimxrt1050_evk board.
+	    An earlier version of the board (EVK, not EVKB), had A0 silicon which
+	    by default did not enter low-power mode on a wfi."
+	  - This change reverts the WFI enable for further investigation post
+	    8.2.  With this change in place together with the previous one my
+	    system is fully stable(*), just drinking a bit more power than I'd
+	    like.  From Dave Marples (2019-11-12).
+	* drivers/mtd/gd25.c:  Add gd25_lock/unlock to case: enable 4-bytes
+	  address  From ligd (2019-11-12).
+	* arch/arm/src/imxrt/imxrt_serial.c:  o, just to complete the
+	  documentation of this...it looks like two issues, which confused me
+	  greatly:
+	  1) Operational issue.  TC (Transmission complete) and TDRE (TX Buffer
+	     Empty) were transposed in imxrt_serial.c.  The end result was that
+	     for unoptimised code everything worked fine, but optimised code
+	     got itself into a real mess and continually fired interrupts.  The
+	     change attached fixes this. This one would have been found much
+	     more quickly if this particular board had supported SWO :-/
+	  2) Startup issue.  There are a number of chip errata that apply to
+	     the 1052 first revision (A-suffix) that don't apply to the second
+	     (B-suffix). Those got me for a while and it's important to use an
+	     EVK_B_ dev board if you're suffering stability problems with this
+	     particular chip. However, even with that resolved with either
+	     optimised or unoptimised code when there is no SNVS (Battery
+	     Backup) power and the power is switched on the CPU appears to boot
+	     but gets stuck with timer interrupts not being generated. The CPU
+	     is running and it will execute linear code.   I have determined
+	     this by putting an 'imxrt_lowputc('A'+irq)' into up_doirq. For the
+	     non-running case the output looks like this:
+
+	       LLLL
+
+	     this implies 4 0x0b interrupts have been generated, and nothing
+	     else. If I hit keys on the keyboard I get 'e' in the flow.  0x0b
+	     is the SVC instruction and is the mechanism by which NuttX handles
+	     task switching.  'e' is 0x24, which corresponds to the LPUART1
+	     interrupt.  Other than these, the system does not respond further
+	     but is happily in the idle loop.  In this circumstance if you hit
+	     SW2 on the EVKB board though the logjam 'unjams' and normal
+	     service is established, output now looks like:
+
+	       LLLLPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPLPP ...etc.
+
+	     Where 'P' is 0x0f (the SYSTICK interrupt)....this is what _should_
+	     be happening so; SYSTICK starts up after SW2 has been pressed.
+	     From this point on everything works correctly and you can reboot
+	     the CPU, put new code into it or do whatever you wish, **provided
+	     power is not cycled off**.  If power is cycled off then return to
+	     the top and go through the process again.   When there is SNVS
+	     power to the CPU then power can be switched on and off as you
+	     wish, and the CPU will boot correctly. This has been determined by
+	     putting 3V onto J6.
+	     I think we are probably doing something naughty with the way we
+	     are starting the clocks to the timers.  There are certainly some
+	     restrictions on imxrt clock manipulation which we have studiously
+	     avoided. I am investigating further and have some potential
+	     patches but even if I find the root cause it should not be
+	     included in 8.2 as the change could be disruptive.
+	  From Dave Marples (2019-11-12).
+	* net/netlink:  Add options to disable individual NETLINK_ROUTE
+	  commands.  This will probably become quite large and will need to be
+	  higher tunable for smaller platforms.  From Gregory Nutt (2019-11-12).
+	* libs/libc/stdio/lib_getdelim.c:  Add implementations of the POSIX
+	  functions getdelim() and getline().  From Gregory Nutt (2019-11-12).
+	* libs/libc/stdio/lib_libfgets.c:  Because of how the function is
+	  defined, getline() canot be used on platforms that use CR-LF line
+	  terminations.  From Gregory Nutt (2019-11-12).
+	* include/sys/time.h, libs/libc/unistd, sched/timer:  Implement
+	  alarm(), setitimer() and getitimer() APIs.  From liuhaitao
+	  (2019-11-13).
+	* libs/libc/stdio/lib_getdelim.c:  Make getdelim() behave per
+	  specification on OpenGroup.org.  Specifically, needs to reallocate
+	  buffer if more data is received than will fit.  From Gregory Nutt
+	  (2019-11-13).
+	* libs/libc/stdio/lib_getdelim.c:  Initial allocation should be larger;
+	  incremental reallocs should be smaller.  Update some comments.  From
+	  Gregory Nutt (2019-11-13).
+	* arch/renesas/include and arch/renesas/src: Fix spurious '=' in
+	  comments.  From David Sidrane (2019-11-14).
+	* drivers/syslog/ramlog.c:  Fix ramlog readers never woken up when using
+	  ramlog as syslog or console.   We also make an attempt to avoid the
+	  thundering herd problem if there are multiple readers/pollers.
+	  Change also removes forcing CONFIG_RAMLOG_CRLF in
+	  uttx/syslog/ramlog.h as there is no point of wasting precious RAM for
+	  useless characters.  From Juha Niskanen (2019-11-14).
+	* boards/arm/imxrt/imxrt1060-evk/src/imxrt_lcd.c:  Because
+	  board-private GPIO definitions have been moved to the public board.h
+	  (VERY BAD IDEA), breakage happened in all files that need GPIO
+	  definitions, but did not include board.h (which they should not have
+	  to).  From Gregory Nutt (2019-11-14).
+	* include/netpacket/netlink.h:  Add definitions that will be needed for
+	  future NETLINK_CRYPTO support.  From Gregory Nutt (2019-11-14).
+	* syscall/:  Implementation of syscall for new getitimer and setitimer
+	  were incomplete.
+	  include/sys/syscall.h:  Should be SYS_getitimer and SYS_setitimer,
+	  not SYS_getitime and SYS_setitime.
+	  From Gregory Nutt (2019-11-14).
+	* syscall/ and include/sys/syscall.h:  Fix an inconsistency.  In
+	  some places, getitimer() and setitimer() depend on
+	  CONFIG_DISABLE_POSIX_TIMERS=n and in other places they depend on
+	  nothing.  As a result, there are link failures when
+	  CONFIG_DISABLE_POSIX_TIMERS=y.  Which is correct?  On one hand, these
+	  interfaces are not POSIX timers, so conditioning them on
+	  CONFIG_DISABLE_POSIX_TIMERS.  I opted to keep the dependence and just
+	  apply it consistently.  I did this because setitimer() and
+	  getitimer() are seldom used so it is really best if a system call is
+	  no generated for them in all cases.  From Gregory Nutt (2019-11-14).
+
+8.3 2020-xx-xx Gregory Nutt <gnutt@nuttx.org>
