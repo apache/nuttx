@@ -283,6 +283,8 @@
 #define RTM_GETNEIGHTBL      33
 #define RTM_SETNEIGHTBL      34
 
+#define RTM_LASTMSG          34
+
 /* Definitions for struct ifaddrmsg  ****************************************/
 
 /* ifa_flags definitions:  ifa_flags is a flag word of IFA_F_SECONDARY for
@@ -350,12 +352,14 @@
 
 /* NETLINK_CRYPTO protocol message types ************************************/
 
-#define CRYPTO_MSG_NEWALG     1
-#define CRYPTO_MSG_DELALG     2
-#define CRYPTO_MSG_UPDATEALG  3
-#define CRYPTO_MSG_GETALG     4
-#define CRYPTO_MSG_DELRNG     5
-#define CRYPTO_MSG_GETSTAT    6
+#define CRYPTO_MSG_NEWALG     (RTM_LASTMSG + 1)
+#define CRYPTO_MSG_DELALG     (RTM_LASTMSG + 2)
+#define CRYPTO_MSG_UPDATEALG  (RTM_LASTMSG + 3)
+#define CRYPTO_MSG_GETALG     (RTM_LASTMSG + 4)
+#define CRYPTO_MSG_DELRNG     (RTM_LASTMSG + 5)
+#define CRYPTO_MSG_GETSTAT    (RTM_LASTMSG + 6)
+
+#define CRYPTO_MSG_LAST       (RTM_LASTMSG + 6)
 
 /* Netlink message attributes. */
 
