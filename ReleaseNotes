@@ -391,7 +391,7 @@ This release of NuttX includes the following changes:
 * Add support for the add-on Pascal P-Code interpreter (pcode/)
   (see the pascal-0.1.0 package)
 
-This release were verified only on the simulated Z80 and and host
+This release were verified only on the simulated Z80 and host
 simulation targets.  As usual, any feedback about bugs or suggestions
 for improvement would be greatly appreciated.
 
@@ -932,7 +932,7 @@ around, the Luminary LM3S6918 MCU.  This is the first ARM Cortex-M3
 architecture supported by Nuttx. This initial, basic port includes
 timer and serial console with configurations to execute the NuttX
 OS test and to run the NuttShell (NSH). Work is still underway on
-this port and current plans are to have I2C, SSI, MMC/SD, and and
+this port and current plans are to have I2C, SSI, MMC/SD, and
 Ethernet driver in the 0.4.7 release.
 
 Additional work was done on the MXADS i.MX1 port, however, that
@@ -14044,7 +14044,7 @@ detailed bugfix information):
         the additional thunking on the foreach to get from holer to
         holder->tcb.  An alternate approach could be to leve the interface
         the same and allocate a holder on the stack of sem_restoreholderprioB
-        copy the sem's holder to it, free it as is done in this pr and and
+        copy the sem's holder to it, free it as is done in this pr and
         then pass that address sem_restoreholderprio as the holder. It could
         then get the holder's tcb but we would keep the same sem_findholder
         in sched_verifytcb.  From David Sidrane.
@@ -14361,7 +14361,7 @@ detailed bugfix information):
         Thus this combination only does following: RTS is asserted on USART
         setup and deasserted on shutdown and does not perform actual RTS
         flow-control.  Data loss can be demonstrated by doing long up_mdelay
-        inside irq critical section and feeding data to RXDMA+IFLOWCONTROL
+        inside IRQ critical section and feeding data to RXDMA+IFLOWCONTROL
         UART.  From Jussi Kivilinna.
       - STM32 F7 Serial:  Do not stop processing input in SW flow-control
         mode.  From Jussi Kivilinna.
@@ -15073,7 +15073,7 @@ Additional new features and extended functionality:
         calls to support multiple composite device configurations dynamically.
       - apps/system/composite:  Remove references to USBMSC.  There still
         dependencies on CDC/ACM in the serial USB trace output.
-      - apps/system/telnet:  Add Telnet Chat deamon and and client from
+      - apps/system/telnet:  Add Telnet Chat deamon and client from
         libtelent.
 
     * Platform-Specific Support (apps/platform)
@@ -15831,7 +15831,7 @@ Additional new features and extended functionality:
         power measurement.  From Sebastien Lorquet.
       - PCA9555:  The IRQ subsystem now supports passing a void * parameter
         to IRQ handlers.  Use that method to support multiple PCA9555
-        devices, by passing a pointer to the device to the board defined irq
+        devices, by passing a pointer to the device to the board defined IRQ
         handler.  Now the CONFIG_ for multiple PCA devices just allocates
         device structures dynamically instead of statically when not enabled.
         The same interrupt handler is entered with the device structure
@@ -18307,7 +18307,7 @@ Additional new features and extended functionality:
       - Signals:  Update signal default STOP action.  If waitpid was
         called with the WUNTRACED then wake up waitpid().  From Gregory
         Nutt.
-      - IRQs:  Monitor the irq execution time.  This is very useful for
+      - IRQs:  Monitor the IRQ execution time.  This is very useful for
         measuring the interrupt latency.  From Xiang Xiao.
       - IRQ Dispatch:  Add support interrupt chains in NuttX.  IRQ chain is
         very useful in these cases:  (1) Multiple hardware connect to the
@@ -21288,7 +21288,7 @@ detailed bugfix information):
         to be set by board-specific logic.  From Gregory Nutt
       - Memory Management:  Revert "This patch prevent heap corruption as in
         below case."  This solution to the problem noted by EunBong Song
-        results in major memory fragmentation and and out-of-memory
+        results in major memory fragmentation and out-of-memory
         conditions on the PX4 platform.  On that platform the lower priority
         work queue is very low priority and essentially never runs when the
         system is busy.  As a result, the systems gets slowly starved of
@@ -22094,7 +22094,7 @@ Additional new features and extended functionality:
         STM32L4.  From Juha Niskanen (Haltian).
       - STM32H7 I2C:  Apply David Sidrane's fix for the STM32F7 to the
         STM32H7.  From Gregory Nutt.
-      - STM32H7 DMA:  Rename  DMA1/2 irq names to match those from other
+      - STM32H7 DMA:  Rename  DMA1/2 IRQ names to match those from other
         STM32.  Add auxiliary definitions.  Add DMAMAP definitions for
         MDMA, DMA1, DMA2 and BDMA.  Add some address blocks.  Change RCC
         definitions to match other STM32 ports.  Enable clock for MDMA and
@@ -25809,7 +25809,7 @@ Additional new features and extended functionality:
     * Renesas RX65N:
 
       - RX65N:  Adds a port of to the Renesas RX65N Micro-controller.  This
-        port includes Serial (UART) driver (13 ports) and and Ethernet
+        port includes Serial (UART) driver (13 ports) and Ethernet
         driver.  From Anjana.
 
     * Renesas RX65N Boards:
@@ -25827,7 +25827,7 @@ Additional new features and extended functionality:
       - CXD56xx SMP:  Add support for SMP.  To run cxd56xx in SMP mode, new
         boot loader which will be released later must be used.  From
         Masayuki Ishikawa.
-      - CXD56xx SMP:  Add irq routing for SMP in cxd56_irq.c.  In CXD56xx,
+      - CXD56xx SMP:  Add IRQ routing for SMP in cxd56_irq.c.  In CXD56xx,
         each external interrupt controller can be accessed from a local
         APP_DSP (Cortex-M4F) only.  This change supports IRQ routing for SMP
         by calling up_send_irqreq() in both up_enable_irq() and
@@ -25936,14 +25936,14 @@ Additional new features and extended functionality:
         maximum frequency.  From Daniel Pereira Volpato.
       - Nucleo-G070RB: Enable basic timers.  Add TIMx clock frequencies to
         board.h.  From Daniel Pereira Volpato.
-      - Nucleo-L476RG:  Add required definitions if libcxx is enabled.  From
-        Matias N.
-      - Nucleo-L476RG:  Add support for LPTIM timers as PWM outputs.  From
-        Matias N.
       - Nucleo-G070RB:  Add PWM support and GPIO_TIM3_* mappings.  Add a PWM
         configuration. From Daniel Pereira Volpato.
       - Nucleo-G070RB:  Add button driver support, Add driver support. Add
         GPIO configuration.  From Daniel Pereira Volpato.
+      - Nucleo-L476RG:  Add required definitions if libcxx is enabled.  From
+        Matias N.
+      - Nucleo-L476RG:  Add support for LPTIM timers as PWM outputs.  From
+        Matias N.
       - Nucleo-H743ZI:  Added GPIO device driver for user-space apps.  From
         Heiko Demlang.
       - olimex-stm32-e407:  Newer Olimex E407 boards are populated with
@@ -25961,7 +25961,7 @@ Additional new features and extended functionality:
       - TM4C129ENCPDT:  Add support for Tiva TM4C129ENCPDT.  From Nathan
         Hartman.
 
-    * TI Tiva Drivers:
+    * TI Tiva Boards:
 
       - TM4C123G-Launchpad: SPI CAN functionality on TM4C123GXL.  From
         DisruptiveNL.
