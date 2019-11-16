@@ -27,6 +27,13 @@ config DISABLE_POSIX_TIMERS
 	bool "Disable POSIX timers"
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
+	---help---
+		Disable support for the the entire POSIX timer family
+		including timer_create(), timer_gettime(), timer_settime(),
+		etc.
+
+		NOTE:  This option will also disable getitimer() and
+		setitimer() which are not, strictly speaking, POSIX timers.
 
 config DISABLE_PTHREAD
 	bool "Disable pthread support"
