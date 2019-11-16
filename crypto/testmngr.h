@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
 struct cipher_testvec
@@ -59,6 +59,10 @@ struct cipher_testvec
   unsigned short ilen;
   unsigned short rlen;
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #if defined(CONFIG_CRYPTO_AES)
 
