@@ -118,6 +118,8 @@
                                                     * to INADDR_ANY */
 #define IP_PKTINFO            (__SO_PROTOCOL + 12) /* Get some information about
                                                     * the incoming packet */
+#define IP_TOS                (__SO_PROTOCOL + 13) /* Access the Type-Of-Service
+                                                    * (TOS) field  */
 
 /* SOL_IPV6 protocol-level socket options. */
 
