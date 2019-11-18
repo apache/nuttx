@@ -26,6 +26,23 @@ config NETLINK_CONNS
 	---help---
 		Maximum number of Netlink connections (all tasks).
 
+config NETLINK_MAXPENDING
+	int "Max pending responses"
+	default 1
+	---help---
+		This defines the maximum number of threads that can be waiting for
+		a NetLink response.  If there is never more than one recv() or
+		recvfrom() per socket, then there need be only 1.  This only
+		accounts for a perverse case where more than one thread is waiting
+		on recv() or recvfrom().
+
+config NETLINK_SIGNAL
+	int "Response notification signal"
+	default 15
+	---help---
+		This is the signal number that is used to wake up threads waiting
+		for a response to be received.
+
 menu "Netlink Protocols"
 
 config NETLINK_ROUTE

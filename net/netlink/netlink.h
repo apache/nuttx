@@ -57,6 +57,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NETLINK_NO_WAITER ((pid_t)-1)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -102,7 +104,11 @@ struct netlink_conn_s
   uint8_t crefs;                     /* Reference counts on this instance */
   uint8_t protocol;                  /* See NETLINK_* definitions */
 
-  /* Buffered response data */
+  /* Threads waiting for a response */
+
+  pid_t waiter[CONFIG_NETLINK_MAXPENDING];
+
+  /* Queued response data */
 
   sq_queue_t resplist;               /* Singly linked list of responses*/
 };
@@ -190,14 +196,33 @@ FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
  * Description:
  *   Add response data at the tail of the pending response list.
  *
- * Assumptions:
- *   The caller has the network locked to prevent concurrent access to the
- *   socket.
+ *   Note:  The network will be momentarily locked to support exclusive
+ *   access to the pending response list.
  *
  ****************************************************************************/
 
 void netlink_add_response(FAR struct socket *psock,
                           FAR struct netlink_response_s *resp);
+
+/****************************************************************************
+ * Name: netlink_tryget_response
+ *
+ * Description:
+ *   Return the next response from the head of the pending response list.
+ *   Responses are returned one-at-a-time in FIFO order.
+ *
+ *   Note:  The network will be momentarily locked to support exclusive
+ *   access to the pending response list.
+ *
+ * Returned Value:
+ *   The next response from the head of the pending response list is
+ *   returned.  NULL will be returned if the pending response list is
+ *   empty
+ *
+ ****************************************************************************/
+
+FAR struct netlink_response_s *
+  netlink_tryget_response(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_get_response
@@ -206,13 +231,18 @@ void netlink_add_response(FAR struct socket *psock,
  *   Return the next response from the head of the pending response list.
  *   Responses are returned one-at-a-time in FIFO order.
  *
- * Assumptions:
- *   The caller has the network locked to prevent concurrent access to the
- *   socket.
+ *   Note:  The network will be momentarily locked to support exclusive
+ *   access to the pending response list.
+ *
+ * Returned Value:
+ *   The next response from the head of the pending response list is
+ *   always returned.  This function will block until a response is
+ *   received if the pending response list is empty.
  *
  ****************************************************************************/
 
-FAR struct netlink_response_s *netlink_get_response(FAR struct socket *psock);
+FAR struct netlink_response_s *
+  netlink_get_response(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_route_sendto()

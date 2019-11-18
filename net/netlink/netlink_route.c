@@ -706,10 +706,7 @@ static int netlink_route_terminator(FAR struct socket *psock,
 
   /* Finally, add the response to the list of pending responses */
 
-  net_lock();
   netlink_add_response(psock, (FAR struct netlink_response_s *)alloc);
-  net_unlock();
-
   return OK;
 }
 #endif
@@ -1049,21 +1046,30 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
   DEBUGASSERT(psock != NULL && nlmsg != NULL &&
               len >= sizeof(struct nlmsghdr));
 
-  /* Find the response to this message */
+  /* Find the response to this message.  The return value */
 
-  net_lock();
-  entry = (FAR struct netlink_response_s *)netlink_get_response(psock);
-  net_unlock();
-
+  entry = (FAR struct netlink_response_s *)netlink_tryget_response(psock);
   if (entry == NULL)
     {
-      /* REVISIT:  The correct behavior here for a blocking socket would be
-       * to wait until the data becomes available.  This is not an issue for
-       * the currently supported operations since they are fully synchronous
-       * but will become an issue in the future.
+      /* No response is variable, but presumably, one is expected.  Check
+       * if the socket has been configured for non-blocking operation.
+       * REVISIT:  I think there needs to be some higher level logic to
+       * select Netlink non-blocking sockets.
        */
 
-      return -ENOENT;
+      if (_SS_ISNONBLOCK(psock->s_flags))
+        {
+          return -EAGAIN;
+        }
+
+      /* Wait for the response.  This should always succeed. */
+
+      entry = (FAR struct netlink_response_s *)netlink_get_response(psock);
+      DEBUGASSERT(entry != NULL);
+      if (entry == NULL)
+        {
+          return -EPIPE;
+        }
     }
 
   if (len < entry->msg.nlmsg_len)
