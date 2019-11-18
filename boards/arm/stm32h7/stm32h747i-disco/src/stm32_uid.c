@@ -1,8 +1,9 @@
-/************************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_spi.h
+/****************************************************************************
+ * boards/arm/stm32h7/stm32h747i-disco/src/stm32_uid.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) 2015 Marawan Ragab. All rights reserved.
+ *   Authors: Marawan Ragab <marawan31@gmail.com>
+ *            David Sidrane <david.sirane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,24 +32,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
-#  include "hardware/stm32h7x3xx_spi.h"
-#elif defined(CONFIG_STM32H7_STM32H7X7XX)
-#  include "hardware/stm32h7x3xx_spi.h"
-#else
-#  error "Unsupported STM32 H7 sub family"
+#include <errno.h>
+#include "stm32_uid.h"
+
+#include <nuttx/board.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef OK
+#  define OK 0
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == 0)
+    {
+      return -EINVAL;
+    }
+
+  stm32_get_uniqueid(uniqueid);
+  return OK;
+}
+#endif

@@ -63,6 +63,7 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_STM32H743ZI)
+#elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified
 #endif
@@ -70,6 +71,43 @@
 /* Size SRAM */
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX)
+/* Memory */
+
+#    define STM32H7_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */
+#    define STM32H7_SRAM1_SIZE            (128*1024)  /* 128Kb SRAM1 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM2_SIZE            (128*1024)  /* 128Kb SRAM2 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM3_SIZE            (32*1024)   /*  32Kb SRAM3 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM123_SIZE          (288*1024)  /* 128Kb SRAM123 on AHB bus Matrix (D2) */
+#    define STM32H7_SRAM4_SIZE            (64*1024)   /*  64Kb SRAM2 on AHB bus Matrix (D3) */
+#  if defined(CONFIG_ARMV7M_HAVE_DTCM)
+#      define STM32H7_DTCM_SRAM_SIZE      (128*1024)  /* 128Kb DTCM SRAM on TCM interface */
+#  else
+#      define STM32H7_DTCM_SRAM_SIZE      (0)         /* No DTCM SRAM on TCM interface */
+#  endif
+#  if defined(CONFIG_ARMV7M_HAVE_ITCM)
+#      define STM32H7_ITCM_SRAM_SIZE      (64*1024)   /*  64b ITCM SRAM on TCM interface */
+#  else
+#      define STM32H7_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
+#  endif
+
+/* Peripherals */
+
+#  define STM32H7_NGPIO                   (11)        /* GPIOA-GPIOK */
+#  define STM32H7_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
+#  define STM32H7_NADC                    (3)         /* (3) ADC1-3*/
+#  define STM32H7_NDAC                    (2)         /* (2) DAC1-2*/
+#  define STM32H7_NCMP                    (2)         /* (2) ultra-low power comparators */
+#  define STM32H7_NPGA                    (2)         /* (2) Operational amplifiers: OPAMP */
+#  define STM32H7_NDFSDM                  (1)         /* (1) digital filters for sigma delta modulator */
+#  define STM32H7_NUSART                  (4)         /* (4) USART1-3, 6 */
+#  define STM32H7_NSPI                    (6)         /* (6) SPI1-6 */
+#  define STM32H7_NI2S                    (3)         /* (3) I2S1-3 */
+#  define STM32H7_NUART                   (4)         /* (4) UART4-5, 7-8 */
+#  define STM32H7_NI2C                    (4)         /* (4) I2C1-4 */
+#  define STM32H7_NSAI                    (4)         /* (4) SAI1-4*/
+#  define STM32H7_NCAN                    (2)         /* (2) CAN1-2 */
+#  define STM32H7_NSDIO                   (2)         /* (2) SDIO */
+#elif defined(CONFIG_STM32H7_STM32H7X7XX)
 /* Memory */
 
 #    define STM32H7_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */
@@ -134,7 +172,7 @@
 #  define STM32F7_NFMC                     0   /* No FMC memory controller */
 #endif
 
-/* NVIC priority levels **********************************************************o***/
+/* NVIC priority levels **************************************************************/
 /* 16 Programmable interrupt levels */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits set in minimum priority */

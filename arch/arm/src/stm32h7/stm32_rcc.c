@@ -73,6 +73,8 @@
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include "stm32h7x3xx_rcc.c"
+#elif defined(CONFIG_STM32H7_STM32H7X7XX)
+#  include "stm32h7x7xx_rcc.c"
 #else
 #  error "Unsupported STM32 H7 chip"
 #endif

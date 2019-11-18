@@ -1,8 +1,8 @@
-/************************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_spi.h
+/****************************************************************************
+ * boards/arm/stm32h7/stm32h747i-disco/scripts/memory.ld
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,24 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H
+/* TODO: Add description for memory organisation */
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
+MEMORY
+{
+  /* ITCM boot address */
 
-#include <nuttx/config.h>
-#include "chip.h"
+  itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 64K
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
-#  include "hardware/stm32h7x3xx_spi.h"
-#elif defined(CONFIG_STM32H7_STM32H7X7XX)
-#  include "hardware/stm32h7x3xx_spi.h"
-#else
-#  error "Unsupported STM32 H7 sub family"
-#endif
+  /* 2048Kb FLASH */
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SPI_H */
+  kflash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+  uflash (rx) : ORIGIN = 0x08020000, LENGTH = 128K
+  xflash (rx) : ORIGIN = 0x08040000, LENGTH = 1792K
+
+  /* 288Kb SRAM123 */
+
+  ksram (rwx) : ORIGIN = 0x30000000, LENGTH = 16K
+  usram (rwx) : ORIGIN = 0x30004000, LENGTH = 16K
+  xsram (rwx) : ORIGIN = 0x30008000, LENGTH = 288K - 32K
+
+  /* 512Kb of contiguous AXI SRAM */
+
+  sram (rwx)  : ORIGIN = 0x24000000, LENGTH = 512K
+
+  /* DTCM SRAM */
+
+  dtcm1 (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  dtcm2 (rwx) : ORIGIN = 0x20010000, LENGTH = 64K
+
+  sram4 (rwx) : ORIGIN = 0x38000000, LENGTH = 64K
+  bbram (rwx) : ORIGIN = 0x38800000, LENGTH = 4K
+}

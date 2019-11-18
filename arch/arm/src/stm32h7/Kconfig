@@ -20,9 +20,34 @@ config ARCH_CHIP_STM32H743ZI
 	---help---
 		STM32 H7 Cortex M7, 2048 FLASH, 1024K Kb SRAM
 
+config ARCH_CHIP_STM32H747XI
+	bool "STM32H747XI"
+	select STM32H7_STM32H7X7XX
+	select STM32H7_FLASH_CONFIG_I
+# TODO: IO_CONFIG
+	---help---
+		Dual core STM32 H7 Cortex M7+M4, 2048 FLASH, 1024K Kb SRAM
+
 endchoice # STM32 H7 Chip Selection
 
 config STM32H7_STM32H7X3XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_SDIO_DELAYED_INVLDT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32H7_HAVE_ETHERNET
+	select STM32H7_HAVE_SPI4
+	select STM32H7_HAVE_SPI5
+	select STM32H7_HAVE_SPI6
+	bool
+	default n
+
+config STM32H7_STM32H7X7XX
 	bool
 	default n
 	select ARCH_HAVE_FPU

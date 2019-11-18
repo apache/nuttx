@@ -57,11 +57,12 @@
  * families
  */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* Base addresses for each GPIO block */
 
 const uint32_t g_gpiobase[STM32H7_NGPIO] =
@@ -436,6 +437,7 @@ bool stm32_gpioread(uint32_t pinset)
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
       return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
+
   return 0;
 }
 
