@@ -84,26 +84,30 @@ int stm32_lsm9ds1_initialize(void)
       return -ENODEV;
     }
 
-  sninfo("INFO: Initializing LMS9DS1 9DoF sensor over I2C%d\n", LMS9DS1_I2CBUS);
+  sninfo("INFO: Initializing LMS9DS1 9DoF sensor over I2C%d\n",
+         LMS9DS1_I2CBUS);
 
   ret = lsm9ds1mag_register(LSM9DS1MAG_DEVPATH, i2c, LSM9DS1MAG_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS9DS1 mag driver %s\n", LSM9DS1MAG_DEVPATH);
+      snerr("ERROR: Failed to initialize LMS9DS1 mag driver %s\n",
+            LSM9DS1MAG_DEVPATH);
       return -ENODEV;
     }
 
   ret = lsm9ds1gyro_register(LSM9DS1GYR_DEVPATH, i2c, LSM9DS1GYRO_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS9DS1 gyro driver %s\n", LSM9DS1MAG_DEVPATH);
+      snerr("ERROR: Failed to initialize LMS9DS1 gyro driver %s\n",
+            LSM9DS1MAG_DEVPATH);
       return -ENODEV;
     }
 
   ret = lsm9ds1accel_register(LSM9DS1ACC_DEVPATH, i2c, LSM9DS1ACCEL_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS9DS1 accel driver %s\n", LSM9DS1MAG_DEVPATH);
+      snerr("ERROR: Failed to initialize LMS9DS1 accel driver %s\n",
+            LSM9DS1MAG_DEVPATH);
       return -ENODEV;
     }
 

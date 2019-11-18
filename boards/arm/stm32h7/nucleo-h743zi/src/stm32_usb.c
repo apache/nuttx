@@ -105,7 +105,7 @@ static int usbhost_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   uinfo("Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 

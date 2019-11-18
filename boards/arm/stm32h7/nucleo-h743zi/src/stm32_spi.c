@@ -171,6 +171,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
       default:
         break;
     }
+
   return status;
 }
 #endif
