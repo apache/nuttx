@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/netdb/lib_getaddrinfo.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           family != AF_INET6 &&
           family != AF_UNSPEC)
         {
-            return EAI_FAMILY;
+          return EAI_FAMILY;
         }
     }
 
@@ -208,6 +208,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           *res = (struct addrinfo *)ai;
         }
 #endif
+
 #ifdef CONFIG_NET_IPv6
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
@@ -229,8 +230,9 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
             }
         }
 #endif
-      return OK;
-   }
+
+      return (*res != NULL) ? OK : EAI_FAMILY;
+    }
 
   if (hostname == NULL)
     {
@@ -240,7 +242,8 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv4
       if (family == AF_INET || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET, socktype, proto, port, (void *)&g_lo_ipv4addr);
+          ai = alloc_ai(AF_INET, socktype, proto, port,
+                        (FAR void *)&g_lo_ipv4addr);
           if (ai == NULL)
             {
               return EAI_MEMORY;
@@ -249,10 +252,12 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           *res = (struct addrinfo *)ai;
         }
 #endif
+
 #ifdef CONFIG_NET_IPv6
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET6, socktype, proto, port, (void *)&g_lo_ipv6addr);
+          ai = alloc_ai(AF_INET6, socktype, proto, port,
+                        (FAR void *)&g_lo_ipv6addr);
           if (ai == NULL)
             {
               return (*res != NULL) ? OK : EAI_MEMORY;
@@ -270,6 +275,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
             }
         }
 #endif
+
       return (*res != NULL) ? OK : EAI_FAMILY;
 #else
       /* Local service, but no loopback so cannot succeed. */
@@ -298,7 +304,8 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
           /* REVISIT: filter by socktype and protocol not implemented. */
 
-          ai = alloc_ai(hp->h_addrtype, socktype, proto, port, hp->h_addr_list[i]);
+          ai = alloc_ai(hp->h_addrtype, socktype, proto, port,
+                        hp->h_addr_list[i]);
           if (ai == NULL)
             {
               if (*res)
@@ -311,8 +318,9 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
           /* REVISIT: grok canonical name.
            *
-           * OpenGroup: "if the canonical name is not available, then ai_canonname shall
-           * refer to the hostname argument or a string with the same contents."
+           * OpenGroup: "if the canonical name is not available, then
+           * ai_canonname shall refer to the hostname argument or a string
+           * with the same contents."
            */
 
           ai->ai.ai_canonname = (char *)hostname;
