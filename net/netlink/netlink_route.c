@@ -753,7 +753,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
-  
+
   resp->dst.attr.rta_len      = RTA_LENGTH(sizeof(in_addr_t));
   resp->dst.attr.rta_type     = RTA_DST;
   resp->dst.addr              = route->target;
@@ -850,7 +850,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
-  
+
   resp->dst.attr.rta_len      = RTA_LENGTH(sizeof(net_ipv6addr_t));
   resp->dst.attr.rta_type     = RTA_DST;
   net_ipv6addr_copy(resp->dst.addr, route->target);
