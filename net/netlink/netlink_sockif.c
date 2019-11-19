@@ -204,7 +204,9 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
 
 static sockcaps_t netlink_sockcaps(FAR struct socket *psock)
 {
-  return 0;
+  /* Permit vfcntl to set socket to non-blocking */
+
+  return SOCKCAP_NONBLOCKING;
 }
 
 /****************************************************************************
