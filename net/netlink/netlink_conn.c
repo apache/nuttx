@@ -53,6 +53,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/netlink.h>
 
 #include "utils/utils.h"
 #include "netlink/netlink.h"
@@ -346,11 +347,13 @@ FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr)
  *
  ****************************************************************************/
 
-void netlink_add_response(FAR struct socket *psock,
+void netlink_add_response(NETLINK_HANDLE handle,
                           FAR struct netlink_response_s *resp)
 {
+  FAR struct socket *psock;
   FAR struct netlink_conn_s *conn;
 
+  psock = (FAR struct socket *)handle;
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && resp != NULL);
 
   conn = (FAR struct netlink_conn_s *)psock->s_conn;

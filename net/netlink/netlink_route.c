@@ -52,6 +52,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/neighbor.h>
+#include <nuttx/net/netlink.h>
 
 #include "netdev/netdev.h"
 #include "arp/arp.h"

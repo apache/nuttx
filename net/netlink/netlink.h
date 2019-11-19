@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netlink/netlink.h
  *
- *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <semaphore.h>
 
 #include <netpacket/netlink.h>
+#include <nuttx/net/netlink.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
@@ -62,25 +63,6 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
-/* Netlink uses a two step, request-get, referenced by a user managed
- * sequence number.  This means that the requested data must be buffered
- * until it is gotten by the client.  This structure holds that buffered
- * data.
- *
- * REVISIT:  There really should be a time stamp on this so that we can
- * someday weed out un-claimed responses.
- */
-
-struct netlink_response_s
-{
-  sq_entry_t flink;
-  FAR struct nlmsghdr msg;
-
-  /* Message-specific data may follow */
-};
-
-#define SIZEOF_NETLINK_RESPONSE_S(n) (sizeof(struct netlink_response_s) + (n) - 1)
 
 /* This "connection" structure describes the underlying state of the socket. */
 
@@ -189,20 +171,6 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
-
-/****************************************************************************
- * Name: netlink_add_response
- *
- * Description:
- *   Add response data at the tail of the pending response list.
- *
- *   Note:  The network will be momentarily locked to support exclusive
- *   access to the pending response list.
- *
- ****************************************************************************/
-
-void netlink_add_response(FAR struct socket *psock,
-                          FAR struct netlink_response_s *resp);
 
 /****************************************************************************
  * Name: netlink_tryget_response
