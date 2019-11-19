@@ -1074,18 +1074,61 @@ int main(int argc, char **argv, char **envp)
                         line[n + 1] != ',' &&
                         line[n + 1] != ';')
                       {
-                        /* One case where there may be garbage after the right
-                         * bracket is, for example, when declaring a until or
-                         * structure variable using an un-named union or
-                         * structure.
+                        int sndx = n + 1;
+
+                        /* Skip over spaces */
+
+                        while (line[sndx] == ' ')
+                          {
+                            sndx++;
+                          }
+
+                        /* One possibility is that the right bracket is
+                         * followed by an identifier then a semi-colon.
+                         * Comma is possible to but would be a case of
+                         * multiple declaration of multiple instances.
                          */
 
-                        if (prevdnest <= 0 || dnest > 0)
+                        if (line[sndx] == '_' || isalpha(line[sndx]))
                           {
-                            /* REVISIT:  Generates false alarms on named structures
-                             * that are fields of other structures or unions.
+                            int endx = sndx;
+
+                            /* Skip to the end of the identifier.  Checking
+                             * for mixed case identifiers will be done
+                             * elsewhere.
                              */
 
+                            while (line[endx] == '_' ||
+                                   isalnum(line[endx]))
+                              {
+                                endx++;
+                              }
+
+                            /* Handle according to what comes after the
+                             * identifier.
+                             */
+
+                            if (strncmp(&line[sndx], "while", 5) == 0)
+                              {
+                                fprintf(stderr,
+                                        "'while' must be on a separate line %d:%d\n",
+                                        lineno, sndx);
+                              }
+                            else if (line[endx] == ',')
+                              {
+                                fprintf(stderr,
+                                        "Multiple data definitions on line %d:%d\n",
+                                        lineno, endx);
+                              }
+                            else if (line[endx] != ';')
+                              {
+                                fprintf(stderr,
+                                        "Garbage follows right bracket at line %d:%d\n",
+                                        lineno, n);
+                              }
+                          }
+                        else
+                          {
                             fprintf(stderr,
                                     "Garbage follows right bracket at line %d:%d\n",
                                     lineno, n);
