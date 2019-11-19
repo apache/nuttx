@@ -165,6 +165,10 @@ typedef uint16_t     dev_t;
 
 typedef uint16_t     ino_t;
 
+/* nlink_t is used for link counts */
+
+typedef uint16_t     nlink_t;
+
 /* pid_t is used for process IDs and process group IDs. It must be signed because
  * negative PID values are used to represent invalid PIDs.
  */
