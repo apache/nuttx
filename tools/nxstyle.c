@@ -1075,6 +1075,7 @@ int main(int argc, char **argv, char **envp)
                         line[n + 1] != ';')
                       {
                         int sndx = n + 1;
+                        bool whitespace = false;
 
                         /* Skip over spaces */
 
@@ -1104,6 +1105,14 @@ int main(int argc, char **argv, char **envp)
                                 endx++;
                               }
 
+                            /* Skip over spaces */
+
+                            while (line[endx] == ' ')
+                              {
+                                whitespace = true;
+                                endx++;
+                              }
+
                             /* Handle according to what comes after the
                              * identifier.
                              */
@@ -1120,7 +1129,16 @@ int main(int argc, char **argv, char **envp)
                                         "Multiple data definitions on line %d:%d\n",
                                         lineno, endx);
                               }
-                            else if (line[endx] != ';')
+                            else if (line[endx] == ';')
+                              {
+                                if (whitespace)
+                                  {
+                                    fprintf(stderr,
+                                        "Space precedes semi-colon at line %d:%d\n",
+                                        lineno, endx);
+                                  }
+                              }
+                            else
                               {
                                 fprintf(stderr,
                                         "Garbage follows right bracket at line %d:%d\n",
