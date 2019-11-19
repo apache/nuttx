@@ -300,7 +300,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
           }
 #endif
 
-#if CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv4
         /* Should have devinfo->psock->s_domain == PF_INET but d_lltype could be
          * several things.
          */
