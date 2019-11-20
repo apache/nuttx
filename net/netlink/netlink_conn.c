@@ -345,6 +345,14 @@ FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr)
  *   Note:  The network will be momentarily locked to support exclusive
  *   access to the pending response list.
  *
+ * Input Parameters:
+ *   handle - The handle previously provided to the sendto() implementation
+ *            for the protocol.  This is an opaque reference to the Netlink
+ *            socket state structure.
+ *   resp   - The response to the request.  The memory referenced by 'resp'
+ *            must have been allocated via kmm_malloc().  It will be freed
+ *            using kmm_free() after it has been consumed.
+ *
  ****************************************************************************/
 
 void netlink_add_response(NETLINK_HANDLE handle,
