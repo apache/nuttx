@@ -63,7 +63,7 @@
 #define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
                                            *      which to received the XIP base.
                                            * OUT: If media is directly accessible,
-                                           *      return (void*) base address
+                                           *      return (void *) base address
                                            *      of device memory */
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
                                            * OUT: None */
@@ -593,6 +593,18 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi,
  ****************************************************************************/
 
 FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
+                                         bool unprotect);
+
+/****************************************************************************
+ * Name: w25qxxxjv_initialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance for the QuadSPI-based W25QxxxJV
+ *   FLASH part from Winbond.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
 /****************************************************************************

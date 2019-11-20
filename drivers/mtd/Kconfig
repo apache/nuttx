@@ -612,6 +612,35 @@ config N25QXXX_SECTOR512
 
 endif # MTD_N25QXXX
 
+config MTD_W25QXXXJV
+	bool "QuadSPI-based Winbond W25QXXXJV family FLASH"
+	default n
+	---help---
+		Support the W25Q016JV, W25Q032JV, W25Q064JV, W25Q128JV, W25Q256JV, W25Q512JV, W25Q01JV
+
+if MTD_W25QXXXJV
+
+config W25QXXXJV_QSPIMODE
+	int "W25QXXXJV QuadSPI Mode"
+	default 0
+	---help---
+		This device can operate in SPI mode 0 or 3.
+
+config W25QXXXJV_QSPI_FREQUENCY
+	int "W25QXXXJV QuadSPI Frequency"
+	default 133000000
+	---help---
+		Per data sheet:
+		– 133MHz Single, Dual/Quad SPI clocks
+		– 266/532MHz equivalent Dual/Quad SPI
+		– 66MB/S continuous data transfer rate
+
+config W25QXXXJV_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+endif # MTD_W25QXXXJV
+
 config MTD_MX25RXX
 	bool "QuadSPI-based Macronix MX25RXX family FLASH"
 	default n
