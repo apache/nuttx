@@ -76,4 +76,8 @@ ifeq ($(CONFIG_INPUT_FT5X06),y)
 CSRCS += stm32_touchscreen.c
 endif
 
+ifeq ($(CONFIG_MTD_N25QXXX),y)
+CSRCS += stm32_n25q.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

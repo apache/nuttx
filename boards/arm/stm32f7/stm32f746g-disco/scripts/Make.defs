@@ -129,3 +129,9 @@ endif
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
+
+ifneq ($(WINTOOL),y)
+define DOWNLOAD
+  $(Q) st-flash write nuttx.bin 0x8000000
+endef
+endif

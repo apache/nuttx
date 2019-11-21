@@ -578,22 +578,61 @@ static void qspi_dumpgpioconfig(const char *msg)
   uint32_t regval;
   spiinfo("%s:\n", msg);
 
-  regval = getreg32(STM32F7_GPIOE_MODER);
+        /* port B */
+  regval = getreg32(STM32_GPIOB_MODER);
+  spiinfo("B_MODER:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOB_OTYPER);
+  spiinfo("B_OTYPER:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOB_OSPEED);
+  spiinfo("B_OSPEED:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOB_PUPDR);
+  spiinfo("B_PUPDR:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOB_AFRL);
+  spiinfo("B_AFRL:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOB_AFRH);
+  spiinfo("B_AFRH:%08x\n", regval);
+
+        /* port D */
+  regval = getreg32(STM32_GPIOD_MODER);
+  spiinfo("D_MODER:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOD_OTYPER);
+  spiinfo("D_OTYPER:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOD_OSPEED);
+  spiinfo("D_OSPEED:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOD_PUPDR);
+  spiinfo("D_PUPDR:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOD_AFRL);
+  spiinfo("D_AFRL:%08x\n", regval);
+
+  regval = getreg32(STM32_GPIOD_AFRH);
+  spiinfo("D_AFRH:%08x\n", regval);
+
+        /* port E */
+  regval = getreg32(STM32_GPIOE_MODER);
   spiinfo("E_MODER:%08x\n", regval);
 
-  regval = getreg32(STM32F7_GPIOE_OTYPER);
+  regval = getreg32(STM32_GPIOE_OTYPER);
   spiinfo("E_OTYPER:%08x\n", regval);
 
-  regval = getreg32(STM32F7_GPIOE_OSPEED);
+  regval = getreg32(STM32_GPIOE_OSPEED);
   spiinfo("E_OSPEED:%08x\n", regval);
 
-  regval = getreg32(STM32F7_GPIOE_PUPDR);
+  regval = getreg32(STM32_GPIOE_PUPDR);
   spiinfo("E_PUPDR:%08x\n", regval);
 
-  regval = getreg32(STM32F7_GPIOE_AFRL);
+  regval = getreg32(STM32_GPIOE_AFRL);
   spiinfo("E_AFRL:%08x\n", regval);
 
-  regval = getreg32(STM32F7_GPIOE_AFRH);
+  regval = getreg32(STM32_GPIOE_AFRH);
   spiinfo("E_AFRH:%08x\n", regval);
 }
 #endif
@@ -2079,9 +2118,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   /* Set up the Communications Configuration Register as per command info */
 
-  qspi_ccrconfig(priv, &xctn,
-                 QSPICMD_ISWRITE(cmdinfo->flags) ? CCR_FMODE_INDWR :
-                                                   CCR_FMODE_INDRD);
+  qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
 
   /* That may be it, unless there is also data to transfer */
 
@@ -2502,7 +2539,6 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
       regval = getreg32(STM32_RCC_AHB3ENR);
       regval |= RCC_AHB3ENR_QSPIEN;
       putreg32(regval, STM32_RCC_AHB3ENR);
-      regval = getreg32(STM32_RCC_AHB3ENR);
 
       /* Reset the QSPI peripheral */
 

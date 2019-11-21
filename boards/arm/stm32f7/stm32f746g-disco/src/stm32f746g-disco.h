@@ -212,6 +212,10 @@ void stm32_disablefmc(void);
 int stm32_tsc_setup(int minor);
 #endif
 
+#ifdef CONFIG_MTD_N25QXXX
+int stm32_n25qxxx_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */

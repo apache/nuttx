@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/stm32f7/stm32f476g-disco/src/stm32_bringup.c
+ * boards/arm/stm32f7/stm32f746g-disco/src/stm32_n25.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,112 +41,96 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
+#include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#include <arch/board/board.h>
+
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/drivers/ramdisk.h>
+
+#ifdef CONFIG_FS_NXFFS
+#include <nuttx/fs/nxffs.h>
+#endif
+
+#ifdef CONFIG_FS_SMARTFS
+#include <nuttx/fs/smart.h>
+#endif
 
 #include "stm32f746g-disco.h"
 
-#ifdef CONFIG_BUTTONS
-#  include <nuttx/input/buttons.h>
-#endif
+#include "stm32_qspi.h"
 
-#ifdef CONFIG_VIDEO_FB
-#  include <nuttx/video/fb.h>
-#endif
+
+#define HAVE_N25QXXX_NXFFS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32_n25qxxx_setup
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   This function is called by board-bringup logic to configure the
+ *   flash device. 
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
+int stm32_n25qxxx_setup(void)
 {
-  int ret;
 
-#ifdef CONFIG_FS_PROCFS
+    int ret = -1;
 
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
+    FAR struct qspi_dev_s *qspi_dev = stm32f7_qspi_initialize(0);
 
-  (void)ccm_procfs_register();
-#endif
-
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
+    if (!qspi_dev) 
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
-      return ret;
-
+        _err("ERROR: Failed to initialize W25 minor %d: %d\n",
+             0, ret);
+       ;
+        return -1;
     }
-#endif
 
-#ifdef CONFIG_BUTTONS
-  /* Register the BUTTON driver */
+    FAR struct mtd_dev_s *mtd_dev = n25qxxx_initialize(qspi_dev, true);
 
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
+    if (!mtd_dev) 
     {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+        _err("ERROR: n25qxxx_initialize() failed!\n");
+        return -1;
     }
-#endif
 
-#ifdef CONFIG_ADC
-  /* Initialize ADC and register the ADC driver. */
+#ifdef HAVE_N25QXXX_NXFFS
+    /* Initialize to provide NXFFS on the N25QXXX MTD interface */
 
-  ret = stm32_adc_setup();
-  if (ret < 0)
+    ret = nxffs_initialize(mtd_dev);
+    if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+        _err("ERROR: NXFFS initialization failed: %d\n", ret);
+        return ret;
     }
-#endif
 
-#ifdef CONFIG_VIDEO_FB
-  /* Initialize and register the framebuffer driver */
-
-  ret = fb_register(0, 0);
-  if (ret < 0)
+    ret = mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
+    if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+        _err("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+        return ret;
     }
+
 #endif
 
-#ifdef CONFIG_INPUT_FT5X06
-  /* Initialize the touchscreen */
-
-  ret = stm32_tsc_setup(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_tsc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MTD_N25QXXX
-  ret = stm32_n25qxxx_setup();
-  if (ret < 0)
-  {
-      syslog(LOG_ERR, "ERROR: stm32_n25qxxx_setup failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);  /* May not be used */
-  return OK;
+    return 0;
 }
+
