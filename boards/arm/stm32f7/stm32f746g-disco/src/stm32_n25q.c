@@ -69,7 +69,6 @@
 
 #include "stm32_qspi.h"
 
-
 #define HAVE_N25QXXX_NXFFS
 
 /****************************************************************************
@@ -81,7 +80,7 @@
  *
  * Description:
  *   This function is called by board-bringup logic to configure the
- *   flash device. 
+ *   flash device.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -91,46 +90,44 @@
 
 int stm32_n25qxxx_setup(void)
 {
+  FAR struct qspi_dev_s *qspi_dev ;
+  FAR struct mtd_dev_s *mtd_dev;
+  int ret = -1;
 
-    int ret = -1;
-
-    FAR struct qspi_dev_s *qspi_dev = stm32f7_qspi_initialize(0);
-
-    if (!qspi_dev) 
+  qspi_dev = stm32f7_qspi_initialize(0);
+  if (!qspi_dev)
     {
-        _err("ERROR: Failed to initialize W25 minor %d: %d\n",
-             0, ret);
-       ;
-        return -1;
+      _err("ERROR: Failed to initialize W25 minor %d: %d\n",
+           0, ret);
+      return -1;
     }
 
-    FAR struct mtd_dev_s *mtd_dev = n25qxxx_initialize(qspi_dev, true);
-
-    if (!mtd_dev) 
+    mtd_dev = n25qxxx_initialize(qspi_dev, true);
+  if (!mtd_dev)
     {
-        _err("ERROR: n25qxxx_initialize() failed!\n");
-        return -1;
+      _err("ERROR: n25qxxx_initialize() failed!\n");
+      return -1;
     }
 
 #ifdef HAVE_N25QXXX_NXFFS
-    /* Initialize to provide NXFFS on the N25QXXX MTD interface */
+  /* Initialize to provide NXFFS on the N25QXXX MTD interface */
 
-    ret = nxffs_initialize(mtd_dev);
-    if (ret < 0)
+  ret = nxffs_initialize(mtd_dev);
+  if (ret < 0)
     {
-        _err("ERROR: NXFFS initialization failed: %d\n", ret);
-        return ret;
+      _err("ERROR: NXFFS initialization failed: %d\n", ret);
+      return ret;
     }
 
-    ret = mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
-    if (ret < 0)
+  ret = mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
+  if (ret < 0)
     {
-        _err("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-        return ret;
+      _err("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      return ret;
     }
 
 #endif
 
-    return 0;
+  return 0;
 }
 

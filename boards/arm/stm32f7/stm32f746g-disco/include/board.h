@@ -170,8 +170,6 @@
 #define STM32_RCC_DCKCFGR1_DFSDM1SRC   0
 #define STM32_RCC_DCKCFGR1_ADFSDM1SRC  0
 
-
-
 /* Configure factors for  PLLI2S clock */
 
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
@@ -413,12 +411,19 @@
 #define BOARD_LTDC_PLLSAIR              5
 
 /* Pixel Clock Polarity */
+
 #define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+
 /* Data Enable Polarity */
+
 #define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+
 /* Vertical Sync Polarity */
+
 #define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
-/* Horicontal Sync Polarity */
+
+/* Horizontal Sync Polarity */
+
 #define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
 
 /* GPIO pinset */

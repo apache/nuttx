@@ -95,7 +95,6 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
              ret, errno);
       return ret;
-
     }
 #endif
 
@@ -142,7 +141,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_MTD_N25QXXX
   ret = stm32_n25qxxx_setup();
   if (ret < 0)
-  {
+    {
       syslog(LOG_ERR, "ERROR: stm32_n25qxxx_setup failed: %d\n", ret);
     }
 #endif

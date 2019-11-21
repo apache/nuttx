@@ -76,7 +76,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* QSPI memory synchronization */
+/* QSPI memory synchronization */
 
 #define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
@@ -211,10 +211,10 @@ struct stm32f7_qspidev_s
 #endif
 
 #ifdef CONFIG_STM32F7_QSPI_REGDEBUG
-   bool     wrlast;            /* Last was a write */
-   uint32_t addresslast;       /* Last address */
-   uint32_t valuelast;         /* Last value */
-   int      ntimes;            /* Number of times */
+  bool     wrlast;              /* Last was a write */
+  uint32_t addresslast;         /* Last address */
+  uint32_t valuelast;           /* Last value */
+  int      ntimes;              /* Number of times */
 #endif
 };
 
@@ -578,7 +578,8 @@ static void qspi_dumpgpioconfig(const char *msg)
   uint32_t regval;
   spiinfo("%s:\n", msg);
 
-        /* port B */
+  /* Port B */
+
   regval = getreg32(STM32_GPIOB_MODER);
   spiinfo("B_MODER:%08x\n", regval);
 
@@ -597,7 +598,8 @@ static void qspi_dumpgpioconfig(const char *msg)
   regval = getreg32(STM32_GPIOB_AFRH);
   spiinfo("B_AFRH:%08x\n", regval);
 
-        /* port D */
+  /* Port D */
+
   regval = getreg32(STM32_GPIOD_MODER);
   spiinfo("D_MODER:%08x\n", regval);
 
@@ -616,7 +618,8 @@ static void qspi_dumpgpioconfig(const char *msg)
   regval = getreg32(STM32_GPIOD_AFRH);
   spiinfo("D_AFRH:%08x\n", regval);
 
-        /* port E */
+  /* Port E */
+
   regval = getreg32(STM32_GPIOE_MODER);
   spiinfo("E_MODER:%08x\n", regval);
 
@@ -1178,56 +1181,58 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
   /* Is it 'Transfer Complete'? */
 
   if ((status & QSPI_SR_TCF) && (cr & QSPI_CR_TCIE))
-  {
-    /* Acknowledge interrupt */
+    {
+      /* Acknowledge interrupt */
 
-    qspi_putreg(&g_qspi0dev, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
 
-    /* Disable the QSPI FIFO Threshold, Transfer Error and Transfer complete Interrupts */
+      /* Disable the QSPI FIFO Threshold, Transfer Error and Transfer
+       * complete Interrupts
+       */
 
-    regval  = qspi_getreg(&g_qspi0dev, STM32_QUADSPI_CR_OFFSET);
-    regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE);
-    qspi_putreg(&g_qspi0dev, regval, STM32_QUADSPI_CR_OFFSET);
+      regval  = qspi_getreg(&g_qspi0dev, STM32_QUADSPI_CR_OFFSET);
+      regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE);
+      qspi_putreg(&g_qspi0dev, regval, STM32_QUADSPI_CR_OFFSET);
 
-    /* Do the last bit of read if needed */
+      /* Do the last bit of read if needed */
 
-    if (g_qspi0dev.xctn->function == CCR_FMODE_INDRD)
-      {
-        volatile uint32_t *datareg =
-          (volatile uint32_t *)(g_qspi0dev.base + STM32_QUADSPI_DR_OFFSET);
+      if (g_qspi0dev.xctn->function == CCR_FMODE_INDRD)
+        {
+          volatile uint32_t *datareg =
+            (volatile uint32_t *)(g_qspi0dev.base + STM32_QUADSPI_DR_OFFSET);
 
-        /* Read any remaining data */
+          /* Read any remaining data */
 
-        while (((regval = qspi_getreg(&g_qspi0dev, STM32_QUADSPI_SR_OFFSET)) &
-               QSPI_SR_FLEVEL_MASK) != 0)
-          {
-            if (g_qspi0dev.xctn->idxnow < g_qspi0dev.xctn->datasize)
-              {
-                ((uint8_t *)g_qspi0dev.xctn->buffer)[g_qspi0dev.xctn->idxnow] =
-                  *(volatile uint8_t *)datareg;
-                ++g_qspi0dev.xctn->idxnow;
-              }
-            else
-              {
-                /* No room at the inn */
+          while (((regval = qspi_getreg(&g_qspi0dev, STM32_QUADSPI_SR_OFFSET)) &
+                 QSPI_SR_FLEVEL_MASK) != 0)
+            {
+              if (g_qspi0dev.xctn->idxnow < g_qspi0dev.xctn->datasize)
+                {
+                  ((uint8_t *)g_qspi0dev.xctn->buffer)[g_qspi0dev.xctn->idxnow] =
+                    *(volatile uint8_t *)datareg;
+                  ++g_qspi0dev.xctn->idxnow;
+                }
+              else
+                {
+                  /* No room at the inn */
 
-                break;
-              }
-          }
-      }
+                  break;
+                }
+            }
+        }
 
-    /* Use 'abort' to ditch any stray fifo contents and clear BUSY flag */
+      /* Use 'abort' to ditch any stray fifo contents and clear BUSY flag */
 
-    qspi_abort(&g_qspi0dev);
+      qspi_abort(&g_qspi0dev);
 
-    /* Set success status */
+      /* Set success status */
 
-    g_qspi0dev.xctn->disposition = OK;
+      g_qspi0dev.xctn->disposition = OK;
 
-    /* Signal complete */
+      /* Signal complete */
 
-    nxsem_post(&g_qspi0dev.op_sem);
-  }
+      nxsem_post(&g_qspi0dev.op_sem);
+    }
 
   /* Is it 'Status Match'? */
 
@@ -2009,9 +2014,9 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   ret = qspi_setupxctnfromcmd(&xctn, cmdinfo);
   if (OK != ret)
-  {
-    return ret;
-  }
+    {
+      return ret;
+    }
 
   /* Prepare for transaction */
 
@@ -2113,6 +2118,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   /* because command transfers are so small, we're not going to use
    * DMA for them, only interrupts or polling
    */
+
 #else
   /* Polling mode */
 
