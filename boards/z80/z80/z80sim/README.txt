@@ -100,49 +100,6 @@ Configuring NuttX
        the configure to Kconfig/mconf tool using SDCC 2.6.0 built to run
        natively under Cygwin.nsh/defconfig:CONFIG_BOARD_LOOPSPERMSEC
 
-  pashello
-
-    Configures to use examples/pashello for execution from FLASH
-    See examples/README.txt for information about pashello.
-
-    This configuration is not usable because the resulting binary
-    is too large for the z80 address space.
-
-    This configuration can be selected by:
-
-    1) From a POSIX window:
-
-         tools/configure.sh [OPTIONS] z80sim:pashello
-
-       where you need to select the right [OPTIONS] for your build
-       environment.  Do:
-
-         tools/configure.sh -h
-
-       to see the options.
-
-    2) Set the PATH environment variable to include the path to the SDCC
-       toolchain binaries.
-
-    3) Then build the binaries:
-
-          make
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  See the
-       "Reconfiguring" section below for information about changing this
-       configuration.
-
-    2. The default setup for this configuration uses a windows native build.
-       See the section entitled "Reconfiguring for Windows Native, Cygwin,
-       or macOS" which will give you the steps you would need to do to convert
-       this configuration to build in other environments.
-
-    3. This configuration was last verified successfully prior to the
-       the configure to Kconfig/mconf tool using SDCC 2.6.0 built to run
-       natively under Cygwin.nsh/defconfig:CONFIG_BOARD_LOOPSPERMSEC
-
 Reconfiguring NuttX
 ^^^^^^^^^^^^^^^^^^^
 

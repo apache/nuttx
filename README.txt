@@ -555,11 +555,6 @@ Related Repositories
     There are snapshots of some tools here that you will need to work with
     NuttX:  kconfig-frontends, genromfs, and others.
 
-  * https://bitbucket.org/nuttx/pascal
-
-    Yes, this really is a Pascal compiler.  The Pascal p-code run-time and
-    pcode debugger can be built as a part of NuttX.
-
 Notes about Header Files
 ------------------------
 
@@ -1753,9 +1748,6 @@ nuttx/
  |   `- README.txt
  |- audio/
  |   `-README.txt
- |- binfmt/
- |   `-libpcode/
- |       `-README.txt
  |- boards/
  |   |- arm/
  |   |   |- a1x/
@@ -2351,5 +2343,3 @@ tools/
 uClibc++/
  `- README.txt
 
-pascal/
- `- README.txt

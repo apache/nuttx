@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 26, 2019)
+NuttX TODO List (Last updated November 21, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -36,7 +36,6 @@ apps/ and other Add-Ons:
   (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (1)  Modbus (apps/modbus)
-  (1)  Pascal add-on (pcode/)
   (5)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
@@ -2760,27 +2759,6 @@ o Modbus (apps/modbus)
   Status:      Open
   Priority:    Low.  This is really an enhancement request:  Modbus was never
                designed to work with removable serial devices.
-
-o Pascal Add-On (pcode/)
-  ^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       P-CODES IN MEMORY UNTESTED
-  Description: Need APIs to verify execution of P-Code from memory buffer.
-  Status:      Open
-  Priority:    Low
-
-  Title:       SMALLER LOADER AND OBJECT FORMAT
-  Description: Loader and object format may be too large for some small
-               memory systems.  Consider ways to reduce memory footprint.
-  Status:      Open
-  Priority:    Medium
-
-  Title:       PDBG
-  Description: Move the pascal p-code debugger into the NuttX apps/ tree
-               where it can be used from the NSH command line.
-  Status:      Open
-  Priority:    Low
-
 o Other Applications & Tests (apps/examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

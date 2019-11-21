@@ -863,10 +863,6 @@ ostest
 
   The "standard" NuttX apps/examples/ostest configuration.
 
-pashello
-
-  Configures to use apps/examples/pashello.
-
 pf_ieee802154
 
   This is the configuration that used for unit level test of the
