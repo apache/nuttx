@@ -292,12 +292,6 @@ static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
 
-#  if defined(CONFIG_QSPI_DMAPRIO)
-#    define QSPI_DMA_PRIO  CONFIG_QSPI_DMAPRIO
-#  else
-#    define QSPI_DMA_PRIO  DMA_CCR_PRIMED
-#  endif
-
 #  ifdef CONFIG_STM32L4_QSPI_DMADEBUG
 #    define qspi_dma_sample(s,i) stm32l4_dmasample((s)->dmach, &(s)->dmaregs[i])
 static void     qspi_dma_sampleinit(struct stm32l4_qspidev_s *priv);

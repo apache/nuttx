@@ -140,6 +140,10 @@ ifeq ($(CONFIG_MTD_N25QXXX),y)
 CSRCS += n25qxxx.c
 endif
 
+ifeq ($(CONFIG_MTD_W25QXXXJV),y)
+CSRCS += w25qxxxjv.c
+endif
+
 ifeq ($(CONFIG_MTD_MX25RXX),y)
 CSRCS += mx25rxx.c
 endif
