@@ -464,15 +464,14 @@
 
 /* SERCOM3
  *
- * An Arduino compatible serial Shield is assumed (or equivalently, an
- * external RS-232 or serial-to-USB adapter connected on Arduino pins D0
- * and D1):
+ * An external RS-232 or serial-to-USB adapter can be connected on pins PA22
+ * and PA23:
  *
- *   ------ ----------------- ---------
- *   SHIELD SAMD5E5           FUNCTION
- *   ------ ----------------- ---------
- *   D0     PA23 SERCOM3 PAD1 RXD
- *   D1     PA22 SERCOM3 PAD0 TXD
+ *   ----------------- ---------
+ *   SAMD5E5           FUNCTION
+ *   ----------------- ---------
+ *   PA23 SERCOM3 PAD1 RXD
+ *   PA22 SERCOM3 PAD0 TXD
  *
  * NOTES:
  *   USART_CTRLA_TXPAD0_2: TxD=PAD0 XCK=N/A RTS/TE=PAD2 CTS=PAD3

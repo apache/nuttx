@@ -45,12 +45,23 @@ Serial Console
 
   The onboard debugger on the SAME54 Xplained Pro provides a virtual serial
   interface over the DEBUG USB port.  The pins on the SAME54 are as follows:
-  
+
     ----------------- -----------
     SAMD5E5           FUNCTION
     ----------------- -----------
     PB24 SERCOM2 PAD1 RXD
     PB25 SERCOM2 PAD0 TXD
+
+
+  An external RS-232 or serial-to-USB adapter can be connected on pins PA22
+  and PA23:
+
+    ----------------- ---------
+    SAMD5E5           FUNCTION
+    ----------------- ---------
+    PA23 SERCOM3 PAD1 RXD
+    PA22 SERCOM3 PAD0 TXD
+
 
 LEDs
 ====
@@ -100,7 +111,7 @@ Run from SRAM
 Configurations
 ==============
 
-  Each Adafruit Metro M4 configuration is maintained in a sub-directory and
+  Each SAME54 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
     tools/configure.sh [OPTIONS] same54-xplained-pro:<subdir>
