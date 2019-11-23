@@ -97,7 +97,7 @@
 #endif
 
 #ifndef CONFIG_SST26_MEMORY_TYPE
-#  define CONFIG_SST26_MEMORY_TYPE  0x25
+#  define CONFIG_SST26_MEMORY_TYPE  0x26
 #endif
 
 /* SST26 Registers *******************************************************************/
