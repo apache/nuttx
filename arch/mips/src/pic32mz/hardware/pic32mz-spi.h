@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz-spi.h
  *
- *   Copyright (C) 2015,m 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -253,23 +253,23 @@
 
 /* SPI control register 2 */
 
-#define SPI2_CON2_AUDMOD_SHIFT     (0)       /* Bits 0-1: Audio Protocol Mode */
-#define SPI2_CON2_AUDMOD_MASK      (3 << SPI2_CON2_AUDMOD_SHIFT)
-#  define SPI2_CON2_AUDMOD_I2S     (0 << SPI2_CON2_AUDMOD_SHIFT) /* I2S mode */
-#  define SPI2_CON2_AUDMOD_LJ      (1 << SPI2_CON2_AUDMOD_SHIFT) /* Left Justified mode */
-#  define SPI2_CON2_AUDMOD_RJ      (2 << SPI2_CON2_AUDMOD_SHIFT) /* Right Justified mode */
-#  define SPI2_CON2_AUDMOD_PCM     (3 << SPI2_CON2_AUDMOD_SHIFT) /* PCM/DSP mode */
+#define SPI_CON2_AUDMOD_SHIFT     (0)       /* Bits 0-1: Audio Protocol Mode */
+#define SPI_CON2_AUDMOD_MASK      (3 << SPI2_CON2_AUDMOD_SHIFT)
+#  define SPI_CON2_AUDMOD_I2S     (0 << SPI2_CON2_AUDMOD_SHIFT) /* I2S mode */
+#  define SPI_CON2_AUDMOD_LJ      (1 << SPI2_CON2_AUDMOD_SHIFT) /* Left Justified mode */
+#  define SPI_CON2_AUDMOD_RJ      (2 << SPI2_CON2_AUDMOD_SHIFT) /* Right Justified mode */
+#  define SPI_CON2_AUDMOD_PCM     (3 << SPI2_CON2_AUDMOD_SHIFT) /* PCM/DSP mode */
                                              /* Bit 2: Reserved */
-#define SPI2_CON2_AUDMONO          (1 << 3)  /* Bit 3:  Transmit Audio Data Format */
+#define SPI_CON2_AUDMONO          (1 << 3)  /* Bit 3:  Transmit Audio Data Format */
                                              /* Bits 5-6: Reserved */
-#define SPI2_CON2_AUDEN            (1 << 7)  /* Bit 7:  Enable Audio CODEC Support */
-#define SPI2_CON2_IGNTUR           (1 << 8)  /* Bit 8:  Ignore Transmit Underrun bit */
-#define SPI2_CON2_IGNROV           (1 << 9)  /* Bit 9:  Ignore Receive Overflow */
-#define SPI2_CON2_SPITUREN         (1 << 10) /* Bit 10: Enable Interrupt Events via SPITUR */
-#define SPI2_CON2_SPIROVEN         (1 << 11) /* Bit 11: Enable Interrupt Events via SPIROV */
-#define SPI2_CON2_FRMERREN         (1 << 12) /* Bit 12: Enable Interrupt Events via FRMERR */
+#define SPI_CON2_AUDEN            (1 << 7)  /* Bit 7:  Enable Audio CODEC Support */
+#define SPI_CON2_IGNTUR           (1 << 8)  /* Bit 8:  Ignore Transmit Underrun bit */
+#define SPI_CON2_IGNROV           (1 << 9)  /* Bit 9:  Ignore Receive Overflow */
+#define SPI_CON2_SPITUREN         (1 << 10) /* Bit 10: Enable Interrupt Events via SPITUR */
+#define SPI_CON2_SPIROVEN         (1 << 11) /* Bit 11: Enable Interrupt Events via SPIROV */
+#define SPI_CON2_FRMERREN         (1 << 12) /* Bit 12: Enable Interrupt Events via FRMERR */
                                              /* Bits 13-14: Reserved */
-#define SPI2_CON2_SPISGNEXT        (1 << 15) /* Bit 15 : Sign Extend Read Data from the RX FIFO */
+#define SPI_CON2_SPISGNEXT        (1 << 15) /* Bit 15 : Sign Extend Read Data from the RX FIFO */
                                              /* Bits 16-31: Reserved */
 
 /* SPI status register */

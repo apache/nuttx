@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
@@ -57,6 +58,7 @@
 #include "hardware/pic32mz-spi.h"
 #include "hardware/pic32mz-pps.h"
 #include "pic32mz-spi.h"
+#include "pic32mz-dma.h"
 
 #ifdef CONFIG_PIC32MZ_SPI
 
@@ -67,6 +69,52 @@
 /* All SPI peripherals are clocked by PBCLK2 */
 
 #define BOARD_PBCLOCK BOARD_PBCLK2
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+
+/* When SPI DMA is enabled, small DMA transfers will still be performed by
+ * polling logic. But we need a threshold value to determine what is small.
+ * That value is provided by CONFIG_PIC32MZ_SPI_DMATHRESHOLD.
+ */
+
+#  ifndef CONFIG_PIC32MZ_SPI_DMATHRESHOLD
+#    define CONFIG_PIC32MZ_SPI_DMATHRESHOLD 4
+#  endif
+
+/* Default values for channels' priority */
+
+#  ifndef CONFIG_PIC32MZ_SPI_DMA_RXPRIO
+#    define CONFIG_PIC32MZ_SPI_DMA_RXPRIO 0
+#  endif
+
+#  ifndef CONFIG_PIC32MZ_SPI_DMA_TXPRIO
+#    define CONFIG_PIC32MZ_SPI_DMA_TXPRIO 0
+#  endif
+
+/* DMA timeout. The value is not critical; we just don't want the system to
+ * hang in the event that a DMA does not finish.
+ */
+
+#  define DMA_TIMEOUT_MS    (800)
+#  define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
+
+#  ifdef CONFIG_PIC32MZ_SPI_DMADEBUG
+#    define DMA_INITIAL      0
+#    define DMA_AFTER_SETUP  1
+#    define DMA_AFTER_START  2
+#    define DMA_CALLBACK     3
+#    define DMA_TIMEOUT      3
+#    define DMA_END_TRANSFER 4
+#    define DMA_NSAMPLES     5
+#  endif
+
+/* Default value for the DMA buffer size */
+
+#  ifndef CONFIG_PIC32MZ_SPI_DMABUFFSIZE
+#    define CONFIG_PIC32MZ_SPI_DMABUFFSIZE 256
+#  endif
+
+#endif
 
 /****************************************************************************
  * Private Types
@@ -79,7 +127,7 @@
 struct pic32mz_config_s
 {
   uint32_t         base;       /* SPI register base address */
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   uint8_t          firq;       /* SPI fault interrupt number */
   uint8_t          rxirq;      /* SPI receive done interrupt number */
   uint8_t          txirq;      /* SPI transfer done interrupt number */
@@ -101,11 +149,24 @@ struct pic32mz_dev_s
   uint8_t          mode;       /* Mode 0,1,2,3 */
   uint8_t          nbits;      /* Width of word in bits (8 to 16) */
 
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  DMA_HANDLE rxdma;            /* SPI RX DMA handle */
+  DMA_HANDLE txdma;            /* SPI TX DMA handle */
+  int result;                  /* DMA result */
+  sem_t dmawait;               /* Used to wait for DMA completion */
+  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+#endif
+
 #ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
   bool             wrlast;     /* Last was a write */
   uint32_t         addrlast;   /* Last address */
   uint32_t         vallast;    /* Last value */
   int              ntimes;     /* Number of times */
+#endif
+
+#ifdef CONFIG_PIC32MZ_SPI_DMADEBUG
+  struct pic32mz_dmaregs_s rxdmaregs[DMA_NSAMPLES];
+  struct pic32mz_dmaregs_s txdmaregs[DMA_NSAMPLES];
 #endif
 };
 
@@ -130,12 +191,35 @@ static inline void     spi_putaddr(FAR struct pic32mz_dev_s *priv,
 #endif
 static inline void spi_putreg(FAR struct pic32mz_dev_s *priv,
                   unsigned int offset, uint32_t value);
+static inline void spi_flush(FAR struct pic32mz_dev_s *priv);
+
 static void     spi_exchange16(FAR struct pic32mz_dev_s *priv,
                    FAR const uint16_t *txbuffer, FAR uint16_t *rxbuffer,
                    size_t nwords);
 static void     spi_exchange8(FAR struct pic32mz_dev_s *priv,
                    FAR const uint8_t *txbuffer, FAR uint8_t *rxbuffer,
                    size_t nbytes);
+
+/* DMA Support */
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+#  ifdef CONFIG_PIC32MZ_SPI_DMADEBUG
+#    define spi_rxdma_sample(s,i) pic32mz_dma_sample((s)->rxdma,\
+                                                    &(s)->rxdmaregs[i])
+#    define spi_txdma_sample(s,i) pic32mz_dma_sample((s)->txdma,\
+                                                    &(s)->txdmaregs[i])
+static void spi_dma_sampleinit(FAR struct pic32mz_dev_s *priv);
+static void spi_dma_sampledone(FAR struct pic32mz_dev_s *priv);
+#  else
+#    define spi_rxdma_sample(s,i)
+#    define spi_txdma_sample(s,i)
+#    define spi_dma_sampleinit(s)
+#    define spi_dma_sampledone(s)
+#  endif
+static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void spi_dmatimeout(int argc, uint32_t arg);
+#endif
 
 /* SPI methods */
 
@@ -144,15 +228,22 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                    uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void     spi_exchange(FAR struct spi_dev_s *dev,
-                   FAR const void *txbuffer, FAR void *rxbuffer,
-                   size_t nwords);
+                             FAR const void *txbuffer, FAR void *rxbuffer,
+                             size_t nwords);
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void     spi_exchange_nodma(FAR struct spi_dev_s *dev,
+                                   FAR const void *txbuffer,
+                                   FAR void *rxbuffer,
+                                   size_t nwords);
+#endif
+
 #ifndef CONFIG_SPI_EXCHANGE
 static void     spi_sndblock(FAR struct spi_dev_s *dev,
-                   FAR const void *buffer, size_t nwords);
+                             FAR const void *buffer, size_t nwords);
 static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
-                   size_t nwords);
+                              size_t nwords);
 #endif
 
 /****************************************************************************
@@ -192,7 +283,7 @@ static const struct spi_ops_s g_spi1ops =
 static const struct pic32mz_config_s g_spi1config =
 {
   .base              = PIC32MZ_SPI1_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI1F,
   .rxirq             = PIC32MZ_IRQ_SPI1RX,
   .txirq             = PIC32MZ_IRQ_SPI1TX,
@@ -241,7 +332,7 @@ static const struct spi_ops_s g_spi2ops =
 static const struct pic32mz_config_s g_spi2config =
 {
   .base              = PIC32MZ_SPI2_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI2F,
   .rxirq             = PIC32MZ_IRQ_SPI2RX,
   .txirq             = PIC32MZ_IRQ_SPI2TX,
@@ -290,7 +381,7 @@ static const struct spi_ops_s g_spi3ops =
 static const struct pic32mz_config_s g_spi3config =
 {
   .base              = PIC32MZ_SPI3_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI3F,
   .rxirq             = PIC32MZ_IRQ_SPI3RX,
   .txirq             = PIC32MZ_IRQ_SPI3TX,
@@ -339,7 +430,7 @@ static const struct spi_ops_s g_spi4ops =
 static const struct pic32mz_config_s g_spi4config =
 {
   .base              = PIC32MZ_SPI4_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI4F,
   .rxirq             = PIC32MZ_IRQ_SPI4RX,
   .txirq             = PIC32MZ_IRQ_SPI4TX,
@@ -388,7 +479,7 @@ static const struct spi_ops_s g_spi5ops =
 static const struct pic32mz_config_s g_spi5config =
 {
   .base              = PIC32MZ_SPI5_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI5F,
   .rxirq             = PIC32MZ_IRQ_SPI5RX,
   .txirq             = PIC32MZ_IRQ_SPI5TX,
@@ -437,7 +528,7 @@ static const struct spi_ops_s g_spi6ops =
 static const struct pic32mz_config_s g_spi6config =
 {
   .base              = PIC32MZ_SPI6_K1BASE,
-#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+#if defined(CONFIG_PIC32MZ_SPI_INTERRUPTS) || defined (CONFIG_PIC32MZ_SPI_DMA)
   .firq              = PIC32MZ_IRQ_SPI6F,
   .rxirq             = PIC32MZ_IRQ_SPI6RX,
   .txirq             = PIC32MZ_IRQ_SPI6TX,
@@ -637,6 +728,295 @@ static inline void spi_putreg(FAR struct pic32mz_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: spi_flush
+ *
+ * Description:
+ *   Make sure that there are now dangling SPI transfer in progress
+ *
+ * Input Parameters:
+ *   spi - SPI controller state
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void spi_flush(FAR struct pic32mz_dev_s *priv)
+{
+  /* Make sure that no TX activity is in progress... waiting if necessary */
+
+  while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPITBF) != 0);
+
+  /* Then make sure that there is no pending RX data... reading and
+   * discarding as necessary.
+   */
+
+  while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) != 0)
+    {
+      (void)spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+    }
+}
+
+/****************************************************************************
+ * Name: spi_dma_sampleinit
+ *
+ * Description:
+ *   Initialize sampling of DMA registers (if CONFIG_PIC32MZ_SPI_DMADEBUG)
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_DMADEBUG
+static void spi_dma_sampleinit(FAR struct pic32mz_dev_s *priv)
+{
+  /* Put contents of register samples into a known state */
+
+  memset(priv->rxdmaregs, 0xff,
+         DMA_NSAMPLES * sizeof(struct pic32mz_dmaregs_s));
+  memset(priv->txdmaregs, 0xff,
+         DMA_NSAMPLES * sizeof(struct pic32mz_dmaregs_s));
+
+  /* Then get the initial samples */
+
+  spi_rxdma_sample(priv, DMA_INITIAL);
+  spi_txdma_sample(priv, DMA_INITIAL);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dma_sampledone
+ *
+ * Description:
+ *   Dump sampled DMA registers
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_DMADEBUG
+static void spi_dma_sampledone(FAR struct pic32mz_dev_s *priv)
+{
+  /* Sample the final registers */
+
+  spi_rxdma_sample(priv, DMA_END_TRANSFER);
+  spi_txdma_sample(priv, DMA_END_TRANSFER);
+
+  /* Then dump the sampled DMA registers */
+
+  /* Initial register values */
+
+  pic32mz_dma_dump(priv->txdma, &priv->txdmaregs[DMA_INITIAL],
+              "TX: Initial Registers");
+  pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_INITIAL],
+              "RX: Initial Registers");
+
+  /* Register values after DMA setup */
+
+  pic32mz_dma_dump(priv->txdma, &priv->txdmaregs[DMA_AFTER_SETUP],
+              "TX: After DMA Setup");
+  pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_SETUP],
+              "RX: After DMA Setup");
+
+  /* Register values after DMA start */
+
+  pic32mz_dma_dump(priv->txdma, &priv->txdmaregs[DMA_AFTER_START],
+              "TX: After DMA Start");
+  pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_START],
+              "RX: After DMA Start");
+
+  /* Register values at the time of the TX and RX DMA callbacks
+   * -OR- DMA timeout.
+   *
+   * If the DMA timed out, then there will not be any RX DMA
+   * callback samples.  There is probably no TX DMA callback
+   * samples either, but we don't know for sure.
+   */
+
+  pic32mz_dma_dump(priv->txdma, &priv->txdmaregs[DMA_CALLBACK],
+                   "TX: At DMA callback");
+
+  /* Register values at the end of the DMA */
+
+  if (priv->result == -ETIMEDOUT)
+    {
+      pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_TIMEOUT],
+                       "RX: At DMA timeout");
+    }
+  else
+    {
+      pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_CALLBACK],
+                       "RX: At DMA callback");
+    }
+
+  pic32mz_dma_dump(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER],
+                   "TX: At End-of-Transfer");
+  pic32mz_dma_dump(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER],
+                   "RX: At End-of-Transfer");
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxcallback
+ *
+ * Description:
+ *   This callback function is invoked at the completion of the SPI RX DMA.
+ *
+ * Input Parameters:
+ *   handle - The DMA handler
+ *   status - The status of the DMA transfer
+ *   arg - A pointer to the dev structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
+{
+  struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Cancel the watchdog timeout */
+
+  (void)wd_cancel(priv->dmadog);
+
+  /* Sample DMA registers at the time of the callback */
+
+  spi_rxdma_sample(priv, DMA_CALLBACK);
+
+  /* Report the result of the transfer */
+
+  if (status & PIC32MZ_DMA_INT_ADDRERR)
+    {
+      priv->result = -EFAULT;
+    }
+  else if (status & PIC32MZ_DMA_INT_ABORT)
+    {
+      priv->result = -ECONNABORTED;
+    }
+  else if (status & PIC32MZ_DMA_INT_BLOCKDONE)
+    {
+      priv->result = OK;
+    }
+  else
+    {
+      priv->result = -EIO;
+    }
+
+  /* Then wake up the waiting thread */
+
+  nxsem_post(&priv->dmawait);
+}
+#endif /* CONFIG_PIC32MZ_SPI_DMA */
+
+/****************************************************************************
+ * Name: spi_dmatxcallback
+ *
+ * Description:
+ *   This callback function is invoked at the completion of the SPI TX DMA.
+ *
+ * Input Parameters:
+ *   handle - The DMA handler
+ *   status - The status of the DMA transfer
+ *   arg - A pointer to the dev structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
+{
+  struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
+  DEBUGASSERT(priv != NULL);
+
+  /* Cancel the watchdog timeout */
+
+  (void)wd_cancel(priv->dmadog);
+
+  /* Sample DMA registers at the time of the callback */
+
+  spi_txdma_sample(priv, DMA_CALLBACK);
+
+  /* Report the result of the transfer */
+
+  if (status & PIC32MZ_DMA_INT_ADDRERR)
+    {
+      priv->result = -EFAULT;
+    }
+  else if (status & PIC32MZ_DMA_INT_ABORT)
+    {
+      priv->result = -ECONNABORTED;
+    }
+  else if (status & PIC32MZ_DMA_INT_BLOCKDONE)
+    {
+      priv->result = OK;
+    }
+  else
+    {
+      priv->result = -EIO;
+    }
+
+  /* Then wake up the waiting thread */
+
+  nxsem_post(&priv->dmawait);
+}
+#endif /* CONFIG_PIC32MZ_SPI_DMA */
+
+/****************************************************************************
+ * Name: spi_dmatimeout
+ *
+ * Description:
+ *   The watchdog timeout has expired without the completion of the DMA
+ *   transfer.
+ *
+ * Input Parameters:
+ *   argc   - The number of arguments (should be 1)
+ *   arg    - The argument (state structure reference cast to uint32_t)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void spi_dmatimeout(int argc, uint32_t arg)
+{
+  struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
+  DEBUGASSERT(priv != NULL);
+
+  /* Sample DMA registers at the time of the timeout */
+
+  spi_rxdma_sample(priv, DMA_CALLBACK);
+
+  /* Report timeout result, perhaps overwriting any failure reports from
+   * the TX callback.
+   */
+
+  priv->result = -ETIMEDOUT;
+
+  /* Then wake up the waiting thread */
+
+  nxsem_post(&priv->dmawait);
+}
+#endif /* CONFIG_PIC32MZ_SPI_DMA */
+
+/****************************************************************************
  * Name: spi_exchange8
  *
  * Description:
@@ -646,7 +1026,7 @@ static inline void spi_putreg(FAR struct pic32mz_dev_s *priv,
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to the buffer in which to receive data
- *   nwords   - the length of byres that to be exchanged
+ *   nbytes   - the length of bytes that to be exchanged
  *
  * Returned Value:
  *   None
@@ -661,6 +1041,7 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
   uint8_t data;
 
   spiinfo("nbytes: %d\n", nbytes);
+
   while (nbytes)
     {
       /* Write the data to be transmitted to the SPI Data Register */
@@ -671,7 +1052,7 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
         }
       else
         {
-          data = 0xff;
+          data = 0xaa;
         }
 
       spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
@@ -743,7 +1124,7 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
         }
       else
         {
-          data = 0xffff;
+          data = 0xaaaa;
         }
 
       spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
@@ -853,9 +1234,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t actual;
   uint32_t regval;
 
-  spiinfo("Old frequency: %d actual: %d New frequency: %d\n",
-          priv->frequency, priv->actual, frequency);
-
   /* Check if the requested frequency is the same as the frequency selection */
 
   if (priv->frequency == frequency)
@@ -888,9 +1266,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   /* Save the new BRG value */
 
   spi_putreg(priv, PIC32MZ_SPI_BRG_OFFSET, regval);
-  spiinfo("PBCLOCK: %d frequency: %d divisor: %d BRG: %d\n",
-          BOARD_PBCLOCK, frequency, divisor, regval);
-
   /* Calculate the new actual frequency.
    *
    * frequency = BOARD_PBCLOCK / (2 * divisor)
@@ -903,7 +1278,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("New frequency: %d Actual: %d\n", frequency, actual);
   return actual;
 }
 
@@ -925,8 +1299,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
-
-  spiinfo("Old mode: %d New mode: %d\n", priv->mode, mode);
 
   /* Has the mode changed? */
 
@@ -989,8 +1361,6 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-      spiinfo("CON: %08x\n", spi_getreg(priv, PIC32MZ_SPI_CON_OFFSET));
-
       /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
@@ -1018,11 +1388,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   uint32_t setting;
   uint32_t regval;
 
-  spiinfo("Old nbits: %d New nbits: %d\n", priv->nbits, nbits);
-
   /* Has the number of bits changed? */
 
-  DEBUGASSERT(priv && nbits > 7 && nbits < 17);
+  DEBUGASSERT(priv && nbits > 7 && nbits < 33);
   if (nbits != priv->nbits)
     {
       /* Yes... Set the CON register appropriately */
@@ -1049,7 +1417,6 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval &= ~SPI_CON_MODE_MASK;
       regval |= setting;
       spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, regval);
-      spiinfo("CON: %08x\n", regval);
 
       /* Save the selection so the subsequence re-configurations will be
        * faster
@@ -1080,6 +1447,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
 
   DEBUGASSERT(priv);
+
+  /* Make sure that any previous transfer is flushed from the hardware */
+
+  spi_flush(priv);
+
   if (priv->nbits > 8)
     {
       uint16_t txword;
@@ -1111,10 +1483,17 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 }
 
 /****************************************************************************
- * Name: spi_exchange
+ * Name: spi_exchange (and spi_exchange_nodma)
  *
  * Description:
- *   Exchange a block of data from SPI..
+ *   Exchange a block of data from SPI. There are two versions of this
+ *   function:
+ *      1- The first is enabled when CONFIG_PIC32MZ_SPI_DMA=y and performs
+ *      DMA SPI transfers, but only when a large block of data is bieng
+ *      transferred.
+ *      2- The second does polled SPI transfers, however it is also used for
+ *      short SPI transfers when CONFIG_PIC32MZ_SPI_DMA=y
+ *      If CONFIG_PIC32MZ_SPI_DMA=n, only the second version is available.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1123,20 +1502,32 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - The length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into
- *              uint16_t's
+ *              packed into uint8_t's; if nbits > 8 and <= 16, the data is
+ *              packed into uint16_t's; if nbits > 16 the data is packed
+ *              into uint32_t's.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void spi_exchange_nodma(FAR struct spi_dev_s *dev,
+                               FAR const void *txbuffer,
+                               FAR void *rxbuffer, size_t nwords)
+#else
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
+#endif
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
 
   DEBUGASSERT(priv);
+
+  /* Make sure that any previous transfer is flushed from the hardware */
+
+  spi_flush(priv);
+
   if (priv->nbits > 8)
     {
       /* spi_exchange16() can do this. */
@@ -1153,6 +1544,313 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 }
 
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords)
+{
+  FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
+  struct pic32mz_dma_chcfg_s rxcfg;
+  struct pic32mz_dma_chcfg_s txcfg;
+  struct pic32mz_dma_xfrcfg_s rxxfr;
+  struct pic32mz_dma_xfrcfg_s txxfr;
+  uint8_t dummy[CONFIG_PIC32MZ_SPI_DMABUFFSIZE];
+  uint32_t width;
+  int ret;
+
+  /* If we failed to allocate a DMA channel or this is a small transfer
+   * then let spi_exchange_nodma() do the work.
+   */
+
+  if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
+       nwords <= CONFIG_PIC32MZ_SPI_DMATHRESHOLD)
+    {
+      spiinfo("Non DMA transfer will be performed\n");
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+  /* Make sure that any previous transfer is flushed from the hardware */
+
+  spi_flush(priv);
+
+  /* Sample initial DMA registers */
+
+  spi_dma_sampleinit(priv);
+
+  /* Select the number of bytes and the width of a cell transfer */
+
+  if (priv->nbits > 8)
+    {
+      /* 16-bit transfer (2 bytes)*/
+
+      width  = 2;
+    }
+  else
+    {
+      /* 8-bit transfer (1 byte) */
+
+      width  = 1;
+    }
+
+  /* Configure the DMA channels. There are four different cases:
+   *
+   * 1) A true exchange with the memory address incrementing on both
+   *    RX and TX channels,
+   * 2) A read operation with the memory address incrementing only on
+   *    the receive channel,
+   * 3) A write operation where the memory address increments only on
+   *    the receive channel, and
+   * 4) A corner case where the memory address does not increment
+   *    on either channel. This case might be used in certain cases
+   *    where you want to assure that certain number of clocks are
+   *    provided on the SPI bus.
+   */
+
+  /* Do we have an RX buffer? */
+
+  if (rxbuffer)
+    {
+      /* Yes, setup the DMA transfer with the RX buffer.
+       * We need a DMA ISR for:
+       *  1 - Block done: The DMA transfer has completed succuessfully.
+       *  2 - Address error: An address error occured during the transfer.
+       *  3 - Transfer abort: Abort event occured. (i.e. SPI Error)
+       */
+
+      rxcfg.priority = CONFIG_PIC32MZ_SPI_DMA_RXPRIO;
+      rxcfg.startirq = priv->config->rxirq;
+      rxcfg.abortirq = priv->config->firq;
+      rxcfg.event    = PIC32MZ_DMA_INT_BLOCKDONE | PIC32MZ_DMA_INT_ADDRERR |
+                       PIC32MZ_DMA_INT_ABORT;
+      rxcfg.mode     = PIC32MZ_DMA_MODE_BASIC;
+
+      rxxfr.srcaddr  = priv->config->base + PIC32MZ_SPI_BUF_OFFSET;
+      rxxfr.destaddr = (uint32_t)rxbuffer;
+      rxxfr.srcsize  = width;
+      rxxfr.destsize = nwords;
+      rxxfr.cellsize = width;
+    }
+  else
+    {
+      /* No RX buffer. Setup the DMA transfer with a dummy RX buffer.
+       *
+       *  In this case we don't need ISR events, TX side will handle the
+       *  transfer.
+       */
+
+      rxcfg.priority = CONFIG_PIC32MZ_SPI_DMA_RXPRIO;
+      rxcfg.startirq = priv->config->rxirq;
+      rxcfg.abortirq = PIC32MZ_DMA_NOIRQ;
+      rxcfg.event    = PIC32MZ_DMA_INT_DISABLE;
+      rxcfg.mode     = PIC32MZ_DMA_MODE_BASIC;
+
+      rxxfr.srcaddr  = priv->config->base + PIC32MZ_SPI_BUF_OFFSET;
+      rxxfr.destaddr = (uint32_t)dummy;
+      rxxfr.srcsize  = width;
+      rxxfr.destsize = nwords;
+      rxxfr.cellsize = width;
+    }
+
+  /* Do we have a TX buffer? */
+
+  if (txbuffer)
+    {
+      /* Yes, setup the DMA transfer with the TX buffer.
+       * We need a DMA ISR for:
+       *  1 - Block done: The DMA transfer has completed succuessfully.
+       *  2 - Address error: An address error occured during the transfer.
+       *  3 - Transfer abort: Abort event occured. (i.e. SPI Error)
+       */
+
+      txcfg.priority = CONFIG_PIC32MZ_SPI_DMA_TXPRIO;
+      txcfg.startirq = priv->config->txirq;
+      txcfg.abortirq = priv->config->firq;
+      txcfg.event    = PIC32MZ_DMA_INT_BLOCKDONE | PIC32MZ_DMA_INT_ADDRERR |
+                       PIC32MZ_DMA_INT_ABORT;
+      txcfg.mode     = PIC32MZ_DMA_MODE_BASIC;
+
+      txxfr.srcaddr  = (uint32_t)txbuffer;
+      txxfr.destaddr = priv->config->base + PIC32MZ_SPI_BUF_OFFSET;
+      txxfr.srcsize  = nwords;
+      txxfr.destsize = width;
+      txxfr.cellsize = width;
+    }
+  else
+    {
+      /* No TX buffer. Setup the DMA transfer with a dummy TX buffer.
+       *
+       *  In this case we don't need ISR events, RX side will handle the
+       *  transfer.
+       */
+
+      txcfg.priority = CONFIG_PIC32MZ_SPI_DMA_TXPRIO;
+      txcfg.startirq = priv->config->txirq;
+      rxcfg.abortirq = PIC32MZ_DMA_NOIRQ;
+      txcfg.event    = PIC32MZ_DMA_INT_DISABLE;
+      txcfg.mode     = PIC32MZ_DMA_MODE_BASIC;
+
+      txxfr.srcaddr  = (uint32_t)dummy;
+      txxfr.destaddr = priv->config->base + PIC32MZ_SPI_BUF_OFFSET;
+      txxfr.srcsize  = nwords;
+      txxfr.destsize = width;
+      txxfr.cellsize = width;
+    }
+
+  /* Configure the channels */
+
+  ret = pic32mz_dma_chcfg(priv->rxdma, &rxcfg);
+  if (ret < 0)
+    {
+      spierr("ERROR: RX transfer config failed: %d\n", ret);
+      return;
+    }
+
+  ret = pic32mz_dma_chcfg(priv->txdma, &txcfg);
+  if (ret < 0)
+    {
+      spierr("ERROR: RX transfer config failed: %d\n", ret);
+      return;
+    }
+
+  /* Then setup the transfers */
+
+  ret = pic32mz_dma_xfrsetup(priv->rxdma, &rxxfr);
+  if (ret < 0)
+    {
+      spierr("ERROR: RX transfer setup failed: %d\n", ret);
+      return;
+    }
+
+  spi_rxdma_sample(priv, DMA_AFTER_SETUP);
+
+  ret = pic32mz_dma_xfrsetup(priv->txdma, &txxfr);
+  if (ret < 0)
+    {
+      spierr("ERROR: TX transfer setup failed: %d\n", ret);
+      return;
+    }
+
+  spi_txdma_sample(priv, DMA_AFTER_SETUP);
+
+  /* Flush cache to physical memory */
+
+  if (txbuffer)
+    {
+      up_flush_dcache((uintptr_t)txbuffer,
+                      (uintptr_t)txbuffer + nwords);
+    }
+  else
+    {
+      up_flush_dcache((uintptr_t)dummy,
+                      (uintptr_t)dummy + CONFIG_PIC32MZ_SPI_DMABUFFSIZE);
+    }
+
+  /* Start the DMA transfer */
+
+  priv->result = -EBUSY;
+
+  ret = pic32mz_dma_start(priv->rxdma, spi_dmarxcallback, (void *)priv);
+  if (ret < 0)
+    {
+      spierr("ERROR: RX DMA start failed: %d\n", ret);
+      return;
+    }
+
+  spi_rxdma_sample(priv, DMA_AFTER_START);
+
+  ret = pic32mz_dma_start(priv->txdma, spi_dmatxcallback, (void *)priv);
+  if (ret < 0)
+    {
+      spierr("ERROR: TX DMA start failed: %d\n", ret);
+      return;
+    }
+
+  spi_txdma_sample(priv, DMA_AFTER_START);
+
+  /* Wait for DMA completion. This is done in a loop because there may be
+   * false alarm semaphore counts that cause sem_wait() not fail to wait
+   * or to wake-up prematurely (for example due to the receipt of a signal).
+   * We know that the DMA has completed when the result is anything other
+   * that -EBUSY.
+   */
+
+  do
+    {
+      /* Start (or re-start) the watchdog timeout */
+
+      ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
+                     (wdentry_t)spi_dmatimeout, 1, (uint32_t)priv);
+      if (ret < 0)
+        {
+          spierr("ERROR: wd_start failed: %d\n", ret);
+        }
+
+      /* Wait for the DMA to complete */
+
+      ret = nxsem_wait(&priv->dmawait);
+
+      /* Cancel the watchdog timeout */
+
+      (void)wd_cancel(priv->dmadog);
+
+      /* Check if we were awakened by an error of some kind. EINTR is not a
+       * failure. It simply means that the wait was awakened by a signal.
+       */
+
+      if (ret < 0 && ret != -EINTR)
+        {
+          DEBUGPANIC();
+          return;
+        }
+
+      /* We might be awakened before the wait is over due to
+       * residual counts on the semaphore.  So, to handle, that case,
+       * we loop until something changes the DMA result to any value other
+       * than -EBUSY.
+       */
+    }
+  while (priv->result == -EBUSY);
+
+  /* Dump the sampled DMA registers */
+
+  spi_dma_sampledone(priv);
+
+  /* Make sure that the DMA is stopped (it will be stopped automatically
+   * on normal transfers, but not necessarily when the transfer terminates
+   * on an error condition).
+   */
+
+  pic32mz_dma_stop(priv->rxdma);
+  pic32mz_dma_stop(priv->txdma);
+
+  /* All we can do is complain if the DMA fails */
+
+  if (priv->result < 0)
+    {
+      spierr("ERROR: DMA failed with result: %d\n", priv->result);
+    }
+  else
+    {
+      spiinfo("DMA Transfer success\n");
+    }
+
+  /* Force RAM re-read */
+
+  if (rxbuffer)
+    {
+      up_invalidate_dcache((uintptr_t)rxbuffer,
+                           (uintptr_t)rxbuffer + nwords);
+    }
+  else
+    {
+      up_invalidate_dcache((uintptr_t)dummy,
+                           (uintptr_t)dummy + CONFIG_PIC32MZ_SPI_DMABUFFSIZE);
+    }
+}
+#endif /* CONFIG_PIC32MZ_SPI_DMA */
+
 /****************************************************************************
  * Name: spi_sndblock
  *
@@ -1164,9 +1862,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   buffer - A pointer to the buffer of data to be sent
  *   nwords - the length of data to send from the buffer in number of
  *            words.  The wordsize is determined by the number of
- *            bits-per-word selected for the SPI interface.  If nbits <= 8,
- *            the data is packed into uint8_t's; if nbits >8, the data is
- *            packed into uint16_t's
+ *            bits-per-word selected for the SPI interface. If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits > 8 and <= 16, the
+ *            data is packed into uint16_t's; if nbits > 16 the data is
+ *            packed into uint32_t's.
  *
  * Returned Value:
  *   None
@@ -1193,10 +1892,11 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *   dev   -  Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in
- *            number of words.  The wordsize is determined by the number of
- *            bits-per-word selected for the SPI interface.  If nbits <= 8,
- *            the data is  packed into uint8_t's; if nbits >8, the data is
- *            packed into uint16_t's
+ *            number of words. The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface. If nbits <= 8,
+ *            the data is  packed into uint8_t's; if nbits > 8 and <= 16, the
+ *            data is packed into uint16_t's; if nbits > 16 the data is
+ *            packed into uint32_t's.
  *
  * Returned Value:
  *   None
@@ -1237,6 +1937,9 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   uintptr_t regaddr;
   irqstate_t flags;
   uint32_t regval;
+#ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
+  int ret;
+#endif
 
   spiinfo("port: %d\n", port);
 
@@ -1318,6 +2021,34 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   spi_putaddr(priv, regaddr, (uint32_t)priv->config->sdipps);
   spi_putaddr(priv, priv->config->sdoreg, (uint32_t)priv->config->sdopps);
+
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  /* Allocate the RX and TX DMA channels, configuration will be done later. */
+
+  priv->rxdma = pic32mz_dma_alloc(NULL);
+  if (priv->rxdma == NULL)
+    {
+      spierr("ERROR: Failed to allocate the RX DMA channel\n");
+    }
+
+  priv->txdma = pic32mz_dma_alloc(NULL);
+  if (priv->txdma == NULL)
+    {
+      spierr("ERROR: Failed to allocate the TX DMA channel\n");
+    }
+
+  /* Initialize the SPI semaphore. This semaphore is used for signaling and,
+   * hence, should not have priority inheritance enabled.
+   */
+
+  nxsem_init(&priv->dmawait, 0, 0);
+  nxsem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
+
+  /* Create a watchdog timer to catch DMA timeouts */
+
+  priv->dmadog = wd_create();
+  DEBUGASSERT(priv->dmadog);
+#endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Attach the interrupt handlers.  We do this early to make sure that the

@@ -110,7 +110,7 @@ enum pic32mz_dma_chmode_e
 
 /* Interrupt type arguments for pic32mz_dma_intctrl. */
 
-enum pic32Mz_dma_event_e
+enum pic32mz_dma_event_e
 {
   PIC32MZ_DMA_INT_DISABLE   = 0U,
   PIC32MZ_DMA_INT_ADDRERR   = 1 << 0U,  /* Address error interrupt */

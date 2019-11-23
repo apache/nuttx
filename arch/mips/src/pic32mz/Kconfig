@@ -47,11 +47,15 @@ config ARCH_CHIP_PIC32MZEC
 	bool
 	default n
 	select ARCH_MIPS_M14K
+	select MIPS32_HAVE_ICACHE
+	select MIPS32_HAVE_DCACHE
 
 config ARCH_CHIP_PIC32MZEF
 	bool
 	default n
 	select ARCH_MIPS_M14K
+	select MIPS32_HAVE_ICACHE
+	select MIPS32_HAVE_DCACHE
 
 config PIC32MZ_MVEC
 	bool
@@ -941,12 +945,14 @@ menu "SPI Driver Configuration"
 config PIC32MZ_SPI_INTERRUPTS
 	bool "SPI Interrupt Driven"
 	default n
-	depends on EXPERIMENTAL
+	---help---
+		SPI Transfers are done through interrupts.
 
 config PIC32MZ_SPI_ENHBUF
 	bool "SPI Enhanced Buffer Mode"
 	default n
-	depends on EXPERIMENTAL
+	---help---
+		Enable the enhanced buffer feature (Queue SPI)
 
 config PIC32MZ_SPI_REGDEBUG
 	bool "SPI Register level debug"
@@ -955,6 +961,56 @@ config PIC32MZ_SPI_REGDEBUG
 	---help---
 		Output detailed register-level SPI device debug information.
 		Requires also CONFIG_DEBUG_FEATURES.
+
+config PIC32MZ_SPI_DMA
+	bool "SPI DMA"
+	depends on PIC32MZ_DMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config PIC32MZ_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on PIC32MZ_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAMV7_SPI_DMATHRESHOLD.
+
+config PIC32MZ_SPI_DMABUFFSIZE
+	int "SPI DMA buffer size"
+	default 256
+	depends on PIC32MZ_SPI_DMA
+	---help---
+		This buffer is used when transmitting/receveing dummy data.
+		It should be the size of the largest transfer.
+
+config PIC32MZ_SPI_DMA_RXPRIO
+	int "SPI DMA RX priority"
+	default 0
+	range 0 3
+	depends on PIC32MZ_SPI_DMA
+	---help---
+		RX channel priority. From 0 to 3
+
+config PIC32MZ_SPI_DMA_TXPRIO
+	int "SPI DMA TX priority"
+	default 0
+	range 0 3
+	depends on PIC32MZ_SPI_DMA
+	---help---
+		RX channel priority. From 0 to 3
+
+config PIC32MZ_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on PIC32MZ_SPI_DMA && DEBUG_FEATURES && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
 
 endmenu # SPI Driver Configuration
 
@@ -1037,9 +1093,9 @@ config PIC32MZ_ETH_NRXDESC
 		Configured number of Rx descriptors. Default: 4
 
 config PIC32MZ_ETH_PRIORITY
-	int ""
-	default 28
-	depends on PIC32MZ_ETHERNET
+	int "Interrupt priority"
+	default 7
+	depends on PIC32MZ_ETHERNET && ARCH_IRQPRIO
 	---help---
 		Ethernet interrupt priority.  The is default is the highest priority.
 
