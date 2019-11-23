@@ -497,7 +497,7 @@ static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
         {
           /* Yes.. bump up the trace index (unless we are out of trace entries) */
 
-          if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
+          if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
               i2cerr("ERROR: Trace table overflow\n");
               return;
@@ -538,7 +538,7 @@ static void pic32mz_i2c_traceevent(FAR struct pic32mz_i2c_priv_s *priv,
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
-      if (priv->tndx >= (CONFIG_I2C_NTRACE-1))
+      if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
         {
           i2cerr("ERROR: Trace table overflow\n");
           return;
@@ -562,7 +562,7 @@ static void pic32mz_i2c_tracedump(FAR struct pic32mz_i2c_priv_s *priv)
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
              "%2d. STATUS: %04x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
-             i+1, trace->status, trace->count, g_trace_names[trace->event],
+             i + 1, trace->status, trace->count, g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }
 }
@@ -921,7 +921,6 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
   switch (priv->process_state)
     {
-
     /* The process starts from this state after a call to i2c_transfer.
      * It may return here in the case of a write/read transaction,
      * to send the address with the READ bit set.
@@ -972,11 +971,10 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
       pic32mz_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
 
-      /* No transmition is in progress. */
+      /* No transmission is in progress. */
 
       if ((status & I2C_STAT_TRSTAT) == 0)
         {
-
           /* ACK received from the slave. */
 
           if ((status & I2C_STAT_ACKSTAT) == 0)
@@ -1018,12 +1016,10 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
       if ((status & I2C_STAT_TRSTAT) == 0)
         {
-
           /* ACK received from the slave. */
 
           if ((status & I2C_STAT_ACKSTAT) == 0)
             {
-
               /* The master logic should be inactive before
                * attempting to enable receive mode.
                */
@@ -1056,7 +1052,6 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
           if (priv->dcnt > 1)
             {
-
 #ifdef CONFIG_I2C_POLLED
               irqstate_t flags = enter_critical_section();
 #endif
@@ -1088,7 +1083,6 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
           else
             {
-
 #ifdef CONFIG_I2C_POLLED
               irqstate_t flags = enter_critical_section();
 #endif
@@ -1165,7 +1159,6 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
 
               if ((status & I2C_STAT_TRSTAT) == 0)
                 {
-
                   if ((status & I2C_STAT_ACKSTAT) == 0)
                     {
                       /* We have more than one byte.
@@ -1262,6 +1255,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
       break;
 
     default:
+
       /* Nothing goes here! */
 
       break;
@@ -1341,16 +1335,16 @@ static inline int pic32mz_i2c_setbaudrate(FAR struct pic32mz_i2c_priv_s *priv,
           pic32mz_i2c_putreg(priv, PIC32MZ_I2C_BRG_OFFSET, baudrate);
           priv->frequency = frequency;
 
-            /* Enable Slew Rate Control when operating on High Speed mode. */
+          /* Enable Slew Rate Control when operating on High Speed mode. */
 
-            if (frequency == 400000)
-              {
-                pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONCLR_OFFSET, I2C_CON_DISSLW);
-              }
-            else
-              {
-                pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_DISSLW);
-              }
+          if (frequency == 400000)
+            {
+              pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONCLR_OFFSET, I2C_CON_DISSLW);
+            }
+          else
+            {
+              pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_DISSLW);
+            }
         }
     }
 
@@ -1369,12 +1363,11 @@ static inline void pic32mz_i2c_send_start(FAR struct pic32mz_i2c_priv_s *priv)
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_SEN);
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET) & I2C_CON_SEN) != 0);
 #endif
-
 }
 
 /************************************************************************************
@@ -1389,12 +1382,11 @@ static inline void pic32mz_i2c_send_stop(FAR struct pic32mz_i2c_priv_s *priv)
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_PEN);
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET) & I2C_CON_PEN) != 0);
 #endif
-
 }
 
 /************************************************************************************
@@ -1409,12 +1401,11 @@ static inline void pic32mz_i2c_send_repeatedstart(FAR struct pic32mz_i2c_priv_s 
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_RSEN);
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET) & I2C_CON_RSEN) != 0);
 #endif
-
 }
 
 /************************************************************************************
@@ -1439,7 +1430,7 @@ static inline void pic32mz_i2c_send_ack(FAR struct pic32mz_i2c_priv_s *priv,
 
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_ACKEN);
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET) & I2C_CON_ACKEN) != 0);
@@ -1459,12 +1450,11 @@ static inline void pic32mz_i2c_transmitbyte(struct pic32mz_i2c_priv_s *priv,
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_TRN_OFFSET, data);
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_STAT_OFFSET) & I2C_STAT_TRSTAT) != 0);
 #endif
-
 }
 
 /************************************************************************************
@@ -1479,7 +1469,7 @@ static inline uint32_t pic32mz_i2c_receivebyte(struct pic32mz_i2c_priv_s *priv)
 {
   uint32_t val;
 
-/* To avoid bus collision during polling. */
+  /* To avoid bus collision during polling. */
 
 #ifdef CONFIG_I2C_POLLED
   while ((pic32mz_i2c_getreg(priv, PIC32MZ_I2C_STAT_OFFSET) & I2C_CON_RCEN) != 0);
@@ -1658,7 +1648,6 @@ static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
 
       i2cerr("ERROR: Timed out: CON: 0x%04x status: 0x%04x\n",
              pic32mz_i2c_getreg(priv, PIC32MZ_I2C_CON_OFFSET), status);
-
     }
   else
     {
@@ -1716,8 +1705,6 @@ static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
   FAR struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
-  uint32_t scl_gpio;
-  uint32_t sda_gpio;
   uint32_t frequency;
   int ret = ERROR;
 
@@ -1741,17 +1728,17 @@ static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Use GPIO configuration to un-wedge the bus */
 
-  pic32mz_configgpio(scl_gpio);
-  pic32mz_configgpio(sda_gpio);
+  pic32mz_configgpio(priv->scl);
+  pic32mz_configgpio(priv->sda);
 
   /* Let SDA go high */
 
-  pic32mz_gpiowrite(sda_gpio, 1);
+  pic32mz_gpiowrite(priv->sda, 1);
 
   /* Clock the bus until any slaves currently driving it let it go. */
 
   clock_count = 0;
-  while (!pic32mz_gpioread(sda_gpio))
+  while (!pic32mz_gpioread(priv->sda))
     {
       /* Give up if we have tried too hard */
 
@@ -1766,7 +1753,7 @@ static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
        */
 
       stretch_count = 0;
-      while (!pic32mz_gpioread(scl_gpio))
+      while (!pic32mz_gpioread(priv->scl))
         {
           /* Give up if we have tried too hard */
 
@@ -1780,12 +1767,12 @@ static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
 
       /* Drive SCL low */
 
-      pic32mz_gpiowrite(scl_gpio, 0);
+      pic32mz_gpiowrite(priv->scl, 0);
       up_udelay(10);
 
       /* Drive SCL high again */
 
-      pic32mz_gpiowrite(scl_gpio, 1);
+      pic32mz_gpiowrite(priv->scl, 1);
       up_udelay(10);
     }
 
@@ -1793,19 +1780,19 @@ static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
    * state machines.
    */
 
-  pic32mz_gpiowrite(sda_gpio, 0);
+  pic32mz_gpiowrite(priv->sda, 0);
   up_udelay(10);
-  pic32mz_gpiowrite(scl_gpio, 0);
+  pic32mz_gpiowrite(priv->scl, 0);
   up_udelay(10);
-  pic32mz_gpiowrite(scl_gpio, 1);
+  pic32mz_gpiowrite(priv->scl, 1);
   up_udelay(10);
-  pic32mz_gpiowrite(sda_gpio, 1);
+  pic32mz_gpiowrite(priv->sda, 1);
   up_udelay(10);
 
   /* Revert the GPIO configuration. */
 
-  pic32mz_unconfiggpio(sda_gpio);
-  pic32mz_unconfiggpio(scl_gpio);
+  pic32mz_unconfiggpio(priv->sda);
+  pic32mz_unconfiggpio(priv->scl);
 
   /* Re-init the port */
 
@@ -1821,7 +1808,6 @@ out:
   /* Release the port for re-use by other clients */
 
   pic32mz_i2c_sem_post(priv);
-
 }
 #endif /* CONFIG_I2C_RESET */
 
@@ -1851,11 +1837,13 @@ FAR struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
       priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c1_priv;
       break;
 #endif
+
 #ifdef CONFIG_PIC32MZ_I2C2
     case 2:
       priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c2_priv;
       break;
 #endif
+
 #ifdef CONFIG_PIC32MZ_I2C3
     case 3:
       priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c3_priv;
@@ -1866,11 +1854,13 @@ FAR struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
       priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c4_priv;
       break;
 #endif
+
 #ifdef CONFIG_PIC32MZ_I2C5
     case 5:
       priv = (struct pic32mz_i2c_priv_s *)&pic32mz_i2c5_priv;
       break;
 #endif
+
     default:
       return NULL;
     }
