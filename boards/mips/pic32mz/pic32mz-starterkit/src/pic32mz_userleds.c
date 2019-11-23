@@ -76,7 +76,7 @@
  * to the correct LED pin configuration.
  */
 
-static const uint16_t g_ledpincfg[PIC32MZ_STARTERKIT_NLEDS] =
+static const pinset_t g_ledpincfg[PIC32MZ_STARTERKIT_NLEDS] =
 {
   GPIO_LED_1, GPIO_LED_2, GPIO_LED_3
 };
