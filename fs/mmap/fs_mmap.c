@@ -90,8 +90,8 @@
  *           PROT_WRITE     - PROT_READ and PROT_EXEC also assumed
  *           PROT_EXEC      - PROT_READ and PROT_WRITE also assumed
  *   flags   See the MAP_* definitions in sys/mman.h.
- *           MAP_SHARED     - Required
- *           MAP_PRIVATE    - Will cause an error
+ *           MAP_SHARED     - MAP_PRIVATE or MAP_SHARED required
+ *           MAP_PRIVATE    - MAP_PRIVATE or MAP_SHARED required
  *           MAP_FIXED      - Will cause an error
  *           MAP_FILE       - Ignored
  *           MAP_ANONYMOUS  - Optional
@@ -128,33 +128,31 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 {
   FAR void *addr;
   int errcode;
-  int ret;
+  int ret = -1;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
    * things.
    */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  /* Private mappings and protections are not currently supported.  These
+  /* Fixed mappings and protections are not currently supported.  These
    * options could be supported in the KERNEL build with an MMU, but that
    * logic is not in place.
    */
 
   if (prot == PROT_NONE ||
-      (flags & (MAP_PRIVATE | MAP_FIXED | MAP_DENYWRITE)) != 0)
+      (flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
     {
       ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
       errcode = ENOSYS;
       goto errout;
     }
 
-  /* A length of 0 is invalid.  Currently only shared mappings are supported.
-   * Non-shared could be implemented in the KERNEL build with an MMU.
-   */
+  /* A length of 0 is invalid. */
 
-  if (length == 0 || (flags & MAP_SHARED) == 0)
+  if (length == 0)
     {
-      ferr("ERROR: Invalid options, length=%d flags=%04x\n", length, flags);
+      ferr("ERROR: Invalid length, length=%d\n", length);
       errcode = EINVAL;
       goto errout;
     }
@@ -187,16 +185,17 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       return alloc;
     }
 
-  /* Okay now we can assume a shared mapping from a file.  This is the
-   * only other option supported
-   *
-   * Perform the ioctl to get the base address of the file in 'mapped'
+  /* Perform the ioctl to get the base address of the file in 'mapped'
    * in memory. (casting to uintptr_t first eliminates complaints on some
    * architectures where the sizeof long is different from the size of
    * a pointer).
    */
 
-  ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
+  if ((flags & MAP_PRIVATE) == 0)
+    {
+      ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
+    }
+
   if (ret < 0)
     {
       /* Not directly mappable, probably because the underlying media does
@@ -213,7 +212,8 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       /* Error out.  The errno value was already set by ioctl() */
 
       ferr("ERROR: ioctl(FIOC_MMAP) failed: %d\n", get_errno());
-      return MAP_FAILED;
+      errcode = ENOSYS;
+      goto errout;
 #endif
     }
 
