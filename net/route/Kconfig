@@ -112,7 +112,7 @@ config ROUTE_MAX_IPv6_RAMROUTES
 
 config ROUTE_FILEDIR
 	string "Routing table directory"
-	default /tmp
+	default LIBC_TMPDIR
 	depends on ROUTE_IPv4_FILEROUTE || ROUTE_IPv6_FILEROUTE
 	---help---
 		Provides the full path to location in the file system where routing

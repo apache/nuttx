@@ -118,6 +118,17 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
+             CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
