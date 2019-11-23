@@ -60,7 +60,7 @@
  *
  *     If a start irq is set this function will only enable the channel.
  *     The transfer will be controlled by the start irq.
- *     If no start irq is specified then the a force start is performed.
+ *     If start irq is set to PIC32MZ_DMA_NOIRQ then a force start is performed.
  *
  * 4. Stop and free the channel
  *
@@ -80,37 +80,24 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#include "hardware/pic32mz-dma.h"
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Interrupt type arguments for pic32mz_dma_intctrl. */
+/* This is used when setting a channel with no start/abort irq */
 
-#define PIC32MZ_DMA_INT_SRCDONE     DMACH_INT_CHSDIE
-#define PIC32MZ_DMA_INT_SRCHALF     DMACH_INT_CHSHIE
-#define PIC32MZ_DMA_INT_DESTDONE    DMACH_INT_CHDDIE
-#define PIC32MZ_DMA_INT_DESTHALF    DMACH_INT_CHDHIE
-#define PIC32MZ_DMA_INT_BLOCKDONE   DMACH_INT_CHBCIE
-#define PIC32MZ_DMA_INT_CELLDONE    DMACH_INT_CHCCIE
-#define PIC32MZ_DMA_INT_ABORT       DMACH_INT_CHTAIE
-#define PIC32MZ_DMA_INT_ERR         DMACH_INT_CHERIE
-#define PIC32MZ_DMA_INT_DISABLE     (0)
-
-/* This is used when setting a channel with no start/abort event */
-
-#define PIC32MZ_DMA_NOEVENT (NR_IRQS + 1)
+#define PIC32MZ_DMA_NOIRQ (NR_IRQS + 1)
 
 /*******************************************************************************
  * Public Types
- *
  ******************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
+
+/* DMA channel modes, arguments for pic32mz_dma_mode. */
 
 enum pic32mz_dma_chmode_e
 {
@@ -121,15 +108,29 @@ enum pic32mz_dma_chmode_e
   PIC32MZ_DMA_MODE_SFM     = 1 << 4U  /* Special Function Module mode */
 };
 
+/* Interrupt type arguments for pic32mz_dma_intctrl. */
+
+enum pic32Mz_dma_event_e
+{
+  PIC32MZ_DMA_INT_DISABLE   = 0U,
+  PIC32MZ_DMA_INT_ADDRERR   = 1 << 0U,  /* Address error interrupt */
+  PIC32MZ_DMA_INT_ABORT     = 1 << 1U,  /* Transfer abort interrupt */
+  PIC32MZ_DMA_INT_CELLDONE  = 1 << 2U,  /* Cell transfer complete interrupt */
+  PIC32MZ_DMA_INT_BLOCKDONE = 1 << 3U,  /* Block transfer complete interrupt */
+  PIC32MZ_DMA_INT_DESTHALF  = 1 << 4U,  /* Destination half full interrup t*/
+  PIC32MZ_DMA_INT_DESTDONE  = 1 << 5U,  /* Destination done interrupt */
+  PIC32MZ_DMA_INT_SRCHALF   = 1 << 6U,  /* Source half full interrupt */
+  PIC32MZ_DMA_INT_SRCDONE   = 1 << 7U   /* Source done interrupt */
+};
+
 /* This structure holds the channel's configuration */
 
 struct pic32mz_dma_chcfg_s
 {
-  uint8_t priority;                 /* Channel's priority (0..3) */
-  uint8_t startirq;                 /* Start event */
-  uint8_t abortirq;                 /* Abort event */
-  uint8_t event;                    /* Interrupt event */
-  enum pic32mz_dma_chmode_e mode;   /* Channel's mode of operation */
+  uint8_t priority; /* Channel's priority (0..3) */
+  uint8_t startirq; /* Start event */
+  uint8_t abortirq; /* Abort event */
+  uint8_t mode;     /* Channel's modes (enum pic32mz_dma_chmode_e) */
 };
 
 /* This structure holds a transfer's configuration */
@@ -141,6 +142,7 @@ struct pic32mz_dma_xfrcfg_s
   uint16_t srcsize;  /* Source size */
   uint16_t destsize; /* Destination size */
   uint16_t cellsize; /* Cell size */
+  uint8_t  event;    /* Interrupt events (enum pic32mz_dma_event_e) */
 };
 
 /* The following is used for sampling DMA registers when CONFIG_DEBUG_DMA
