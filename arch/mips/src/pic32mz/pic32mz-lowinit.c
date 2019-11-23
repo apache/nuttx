@@ -50,6 +50,7 @@
 #include "hardware/pic32mz-features.h"
 #include "hardware/pic32mz-prefetch.h"
 #include "hardware/pic32mz-osc.h"
+#include "hardware/pic32mz-ioport.h"
 
 #include "pic32mz-config.h"
 #include "pic32mz-lowconsole.h"
@@ -58,16 +59,23 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Maximum Frequencies ******************************************************/
 
-#if CONFIG_PIC32MZ_ECC_OPTION == 3
-#  define MAX_FLASH_HZ       83000000 /* Maximum FLASH speed (Hz) without ECC */
+#if (CONFIG_PIC32MZ_ECC_OPTION == 3) || (CONFIG_PIC32MZ_ECC_OPTION == 2)
+#  define SYSCLK_MAX1   0
+#  define SYSCLK_MAX2   74000000
+#  define SYSCLK_MAX3   140000000
+#  define SYSCLK_MAX4   200000000
 #else
-#  define MAX_FLASH_HZ       66000000 /* Maximum FLASH speed (Hz) with ECC */
+#  define SYSCLK_MAX1   0
+#  define SYSCLK_MAX2   60000000
+#  define SYSCLK_MAX3   120000000
+#  define SYSCLK_MAX4   200000000
 #endif
 
-#define MAX_PBCLK           100000000 /* Max peripheral bus speed (Hz) */
-#define MAX_PBCLK7          200000000 /* Max peripheral bus speed (Hz) for PBCLK7 */
+#define MAX_PBCLK       100000000 /* Max peripheral bus speed (Hz) */
+#define MAX_PBCLK7      200000000 /* Max peripheral bus speed (Hz) for PBCLK7 */
 
 /* Sanity checks ************************************************************/
 
@@ -165,22 +173,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -201,61 +193,43 @@
 static inline void pic32mz_prefetch(void)
 {
   unsigned int nwaits;
-  unsigned int residual;
   uint32_t regval;
 
-  /* Configure pre-fetch cache FLASH wait states (assuming ECC is enabled).
-   * REVISIT: Is this calculation right?  It seems like residual should be
-   *
-   *    residual = BOARD_CPU_CLOCK / nwaits
-   *
-   * This logic uses:
-   *
-   *    BOARD_CPU_CLOCK - nwaits * MAX_FLASH_HZ
-   */
+  /* Configure pre-fetch cache FLASH wait states */
 
-  residual = BOARD_CPU_CLOCK;
-  nwaits   = 0;
-
-  while (residual > MAX_FLASH_HZ)
+  if (BOARD_CPU_CLOCK > SYSCLK_MAX1 && BOARD_CPU_CLOCK <= SYSCLK_MAX2)
     {
-      nwaits++;
-      residual -= MAX_FLASH_HZ;
+      nwaits = 0;
+
+      /* Don't enable predictive prefetch for wait states = 0 */
+
+      regval = PRECON_PREFEN_DISABLE;
+    }
+  else if (BOARD_CPU_CLOCK > SYSCLK_MAX2 && BOARD_CPU_CLOCK <= SYSCLK_MAX3)
+    {
+      nwaits = 1;
+      regval = PRECON_PREFEN_CPUID;
+    }
+  else if (BOARD_CPU_CLOCK > SYSCLK_MAX3 && BOARD_CPU_CLOCK <= SYSCLK_MAX4)
+    {
+      nwaits = 2;
+      regval = PRECON_PREFEN_CPUID;
+    }
+  else
+    {
+      /* For devices with 252 Mhz SYSCLK */
+
+      nwaits = 4;
+      regval = PRECON_PREFEN_CPUID;
     }
 
-  DEBUGASSERT(nwaits < 8);
+  regval |= PRECON_PFMWS(nwaits);
 
-  /* Set the FLASH wait states and enabled prefetch on CPU instructions and
-   * data.
+  /* Set the FLASH wait states and enable prefetch on CPU instructions
+   * and data when required.
    */
 
-  regval = (PRECON_PREFEN_CPUID | PRECON_PFMWS(nwaits));
   putreg32(regval, PIC32MZ_PRECON);
-}
-
-/****************************************************************************
- * Name: pic32mz_k0cache
- *
- * Description:
- *   Enable caching in KSEG0.
- *
- * Assumptions:
- *   Interrupts are disabled.
- *
- ****************************************************************************/
-
-static inline void pic32mz_k0cache(void)
-{
-  register uint32_t regval;
-
-  /* Enable cache on KSEG 0 in the CP0 CONFIG register */
-
-  asm("\tmfc0 %0,$16,0\n" :  "=r"(regval));
-  regval &= ~CP0_CONFIG_K23_MASK;
-  regval |= CP0_CONFIG_K23_CACHEABLE;
-  asm("\tmtc0 %0,$16,0\n" : : "r" (regval));
-
-  UNUSED(regval);
 }
 
 /****************************************************************************
@@ -376,6 +350,58 @@ static inline void pic32mz_pbclk(void)
 }
 
 /****************************************************************************
+ * Name: pic32mz_adcdisable
+ *
+ * Description:
+ *   Disable adc inputs in all pins.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void pic32mz_adcdisable(void)
+{
+  putreg32(0xffffffff, PIC32MZ_IOPORTA_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#if CHIP_NPORTS > 1
+  putreg32(0xffffffff, PIC32MZ_IOPORTB_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 2
+  putreg32(0xffffffff, PIC32MZ_IOPORTC_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 3
+  putreg32(0xffffffff, PIC32MZ_IOPORTD_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 4
+  putreg32(0xffffffff, PIC32MZ_IOPORTE_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 5
+  putreg32(0xffffffff, PIC32MZ_IOPORTF_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 6
+  putreg32(0xffffffff, PIC32MZ_IOPORTG_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 7
+  putreg32(0xffffffff, PIC32MZ_IOPORTH_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 8
+  putreg32(0xffffffff, PIC32MZ_IOPORTJ_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+#if CHIP_NPORTS > 9
+  putreg32(0xffffffff, PIC32MZ_IOPORTK_K1BASE +
+                       PIC32MZ_IOPORT_ANSELCLR_OFFSET);
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -396,13 +422,13 @@ void pic32mz_lowinit(void)
 
   pic32mz_prefetch();
 
-  /* Enable caching in KSEG0 */
-
-  pic32mz_k0cache();
-
   /* Configure peripheral clocking */
 
   pic32mz_pbclk();
+
+  /* Init IO pins (Disable all ADC circuits) */
+
+  pic32mz_adcdisable();
 
   /* Initialize a console (probably a serial console) */
 
