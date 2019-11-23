@@ -130,6 +130,7 @@ struct pic32mz_dma_chcfg_s
   uint8_t priority; /* Channel's priority (0..3) */
   uint8_t startirq; /* Start event */
   uint8_t abortirq; /* Abort event */
+  uint8_t event;    /* Interrupt events (enum pic32mz_dma_event_e) */
   uint8_t mode;     /* Channel's modes (enum pic32mz_dma_chmode_e) */
 };
 
@@ -142,7 +143,6 @@ struct pic32mz_dma_xfrcfg_s
   uint16_t srcsize;  /* Source size */
   uint16_t destsize; /* Destination size */
   uint16_t cellsize; /* Cell size */
-  uint8_t  event;    /* Interrupt events (enum pic32mz_dma_event_e) */
 };
 
 /* The following is used for sampling DMA registers when CONFIG_DEBUG_DMA
@@ -249,6 +249,19 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg);
  ******************************************************************************/
 
 void pic32mz_dma_free(DMA_HANDLE handle);
+
+/*******************************************************************************
+ * Name: pic32mz_dma_chcfg
+ *
+ * Description:
+ *   Configure a DMA channel.
+ *   This config can be done during alloc, however if reconfig is needed,
+ *   this functions should be used.
+ *
+ ******************************************************************************/
+
+int pic32mz_dma_chcfg(DMA_HANDLE handle,
+                      FAR const struct pic32mz_dma_chcfg_s *cfg);
 
 /*******************************************************************************
  * Name: pic32mz_dma_xfrsetup

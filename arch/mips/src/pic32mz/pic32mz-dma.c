@@ -475,7 +475,7 @@ static inline void pic32mz_dma_forcestart(FAR struct pic32mz_dmach_s *dmach)
 static inline void pic32mz_dma_abortirq(FAR struct pic32mz_dmach_s *dmach,
                                         int irq)
 {
-  /* Enable start irq matching. */
+  /* Enable abort irq matching. */
 
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_ECONSET_OFFSET, DMACH_ECON_AIRQEN);
 
@@ -621,11 +621,25 @@ static void pic32mz_dma_config(FAR struct pic32mz_dmach_s *dmach,
     {
       pic32mz_dma_startirq(dmach, cfg->startirq);
     }
+  else
+    {
+      pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_ECONCLR_OFFSET,
+                         DMACH_ECON_SIRQEN);
+    }
 
   if (cfg->abortirq != PIC32MZ_DMA_NOIRQ)
     {
       pic32mz_dma_abortirq(dmach, cfg->abortirq);
     }
+  else
+    {
+      pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_ECONCLR_OFFSET,
+                         DMACH_ECON_AIRQEN);
+    }
+
+  /* Set the interrupt event(s) */
+
+  pic32mz_dma_intctrl(dmach, cfg->event);
 
   /* Set the channel's mode */
 
@@ -830,7 +844,10 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg)
 
           /* Config this channel */
 
-          pic32mz_dma_config(dmach, cfg);
+          if (cfg != NULL)
+            {
+              pic32mz_dma_config(dmach, cfg);
+            }
 
           break;
         }
@@ -885,6 +902,28 @@ void pic32mz_dma_free(DMA_HANDLE handle)
   up_clrpend_irq(dmach->irq);
 }
 
+/*******************************************************************************
+ * Name: pic32mz_dma_chcfg
+ *
+ * Description:
+ *   Configure a DMA channel.
+ *   This config can be done during alloc, however if reconfig is needed,
+ *   this functions should be used.
+ *
+ ******************************************************************************/
+
+int pic32mz_dma_chcfg(DMA_HANDLE handle,
+                      FAR const struct pic32mz_dma_chcfg_s *cfg)
+{
+  struct pic32mz_dmach_s *dmach = (struct pic32mz_dmach_s *)handle;
+
+  DEBUGASSERT(dmach != NULL);
+
+  pic32mz_dma_config(dmach, cfg);
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: pic32mz_dma_xfrsetup
  *
@@ -910,10 +949,6 @@ int pic32mz_dma_xfrsetup(DMA_HANDLE handle,
   pic32mz_dma_srcsize(dmach,  cfg->srcsize);
   pic32mz_dma_destsize(dmach, cfg->destsize);
   pic32mz_dma_cellsize(dmach, cfg->cellsize);
-
-  /* Set the interrupt event(s) */
-
-  pic32mz_dma_intctrl(dmach, cfg->event);
 
   return OK;
 }
