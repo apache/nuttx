@@ -83,4 +83,75 @@ config MIPS32_FRAMEPOINTER
 		Register r30 may be a frame pointer in some ABIs.  Or may just be
 		saved register s8.  It makes a difference for vfork handling.
 
+config MIPS32_HAVE_ICACHE
+	bool
+	default n
+
+config MIPS32_HAVE_DCACHE
+	bool
+	default n
+
+config MIPS32_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on MIPS32_HAVE_ICACHE
+	select ARCH_ICACHE
+	---help---
+		Enable K0 I-Cache
+
+config MIPS32_ICACHE_SIZE
+	int "I-Cache Size"
+	default 16384
+	depends on MIPS32_ICACHE && !MIPS32_CACHE_AUTOINFO
+	---help---
+		Instruction cache size in bytes.
+
+config MIPS32_ILINE_SIZE
+	int "I-Cache Line Size"
+	default 16
+	depends on MIPS32_ICACHE && !MIPS32_CACHE_AUTOINFO
+	---help---
+		Instruction cache line size.
+
+config MIPS32_KSEG0_IBASE
+	hex "Instruction base address"
+	default 0x9d000000
+	depends on MIPS32_ICACHE
+	---help---
+		Instruction base address in KSEG0
+
+config MIPS32_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on MIPS32_HAVE_DCACHE
+	select ARCH_DCACHE
+	---help---
+		Enable K0 D-Cache
+
+config MIPS32_DCACHE_SIZE
+	int "D-Cache Size"
+	default 4096
+	depends on MIPS32_DCACHE && !MIPS32_CACHE_AUTOINFO
+	---help---
+		Data cache size in bytes.
+
+config MIPS32_DLINE_SIZE
+	int "D-Cache Line Size"
+	default 16
+	depends on MIPS32_DCACHE && !MIPS32_CACHE_AUTOINFO
+	---help---
+		Data cache line size.
+
+config MIPS32_KSEG0_DBASE
+	hex "Data base address"
+	default 0x80000000
+	depends on MIPS32_DCACHE
+	---help---
+		Data base address in KSEG0
+
+config MIPS32_CACHE_AUTOINFO
+	bool "Auto detect cache size"
+	depends on MIPS32_ICACHE || MIPS32_DCACHE
+	default n
+
 endif

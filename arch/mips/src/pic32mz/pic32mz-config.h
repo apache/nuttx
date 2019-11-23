@@ -48,6 +48,12 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* Cache line sizes (in bytes) for the PIC32MZ */
+
+#define PIC32MZ_DCACHE_LINESIZE 16  /* 16 bytes (4 words) */
+#define PIC32MZ_ICACHE_LINESIZE 16  /* 16 bytes (4 words) */
+
 /* GPIO IRQs ************************************************************************/
 
 #ifndef CONFIG_PIC32MZ_GPIOIRQ

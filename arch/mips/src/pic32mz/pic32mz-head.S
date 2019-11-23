@@ -105,6 +105,46 @@
 #  define PIC32MZ_HEAP_BASE     PIC32MZ_STACK_TOP
 #endif
 
+#if defined (CONFIG_MIPS32_ICACHE) || defined (CONFIG_MIPS32_DCACHE)
+#  define K0_CACHE_ALGORITHM CP0_CONFIG_K0_CACHEABLE
+#else
+#  define K0_CACHE_ALGORITHM CP0_CONFIG_K0_UNCACHED
+#endif
+
+#ifdef CONFIG_MIPS32_ICACHE
+#  ifdef CONFIG_MIPS32_ICACHE_SIZE
+#    define PIC32MZ_ICACHE_SIZE CONFIG_MIPS32_ICACHE_SIZE
+#  else
+#    define PIC32MZ_ICACHE_SIZE 16384
+#  endif
+
+#  ifdef CONFIG_MIPS32_ILINE_SIZE
+#    define PIC32MZ_ILINE_SIZE CONFIG_MIPS32_ILINE_SIZE
+#  else
+#    define PIC32MZ_ILINE_SIZE 16
+#  endif
+
+#  define PIC32MZ_KSEG0_IBASE CONFIG_MIPS32_KSEG0_IBASE
+#  define PIC32MZ_INDEXSTORETAG_I 8
+#endif
+
+#ifdef CONFIG_MIPS32_DCACHE
+#  ifdef CONFIG_MIPS32_DCACHE_SIZE
+#    define PIC32MZ_DCACHE_SIZE CONFIG_MIPS32_DCACHE_SIZE
+#  else
+#    define PIC32MZ_DCACHE_SIZE 4096
+#  endif
+
+#  ifdef CONFIG_MIPS32_DLINE_SIZE
+#    define PIC32MZ_DLINE_SIZE CONFIG_MIPS32_DLINE_SIZE
+#  else
+#    define PIC32MZ_DLINE_SIZE 16
+#  endif
+
+#  define PIC32MZ_KSEG0_DBASE CONFIG_MIPS32_KSEG0_DBASE
+#  define PIC32MZ_INDEXSTORETAG_D 9
+#endif
+
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
@@ -400,6 +440,61 @@ __start:
 
 	mtc0	t3, PIC32MZ_CP0_SRSCTL	/* Restore SRSCtl */
 	ehb
+
+#if defined (CONFIG_MIPS32_ICACHE) || defined (CONFIG_MIPS32_DCACHE)
+  /* Initialize K0 Cache. The cache resets in an indeterminate state.
+   * We need to clear the tags and invalidate any data.
+   * It's done as follows:
+   *  1 - Clear the ErrCtl register to use the TagLo(1) register.
+   *  2 - Clear the TagLo register.
+   *  3 - Perform an IndexStoreTag for each line to copy the content of TagLo.
+   */
+
+  /* Clear ErrCtl and TagLo */
+
+  mtc0 zero, PIC32MZ_CP0_ERRCTL
+  mtc0 zero, PIC32MZ_CP0_TAGLO
+  ehb
+
+#ifdef CONFIG_MIPS32_ICACHE
+  /* Init I-Cache (Copy content of TagLo) */
+
+  li t0, PIC32MZ_KSEG0_IBASE
+  addu t1, t0, PIC32MZ_ICACHE_SIZE
+.icacheloop:
+  addu t0, t0, PIC32MZ_ILINE_SIZE
+  bne t0, t1, .icacheloop
+  cache PIC32MZ_INDEXSTORETAG_I, -4(t0)
+#endif
+
+#ifdef CONFIG_MIPS32_DCACHE
+  /* Init D-Cache (Copy content of TagLo) */
+
+  li t0, PIC32MZ_KSEG0_DBASE
+  addu t1, t0, PIC32MZ_DCACHE_SIZE
+.dcacheloop:
+  addu t0, t0, PIC32MZ_DLINE_SIZE
+  bne t0, t1, .dcacheloop
+  cache PIC32MZ_INDEXSTORETAG_D, -4(t0)
+#endif
+
+  /* Force memory synchronization */
+
+  sync
+
+#endif /* CONFIG_MIPS32_ICACHE || CONFIG_MIPS32_DCACHE */
+
+  /* Set the cache algorithm.
+   * If the cache was enable, then it has already been initiliazed and
+   * the cache algorithm will be set to write-back with write allocation.
+   * if not, just set the algorithm to uncached.
+   */
+
+  mfc0 t0, PIC32MZ_CP0_CONFIG
+  ori  t0, CP0_CONFIG_K0_MASK
+  xori t0, CP0_CONFIG_K0_MASK
+  ori  t0, K0_CACHE_ALGORITHM
+  mtc0 t0, PIC32MZ_CP0_CONFIG
 
 	/* Clear uninitialized data sections */
 

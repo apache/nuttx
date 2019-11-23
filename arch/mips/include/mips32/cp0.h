@@ -73,6 +73,7 @@
 #  define MIPS32_CP0_DEBUG3         $23,0  /* Debug control and exception status */
 #  define MIPS32_CP0_DEPC3          $24,0  /* Program counter at last debug exception */
 #  define MIPS32_CP0_ERRCTL         $26,0  /* Controls access data CACHE instruction */
+#  define MIPS32_CP0_CACHEERR       $27,0  /* Cache error-detection logic */
 #  define MIPS32_CP0_TAGLO          $28,0  /* LS portion of cache tag interface */
 #  define MIPS32_CP0_DATALO         $28,1  /* LS portion of cache tag interface */
 #  define MIPS32_CP0_TAGHI          $29,0  /* MS portion of cache tag interface */
@@ -333,7 +334,9 @@
 #define CP0_CONFIG_BE               (1 << 15) /* Bit 15: Processor is running in big-endian mode */
 #define CP0_CONFIG_IMPL_SHIFT       (16)      /* Bits 16-30: Implementation dependent */
 #define CP0_CONFIG_IMPL_MASK        (0x7fff << CP0_CONFIG_IMPL_SHIFT)
-#define CP0_CONFIG_M                (1 << 31) /* Bit 31: Config1 register is implemented at select=1 */
+#define CP0_CONFIG_M_SHIFT         (31)
+#define CP0_CONFIG_M_MASK          (1 << CP0_CONFIG_M_SHIFT)
+#  define CP0_CONFIG_M             (1 << CP0_CONFIG_M_SHIFT) /* Bit 31: Indicates the presence of a Config1 register */
 
 /* Register Number: 16 Sel: 1 Name: Config1
  * Function: Configuration register 1

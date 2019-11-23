@@ -39,7 +39,7 @@ HEAD_ASRC = pic32mz-head.S
 
 # Common MIPS files
 
-CMN_ASRCS  = up_syscall0.S vfork.S
+CMN_ASRCS  = up_syscall0.S vfork.S up_cache.S
 CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c
 CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_initialize.c
 CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c
