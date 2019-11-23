@@ -1508,11 +1508,19 @@ static void refresh(void)
   printf("  Refreshing...\n");
   fflush(stdout);
 
+  if (g_debug)
+    {
+      ret = system("make olddefconfig V=1");
+    }
+  else
+   {
 #ifdef WIN32
-  ret = system("make olddefconfig");
+      ret = system("make olddefconfig");
 #else
-  ret = system("make olddefconfig 1>/dev/null");
+      ret = system("make olddefconfig 1>/dev/null");
 #endif
+   }
+
   putchar('\n');
 
 #ifdef WEXITSTATUS

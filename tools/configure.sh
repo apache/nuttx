@@ -70,6 +70,7 @@ unset boardconfig
 unset appdir
 unset host
 unset wenv
+debug=n
 skip=0
 
 while [ ! -z "$1" ]; do
@@ -83,6 +84,7 @@ while [ ! -z "$1" ]; do
       wenv=cygwin
       ;;
     -d )
+      debug=y
       set -x
       ;;
     -g )
@@ -379,5 +381,8 @@ if [ ! -z `which gmake 2>/dev/null` ]; then
   MAKE_BIN=gmake
 fi
 
-${MAKE_BIN} olddefconfig 1>/dev/null
-
+if [ "X${debug}" = "Xy" ]; then
+  ${MAKE_BIN} olddefconfig V=1
+else
+  ${MAKE_BIN} olddefconfig 1>/dev/null
+fi
