@@ -135,7 +135,7 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          eventset |= ((POLLHUP | POLLERR) & info->fds->events);
+          eventset |= (POLLHUP | POLLERR);
         }
 
       /* Awaken the caller of poll() is requested event occurred. */
@@ -344,23 +344,18 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = 0;
+  cb->flags    = NETDEV_DOWN;
   cb->priv     = (FAR void *)info;
   cb->event    = udp_poll_eventhandler;
 
-  if ((info->fds->events & POLLOUT) != 0)
+  if ((fds->events & POLLOUT) != 0)
     {
       cb->flags |= UDP_POLL;
     }
 
-  if ((info->fds->events & POLLIN) != 0)
+  if ((fds->events & POLLIN) != 0)
     {
       cb->flags |= UDP_NEWDATA;
-    }
-
-  if ((info->fds->events & (POLLHUP | POLLERR)) != 0)
-    {
-      cb->flags |= NETDEV_DOWN;
     }
 
   /* Save the reference in the poll info structure as fds private as well
