@@ -533,7 +533,8 @@
 #  define MIN_TCP_MSS           __MIN_TCP_MSS(__IPv6_HDRLEN)
 #endif
 
-/* How long a connection should stay in the TIME_WAIT state.
+/* How long a connection should stay in the TIME_WAIT state (in units of
+ * seconds).
  *
  * TIME_WAIT is often also known as the 2MSL wait state.  This is because
  * the socket that transitions to TIME_WAIT stays there for a period that
@@ -542,7 +543,8 @@
  * being discarded.  This time limit is ultimately bounded by the TTL field
  * in the IP datagram that is used to transmit the TCP segment.  RFC 793
  * specifies MSL as 2 minutes but most systems permit this value to be tuned.
- * Here a default of 2 minutes is used, half the value specified by RFC 793.
+ * Here a default TIME_WAIT (2MSL) 2 minutes is used, half the value
+ * specified by RFC 793.
  */
 
 #ifdef CONFIG_NET_TCP_WAIT_TIMEOUT

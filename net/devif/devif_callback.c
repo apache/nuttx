@@ -194,7 +194,7 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
 
   if ((events & DEVPOLL_MASK) == (triggers & DEVPOLL_MASK))
     {
-      return true;
+      return (triggers & DEVPOLL_MASK) != 0;
     }
 
   /* No.. this event set will not generate the callback */
