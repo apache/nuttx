@@ -1269,7 +1269,7 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
         {
           /* Set up the callback in the connection */
 
-          state.ir_cb->flags   = (UDP_NEWDATA | UDP_POLL | NETDEV_DOWN);
+          state.ir_cb->flags   = (UDP_NEWDATA | NETDEV_DOWN);
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = inet_udp_eventhandler;
 
@@ -1442,7 +1442,7 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
       state.ir_cb = tcp_callback_alloc(conn);
       if (state.ir_cb)
         {
-          state.ir_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
+          state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = inet_tcp_eventhandler;
 

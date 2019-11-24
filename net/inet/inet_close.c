@@ -159,30 +159,30 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
       goto end_wait;
     }
-
+  else if ((flags & TCP_NEWDATA) != 0)
+    {
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* Check if all outstanding bytes have been ACKed */
+      /* Check if all outstanding bytes have been ACKed */
 
-  else if (conn->unacked != 0 || !sq_empty(&conn->write_q))
-    {
-      /* No... we are still waiting for ACKs.  Drop any received data, but
-       * do not yet report TCP_CLOSE in the response.
-       */
+      if (conn->unacked != 0 || !sq_empty(&conn->write_q))
+        {
+          /* No... we are still waiting for ACKs.  Drop any received data, but
+           * do not yet report TCP_CLOSE in the response.
+           */
 
-      dev->d_len = 0;
-      flags = (flags & ~TCP_NEWDATA);
-    }
-
+          dev->d_len = 0;
+          flags &= ~TCP_NEWDATA;
+        }
+      else
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+        {
+          /* Drop data received in this state and make sure that TCP_CLOSE
+           * is set in the response
+           */
 
-  else
-    {
-      /* Drop data received in this state and make sure that TCP_CLOSE
-       * is set in the response
-       */
-
-      dev->d_len = 0;
-      flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
+          dev->d_len = 0;
+          flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
+        }
     }
 
   UNUSED(conn);           /* May not be used */
@@ -195,57 +195,7 @@ end_wait:
   nxsem_post(&pstate->cl_sem);
 
   ninfo("Resuming\n");
-  UNUSED(conn);           /* May not be used */
-  return 0;
-}
-#endif /* NET_TCP_HAVE_STACK */
-
-/****************************************************************************
- * Name: tcp_close_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
- *
- * Input Parameters:
- *   psock - Socket state structure
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef NET_TCP_HAVE_STACK
-static inline void tcp_close_txnotify(FAR struct socket *psock,
-                                      FAR struct tcp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
+  return flags;
 }
 #endif /* NET_TCP_HAVE_STACK */
 
@@ -355,7 +305,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     {
       /* Set up to receive TCP data event callbacks */
 
-      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
+      state.cl_cb->flags = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
       state.cl_cb->event = tcp_close_eventhandler;
 
       /* A non-NULL value of the priv field means that lingering is
@@ -375,10 +325,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
       nxsem_init(&state.cl_sem, 0, 0);
       nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
-
-      /* Notify the device driver of the availability of TX data */
-
-      tcp_close_txnotify(psock, conn);
 
       /* Wait for the disconnect event */
 
