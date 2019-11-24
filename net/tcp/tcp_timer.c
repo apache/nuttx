@@ -73,7 +73,7 @@
  * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
- *   hsed - The polling interval in halves of a second
+ *   hsec - The polling interval in units of halves of a second
  *
  * Returned Value:
  *   None
@@ -143,11 +143,11 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       /* Check if the timer exceeds the timeout value */
 
-      if (newtimer >= TCP_TIME_WAIT_TIMEOUT)
+      if (newtimer >= (TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC))
         {
           /* Set the timer to the maximum value */
 
-          conn->timer = TCP_TIME_WAIT_TIMEOUT;
+          conn->timer = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
 
           /* The TCP connection was established and, hence, should be bound
            * to a device. Make sure that the polling device is the one that

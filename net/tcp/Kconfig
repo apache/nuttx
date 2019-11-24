@@ -51,7 +51,8 @@ config NET_TCP_WAIT_TIMEOUT
 	int "TIME_WAIT Length of TCP/IP connections"
 	default 120
 	---help---
-		TIME_WAIT Length of TCP/IP connections (all tasks)
+		TIME_WAIT Length of TCP/IP connections (all tasks).  In units
+		of seconds.
 
 config NET_MAX_LISTENPORTS
 	int "Number of listening ports"
