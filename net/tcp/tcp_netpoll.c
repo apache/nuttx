@@ -364,9 +364,19 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * callback processing.
    */
 
-  cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_DISCONN_EVENTS);
+  cb->flags    = TCP_DISCONN_EVENTS;
   cb->priv     = (FAR void *)info;
   cb->event    = tcp_poll_eventhandler;
+
+  if ((fds->events & POLLOUT) != 0)
+    {
+      cb->flags |= TCP_POLL;
+    }
+
+  if ((fds->events & POLLIN) != 0)
+    {
+      cb->flags |= TCP_NEWDATA | TCP_BACKLOG;
+    }
 
   /* Save the reference in the poll info structure as fds private as well
    * for use during poll teardown as well.
