@@ -824,7 +824,7 @@ errout:
  *   psock    An instance of the internal socket structure.
  *
  * Returned Value:
- *   -ENOSYS (Function not implemented, always have to wait to send).
+ *   OK (Always can send).
  *
  * Assumptions:
  *   None
@@ -833,7 +833,7 @@ errout:
 
 int psock_tcp_cansend(FAR struct socket *psock)
 {
-  return -ENOSYS;
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP && !CONFIG_NET_TCP_WRITE_BUFFERS */

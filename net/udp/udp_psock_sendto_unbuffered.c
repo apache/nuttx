@@ -588,7 +588,7 @@ errout_with_lock:
  *   psock    An instance of the internal socket structure.
  *
  * Returned Value:
- *   -ENOSYS (Function not implemented, always have to wait to send).
+ *   OK (Always can send).
  *
  * Assumptions:
  *   None
@@ -597,7 +597,7 @@ errout_with_lock:
 
 int psock_udp_cansend(FAR struct socket *psock)
 {
-  return -ENOSYS;
+  return OK;
 }
 
 #endif /* CONFIG_NET_UDP */

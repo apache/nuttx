@@ -120,13 +120,9 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLIN & info->fds->events);
         }
 
-      /* A poll is a sign that we are free to send data.
-       * REVISIT: This is bogus:  If CONFIG_UDP_WRITE_BUFFERS=y then
-       * we never have to wait to send; otherwise, we always have to
-       * wait to send.  Receiving a poll is irrelevant.
-       */
+      /* A poll is a sign that we are free to send data. */
 
-      if ((flags & UDP_POLL) != 0)
+      if ((flags & UDP_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -214,55 +210,6 @@ static inline void udp_iob_work(FAR void *arg)
    */
 
   kmm_free(arg);
-}
-#endif
-
-/****************************************************************************
- * Name: udp_poll_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be sent (UDP)
- *
- * Input Parameters:
- *   psock - Socket state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_NET_UDP_WRITE_BUFFERS) || !defined(CONFIG_IOB_NOTIFIER)
-static inline void udp_poll_txnotify(FAR struct socket *psock)
-{
-  FAR struct udp_conn_s *conn = psock->s_conn;
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
 }
 #endif
 
@@ -400,46 +347,6 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Ask for the IOB free notification */
 
       info->key = iob_notifier_setup(LPWORK, udp_iob_work, info);
-    }
-
-#else
-  /* If (1) the socket is in a bound state via bind() or via the
-   * UDP_BINDTODEVICE socket options, (2) revents == 0, (3) write buffering
-   * is not enabled (determined by a configuration setting), and (3) the
-   * POLLOUT event is needed then request an immediate Tx poll from the
-   * device associated with the binding.
-   */
-
-  else if ((fds->events & POLLOUT) != 0)
-    {
-      /* Check if the socket has been bound to a local address (might be
-       * INADDR_ANY or the IPv6 unspecified address!  In that case the
-       * notification will fail)
-       */
-
-      if (_SS_ISBOUND(psock->s_flags))
-        {
-          udp_poll_txnotify(psock);
-        }
-
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-      /* Check if the socket has been bound to a device interface index via
-       * the UDP_BINDTODEVICE socket option.
-       */
-
-      else if (conn->boundto > 0)
-        {
-          /* Yes, find the device associated with the interface index */
-
-          FAR struct net_driver_s *dev = netdev_findbyindex(conn->boundto);
-          if (dev != NULL)
-            {
-              /* And request a poll from the device */
-
-              netdev_txnotify_dev(dev);
-            }
-        }
-#endif
     }
 #endif
 
