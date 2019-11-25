@@ -47,7 +47,6 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-
 #include "stm32_gpio.h"
 #include "stm32_sdmmc.h"
 #include "stm32f746g-disco.h"

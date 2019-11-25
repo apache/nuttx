@@ -889,6 +889,7 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   /* Save all of the data and set the new interrupt mask in one, atomic
    * operation.
    */
+
   flags = enter_critical_section();
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
@@ -1899,8 +1900,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 #ifdef CONFIG_SDIO_MUXBUS
 static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock)
 {
-  /* The multiplex bus is part of board support package.
-   */
+  /* The multiplex bus is part of board support package. */
+
   stm32_muxbus_sdio_lock(dev, lock);
   return OK;
 }
