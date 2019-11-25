@@ -38,6 +38,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ************************************************************************************/
+
 /************************************************************************************
  *   Copyright (c) 2015 Google, Inc.
  *   All rights reserved.
@@ -183,7 +184,8 @@ static inline void stm32l4_modifyreg32(FAR struct stm32l4_lptim_dev_s *dev,
                                        uint8_t offset, uint32_t clearbits,
                                        uint32_t setbits)
 {
-  modifyreg32(((struct stm32l4_lptim_priv_s *)dev)->base + offset, clearbits, setbits);
+  modifyreg32(((struct stm32l4_lptim_priv_s *)dev)->base + offset,
+              clearbits, setbits);
 }
 
 /************************************************************************************
