@@ -185,8 +185,8 @@ static inline void udp_iob_work(FAR void *arg)
    * event.  If so, don't do it again.
    */
 
-  if ((fds->events && POLLWRNORM) == 0 ||
-      (fds->revents && POLLWRNORM) != 0)
+  if ((fds->events & POLLWRNORM) != 0 &&
+      (fds->revents & POLLWRNORM) == 0)
     {
       /* Check if we are now able to send */
 
