@@ -263,14 +263,14 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
         {
           ninfo("socket send ready.\n");
 
-          fds->revents |= (POLLOUT & fds->events);
+          fds->revents |= POLLOUT;
         }
 
       if (conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL)
         {
           ninfo("socket recv avail.\n");
 
-          fds->revents |= (POLLIN & fds->events);
+          fds->revents |= POLLIN;
         }
     }
 
