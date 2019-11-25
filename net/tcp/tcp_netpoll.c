@@ -120,13 +120,6 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= POLLIN & info->fds->events;
         }
 
-      /* A poll is a sign that we are free to send data. */
-
-      if ((flags & TCP_POLL) != 0 && psock_tcp_cansend(info->psock) >= 0)
-        {
-          eventset |= (POLLOUT & info->fds->events);
-        }
-
       /* Check for a loss of connection events. */
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
@@ -135,6 +128,13 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_lost_connection(info->psock, info->cb, flags);
           eventset |= (POLLERR | POLLHUP);
+        }
+
+      /* A poll is a sign that we are free to send data. */
+
+      else if ((flags & TCP_POLL) != 0 && psock_tcp_cansend(info->psock) >= 0)
+        {
+          eventset |= (POLLOUT & info->fds->events);
         }
 
       /* Awaken the caller of poll() if requested event occurred. */

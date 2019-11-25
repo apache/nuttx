@@ -120,18 +120,18 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLIN & info->fds->events);
         }
 
-      /* A poll is a sign that we are free to send data. */
-
-      if ((flags & UDP_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
-        {
-          eventset |= (POLLOUT & info->fds->events);
-        }
-
       /* Check for loss of connection events. */
 
       if ((flags & NETDEV_DOWN) != 0)
         {
           eventset |= (POLLHUP | POLLERR);
+        }
+
+      /* A poll is a sign that we are free to send data. */
+
+      else if ((flags & UDP_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
+        {
+          eventset |= (POLLOUT & info->fds->events);
         }
 
       /* Awaken the caller of poll() is requested event occurred. */

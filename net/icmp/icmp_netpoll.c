@@ -130,18 +130,18 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLIN & info->fds->events);
         }
 
-      /*  ICMP_POLL is a sign that we are free to send data. */
-
-      if ((flags & DEVPOLL_MASK) == ICMP_POLL)
-        {
-          eventset |= (POLLOUT & info->fds->events);
-        }
-
       /* Check for loss of connection events. */
 
       if ((flags & NETDEV_DOWN) != 0)
         {
           eventset |= (POLLHUP | POLLERR);
+        }
+
+      /*  ICMP_POLL is a sign that we are free to send data. */
+
+      else if ((flags & DEVPOLL_MASK) == ICMP_POLL)
+        {
+          eventset |= (POLLOUT & info->fds->events);
         }
 
       /* Awaken the caller of poll() is requested event occurred. */
