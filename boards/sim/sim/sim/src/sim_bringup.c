@@ -59,10 +59,6 @@
 #include "up_internal.h"
 #include "sim.h"
 
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-int trv_mount_world(int minor, FAR const char *mountpoint);
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -133,12 +129,6 @@ int sim_bringup(void)
   /* Mount the TZ database */
 
   (void)sim_zoneinfo(3);
-#endif
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-  /* Special initialization for the Traveler game simulation */
-
-  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
 #endif
 
 #ifdef CONFIG_EXAMPLES_GPIO
