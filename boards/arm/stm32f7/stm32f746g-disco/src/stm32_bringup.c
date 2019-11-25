@@ -146,6 +146,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_SDIO
+    ret = stm32_sdio_initialize();
+
+    if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_n25qxxx_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);  /* May not be used */
   return OK;
 }

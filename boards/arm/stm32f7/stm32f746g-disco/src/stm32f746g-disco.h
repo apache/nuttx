@@ -58,6 +58,12 @@
 #  endif
 #endif
 
+#ifdef CONFIG_STM32F7_SDMMC
+#define HAVE_SDIO
+#else
+#undef HAVE_SDIO
+#endif
+
 /* STM32F736G Discovery GPIOs ***********************************************/
 
 /* The STM32F746G-DISCO board has numerous LEDs but only one,
@@ -106,6 +112,14 @@
 
 #define GPIO_LCD_BL       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTK|GPIO_PIN3)
+
+/* SD/TF Card'detected pin */
+
+#define GPIO_SDIO_NCD         (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
+
+#define SDIO_SLOTNO        0
+#define SDIO_MINOR         0
+
 /****************************************************************************
  * Public data
  ****************************************************************************/
@@ -214,6 +228,10 @@ int stm32_tsc_setup(int minor);
 
 #ifdef CONFIG_MTD_N25QXXX
 int stm32_n25qxxx_setup(void);
+#endif
+
+#ifdef HAVE_SDIO
+int stm32_sdio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

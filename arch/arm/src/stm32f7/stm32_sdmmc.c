@@ -1774,7 +1774,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
             {
               /* Terminate the transfer with an error */
 
-              mcerr("ERROR: RX FIFO overrun, remaining: %d\n"
+              mcerr("ERROR: RX FIFO overrun, remaining: %d\n",
                     priv->remaining);
               stm32_endtransfer(priv,
                                 SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);

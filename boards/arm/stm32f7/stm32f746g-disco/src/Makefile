@@ -80,4 +80,8 @@ ifeq ($(CONFIG_MTD_N25QXXX),y)
 CSRCS += stm32_n25q.c
 endif
 
+ifeq ($(CONFIG_STM32F7_SDMMC), y)
+CSRCS += stm32_sdmmc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
