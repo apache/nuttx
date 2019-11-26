@@ -185,12 +185,10 @@ void up_idle(void)
  * For further investigation post release of 8.2.
  */
 
-#if 0
   /* Sleep until an interrupt occurs to save power. */
 
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();
-#endif
 #endif
 }

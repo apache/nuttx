@@ -49,6 +49,7 @@
 #include "imxrt_clockconfig.h"
 #include "imxrt_lcd.h"
 #include "hardware/imxrt_memorymap.h"
+#include "hardware/imxrt_iomuxc.h"
 
 #include <stdlib.h>
 
@@ -270,7 +271,8 @@ static void imxrt_pllsetup(void)
 
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
 
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) & CCM_ANALOG_PLL_ENET_LOCK) == 0)
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) &
+          CCM_ANALOG_PLL_ENET_LOCK) == 0)
     {
     }
 
@@ -291,7 +293,8 @@ static void imxrt_pllsetup(void)
         CCM_ANALOG_PLL_SYS_ENABLE;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_SYS);
 
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) &
+          CCM_ANALOG_PLL_SYS_LOCK) == 0)
     {
     }
 
@@ -314,7 +317,8 @@ static void imxrt_pllsetup(void)
         CCM_ANALOG_PLL_USB1_POWER;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB1);
 
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) & CCM_ANALOG_PLL_USB1_LOCK) == 0)
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
+          CCM_ANALOG_PLL_USB1_LOCK) == 0)
     {
     }
 
@@ -326,7 +330,8 @@ static void imxrt_pllsetup(void)
         CCM_ANALOG_PLL_AUDIO_ENABLE;
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_AUDIO);
 
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_AUDIO) & CCM_ANALOG_PLL_AUDIO_LOCK) == 0)
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_AUDIO) &
+          CCM_ANALOG_PLL_AUDIO_LOCK) == 0)
     {
     }
 
@@ -339,7 +344,8 @@ static void imxrt_pllsetup(void)
 
   putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
 
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) & CCM_ANALOG_PLL_ENET_LOCK) == 0)
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) &
+          CCM_ANALOG_PLL_ENET_LOCK) == 0)
     {
     }
 
@@ -368,6 +374,11 @@ void imxrt_clockconfig(void)
    * from SDRAM.  In this case, some bootloader logic has already configured
    * clocking and SDRAM.  We are pretty much committed to using things the
    * way that the bootloader has left them.
+   *
+   * Note that although this is safe at boot while nothing is using the clocks
+   * additional caution is required if at some later date we want to
+   * manipulate the PODFs while the system is running (for power minimisation)
+   * because changing those is not glitch free.
    */
 
 #ifndef CONFIG_IMXRT_BOOT_SDRAM
@@ -382,25 +393,29 @@ void imxrt_clockconfig(void)
   reg |= CCM_CBCMR_PERIPH_CLK2_SEL_OSC_CLK;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH2_CLK_SEL_BUSY) != 0)
+    {
+    }
+
   /* Set PERIPH_CLK MUX to PERIPH_CLK2 */
 
   reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_PERIPH_CLK_SEL_MASK;
   reg |= CCM_CBCDR_PERIPH_CLK_SEL(CCM_CBCDR_PERIPH_CLK_SEL_PERIPH_CLK2);
   putreg32(reg, IMXRT_CCM_CBCDR);
-
-  /* Wait handshake */
-
-  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH2_CLK_SEL_BUSY) != 0)
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)
     {
     }
 
-  /* Set Soc VDD */
+  /* Set Soc VDD and wait for it to stablise */
 
   reg  = getreg32(IMXRT_DCDC_REG3);
   reg &= ~(DCDC_REG3_TRG_MASK);
   reg |= DCDC_REG3_TRG(IMXRT_VDD_SOC);
   putreg32(reg, IMXRT_DCDC_REG3);
+  while ((getreg32(IMXRT_DCDC_REG0) & DCDC_REG0_STS_DC_OK) == 0)
+    {
+    }
 
   /* OK, now nothing is depending on us, configure the PLLs */
 
@@ -412,11 +427,21 @@ void imxrt_clockconfig(void)
   reg &= ~CCM_CACRR_ARM_PODF_MASK;
   reg |= CCM_CACRR_ARM_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_ARM_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CACRR);
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_ARM_PODF_BUSY) != 0)
+    {
+    }
 
   reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_AHB_PODF_MASK;
   reg |= CCM_CBCDR_AHB_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_AHB_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CBCDR);
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_AHB_PODF_BUSY) != 0)
+    {
+    }
+
+  /* Adjust IPG and PERCLK PODFs. Consumers of these clocks will need to
+   * be gated if there are any (there aren't at boot).
+   */
 
   reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_IPG_PODF_MASK;
@@ -425,7 +450,8 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCMR1);
   reg &= ~CCM_CSCMR1_PERCLK_PODF_MASK;
-  reg |= CCM_CSCMR1_PERCLK_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_PERCLK_PODF_DIVIDER));
+  reg |= CCM_CSCMR1_PERCLK_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_PERCLK_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CSCMR1);
 
 #ifndef CONFIG_IMXRT_SEMC_INIT_DONE
@@ -435,6 +461,10 @@ void imxrt_clockconfig(void)
   reg &= ~CCM_CBCDR_SEMC_PODF_MASK;
   reg |= CCM_CBCDR_SEMC_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_SEMC_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CBCDR);
+
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_SEMC_PODF_BUSY) != 0)
+    {
+    }
 #endif
 
   /* Set PRE_PERIPH_CLK to Board Selection */
@@ -453,7 +483,7 @@ void imxrt_clockconfig(void)
 
   /* Wait handshake */
 
-  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH2_CLK_SEL_BUSY) != 0)
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)
     {
     }
 
@@ -463,6 +493,14 @@ void imxrt_clockconfig(void)
   reg &= ~CCM_CSCMR1_PERCLK_CLK_SEL_MASK;
   reg |= CCM_CSCMR1_PERCLK_CLK_SEL(IMXRT_PERCLK_CLK_SEL);
   putreg32(reg, IMXRT_CCM_CSCMR1);
+
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)
+    {
+    }
+
+  /* Setup perhiperals. At this point these are not activated so don't
+   * need to worry too much about switching off the clock feeds.
+   */
 
   /* Set UART source to PLL3 80M */
 
@@ -486,10 +524,6 @@ void imxrt_clockconfig(void)
   reg |= CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M;
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
-  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)
-    {
-    }
-
   /* Set LPI2C divider to 5  for 12 Mhz */
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
@@ -497,9 +531,6 @@ void imxrt_clockconfig(void)
   reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5 - 1);
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
-  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)
-    {
-    }
 #endif
 
 #ifdef CONFIG_IMXRT_LPSPI
@@ -519,16 +550,17 @@ void imxrt_clockconfig(void)
 #endif
 
 #ifdef IMXRT_TRACE_PODF_DIVIDER
-  /* Set TRACE clock source to PLL2 PFD0 */
+  /* Set TRACE clock source and speed */
 
   reg  = getreg32(IMXRT_CCM_CBCMR);
   reg &= ~CCM_CBCMR_TRACE_CLK_SEL_MASK;
-  reg |= CCM_CBCMR_TRACE_CLK_SEL_PLL2_PFD0;
+  reg |= IMXRT_TRACE_CLK_SELECT;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
   reg  = getreg32(IMXRT_CCM_CSCDR1);
   reg &= ~CCM_CSCDR1_TRACE_PODF_MASK;
-  reg |= CCM_CSCDR1_TRACE_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_TRACE_PODF_DIVIDER));
+  reg |= CCM_CSCDR1_TRACE_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_TRACE_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CSCDR1);
 #endif
 
@@ -550,13 +582,20 @@ void imxrt_clockconfig(void)
   reg  = getreg32(IMXRT_CCM_CSCDR1);
   reg &= ~(CCM_CSCDR1_USDHC1_PODF_MASK | CCM_CSCDR1_USDHC2_PODF_MASK);
 #if defined(IMXRT_USDHC1_PODF_DIVIDER)
-  reg |= CCM_CSCDR1_USDHC1_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_USDHC1_PODF_DIVIDER));
+  reg |= CCM_CSCDR1_USDHC1_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_USDHC1_PODF_DIVIDER));
 #endif
 #if defined(IMXRT_USDHC2_PODF_DIVIDER)
-  reg |= CCM_CSCDR1_USDHC2_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_USDHC2_PODF_DIVIDER));
+  reg |= CCM_CSCDR1_USDHC2_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_USDHC2_PODF_DIVIDER));
 #endif
   putreg32(reg, IMXRT_CCM_CSCDR1);
 #endif
 
+  /* Ensure platform memory clocks remain enabled in WFI */
+
+  reg  = getreg32(IMXRT_CCM_CGPR);
+  reg |= CCM_CGPR_INT_MEM_CLK_LPM;
+  putreg32(reg, IMXRT_CCM_CGPR);
 #endif
 }
