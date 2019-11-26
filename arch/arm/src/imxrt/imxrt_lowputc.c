@@ -393,6 +393,7 @@ int imxrt_lpuart_configure(uint32_t base,
   uint32_t calculated_baud;
   uint32_t baud_diff;
   uint32_t regval;
+  uint32_t regval2;
 
   if ((getreg32(IMXRT_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_SEL) != 0)
     {
@@ -413,7 +414,8 @@ int imxrt_lpuart_configure(uint32_t base,
       src_freq = (BOARD_XTAL_FREQUENCY * pll3_div) / 6;
     }
 
-  uart_div    = (getreg32(IMXRT_CCM_CSCDR1) & CCM_CSCDR1_UART_CLK_PODF_MASK) + 1;
+  uart_div    = (getreg32(IMXRT_CCM_CSCDR1) &
+                 CCM_CSCDR1_UART_CLK_PODF_MASK) + 1;
   lpuart_freq = src_freq / uart_div;
 
   /* This LPUART instantiation uses a slightly different baud rate
@@ -451,9 +453,11 @@ int imxrt_lpuart_configure(uint32_t base,
 
       /* Select the better value between srb and (sbr + 1) */
 
-      if (temp_diff > (config->baud - (lpuart_freq / (temp_osr * (temp_sbr + 1)))))
+      if (temp_diff > (config->baud -
+                      (lpuart_freq / (temp_osr * (temp_sbr + 1)))))
         {
-          temp_diff = config->baud - (lpuart_freq / (temp_osr * (temp_sbr + 1)));
+          temp_diff = config->baud -
+                      (lpuart_freq / (temp_osr * (temp_sbr + 1)));
           temp_sbr++;
         }
 
@@ -556,8 +560,10 @@ int imxrt_lpuart_configure(uint32_t base,
       return ERROR;
     }
 
-  putreg32(LPUART_FIFO_RXFE | LPUART_FIFO_RXIDEN_1 | LPUART_FIFO_TXFE ,
-           base + IMXRT_LPUART_FIFO_OFFSET);
+  regval2  = getreg32(base + IMXRT_LPUART_FIFO_OFFSET);
+  regval2 |= LPUART_FIFO_RXFLUSH | LPUART_FIFO_TXFLUSH |
+             LPUART_FIFO_RXFE | LPUART_FIFO_RXIDEN_1 | LPUART_FIFO_TXFE;
+  putreg32(regval2 , base + IMXRT_LPUART_FIFO_OFFSET);
 
   regval |= LPUART_CTRL_RE | LPUART_CTRL_TE;
   putreg32(regval, base + IMXRT_LPUART_CTRL_OFFSET);
@@ -605,14 +611,5 @@ void imxrt_lowputc(int ch)
   /* Send the character by writing it into the UART_TXD register. */
 
   putreg32((uint32_t)ch, IMXRT_CONSOLE_BASE + IMXRT_LPUART_DATA_OFFSET);
-
-  /* Wait for the transmit register to be emptied. When the TXFE bit is
-   * non-zero, the TX Buffer FIFO is empty.
-   */
-
-  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
-         LPUART_STAT_TDRE) == 0)
-    {
-    }
 }
 #endif
