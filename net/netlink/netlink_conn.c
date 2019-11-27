@@ -143,6 +143,8 @@ static void netlink_notify_waiters(FAR struct netlink_conn_s *conn)
               nerr("ERROR: nxsig_kill() failed: %d\n", ret);
               UNUSED(ret);
             }
+
+          conn->waiter[i] = NETLINK_NO_WAITER;
         }
     }
 
@@ -176,6 +178,34 @@ static int netlink_add_waiter(FAR struct netlink_conn_s *conn)
   nerr("ERROR:  Too many waiters\n");
   DEBUGPANIC();
   return -ENOSPC;
+}
+
+/****************************************************************************
+ * Name: netlink_remove_waiter
+ *
+ * Description:
+ *   Remove a waiter to the list of waiters.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static int netlink_remove_waiter(FAR struct netlink_conn_s *conn,
+                                 pid_t waiter)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_NETLINK_MAXPENDING; i++)
+    {
+      if (conn->waiter[i] == waiter)
+        {
+          conn->waiter[i] = NETLINK_NO_WAITER;
+          break;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -484,7 +514,7 @@ FAR struct netlink_response_s *
       ret = sigwaitinfo(&set, &info);
       if (ret < 0)
         {
-          nerr("ERROR: sigwaitinfo failed: %d\n", ret);
+          nerr("ERROR: sigwaitinfo() failed: %d\n", ret);
         }
 
       /* Restore the network lock */
@@ -494,6 +524,118 @@ FAR struct netlink_response_s *
     }
 
   return resp;
+}
+
+/****************************************************************************
+ * Name: netlink_check_response
+ *
+ * Description:
+ *   Return true is a response is pending now.
+ *
+ * Returned Value:
+ *   True: A response is available; False; No response is available.
+ *
+ ****************************************************************************/
+
+bool netlink_check_response(FAR struct socket *psock)
+{
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Check if the response is available.  It is not necessary to lock the
+   * network because the sq_peek() is an atomic operation.
+   */
+
+  return (sq_peek(&conn->resplist) != NULL);
+}
+
+/****************************************************************************
+ * Name: netlink_notify_response
+ *
+ * Description:
+ *   Notify a thread until a response be available.  The thread will be
+ *   notified via CONFIG_NETLINK_SIGNAL when the response becomes available.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the response is already available.  Not signal
+ *     will be sent.
+ *   One is returned if the notification was successfully setup.
+ *   A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int netlink_notify_response(FAR struct socket *psock)
+{
+  FAR struct netlink_conn_s *conn;
+  FAR struct siginfo info;
+  sigset_t set;
+  int ret = 0;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Check if the response is available */
+
+  net_lock();
+  if (((FAR struct netlink_response_s *)sq_peek(&conn->resplist)) == NULL)
+    {
+      /* No.. Add this task as a waiter */
+
+      ret = netlink_add_waiter(conn);
+      if (ret < 0)
+        {
+          nerr("ERROR: netlink_add_waiter failed: %d\n", ret);
+        }
+      else
+        {
+          /* Set up to signal when a response is available */
+
+          sigemptyset(&set);
+          sigaddset(&set, CONFIG_NETLINK_SIGNAL);
+          ret = sigwaitinfo(&set, &info);
+          if (ret < 0)
+            {
+              nerr("ERROR: sigwaitinfo() failed: %d\n", ret);
+            }
+          else
+            {
+              ret = 1;
+            }
+        }
+    }
+
+  net_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: netlink_notify_cancel
+ *
+ * Description:
+ *   Cancel a notification previously created with netlink_notify_response().
+ *
+ * Returned Value:
+ *   Zero (OK) is always returned.
+ *
+ ****************************************************************************/
+
+int netlink_notify_cancel(FAR struct socket *psock)
+{
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Remove this thread as waiter for response notifications for this
+   * socket.
+   */
+
+  net_lock();
+  (void)netlink_remove_waiter(conn, getpid());
+  net_unlock();
+  return OK;
 }
 
 #endif /* CONFIG_NET_NETLINK */

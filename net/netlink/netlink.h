@@ -213,6 +213,49 @@ FAR struct netlink_response_s *
   netlink_get_response(FAR struct socket *psock);
 
 /****************************************************************************
+ * Name: netlink_check_response
+ *
+ * Description:
+ *   Return true is a response is pending now.
+ *
+ * Returned Value:
+ *   True: A response is available; False; No response is available.
+ *
+ ****************************************************************************/
+
+bool netlink_check_response(FAR struct socket *psock);
+
+/****************************************************************************
+ * Name: netlink_notify_response
+ *
+ * Description:
+ *   Notify a thread until a response be available.  The thread will be
+ *   notified via CONFIG_NETLINK_SIGNAL when the response becomes available.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the response is already available.  Not signal
+ *     will be sent.
+ *   One is returned if the notification was successfully setup.
+ *   A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int netlink_notify_response(FAR struct socket *psock);
+
+/****************************************************************************
+ * Name: netlink_notify_cancel
+ *
+ * Description:
+ *   Cancel a notification previously created with netlink_notify_response().
+ *
+ * Returned Value:
+ *   Zero (OK) is always returned.
+ *
+ ****************************************************************************/
+
+int netlink_notify_cancel(FAR struct socket *psock);
+
+/****************************************************************************
  * Name: netlink_route_sendto()
  *
  * Description:
