@@ -1102,7 +1102,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   ninfo("d_len: %d d_buf: %p txhead: %p tdes3: %08x\n",
         priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->des3);
 
-  DEBUGASSERT(txdesc && (txdesc->des3 & ETH_TDES3_RD_OWN) == 0);
+  DEBUGASSERT(txdesc);
 
   /* Flush the contents of the TX buffer into physical memory */
 
@@ -1133,8 +1133,6 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       for (i = 0; i < bufcount; i++)
         {
-          /* This could be a normal event but the design does not handle it */
-
           DEBUGASSERT((txdesc->des3 & ETH_TDES3_RD_OWN) == 0);
 
           /* Set the Buffer1 address pointer */
@@ -1170,7 +1168,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
               /* The size of the transfer is the whole buffer */
 
-              txdesc->des2  = ALIGNED_BUFSIZE | ETH_TDES2_RD_IOC;
+              txdesc->des2  = ALIGNED_BUFSIZE;
               buffer        += ALIGNED_BUFSIZE;
             }
 
@@ -1193,6 +1191,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   else
 #endif
     {
+      DEBUGASSERT((txdesc->des3 & ETH_TDES3_RD_OWN) == 0);
+
       /* Set the Buffer1 address pointer */
 
       txdesc->des0 = (uint32_t)priv->dev.d_buf;
@@ -1265,8 +1265,6 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
     {
       stm32_disableint(priv, ETH_DMACIER_RIE);
     }
-
-  /* Check if the TX Buffer unavailable flag is set */
 
   MEMORY_SYNC();
 
@@ -1367,6 +1365,8 @@ static int stm32_txpoll(struct net_driver_s *dev)
            * available for another transfer.
            */
 
+          nerr("No tx descriptors available");
+
           return -EBUSY;
         }
 
@@ -1381,6 +1381,8 @@ static int stm32_txpoll(struct net_driver_s *dev)
       if (dev->d_buf == NULL)
         {
           /* Terminate the poll. */
+
+          nerr("No tx buffer available");
 
           return -ENOMEM;
         }
@@ -1457,6 +1459,14 @@ static void stm32_dopoll(struct stm32_ethmac_s *priv)
               dev->d_buf = NULL;
             }
         }
+      else
+        {
+          nerr("No tx buffers");
+        }
+    }
+  else
+    {
+      nerr("No tx descriptors\n");
     }
 }
 
@@ -1602,9 +1612,7 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
       up_clean_dcache((uintptr_t)rxdesc,
                       (uintptr_t)rxdesc + sizeof(struct eth_desc_s));
 
-      /* Get the next RX descriptor in the chain (cache coherency should not
-       * be an issue because the link address is constant.
-       */
+      /* Get the next RX descriptor in the chain */
 
       rxdesc = stm32_get_next_rxdesc(priv, rxdesc);
 
