@@ -1478,7 +1478,11 @@ static int stm32l4pwm_lptimer(FAR struct stm32l4_pwmtimer_s *priv,
   DEBUGASSERT(priv != NULL && info != NULL);
 
   pwminfo("LPTIM%u frequency: %u duty: %08x\n",
+#ifdef CONFIG_PWM_MULTICHAN
+          priv->timid, info->frequency, info->channels[0].duty);
+#else
           priv->timid, info->frequency, info->duty);
+#endif
 
   DEBUGASSERT(info->frequency > 0);
   DEBUGASSERT(info->duty >= 0 && info->duty < uitoub16(100));
@@ -1546,7 +1550,11 @@ static int stm32l4pwm_lptimer(FAR struct stm32l4_pwmtimer_s *priv,
 
   /* Compute reload value */
 
+#ifdef CONFIG_PWM_MULTICHAN
+  ub16_t duty = info->channels[0].duty;
+#else
   ub16_t duty = info->duty;
+#endif
 
   /* Duty cycle:
    *
@@ -1879,7 +1887,7 @@ static void stm32l4pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv, bool on)
 #ifdef CONFIG_STM32L4_TIM3_PWM
           case 3:
             regaddr  = STM32L4_RCC_APB1ENR1;
-            en_bit   = RCC_APB1ENR_TIM3EN;
+            en_bit   = RCC_APB1ENR1_TIM3EN;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM4_PWM
@@ -1891,7 +1899,7 @@ static void stm32l4pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv, bool on)
 #ifdef CONFIG_STM32L4_TIM5_PWM
           case 5:
             regaddr  = STM32L4_RCC_APB1ENR1;
-            en_bit   = RCC_APB1ENR_TIM5EN;
+            en_bit   = RCC_APB1ENR1_TIM5EN;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM8_PWM
@@ -2256,7 +2264,7 @@ static int stm32l4pwm_start(FAR struct pwm_lowerhalf_s *dev,
 static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
-  uint32_t resetbit;
+  uint32_t resetbit = 0;
   uint32_t regaddr;
   uint32_t regval;
   irqstate_t flags;
@@ -2306,7 +2314,7 @@ static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 #ifdef CONFIG_STM32L4_TIM3_PWM
           case 3:
             regaddr  = STM32L4_RCC_APB1RSTR1;
-            resetbit = RCC_APB1RSTR_TIM3RST;
+            resetbit = RCC_APB1RSTR1_TIM3RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM4_PWM
@@ -2318,7 +2326,7 @@ static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 #ifdef CONFIG_STM32L4_TIM5_PWM
           case 5:
             regaddr  = STM32L4_RCC_APB1RSTR1;
-            resetbit = RCC_APB1RSTR_TIM5RST;
+            resetbit = RCC_APB1RSTR1_TIM5RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM8_PWM
@@ -2349,7 +2357,7 @@ static int stm32l4pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         {
 #ifdef CONFIG_STM32L4_LPTIM1_PWM
           case 1:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32L4_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_LPTIM1RST;
             break;
 #endif

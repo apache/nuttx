@@ -92,6 +92,12 @@
 #ifndef CONFIG_STM32L4_TIM17
 #  undef CONFIG_STM32L4_TIM17_PWM
 #endif
+#ifndef CONFIG_STM32L4_LPTIM1
+#  undef CONFIG_STM32L4_LPTIM1_PWM
+#endif
+#ifndef CONFIG_STM32L4_LPTIM2
+#  undef CONFIG_STM32L4_LPTIM2_PWM
+#endif
 
 /* The basic timers (timer 6 and 7) are not capable of generating output pulses */
 
@@ -462,6 +468,40 @@
 #endif
 #define PWM_TIM17_NCHANNELS PWM_TIM17_CHANNEL1
 
+#ifdef CONFIG_STM32L4_LPTIM1_CHANNEL1
+#  ifdef CONFIG_STM32L4_LPTIM1_CH1OUT
+#    define PWM_LPTIM1_CH1CFG GPIO_LPTIM1_CH1OUT
+#  else
+#    define PWM_LPTIM1_CH1CFG 0
+#  endif
+#  ifdef CONFIG_STM32L4_LPTIM1_CH1NOUT
+#    define PWM_LPTIM1_CH1NCFG GPIO_LPTIM1_CH1NOUT
+#  else
+#    define PWM_LPTIM1_CH1NCFG 0
+#  endif
+#  define PWM_LPTIM1_CHANNEL1 1
+#else
+#  define PWM_LPTIM1_CHANNEL1 0
+#endif
+#define PWM_LPTIM1_NCHANNELS PWM_LPTIM1_CHANNEL1
+
+#ifdef CONFIG_STM32L4_LPTIM2_CHANNEL1
+#  ifdef CONFIG_STM32L4_LPTIM2_CH1OUT
+#    define PWM_LPTIM2_CH1CFG GPIO_LPTIM2_CH1OUT
+#  else
+#    define PWM_LPTIM2_CH1CFG 0
+#  endif
+#  ifdef CONFIG_STM32L4_LPTIM2_CH1NOUT
+#    define PWM_LPTIM2_CH1NCFG GPIO_LPTIM2_CH1NOUT
+#  else
+#    define PWM_LPTIM2_CH1NCFG 0
+#  endif
+#  define PWM_LPTIM2_CHANNEL1 1
+#else
+#  define PWM_LPTIM2_CHANNEL1 0
+#endif
+#define PWM_LPTIM2_NCHANNELS PWM_LPTIM2_CHANNEL1
+
 #define PWM_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define PWM_NCHANNELS PWM_MAX(PWM_TIM1_NCHANNELS, \
@@ -472,7 +512,9 @@
                       PWM_MAX(PWM_TIM8_NCHANNELS, \
                       PWM_MAX(PWM_TIM15_NCHANNELS, \
                       PWM_MAX(PWM_TIM16_NCHANNELS, \
-                              PWM_TIM17_NCHANNELS))))))))
+                      PWM_MAX(PWM_TIM17_NCHANNELS, \
+                      PWM_MAX(PWM_LPTIM1_NCHANNELS, \
+                              PWM_LPTIM2_NCHANNELS))))))))))
 
 #else
 
@@ -682,16 +724,11 @@
 #  endif
 #endif
 
-/* REVISIT: any other LPTIM implementations have more than one channel? */
-
-#define CONFIG_STM32L4_LPTIM1_CHANNEL 1
-
 #ifdef CONFIG_STM32L4_LPTIM1_PWM
 #  if !defined(CONFIG_STM32L4_LPTIM1_CHANNEL)
 #    error "CONFIG_STM32L4_LPTIM1_CHANNEL must be provided"
 #  elif CONFIG_STM32L4_LPTIM1_CHANNEL == 1
 #    define CONFIG_STM32L4_LPTIM1_CHANNEL1  1
-#    define CONFIG_STM32L4_LPTIM1_CH1MODE   CONFIG_STM32L4_LPTIM1_CHMODE
 #    define PWM_LPTIM1_CH1CFG               GPIO_LPTIM1_CH1OUT
 #    define PWM_LPTIM1_CH1NCFG              0
 #  else
@@ -699,16 +736,11 @@
 #  endif
 #endif
 
-/* REVISIT: any other LPTIM implementations have more than one channel? */
-
-#define CONFIG_STM32L4_LPTIM2_CHANNEL 1
-
 #ifdef CONFIG_STM32L4_LPTIM2_PWM
 #  if !defined(CONFIG_STM32L4_LPTIM2_CHANNEL)
 #    error "CONFIG_STM32L4_LPTIM2_CHANNEL must be provided"
 #  elif CONFIG_STM32L4_LPTIM2_CHANNEL == 1
 #    define CONFIG_STM32L4_LPTIM2_CHANNEL1  1
-#    define CONFIG_STM32L4_LPTIM2_CH1MODE   CONFIG_STM32L4_LPTIM2_CHMODE
 #    define PWM_LPTIM2_CH1CFG               GPIO_LPTIM2_CH1OUT
 #    define PWM_LPTIM2_CH1NCFG              0
 #  else

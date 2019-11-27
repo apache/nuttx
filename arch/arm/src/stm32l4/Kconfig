@@ -2993,10 +2993,122 @@ endif # !STM32L4_PWM_MULTICHAN
 
 endif # STM32L4_TIM17_PWM
 
+config STM32L4_LPTIM1_PWM
+	bool "LPTIM1 PWM"
+	default n
+	depends on STM32L4_LPTIM1
+	select PWM
+	---help---
+		Reserve Low-power timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32L4_LPTIM1_PWM
+
+if STM32L4_PWM_MULTICHAN
+
+config STM32L4_LPTIM1_CHANNEL1
+	bool "LPTIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32L4_LPTIM1_CHANNEL1
+
+config STM32L4_LPTIM1_CH1OUT
+	bool "LPTIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32L4_LPTIM1_CH1NOUT
+	bool "LPTIM1 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_LPTIM1_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32L4_LPTIM1_CHANNEL1
+
+endif # STM32L4_PWM_MULTICHAN
+
+if !STM32L4_PWM_MULTICHAN
+
+config STM32L4_LPTIM1_CHANNEL
+	int "LPTIM1 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If LPTIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+endif # !STM32L4_PWM_MULTICHAN
+
+endif # STM32L4_LPTIM1_PWM
+
+config STM32L4_LPTIM2_PWM
+	bool "LPTIM2 PWM"
+	default n
+	depends on STM32L4_LPTIM2
+	select PWM
+	---help---
+		Reserve Low-power timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32L4_LPTIM2_PWM
+
+if STM32L4_PWM_MULTICHAN
+
+config STM32L4_LPTIM2_CHANNEL1
+	bool "LPTIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32L4_LPTIM2_CHANNEL1
+
+config STM32L4_LPTIM2_CH1OUT
+	bool "LPTIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32L4_LPTIM2_CH1NOUT
+	bool "LPTIM2 Channel 1 Complementary Output"
+	default n
+	depends on STM32L4_LPTIM2_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32L4_LPTIM2_CHANNEL1
+
+endif # STM32L4_PWM_MULTICHAN
+
+if !STM32L4_PWM_MULTICHAN
+
+config STM32L4_LPTIM2_CHANNEL
+	int "LPTIM2 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If LPTIM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+endif # !STM32L4_PWM_MULTICHAN
+
+endif # STM32L4_LPTIM2_PWM
+
 config STM32L4_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32L4_TIM1_PWM || STM32L4_TIM2_PWM || STM32L4_TIM3_PWM || STM32L4_TIM4_PWM || STM32L4_TIM5_PWM || STM32L4_TIM8_PWM || STM32L4_TIM15_PWM || STM32L4_TIM16_PWM || STM32L4_TIM17_PWM
+	depends on STM32L4_TIM1_PWM || STM32L4_TIM2_PWM || STM32L4_TIM3_PWM || STM32L4_TIM4_PWM || STM32L4_TIM5_PWM || STM32L4_TIM8_PWM || STM32L4_TIM15_PWM || STM32L4_TIM16_PWM || STM32L4_TIM17_PWM || STM32L4_LPTIM1_PWM || STM32L4_LPTIM2_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
