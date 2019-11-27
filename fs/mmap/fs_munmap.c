@@ -198,6 +198,7 @@ int munmap(FAR void *start, size_t length)
     {
       newaddr = kumm_realloc(curr->addr, sizeof(struct fs_rammap_s) + length);
       DEBUGASSERT(newaddr == (FAR void *)(curr->addr));
+      UNUSED(newaddr); /* May not be used */
       curr->length = length;
     }
 
