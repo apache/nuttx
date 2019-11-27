@@ -125,7 +125,7 @@ static uint16_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
       /* Check for data or connection availability events. */
 
       eventset = 0;
-      if ((flags & ICMPv6_ECHOREPLY) != 0)
+      if ((flags & ICMPv6_NEWDATA) != 0)
         {
           eventset |= (POLLIN & info->fds->events);
         }

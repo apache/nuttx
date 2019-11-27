@@ -372,7 +372,6 @@ struct net_driver_s
    *      socket-less packet transfers.  There events include:
    *
    *        ICMP data receipt:     ICMP_NEWDATA, ICMPv6_NEWDATA
-   *        ICMP ECHO replies:     ICMP_ECHOREPLY, ICMPv6_ECHOREPLY
    *        Driver Tx poll events: ARP_POLL, ICMP_POLL. ICMPv6_POLL
    *        IP Forwarding:         IPFWD_POLL
    *

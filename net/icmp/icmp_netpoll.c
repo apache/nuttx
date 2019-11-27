@@ -125,7 +125,7 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
       /* Check for data or connection availability events. */
 
       eventset = 0;
-      if ((flags & ICMP_ECHOREPLY) != 0)
+      if ((flags & ICMP_NEWDATA) != 0)
         {
           eventset |= (POLLIN & info->fds->events);
         }

@@ -184,7 +184,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check if we have just received a ICMP ECHO reply. */
 
-      if ((flags & ICMP_ECHOREPLY) != 0)    /* No incoming data */
+      if ((flags & ICMP_NEWDATA) != 0)    /* No incoming data */
         {
           unsigned int recvsize;
 
@@ -232,6 +232,10 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           DEBUGASSERT(conn->nreqs > 0);
           conn->nreqs--;
+
+          /* Indicate that the data has been consumed */
+
+          flags &= ~ICMP_NEWDATA;
           goto end_wait;
         }
 
@@ -491,7 +495,7 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   state.recv_cb = icmp_callback_alloc(dev, conn);
   if (state.recv_cb != NULL)
     {
-      state.recv_cb->flags = (ICMP_ECHOREPLY | NETDEV_DOWN);
+      state.recv_cb->flags = (ICMP_NEWDATA | NETDEV_DOWN);
       state.recv_cb->priv  = (FAR void *)&state;
       state.recv_cb->event = recvfrom_eventhandler;
       state.recv_result    = -EINTR; /* Assume sem-wait interrupted by signal */

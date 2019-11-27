@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The following flags may be set in the set of flags by the lower, device-
  * interfacing layer before calling through the socket layer callback. The
  * TCP_ACKDATA, XYZ_NEWDATA, and TCP_CLOSE flags may be set at the same time,
@@ -73,8 +74,10 @@
  *
  *   TCP_NEWDATA      IN: Set to indicate that the peer has sent us new data.
  *   UDP_NEWDATA     OUT: Cleared (only) by the socket layer logic to indicate
- *   PKT_NEWDATA          that the new data was consumed, suppressing further
- *   BLUETOOTH_NEWDATA    attempts to process the new data.
+ *   ICMP_NEWDATA         that the new data was consumed, suppressing further
+ *   ICMPv6_NEWDATA       attempts to process the new data.
+ *   PKT_NEWDATA
+ *   BLUETOOTH_NEWDATA
  *   IEEE802154_NEWDATA
  *
  *   TCP_SNDACK       IN: Not used; always zero
@@ -119,11 +122,6 @@
  * Device Specific Events:  These are events that may be notified through
  * callback lists residing in the network device structure.
  *
- *   ICMP_NEWDATA     IN: Set to indicate that the peer has sent us new data.
- *   ICMPv6_NEWDATA OUT: Cleared (only) by the socket layer logic to indicate
- *                       that the new data was consumed, suppressing further
- *                       attempts to process the new data.
- *
  *   ARP_POLL         IN: Used for polling the socket layer.  This is provided
  *                        periodically from the drivers to support (1) timed
  *                        operations, and (2) to check if the ARP layer needs
@@ -157,18 +155,6 @@
  *                        The appdata pointer is not used in this case.
  *                   OUT: Not used
  *
- *   ICMP_ECHOREPLY   IN: An ICMP Echo Reply has been received.  Used to support
- *                        ICMP ping from the socket layer. (ICMPv4 only)
- *                   OUT: Cleared (only) by the socket layer logic to indicate
- *                        that the reply was processed, suppressing further
- *                        attempts to process the reply.
- *
- *   ICMPv6_ECHOREPLY IN: An ICMP Echo Reply has been received.  Used to support
- *                        ICMP ping from the socket layer. (ICMPv6 only)
- *                   OUT: Cleared (only) by the socket layer logic to indicate
- *                        that the reply was processed, suppressing further
- *                        attempts to process the reply.
- *
  *   NETDEV_DOWN:     IN: The network device has been taken down.
  *                   OUT: Not used
  */
@@ -178,6 +164,8 @@
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
 #define UDP_NEWDATA        TCP_NEWDATA
+#define ICMP_NEWDATA       TCP_NEWDATA
+#define ICMPv6_NEWDATA     TCP_NEWDATA
 #define BLUETOOTH_NEWDATA  TCP_NEWDATA
 #define IEEE802154_NEWDATA TCP_NEWDATA
 #define PKT_NEWDATA        TCP_NEWDATA
@@ -197,12 +185,10 @@
 #define TCP_CONNECTED      (1 << 8)
 #define TCP_TIMEDOUT       (1 << 9)
 
-/* Bits 10-12: Device specific event bits */
+/* Bits 10-11: Unused, available */
 
-#define ICMP_NEWDATA       TCP_NEWDATA
-#define ICMPv6_NEWDATA     TCP_NEWDATA
-#define ICMP_ECHOREPLY     (1 << 10)
-#define ICMPv6_ECHOREPLY   (1 << 11)
+/* Bit 12: Device specific event bits */
+
 #define NETDEV_DOWN        (1 << 12)
 
 /* Bits 13-15: Encoded device specific poll events.  Unlike connection
