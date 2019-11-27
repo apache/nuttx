@@ -137,13 +137,6 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLHUP | POLLERR);
         }
 
-      /*  ICMP_POLL is a sign that we are free to send data. */
-
-      else if ((flags & DEVPOLL_MASK) == ICMP_POLL)
-        {
-          eventset |= (POLLOUT & info->fds->events);
-        }
-
       /* Awaken the caller of poll() is requested event occurred. */
 
       if (eventset)
@@ -221,11 +214,6 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   cb->priv  = (FAR void *)info;
   cb->event = icmp_poll_eventhandler;
 
-  if ((fds->events & POLLOUT) != 0)
-    {
-      cb->flags |= ICMP_POLL;
-    }
-
   if ((fds->events & POLLIN) != 0)
     {
       cb->flags |= ICMP_NEWDATA;
@@ -245,6 +233,12 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       fds->revents |= (POLLRDNORM & fds->events);
     }
+
+  /* Always report POLLWRNORM if caller request it because we don't utilize
+   * IOB buffer for sending.
+   */
+
+  fds->revents |= (POLLWRNORM & fds->events);
 
   /* Check if any requested events are already in effect */
 
