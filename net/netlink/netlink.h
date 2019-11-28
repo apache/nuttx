@@ -45,6 +45,8 @@
 #include <sys/types.h>
 #include <queue.h>
 #include <semaphore.h>
+#include <signal.h>
+#include <poll.h>
 
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
@@ -86,6 +88,12 @@ struct netlink_conn_s
   uint8_t crefs;                     /* Reference counts on this instance */
   uint8_t protocol;                  /* See NETLINK_* definitions */
 
+  /* poll() support */
+
+  FAR sem_t *pollsem;                /* Used to wakeup poll() */
+  FAR pollevent_t *pollevent;        /* poll() wakeup event */
+  struct sigaction oact;             /* Previous signal action */
+  
   /* Threads waiting for a response */
 
   pid_t waiter[CONFIG_NETLINK_MAXPENDING];

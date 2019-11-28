@@ -144,13 +144,13 @@ static void netlink_notify_waiters(FAR struct netlink_conn_s *conn)
 
           value.sival_ptr = conn;
           ret = nxsig_queue((int)conn->waiter[i],
-		                    (int)CONFIG_NETLINK_SIGNAL, value);
+                            (int)CONFIG_NETLINK_SIGNAL, value);
 #else
           ret = nxsig_queue((int)conn->waiter[i],
-	                        (int)CONFIG_NETLINK_SIGNAL, conn);
+                            (int)CONFIG_NETLINK_SIGNAL, conn);
 #endif
           if (ret < 0)
-		    {
+            {
               nerr("ERROR: nxsig_queue() failed: %d\n", ret);
               UNUSED(ret);
             }

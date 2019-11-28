@@ -44,11 +44,13 @@
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/net.h>
 
 #include "netlink/netlink.h"
@@ -485,6 +487,89 @@ static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 }
 
 /****************************************************************************
+ * Name: netlink_notify_teardown
+ *
+ * Description:
+ *   Teardown a Netlink response notification.
+ *
+ * Input Parameters:
+ *   conn - Netlink connection structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void netlink_notify_teardown(FAR struct netlink_conn_s *conn)
+{
+  sched_lock();
+  if (conn->pollsem != NULL || conn->pollevent != NULL)
+    {
+      /* Allow another poll() */
+
+      conn->pollsem   = NULL;
+      conn->pollevent = NULL;
+
+      /* Detach the signal handler by restoring the previous signal handler
+       * state.
+       */
+
+      (void)nxsig_action(CONFIG_NETLINK_SIGNAL, &conn->oact, NULL, true);
+    }
+
+  sched_unlock();
+}
+
+/****************************************************************************
+ * Name: netlink_response_available
+ *
+ * Description:
+ *   Handle a Netlink response available notification
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void netlink_response_available(int signo, FAR siginfo_t *siginfo,
+                                       FAR void *context)
+{
+  FAR struct netlink_conn_s *conn;
+
+  /* The si_value member should be a reference to a Netlink connection
+   * structure.
+   */
+
+  DEBUGASSERT(siginfo != NULL);
+  conn = (FAR struct netlink_conn_s *)siginfo->si_value.sival_ptr;
+  DEBUGASSERT(conn != NULL);
+
+  /* This should always be true ... but maybe not in some race condition?
+   * REVISIT:  Is locking the scheduler strong enough Kung Fu here?  Could
+   * the awakened thread try to poll() again on another CPU?
+   */
+
+  sched_lock();
+  if (conn->pollsem != NULL && conn->pollevent != NULL)
+    {
+      /* Wake up the poll() with POLLIN */
+
+       *conn->pollevent |= POLLIN;
+       (void)nxsem_post(conn->pollsem);
+    }
+  else
+    {
+      nwarn("WARNING: Missing references in connection.\n");
+    }
+
+  netlink_notify_teardown(conn);
+  sched_unlock();
+}
+
+/****************************************************************************
  * Name: netlink_poll
  *
  * Description:
@@ -510,7 +595,11 @@ static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
+  FAR struct netlink_conn_s *conn;
   int ret;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
   /* Check if we are setting up or tearing down the poll */
 
@@ -549,32 +638,82 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) != 0)
         {
-#if 0
-          /* Call netlink_notify_response() to receive a signal when
+          struct sigaction act;
+
+          /* Set up a signal handler to recive the notification when
            * a response has been queued.
-           *
-           * REVISIT:  How shall we pass the FDS info to the signal
-           * handler?
            */
 
-#else
-#warning Missing logic for NETLINK POLLIN
-          nxsem_post(fds->sem);
-          net_unlock();
-          return -ENOSYS;
-#endif
+          if (conn->pollsem != NULL || conn->pollevent != NULL)
+            {
+               nerr("ERROR: Multiple polls() on socket not supported.\n");
+               net_unlock();
+               return -EBUSY;
+            }
+
+          conn->pollsem    = fds->sem;
+          conn->pollevent  = &fds->revents;
+
+          memset(&act, 0, sizeof(act));
+          act.sa_sigaction = netlink_response_available;
+          act.sa_flags     = SA_SIGINFO;
+          ret = nxsig_action(CONFIG_NETLINK_SIGNAL, &act, &conn->oact,
+                             true);
+          if (ret < 0)
+            {
+              nerr("ERROR: nxsig_action() failed: %d\n", ret);
+            }
+          else if (conn->oact.sa_handler != SIG_DFL &&
+                   conn->oact.sa_handler != NULL)
+            {
+              nerr("ERROR: Signal being used for some other purpose\n");
+              netlink_notify_teardown(conn);
+              ret = -ENOEXEC;
+            }
+          else
+            {
+              /* Call netlink_notify_response() to receive a signal when
+               * a response has been queued.
+               */
+
+              ret =  netlink_notify_response(psock);
+              if (ret < 0)
+                {
+                  nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
+                  netlink_notify_teardown(conn);
+                }
+              else if (ret == 0)
+                {
+                  /* The return value of zero means that a response is
+                   * already available and that no notification is
+                   * forthcoming.
+                   */
+
+                  netlink_notify_teardown(conn);
+                  fds->revents = POLLIN;
+                  nxsem_post(fds->sem);
+                }
+              else
+                {
+                  ret = OK;
+                }
+            }
+        }
+      else
+        {
+          /* There will not be any wakeups coming?  Probably an error? */
+
+          ret = OK;
         }
 
-      /* There will not be any wakeups coming?  Probably an error? */
-
       net_unlock();
-      ret = OK;
     }
   else
     {
       /* Cancel any response notifications */
 
       ret = netlink_notify_cancel(psock);
+      netlink_notify_teardown(conn);
     }
 
   return ret;
