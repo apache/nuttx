@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/fe310_memorymap.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,41 +30,32 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
+#ifndef _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
+#define _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-/* Include RISC-V architecture-specific IRQ definitions */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
-#endif
+#include "hardware/fe310_memorymap.h"
+#include "hardware/fe310_uart.h"
+#include "hardware/fe310_clic.h"
+#include "hardware/fe310_plic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+/* Idle thread stack starts from _ebss */
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#ifndef __ASSEMBLY__
+#define FE310_IDLESTACK_BASE  (uint32_t)&_ebss
+#else
+#define FE310_IDLESTACK_BASE  _ebss
+#endif
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#define FE310_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
+#define FE310_IDLESTACK_TOP  (FE310_IDLESTACK_BASE + FE310_IDLESTACK_SIZE)
 
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+#endif  /* _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H */
+

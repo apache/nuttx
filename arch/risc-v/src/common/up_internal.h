@@ -116,6 +116,33 @@ extern "C"
 EXTERN volatile uint32_t *g_current_regs;
 EXTERN uint32_t g_idle_topstack;
 
+/* Address of the saved user stack pointer */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
+EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
+#endif
+
+/* These 'addresses' of these values are setup by the linker script.  They are
+ * not actual uint32_t storage locations! They are only used meaningfully in the
+ * following way:
+ *
+ *  - The linker script defines, for example, the symbol_sdata.
+ *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *    that the value _sdata is the address of a uint32_t variable _data (it is
+ *    not!).
+ *  - We can recoved the linker value then by simply taking the address of
+ *    of _data.  like:  uint32_t *pdata = &_sdata;
+ */
+
+EXTERN uint32_t _stext;           /* Start of .text */
+EXTERN uint32_t _etext;           /* End_1 of .text + .rodata */
+EXTERN const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
+EXTERN uint32_t _sdata;           /* Start of .data */
+EXTERN uint32_t _edata;           /* End+1 of .data */
+EXTERN uint32_t _sbss;            /* Start of .bss */
+EXTERN uint32_t _ebss;            /* End+1 of .bss */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -129,13 +156,12 @@ void up_boot(void);
 /* Memory allocation ********************************************************/
 
 void up_addregion(void);
-void up_allocat_eheap(FAR void **heap_start, size_t *heap_size);
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 
 /* IRQ initialization *******************************************************/
 
 void up_irqinitialize(void);
 void up_copystate(uint32_t *dest, uint32_t *src);
-void up_dumpstate(void);
 void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
@@ -146,16 +172,37 @@ void riscv_timer_initialize(void);
 
 /* Low level serial output **************************************************/
 
-void up_serialinit(void);
 void up_lowputc(char ch);
 void up_puts(const char *str);
 void up_lowputs(const char *str);
 
+#ifdef USE_SERIALDRIVER
+void up_serialinit(void);
+#else
+#  define up_serialinit()
+#endif
+
+#ifdef USE_EARLYSERIALINIT
+void up_earlyserialinit(void);
+#else
+#  define up_earlyserialinit()
+#endif
+
+#ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
+#else
+#  define rpmsg_serialinit()
+#endif
 
 /* The OS start routine    **************************************************/
 
 void nx_start(void);
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

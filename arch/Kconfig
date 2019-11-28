@@ -58,6 +58,7 @@ config ARCH_RENESAS
 config ARCH_RISCV
 	bool "RISC-V"
 	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
 	---help---

@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/fe310_config.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,6 +14,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,41 +33,37 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
+#ifndef __ARCH_RISCV_SRC_FE310_FE310_CONFIG_H
+#define __ARCH_RISCV_SRC_FE310_FE310_CONFIG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
+#include <nuttx/config.h>
 
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-/* Include RISC-V architecture-specific IRQ definitions */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
-#endif
+#include <arch/chip/chip.h>
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+#undef HAVE_UART_DEVICE
+#if defined(CONFIG_FE310_UART0) || defined(CONFIG_FE310_UART1)
+#  define HAVE_UART_DEVICE 1
+#endif
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_FE310_UART0)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_FE310_UART1)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
+#endif
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_FE310_FE310_CONFIG_H */

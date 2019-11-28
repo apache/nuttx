@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/src/common/up_arch.h
+ * arch/risc-v/include/fe310/irq.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,9 +14,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,37 +30,65 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
+#ifndef __ARCH_RISCV_INCLUDE_FE310_IRQ_H
+#define __ARCH_RISCV_INCLUDE_FE310_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Machine Interrupt Enable bit in mstatus register */
+
+#define MSTATUS_MIE  (0x1 << 3)
+
+/* Map RISC-V exception code to NuttX IRQ */
+
+/* IRQ 0-15 : (exception:interrupt=0) */
+
+#define FE310_IRQ_IAMISALIGNED  (0) /* Instruction Address Misaligned */
+#define FE310_IRQ_IAFAULT       (1) /* Instruction Address Fault */
+#define FE310_IRQ_IINSTRUCTION  (2) /* Illegal Instruction */
+#define FE310_IRQ_BPOINT        (3) /* Break Point */
+#define FE310_IRQ_LAMISALIGNED  (4) /* Load Address Misaligned */
+#define FE310_IRQ_LAFAULT       (5) /* Load Access Fault */
+#define FE310_IRQ_SAMISALIGNED  (6) /* Store/AMO Address Misaligned */
+#define FE310_IRQ_SAFAULT       (7) /* Store/AMO Access Fault */
+#define FE310_IRQ_ECALLU        (8) /* Environment Call from U-mode */
+                                    /* 9-10: Reserved */
+
+#define FE310_IRQ_ECALLM       (11) /* Environment Call from M-mode */
+                                    /* 12-15: Reserved */
+
+/* IRQ 16- : (async event:interrupt=1) */
+
+#define FE310_IRQ_ASYNC        (16)
+#define FE310_IRQ_MSOFT    (FE310_IRQ_ASYNC + 3)  /* Machine Software Int */
+#define FE310_IRQ_MTIMER   (FE310_IRQ_ASYNC + 7)  /* Machine Timer Int */
+#define FE310_IRQ_MEXT     (FE310_IRQ_ASYNC + 11) /* Machine External Int */
+
+/* Machine Grobal External Interrupt */
+
+#define FE310_IRQ_UART0    (FE310_IRQ_MEXT + 3)
+#define FE310_IRQ_UART1    (FE310_IRQ_MEXT + 4)
+
+/* Total number of IRQs */
+
+#define NR_IRQS            (FE310_IRQ_UART1 + 1)
+
 /****************************************************************************
- * Inline Functions
+ * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
-
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -75,14 +100,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Atomic modification of registers */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+EXTERN irqstate_t  up_irq_save(void);
+EXTERN void up_irq_restore(irqstate_t);
+EXTERN irqstate_t up_irq_enable(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */
+#endif /* __ARCH_RISCV_INCLUDE_FE310_IRQ_H */
+

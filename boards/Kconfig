@@ -297,6 +297,13 @@ config ARCH_BOARD_GAPUINO
 	---help---
 		Nuttx port for gapuino, a GAP8 evaluation board.
 
+config ARCH_BOARD_HIFIVE1_REVB
+	bool "HiFive1 Rev B board"
+	depends on ARCH_CHIP_FE310
+	---help---
+		This is the board configuration for the port of NuttX to the SiFive HiFive1
+		Rev B board.  This board features the RISC-V FE310-G002
+
 config ARCH_BOARD_HYMINI_STM32V
 	bool "HY-Mini STM32v board"
 	depends on ARCH_CHIP_STM32F103VC
@@ -1998,6 +2005,7 @@ config ARCH_BOARD
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "gapuino"                  if ARCH_BOARD_GAPUINO
+	default "hifive1-revb"             if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
@@ -2709,6 +2717,9 @@ source "boards/risc-v/gap8/gapuino/Kconfig"
 endif
 if ARCH_BOARD_NR5M100_NEXYS4
 source "boards/risc-v/nr5m100/nr5m100-nexys4/Kconfig"
+endif
+if ARCH_BOARD_HIFIVE_REVB
+source "boards/risc-v/fe310/hifive1-revb/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"

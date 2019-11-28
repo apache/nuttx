@@ -1,0 +1,62 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "FE310 Configuration Options"
+
+choice
+	prompt "FE310 Chip Selection"
+	default ARCH_CHIP_FE310_G002
+	depends on ARCH_CHIP_FE310
+
+config ARCH_CHIP_FE310_G002
+	bool "FE310_G002"
+	select FE310_HAVE_UART0
+	select FE310_HAVE_GPIO
+	---help---
+		FE310, RV32IMAC 32Mbit SPI-Flash, 16KB SRAM
+
+endchoice
+
+config FE310_G002
+	bool
+	default y
+	select FE310_HAVE_UART0
+
+menu "FE310 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config FE310_HAVE_UART0
+	bool
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+# These are the peripheral selections proper
+
+config FE310_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select FE310_UART
+
+endmenu
+
+config FE310_UART_RX_BUF_SIZE
+	int "UART RX Bufer size"
+	default 64
+	depends on FE310_UART
+	---help---
+		Size of RX buffers for FE310 UARTs
+
+config FE310_UART_TX_BUF_SIZE
+	int "UART TX Bufer size"
+	default 64
+	depends on FE310_UART
+	---help---
+		Size of TX buffers for FE310 UARTs
+

@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/hardware/fe310_memorymap.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,41 +30,21 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-/* Include RISC-V architecture-specific IRQ definitions */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
-#endif
+#ifndef __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_MEMORYMAP_H
+#define __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+/* Register Base Address ****************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#define FE310_CLIC_BASE    0x02000000
+#define FE310_PLIC_BASE    0x0c000000
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#define FE310_GPIO_BASE    0x10012000  /* 0x10012000 - 0x10012fff: GPIO  */
+#define FE310_UART0_BASE   0x10013000  /* 0x10013000 - 0x10013fff: UART0 */
+#define FE310_UART1_BASE   0x10023000  /* 0x10023000 - 0x10023fff: UART1 */
 
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_MEMORYMAP_H */
+

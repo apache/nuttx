@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/src/common/up_arch.h
+ * arch/risc-v/src/fe310/fe310_timerisr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,56 +33,108 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include <stdint.h>
+#include <time.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+
+#include "fe310.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
+#define getreg64(a)   (*(volatile uint64_t *)(a))
+#define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+static bool _b_tick_started = false;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  fe310_reload_mtimecmp
+ ****************************************************************************/
+
+static void fe310_reload_mtimecmp(void)
 {
-#else
-#define EXTERN extern
-#endif
+  irqstate_t flags = spin_lock_irqsave();
 
-/* Atomic modification of registers */
+  uint64_t current;
+  uint64_t next;
 
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+  if (!_b_tick_started)
+    {
+      _b_tick_started = true;
+      current = getreg64(FE310_CLIC_MTIME);
+    }
+  else
+    {
+      current = getreg64(FE310_CLIC_MTIMECMP);
+    }
 
-#undef EXTERN
-#if defined(__cplusplus)
+  uint64_t tick = 100000; /* TODO */
+  next = current + tick;
+
+  putreg64(next, FE310_CLIC_MTIMECMP);
+
+  spin_unlock_irqrestore(flags);
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */
+/****************************************************************************
+ * Name:  fe310_timerisr
+ ****************************************************************************/
+
+static int fe310_timerisr(int irq, void *context, FAR void *arg)
+{
+  fe310_reload_mtimecmp();
+
+  /* Process timer interrupt */
+
+  nxsched_process_timer();
+  return 0;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: riscv_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
+
+void riscv_timer_initialize(void)
+{
+  /* Attach timer interrupt handler */
+
+  (void)irq_attach(FE310_IRQ_MTIMER, fe310_timerisr, NULL);
+
+  /* Reload CLIC mtimecmp */
+
+  fe310_reload_mtimecmp();
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(FE310_IRQ_MTIMER);
+}
+

@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/fe310_irq_dispatch.c
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,41 +30,91 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
+#include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
+
 #include <nuttx/irq.h>
-#include <arch/chip/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-/* Include RISC-V architecture-specific IRQ definitions */
+#include "up_arch.h"
+#include "up_internal.h"
 
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
+#include "group/group.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+volatile uint32_t * g_current_regs;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * fe310_dispatch_irq
+ ****************************************************************************/
+
+void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
+{
+  uint32_t  irq = (vector >> 27) | (vector & 0xf);
+  uint32_t *mepc = regs;
+
+  if (FE310_IRQ_MEXT == irq)
+    {
+      /* Read & write FE310_PLIC_CLAIM to clear pending */
+
+      uint32_t val = getreg32(FE310_PLIC_CLAIM);
+      putreg32(val, FE310_PLIC_CLAIM);
+
+      irq += val;
+    }
+
+  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+
+  if (FE310_IRQ_ECALLM == irq)
+    {
+      *mepc += 4;
+    }
+
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC();
+#else
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * g_current_regs is also used to manage interrupt level context switches.
+   *
+   * Nested interrupts are not supported
+   */
+
+  DEBUGASSERT(g_current_regs == NULL);
+  g_current_regs = regs;
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+  /* If a context switch occurred while processing the interrupt then
+   * g_current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
 
-typedef uint32_t  irqstate_t;
+  regs = (uint32_t *)g_current_regs;
+  g_current_regs = NULL;
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+  /* Set machine previous privilege mode to machine mode */
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+  *(regs + REG_INT_CTX_NDX) |= 0x3 << 11;
 
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+  return regs;
+}
+

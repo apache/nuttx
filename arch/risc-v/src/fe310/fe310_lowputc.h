@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/fe310_lowputc.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,6 +14,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,41 +33,43 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
+#ifndef __ARCH_RISCV_SRC_FE310_FE310_LOWPUTC_H
+#define __ARCH_RISCV_SRC_FE310_FE310_LOWPUTC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
+#include <nuttx/config.h>
 
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
+#include "chip.h"
 
-/* Include RISC-V architecture-specific IRQ definitions */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Name: fe310_lowsetup
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+EXTERN void fe310_lowsetup(void);
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_FE310_FE310_LOWPUTC_H */
 
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */

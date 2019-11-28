@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/fe310/hardware/fe310_plic.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,41 +30,17 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-/* Include RISC-V architecture-specific IRQ definitions */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
-#endif
+#ifndef __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PLIC_H
+#define __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PLIC_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+#define FE310_PLIC_PRIORITY    (FE310_PLIC_BASE + 0x000000)
+#define FE310_PLIC_PENDING1    (FE310_PLIC_BASE + 0x001000)
+#define FE310_PLIC_ENABLE1     (FE310_PLIC_BASE + 0x002000)
+#define FE310_PLIC_THRESHOLD   (FE310_PLIC_BASE + 0x200000)
+#define FE310_PLIC_CLAIM       (FE310_PLIC_BASE + 0x200004)
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PLIC_H */

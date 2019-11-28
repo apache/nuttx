@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/src/common/up_arch.h
+ * arch/risc-v/src/fe310/fe310_init.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,9 +14,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,56 +30,100 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_RISCV_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include <arch/board/board.h>
+
+#include "fe310.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
 #else
-#define EXTERN extern
+#  define showprogress(c)
 #endif
 
-/* Atomic modification of registers */
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
+ * linker script. _ebss lies at the end of the BSS region. The idle task
+ * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
+ * The IDLE thread is the thread that the system boots on and, eventually,
+ * becomes the IDLE, do nothing task that runs only when there is nothing
+ * else to run.  The heap continues from there until the end of memory.
+ * g_idle_topstack is a read-only variable the provides this computed
+ * address.
+ */
 
-#undef EXTERN
-#if defined(__cplusplus)
+uint32_t g_idle_topstack = FE310_IDLESTACK_TOP;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: fe310_start
+ ****************************************************************************/
+
+void __fe310_start(void)
+{
+  const uint32_t *src;
+  uint32_t *dest;
+
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = &_sbss; dest < &_ebss; )
+    {
+      *dest++ = 0;
+    }
+
+  /* Move the initialized data section from his temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+    {
+      *dest++ = *src++;
+    }
+
+  showprogress('A');
+
+  /* Configure the UART so we can get debug output */
+
+  fe310_lowsetup();
+
+  showprogress('B');
+
+#ifdef USE_EARLYSERIALINIT
+  up_earlyserialinit();
+#endif
+  /* Do board initialization */
+
+  fe310_boardinitialize();
+
+  showprogress('C');
+
+  /* Call nx_start() */
+
+  nx_start();
+
+  /* Shouldn't get here */
+
+  for (; ; );
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */
+

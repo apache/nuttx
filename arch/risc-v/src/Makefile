@@ -229,4 +229,4 @@ info:
 	@echo $(ASRCS)
 	@echo $(CONFIG_ARCH_CHIP)
 
-#-include Make.dep
+-include Make.dep
