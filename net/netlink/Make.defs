@@ -38,7 +38,7 @@
 ifeq ($(CONFIG_NET_NETLINK),y)
 
 SOCK_CSRCS += netlink_sockif.c
-NET_CSRCS += netlink_conn.c
+NET_CSRCS += netlink_conn.c netlink_notifier.c
 
 ifeq ($(CONFIG_NETLINK_ROUTE),y)
 NET_CSRCS += netlink_route.c

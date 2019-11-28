@@ -501,9 +501,9 @@ int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
  * Name: netdown_notifier_setup
  *
  * Description:
- *   Set up to perform a callback to the worker function the network goes
- *   down.  The worker function will execute on the high priority worker
- *   thread.
+ *   Set up to perform a callback to the worker function when the network
+ *   goes down.  The worker function will execute on the high priority
+ *   worker thread.
  *
  * Input Parameters:
  *   worker - The worker function to execute on the high priority work

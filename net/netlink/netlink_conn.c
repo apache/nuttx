@@ -50,7 +50,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/signal.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netlink.h>
@@ -111,112 +110,40 @@ static void _netlink_semgive(FAR sem_t *sem)
 }
 
 /****************************************************************************
- * Name: netlink_notify_waiters
+ * Name: netlink_response_available
  *
  * Description:
- *   Notify all threads waiting for a response.
+ *   Handle a Netlink response available notification.
  *
- * Assumptions:
- *   The network is locked.
+ * Input Parameters:
+ *   Standard work handler parameters
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-static void netlink_notify_waiters(FAR struct netlink_conn_s *conn)
+static void netlink_response_available(FAR void *arg)
 {
-  int ret;
-  int i;
-
-  /* Notify every pending thread.  Lock the scheduler while we do this so
-   * that there is no thrashing:  All waiters will be restarted, but only
-   * the highest priority waiter will get to run and it will receive the
-   * response.
+  /* The entire notifier entry is passed to us.  That is because we are
+   * responsible for disposing of the entry via kmm_free() when we are
+   * finished with it.
    */
 
-  sched_lock();
-  for (i = 0; i < CONFIG_NETLINK_MAXPENDING; i++)
-    {
-      if (conn->waiter[i] > 0)
-        {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
+  FAR struct work_notifier_entry_s *notifier =
+    (FAR struct work_notifier_entry_s *)arg;
+  FAR sem_t *waitsem;
 
-          /* Send the CONFIG_NETLINK_SIGNAL signal to the waiter. */
+  DEBUGASSERT(notifier != NULL && notifier->info.qualifier != NULL);
+  waitsem = (FAR sem_t *)notifier->info.arg;
 
-          value.sival_ptr = conn;
-          ret = nxsig_queue((int)conn->waiter[i],
-                            (int)CONFIG_NETLINK_SIGNAL, value);
-#else
-          ret = nxsig_queue((int)conn->waiter[i],
-                            (int)CONFIG_NETLINK_SIGNAL, conn);
-#endif
-          if (ret < 0)
-            {
-              nerr("ERROR: nxsig_queue() failed: %d\n", ret);
-              UNUSED(ret);
-            }
+  /* Free the notifier entry */
 
-          conn->waiter[i] = NETLINK_NO_WAITER;
-        }
-    }
+  kmm_free(notifier);
 
-  sched_unlock();
-}
+  /* wakeup the waiter */
 
-/****************************************************************************
- * Name: netlink_add_waiter
- *
- * Description:
- *   Add one more waiter to the list of waiters.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int netlink_add_waiter(FAR struct netlink_conn_s *conn)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_NETLINK_MAXPENDING; i++)
-    {
-      if (conn->waiter[i] <= 0)
-        {
-          conn->waiter[i] = getpid();
-          return OK;
-        }
-    }
-
-  nerr("ERROR:  Too many waiters\n");
-  DEBUGPANIC();
-  return -ENOSPC;
-}
-
-/****************************************************************************
- * Name: netlink_remove_waiter
- *
- * Description:
- *   Remove a waiter to the list of waiters.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int netlink_remove_waiter(FAR struct netlink_conn_s *conn,
-                                 pid_t waiter)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_NETLINK_MAXPENDING; i++)
-    {
-      if (conn->waiter[i] == waiter)
-        {
-          conn->waiter[i] = NETLINK_NO_WAITER;
-          break;
-        }
-    }
-
-  return OK;
+  nxsem_post(waitsem);
 }
 
 /****************************************************************************
@@ -265,7 +192,6 @@ void netlink_initialize(void)
 FAR struct netlink_conn_s *netlink_alloc(void)
 {
   FAR struct netlink_conn_s *conn;
-  int i;
 
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
@@ -276,13 +202,6 @@ FAR struct netlink_conn_s *netlink_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       memset(conn, 0, sizeof(*conn));
-
-      /* With no waiters */
-
-      for (i = 0; i < CONFIG_NETLINK_MAXPENDING; i++)
-        {
-          conn->waiter[i] = NETLINK_NO_WAITER;
-        }
 
       /* Enqueue the connection into the active list */
 
@@ -414,7 +333,7 @@ void netlink_add_response(NETLINK_HANDLE handle,
 
   /* Notify any waiters that a response is available */
 
-  netlink_notify_waiters(conn);
+  netlink_notifier_signal(conn);
   net_unlock();
 }
 
@@ -468,8 +387,9 @@ FAR struct netlink_response_s *
  *
  * Returned Value:
  *   The next response from the head of the pending response list is
- *   always returned.  This function will block until a response is
- *   received if the pending response list is empty.
+ *   returned.  This function will block until a response is received if
+ *   the pending response list is empty.  NULL will be returned only in the
+ *   event of a failure.
  *
  ****************************************************************************/
 
@@ -478,10 +398,6 @@ FAR struct netlink_response_s *
 {
   FAR struct netlink_response_s *resp;
   FAR struct netlink_conn_s *conn;
-  FAR struct siginfo info;
-  unsigned int count;
-  sigset_t set;
-  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
@@ -496,44 +412,64 @@ FAR struct netlink_response_s *
   net_lock();
   while ((resp = netlink_tryget_response(psock)) == NULL)
     {
-      /* Add this task as a waiter */
+      sem_t waitsem;
 
-      ret = netlink_add_waiter(conn);
+      /* Set up a semaphore to notify us when a response is queued. */
+
+      (void)sem_init(&waitsem, 0, 0);
+      (void)nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
+
+      /* Set up a notifier to post the semaphore when a response is
+       * received.
+       */
+
+      ret = netlink_notifier_setup(netlink_response_available, conn,
+                                   &waitsem);
       if (ret < 0)
         {
-          nerr("ERROR: netlink_add_waiter failed: %d\n", ret);
+          nerr("ERROR: netlink_notifier_setup() failed: %d\n", ret);
         }
-
-      /* Break any network lock while we wait */
-
-      flags = enter_critical_section();
-      ret = net_breaklock(&count);
-      if (ret < 0)
+      else
         {
-          /* net_breaklock() would only fail if we were not the holder of
-           * lock.  But we do hold the lock?
+          /* Call netlink_notify_response() to receive a notification
+           * when a response has been queued.
            */
 
-          nerr("ERROR: net_breaklock failed: %d\n", ret);
-          DEBUGPANIC();
+          ret = netlink_notify_response(psock);
+          if (ret < 0)
+            {
+              nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
+            }
+          else if (ret == 0)
+            {
+              /* The return value of zero means that a response is
+               * already available and that no notification is
+               * forthcoming.
+               */
+            }
+          else
+            {
+              /* Otherwise, we have to wait */
+
+              _netlink_semtake(&waitsem);
+            }
         }
 
-      /* Wait for a response */
+      /* Clean-up the semaphore */
 
-      sigemptyset(&set);
-      sigaddset(&set, CONFIG_NETLINK_SIGNAL);
-      ret = sigwaitinfo(&set, &info);
+      sem_destroy(&waitsem);
+      netlink_notifier_teardown(conn);
+
+      /* Check for any failures */
+
       if (ret < 0)
         {
-          nerr("ERROR: sigwaitinfo() failed: %d\n", ret);
+          resp = NULL;
+          break;
         }
-
-      /* Restore the network lock */
-
-      net_restorelock(count);
-      leave_critical_section(flags);
     }
 
+  net_unlock();
   return resp;
 }
 
@@ -567,7 +503,7 @@ bool netlink_check_response(FAR struct socket *psock)
  *
  * Description:
  *   Notify a thread until a response be available.  The thread will be
- *   notified via CONFIG_NETLINK_SIGNAL when the response becomes available.
+ *   notified via work queue notifier when the response becomes available.
  *
  * Returned Value:
  *   Zero (OK) is returned if the response is already available.  Not signal
@@ -580,8 +516,6 @@ bool netlink_check_response(FAR struct socket *psock)
 int netlink_notify_response(FAR struct socket *psock)
 {
   FAR struct netlink_conn_s *conn;
-  FAR struct siginfo info;
-  sigset_t set;
   int ret = 0;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
@@ -592,61 +526,57 @@ int netlink_notify_response(FAR struct socket *psock)
   net_lock();
   if (((FAR struct netlink_response_s *)sq_peek(&conn->resplist)) == NULL)
     {
-      /* No.. Add this task as a waiter */
+      sem_t waitsem;
 
-      ret = netlink_add_waiter(conn);
+      /* No.. Set up a semaphore to notify us when a response is queued. */
+
+      (void)sem_init(&waitsem, 0, 0);
+      (void)nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
+
+      /* Set up a notifier to post the semaphore when a response is
+       * received.
+       */
+
+      ret = netlink_notifier_setup(netlink_response_available, conn,
+                                   &waitsem);
       if (ret < 0)
         {
-          nerr("ERROR: netlink_add_waiter failed: %d\n", ret);
+          nerr("ERROR: netlink_notifier_setup() failed: %d\n", ret);
         }
       else
         {
-          /* Set up to signal when a response is available */
+          /* Call netlink_notify_response() to receive a notification
+           * when a response has been queued.
+           */
 
-          sigemptyset(&set);
-          sigaddset(&set, CONFIG_NETLINK_SIGNAL);
-          ret = sigwaitinfo(&set, &info);
+          ret = netlink_notify_response(psock);
           if (ret < 0)
             {
-              nerr("ERROR: sigwaitinfo() failed: %d\n", ret);
+              nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
+            }
+          else if (ret == 0)
+            {
+              /* The return value of zero means that a response is
+               * already available and that no notification is
+               * forthcoming.
+               */
             }
           else
             {
-              ret = 1;
+              /* Otherwise, we have to wait */
+
+              _netlink_semtake(&waitsem);
             }
         }
+
+      /* Tear-down the notifier and the semaphore */
+
+      netlink_notifier_teardown(conn);
+      sem_destroy(&waitsem);
     }
 
   net_unlock();
-  return ret;
-}
-
-/****************************************************************************
- * Name: netlink_notify_cancel
- *
- * Description:
- *   Cancel a notification previously created with netlink_notify_response().
- *
- * Returned Value:
- *   Zero (OK) is always returned.
- *
- ****************************************************************************/
-
-int netlink_notify_cancel(FAR struct socket *psock)
-{
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
-
-  /* Remove this thread as waiter for response notifications for this
-   * socket.
-   */
-
-  net_lock();
-  (void)netlink_remove_waiter(conn, getpid());
-  net_unlock();
-  return OK;
+  return ret < 0 ? ret : OK;
 }
 
 #endif /* CONFIG_NET_NETLINK */

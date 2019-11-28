@@ -90,13 +90,9 @@ struct netlink_conn_s
 
   /* poll() support */
 
+  int key;                           /* used to cancel notifications */
   FAR sem_t *pollsem;                /* Used to wakeup poll() */
   FAR pollevent_t *pollevent;        /* poll() wakeup event */
-  struct sigaction oact;             /* Previous signal action */
-  
-  /* Threads waiting for a response */
-
-  pid_t waiter[CONFIG_NETLINK_MAXPENDING];
 
   /* Queued response data */
 
@@ -181,6 +177,68 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
 FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
 
 /****************************************************************************
+ * Name: netlink_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function the Netlink
+ *   response data is received.  The worker function will execute on the low
+ *   priority worker thread.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the low priority work
+ *            queue when Netlink response data is available.
+ *   conn   - The Netlink connection where the response is expected.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the notification was successfully set up.
+ *   A negated error value is returned if an unexpected error occurred
+ *   and no notification will occur.
+ *
+ ****************************************************************************/
+
+int netlink_notifier_setup(worker_t worker, FAR struct netlink_conn_s *conn,
+                           FAR void *arg);
+
+/****************************************************************************
+ * Name: netlink_notifier_teardown
+ *
+ * Description:
+ *   Eliminate a Netlink response notification previously setup by
+ *   netlink_notifier_setup().  This function should only be called if the
+ *   notification should be aborted prior to the notification.  The
+ *   notification will automatically be torn down after the notification.
+ *
+ * Input Parameters:
+ *   conn - Teardown the notification for this Netlink connection.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int netlink_notifier_teardown(FAR struct netlink_conn_s *conn);
+
+/****************************************************************************
+ * Name: netlink_notifier_signal
+ *
+ * Description:
+ *   New Netlink response data is available.  Execute worker thread
+ *   functions for all threads that wait for response data.
+ *
+ * Input Parameters:
+ *   conn - The Netlink connection where the response was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
+
+/****************************************************************************
  * Name: netlink_tryget_response
  *
  * Description:
@@ -212,8 +270,9 @@ FAR struct netlink_response_s *
  *
  * Returned Value:
  *   The next response from the head of the pending response list is
- *   always returned.  This function will block until a response is
- *   received if the pending response list is empty.
+ *   returned.  This function will block until a response is received if
+ *   the pending response list is empty.  NULL will be returned only in the
+ *   event of a failure.
  *
  ****************************************************************************/
 
@@ -238,7 +297,7 @@ bool netlink_check_response(FAR struct socket *psock);
  *
  * Description:
  *   Notify a thread until a response be available.  The thread will be
- *   notified via CONFIG_NETLINK_SIGNAL when the response becomes available.
+ *   notified via work queue notifier when the response becomes available.
  *
  * Returned Value:
  *   Zero (OK) is returned if the response is already available.  Not signal
@@ -249,19 +308,6 @@ bool netlink_check_response(FAR struct socket *psock);
  ****************************************************************************/
 
 int netlink_notify_response(FAR struct socket *psock);
-
-/****************************************************************************
- * Name: netlink_notify_cancel
- *
- * Description:
- *   Cancel a notification previously created with netlink_notify_response().
- *
- * Returned Value:
- *   Zero (OK) is always returned.
- *
- ****************************************************************************/
-
-int netlink_notify_cancel(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_route_sendto()

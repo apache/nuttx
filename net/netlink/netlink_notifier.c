@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev/netdown_notifier.c
+ * net/netlink/netlink_notifier.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,81 +43,65 @@
 #include <assert.h>
 
 #include <nuttx/wqueue.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/net/netdev.h>
 
-#include "netdev/netdev.h"
-
-#ifdef CONFIG_NETDOWN_NOTIFIER
+#include "netlink/netlink.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdown_notifier_setup
+ * Name: netlink_notifier_setup
  *
  * Description:
- *   Set up to perform a callback to the worker function when the network
- *   goes down.  The worker function will execute on the high priority
- *   worker thread.
+ *   Set up to perform a callback to the worker function the Netlink
+ *   response data is received.  The worker function will execute on the low
+ *   priority worker thread.
  *
  * Input Parameters:
  *   worker - The worker function to execute on the low priority work
- *            queue when data is available in the UDP read-ahead buffer.
- *   dev   - The network driver to be monitored
+ *            queue when Netlink response data is available.
+ *   conn   - The Netlink connection where the response is expected.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
+ *
  * Returned Value:
- *   > 0   - The notification is in place.  The returned value is a key that
- *           may be used later in a call to netdown_notifier_teardown().
- *   == 0  - The the device is already down.  No notification will be
- *           provided.
- *   < 0   - An unexpected error occurred and notification will occur.  The
- *           returned value is a negated errno value that indicates the
- *           nature of the failure.
+ *   Zero (OK) is returned if the notification was successfully set up.
+ *   A negated error value is returned if an unexpected error occurred
+ *   and no notification will occur.
  *
  ****************************************************************************/
 
-int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
+int netlink_notifier_setup(worker_t worker, FAR struct netlink_conn_s *conn,
                            FAR void *arg)
 {
   struct work_notifier_s info;
 
-  DEBUGASSERT(worker != NULL);
+  DEBUGASSERT(worker != NULL && conn != NULL);
 
-  /* If network driver is already down, then return zero without setting up
-   * the notification.
-   */
+  /* This is just a simple wrapper around work_notifer_setup(). */
 
-  if ((dev->d_flags & IFF_UP) == 0)
-    {
-      return 0;
-    }
-
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
-
-  info.evtype    = WORK_NET_DOWN;
+  info.evtype    = WORK_NETLINK_RESPONSE;
   info.qid       = LPWORK;
-  info.qualifier = dev;
+  info.qualifier = conn;
   info.arg       = arg;
   info.worker    = worker;
 
-  return work_notifier_setup(&info);
+  conn->key      =  work_notifier_setup(&info);
+  return OK;
 }
 
 /****************************************************************************
- * Name: netdown_notifier_teardown
+ * Name: netlink_notifier_teardown
  *
  * Description:
- *   Eliminate a network down notification previously setup by
- *   netdown_notifier_setup().  This function should only be called if the
+ *   Eliminate a Netlink response notification previously setup by
+ *   netlink_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
- *   key - The key value returned from a previous call to
- *         netdown_notifier_setup().
+ *   conn - Teardown the notification for this Netlink connection.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -125,33 +109,40 @@ int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int netdown_notifier_teardown(int key)
+int netlink_notifier_teardown(FAR struct netlink_conn_s *conn)
 {
+  DEBUGASSERT(conn != NULL);
+  int ret = OK;
+
   /* This is just a simple wrapper around work_notifier_teardown(). */
 
-  return work_notifier_teardown(key);
+  if (conn->key > 0)
+    {
+      ret = work_notifier_teardown(conn->key);
+      conn->key = 0;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
- * Name: netdown_notifier_signal
+ * Name: netlink_notifier_signal
  *
  * Description:
- *   A network has gone down has been buffered.  Execute worker thread
- *   functions for all threads monitoring the state of the device.
+ *   New Netlink response data is available.  Execute worker thread
+ *   functions for all threads that wait for response data.
  *
  * Input Parameters:
- *   dev  - The TCP connection where read-ahead data was just buffered.
+ *   conn - The Netlink connection where the response was just buffered.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-void netdown_notifier_signal(FAR struct net_driver_s *dev)
+void netlink_notifier_signal(FAR struct netlink_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_NET_DOWN, dev);
+  return work_notifier_signal(WORK_NETLINK_RESPONSE, conn);
 }
-
-#endif /* CONFIG_NETDOWN_NOTIFIER */

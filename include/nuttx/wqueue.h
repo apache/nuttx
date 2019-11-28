@@ -290,7 +290,8 @@ enum work_evtype_e
   WORK_TCP_WRITEBUFFER,  /* Notify that TCP write buffer is empty */
   WORK_TCP_DISCONNECT,   /* Notify loss of TCP connection */
   WORK_UDP_READAHEAD,    /* Notify that UDP read-ahead data is available */
-  WORK_UDP_WRITEBUFFER   /* Notify that UDP write buffer is empty */
+  WORK_UDP_WRITEBUFFER,  /* Notify that UDP write buffer is empty */
+  WORK_NETLINK_RESPONSE  /* Notify thtat Netlink response is available */
 };
 
 /* This structure describes one notification and is provided as input to
@@ -562,7 +563,7 @@ int work_notifier_teardown(int key);
  *   need to call work_notifier_setup() once again.
  *
  * Input Parameters:
- *   evtype   - The type of the event that just occurred.
+ *   evtype    - The type of the event that just occurred.
  *   qualifier - Event qualifier to distinguish different cases of the
  *               generic event type.
  *
