@@ -317,7 +317,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
    */
 
   if (sigismember(&stcb->sigprocmask, info->si_signo) ||
-      (stcb->flags & TCB_FLAG_SYSCALL) != NULL)
+      (stcb->flags & TCB_FLAG_SYSCALL) != 0)
     {
       /* Check if the task is waiting for this pending signal.  If so, then
        * unblock it.  This must be performed in a critical section because
