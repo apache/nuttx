@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #  include <syscall.h>
 #endif
 
+#include "signal/signal.h"
 #include "svcall.h"
 #include "exc_return.h"
 #include "up_internal.h"
@@ -269,6 +270,13 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
            */
 
           regs[REG_R0]         = regs[REG_R2];
+
+          /* Handle any signal actions that were deferred while processing
+           * the system call.
+           */
+
+          rtcb->flags          &= ~TCB_FLAG_SYSCALL;
+          (void)nxsig_unmask_pendingsignal();
         }
         break;
 #endif
@@ -437,7 +445,11 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
           /* Offset R0 to account for the reserved values */
 
-          regs[REG_R0] -= CONFIG_SYS_RESERVED;
+          regs[REG_R0]        -= CONFIG_SYS_RESERVED;
+
+          /* Indicate that we are in a syscall handler. */
+
+          rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif

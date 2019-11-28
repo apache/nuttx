@@ -640,8 +640,10 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
         {
           struct sigaction act;
 
-          /* Set up a signal handler to recive the notification when
+          /* Set up a signal handler to receive the notification when
            * a response has been queued.
+           * REVISIT: Make sure that the CONFIG_NETLINK_SIGNAL is not
+           * blocked.
            */
 
           if (conn->pollsem != NULL || conn->pollevent != NULL)

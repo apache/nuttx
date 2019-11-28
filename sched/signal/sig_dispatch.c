@@ -1,8 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_dispatch.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2016, 2018-2019 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -311,11 +311,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   /************************* MASKED SIGNAL HANDLING ************************/
 
-  /* Check if the signal is masked -- if it is, it will be added to the list
-   * of pending signals.
+  /* Check if the signal is masked OR if it is received while we are
+   * processing a system call -- in either case, it will be added to the
+   * list of pending signals.
    */
 
-  if (sigismember(&stcb->sigprocmask, info->si_signo))
+  if (sigismember(&stcb->sigprocmask, info->si_signo) ||
+      (stcb->flags & TCB_FLAG_SYSCALL) != NULL)
     {
       /* Check if the task is waiting for this pending signal.  If so, then
        * unblock it.  This must be performed in a critical section because
@@ -380,9 +382,16 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * handler attached to the signal, then the default action is
        * simply to ignore the signal
        */
+    }
 
-      /*********************** OTHER SIGNAL HANDLING ***********************/
+  /************************* OTHER SIGNAL HANDLING *************************/
 
+  /* Performed only if the signal is unmasked.  These actions also must
+   * happen within a system call.
+   */
+
+  if (!sigismember(&stcb->sigprocmask, info->si_signo))
+    {
       /* If the task is blocked waiting for a semaphore, then that task must
        * be unblocked when a signal is received.
        */

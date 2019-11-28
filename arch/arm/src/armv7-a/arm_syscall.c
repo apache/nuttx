@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-a/arm_syscall.c
  *
- *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
 
+#include "signal/signal.h"
 #include "arm.h"
 #include "svcall.h"
 #include "addrenv.h"
@@ -218,7 +219,14 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
           /* Save the new SYSCALL nesting level */
 
-          rtcb->xcp.nsyscalls = index;
+          rtcb->xcp.nsyscalls   = index;
+
+          /* Handle any signal actions that were deferred while processing
+           * the system call.
+           */
+
+          rtcb->flags          &= ~TCB_FLAG_SYSCALL;
+          (void)nxsig_unmask_pendingsignal();
         }
         break;
 
@@ -449,7 +457,11 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
           /* Offset R0 to account for the reserved values */
 
-          regs[REG_R0] -= CONFIG_SYS_RESERVED;
+          regs[REG_R0]  -= CONFIG_SYS_RESERVED;
+
+          /* Indicate that we are in a syscall handler. */
+
+          rtcb->flags   |= TCB_FLAG_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif

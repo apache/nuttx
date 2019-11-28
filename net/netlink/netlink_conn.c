@@ -127,8 +127,8 @@ static void netlink_notify_waiters(FAR struct netlink_conn_s *conn)
   int i;
 
   /* Notify every pending thread.  Lock the scheduler while we do this so
-   * there there is no thrashing:  All waiters will be restarted, but only
-   * the highest priority waiter will get to run and will receive the
+   * that there is no thrashing:  All waiters will be restarted, but only
+   * the highest priority waiter will get to run and it will receive the
    * response.
    */
 

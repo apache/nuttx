@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_swint0.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <arch/irq.h>
 #include <arch/mips32/cp0.h>
 
+#include "signal/signal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -224,7 +225,14 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
 
           g_current_regs[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
-          rtcb->xcp.nsyscalls   = index;
+          rtcb->xcp.nsyscalls     = index;
+
+          /* Handle any signal actions that were deferred while processing
+           * the system call.
+           */
+
+          rtcb->flags            &= ~TCB_FLAG_SYSCALL;
+          (void)nxsig_unmask_pendingsignal();
         }
         break;
 #endif
@@ -256,12 +264,16 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
 #error "Missing logic -- Need to save mode"
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_EPC] = (uint32_t)dispatch_syscall;
+          regs[REG_EPC]        = (uint32_t)dispatch_syscall;
 #error "Missing logic -- Need to set privileged mode"
 
           /* Offset R0 to account for the reserved values */
 
           g_current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
+
+          /* Indicate that we are in a syscall handler. */
+
+          rtcb->flags            |= TCB_FLAG_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif

@@ -127,4 +127,3 @@ bool nxsig_unmask_pendingsignal(void)
   sched_unlock();
   return true;
 }
-

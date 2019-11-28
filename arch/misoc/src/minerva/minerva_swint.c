@@ -49,6 +49,7 @@
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 
+#include "signal/signal.h"
 #include "minerva.h"
 
 /****************************************************************************
@@ -212,7 +213,14 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
 
         g_current_regs[REG_CSR_MEPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
-        rtcb->xcp.nsyscalls = index;
+        rtcb->xcp.nsyscalls          = index;
+
+        /* Handle any signal actions that were deferred while processing
+         * the system call.
+         */
+
+        rtcb->flags                 &= ~TCB_FLAG_SYSCALL;
+        (void)nxsig_unmask_pendingsignal();
       }
       break;
 #endif
@@ -245,12 +253,16 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
 #error "Missing logic -- Need to save mode"
         rtcb->xcp.nsyscalls = index + 1;
 
-        regs[REG_CSR_MEPC] = (uint32_t) dispatch_syscall;
+        regs[REG_CSR_MEPC]  = (uint32_t) dispatch_syscall;
 #error "Missing logic -- Need to set privileged mode"
 
         /* Offset R0 to account for the reserved values */
 
         g_current_regs[REG_A0] -= CONFIG_SYS_RESERVED;
+
+        /* Indicate that we are in a syscall handler. */
+
+        rtcb->flags            |= TCB_FLAG_SYSCALL;
 #else
         svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
