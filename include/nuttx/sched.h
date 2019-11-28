@@ -675,11 +675,14 @@ struct tcb_s
 
   /* POSIX Semaphore Control Fields *********************************************/
 
-  sem_t *waitsem;                        /* Semaphore ID waiting on             */
+  FAR sem_t *waitsem;                    /* Semaphore ID waiting on             */
 
   /* POSIX Signal Control Fields ************************************************/
 
   sigset_t   sigprocmask;                /* Signals that are blocked            */
+#ifdef CONFIG_LIB_SYSCALL
+  sigset_t   sigoldmask;                 /* Signals previously blocked          */
+#endif
   sigset_t   sigwaitmask;                /* Waiting for pending signals         */
   sq_queue_t sigpendactionq;             /* List of pending signal actions      */
   sq_queue_t sigpostedq;                 /* List of posted signals              */

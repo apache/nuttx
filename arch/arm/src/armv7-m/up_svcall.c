@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <nuttx/userspace.h>
 
 #ifdef CONFIG_LIB_SYSCALL
@@ -269,6 +270,11 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
            */
 
           regs[REG_R0]         = regs[REG_R2];
+
+          /* Restore the signal mask when the syscall returns */
+
+          (void)nxsig_procmask(SIG_SETMASK, &rtcb->sigoldmask, NULL);
+          sigemptyset(rtcb->sigoldmask);
         }
         break;
 #endif
@@ -415,6 +421,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_LIB_SYSCALL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
+          sigset_t set;
 
           /* Verify that the SYS call number is within range */
 
@@ -438,6 +445,11 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           /* Offset R0 to account for the reserved values */
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
+
+          /* Block all signals while the system call runs */
+
+          sigfillset(&set);
+          (void)nxsig_procmask(SIG_BLOCK, &set, &rtcb->sigoldmask);
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif

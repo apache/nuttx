@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <arch/irq.h>
 
 #include "minerva.h"
@@ -213,6 +214,11 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
         g_current_regs[REG_CSR_MEPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
         rtcb->xcp.nsyscalls = index;
+
+        /* Restore the signal mask when the syscall returns */
+
+        (void)nxsig_procmask(SIG_SETMASK, &rtcb->sigoldmask, NULL);
+        sigemptyset(rtcb->sigoldmask);
       }
       break;
 #endif
@@ -227,6 +233,7 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_BUILD_KERNEL
         FAR struct tcb_s *rtcb = sched_self();
         int index = rtcb->xcp.nsyscalls;
+        sigset_t set;
 
         /* Verify that the SYS call number is within range */
 
@@ -251,6 +258,11 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
         /* Offset R0 to account for the reserved values */
 
         g_current_regs[REG_A0] -= CONFIG_SYS_RESERVED;
+
+        /* Block all signals while the system call runs */
+
+        sigfillset(&set);
+        (void)nxsig_procmask(SIG_BLOCK, &set, &rtcb->sigoldmask);
 #else
         svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
