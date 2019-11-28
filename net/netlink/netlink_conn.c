@@ -431,28 +431,9 @@ FAR struct netlink_response_s *
         }
       else
         {
-          /* Call netlink_notify_response() to receive a notification
-           * when a response has been queued.
-           */
+          /* Wait for a response to be queued */
 
-          ret = netlink_notify_response(psock);
-          if (ret < 0)
-            {
-              nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
-            }
-          else if (ret == 0)
-            {
-              /* The return value of zero means that a response is
-               * already available and that no notification is
-               * forthcoming.
-               */
-            }
-          else
-            {
-              /* Otherwise, we have to wait */
-
-              _netlink_semtake(&waitsem);
-            }
+          _netlink_semtake(&waitsem);
         }
 
       /* Clean-up the semaphore */
@@ -502,12 +483,12 @@ bool netlink_check_response(FAR struct socket *psock)
  * Name: netlink_notify_response
  *
  * Description:
- *   Notify a thread until a response be available.  The thread will be
+ *   Notify a thread when a response is available.  The thread will be
  *   notified via work queue notifier when the response becomes available.
  *
  * Returned Value:
- *   Zero (OK) is returned if the response is already available.  Not signal
- *     will be sent.
+ *   Zero (OK) is returned if the response is already available.  No
+ *     notification will be sent.
  *   One is returned if the notification was successfully setup.
  *   A negated errno value is returned on any failure.
  *
@@ -545,28 +526,9 @@ int netlink_notify_response(FAR struct socket *psock)
         }
       else
         {
-          /* Call netlink_notify_response() to receive a notification
-           * when a response has been queued.
-           */
+          /* Wait for a reponse to be queued */
 
-          ret = netlink_notify_response(psock);
-          if (ret < 0)
-            {
-              nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
-            }
-          else if (ret == 0)
-            {
-              /* The return value of zero means that a response is
-               * already available and that no notification is
-               * forthcoming.
-               */
-            }
-          else
-            {
-              /* Otherwise, we have to wait */
-
-              _netlink_semtake(&waitsem);
-            }
+          _netlink_semtake(&waitsem);
         }
 
       /* Tear-down the notifier and the semaphore */

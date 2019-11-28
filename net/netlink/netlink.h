@@ -45,7 +45,6 @@
 #include <sys/types.h>
 #include <queue.h>
 #include <semaphore.h>
-#include <signal.h>
 #include <poll.h>
 
 #include <netpacket/netlink.h>
@@ -296,12 +295,12 @@ bool netlink_check_response(FAR struct socket *psock);
  * Name: netlink_notify_response
  *
  * Description:
- *   Notify a thread until a response be available.  The thread will be
+ *   Notify a thread when a response is available.  The thread will be
  *   notified via work queue notifier when the response becomes available.
  *
  * Returned Value:
- *   Zero (OK) is returned if the response is already available.  Not signal
- *     will be sent.
+ *   Zero (OK) is returned if the response is already available.  No
+ *     notification will be sent.
  *   One is returned if the notification was successfully setup.
  *   A negated errno value is returned on any failure.
  *
