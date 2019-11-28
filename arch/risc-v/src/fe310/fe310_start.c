@@ -125,5 +125,3 @@ void __fe310_start(void)
 
   for (; ; );
 }
-
-

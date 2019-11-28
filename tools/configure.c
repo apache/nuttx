@@ -219,6 +219,7 @@ static const char *g_chipnames[] =
   "mor1kx",
   "m32262f8",
   "sh7032",
+  "fe310",
   "gap8",
   "nr5m100",
   "sim",
