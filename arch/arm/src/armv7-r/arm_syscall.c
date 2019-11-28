@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-r/arm_syscall.c
  *
- *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
-#include <nuttx/signal.h>
 
 #include "arm.h"
 #include "svcall.h"
@@ -218,11 +217,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Save the new SYSCALL nesting level */
 
           rtcb->xcp.nsyscalls = index;
-
-          /* Restore the signal mask when the syscall returns */
-
-          (void)nxsig_procmask(SIG_SETMASK, &rtcb->sigoldmask, NULL);
-          sigemptyset(rtcb->sigoldmask);
         }
         break;
 
@@ -357,7 +351,7 @@ uint32_t *arm_syscall(uint32_t *regs)
           regs[REG_R3]   = regs[REG_R4]; /* ucontext */
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-          /* If we are signaling a user process, then we must be operating
+          /* If we are signalling a user process, then we must be operating
            * on the kernel stack now.  We need to switch back to the user
            * stack before dispatching the signal handler to the user code.
            * The existence of an allocated kernel stack is sufficient
@@ -428,7 +422,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_LIB_SYSCALL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
-          sigset_t set;
 
           /* Verify that the SYS call number is within range */
 
@@ -455,11 +448,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Offset R0 to account for the reserved values */
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
-
-          /* Block all signals while the system call runs */
-
-          sigfillset(&set);
-          (void)nxsig_procmask(SIG_BLOCK, &set, &rtcb->sigoldmask);
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif

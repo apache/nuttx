@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-a/arm_syscall.c
  *
- *   Copyright (C) 2013-2014, 2016, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
-#include <nuttx/signal.h>
 #include <nuttx/addrenv.h>
 
 #include "arm.h"
@@ -220,11 +219,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Save the new SYSCALL nesting level */
 
           rtcb->xcp.nsyscalls = index;
-
-          /* Restore the signal mask when the syscall returns */
-
-          (void)nxsig_procmask(SIG_SETMASK, &rtcb->sigoldmask, NULL);
-          sigemptyset(rtcb->sigoldmask);
         }
         break;
 
@@ -430,7 +424,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_LIB_SYSCALL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
-          sigset_t set;
 
           /* Verify that the SYS call number is within range */
 
@@ -457,11 +450,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Offset R0 to account for the reserved values */
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
-
-          /* Block all signals while the system call runs */
-
-          sigfillset(&set);
-          (void)nxsig_procmask(SIG_BLOCK, &set, &rtcb->sigoldmask);
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
@@ -477,7 +465,6 @@ uint32_t *arm_syscall(uint32_t *regs)
               regs[REG_SP]      = (uint32_t)rtcb->xcp.kstack + ARCH_KERNEL_STACKSIZE;
             }
 #endif
-
           /* Save the new SYSCALL nesting level */
 
           rtcb->xcp.nsyscalls   = index + 1;
