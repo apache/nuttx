@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <arch/chip/audio.h>
 
 #include "chip.h"
@@ -297,13 +298,13 @@ int board_external_amp_mute_control(bool en)
       /* Mute ON */
 
       ret = board_power_control(POWER_AUDIO_MUTE, false);
-      usleep(MUTE_ON_DELAY);
+      nxsig_usleep(MUTE_ON_DELAY);
     }
   else
     {
       /* Mute OFF */
 
-      usleep(MUTE_OFF_DELAY);
+      nxsig_usleep(MUTE_OFF_DELAY);
       ret = board_power_control(POWER_AUDIO_MUTE, true);
     }
 

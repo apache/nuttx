@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f334r8/src/stm32_highpri.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,13 +46,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
-
-#include <arch/irq.h>
-#include <arch/armv7-m/nvicpri.h>
-
 #include <nuttx/timers/pwm.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
+
+#include <arch/irq.h>
+#include <arch/armv7-m/nvicpri.h>
 
 #include "up_internal.h"
 #include "ram_vectors.h"
@@ -547,7 +546,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_REG, 0);
 
-      usleep(100);
+      nxsig_usleep(100);
 #endif
 
 #ifdef HIGHPRI_HAVE_INJECTED
@@ -555,7 +554,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_INJ, 0);
 
-      usleep(100);
+      nxsig_usleep(100);
 #endif
       /* Lock global data */
 

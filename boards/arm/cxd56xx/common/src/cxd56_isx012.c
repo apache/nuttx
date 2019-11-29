@@ -43,12 +43,14 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/signal.h>
+
 #include "cxd56_gpio.h"
 #include "cxd56_pinconfig.h"
 #include "cxd56_i2c.h"
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 /****************************************************************************
@@ -111,8 +113,9 @@ int board_isx012_power_on(void)
           break;
         }
 
-      usleep(POWER_CHECK_TIME);
+      nxsig_usleep(POWER_CHECK_TIME);
     }
+
   return ret;
 }
 
@@ -144,7 +147,7 @@ int board_isx012_power_off(void)
           break;
         }
 
-      usleep(POWER_CHECK_TIME);
+      nxsig_usleep(POWER_CHECK_TIME);
     }
 
   return ret;
@@ -167,20 +170,20 @@ void board_isx012_set_sleep(int kind)
     {
       /* PowerON -> sleep */
 
-      usleep(DEVICE_STARTUP_TIME);
+      nxsig_usleep(DEVICE_STARTUP_TIME);
     }
   else
     {
       /* active -> sleep */
 
-      usleep(STANDBY_TIME);
+      nxsig_usleep(STANDBY_TIME);
     }
 }
 
 void board_isx012_release_sleep(void)
 {
   cxd56_gpio_write(IMAGER_SLEEP, true);
-  usleep(SLEEP_CANCEL_TIME);
+  nxsig_usleep(SLEEP_CANCEL_TIME);
 }
 
 int isx012_register(FAR struct i2c_master_s *i2c);

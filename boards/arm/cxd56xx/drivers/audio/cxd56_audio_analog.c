@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <time.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <time.h>
+#include <nuttx/signal.h>
+
 #include <arch/board/board.h>
 #include <arch/chip/audio.h>
 
@@ -107,7 +111,7 @@ static void wait_mic_boot_finish(void)
 
       if (time < CXD56_AUDIO_MIC_BOOT_WAIT)
         {
-          usleep((CXD56_AUDIO_MIC_BOOT_WAIT - time) * 1000);
+          nxsig_usleep((CXD56_AUDIO_MIC_BOOT_WAIT - time) * 1000);
         }
     }
 }

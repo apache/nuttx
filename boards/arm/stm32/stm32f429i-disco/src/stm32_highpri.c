@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/src/stm32_highpri.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -495,7 +495,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_REG, 0);
 
-      usleep(100);
+      nxsig_usleep(100);
 #endif
 
 #ifdef HIGHPRI_HAVE_INJECTED
@@ -503,7 +503,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_INJ, 0);
 
-      usleep(100);
+      nxsig_usleep(100);
 #endif
       /* Lock global data */
 

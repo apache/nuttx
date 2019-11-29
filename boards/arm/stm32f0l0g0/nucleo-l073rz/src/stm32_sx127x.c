@@ -47,8 +47,9 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/wireless/lpwan/sx127x.h>
+#include <arch/board/board.h>
 
 #include "stm32_gpio.h"
 #include "stm32_exti.h"
@@ -125,7 +126,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 1 ms */
 
-  usleep(1000);
+  nxsig_usleep(1000);
 
   /* Configure reset as input */
 
@@ -133,7 +134,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 10 ms */
 
-  usleep(10000);
+  nxsig_usleep(10000);
 }
 
 /****************************************************************************

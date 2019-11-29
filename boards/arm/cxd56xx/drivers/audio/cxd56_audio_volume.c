@@ -37,8 +37,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
 #include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/signal.h>
 
 #include "cxd56_audio_config.h"
 #include "cxd56_audio_ac_reg.h"
@@ -134,7 +136,7 @@ static CXD56_AUDIO_ECODE set_mute(cxd56_audio_volid_t id,
 
   if (wait)
     {
-      usleep(waittime);
+      nxsig_usleep(waittime);
     }
 
   g_volparam[id].mute_bit |= type;
@@ -200,7 +202,7 @@ static CXD56_AUDIO_ECODE set_unmute(cxd56_audio_volid_t id,
 
       if (wait)
         {
-          usleep(waittime);
+          nxsig_usleep(waittime);
         }
     }
 

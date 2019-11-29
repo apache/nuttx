@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 #include <unistd.h>
+
+#include <nuttx/board.h>
+#include <nuttx/signal.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
@@ -69,9 +71,9 @@ void up_bt_enable(int enable)
   if (enable)
     {
       lc823450_gpio_write(BT_POWER, 0);
-      usleep(100 * 1000);
+      nxsig_usleep(100 * 1000);
       lc823450_gpio_write(BT_POWER, 1);
-      usleep(100 * 1000);
+      nxsig_usleep(100 * 1000);
     }
   else
     {
