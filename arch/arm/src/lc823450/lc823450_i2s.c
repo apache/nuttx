@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_i2s.c
  *
- *   Copyright 2017,2018 Sony Video & Sound Products Inc.
+ *   Copyright 2017, 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,20 +41,16 @@
 #include <nuttx/config.h>
 
 #include <semaphore.h>
-#include <nuttx/arch.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
-
-#ifdef CONFIG_SMP
-#  include <nuttx/signal.h>
-#endif
 
 #include "up_arch.h"
 #include "lc823450_dma.h"
@@ -303,7 +299,7 @@ static void _setup_audio_pll(uint32_t freq)
 
   /* TODO: Wait */
 
-  usleep(50 * 1000);
+  nxsig_usleep(50 * 1000);
 
   /* Switch to the PLL */
 

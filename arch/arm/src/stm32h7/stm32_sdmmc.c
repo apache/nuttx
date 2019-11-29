@@ -55,12 +55,13 @@
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/mmcsd.h>
-
 #include <nuttx/irq.h>
+#include <nuttx/cache.h>
+
 #include <arch/board/board.h>
 
-#include <nuttx/cache.h>
 #include "chip.h"
 #include "up_arch.h"
 
@@ -1779,11 +1780,11 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   regval = getreg32(regaddress);
   putreg32(regval | restval, regaddress);
-  usleep(2);
+  nxsig_usleep(2);
   putreg32(regval, regaddress);
 
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_CYCLE);
-  usleep(1000);
+  nxsig_usleep(1000);
 
   /* Put SDIO registers in their default, reset state */
 
@@ -1808,7 +1809,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   /* Configure the SDIO peripheral */
 
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_OFF);
-  usleep(1000);
+  nxsig_usleep(1000);
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_ON);
 
   stm32_setclkcr(priv, STM32_CLCKCR_INIT);

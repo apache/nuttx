@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
@@ -2741,7 +2742,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
   while ((lpc17_40_phyread(phyaddr, MII_DP83848C_STS) & 0x0001) == 0)
     {
-      usleep(40000);
+      nxsig_usleep(40000);
     }
 #endif
 

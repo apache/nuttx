@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_gnss.c
  *
- *   Copyright 2018,2019 Sony Semiconductor Solutions Corporation
+ *   Copyright 2018, 2019 Sony Semiconductor Solutions Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,11 +48,14 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
+
 #include <arch/chip/gnss.h>
 #include <arch/board/board.h>
+
 #include "cxd56_gnss_api.h"
 #include "cxd56_cpu1signal.h"
 #include "cxd56_gnss.h"
@@ -403,7 +406,7 @@ static int cxd56_gnss_start(FAR struct file *filep, unsigned long arg)
     {
       /* GNSS requires stable RTC */
 
-      usleep(100 * 1000);
+      nxsig_usleep(100 * 1000);
     }
 
   ret = cxd56_gnss_cpufifo_api(filep, CXD56_GNSS_GD_GNSS_START,
@@ -1311,7 +1314,7 @@ static int cxd56_gnss_start_test(FAR struct file *filep, unsigned long arg)
         {
           /* GNSS requires stable RTC */
 
-          usleep(100 * 1000);
+          nxsig_usleep(100 * 1000);
         }
 
       /* set parameter */

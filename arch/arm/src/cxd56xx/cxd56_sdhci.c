@@ -53,12 +53,13 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/kmalloc.h>
-
 #include <nuttx/irq.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -4305,10 +4306,12 @@ static int cxd56_sdio_initialize(struct cxd56_sdiodev_s *priv)
             {
               cxd56_sdio_recvshort(&priv->dev, SDIO_CMD5, &response);
             }
-          usleep(4000);
+
+          nxsig_usleep(4000);
         }
       while ((response == 0xffffffff) ||
                 ((response & 0x80000000) == 0));
+
       mcinfo("response = 0x%x, card is ready(MSB=1)\n", response);
       priv->sc.func_num = SDIO_OCR_NUM_FUNCTIONS(response) + 1;
     }
@@ -4642,7 +4645,8 @@ void cxd56_sdhci_mediachange(FAR struct sdio_dev_s *dev)
             {
               break;
             }
-          usleep(100000);
+
+          nxsig_usleep(100000);
           timeout -= 100000;
         }
     }

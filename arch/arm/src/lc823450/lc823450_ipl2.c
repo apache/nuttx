@@ -40,19 +40,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-
-#ifdef CONFIG_FS_EVFAT
-#  include <nuttx/fs/mkevfatfs.h>
-#endif
-
-#include <nuttx/usb/usbmsc.h>
-#include <nuttx/mtd/mtd.h>
-#include <nuttx/drivers/drivers.h>
-
-#ifdef CONFIG_I2C
-#  include <nuttx/i2c.h>
-#endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -65,6 +52,21 @@
 #include <nvic.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/signal.h>
+
+#ifdef CONFIG_FS_EVFAT
+#  include <nuttx/fs/mkevfatfs.h>
+#endif
+
+#include <nuttx/usb/usbmsc.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/drivers/drivers.h>
+
+#ifdef CONFIG_I2C
+#  include <nuttx/i2c.h>
+#endif
 
 #ifdef CONFIG_LASTKMSG
 #  include <nuttx/lastkmsg.h>
@@ -371,7 +373,7 @@ static int check_forceusbboot(void)
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_ADC_CLKEN);
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_ADC_RSTB);
 
-  usleep(10000);
+  nxsig_usleep(10000);
 
   /* start ADC0,1 */
 
@@ -430,7 +432,7 @@ static void sysreset(void)
 {
   /* workaround to flush eMMC cache */
 
-  usleep(100000);
+  nxsig_usleep(100000);
 
   up_systemreset();
 }
@@ -534,7 +536,7 @@ static void chg_disable(void)
             }
           else
             {
-              usleep(20);
+              nxsig_usleep(20);
             }
         }
 
@@ -581,7 +583,8 @@ static int msc_enable(int forced)
           usbmsc_uninitialize(handle);
           return 0;
         }
-      usleep(10000);
+
+      nxsig_usleep(10000);
     }
 
 #else
@@ -589,7 +592,7 @@ static int msc_enable(int forced)
 
   while (g_update_flag == 0)
     {
-      usleep(10000);
+      nxsig_usleep(10000);
     }
 #endif
 
@@ -598,7 +601,7 @@ static int msc_enable(int forced)
   /* check recovery kernel update */
 
   mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
-  usleep(10000);
+  nxsig_usleep(10000);
 
   /* recovery kernel install from UPG.img */
 
@@ -671,7 +674,7 @@ void check_lastkmsg(void)
 
   /* XXX: workaround for logfile size = 0 */
 
-  usleep(100000);
+  nxsig_usleep(100000);
 }
 #endif /* CONFIG_LASTKMSG */
 
@@ -740,7 +743,7 @@ int ipl2_main(int argc, char *argv[])
       /* check recovery kernel update */
 
       mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
-      usleep(10000);
+      nxsig_usleep(10000);
 
       /* recovery kernel install from UPG.img */
 
