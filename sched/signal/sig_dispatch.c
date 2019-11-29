@@ -312,13 +312,16 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   /************************* MASKED SIGNAL HANDLING ************************/
 
-  masked = sigismember(&stcb->sigprocmask, info->si_signo);
+  masked = (bool)sigismember(&stcb->sigprocmask, info->si_signo);
 
 #ifdef CONFIG_LIB_SYSCALL
   /* Check if the signal is masked OR if the signal is received while we are
    * processing a system call -- in either case, it will be added to the
    * list of pending signals.  Unmasked user signal actions will be deferred
    * while we process the system call.
+   *
+   * Syscall handlers (and logic-in-general within the OS) should not use
+   * signal handlers.
    */
 
   if (masked || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
