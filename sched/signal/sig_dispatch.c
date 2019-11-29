@@ -301,6 +301,7 @@ static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   irqstate_t flags;
+  bool masked;
   int ret = OK;
 
   sinfo("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
@@ -311,13 +312,23 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   /************************* MASKED SIGNAL HANDLING ************************/
 
-  /* Check if the signal is masked OR if it is received while we are
+  masked = sigismember(&stcb->sigprocmask, info->si_signo);
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* Check if the signal is masked OR if the signal is received while we are
    * processing a system call -- in either case, it will be added to the
+   * list of pending signals.  Unmasked user signal actions will be deferred
+   * while we process the system call.
+   */
+
+  if (masked || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
+#else
+  /* Check if the signal is masked.  In that  case, it will be added to the
    * list of pending signals.
    */
 
-  if (sigismember(&stcb->sigprocmask, info->si_signo) ||
-      (stcb->flags & TCB_FLAG_SYSCALL) != 0)
+  if (masked)
+#endif
     {
       /* Check if the task is waiting for this pending signal.  If so, then
        * unblock it.  This must be performed in a critical section because
@@ -390,7 +401,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
    * happen within a system call.
    */
 
-  if (!sigismember(&stcb->sigprocmask, info->si_signo))
+  if (!masked)
     {
       /* If the task is blocked waiting for a semaphore, then that task must
        * be unblocked when a signal is received.
