@@ -53,6 +53,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -278,6 +279,7 @@
 #endif
 
 /* Clocking *****************************************************************/
+
 /* Set MACMIIAR CR bits depending on HCLK setting */
 
 #if STM32_HCLK_FREQUENCY >= 20000000 && STM32_HCLK_FREQUENCY < 35000000
@@ -295,6 +297,7 @@
 #endif
 
 /* Timing *******************************************************************/
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second
  */
@@ -314,7 +317,7 @@
 
 #define PHY_READ_TIMEOUT  (0x0004ffff)
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
-#define PHY_RETRY_TIMEOUT (0x0004ffff)
+#define PHY_RETRY_TIMEOUT (0x00000ccc)
 
 /* MAC reset ready delays in loop counts */
 
@@ -556,6 +559,7 @@
 #endif
 
 /* Interrupt bit sets *******************************************************/
+
 /* All interrupts in the normal and abnormal interrupt summary.  Early transmit
  * interrupt (ETI) is excluded from the abnormal set because it causes too
  * many interrupts and is not interesting.
@@ -582,6 +586,7 @@
 #endif
 
 /* Helpers ******************************************************************/
+
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header
  */
@@ -591,6 +596,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This union type forces the allocated size of RX descriptors to be the
  * padded to a exact multiple of the Cortex-M7 D-Cache line size.
  */
@@ -675,6 +681,7 @@ static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_STM32F7_ETHMAC_REGDEBUG
@@ -786,6 +793,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_getreg
  *
@@ -840,7 +848,7 @@ static uint32_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ninfo("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -1086,7 +1094,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
     {
       /* Yes... how many buffers will be need to send the packet? */
 
-      bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE-1)) / ALIGNED_BUFSIZE;
+      bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE - 1)) / ALIGNED_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * ALIGNED_BUFSIZE;
 
       ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
@@ -1111,7 +1119,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
           /* Set the buffer size in all TX descriptors */
 
-          if (i == (bufcount-1))
+          if (i == (bufcount - 1))
             {
               /* This is the last segment.  Set the last segment bit in the
                * last TX descriptor and ask for an interrupt when this
@@ -2634,6 +2642,7 @@ static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
           if (((crc >> 31) ^ (data[i] >> j)) & 0x01)
             {
               /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
+
               crc = (crc << 1) ^ 0x04c11db7;
             }
           else
@@ -2680,7 +2689,7 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   crc = stm32_calcethcrc(mac, 6);
 
-  hashindex = (crc >> 26) & 0x3F;
+  hashindex = (crc >> 26) & 0x3f;
 
   if (hashindex > 31)
     {
@@ -2737,7 +2746,7 @@ static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
   crc = stm32_calcethcrc(mac, 6);
 
-  hashindex = (crc >> 26) & 0x3F;
+  hashindex = (crc >> 26) & 0x3f;
 
   if (hashindex > 31)
     {
@@ -2803,8 +2812,8 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
    * transfers.
    */
 
-   priv->txtail   = NULL;
-   priv->inflight = 0;
+  priv->txtail   = NULL;
+  priv->inflight = 0;
 
   /* Initialize each TX descriptor */
 
@@ -2830,13 +2839,13 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
 
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
-      if (i < (CONFIG_STM32F7_ETH_NTXDESC-1))
+      if (i < (CONFIG_STM32F7_ETH_NTXDESC - 1))
         {
           /* Set next descriptor address register with next descriptor base
            * address
            */
 
-          txdesc->tdes3 = (uint32_t)&txtable[i+1].txdesc;
+          txdesc->tdes3 = (uint32_t)&txtable[i + 1].txdesc;
         }
       else
         {
@@ -2920,13 +2929,13 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
-      if (i < (CONFIG_STM32F7_ETH_NRXDESC-1))
+      if (i < (CONFIG_STM32F7_ETH_NRXDESC - 1))
         {
           /* Set next descriptor address register with next descriptor base
            * address
            */
 
-          rxdesc->rdes3 = (uint32_t)&rxtable[i+1].rxdesc;
+          rxdesc->rdes3 = (uint32_t)&rxtable[i + 1].rxdesc;
         }
       else
         {
@@ -3287,6 +3296,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       nerr("ERROR: Failed to reset the PHY: %d\n", ret);
       return ret;
     }
+
   up_mdelay(PHY_RESET_DELAY);
 
   /* Perform any necessary, board-specific PHY initialization */
@@ -3327,6 +3337,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
         {
           break;
         }
+
+      nxsig_usleep(100);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3358,6 +3370,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
         {
           break;
         }
+
+      nxsig_usleep(100);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3787,6 +3801,7 @@ static int stm32_macconfig(struct stm32_ethmac_s *priv)
   stm32_putreg(0, STM32_ETH_MACVLANTR);
 
   /* DMA Configuration */
+
   /* Set up the DMAOMR register */
 
   regval  = stm32_getreg(STM32_ETH_DMAOMR);
