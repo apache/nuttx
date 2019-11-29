@@ -2,7 +2,7 @@
  * drivers/mtd/mx35.c
  * Driver for SPI-based MX35LFxGE4AB parts of 1 or 2GBit.
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ekaterina Kovylova <fomalhaut.hm@gmail.com>
  *
  *   Copied from / based on mx25lx.c driver written by
@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
@@ -379,7 +380,7 @@ static bool mx35_waitstatus(FAR struct mx35_dev_s *priv, uint8_t mask, bool succ
        * other peripherals to access the SPI bus.
        */
     }
-  while (((status & MX35_SR_OIP) != 0) && (!usleep(1000)));
+  while (((status & MX35_SR_OIP) != 0) && (!nxsig_usleep(1000)));
 
   mx35info("Complete\n");
   return successif ? ((status & mask) != 0) : ((status & mask) == 0);

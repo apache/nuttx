@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
@@ -327,7 +328,7 @@ static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv, uint8_t mask, bool succ
       /* Deselect the FLASH */
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
-      usleep(1000);
+      nxsig_usleep(1000);
     }
   while ((status & GD5F_SR_OIP) != 0);
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc_scsi.c
  *
- *   Copyright (C) 2008-2010, 2012, 2016-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2008-2010, 2012, 2016-2017, 2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -71,6 +71,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/scsi.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
@@ -2467,12 +2468,12 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
                * First, wait for the transfer to complete, then stall the endpoint
                */
 
-              usleep (100000);
+              nxsig_usleep (100000);
               (void)EP_STALL(priv->epbulkin);
 
               /* now wait for stall to go away .... */
 
-              usleep (100000);
+              nxsig_usleep (100000);
 #else
               (void)EP_STALL(priv->epbulkin);
 #endif

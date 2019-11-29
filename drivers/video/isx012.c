@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <arch/board/board.h>
@@ -741,7 +742,7 @@ static int isx012_chk_int_state(isx012_dev_t *priv,
   volatile uint8_t data;
   uint32_t time = 0;
 
-  usleep(delay_time * 1000);
+  nxsig_usleep(delay_time * 1000);
   while (time < timeout)
     {
       data = isx012_getreg(priv, INTSTS0, sizeof(data));
@@ -752,7 +753,7 @@ static int isx012_chk_int_state(isx012_dev_t *priv,
           return ret;
         }
 
-      usleep(wait_time * 1000);
+      nxsig_usleep(wait_time * 1000);
       time += wait_time;
     }
   return ERROR;
@@ -1107,10 +1108,10 @@ int init_isx012(FAR struct isx012_dev_s *priv)
 #ifdef ISX012_NOT_USE_NSTBY
   board_isx012_release_sleep();
   board_isx012_release_reset();
-  usleep(6000);
+  nxsig_usleep(6000);
 #else
   board_isx012_release_reset();
-  usleep(6000);
+  nxsig_usleep(6000);
 #endif
 
 #ifdef ISX012_CHECK_IN_DETAIL

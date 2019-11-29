@@ -111,6 +111,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/wireless/cc1101.h>
 
@@ -720,7 +721,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
     }
   else
     {
-      usleep(150 * 1000);
+      nxsig_usleep(150 * 1000);
     }
 }
 

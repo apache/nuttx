@@ -50,6 +50,7 @@
 #include <net/ethernet.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sdio.h>
 #include <nuttx/net/arp.h>
@@ -995,7 +996,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   /* TODO wait for WLC_E_RADIO event */
 
-  usleep(3000);
+  nxsig_usleep(3000);
 
   if (ret == OK)
     {

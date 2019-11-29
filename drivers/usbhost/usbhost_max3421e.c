@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_max3421e.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -3295,7 +3295,7 @@ static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
 
       if (regval == 0 && usec > 0)
         {
-          usleep(usec);
+          nxsig_usleep(usec);
         }
     }
   while (regval == 0);
@@ -4510,7 +4510,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
   while ((max3421e_getreg(priv, MAX3421E_USBHOST_HCTL) &
           USBHOST_HCTL_BUSSAMPLE) == 0)
     {
-      usleep(5);
+      nxsig_usleep(5);
     }
 
   /* Check for low- or full-speed and start SOF (actually already started
@@ -4579,7 +4579,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
  /* Wait for the first SOF received and 20ms has passed */
 
   max3421e_int_wait(priv, USBHOST_HIRQ_FRAMEIRQ, 0);
-  usleep(20*1000);
+  nxsig_usleep(20*1000);
   return OK;
 }
 

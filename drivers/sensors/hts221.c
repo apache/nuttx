@@ -37,16 +37,19 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <debug.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/random.h>
 
 #include <nuttx/sensors/hts221.h>
@@ -400,7 +403,7 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
               break;
             }
 
-          usleep(10 * 1000);
+          nxsig_usleep(10 * 1000);
           retries--;
         }
       while (retries);

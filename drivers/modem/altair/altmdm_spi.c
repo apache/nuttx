@@ -41,8 +41,10 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/modem/altmdm.h>
+
 #include "altmdm_sys.h"
 #include "altmdm_pm.h"
 #include "altmdm_pm_state.h"
@@ -1943,7 +1945,7 @@ int altmdm_spi_uninit(FAR struct altmdm_dev_s *priv)
           break;
         }
 
-      usleep(10);
+      nxsig_usleep(10);
     }
 
   altmdm_sys_deletelock(&priv->spidev.tx_param.lock);
@@ -2153,7 +2155,7 @@ again:
           break;
 
         case TRANS_OK_RCVBUFFUL:
-          usleep(100);
+          nxsig_usleep(100);
           goto again;
           break;
 

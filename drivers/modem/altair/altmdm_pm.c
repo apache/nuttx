@@ -43,7 +43,9 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/modem/altmdm.h>
+
 #include "altmdm_sys.h"
 #include "altmdm_pm.h"
 #include "altmdm_pm_state.h"
@@ -1277,7 +1279,8 @@ int altmdm_pm_uninit(FAR struct altmdm_dev_s *priv)
         {
           break;
         }
-      usleep(10);
+
+      nxsig_usleep(10);
     }
 
   /* Delete event flags. */

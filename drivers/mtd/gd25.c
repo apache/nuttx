@@ -411,7 +411,7 @@ static uint8_t gd25_waitwritecomplete(FAR struct gd25_dev_s *priv)
       if (priv->prev_instr != GD25_PP && (status & GD25_SR_WIP) != 0)
         {
           gd25_unlock(priv->spi);
-          usleep(1000);
+          nxsig_usleep(1000);
           gd25_lock(priv->spi);
         }
     }

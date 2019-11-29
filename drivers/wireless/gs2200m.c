@@ -55,6 +55,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/wireless/gs2200m.h>
 #include <nuttx/net/netdev.h>
 
@@ -878,14 +879,14 @@ retry:
     {
       /* TODO: timeout */
 
-      usleep(10);
+      nxsig_usleep(10);
     }
 
   /* NOTE: wait 100us
-   * workaround to avoid realy receiving an invalid frame response
+   * workaround to avoid really receiving an invalid frame response
    */
 
-  up_udelay(100);
+  nxsig_usleep(100);
 
   /* Read frame response */
 
