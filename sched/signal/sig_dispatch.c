@@ -310,7 +310,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   DEBUGASSERT(stcb != NULL && info != NULL);
 
-  /************************* MASKED SIGNAL HANDLING ************************/
+  /************************** MASKED SIGNAL ACTIONS *************************/
 
   masked = (bool)sigismember(&stcb->sigprocmask, info->si_signo);
 
@@ -319,6 +319,21 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
    * processing a system call -- in either case, it will be added to the
    * list of pending signals.  Unmasked user signal actions will be deferred
    * while we process the system call.
+   *
+   * If a thread calls a blocking system call, the thread will still be
+   * unblocked when the signal occurs (see OTHER SIGNAL HANDLING below), but
+   * any associated user signal action will be deferred until the system
+   * call returns.  For example, if the application calls sem_wait(), the
+   * following would occur:
+   *
+   *   1. System call entry logic will block user signal handling and call
+   *      sem_wait() in kernel mode.
+   *   2. sem_wait() will block,
+   *   3. The receipt of the signal will cause any signal action to pend
+   *      but will unblock sem_wait(),
+   *   4. The sem_wait() system call will awaken and return EINTR,
+   *   5. The pending signal action will occur after the sem_wait() system
+   *      call returns to user mode.
    *
    * Syscall handlers (and logic-in-general within the OS) should not use
    * signal handlers.
@@ -359,7 +374,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
         }
     }
 
-  /************************ UNMASKED SIGNAL HANDLING ***********************/
+  /************************* UNMASKED SIGNAL ACTIONS ************************/
 
   else
     {
