@@ -1822,48 +1822,70 @@ static int stm32pwm_stop(FAR struct pwm_lowerhalf_s *dev)
         resetbit = RCC_APB2RSTR_TIM1RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM2_PWM
       case 2:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM2RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM3_PWM
       case 3:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM3RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM4_PWM
       case 4:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM4RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM5_PWM
       case 5:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM5RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM8_PWM
       case 8:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM8RST;
         break;
 #endif
+
+#ifdef CONFIG_STM32F0L0G0_TIM14_PWM
+      case 14:
+        regaddr  = STM32_RCC_APB2RSTR;
+        resetbit = RCC_APB2RSTR_TIM14RST;
+        break;
+#endif
+
+#ifdef CONFIG_STM32F0L0G0_TIM15_PWM
+      case 15:
+        regaddr  = STM32_RCC_APB2RSTR;
+        resetbit = RCC_APB2RSTR_TIM15RST;
+        break;
+#endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM16_PWM
       case 16:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM16RST;
         break;
 #endif
+
 #ifdef CONFIG_STM32F0L0G0_TIM17_PWM
       case 17:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM17RST;
         break;
 #endif
+
       default:
         return -EINVAL;
     }
