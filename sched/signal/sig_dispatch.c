@@ -413,7 +413,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        */
     }
 
-  /************************* OTHER SIGNAL HANDLING *************************/
+  /************************* OTHER SIGNAL HANDLING **************************/
 
   /* Performed only if the signal is unmasked.  These actions also must
    * happen within a system call.
