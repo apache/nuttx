@@ -3001,7 +3001,7 @@ static int max3421e_connected(FAR struct max3421e_usbhost_s *priv)
   /* Stop SOF generation and reset the bus */
 
   max3421e_busreset(priv);
-  sleep(1);
+  nxsig_sleep(1);
 
   /* Check for low- or full-speed and restart SOF generation. */
 
@@ -3460,7 +3460,7 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
   /* Stop SOF generation and reset the host port */
 
   max3421e_busreset(priv);
-  sleep(1);
+  nxsig_sleep(1);
 
   /* Get the current device speed */
 

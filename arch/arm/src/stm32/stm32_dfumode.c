@@ -44,6 +44,8 @@
 #include <unistd.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #include "stm32_dfumode.h"
 
 /****************************************************************************
@@ -73,7 +75,7 @@ void stm32_dfumode(void)
 {
 #ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
-  sleep(1);
+  nxsig_sleep(1);
 #endif
 
   asm("ldr r0, =0x40023844\n\t"    /* RCC_APB2ENR */

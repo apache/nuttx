@@ -10,7 +10,7 @@
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,11 @@
 #include <stdlib.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/random.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lsm303agr.h>
-#include <nuttx/random.h>
-#include <nuttx/signal.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LSM303AGR)
 
@@ -834,7 +834,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
       sninfo("\n");
     }
 
-  sleep(2);
+  nxsig_sleep(2);
 
   /* Disable test */
 

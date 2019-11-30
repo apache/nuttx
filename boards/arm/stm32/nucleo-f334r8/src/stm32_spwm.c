@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f334r8/src/stm32_spwm.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1047,7 +1047,7 @@ int spwm_main(int argc, char *argv[])
 
       /* Sleep */
 
-      sleep(1);
+      nxsig_sleep(1);
     }
 
 errout:
