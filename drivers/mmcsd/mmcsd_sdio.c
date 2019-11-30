@@ -3064,7 +3064,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   up_udelay(MMCSD_IDLE_DELAY);
 
 #ifdef CONFIG_MMCSD_MMCSUPPORT
-  /* Send CMD3 which is supported only by MMC.  if there is valid response
+  /* Send CMD1 which is supported only by MMC.  if there is valid response
    * then the card is definitely of MMC type
    */
 
