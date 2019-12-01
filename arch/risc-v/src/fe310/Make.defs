@@ -39,7 +39,7 @@ CHIP_ASRCS = fe310_head.S up_syscall.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS  += up_initialize.c up_swint.c
-CMN_CSRCS  += up_allocateheap.c up_createstack.c up_dumpstate.c up_exit.c
+CMN_CSRCS  += up_allocateheap.c up_createstack.c up_exit.c
 CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
 CMN_CSRCS  += up_interruptcontext.c up_modifyreg32.c up_puts.c
 CMN_CSRCS  += up_releasepending.c up_reprioritizertr.c

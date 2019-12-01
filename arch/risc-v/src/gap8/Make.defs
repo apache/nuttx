@@ -51,7 +51,7 @@ ASARCHCPUFLAGS += -march=rv32imcxgap8 -mPE=8 -mFC=1 -D__riscv__ -D__pulp__ -D__G
 # Specify C code within the common directory to be included
 
 CMN_CSRCS  += up_initialize.c up_swint.c
-CMN_CSRCS  += up_createstack.c up_dumpstate.c up_exit.c
+CMN_CSRCS  += up_createstack.c up_exit.c
 CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
 CMN_CSRCS  += up_interruptcontext.c up_releasepending.c up_reprioritizertr.c
 CMN_CSRCS  += up_releasestack.c up_stackframe.c up_sigdeliver.c
