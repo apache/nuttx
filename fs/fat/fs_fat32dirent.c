@@ -2772,6 +2772,7 @@ int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
    * cache.  So we can just fall throught to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
+
 #endif
 
   return fat_putsfname(fs, dirinfo);
@@ -2816,6 +2817,7 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
    * cache.  So we can just fall throught to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
+
 #endif
 
   /* Put the short file name entry data */

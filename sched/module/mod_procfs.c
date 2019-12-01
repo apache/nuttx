@@ -279,7 +279,8 @@ static int modprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
+  newpriv = (FAR struct modprocfs_file_s *)
+    kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!newpriv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

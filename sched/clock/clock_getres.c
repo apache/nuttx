@@ -76,6 +76,7 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
       case CLOCK_MONOTONIC:
 #endif
       case CLOCK_REALTIME:
+
         /* Form the timspec using clock resolution in nanoseconds */
 
         res->tv_sec  = 0;

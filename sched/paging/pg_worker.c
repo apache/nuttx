@@ -606,7 +606,8 @@ int pg_worker(int argc, char *argv[])
           else
             {
               pgerr("ERROR: Timeout!\n");
-              DEBUGASSERT(clock_systimer() - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
+              DEBUGASSERT(clock_systimer() - g_starttime <
+                          CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif
         }

@@ -487,8 +487,8 @@ int main(int argc, char **argv, char **envp)
                strncmp(&line[indent], "CODE ", 5) == 0 ||
                strncmp(&line[indent], "const ", 6) == 0 ||
                strncmp(&line[indent], "double ", 7) == 0 ||
-//             strncmp(&line[indent], "struct ", 7) == 0 ||
-               strncmp(&line[indent], "struct", 6) == 0 ||      /* May be unnamed */
+               strncmp(&line[indent], "struct ", 7) == 0 ||
+               strncmp(&line[indent], "struct\n", 7) == 0 ||      /* May be unnamed */
                strncmp(&line[indent], "enum ", 5) == 0 ||
                strncmp(&line[indent], "extern ", 7) == 0 ||
                strncmp(&line[indent], "EXTERN ", 7) == 0 ||
@@ -510,8 +510,8 @@ int main(int argc, char **argv, char **envp)
                strncmp(&line[indent], "uint8_t ", 8) == 0 ||
                strncmp(&line[indent], "uint16_t ", 9) == 0 ||
                strncmp(&line[indent], "uint32_t ", 9) == 0 ||
-//             strncmp(&line[indent], "union ", 6) == 0 ||
-               strncmp(&line[indent], "union", 5) == 0 ||      /* May be unnamed */
+               strncmp(&line[indent], "union ", 6) == 0 ||
+               strncmp(&line[indent], "union\n", 6) == 0 ||      /* May be unnamed */
                strncmp(&line[indent], "unsigned ", 9) == 0 ||
                strncmp(&line[indent], "void ", 5) == 0 ||
                strncmp(&line[indent], "volatile ", 9) == 0)

@@ -353,8 +353,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
         }
       else
 #endif
-       {
-       }
+        {
+        }
     }
   else if (inode->u.i_ops != NULL)
     {

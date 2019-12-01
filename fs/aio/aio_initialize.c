@@ -78,6 +78,7 @@ static uint16_t g_aio_count;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* This is a list of pending asynchronous I/O.  The user must hold the
  * lock on this list in order to access the list.
  */

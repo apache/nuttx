@@ -95,7 +95,6 @@ struct skel_level1_s
   /* Add context specific data types here for managing the directory
    * open / read / stat, etc.
    */
-
 };
 
 /****************************************************************************
