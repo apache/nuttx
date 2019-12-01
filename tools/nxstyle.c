@@ -117,6 +117,7 @@ int main(int argc, char **argv, char **envp)
   bool hdrfile;         /* True: File is a header file */
   bool bexternc;        /* True: Within 'extern "C"' */
   bool brhcomment;      /* True: Comment to the right of code */
+  bool prevbrhcmt;      /* True: previous line had comment to the right of code */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -207,6 +208,7 @@ int main(int argc, char **argv, char **envp)
   ppline         = false; /* True: Continuation of a pre-processor line */
   bexternc       = false; /* True: Within 'extern "C"' */
   brhcomment     = false; /* True: Comment to the right of code */
+  prevbrhcmt     = false; /* True: Previous line had comment to the right of code */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
   bnest          = 0;     /* Brace nesting level on this line */
@@ -233,6 +235,7 @@ int main(int argc, char **argv, char **envp)
 
       /* If we are not in a comment, then this certainly is not a right-hand comment. */
 
+      prevbrhcmt   = brhcomment;
       if (ncomment <= 0)
         {
           brhcomment = false;
@@ -284,7 +287,7 @@ int main(int argc, char **argv, char **envp)
                * follow another with no space separation.
                */
 
-              if (line[n] != '}' /* && line[n] != '#' */)
+              if (line[n] != '}' /* && line[n] != '#' */ && !prevbrhcmt)
                 {
                   fprintf(stderr,
                           "Missing blank line after comment found at line %d\n",
@@ -429,12 +432,21 @@ int main(int argc, char **argv, char **envp)
           if (line[indent] == '/' && line[indent + 1] == '*' &&
               lptr - line == linelen - 3)
             {
+              /* If preceding comments were to the right of code, then we can
+               * assume that there is a columnar alignment of columns that do
+               * no follow the usual alignment.  So the brhcomment flag
+               * should propagate.
+               */
+
+              brhcomment = prevbrhcmt;
+
               /* Check if there should be a blank line before the comment */
 
               if (lineno > 1 &&
                   comment_lineno != lineno - 1 &&
                   blank_lineno   != lineno - 1 &&
-                  noblank_lineno != lineno - 1)
+                  noblank_lineno != lineno - 1 &&
+                  !brhcomment)
                 {
                   /* TODO:  This generates a false alarm if preceded by a label. */
 
@@ -449,7 +461,6 @@ int main(int argc, char **argv, char **envp)
                */
 
               comment_lineno = lineno;
-              brhcomment = false;
             }
         }
 
@@ -820,8 +831,20 @@ int main(int argc, char **argv, char **envp)
                               lineno, n);
                     }
 
+                  /* Increment the count of nested comments */
+
                   ncomment++;
-                  brhcomment = (n != indent);
+
+                  /* If there is anything to the left of the left brace, then
+                   * this must be a comment to the right of code.
+                   * Also if preceding comments were to the right of code, then
+                   * we can assume that there is a columnar alignment of columns
+                   * that do no follow the usual alignment.  So the brhcomment
+                   * flag should propagate.
+                   */
+
+                  brhcomment = ((n != indent) || prevbrhcmt);
+
                   n++;
                   continue;
                 }
@@ -881,16 +904,10 @@ int main(int argc, char **argv, char **envp)
                           /* 'comment_lineno 'holds the line number of the
                            * last closing comment.  It is used only to
                            * verify that the comment is followed by a blank
-                           * line.  'comment_lineno' is NOT set here if this
-                           * comment is to the right of the code.  In that
-                           * case, no blank link is required following the
-                           * comment
+                           * line.
                            */
 
-                          if (!brhcomment)
-                            {
-                              comment_lineno = lineno;
-                            }
+                          comment_lineno = lineno;
 
                           /* Note that brhcomment must persist to support a
                            * later test for comment alignment.  We will fix
@@ -1653,10 +1670,20 @@ int main(int argc, char **argv, char **envp)
 
       if ((ncomment > 0 || prevncomment > 0) && !bstring)
         {
+          /* Nothing should begin in comment zero */
+
           if (indent == 0 && line[0] != '/' && !bexternc)
             {
-              fprintf(stderr, "No indentation line %d:%d\n",
-                      lineno, indent);
+              /* NOTE:  if this line contains a comment to the right of the
+               * code, then ncomment will be misleading because it was
+               * already incremented above.
+               */
+
+              if (ncomment > 1 || !brhcomment)
+                {
+                  fprintf(stderr, "No indentation line %d:%d\n",
+                          lineno, indent);
+                }
             }
           else if (indent == 1 && line[0] == ' ' && line[1] == '*')
             {
@@ -1684,7 +1711,12 @@ int main(int argc, char **argv, char **envp)
             {
               if (line[indent] == '/')
                 {
-                  if ((indent & 3) != 2)
+                  /* Comments should like at offsets 2, 6, 10, ...
+                   * This rule is not followed, however, if the comments are
+                   * aligned to the right of the code.
+                   */
+
+                  if ((indent & 3) != 2 && !brhcomment)
                     {
                       fprintf(stderr,
                               "Bad comment alignment at line %d:%d\n",
