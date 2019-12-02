@@ -62,10 +62,10 @@
 
 /* I2C command bytes */
 
-#define AHT10_SOFT_INIT              0xE1
-#define AHT10_MEAS_TRIG              0xAC
+#define AHT10_SOFT_INIT              0xe1
+#define AHT10_MEAS_TRIG              0xac
 #define AHT10_MEAS_READ              0x71
-#define AHT10_NORMAL_CMD             0xA8
+#define AHT10_NORMAL_CMD             0xa8
 
 /****************************************************************************
  * Private
@@ -89,6 +89,7 @@ struct aht10_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int aht10_writereg(FAR struct aht10_dev_s *priv,
@@ -176,6 +177,7 @@ static int aht10_writereg(FAR struct aht10_dev_s *priv,
  *   I2C read access helper.
  *
  ****************************************************************************/
+
 static int aht10_readregs(FAR struct aht10_dev_s *priv,
                           FAR uint8_t *buf, uint8_t len)
 {
@@ -200,6 +202,7 @@ static int aht10_readregs(FAR struct aht10_dev_s *priv,
  *   Initialize the AHT10 sensor. This takes less than 20 ms.
  *
  ****************************************************************************/
+
 static int aht10_initialize(FAR struct aht10_dev_s *priv)
 {
   int ret;
@@ -207,26 +210,30 @@ static int aht10_initialize(FAR struct aht10_dev_s *priv)
 
   buf[0] = 0x00;
   buf[1] = 0x00;
+
   ret = aht10_writereg(priv, AHT10_NORMAL_CMD, buf);
   if (ret < 0)
-  {
-    snerr("ERROR: write normal command failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: write normal command failed: %d\n", ret);
+      return ret;
+    }
 
   /* wait at least 300ms */
+
   nxsig_usleep(300000);
 
   buf[0] = 0x08;
   buf[1] = 0x00;
+
   ret = aht10_writereg(priv, AHT10_SOFT_INIT, buf);
   if (ret < 0)
-  {
-    snerr("ERROR: send calibrate command failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: send calibrate command failed: %d\n", ret);
+      return ret;
+    }
 
   /* wait at least 300ms */
+
   nxsig_usleep(300000);
 
   return ret;
@@ -282,39 +289,47 @@ static int aht10_read_values(FAR struct aht10_dev_s *priv, FAR int *temp,
   uint32_t rh20;
   int ret;
 
-  /* sample command */
+  /* Sample command */
+
   buf[0] = 0x33;
   buf[1] = 0x00;
+
   ret = aht10_writereg(priv, AHT10_MEAS_TRIG, buf);
   if (ret < 0)
-  {
-    snerr("ERROR: aht10_writereg failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: aht10_writereg failed: %d\n", ret);
+      return ret;
+    }
 
   /* Read the raw temperature data and humidity data */
 
   ret = aht10_readregs(priv, buf, 6);
   if (ret < 0)
-  {
-    snerr("ERROR: aht10_readregs failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: aht10_readregs failed: %d\n", ret);
+      return ret;
+    }
 
   /* Check the AHT10 has been calibrated. */
 
-  if((buf[0] & 0x68) != 0x08)
-  {
-    aht10_initialize(priv);
-    snwarn("WARNING: aht10 are not calibrated.\n");
-  }
+  if ((buf[0] & 0x68) != 0x08)
+    {
+      aht10_initialize(priv);
+      snwarn("WARNING: aht10 are not calibrated.\n");
+    }
 
-  rh20 = ((buf[1] << 12) | (buf[2] << 4) | ((buf[3] & 0xF0) >> 4)) & 0x000FFFFF; // humidity data (20bits).
-  temp20 = (((buf[3] & 0x0F) << 16) | (buf[4] << 8) | buf[5]) & 0x000FFFFF; // temperature data (20bits).
+  /* Humidity data (20bits). */
+
+  rh20 = ((buf[1] << 12) | (buf[2] << 4) | ((buf[3] & 0xf0) >> 4)) & 0x000fffff;
+
+  /* Temperature data (20bits). */
+
+  temp20 = (((buf[3] & 0x0f) << 16) | (buf[4] << 8) | buf[5]) & 0x000fffff;
 
   add_sensor_randomness((int)temp20 << 16 | rh20);
 
-  /* sensor data converse to reality */
+  /* Sensor data convert to reality */
+
   priv->temperature = aht10_temp_to_mcelsius(temp20);
   priv->humidity = aht10_rh_to_pcm(rh20);
 
@@ -454,7 +469,7 @@ static ssize_t aht10_read(FAR struct file *filep, FAR char *buffer, size_t bufle
   ret = aht10_read_values(priv, &temp, &rh);
   if (ret < 0)
     {
-	  sninfo("cannot read data: %d\n", ret);
+      sninfo("cannot read data: %d\n", ret);
     }
   else
     {
@@ -537,7 +552,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = aht10_read_values(priv, &temp, &rh);
           if (ret < 0)
             {
-        	  sninfo("cannot read data: %d\n", ret);
+              sninfo("cannot read data: %d\n", ret);
             }
           else
             {
@@ -551,7 +566,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       default:
-    	  sninfo("Unrecognized cmd: %d\n", cmd);
+          sninfo("Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -652,11 +667,11 @@ int aht10_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   ret = aht10_initialize(priv);
   if (ret < 0)
-  {
-    snerr("ERROR: Failed to initialize AHT10: %d\n", ret);
-    kmm_free(priv);
-    return ret;
-  }
+    {
+      snerr("ERROR: Failed to initialize AHT10: %d\n", ret);
+      kmm_free(priv);
+      return ret;
+    }
 
   /* Register the character driver */
 
