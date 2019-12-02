@@ -691,6 +691,20 @@ config SGP30_DEBUG
 
 endif # SENSORS_SGP30
 
+config SENSORS_AHT10
+        bool "ASAIR AHT10 temperature and humidity sensor"
+        default n
+        select I2C
+        ---help---
+                Enable driver support for the ASAIR AHT10 temperature and humidity sensors.
+
+if SENSORS_AHT10
+config AHT10_I2C_FREQUENCY
+	int "AHT10 I2C frequency"
+	default 400000
+	range 1 400000
+endif # SENSORS_AHT10
+
 config SENSORS_SHT21
 	bool "Sensirion SHT21 temperature and humidity sensor"
 	default n
