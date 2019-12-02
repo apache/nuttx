@@ -1045,7 +1045,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   finfo("Entry %lu: %s\n", (unsigned long)offset, name);
   strncpy(dir->fd_dir.d_name, name, NAME_MAX + 1);
 
-  switch ((node->cn_mode & s_IFTGT) != 0)
+  switch (node->cn_mode & s_IFTGT)
     {
       case S_IFDIR:  /* Directory */
         dir->fd_dir.d_type = DTYPE_DIRECTORY;
