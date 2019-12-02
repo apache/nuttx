@@ -490,7 +490,7 @@ static void sai_exclsem_take(struct stm32l4_sai_s *priv)
 
 static void sai_mckdivider(struct stm32l4_sai_s *priv)
 {
-  uint8_t mckdiv;
+  uint32_t mckdiv;
 
   DEBUGASSERT(priv && priv->samplerate > 0 && priv->frequency > 0);
 
