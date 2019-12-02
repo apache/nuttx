@@ -485,6 +485,27 @@
 
 #endif
 
+/* Complementary outputs support */
+
+#if defined(CONFIG_STM32F0L0G0_TIM1_CH1NOUT) || defined(CONFIG_STM32F0L0G0_TIM1_CH2NOUT) || \
+    defined(CONFIG_STM32F0L0G0_TIM1_CH3NOUT)
+#  define HAVE_TIM1_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32F0L0G0_TIM15_CH1NOUT)
+#  define HAVE_TIM15_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32F0L0G0_TIM16_CH1NOUT)
+#  define HAVE_TIM16_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32F0L0G0_TIM17_CH1NOUT)
+#  define HAVE_TIM17_COMPLEMENTARY
+#endif
+#if defined(HAVE_TIM1_COMPLEMENTARY)  || defined(HAVE_TIM8_COMPLEMENTARY)  || \
+    defined(HAVE_TIM15_COMPLEMENTARY) || defined(HAVE_TIM16_COMPLEMENTARY) || \
+    defined(HAVE_TIM17_COMPLEMENTARY)
+#  define HAVE_PWM_COMPLEMENTARY
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
