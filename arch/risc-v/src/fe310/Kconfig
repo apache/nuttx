@@ -15,7 +15,7 @@ config ARCH_CHIP_FE310_G002
 	select FE310_HAVE_UART0
 	select FE310_HAVE_GPIO
 	---help---
-		FE310, RV32IMAC 32Mbit SPI-Flash, 16KB SRAM
+		FE310, RV32IMAC 16KB SRAM
 
 endchoice
 
@@ -45,18 +45,3 @@ config FE310_UART0
 	select FE310_UART
 
 endmenu
-
-config FE310_UART_RX_BUF_SIZE
-	int "UART RX Bufer size"
-	default 64
-	depends on FE310_UART
-	---help---
-		Size of RX buffers for FE310 UARTs
-
-config FE310_UART_TX_BUF_SIZE
-	int "UART TX Bufer size"
-	default 64
-	depends on FE310_UART
-	---help---
-		Size of TX buffers for FE310 UARTs
-

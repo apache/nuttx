@@ -39,7 +39,7 @@
 
 /* Register Base Address ****************************************************/
 
-#define FE310_CLIC_BASE    0x02000000
+#define FE310_CLINT_BASE   0x02000000
 #define FE310_PLIC_BASE    0x0c000000
 
 #define FE310_GPIO_BASE    0x10012000  /* 0x10012000 - 0x10012fff: GPIO  */

@@ -39,7 +39,7 @@
 
 #include "hardware/fe310_memorymap.h"
 #include "hardware/fe310_uart.h"
-#include "hardware/fe310_clic.h"
+#include "hardware/fe310_clint.h"
 #include "hardware/fe310_plic.h"
 
 /****************************************************************************

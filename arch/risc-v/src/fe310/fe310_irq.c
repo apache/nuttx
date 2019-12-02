@@ -191,14 +191,10 @@ void up_ack_irq(int irq)
 irqstate_t up_irq_save(void)
 {
   uint32_t oldstat;
-  uint32_t newstat;
 
-  /* Clear machine interrupt enable bit */
+  /* Read mstatus & clear machine interrupt enable (MIE) in mstatus */
 
-  asm volatile ("csrr %0, mstatus": "=r" (oldstat));
-  newstat = oldstat & ~MSTATUS_MIE;
-  asm volatile("csrw mstatus, %0" : /* no output */ : "r" (newstat));
-
+  asm volatile ("csrrc %0, mstatus, %1": "=r" (oldstat) : "r"(MSTATUS_MIE));
   return oldstat;
 }
 
@@ -242,11 +238,8 @@ irqstate_t up_irq_enable(void)
   asm volatile("csrw mie, %0" : /* no output */ : "r" (mie));
 #endif
 
-  /* Set machine interrupt enable (MIE) in mstatus */
+  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
 
-  asm volatile ("csrr %0, mstatus": "=r" (oldstat));
-  newstat = oldstat | MSTATUS_MIE;
-  asm volatile("csrw mstatus, %0" : /* no output */ : "r" (newstat));
-
+  asm volatile ("csrrs %0, mstatus, %1": "=r" (oldstat) : "r"(MSTATUS_MIE));
   return oldstat;
 }

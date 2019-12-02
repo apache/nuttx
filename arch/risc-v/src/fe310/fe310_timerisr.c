@@ -81,17 +81,17 @@ static void fe310_reload_mtimecmp(void)
   if (!_b_tick_started)
     {
       _b_tick_started = true;
-      current = getreg64(FE310_CLIC_MTIME);
+      current = getreg64(FE310_CLINT_MTIME);
     }
   else
     {
-      current = getreg64(FE310_CLIC_MTIMECMP);
+      current = getreg64(FE310_CLINT_MTIMECMP);
     }
 
   uint64_t tick = 100000; /* TODO */
   next = current + tick;
 
-  putreg64(next, FE310_CLIC_MTIMECMP);
+  putreg64(next, FE310_CLINT_MTIMECMP);
 
   spin_unlock_irqrestore(flags);
 }
@@ -129,7 +129,7 @@ void riscv_timer_initialize(void)
 
   (void)irq_attach(FE310_IRQ_MTIMER, fe310_timerisr, NULL);
 
-  /* Reload CLIC mtimecmp */
+  /* Reload CLINT mtimecmp */
 
   fe310_reload_mtimecmp();
 

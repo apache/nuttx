@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/hardware/fe310_clic.h
+ * arch/risc-v/src/fe310/hardware/fe310_clint.h
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -30,14 +30,14 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLIC_H
-#define __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLIC_H
+#ifndef __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLINT_H
+#define __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLINT_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FE310_CLIC_MTIMECMP  (FE310_CLIC_BASE + 0x4000)
-#define FE310_CLIC_MTIME     (FE310_CLIC_BASE + 0xbff8)
+#define FE310_CLINT_MTIMECMP  (FE310_CLINT_BASE + 0x4000)
+#define FE310_CLINT_MTIME     (FE310_CLINT_BASE + 0xbff8)
 
-#endif /* __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLIC_H */
+#endif /* __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_CLINT_H */
