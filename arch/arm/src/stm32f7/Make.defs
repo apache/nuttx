@@ -237,6 +237,10 @@ ifeq ($(CONFIG_STM32F7_CAN),y)
 CHIP_CSRCS += stm32_can.c
 endif
 
+ifeq ($(CONFIG_STM32F7_SAI),y)
+CHIP_CSRCS += stm32_sai.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif

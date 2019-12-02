@@ -732,6 +732,8 @@ config STM32F7_STM32F746XX
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
 	select STM32F7_HAVE_EXTERNAL_ULPI
+    select STM32F7_HAVE_SAI1
+    select STM32F7_HAVE_SAI2
 
 config STM32F7_STM32F756XX
 	bool
@@ -1236,6 +1238,15 @@ config STM32F7_HAVE_EXTERNAL_ULPI
 	bool
 	default n
 
+config STM32F7_HAVE_SAI1
+	bool
+	default n
+
+config STM32F7_HAVE_SAI2
+	bool
+	default n
+
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -1491,12 +1502,48 @@ config STM32F7_RNG
 config STM32F7_SAI1
 	bool "SAI1"
 	default n
+	depends on STM32F7_HAVE_SAI1
+
+config STM32F7_SAI1_A
+	bool "SAI1 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
 	select STM32F7_SAI
+	depends on STM32F7_SAI1
+
+config STM32F7_SAI1_B
+	bool "SAI1 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32F7_SAI
+	depends on STM32F7_SAI1
 
 config STM32F7_SAI2
 	bool "SAI2"
 	default n
+	select STM32F7_HAVE_SAI2
+
+config STM32F7_SAI2_A
+	bool "SAI2 Block A"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
 	select STM32F7_SAI
+	depends on STM32F7_SAI2
+
+config STM32F7_SAI2_B
+	bool "SAI2 Block B"
+	default n
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32F7_SAI
+	depends on STM32F7_SAI2
 
 config STM32F7_SDMMC1
 	bool "SDMMC1"
@@ -5760,6 +5807,70 @@ config STM32F7_QENCODER_SAMPLE_EVENT_8
 	bool "8"
 
 endchoice
+
+endmenu
+
+menu "SAI Configuration"
+	depends on STM32F7_SAI
+
+choice
+	prompt "Operation mode"
+	default STM32F7_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32F7_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32F7_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32F7_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	default STM32F7_SAI1_BOTH_ASYNC
+	depends on STM32F7_SAI1_A && STM32F7_SAI1_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32F7_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32F7_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32F7_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	default STM32F7_SAI2_BOTH_ASYNC
+	depends on STM32F7_SAI2_A && STM32F7_SAI2_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32F7_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32F7_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32F7_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
 
 endmenu
 
