@@ -550,14 +550,14 @@ config UART_TXDMA
 	default n
 	select SERIAL_TXDMA
 	---help---
-		Enable DMA transfers on UART
+		Enable Tx DMA transfers on UART
 
 config UART_RXDMA
 	bool "UART Rx DMA support"
 	default n
 	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART
+		Enable Rx DMA transfers on UART
 
 endmenu
 

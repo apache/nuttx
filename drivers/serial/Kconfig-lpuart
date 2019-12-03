@@ -133,12 +133,19 @@ config LPUART0_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART0_DMA
-	bool "LPUART0 DMA support"
+config LPUART0_RXDMA
+	bool "LPUART0 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART0
+
+config LPUART0_TXDMA
+	bool "LPUART0 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART0
 
 endmenu
 
@@ -222,12 +229,19 @@ config LPUART1_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART1_DMA
-	bool "LPUART1 DMA support"
+config LPUART1_RXDMA
+	bool "LPUART1 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART1
+
+config LPUART1_TXDMA
+	bool "LPUART1 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART1
 
 endmenu
 
@@ -313,12 +327,19 @@ config LPUART2_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART2_DMA
-	bool "LPUART2 DMA support"
+config LPUART2_RXDMA
+	bool "LPUART2 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART2
+
+config LPUART2_TXDMA
+	bool "LPUART2 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART2
 
 endmenu
 
@@ -402,12 +423,19 @@ config LPUART3_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART3_DMA
-	bool "LPUART3 DMA support"
+config LPUART3_RXDMA
+	bool "LPUART3 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART3
+
+config LPUART3_TXDMA
+	bool "LPUART3 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART3
 
 endmenu
 
@@ -491,12 +519,19 @@ config LPUART4_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART4_DMA
-	bool "LPUART4 DMA support"
+config LPUART4_RXDMA
+	bool "LPUART4 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART4
+
+config LPUART4_TXDMA
+	bool "LPUART4 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART4
 
 endmenu
 
@@ -580,12 +615,19 @@ config LPUART5_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART5_DMA
-	bool "LPUART5 DMA support"
+config LPUART5_RXDMA
+	bool "LPUART5 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART5
+
+config LPUART5_TXDMA
+	bool "LPUART5 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART5
 
 endmenu
 
@@ -669,12 +711,19 @@ config LPUART6_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART6_DMA
-	bool "LPUART6 DMA support"
+config LPUART6_RXDMA
+	bool "LPUART6 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART6
+
+config LPUART6_TXDMA
+	bool "LPUART6 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART6
 
 endmenu
 
@@ -758,12 +807,19 @@ config LPUART7_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART7_DMA
-	bool "LPUART7 DMA support"
+config LPUART7_RXDMA
+	bool "LPUART7 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART7
+
+config LPUART7_TXDMA
+	bool "LPUART7 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART7
 
 endmenu
 
@@ -847,11 +903,18 @@ config LPUART8_OFLOWCONTROL
 	---help---
 		Enable CTS flow control
 
-config LPUART8_DMA
-	bool "LPUART8 DMA support"
+config LPUART8_RXDMA
+	bool "LPUART8 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers
+		Enable Rx DMA transfers on LPUART8
+
+config LPUART8_TXDMA
+	bool "LPUART8 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on LPUART8
 
 endmenu

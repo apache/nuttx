@@ -109,12 +109,19 @@ config UART0_OFLOWCONTROL
 	---help---
 		Enable UART0 CTS flow control
 
-config UART0_DMA
-	bool "UART0 DMA support"
+config UART0_RXDMA
+	bool "UART0 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART0
+		Enable Rx DMA transfers on UART0
+
+config UART0_TXDMA
+	bool "UART0 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART0
 
 endmenu
 
@@ -174,12 +181,19 @@ config UART1_OFLOWCONTROL
 	---help---
 		Enable UART1 CTS flow control
 
-config UART1_DMA
-	bool "UART1 DMA support"
+config UART1_RXDMA
+	bool "UART1 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART1
+		Enable Rx DMA transfers on UART1
+
+config UART1_TXDMA
+	bool "UART1 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART1
 
 endmenu
 
@@ -239,12 +253,19 @@ config UART2_OFLOWCONTROL
 	---help---
 		Enable UART2 CTS flow control
 
-config UART2_DMA
-	bool "UART2 DMA support"
+config UART2_RXDMA
+	bool "UART2 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART2
+		Enable Rx DMA transfers on UART2
+
+config UART2_TXDMA
+	bool "UART2 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART2
 
 endmenu
 
@@ -304,12 +325,19 @@ config UART3_OFLOWCONTROL
 	---help---
 		Enable UART3 CTS flow control
 
-config UART3_DMA
-	bool "UART3 DMA support"
+config UART3_RXDMA
+	bool "UART3 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART3
+		Enable Rx DMA transfers on UART3
+
+config UART3_TXDMA
+	bool "UART3 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART3
 
 endmenu
 
@@ -369,12 +397,19 @@ config UART4_OFLOWCONTROL
 	---help---
 		Enable UART4 CTS flow control
 
-config UART4_DMA
-	bool "UART4 DMA support"
+config UART4_RXDMA
+	bool "UART4 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART4
+		Enable Rx DMA transfers on UART4
+
+config UART4_TXDMA
+	bool "UART4 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART4
 
 endmenu
 
@@ -434,12 +469,19 @@ config UART5_OFLOWCONTROL
 	---help---
 		Enable UART5 CTS flow control
 
-config UART5_DMA
-	bool "UART5 DMA support"
+config UART5_RXDMA
+	bool "UART5 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART5
+		Enable Rx DMA transfers on UART5
+
+config UART5_TXDMA
+	bool "UART5 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART5
 
 endmenu
 
@@ -499,12 +541,19 @@ config UART6_OFLOWCONTROL
 	---help---
 		Enable UART6 CTS flow control
 
-config UART6_DMA
-	bool "UART6 DMA support"
+config UART6_RXDMA
+	bool "UART6 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART6
+		Enable Rx DMA transfers on UART6
+
+config UART6_TXDMA
+	bool "UART6 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART6
 
 endmenu
 
@@ -564,12 +613,19 @@ config UART7_OFLOWCONTROL
 	---help---
 		Enable UART7 CTS flow control
 
-config UART7_DMA
-	bool "UART7 DMA support"
+config UART7_RXDMA
+	bool "UART7 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART7
+		Enable Rx DMA transfers on UART7
+
+config UART7_TXDMA
+	bool "UART7 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART7
 
 endmenu
 
@@ -629,11 +685,18 @@ config UART8_OFLOWCONTROL
 	---help---
 		Enable UART8 CTS flow control
 
-config UART8_DMA
-	bool "UART8 DMA support"
+config UART8_RXDMA
+	bool "UART8 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on UART8
+		Enable Rx DMA transfers on UART8
+
+config UART8_TXDMA
+	bool "UART8 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART8
 
 endmenu

@@ -109,12 +109,19 @@ config USART0_OFLOWCONTROL
 	---help---
 		Enable USART0 CTS flow control
 
-config USART0_DMA
-	bool "USART0 DMA support"
+config USART0_RXDMA
+	bool "USART0 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART0
+		Enable Rx DMA transfers on USART0
+
+config USART0_TXDMA
+	bool "USART0 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART0
 
 endmenu
 
@@ -174,12 +181,19 @@ config USART1_OFLOWCONTROL
 	---help---
 		Enable USART1 CTS flow control
 
-config USART1_DMA
-	bool "USART1 DMA support"
+config USART1_RXDMA
+	bool "USART1 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART1
+		Enable Rx DMA transfers on USART1
+
+config USART1_TXDMA
+	bool "USART1 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART1
 
 endmenu
 
@@ -239,12 +253,19 @@ config USART2_OFLOWCONTROL
 	---help---
 		Enable USART2 CTS flow control
 
-config USART2_DMA
-	bool "USART2 DMA support"
+config USART2_RXDMA
+	bool "USART2 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART2
+		Enable Rx DMA transfers on USART2
+
+config USART2_TXDMA
+	bool "USART2 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART2
 endmenu
 
 menu "USART3 Configuration"
@@ -303,12 +324,19 @@ config USART3_OFLOWCONTROL
 	---help---
 		Enable USART3 CTS flow control
 
-config USART3_DMA
-	bool "USART3 DMA support"
+config USART3_RXDMA
+	bool "USART3 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART3
+		Enable Rx DMA transfers on USART3
+
+config USART3_TXDMA
+	bool "USART3 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART3
 
 endmenu
 
@@ -368,12 +396,19 @@ config USART4_OFLOWCONTROL
 	---help---
 		Enable USART4 CTS flow control
 
-config USART4_DMA
-	bool "USART4 DMA support"
+config USART4_RXDMA
+	bool "USART4 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART4
+		Enable Rx DMA transfers on USART4
+
+config USART4_TXDMA
+	bool "USART4 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART4
 
 endmenu
 
@@ -433,12 +468,19 @@ config USART5_OFLOWCONTROL
 	---help---
 		Enable USART5 CTS flow control
 
-config USART5_DMA
-	bool "USART5 DMA support"
+config USART5_RXDMA
+	bool "USART5 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART5
+		Enable Rx DMA transfers on USART5
+
+config USART5_TXDMA
+	bool "USART5 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART5
 
 endmenu
 
@@ -498,12 +540,19 @@ config USART6_OFLOWCONTROL
 	---help---
 		Enable USART6 CTS flow control
 
-config USART6_DMA
-	bool "USART6 DMA support"
+config USART6_RXDMA
+	bool "USART6 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART6
+		Enable Rx DMA transfers on USART6
+
+config USART6_TXDMA
+	bool "USART6 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART6
 
 endmenu
 
@@ -563,12 +612,19 @@ config USART7_OFLOWCONTROL
 	---help---
 		Enable USART7 CTS flow control
 
-config USART7_DMA
-	bool "USART7 DMA support"
+config USART7_RXDMA
+	bool "USART7 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART7
+		Enable Rx DMA transfers on USART7
+
+config USART7_TXDMA
+	bool "USART7 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART7
 
 endmenu
 
@@ -628,12 +684,19 @@ config USART8_OFLOWCONTROL
 	---help---
 		Enable USART8 CTS flow control
 
-config USART8_DMA
-	bool "USART8 DMA support"
+config USART8_RXDMA
+	bool "USART8 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART8
+		Enable Rx DMA transfers on USART8
+
+config USART8_TXDMA
+	bool "USART8 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART8
 
 endmenu
 
@@ -693,11 +756,18 @@ config USART9_OFLOWCONTROL
 	---help---
 		Enable USART9 CTS flow control
 
-config USART9_DMA
-	bool "USART9 DMA support"
+config USART9_RXDMA
+	bool "USART9 Rx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_RXDMA
 	---help---
-		Enable DMA transfers on USART9
+		Enable Rx DMA transfers on USART9
+
+config USART9_TXDMA
+	bool "USART9 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART9
 
 endmenu
