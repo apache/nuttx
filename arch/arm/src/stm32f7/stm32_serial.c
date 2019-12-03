@@ -186,26 +186,35 @@
 
 /* DMA priority */
 
-#  ifndef CONFIG_USART_DMAPRIO
-#      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
+#  ifndef CONFIG_USART_RXDMAPRIO
+#      define CONFIG_USART_RXDMAPRIO  DMA_SCR_PRIMED
 #  endif
 
-#  if (CONFIG_USART_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_USART_DMAPRIO"
+#  if (CONFIG_USART_RXDMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#    error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #  endif
 
 /* DMA control words */
 
-#  define SERIAL_DMA_CONTROL_WORD      \
-              (DMA_SCR_DIR_P2M       | \
-               DMA_SCR_CIRC          | \
-               DMA_SCR_MINC          | \
-               DMA_SCR_PSIZE_8BITS   | \
-               DMA_SCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO  | \
-               DMA_SCR_PBURST_SINGLE | \
+#  define SERIAL_DMA_CONTROL_WORD       \
+              (DMA_SCR_DIR_P2M        | \
+               DMA_SCR_CIRC           | \
+               DMA_SCR_MINC           | \
+               DMA_SCR_PSIZE_8BITS    | \
+               DMA_SCR_MSIZE_8BITS    | \
+               CONFIG_USART_RXDMAPRIO | \
+               DMA_SCR_PBURST_SINGLE  | \
                DMA_SCR_MBURST_SINGLE)
-#endif /* SERIAL_HAVE_DMA */
+
+#  define SERIAL_DMA_CONTROL_WORD_TX    \
+              (DMA_SCR_DIR_M2P        | \
+               DMA_SCR_MINC           | \
+               DMA_SCR_PSIZE_8BITS    | \
+               DMA_SCR_MSIZE_8BITS    | \
+               DMA_SCR_PBURST_SINGLE  | \
+               DMA_SCR_MBURST_SINGLE  | \
+               CONFIG_USART_RXDMAPRIO)
+#endif /* SERIAL_HAVE_RXDMA */
 
 /* Power management definitions */
 
