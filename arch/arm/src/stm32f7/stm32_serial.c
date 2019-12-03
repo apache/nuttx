@@ -1241,7 +1241,7 @@ static struct up_dev_s g_uart7priv =
   .iflow          = true,
   .rts_gpio       = GPIO_UART7_RTS,
 #endif
-#ifdef CONFIG_UART7_RXDMA
+#ifdef CONFIG_UART7_TXDMA
   .txdma_channel = DMAMAP_UART7_TX,
 #endif
 #ifdef CONFIG_UART7_RXDMA
