@@ -1384,7 +1384,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
@@ -1465,9 +1466,10 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
       cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
       cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET);
 
-      /* Return the current interrupt mask value for the used interrupts.  Notice
-       * that this depends on the fact that none of the used interrupt enable bits
-       * overlap.  This logic would fail if we needed the break interrupt!
+      /* Return the current interrupt mask value for the used interrupts.
+       * Notice that this depends on the fact that none of the used interrupt
+       * enable bits overlap.  This logic would fail if we needed the break
+       * interrupt!
        */
 
       *ie = (cr1 & (USART_CR1_USED_INTS)) | (cr3 & USART_CR3_EIE);
@@ -2211,7 +2213,8 @@ static void up_dma_shutdown(struct uart_dev_s *dev)
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   interrupts are not enabled until the txint() and rxint() methods are
+ *   called.
  *
  ****************************************************************************/
 
@@ -2308,9 +2311,9 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
        * "           "      USART_ISR_ORE   Overrun Error Detected
        * USART_CR3_CTSIE    USART_ISR_CTS   CTS flag                        (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicitly writing zero
-       * to the SR register: USART_ISR_CTS, USART_ISR_LBD. Note of those are currently
-       * being used.
+       * NOTE: Some of these status bits must be cleared by explicitly writing
+       * zero to the SR register: USART_ISR_CTS, USART_ISR_LBD. Note of those
+       * are currently being used.
        */
 
 #ifdef HAVE_RS485
@@ -2330,10 +2333,12 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
       /* Handle incoming, receive bytes. */
 
-      if ((priv->sr & USART_ISR_RXNE) != 0 && (priv->ie & USART_CR1_RXNEIE) != 0)
+      if ((priv->sr & USART_ISR_RXNE) != 0 &&
+          (priv->ie & USART_CR1_RXNEIE) != 0)
         {
           /* Received data ready... process incoming bytes.  NOTE the check for
-           * RXNEIE:  We cannot call uart_recvchards of RX interrupts are disabled.
+           * RXNEIE:  We cannot call uart_recvchards of RX interrupts are
+           * disabled.
            */
 
           uart_recvchars(&priv->dev);
@@ -2434,14 +2439,19 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
             uint32_t gpio_val = GPIO_OPENDRAIN;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP ? GPIO_PULLUP : GPIO_FLOAT;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN ? GPIO_PULLDOWN : GPIO_FLOAT;
-            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
+            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                         SER_SINGLEWIRE_PULLUP ? GPIO_PULLUP : GPIO_FLOAT;
+            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                         SER_SINGLEWIRE_PULLDOWN ? GPIO_PULLDOWN : GPIO_FLOAT;
+            stm32_configgpio((priv->tx_gpio &
+                             ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
             cr |= USART_CR3_HDSEL;
           }
         else
           {
-            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | GPIO_PUSHPULL);
+            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
+                                                GPIO_OPENDRAIN)) |
+                                                GPIO_PUSHPULL);
             cr &= ~USART_CR3_HDSEL;
           }
 
@@ -2787,8 +2797,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   ie = priv->ie;
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
