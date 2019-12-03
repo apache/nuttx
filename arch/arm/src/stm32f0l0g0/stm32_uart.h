@@ -349,12 +349,12 @@
 
 /* Is DMA available on any (enabled) USART? */
 
-#undef SERIAL_HAVE_DMA
+#undef SERIAL_HAVE_RXDMA
 #if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
     defined(CONFIG_USART3_RXDMA) || defined(CONFIG_USART4_RXDMA)  || \
     defined(CONFIG_USART5_RXDMA)  || defined(CONFIG_USART6_RXDMA) || \
     defined(CONFIG_USART7_RXDMA)  || defined(CONFIG_USART8_RXDMA)
-#  define SERIAL_HAVE_DMA 1
+#  define SERIAL_HAVE_RXDMA 1
 #endif
 
 /* Is DMA used on the console USART? */
@@ -450,7 +450,7 @@ extern "C"
  *
  ************************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 void stm32_serial_dma_poll(void);
 #endif
 
