@@ -146,11 +146,11 @@
 
 /* DMA priority */
 
-#  ifndef CONFIG_USART_DMAPRIO
-#    define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
+#  ifndef CONFIG_USART_RXDMAPRIO
+#    define CONFIG_USART_RXDMAPRIO  DMA_CCR_PRIMED
 #  endif
-#  if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_USART_DMAPRIO"
+#  if (CONFIG_USART_RXDMAPRIO & ~DMA_CCR_PL_MASK) != 0
+#    error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #  endif
 
 /* DMA control words */
@@ -160,13 +160,13 @@
                DMA_CCR_MINC          | \
                DMA_CCR_PSIZE_8BITS   | \
                DMA_CCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO)
+               CONFIG_USART_RXDMAPRIO)
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
 #    define SERIAL_DMA_IFLOW_CONTROL_WORD \
               (DMA_CCR_MINC          | \
                DMA_CCR_PSIZE_8BITS   | \
                DMA_CCR_MSIZE_8BITS   | \
-               CONFIG_USART_DMAPRIO)
+               CONFIG_USART_RXDMAPRIO)
 #  endif
 
 #endif
