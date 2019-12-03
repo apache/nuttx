@@ -1,5 +1,4 @@
 /****************************************************************************
- *
  * tools/cxd56/clefia.c
  *
  * Copyright (C) 2007, 2008 Sony Corporation
@@ -32,6 +31,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,9 +43,22 @@
 
 #include "clefia.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define clefiamul4(_x) (clefiamul2(clefiamul2((_x))))
+#define clefiamul6(_x) (clefiamul2((_x)) ^ clefiamul4((_x)))
+#define clefiamul8(_x) (clefiamul2(clefiamul4((_x))))
+#define clefiamula(_x) (clefiamul2((_x)) ^ clefiamul8((_x)))
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 /* S0 (8-bit S-box based on four 4-bit S-boxes) */
 
-const unsigned char clefia_s0[256] =
+static const unsigned char clefia_s0[256] =
 {
   0x57u, 0x49u, 0xd1u, 0xc6u, 0x2fu, 0x33u, 0x74u, 0xfbu,
   0x95u, 0x6du, 0x82u, 0xeau, 0x0eu, 0xb0u, 0xa8u, 0x1cu,
@@ -80,7 +96,7 @@ const unsigned char clefia_s0[256] =
 
 /* S1 (8-bit S-box based on inverse function) */
 
-const unsigned char clefia_s1[256] =
+static const unsigned char clefia_s1[256] =
 {
   0x6cu, 0xdau, 0xc3u, 0xe9u, 0x4eu, 0x9du, 0x0au, 0x3du,
   0xb8u, 0x36u, 0xb4u, 0x38u, 0x13u, 0x34u, 0x0cu, 0xd9u,
@@ -116,7 +132,11 @@ const unsigned char clefia_s1[256] =
   0x6bu, 0x03u, 0xe1u, 0x2eu, 0x7du, 0x14u, 0x95u, 0x1du
 };
 
-void bytecpy(unsigned char *dst, const unsigned char *src, int bytelen)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void bytecpy(unsigned char *dst, const unsigned char *src, int bytelen)
 {
   while (bytelen-- > 0)
     {
@@ -124,16 +144,7 @@ void bytecpy(unsigned char *dst, const unsigned char *src, int bytelen)
     }
 }
 
-void bytexor(unsigned char *dst, const unsigned char *a,
-             const unsigned char *b, int bytelen)
-{
-  while (bytelen-- > 0)
-    {
-      *dst++ = *a++ ^ *b++;
-    }
-}
-
-unsigned char clefiamul2(unsigned char x)
+static unsigned char clefiamul2(unsigned char x)
 {
   /* multiplication over GF(2^8) (p(x) = '11d') */
 
@@ -141,16 +152,12 @@ unsigned char clefiamul2(unsigned char x)
     {
       x ^= 0x0eu;
     }
+
   return ((x << 1) | (x >> 7));
 }
 
-#define clefiamul4(_x) (clefiamul2(clefiamul2((_x))))
-#define clefiamul6(_x) (clefiamul2((_x)) ^ clefiamul4((_x)))
-#define clefiamul8(_x) (clefiamul2(clefiamul4((_x))))
-#define clefiamula(_x) (clefiamul2((_x)) ^ clefiamul8((_x)))
-
-void clefiaf0xor(unsigned char *dst, const unsigned char *src,
-                 const unsigned char *rk)
+static void clefiaf0xor(unsigned char *dst, const unsigned char *src,
+                        const unsigned char *rk)
 {
   unsigned char x[4];
   unsigned char y[4];
@@ -182,8 +189,8 @@ void clefiaf0xor(unsigned char *dst, const unsigned char *src,
   bytexor(dst + 4, src + 4, y, 4);
 }
 
-void clefiaf1xor(unsigned char *dst, const unsigned char *src,
-                 const unsigned char *rk)
+static void clefiaf1xor(unsigned char *dst, const unsigned char *src,
+                        const unsigned char *rk)
 {
   unsigned char x[4];
   unsigned char y[4];
@@ -215,8 +222,8 @@ void clefiaf1xor(unsigned char *dst, const unsigned char *src,
   bytexor(dst + 4, src + 4, y, 4);
 }
 
-void clefiagfn4(unsigned char *y, const unsigned char *x,
-                const unsigned char *rk, int r)
+static void clefiagfn4(unsigned char *y, const unsigned char *x,
+                       const unsigned char *rk, int r)
 {
   unsigned char fin[16];
   unsigned char fout[16];
@@ -228,16 +235,20 @@ void clefiagfn4(unsigned char *y, const unsigned char *x,
       clefiaf1xor(fout + 8, fin + 8, rk + 4);
       rk += 8;
       if (r)
-        {                       /* swapping for encryption */
+        {
+          /* swapping for encryption */
+
           bytecpy(fin + 0, fout + 4, 12);
           bytecpy(fin + 12, fout + 0, 4);
         }
     }
+
   bytecpy(y, fout, 16);
 }
 
-void clefiagfn8(unsigned char *y, const unsigned char *x,
-                const unsigned char *rk, int r)
+#if 0 /* Not used */
+static void clefiagfn8(unsigned char *y, const unsigned char *x,
+                       const unsigned char *rk, int r)
 {
   unsigned char fin[32];
   unsigned char fout[32];
@@ -251,16 +262,21 @@ void clefiagfn8(unsigned char *y, const unsigned char *x,
       clefiaf1xor(fout + 24, fin + 24, rk + 12);
       rk += 16;
       if (r)
-        {                       /* swapping for encryption */
+        {
+          /* swapping for encryption */
+
           bytecpy(fin + 0, fout + 4, 28);
           bytecpy(fin + 28, fout + 0, 4);
         }
     }
+
   bytecpy(y, fout, 32);
 }
+#endif
 
-void clefiagfn4inv(unsigned char *y, const unsigned char *x,
-                   const unsigned char *rk, int r)
+#if 0 /* Not used */
+static void clefiagfn4inv(unsigned char *y, const unsigned char *x,
+                          const unsigned char *rk, int r)
 {
   unsigned char fin[16];
   unsigned char fout[16];
@@ -273,15 +289,19 @@ void clefiagfn4inv(unsigned char *y, const unsigned char *x,
       clefiaf1xor(fout + 8, fin + 8, rk + 4);
       rk -= 8;
       if (r)
-        {                       /* swapping for decryption */
+        {
+          /* swapping for decryption */
+
           bytecpy(fin + 0, fout + 12, 4);
           bytecpy(fin + 4, fout + 0, 12);
         }
     }
+
   bytecpy(y, fout, 16);
 }
+#endif
 
-void clefiadoubleswap(unsigned char *lk)
+static void clefiadoubleswap(unsigned char *lk)
 {
   unsigned char t[16];
 
@@ -306,7 +326,7 @@ void clefiadoubleswap(unsigned char *lk)
   bytecpy(lk, t, 16);
 }
 
-void clefiaconset(unsigned char *con, const unsigned char *iv, int lk)
+static void clefiaconset(unsigned char *con, const unsigned char *iv, int lk)
 {
   unsigned char t[2];
   unsigned char tmp;
@@ -331,61 +351,11 @@ void clefiaconset(unsigned char *con, const unsigned char *iv, int lk)
           t[0] ^= 0xa8u;
           t[1] ^= 0x30u;
         }
+
       tmp = t[0] << 7;
       t[0] = (t[0] >> 1) | (t[1] << 7);
       t[1] = (t[1] >> 1) | tmp;
     }
-}
-
-int clefiakeyset(unsigned char *rk, const unsigned char *skey)
-{
-  const unsigned char iv[2] = { 0x42u, 0x8au }; /* cubic root of 2 */
-  unsigned char lk[16];
-  unsigned char con128[4 * 60];
-  int i;
-
-  /* generating CONi^(128) (0 <= i < 60, lk = 30) */
-
-  clefiaconset(con128, iv, 30);
-
-  /* GFN_{4,12} (generating L from K) */
-
-  clefiagfn4(lk, skey, con128, 12);
-
-  bytecpy(rk, skey, 8);         /* initial whitening key (WK0, WK1) */
-  rk += 8;
-  for (i = 0; i < 9; i++)
-    {                           /* round key (RKi (0 <= i < 36)) */
-      bytexor(rk, lk, con128 + i * 16 + (4 * 24), 16);
-      if (i % 2)
-        {
-          bytexor(rk, rk, skey, 16);    /* Xoring K */
-        }
-      clefiadoubleswap(lk);     /* Updating L (DoubleSwap function) */
-      rk += 16;
-    }
-  bytecpy(rk, skey + 8, 8);     /* final whitening key (WK2, WK3) */
-
-  return 18;
-}
-
-void clefiaencrypt(unsigned char *ct, const unsigned char *pt,
-                   const unsigned char *rk, const int r)
-{
-  unsigned char rin[16];
-  unsigned char  rout[16];
-
-  bytecpy(rin, pt, 16);
-
-  bytexor(rin + 4, rin + 4, rk + 0, 4); /* initial key whitening */
-  bytexor(rin + 12, rin + 12, rk + 4, 4);
-  rk += 8;
-
-  clefiagfn4(rout, rin, rk, r); /* GFN_{4,r} */
-
-  bytecpy(ct, rout, 16);
-  bytexor(ct + 4, ct + 4, rk + r * 8 + 0, 4);   /* final key whitening */
-  bytexor(ct + 12, ct + 12, rk + r * 8 + 4, 4);
 }
 
 static void left_shift_one(uint8_t * in, uint8_t * out)
@@ -411,14 +381,22 @@ static void gen_subkey(struct cipher *c)
 
   left_shift_one(L, c->k1);
   if (L[0] & 0x80)
-    c->k1[15] = c->k1[15] ^ 0x87;
+    {
+      c->k1[15] = c->k1[15] ^ 0x87;
+    }
 
   left_shift_one(c->k1, c->k2);
   if (c->k1[0] & 0x80)
-    c->k2[15] = c->k2[15] ^ 0x87;
+    {
+      c->k2[15] = c->k2[15] ^ 0x87;
+    }
 
   memset(L, 0, 16);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 struct cipher *cipher_init(uint8_t * key, uint8_t * iv)
 {
@@ -426,7 +404,9 @@ struct cipher *cipher_init(uint8_t * key, uint8_t * iv)
 
   c = (struct cipher *)malloc(sizeof(*c));
   if (!c)
-    return NULL;
+    {
+      return NULL;
+    }
 
   c->round = clefiakeyset(c->rk, key);
 
@@ -448,7 +428,9 @@ int cipher_calc_cmac(struct cipher *c, void *data, int size, void *cmac)
   uint8_t *p;
 
   if (size & 0xf)
-    return -1;
+    {
+      return -1;
+    }
 
   p = (uint8_t *) data;
   while (size)
@@ -464,4 +446,72 @@ int cipher_calc_cmac(struct cipher *c, void *data, int size, void *cmac)
   memset(m, 0, 16);
 
   return 0;
+}
+
+void bytexor(unsigned char *dst, const unsigned char *a,
+             const unsigned char *b, int bytelen)
+{
+  while (bytelen-- > 0)
+    {
+      *dst++ = *a++ ^ *b++;
+    }
+}
+
+int clefiakeyset(unsigned char *rk, const unsigned char *skey)
+{
+  const unsigned char iv[2] =
+  {
+    0x42u, 0x8au  /* cubic root of 2 */
+  };
+
+  unsigned char lk[16];
+  unsigned char con128[4 * 60];
+  int i;
+
+  /* generating CONi^(128) (0 <= i < 60, lk = 30) */
+
+  clefiaconset(con128, iv, 30);
+
+  /* GFN_{4,12} (generating L from K) */
+
+  clefiagfn4(lk, skey, con128, 12);
+
+  bytecpy(rk, skey, 8);    /* initial whitening key (WK0, WK1) */
+  rk += 8;
+  for (i = 0; i < 9; i++)
+    {
+      /* round key (RKi (0 <= i < 36)) */
+
+      bytexor(rk, lk, con128 + i * 16 + (4 * 24), 16);
+      if (i % 2)
+        {
+          bytexor(rk, rk, skey, 16);    /* Xoring K */
+        }
+
+      clefiadoubleswap(lk);     /* Updating L (DoubleSwap function) */
+      rk += 16;
+    }
+
+  bytecpy(rk, skey + 8, 8);     /* final whitening key (WK2, WK3) */
+
+  return 18;
+}
+
+void clefiaencrypt(unsigned char *ct, const unsigned char *pt,
+                   const unsigned char *rk, const int r)
+{
+  unsigned char rin[16];
+  unsigned char  rout[16];
+
+  bytecpy(rin, pt, 16);
+
+  bytexor(rin + 4, rin + 4, rk + 0, 4); /* initial key whitening */
+  bytexor(rin + 12, rin + 12, rk + 4, 4);
+  rk += 8;
+
+  clefiagfn4(rout, rin, rk, r); /* GFN_{4,r} */
+
+  bytecpy(ct, rout, 16);
+  bytexor(ct + 4, ct + 4, rk + r * 8 + 0, 4);   /* final key whitening */
+  bytexor(ct + 12, ct + 12, rk + r * 8 + 4, 4);
 }

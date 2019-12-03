@@ -1,5 +1,4 @@
 /****************************************************************************
- *
  * tools/cxd56/clefia.h
  *
  * Copyright (C) 2007, 2008 Sony Corporation
@@ -32,8 +31,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef _CLEFIA_H_
-#define _CLEFIA_H_
+#ifndef _TOOLS_CXD56_CLEFIA_H_
+#define _TOOLS_CXD56_CLEFIA_H_
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 struct cipher
   {
@@ -42,8 +45,13 @@ struct cipher
     uint8_t rk[8 * 26 + 16];
     uint8_t vector[16];
     int round;
-    uint8_t k1[16], k2[16];
+    uint8_t k1[16];
+    uint8_t k2[16];
   };
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 struct cipher *cipher_init(uint8_t * key, uint8_t * iv);
 void cipher_deinit(struct cipher *c);

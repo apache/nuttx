@@ -1,5 +1,4 @@
 /****************************************************************************
- *
  * tools/cxd56/mkspk.c
  *
  * Copyright (C) 2007, 2008 Sony Corporation
@@ -32,6 +31,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -44,18 +47,33 @@
 
 #include "mkspk.h"
 
-static uint8_t vmk[16] =
-  "\x27\xc0\xaf\x1b\x5d\xcb\xc6\xc5\x58\x22\x1c\xdd\xaf\xf3\x20\x21";
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct args
 {
-    int core;
-    char *elffile;
-    char *savename;
-    char *outputfile;
+  int core;
+  char *elffile;
+  char *savename;
+  char *outputfile;
 };
 
-static struct args g_options = { 0 };
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t vmk[16] =
+  "\x27\xc0\xaf\x1b\x5d\xcb\xc6\xc5\x58\x22\x1c\xdd\xaf\xf3\x20\x21";
+
+static struct args g_options =
+{
+  0
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static struct args *parse_args(int argc, char **argv)
 {
@@ -67,7 +85,9 @@ static struct args *parse_args(int argc, char **argv)
   show_help = 0;
 
   if (argc < 2)
-    show_help = 1;
+    {
+      show_help = 1;
+    }
 
   memset(args, 0, sizeof(*args));
   args->core = -1;
@@ -84,11 +104,13 @@ static struct args *parse_args(int argc, char **argv)
               show_help = 1;
             }
           break;
+
         case 'h':
         default:
           show_help = 1;
         }
     }
+
   argc -= optind;
   argv += optind;
 
@@ -130,7 +152,7 @@ static struct args *parse_args(int argc, char **argv)
   return args;
 }
 
-struct elf_file *load_elf(const char *filename)
+static struct elf_file *load_elf(const char *filename)
 {
   size_t fsize;
   int pos;
@@ -143,11 +165,15 @@ struct elf_file *load_elf(const char *filename)
 
   fp = fopen(filename, "rb");
   if (!fp)
-    return NULL;
+    {
+      return NULL;
+    }
 
   ef = (struct elf_file *)malloc(sizeof(*ef));
   if (!ef)
-    return NULL;
+    {
+      return NULL;
+    }
 
   pos = fseek(fp, 0, SEEK_END);
   fsize = (size_t) ftell(fp);
@@ -155,7 +181,9 @@ struct elf_file *load_elf(const char *filename)
 
   buf = (char *)malloc(fsize);
   if (!buf)
-    return NULL;
+    {
+      return NULL;
+    }
 
   ret = fread(buf, fsize, 1, fp);
   fclose(fp);
@@ -191,6 +219,7 @@ struct elf_file *load_elf(const char *filename)
           ef->nsyms = sh->sh_size / sh->sh_entsize;
           continue;
         }
+
       if (sh->sh_type == SHT_STRTAB)
         {
           if (!strcmp(".strtab", ef->shstring + sh->sh_name))
@@ -203,8 +232,8 @@ struct elf_file *load_elf(const char *filename)
   return ef;
 }
 
-void *create_image(struct elf_file *elf, int core, char *savename,
-                   int *image_size)
+static void *create_image(struct elf_file *elf, int core, char *savename,
+                         int *image_size)
 {
   char *img;
   struct spk_header *header;
@@ -226,7 +255,10 @@ void *create_image(struct elf_file *elf, int core, char *savename,
   for (i = 0, ph = elf->phdr; i < elf->ehdr->e_phnum; i++, ph++)
     {
       if (ph->p_type != PT_LOAD || ph->p_filesz == 0)
-        continue;
+        {
+          continue;
+        }
+
       nphs++;
       psize += alignup(ph->p_filesz, 16);
     }
@@ -235,7 +267,9 @@ void *create_image(struct elf_file *elf, int core, char *savename,
 
   img = (char *)malloc(imgsize + 32);
   if (!img)
-    return NULL;
+    {
+      return NULL;
+    }
 
   *image_size = imgsize;
   sym = elf->symtab;
@@ -245,7 +279,9 @@ void *create_image(struct elf_file *elf, int core, char *savename,
   for (j = 0; j < elf->nsyms; j++, sym++)
     {
       if (!strcmp("__stack", name + sym->st_name))
-        sp = sym->st_value;
+        {
+          sp = sym->st_value;
+        }
     }
 
   memset(img, 0, imgsize);
@@ -289,6 +325,10 @@ void *create_image(struct elf_file *elf, int core, char *savename,
   return img;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int main(int argc, char **argv)
 {
   struct args *args;
@@ -307,6 +347,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "Loading ELF %s failure.\n", args->elffile);
       exit(EXIT_FAILURE);
     }
+
   spkimage = create_image(elf, args->core, args->savename, &size);
   free(elf);
 
