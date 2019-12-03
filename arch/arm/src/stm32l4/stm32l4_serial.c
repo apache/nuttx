@@ -86,7 +86,7 @@
  *    5       X
  */
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
@@ -283,13 +283,13 @@ struct stm32l4_serial_s
   const uint32_t    cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
 
   /* RX DMA state */
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
   bool              rxenable;  /* DMA-based reception en/disable */
 #ifdef CONFIG_PM
@@ -333,7 +333,7 @@ static void stm32l4serial_send(FAR struct uart_dev_s *dev, int ch);
 static void stm32l4serial_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool stm32l4serial_txready(FAR struct uart_dev_s *dev);
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static int  stm32l4serial_dmasetup(FAR struct uart_dev_s *dev);
 static void stm32l4serial_dmashutdown(FAR struct uart_dev_s *dev);
 static int  stm32l4serial_dmareceive(FAR struct uart_dev_s *dev,
@@ -383,7 +383,7 @@ static const struct uart_ops_s g_uart_ops =
 };
 #endif
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static const struct uart_ops_s g_uart_dma_ops =
 {
   .setup          = stm32l4serial_dmasetup,
@@ -912,7 +912,7 @@ static void stm32l4serial_disableusartint(FAR struct stm32l4_serial_s *priv,
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static int stm32l4serial_dmanextrx(FAR struct stm32l4_serial_s *priv)
 {
   size_t dmaresidual;
@@ -1078,7 +1078,7 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
 static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 {
   FAR struct stm32l4_serial_s *priv = (struct stm32l4_serial_s *)dev->priv;
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
   bool dmarestored = false;
 #endif
 
@@ -1109,7 +1109,7 @@ static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 
       while ((stm32l4serial_getreg(priv, STM32L4_USART_ISR_OFFSET) & USART_ISR_TC) == 0);
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
       if (priv->dev.ops == &g_uart_dma_ops && !priv->rxdmasusp)
         {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -1131,7 +1131,7 @@ static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
     }
   else
     {
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
       if (priv->dev.ops == &g_uart_dma_ops && priv->rxdmasusp)
         {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -1167,7 +1167,7 @@ static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 #endif
     }
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
   if (dmarestored)
     {
       irqstate_t flags;
@@ -1414,7 +1414,7 @@ static int stm32l4serial_setup(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static int stm32l4serial_dmasetup(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
@@ -1572,7 +1572,7 @@ static void stm32l4serial_shutdown(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static void stm32l4serial_dmashutdown(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
@@ -2325,7 +2325,7 @@ static bool stm32l4serial_rxflowcontrol(FAR struct uart_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static int stm32l4serial_dmareceive(FAR struct uart_dev_s *dev,
                                     FAR unsigned int *status)
 {
@@ -2366,7 +2366,7 @@ static int stm32l4serial_dmareceive(FAR struct uart_dev_s *dev,
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_DMA)
+#if defined(SERIAL_HAVE_RXDMA)
 static void stm32l4serial_dmareenable(FAR struct stm32l4_serial_s *priv)
 {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -2435,7 +2435,7 @@ static void stm32l4serial_dmareenable(FAR struct stm32l4_serial_s *priv)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
+#if defined(SERIAL_HAVE_RXDMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
 static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv)
 {
   if (!priv->rxenable)
@@ -2483,7 +2483,7 @@ static bool stm32l4serial_dmaiflowrestart(struct stm32l4_serial_s *priv)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static void stm32l4serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
 {
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
@@ -2517,7 +2517,7 @@ static void stm32l4serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static bool stm32l4serial_dmarxavailable(FAR struct uart_dev_s *dev)
 {
   FAR struct stm32l4_serial_s *priv = (FAR struct stm32l4_serial_s *)dev->priv;
@@ -2642,7 +2642,7 @@ static bool stm32l4serial_txready(FAR struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 static void stm32l4serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
                                         FAR void *arg)
 {
@@ -2798,7 +2798,7 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
     case PM_STANDBY:
     case PM_SLEEP:
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
       /* Flush Rx DMA buffers before checking state of serial device
        * buffers.
        */
@@ -2983,7 +2983,7 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_DMA
+#ifdef SERIAL_HAVE_RXDMA
 void stm32l4_serial_dma_poll(void)
 {
     irqstate_t flags;
