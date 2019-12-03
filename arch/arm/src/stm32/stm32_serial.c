@@ -194,13 +194,13 @@
 
 /* DMA priority */
 
-#  ifndef CONFIG_USART_DMAPRIO
+#  ifndef CONFIG_USART_RXDMAPRIO
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
         defined(CONFIG_STM32_STM32F37XX)
-#      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
+#      define CONFIG_USART_RXDMAPRIO  DMA_CCR_PRIMED
 #    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
+#      define CONFIG_USART_RXDMAPRIO  DMA_SCR_PRIMED
 #    else
 #      error "Unknown STM32 DMA"
 #    endif
@@ -208,12 +208,12 @@
 #    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
         defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
         defined(CONFIG_STM32_STM32F37XX)
-#    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_USART_DMAPRIO"
+#    if (CONFIG_USART_RXDMAPRIO & ~DMA_CCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #    endif
 #  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#    if (CONFIG_USART_DMAPRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_USART_DMAPRIO"
+#    if (CONFIG_USART_RXDMAPRIO & ~DMA_SCR_PL_MASK) != 0
+#      error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #    endif
 #  else
 #    error "Unknown STM32 DMA"
@@ -222,14 +222,14 @@
 /* DMA control word */
 
 #  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#    define SERIAL_DMA_CONTROL_WORD      \
-                (DMA_SCR_DIR_P2M       | \
-                 DMA_SCR_CIRC          | \
-                 DMA_SCR_MINC          | \
-                 DMA_SCR_PSIZE_8BITS   | \
-                 DMA_SCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO  | \
-                 DMA_SCR_PBURST_SINGLE | \
+#    define SERIAL_DMA_CONTROL_WORD       \
+                (DMA_SCR_DIR_P2M        | \
+                 DMA_SCR_CIRC           | \
+                 DMA_SCR_MINC           | \
+                 DMA_SCR_PSIZE_8BITS    | \
+                 DMA_SCR_MSIZE_8BITS    | \
+                 CONFIG_USART_RXDMAPRIO | \
+                 DMA_SCR_PBURST_SINGLE  | \
                  DMA_SCR_MBURST_SINGLE)
 #  else
 #    define SERIAL_DMA_CONTROL_WORD      \
@@ -237,7 +237,7 @@
                  DMA_CCR_MINC          | \
                  DMA_CCR_PSIZE_8BITS   | \
                  DMA_CCR_MSIZE_8BITS   | \
-                 CONFIG_USART_DMAPRIO)
+                 CONFIG_USART_RXDMAPRIO)
 # endif
 
 #endif

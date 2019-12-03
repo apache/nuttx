@@ -8668,7 +8668,7 @@ config STM32_HCIUART_RXDMA_BUFSIZE
 
 		Value given here will be rounded up to next multiple of 4 bytes.
 
-config STM32_HCIUART_DMAPRIO
+config STM32_HCIUART_RXDMAPRIO
 	hex "HCI UART DMA priority"
 	default 0x00001000 if STM32_STM32F10XX
 	default 0x00010000 if !STM32_STM32F10XX
