@@ -109,8 +109,11 @@ APPDIR := ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APP
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
 #   configuration specific files or creation of configurable symbolic links
-# CLEANDIRS are the directories that will clean in.  These are
-#   all directories that we know about.
+# CLEANDIRS are the directories that the clean target will executed in.
+#   These are all directories that we know about.
+# CCLEANDIRS are directories that the clean_context target will execute in.
+#   The clean_context target "undoes" the actions of the context target.
+#   Only directories known to require cleaning are included.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
 #   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED or
 #   CONFIG_BUILD_KERNEL), then this holds only the directories containing
@@ -393,8 +396,11 @@ context: check_context staging include/nuttx/config.h include/nuttx/version.h in
 # and symbolic links created by the context target.
 
 clean_context:
-	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" clean_context
-	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" clean_context
+	$(Q) for dir in $(CCLEANDIRS) ; do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean_context ; \
+		fi \
+	done
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)

@@ -285,6 +285,13 @@ int main(int argc, char **argv, char **envp)
                * REVISIT: Generates a false alarm if the current line is also
                * a comment.  Generally it is acceptable for one comment to
                * follow another with no space separation.
+               *
+               * REVISIT: prevbrhcmt is tested to case the preceding line
+               * contained comments to the right of the code.  In such cases,
+               * the comments are normally aligned and do not follow normal
+               * indentation rules.  However, this code will generate a false
+               * alarm if the comments are aligned to the right BUT the
+               * preceding line has no comment.
                */
 
               if (line[n] != '}' /* && line[n] != '#' */ && !prevbrhcmt)

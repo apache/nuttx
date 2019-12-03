@@ -39,8 +39,11 @@
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
 #   configuration specific files or creation of configurable symbolic links
-# CLEANDIRS are the directories that will clean in.  These are
-#   all directories that we know about.
+# CLEANDIRS are the directories that the clean target will executed in.
+#   These are all directories that we know about.
+# CCLEANDIRS are directories that the clean_context target will execute in.
+#   The clean_context target "undoes" the actions of the context target.
+#   Only directories known to require cleaning are included.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
 #   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED or
 #   CONFIG_BUILD_KERNEL), then this holds only the directories containing
@@ -50,6 +53,7 @@
 #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
 CLEANDIRS :=
+CCLEANDIRS := boards $(APPDIR) graphics
 KERNDEPDIRS :=
 USERDEPDIRS :=
 

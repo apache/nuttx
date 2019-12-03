@@ -138,6 +138,11 @@ mklibgraphics: $(BIN)
 
 depend: .depend
 
+clean_context:
+	$(Q) $(MAKE) -C nxglib -f Makefile.devblit distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C nxglib -f Makefile.cursor distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+
 context: gensources
 
 clean:
@@ -147,10 +152,7 @@ clean:
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
-distclean: clean
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+distclean: clean clean_context
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 
