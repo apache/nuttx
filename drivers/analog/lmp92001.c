@@ -69,123 +69,123 @@
 
 #if defined(CONFIG_LMP92001)
 
-#define LMP92001_REG_TEST   0x01U
+#define LMP92001_REG_TEST   0x01u
 
-#define LMP92001_REG_ID     0x0eU
-#define LMP92001_REG_VER    0x0fU
+#define LMP92001_REG_ID     0x0eu
+#define LMP92001_REG_VER    0x0fu
 
-#define LMP92001_REG_SGEN   0x10U
-#define LMP92001_REG_SGPI   0x11U
-#define LMP92001_REG_SHIL   0x12U
-#define LMP92001_REG_SLOL   0x13U
+#define LMP92001_REG_SGEN   0x10u
+#define LMP92001_REG_SGPI   0x11u
+#define LMP92001_REG_SHIL   0x12u
+#define LMP92001_REG_SLOL   0x13u
 
-#define LMP92001_REG_CGEN   0x14U
-#define LMP92001_REG_CDAC   0x15U
-#define LMP92001_REG_CGPO   0x16U
-#define LMP92001_REG_CINH   0x17U
-#define LMP92001_REG_CINL   0x18U
-#define LMP92001_REG_CAD1   0x19U
-#define LMP92001_REG_CAD2   0x1aU
-#define LMP92001_REG_CAD3   0x1bU
-#define LMP92001_REG_CTRIG  0x1cU
+#define LMP92001_REG_CGEN   0x14u
+#define LMP92001_REG_CDAC   0x15u
+#define LMP92001_REG_CGPO   0x16u
+#define LMP92001_REG_CINH   0x17u
+#define LMP92001_REG_CINL   0x18u
+#define LMP92001_REG_CAD1   0x19u
+#define LMP92001_REG_CAD2   0x1au
+#define LMP92001_REG_CAD3   0x1bu
+#define LMP92001_REG_CTRIG  0x1cu
 
-#define LMP92001_REG_ADC1   0x20U
-#define LMP92001_REG_ADC2   0x21U
-#define LMP92001_REG_ADC3   0x22U
-#define LMP92001_REG_ADC4   0x23U
-#define LMP92001_REG_ADC5   0x24U
-#define LMP92001_REG_ADC6   0x25U
-#define LMP92001_REG_ADC7   0x26U
-#define LMP92001_REG_ADC8   0x27U
-#define LMP92001_REG_ADC9   0x28U
-#define LMP92001_REG_ADC10  0x29U
-#define LMP92001_REG_ADC11  0x2aU
-#define LMP92001_REG_ADC12  0x2bU
-#define LMP92001_REG_ADC13  0x2cU
-#define LMP92001_REG_ADC14  0x2dU
-#define LMP92001_REG_ADC15  0x2eU
-#define LMP92001_REG_ADC16  0x2fU
-#define LMP92001_REG_ADC17  0x30U
+#define LMP92001_REG_ADC1   0x20u
+#define LMP92001_REG_ADC2   0x21u
+#define LMP92001_REG_ADC3   0x22u
+#define LMP92001_REG_ADC4   0x23u
+#define LMP92001_REG_ADC5   0x24u
+#define LMP92001_REG_ADC6   0x25u
+#define LMP92001_REG_ADC7   0x26u
+#define LMP92001_REG_ADC8   0x27u
+#define LMP92001_REG_ADC9   0x28u
+#define LMP92001_REG_ADC10  0x29u
+#define LMP92001_REG_ADC11  0x2au
+#define LMP92001_REG_ADC12  0x2bu
+#define LMP92001_REG_ADC13  0x2cu
+#define LMP92001_REG_ADC14  0x2du
+#define LMP92001_REG_ADC15  0x2eu
+#define LMP92001_REG_ADC16  0x2fu
+#define LMP92001_REG_ADC17  0x30u
 
-#define LMP92001_REG_LIH1   0x40U
-#define LMP92001_REG_LIH2   0x41U
-#define LMP92001_REG_LIH3   0x42U
-#define LMP92001_REG_LIH9   0x43U
-#define LMP92001_REG_LIH10  0x44U
-#define LMP92001_REG_LIH11  0x45U
-#define LMP92001_REG_LIL1   0x46U
-#define LMP92001_REG_LIL2   0x47U
-#define LMP92001_REG_LIL3   0x48U
-#define LMP92001_REG_LIL9   0x49U
-#define LMP92001_REG_LIL10  0x4aU
-#define LMP92001_REG_LIL11  0x4bU
+#define LMP92001_REG_LIH1   0x40u
+#define LMP92001_REG_LIH2   0x41u
+#define LMP92001_REG_LIH3   0x42u
+#define LMP92001_REG_LIH9   0x43u
+#define LMP92001_REG_LIH10  0x44u
+#define LMP92001_REG_LIH11  0x45u
+#define LMP92001_REG_LIL1   0x46u
+#define LMP92001_REG_LIL2   0x47u
+#define LMP92001_REG_LIL3   0x48u
+#define LMP92001_REG_LIL9   0x49u
+#define LMP92001_REG_LIL10  0x4au
+#define LMP92001_REG_LIL11  0x4bu
 
-#define LMP92001_REG_CREF   0x66U
+#define LMP92001_REG_CREF   0x66u
 
-#define LMP92001_REG_DAC1   0x80U
-#define LMP92001_REG_DAC2   0x81U
-#define LMP92001_REG_DAC3   0x82U
-#define LMP92001_REG_DAC4   0x83U
-#define LMP92001_REG_DAC5   0x84U
-#define LMP92001_REG_DAC6   0x85U
-#define LMP92001_REG_DAC7   0x86U
-#define LMP92001_REG_DAC8   0x87U
-#define LMP92001_REG_DAC9   0x88U
-#define LMP92001_REG_DAC10  0x89U
-#define LMP92001_REG_DAC11  0x8aU
-#define LMP92001_REG_DAC12  0x8bU
+#define LMP92001_REG_DAC1   0x80u
+#define LMP92001_REG_DAC2   0x81u
+#define LMP92001_REG_DAC3   0x82u
+#define LMP92001_REG_DAC4   0x83u
+#define LMP92001_REG_DAC5   0x84u
+#define LMP92001_REG_DAC6   0x85u
+#define LMP92001_REG_DAC7   0x86u
+#define LMP92001_REG_DAC8   0x87u
+#define LMP92001_REG_DAC9   0x88u
+#define LMP92001_REG_DAC10  0x89u
+#define LMP92001_REG_DAC11  0x8au
+#define LMP92001_REG_DAC12  0x8bu
 
-#define LMP92001_REG_DALL   0x90U
+#define LMP92001_REG_DALL   0x90u
 
-#define LMP92001_REG_BLK0   0xf0U
-#define LMP92001_REG_BLK1   0xf1U
-#define LMP92001_REG_BLK2   0xf2U
-#define LMP92001_REG_BLK3   0xf3U
-#define LMP92001_REG_BLK4   0xf4U
-#define LMP92001_REG_BLK5   0xf5U
+#define LMP92001_REG_BLK0   0xf0u
+#define LMP92001_REG_BLK1   0xf1u
+#define LMP92001_REG_BLK2   0xf2u
+#define LMP92001_REG_BLK3   0xf3u
+#define LMP92001_REG_BLK4   0xf4u
+#define LMP92001_REG_BLK5   0xf5u
 
-#define LMP92001_SGEN_BUSY  (1 << 7U)
-#define LMP92001_SGEN_RDYN  (1 << 6U)
-#define LMP92001_SGEN_HV    (1 << 2U)
-#define LMP92001_SGEN_LV    (1 << 1U)
-#define LMP92001_SGEN_GPI   (1 << 0U)
+#define LMP92001_SGEN_BUSY  (1 << 7u)
+#define LMP92001_SGEN_RDYN  (1 << 6u)
+#define LMP92001_SGEN_HV    (1 << 2u)
+#define LMP92001_SGEN_LV    (1 << 1u)
+#define LMP92001_SGEN_GPI   (1 << 0u)
 
-#define LMP92001_SGPI_GPI7  (1 << 7U)
-#define LMP92001_SGPI_GPI6  (1 << 6U)
-#define LMP92001_SGPI_GPI5  (1 << 5U)
-#define LMP92001_SGPI_GPI4  (1 << 4U)
-#define LMP92001_SGPI_GPI3  (1 << 3U)
-#define LMP92001_SGPI_GPI2  (1 << 2U)
-#define LMP92001_SGPI_GPI1  (1 << 1U)
-#define LMP92001_SGPI_GPI0  (1 << 0U)
+#define LMP92001_SGPI_GPI7  (1 << 7u)
+#define LMP92001_SGPI_GPI6  (1 << 6u)
+#define LMP92001_SGPI_GPI5  (1 << 5u)
+#define LMP92001_SGPI_GPI4  (1 << 4u)
+#define LMP92001_SGPI_GPI3  (1 << 3u)
+#define LMP92001_SGPI_GPI2  (1 << 2u)
+#define LMP92001_SGPI_GPI1  (1 << 1u)
+#define LMP92001_SGPI_GPI0  (1 << 0u)
 
-#define LMP92001_CGEN_RST   (1 << 7U)
-#define LMP92001_CGEN_TOD   (1 << 2U)
-#define LMP92001_CGEN_LCK   (1 << 1U)
-#define LMP92001_CGEN_STRT  (1 << 0U)
+#define LMP92001_CGEN_RST   (1 << 7u)
+#define LMP92001_CGEN_TOD   (1 << 2u)
+#define LMP92001_CGEN_LCK   (1 << 1u)
+#define LMP92001_CGEN_STRT  (1 << 0u)
 
-#define LMP92001_CDAC_GANG  (1 << 2U)
-#define LMP92001_CDAC_OLVL  (1 << 1U)
-#define LMP92001_CDAC_OFF   (1 << 0U)
-#define LMP92001_CDAC_ON    (0U)
+#define LMP92001_CDAC_GANG  (1 << 2u)
+#define LMP92001_CDAC_OLVL  (1 << 1u)
+#define LMP92001_CDAC_OFF   (1 << 0u)
+#define LMP92001_CDAC_ON    (0u)
 
-#define LMP92001_CGPO_GPO7  (1 << 7U)
-#define LMP92001_CGPO_GPO6  (1 << 6U)
-#define LMP92001_CGPO_GPO5  (1 << 5U)
-#define LMP92001_CGPO_GPO4  (1 << 4U)
-#define LMP92001_CGPO_GPO3  (1 << 3U)
-#define LMP92001_CGPO_GPO2  (1 << 2U)
-#define LMP92001_CGPO_GPO1  (1 << 1U)
-#define LMP92001_CGPO_GPO0  (1 << 0U)
+#define LMP92001_CGPO_GPO7  (1 << 7u)
+#define LMP92001_CGPO_GPO6  (1 << 6u)
+#define LMP92001_CGPO_GPO5  (1 << 5u)
+#define LMP92001_CGPO_GPO4  (1 << 4u)
+#define LMP92001_CGPO_GPO3  (1 << 3u)
+#define LMP92001_CGPO_GPO2  (1 << 2u)
+#define LMP92001_CGPO_GPO1  (1 << 1u)
+#define LMP92001_CGPO_GPO0  (1 << 0u)
 
-#define LMP92001_CTRIG_SNGL (1 << 0U)
+#define LMP92001_CTRIG_SNGL (1 << 0u)
 
-#define LMP92001_CREF_AEXT  (1 << 2U)
-#define LMP92001_CREF_DEXT  (1 << 1U)
+#define LMP92001_CREF_AEXT  (1 << 2u)
+#define LMP92001_CREF_DEXT  (1 << 1u)
 
-#define LMP92001_ADC_MAX_CHANNELS 17U
-#define LMP92001_DAC_MAX_CHANNELS 12U
-#define LMP92001_GPIO_MAX_PINS     8U
+#define LMP92001_ADC_MAX_CHANNELS 17u
+#define LMP92001_DAC_MAX_CHANNELS 12u
+#define LMP92001_GPIO_MAX_PINS     8u
 
 /****************************************************************************
  * Private Types
@@ -441,7 +441,7 @@ static int lmp92001_dac_setref(FAR struct lmp92001_dev_s *priv,
 {
   uint8_t value = 0;
 
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret = OK;
@@ -485,13 +485,13 @@ static int lmp92001_dac_setref(FAR struct lmp92001_dev_s *priv,
 static int lmp92001_dac_updateall(FAR struct lmp92001_dev_s *priv,
                                   uint16_t value)
 {
-  uint8_t const BUFFER_SIZE = 3U;
+  uint8_t const BUFFER_SIZE = 3u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret = OK;
 
   buffer[0] = LMP92001_REG_DALL;
-  buffer[1] = (uint8_t)(value >> 8U);
+  buffer[1] = (uint8_t)(value >> 8u);
   buffer[2] = (uint8_t)(value & 0xffu);
 
   ret = lmp92001_i2c_write(priv, buffer, BUFFER_SIZE);
@@ -533,7 +533,7 @@ static int lmp92001_dac_setup(FAR struct dac_dev_s *dev)
 {
   FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
 
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret = OK;
@@ -590,7 +590,7 @@ static int lmp92001_dac_send(FAR struct dac_dev_s *dev,
 {
   FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
 
-  uint8_t const BUFFER_SIZE = 3U;
+  uint8_t const BUFFER_SIZE = 3u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret;
@@ -675,7 +675,7 @@ static int lmp92001_adc_setref(FAR struct lmp92001_dev_s *priv,
 {
   uint8_t value = 0;
 
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret = OK;
@@ -724,15 +724,15 @@ static void lmp92001_adc_extractchannel(FAR struct lmp92001_dev_s *priv,
   uint8_t j;
   uint16_t tmp;
 
-  i   = 0U;
+  i   = 0u;
   j   = priv->adc_channels_enabled;
   tmp = channels;
 
   /* Channels to be enabled are the bits set in the argument channels. */
 
-  while (tmp != 0U)
+  while (tmp != 0u)
     {
-      if (tmp & 1U)
+      if (tmp & 1u)
         {
           priv->adc_channels_enabled++;
           priv->adc_channels[j] = i + 1;
@@ -742,7 +742,7 @@ static void lmp92001_adc_extractchannel(FAR struct lmp92001_dev_s *priv,
           j++;
         }
 
-      tmp >>= 1U;
+      tmp >>= 1u;
       i++;
     }
 
@@ -761,11 +761,11 @@ static void lmp92001_adc_extractchannel(FAR struct lmp92001_dev_s *priv,
 static int lmp92001_adc_enablechannel(FAR struct lmp92001_dev_s *priv,
                                       enum lmp92001_adc_enable_e channels)
 {
-  uint8_t cad1 = 0U;
-  uint8_t cad2 = 0U;
-  uint8_t cad3 = 0U;
+  uint8_t cad1 = 0u;
+  uint8_t cad2 = 0u;
+  uint8_t cad3 = 0u;
 
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret = OK;
@@ -852,7 +852,7 @@ static int lmp92001_adc_enablechannel(FAR struct lmp92001_dev_s *priv,
 
 static int lmp92001_adc_singleshot(FAR struct lmp92001_dev_s *priv)
 {
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   uint8_t sgen_value = 0;
@@ -916,10 +916,10 @@ static int lmp92001_adc_singleshot(FAR struct lmp92001_dev_s *priv)
 
 static int lmp92001_adc_continuousconv(FAR struct lmp92001_dev_s *priv)
 {
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
-  uint8_t sgen_value = 0U;
+  uint8_t sgen_value = 0u;
 
   int ret = OK;
 
@@ -990,7 +990,7 @@ static int lmp92001_adc_readchannel(FAR struct lmp92001_dev_s *priv,
       return ret;
     }
 
-  msg->am_data = (buffer[0] << 8U) | buffer[1];
+  msg->am_data = (buffer[0] << 8u) | buffer[1];
 
   return ret;
 }
@@ -1204,7 +1204,7 @@ static int lmp92001_gpio_direction(FAR struct ioexpander_dev_s *dev,
   FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev;
 
   uint8_t regval;
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret;
@@ -1289,7 +1289,7 @@ static int lmp92001_gpio_writepin(FAR struct ioexpander_dev_s *dev,
   FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev;
 
   uint8_t regval;
-  uint8_t const BUFFER_SIZE = 2U;
+  uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
 
   int ret;
@@ -1360,7 +1360,7 @@ static int lmp92001_gpio_readpin(FAR struct ioexpander_dev_s *dev,
       return ret;
     }
 
-  *value = (bool)(regval >> pin) & 1U;
+  *value = (bool)(regval >> pin) & 1u;
 
   return ret;
 }
