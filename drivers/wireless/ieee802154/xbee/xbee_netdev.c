@@ -184,6 +184,7 @@ static int  xbeenet_rxframe(FAR struct xbeenet_driver_s *maccb,
                             FAR struct ieee802154_data_ind_s *ind);
 
 /* Network interface support ************************************************/
+
 /* Common TX logic */
 
 static int  xbeenet_txpoll_callback(FAR struct net_driver_s *dev);
@@ -240,20 +241,20 @@ static struct sixlowpan_reassbuf_s g_iobuffer;
  ****************************************************************************/
 
 /****************************************************************************
-* Name: xbeenet_set_ipaddress
-*
-* Description:
-*   Advertise the MAC and IPv6 address for this node.
-*
-*   Creates a MAC-based IP address from the IEEE 802.15.14 short or extended
-*   address assigned to the node.
-*
-*    128  112  96   80    64   48   32   16
-*    ---- ---- ---- ----  ---- ---- ---- ----
-*    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
-*    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
-*
-****************************************************************************/
+ * Name: xbeenet_set_ipaddress
+ *
+ * Description:
+ *   Advertise the MAC and IPv6 address for this node.
+ *
+ *   Creates a MAC-based IP address from the IEEE 802.15.14 short or extended
+ *   address assigned to the node.
+ *
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ ****************************************************************************/
 
 static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
 {
@@ -517,7 +518,6 @@ static int xbeenet_rxframe(FAR struct xbeenet_driver_s *priv,
           ret = sixlowpan_input(&priv->xd_dev, iob, (FAR void *)ind);
         }
     }
-
 
   if (ret < 0)
 #endif
@@ -1122,7 +1122,6 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   nxsem_post(&priv->xd_exclsem);
   return ret;
-
 }
 #endif
 

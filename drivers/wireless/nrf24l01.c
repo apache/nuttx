@@ -744,16 +744,16 @@ static void nrf24l01_worker(FAR void *arg)
 
   if (status & (NRF24L01_TX_DS | NRF24L01_MAX_RT))
     {
-       /* Confirm send */
+      /* Confirm send */
 
-       nrf24l01_chipenable(dev, false);
+      nrf24l01_chipenable(dev, false);
 
-       if (dev->tx_pending)
-         {
-           /* The actual work is done in the send function */
+      if (dev->tx_pending)
+        {
+          /* The actual work is done in the send function */
 
-           nxsem_post(&dev->sem_tx);
-         }
+          nxsem_post(&dev->sem_tx);
+        }
     }
 
   if (dev->state == ST_RX)
@@ -794,6 +794,7 @@ static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev,
   switch (state)
     {
     case ST_UNKNOWN:
+
       /* Power down the module here... */
 
     case ST_POWER_DOWN:
@@ -870,9 +871,9 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   if (ret < 0)
     {
-       wlerr("wait for irq failed\n");
-       nrf24l01_flush_tx(dev);
-       goto out;
+      wlerr("wait for irq failed\n");
+      nrf24l01_flush_tx(dev);
+      goto out;
     }
 
   status = nrf24l01_readreg(dev, NRF24L01_OBSERVE_TX, &obsvalue, 1);
@@ -1886,7 +1887,10 @@ int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower)
 int nrf24l01_gettxpower(FAR struct nrf24l01_dev_s *dev)
 {
   uint8_t value;
-  int powers[] = { -18, -12, -6, 0};
+  int powers[] =
+  {
+    -18, -12, -6, 0
+  };
 
   nrf24l01_lock(dev->spi);
 

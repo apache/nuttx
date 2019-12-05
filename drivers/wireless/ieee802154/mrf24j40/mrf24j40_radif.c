@@ -646,6 +646,7 @@ int mrf24j40_setattr(FAR struct ieee802154_radio_s *radio,
         ret = IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE;
         break;
     }
+
   return ret;
 }
 
@@ -757,6 +758,7 @@ int mrf24j40_sfupdate(FAR struct ieee802154_radio_s *radio,
     {
       reg &= ~MRF24J40_TXMCR_SLOTTED;
     }
+
   mrf24j40_setreg(dev->spi, MRF24J40_TXMCR, reg);
 
   mrf24j40_setorder(dev, sfspec->beaconorder, sfspec->sforder);

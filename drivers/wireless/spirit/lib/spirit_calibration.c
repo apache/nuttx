@@ -226,7 +226,7 @@ int spirit_calibration_get_rcocal(FAR struct spirit_library_s *spirit,
 
       /* Build the RFB value */
 
-      (*rfb) = (regval[0] & 0x0F) << 1 | (regval[1] >> 7);
+      (*rfb) = (regval[0] & 0x0f) << 1 | (regval[1] >> 7);
     }
 
   return ret;
@@ -461,7 +461,8 @@ int spirit_calibration_set_vcowin(FAR struct spirit_library_s *spirit,
 enum spirit_vcowin_e
   spirit_calibration_get_vcowin(FAR struct spirit_library_s *spirit)
 {
-  uint8_t regval1, regval2;
+  uint8_t regval1;
+  uint8_t regval2;
   enum spirit_vcowin_e refword;
 
   /* Reads the register containing the REFWORD value */
@@ -525,7 +526,6 @@ enum spirit_vcowin_e
         case 3:
           refword = CALIB_TIME_58_67_US_24MHZ;
           break;
-
         }
     }
 

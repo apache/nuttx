@@ -458,9 +458,10 @@ enum gm_conf_e spirit_general_get_xogm(FAR struct spirit_library_s *spirit)
   (void)spirit_reg_read(spirit, ANA_FUNC_CONF1_BASE, &regval, 1);
 
   /* Mask the GM_CONF field field and returns the settled transconductance of
-   * the XO at startup */
+   * the XO at startup.
+   */
 
-  return ((enum gm_conf_e) ((regval & 0x1C) >> 2));
+  return ((enum gm_conf_e) ((regval & 0x1c) >> 2));
 }
 
 /******************************************************************************

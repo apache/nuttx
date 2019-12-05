@@ -798,6 +798,13 @@ int main(int argc, char **argv, char **envp)
                       (line[ident_index] != 'x' && line[ident_index] != 'X') ||
                       line[ident_index - 1] != '0')
                     {
+                      /* REVISIT:  Although pre-processor definitions are
+                       * supposed to be all upper-case, there are exceptions
+                       * such as using 'p' for a decimal point or 'MHz'.
+                       * Those will be reported here, but probably should be
+                       * considered false alarms.
+                       */
+
                       fprintf(stderr,
                               "Mixed case identifier found at line %d:%d\n",
                               lineno, ident_index);

@@ -355,7 +355,6 @@ void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev)
 void mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
                         FAR struct iob_s *frame)
 {
-
 }
 
 /****************************************************************************
@@ -369,7 +368,6 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
                          FAR const uint8_t *buf, uint8_t length,
                          uint32_t fifo_addr)
 {
-
   uint16_t frame_ctrl;
   uint16_t addrmode;
   int hlen = 3; /* Include frame control and seq number */

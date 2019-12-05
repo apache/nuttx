@@ -154,7 +154,8 @@ static void xbee_assocworker(FAR void *arg)
     {
       xbee_send_atquery(priv, "AI");
 
-      (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
+      (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
+                     1, (wdparm_t)arg);
     }
 }
 
@@ -341,8 +342,8 @@ int xbee_req_data(XBEEHANDLE xbee,
   apiframelen = (frame->io_len - frame->io_offset - 3);
 
   frame->io_data[index++] = XBEE_STARTBYTE;
-  frame->io_data[index++] = ((apiframelen >> 8) & 0xFF);
-  frame->io_data[index++] = (apiframelen & 0xFF);
+  frame->io_data[index++] = ((apiframelen >> 8) & 0xff);
+  frame->io_data[index++] = (apiframelen & 0xff);
   frame->io_data[index++] = frametype;
   frame->io_data[index++] = xbee_next_frameid(priv);
 
@@ -466,13 +467,15 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
 
       case IEEE802154_ATTR_MAC_COORD_SADDR:
         {
-          IEEE802154_SADDRCOPY(attrval->mac.coordsaddr, priv->pandesc.coordaddr.saddr);
+          IEEE802154_SADDRCOPY(attrval->mac.coordsaddr,
+                               priv->pandesc.coordaddr.saddr);
         }
         break;
 
       case IEEE802154_ATTR_MAC_COORD_EADDR:
         {
-          IEEE802154_EADDRCOPY(attrval->mac.coordeaddr, priv->pandesc.coordaddr.eaddr);
+          IEEE802154_EADDRCOPY(attrval->mac.coordeaddr,
+                               priv->pandesc.coordaddr.eaddr);
         }
         break;
 
@@ -552,21 +555,25 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
           xbee_set_panid(priv, attrval->mac.panid);
         }
         break;
+
       case IEEE802154_ATTR_MAC_EADDR:
         {
           ret = IEEE802154_STATUS_DENIED;
         }
         break;
+
       case IEEE802154_ATTR_MAC_SADDR:
         {
           xbee_set_saddr(priv, attrval->mac.saddr);
         }
         break;
+
       case IEEE802154_ATTR_PHY_CHAN:
         {
           xbee_set_chan(priv, attrval->phy.chan);
         }
         break;
+
       case IEEE802154_ATTR_MAC_ASSOCIATION_PERMIT:
         {
           if (attrval->mac.assocpermit)
@@ -579,6 +586,7 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
             }
         }
         break;
+
       case IEEE802154_ATTR_PHY_TX_POWER:
         {
           /* TODO: Convert int32_t dbm input to closest PM/PL settings. Need to
@@ -594,20 +602,26 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
           xbee_set_coordsaddr(priv, attrval->mac.coordsaddr);
         }
         break;
+
       case IEEE802154_ATTR_MAC_COORD_EADDR:
         {
           xbee_set_coordeaddr(priv, attrval->mac.coordeaddr);
         }
         break;
+
       case IEEE802154_ATTR_MAC_RESPONSE_WAIT_TIME:
         {
           priv->resp_waittime = attrval->mac.resp_waittime;
         }
+        break;
+
       case IEEE802154_ATTR_MAC_RX_ON_WHEN_IDLE:
         {
           xbee_setrxonidle(priv, attrval->mac.rxonidle);
         }
+        break;
 #endif
+
       default:
         {
           wlwarn("Unsupported attribute\n");
@@ -684,7 +698,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
    * an update.
    */
 
-  return wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)priv);
+  return wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
+                  1, (wdparm_t)priv);
 }
 
 /****************************************************************************

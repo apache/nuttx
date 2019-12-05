@@ -183,7 +183,7 @@ int spirit_csma_getinfo(FAR struct spirit_library_s *spirit,
 
   /* Reads the Cca length */
 
-  csmainit->ccalen = (enum spirit_csmalen_e) (regval[3] & 0xF0);
+  csmainit->ccalen = (enum spirit_csmalen_e) (regval[3] & 0xf0);
 
   /* Reads the max number of back off */
 

@@ -130,7 +130,8 @@ int spirit_pktstack_initialize(FAR struct spirit_library_s *spirit,
     }
 
   /* Address and control length setting: source and destination address are
-   * always present so ADDRESS_LENGTH=2 */
+   * always present so ADDRESS_LENGTH=2.
+   */
 
   regval[0] = 0x10 | (uint8_t)pktstack->ctrllen;
 
@@ -479,7 +480,7 @@ int spirit_pktstack_llp_initialize(FAR struct spirit_library_s *spirit,
       regval[1] &= ~PROTOCOL0_NMAX_RETX_MASK;
       regval[1] |= llpinit->maxretx;
 
-     /* Write registers */
+      /* Write registers */
 
       ret = spirit_reg_write(spirit, PROTOCOL1_BASE, regval, 2);
     }

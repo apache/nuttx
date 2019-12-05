@@ -73,12 +73,12 @@
 #  error CONFIG_SPI_EXCHANGE required for this driver
 #endif
 
-#ifndef CONFIG_IEEE802154_at86rf23x_SPIMODE
-#  define CONFIG_IEEE802154_at86rf23x_SPIMODE SPIDEV_MODE0
+#ifndef CONFIG_IEEE802154_AT86RF23X_SPIMODE
+#  define CONFIG_IEEE802154_AT86RF23X_SPIMODE SPIDEV_MODE0
 #endif
 
-#ifndef CONFIG_IEEE802154_at86rf23x_FREQUENCY
-#  define CONFIG_IEEE802154_at86rf23x_FREQUENCY 1000000
+#ifndef CONFIG_IEEE802154_AT86RF23X_FREQUENCY
+#  define CONFIG_IEEE802154_AT86RF23X_FREQUENCY 1000000
 #endif
 
 /* Definitions for the device structure */
@@ -136,9 +136,9 @@ static int  at86rf23x_writeframe(FAR struct spi_dev_s *spi,
               FAR uint8_t *frame, uint8_t len);
 static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
               FAR uint8_t *frame_rx);
-static int  at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
+static int  at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
               uint8_t state, uint8_t force);
-static  uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev);
+static  uint8_t at86rf23x_get_trxstate(FAR struct at86rf23x_dev_s *dev);
 static int  at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev);
 static int  at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev);
 
@@ -224,8 +224,8 @@ static void at86rf23x_lock(FAR struct spi_dev_s *spi)
 {
   SPI_LOCK(spi, 1);
   SPI_SETBITS(spi, 8);
-  SPI_SETMODE(spi, CONFIG_IEEE802154_at86rf23x_SPIMODE);
-  SPI_SETFREQUENCY(spi, CONFIG_IEEE802154_at86rf23x_FREQUENCY);
+  SPI_SETMODE(spi, CONFIG_IEEE802154_AT86RF23X_SPIMODE);
+  SPI_SETFREQUENCY(spi, CONFIG_IEEE802154_AT86RF23X_FREQUENCY);
 }
 
 /****************************************************************************
@@ -390,7 +390,7 @@ static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
 
   SPI_SNDBLOCK(spi, &reg, 1);
   SPI_RECVBLOCK(spi, &len, 1);
-  SPI_RECVBLOCK(spi, frame_rx, len+3);
+  SPI_RECVBLOCK(spi, frame_rx, len + 3);
 
   SPI_SELECT(spi, SPIDEV_IEEE802154(0), false);
   at86rf23x_unlock(spi);
@@ -399,20 +399,20 @@ static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
 }
 
 /****************************************************************************
- * Name: at86rf23x_getTRXstate
+ * Name: at86rf23x_get_trxstate
  *
  * Description:
  *   Return the current status of the TRX state machine.
  *
  ****************************************************************************/
 
-static uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev)
+static uint8_t at86rf23x_get_trxstate(FAR struct at86rf23x_dev_s *dev)
 {
   return at86rf23x_getregbits(dev->spi, RF23X_TRXSTATUS_STATUS);
 }
 
 /****************************************************************************
- * Name: at86rf23x_setTRXstate
+ * Name: at86rf23x_set_trxstate
  *
  * Description:
  *   Set the TRX state machine to the desired state.  If the state machine
@@ -423,12 +423,12 @@ static uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev)
  *
  ****************************************************************************/
 
-static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
-                                 uint8_t state, uint8_t force)
+static int at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
+                                  uint8_t state, uint8_t force)
 {
   /* Get the current state of the transceiver */
 
-  uint8_t status = at86rf23x_getTRXstate(dev);
+  uint8_t status = at86rf23x_get_trxstate(dev);
 
   int ret = OK;
 
@@ -559,7 +559,7 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
             up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
         }
 
-      status = at86rf23x_getTRXstate(dev);
+      status = at86rf23x_get_trxstate(dev);
       if ((status == TRX_STATUS_RXON) || (status == TRX_STATUS_PLLON))
         {
           at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
@@ -670,7 +670,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   /* Validate we are in an acceptable mode to change the channel */
 
-  state = at86rf23x_getTRXstate(dev);
+  state = at86rf23x_get_trxstate(dev);
 
   if ((TRX_STATUS_SLEEP == state) || (TRX_STATUS_PON == state))
     {
@@ -928,7 +928,7 @@ static int at86rf23x_setdevmode(FAR struct ieee802154_radio_s *ieee,
     }
   else
     {
-    return -EINVAL;
+      return -EINVAL;
     }
 
   dev->devmode = mode;
@@ -1006,70 +1006,69 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
   reg = at86rf23x_getreg(dev->spi, RF23X_REG_TXPWR);
   switch (reg)
     {
-   case RF23X_TXPWR_POS_4:
+      case RF23X_TXPWR_POS_4:
+        *txpwr = 0;
+         break;
 
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_3_7:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_POS_3_7:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_3_4:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_POS_3_4:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_3:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_POS_3:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_2_5:
+        *txpwr = 0;
+        break;
 
-   case RF23X_TXPWR_POS_2_5:
-     *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_2:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_POS_2:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_POS_1:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_POS_1:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_0:
+         *txpwr = 0;
+         break;
 
-   case RF23X_TXPWR_0:
-      *txpwr = 0;
-      break;
+      case RF23X_TXPWR_NEG_1:
+         *txpwr = 1000;
+         break;
 
-   case RF23X_TXPWR_NEG_1:
-      *txpwr = 1000;
-      break;
+      case RF23X_TXPWR_NEG_2:
+         *txpwr = 2000;
+         break;
 
-   case RF23X_TXPWR_NEG_2:
-      *txpwr = 2000;
-      break;
+       case RF23X_TXPWR_NEG_3:
+         *txpwr = 3000;
+         break;
 
-    case RF23X_TXPWR_NEG_3:
-      *txpwr = 3000;
-      break;
+       case RF23X_TXPWR_NEG_4:
+         *txpwr = 4000;
+         break;
 
-    case RF23X_TXPWR_NEG_4:
-      *txpwr = 4000;
-      break;
+       case RF23X_TXPWR_NEG_6:
+         *txpwr = 6000;
+         break;
 
-    case RF23X_TXPWR_NEG_6:
-      *txpwr = 6000;
-      break;
+       case RF23X_TXPWR_NEG_8:
+         *txpwr = 8000;
+         break;
 
-    case RF23X_TXPWR_NEG_8:
-      *txpwr = 8000;
-      break;
+       case RF23X_TXPWR_NEG_12:
+         *txpwr = 12000;
+         break;
 
-    case RF23X_TXPWR_NEG_12:
-      *txpwr = 12000;
-      break;
-
-    case RF23X_TXPWR_NEG_17:
-      *txpwr = 17000;
-      break;
+       case RF23X_TXPWR_NEG_17:
+         *txpwr = 17000;
+         break;
     }
 
   return OK;
@@ -1085,8 +1084,8 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
  ****************************************************************************/
 
 static
- int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
-                      FAR struct ieee802154_cca_s *cca)
+  int at86rf23x_setcca(FAR struct ieee802154_radio_s *ieee,
+                       FAR struct ieee802154_cca_s *cca)
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
@@ -1206,7 +1205,7 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
 
   do
     {
-      trx_status = at86rf23x_setTRXstate(dev, TRX_CMD_TRXOFF, true);
+      trx_status = at86rf23x_set_trxstate(dev, TRX_CMD_TRXOFF, true);
 
       if (retry_cnt == RF23X_MAX_RETRY_RESET_TO_TRX_OFF)
         {
@@ -1237,7 +1236,7 @@ static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
 
   /* Set the radio to the receive state */
 
-  return at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
+  return at86rf23x_set_trxstate(dev, TRX_CMD_RX_ON, false);
 
   /* Enable the RX IRQ */
 
@@ -1309,13 +1308,13 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
       /* First row and every 15 regs */
 
       if ((i & 0x0f) == 0)
-       {
-         len = sprintf(buf, "%02x: ", i & 0xFF);
-       }
+        {
+          len = sprintf(buf, "%02x: ", i & 0xff);
+        }
 
       /* Print the register value */
 
-      len += sprintf(buf+len, "%02x ", at86rf23x_getreg(dev->spi, i));
+      len += sprintf(buf + len, "%02x ", at86rf23x_getreg(dev->spi, i));
 
       /* At the end of each 15 regs or end of rf233s regs and actually print
        * debug message.
@@ -1357,7 +1356,7 @@ static void at86rf23x_irqworker(FAR void *arg)
       else
         {
           at86rf23x_irqwork_tx(dev);
-       }
+        }
     }
   else
     {
@@ -1450,7 +1449,7 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
    * 3.  Where do we control the retry process?
    */
 
-  if (at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false))
+  if (at86rf23x_set_trxstate(dev, TRX_CMD_PLL_ON, false))
     {
       at86rf23x_writeframe(dev->spi, packet->data, packet->len);
     }
@@ -1518,7 +1517,7 @@ FAR struct ieee802154_radio_s *
 
   /* Turn the PLL to the on state */
 
-  at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false);
+  at86rf23x_set_trxstate(dev, TRX_CMD_PLL_ON, false);
 
   /* SEED value of the CSMA backoff algorithm. */
 
@@ -1574,7 +1573,7 @@ FAR struct ieee802154_radio_s *
 #if 0
   /* Put the Device to RX ON Mode */
 
-  at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
+  at86rf23x_set_trxstate(dev, TRX_CMD_RX_ON, false);
 #endif
 
   /* Enable Radio IRQ */

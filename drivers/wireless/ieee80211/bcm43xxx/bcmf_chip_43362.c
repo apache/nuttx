@@ -62,10 +62,9 @@ extern const unsigned int bcm43362_firmware_image_len;
 
 const struct bcmf_sdio_chip bcmf_43362_config_sdio =
 {
-
   /* General chip stats */
 
-  .ram_size = 0x3C000,
+  .ram_size = 0x3c000,
 
   /* Backplane architecture */
 
@@ -81,6 +80,7 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio =
   },
 
   /* Firmware images */
+
   /* TODO find something smarter than using image_len references */
 
   .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,

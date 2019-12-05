@@ -246,10 +246,11 @@ int spirit_aes_write_key(FAR struct spirit_library_s *spirit,
  *
  * Input Parameters:
  *   spirit  - Reference to a Spirit library state structure instance
- *  key  pointer to the buffer of 4 words (16 bytes) containing the AES key.
- *         The first byte of the buffer shall be the most significant byte AES_KEY_0 of the AES key.
- *         The last byte of the buffer shall be the less significant byte AES_KEY_15 of the AES key.
- *         This parameter is an uint8_t*.
+ *   key     - Pointer to the buffer of 4 words (16 bytes) containing the AES
+ *             key.  The first byte of the buffer shall be the most
+ *             significant byte AES_KEY_0 of the AES key.
+ *             The last byte of the buffer shall be the less significant byte
+ *             AES_KEY_15 of the AES key.  This parameter is an uint8_t*.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure.

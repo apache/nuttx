@@ -66,15 +66,6 @@
 #include "bcmf_sdio_core.h"
 #include "bcmf_sdio_regs.h"
 
-/* Supported chip configurations */
-
-#ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
-  extern const struct bcmf_sdio_chip bcmf_43362_config_sdio;
-#endif
-#ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
-  extern const struct bcmf_sdio_chip bcmf_43438_config_sdio;
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -88,15 +79,24 @@
 
 #define BCMF_WAITDOG_TIMEOUT_TICK (5*CLOCKS_PER_SEC)
 
-/* Chipcommon registers */
+/* Chip-common registers */
 
-#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6C) )
+#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6c) )
 #define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504) )
 #define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508) )
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
+
+/* Supported chip configurations */
+
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
+  extern const struct bcmf_sdio_chip bcmf_43362_config_sdio;
+#endif
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
+  extern const struct bcmf_sdio_chip bcmf_43438_config_sdio;
+#endif
 
 /****************************************************************************
  * Private Function Prototypes

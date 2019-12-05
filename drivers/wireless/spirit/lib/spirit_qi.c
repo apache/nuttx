@@ -185,7 +185,7 @@ int spirit_qi_set_pqithreshold(FAR struct spirit_library_s *spirit,
       regval &= 0xc3;
       regval |= (uint8_t)pqithr;
 
-     /* Write the value on the QI register */
+      /* Write the value on the QI register */
 
       ret = spirit_reg_write(spirit, QI_BASE, &regval, 1);
     }

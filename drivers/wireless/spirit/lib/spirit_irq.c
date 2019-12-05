@@ -64,7 +64,10 @@
 
 int spirit_irq_disable_all(FAR struct spirit_library_s *spirit)
 {
-  uint8_t regval[4] = { 0x00, 0x00, 0x00, 0x00 };
+  uint8_t regval[4] =
+  {
+    0x00, 0x00, 0x00, 0x00
+  };
 
   /* Writes the IRQ_MASK registers */
 

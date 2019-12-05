@@ -309,7 +309,8 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   /* Check the channel center frequency is in one of the possible range */
 
   DEBUGASSERT(IS_FREQUENCY_BAND((radioinit->base_frequency +
-                                ((fcoffset * spirit->xtal_frequency) / FBASE_DIVIDER) +
+                                ((fcoffset * spirit->xtal_frequency) /
+                                 FBASE_DIVIDER) +
                                 radioinit->chspace * radioinit->chnum)));
 
   /* Calculates the datarate mantissa and exponent */
@@ -1136,7 +1137,8 @@ int spirit_radio_set_foffset_ppm(FAR struct spirit_library_s *spirit,
                         FBASE_DIVIDER);
 
   /* Calculate the offset respect to RF frequency and according to xtal_ppm
-   * parameter */
+   * parameter.
+   */
 
   offset = (int32_t)(((float)xtaloffset * fbase) / PPM_FACTOR);
 
@@ -1502,7 +1504,8 @@ uint32_t spirit_radio_get_centerfreq(FAR struct spirit_library_s *spirit)
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance
- *   datarate - datarate expressed in bps. This parameter ranging between 100 and 500000.
+ *   datarate - datarate expressed in bps. This parameter ranging between
+ *              100 and 500000.
  *   pcm      - pointer to the returned mantissa value.
  *   pce      - pointer to the returned exponent value.
  *
@@ -1653,7 +1656,7 @@ int spirit_radio_convert_chbandwidth(FAR struct spirit_library_s *spirit,
             }
         }
 
-      delta = 0xFFFF;
+      delta = 0xffff;
 
       for (j = 0; j < 3; j++)
         {
@@ -1698,7 +1701,7 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
   uint32_t bp;
   uint32_t b = 0;
   uint8_t i;
-  float xtalDivtmp = (float)spirit->xtal_frequency / (((uint32_t) 1) << 18);
+  float divtmp = (float)spirit->xtal_frequency / (((uint32_t) 1) << 18);
 
   /* Check the parameters */
 
@@ -1706,7 +1709,7 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
 
   for (i = 0; i < 10; i++)
     {
-      a = (uint32_t)(xtalDivtmp * (uint32_t)(7.5 * (1 << i)));
+      a = (uint32_t)(divtmp * (uint32_t)(7.5 * (1 << i)));
       if (fdev < a)
         {
           break;
@@ -1718,7 +1721,7 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
   for (i = 0; i < 8; i++)
     {
       bp = b;
-      b = (uint32_t)(xtalDivtmp * (uint32_t)((8.0 + i) / 2 * (1 << (*pce))));
+      b = (uint32_t)(divtmp * (uint32_t)((8.0 + i) / 2 * (1 << (*pce))));
       if (fdev < b)
         {
           break;
@@ -1754,7 +1757,8 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
 int spirit_radio_set_datarate(FAR struct spirit_library_s *spirit,
                               uint32_t datarate)
 {
-  uint8_t dre, regval[2];
+  uint8_t regval[2];
+  uint8_t dre;
   int ret;
 
   /* Check the parameters */
@@ -1975,7 +1979,9 @@ int spirit_radio_set_chfilterbw(FAR struct spirit_library_s *spirit,
 
 uint32_t spirit_radio_get_chfilterbw(FAR struct spirit_library_s *spirit)
 {
-  uint8_t regval, bwm, bwe;
+  uint8_t regval;
+  uint8_t bwm;
+  uint8_t bwe;
 
   /* Read the channel filter register for mantissa and exponent */
 
@@ -2102,7 +2108,7 @@ int spirit_radio_enable_cwtxmode(FAR struct spirit_library_s *spirit,
       ret = spirit_reg_write(spirit, MOD0_BASE, &regval, 1);
     }
 
-   return ret;
+  return ret;
 }
 
 /******************************************************************************
@@ -2365,7 +2371,8 @@ int spirit_radio_config_patable_dbm(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_PA_LOAD_CAP(load));
 
   /* Check the PA level in dBm is in the range and calculate the PA_LEVEL value
-   * to write in the corresponding register using the linearization formula */
+   * to write in the corresponding register using the linearization formula.
+   */
 
   for (i = 0; i <= nlevels; i++)
     {
@@ -2401,7 +2408,7 @@ int spirit_radio_config_patable_dbm(FAR struct spirit_library_s *spirit,
  *   table   - Pointer to an array of 8 elements containing the PA value in dbm.
  *             The first element will be the PA_LEVEL_0 and the last element
  *             will be PA_LEVEL_7. Any value higher than PA_UPPER_LIMIT implies
- (             no output power (output stage is in high impedance).
+ *             no output power (output stage is in high impedance).
  *
  * Returned Value:
  *   Zero (OK) on success.  A negated errno value is returned on any failure.
@@ -3440,7 +3447,8 @@ uint8_t spirit_radio_get_afclowgain(FAR struct spirit_library_s *spirit)
   uint8_t regval;
 
   /* Read the AFC_0 register, mask the AFC Slow Gain field and return the
-   * value */
+   * value.
+   */
 
   (void)spirit_reg_read(spirit, AFC0_BASE, &regval, 1);
 
@@ -3760,7 +3768,8 @@ int spirit_radio_enable_agcfreeze_maxatten(FAR struct spirit_library_s *spirit,
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(newstate));
 
   /* Read the AGCCTRL_2 register and configure the AGC Start Max Attenuation
-   * field */
+   * field.
+   */
 
   ret = spirit_reg_read(spirit, AGCCTRL2_BASE, &regval, 1);
   if (ret >= 0)
@@ -3960,7 +3969,8 @@ uint8_t spirit_radio_get_agcmeasure(FAR struct spirit_library_s *spirit)
 int spirit_radio_set_agcholdtime_us(FAR struct spirit_library_s *spirit,
                                     uint8_t time)
 {
-  uint8_t regval, hold;
+  uint8_t regval;
+  uint8_t hold;
 
   /* Check the parameter */
 
@@ -4149,7 +4159,8 @@ uint8_t spirit_radio_get_agchighthres(FAR struct spirit_library_s *spirit)
   uint8_t regval;
 
   /* Read the AGCCTRL_1 register, mask the THRESHOLD_HIGH field and return the
-   * value */
+   * value.
+   */
 
   (void)spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
 
@@ -4216,7 +4227,8 @@ uint8_t spirit_radio_get_agclowthres(FAR struct spirit_library_s *spirit)
   uint8_t regval;
 
   /* Read the AGCCTRL_1 register, mask the THRESHOLD_LOW field and return the
-   * value */
+   * value.
+   */
 
   (void)spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
 
@@ -4289,7 +4301,8 @@ enum spirit_clkrecmode_e
   uint8_t regval;
 
   /* Read the FDEV_0 register, mask the CLOCK_REC_ALGO_SEL field and return
-   * the value */
+   * the value.
+   */
 
   (void)spirit_reg_read(spirit, FDEV0_BASE, &regval, 1);
 
@@ -4357,7 +4370,8 @@ uint8_t spirit_radio_get_clkrecgain(FAR struct spirit_library_s *spirit)
   uint8_t regval;
 
   /* Read the CLOCKREC register, mask the CLK_REC_P_GAIN field and return the
-   * value */
+   * value.
+   */
 
   (void)spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
 
@@ -4498,7 +4512,8 @@ enum spirit_pstfltlen_e
   uint8_t regval;
 
   /* Read the CLOCKREC register, mask the PSTFLT_LEN field and return the
-   * value */
+   * value.
+   */
 
   (void)spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
 

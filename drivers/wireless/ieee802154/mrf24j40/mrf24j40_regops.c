@@ -49,7 +49,7 @@
 #include "mrf24j40_regops.h"
 
 /****************************************************************************
- * Internal Driver Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,7 +67,7 @@ void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t val)
 
   if (!(addr & 0x80000000))
     {
-      addr  &= 0x3F; /* 6-bit address */
+      addr  &= 0x3f; /* 6-bit address */
       addr <<= 1;
       addr  |= 0x01; /* writing */
       buf[0] = addr;
@@ -75,11 +75,11 @@ void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t val)
     }
   else
     {
-      addr  &= 0x3FF; /* 10-bit address */
+      addr  &= 0x3ff; /* 10-bit address */
       addr <<= 5;
       addr  |= 0x8010; /* writing long */
       buf[0] = (addr >>   8);
-      buf[1] = (addr & 0xFF);
+      buf[1] = (addr & 0xff);
       len    = 2;
     }
 
@@ -110,7 +110,7 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
     {
       /* 6-bit address */
 
-      addr  &= 0x3F;
+      addr  &= 0x3f;
       addr <<= 1;
       buf[0] = addr;
       len    = 1;
@@ -119,15 +119,15 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
     {
       /* 10-bit address */
 
-      addr  &= 0x3FF;
+      addr  &= 0x3ff;
       addr <<= 5;
       addr  |= 0x8000;
       buf[0] = (addr >>   8);
-      buf[1] = (addr & 0xFF);
+      buf[1] = (addr & 0xff);
       len    = 2;
     }
 
-  buf[len++] = 0xFF; /* dummy */
+  buf[len++] = 0xff; /* dummy */
 
   mrf24j40_spi_lock(spi);
   SPI_SELECT     (spi, SPIDEV_IEEE802154(0), true);
@@ -135,7 +135,6 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
   SPI_SELECT     (spi, SPIDEV_IEEE802154(0), false);
   mrf24j40_spi_unlock(spi);
 
-  /* wlinfo("r[%04X]=%02X\n", addr, rx[len - 1]); */
   return rx[len - 1];
 }
 
@@ -150,7 +149,7 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
 {
   uint32_t i;
-  char buf[4+16*3+2+1];
+  char buf[4 + 16 * 3 + 2 + 1];
   int len = 0;
 
   wlinfo("Short regs:\n");
@@ -159,13 +158,13 @@ int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
     {
       if ((i & 15) == 0)
         {
-          len=sprintf(buf, "%02x: ", i & 0xFF);
+          len = sprintf(buf, "%02x: ", i & 0xff);
         }
 
-      len += sprintf(buf+len, "%02x ", mrf24j40_getreg(dev->spi, i));
+      len += sprintf(buf + len, "%02x ", mrf24j40_getreg(dev->spi, i));
       if ((i & 15) == 15)
         {
-          sprintf(buf+len, "\n");
+          sprintf(buf + len, "\n");
           wlinfo("%s", buf);
         }
     }
@@ -176,13 +175,13 @@ int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
     {
       if ((i & 15) == 0)
         {
-          len=sprintf(buf, "%02x: ", i & 0xFF);
+          len = sprintf(buf, "%02x: ", i & 0xff);
         }
 
-      len += sprintf(buf+len, "%02x ", mrf24j40_getreg(dev->spi, i));
+      len += sprintf(buf + len, "%02x ", mrf24j40_getreg(dev->spi, i));
       if ((i & 15) == 15)
         {
-          sprintf(buf+len, "\n");
+          sprintf(buf + len, "\n");
           wlinfo("%s", buf);
         }
     }

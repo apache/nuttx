@@ -99,7 +99,7 @@ int spirit_timer_enable_ldcrmode(FAR struct spirit_library_s *spirit,
       ret = spirit_reg_write(spirit, PROTOCOL2_BASE, &regval, 1);
     }
 
- return ret;
+  return ret;
 }
 
 /******************************************************************************
@@ -196,7 +196,10 @@ enum spirit_functional_state_e
 int spirit_timer_setup_rxtimeout(FAR struct spirit_library_s *spirit,
                                  uint8_t counter, uint8_t prescaler)
 {
-  uint8_t regval[2] = { prescaler, counter };
+  uint8_t regval[2] =
+  {
+    prescaler, counter
+  };
 
   /* Writes the prescaler and counter value for RX timeout to the corresponding
    * register.
@@ -344,7 +347,10 @@ int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
  *
  * Description:
  *   Sets the LDCR wake up timer initialization registers with the values of
- *   COUNTER and PRESCALER according to the formula: Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
+ *   COUNTER and PRESCALER according to the formula:
+ *
+ *     Twu=(PRESCALER + 1) * (COUNTER +1 ) * Tck,
+ *
  *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is 28.818us
  *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
  *   (PRESCALER anc COUNTER equals to 255).
@@ -362,10 +368,14 @@ int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
 int spirit_timer_setup_wakeuptimer(FAR struct spirit_library_s *spirit,
                                         uint8_t counter, uint8_t prescaler)
 {
-  uint8_t regval[2] = { prescaler, counter };
+  uint8_t regval[2] =
+  {
+    prescaler, counter
+  };
 
   /* Writes the counter and prescaler value of wake-up timer in the
-   * corresponding register */
+   * corresponding register.
+   */
 
   return spirit_reg_write(spirit, TIMERS3_LDC_PRESCALER_BASE, regval, 2);
 }
@@ -399,7 +409,8 @@ int spirit_timer_set_wakeuptimer(FAR struct spirit_library_s *spirit,
   spirit_timer_calc_wakeup_values(spirit, desired, &regval[1], &regval[0]);
 
   /* Writes the counter and prescaler value of wake-up timer in the
-   * corresponding register */
+   * corresponding register.
+   */
 
   return spirit_reg_write(spirit, TIMERS3_LDC_PRESCALER_BASE, regval, 2);
 }
@@ -497,7 +508,8 @@ int spirit_timer_get_wakeuptimer_setup(FAR struct spirit_library_s *spirit,
 
       *prescaler  = regval[0];
       *counter    = regval[1];
-      *wakeupmsec = (float)((((*prescaler) + 1) * ((*counter) + 1) * (1000.0 / rco_freq)));
+      *wakeupmsec = (float)((((*prescaler) + 1) * ((*counter) + 1) *
+                            (1000.0 / rco_freq)));
     }
 
   return ret;
@@ -529,7 +541,10 @@ int spirit_timer_get_wakeuptimer_setup(FAR struct spirit_library_s *spirit,
 int spirit_timer_setup_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
                                           uint8_t counter, uint8_t prescaler)
 {
-  uint8_t regval[2] = { prescaler, counter };
+  uint8_t regval[2] =
+  {
+    prescaler, counter
+  };
 
   /* Write the counter and prescaler value of reload wake-up timer in the
    * corresponding register
@@ -570,7 +585,8 @@ int spirit_timer_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
   spirit_timer_calc_wakeup_values(spirit, desired, &regval[1], &regval[0]);
 
   /* Writes the counter and prescaler value of reload wake-up timer in the
-   * corresponding register */
+   * corresponding register.
+   */
 
   return spirit_reg_write(spirit, TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
 }
@@ -679,7 +695,8 @@ int spirit_timer_get_wakeuptimer_reload_setup(FAR struct spirit_library_s *spiri
 
       *prescaler = regval[0];
       *counter = regval[1];
-      *reload = (float)((((*prescaler) + 1) * ((*counter) + 1) * (1000.0 / rco_freq)));
+      *reload = (float)((((*prescaler) + 1) * ((*counter) + 1) *
+                         (1000.0 / rco_freq)));
     }
 
   return ret;
@@ -757,19 +774,22 @@ void spirit_timer_calc_wakeup_values(FAR struct spirit_library_s *spirit,
                                      float desired, FAR uint8_t *counter,
                                      FAR uint8_t *prescaler)
 {
-  float rco_freq, err;
+  float rco_freq;
+  float err;
   uint32_t n;
 
   rco_freq = ((float)spirit_timer_get_rcofrequency(spirit)) / 1000;
 
   /* N cycles in the time base of the timer: - clock of the timer is RCO
    * frequency - divide times 1000 more because we have an input in ms
-   * (variable rco_freq is already this frequency divided by 1000) */
+   * (variable rco_freq is already this frequency divided by 1000).
+   */
 
   n = (uint32_t)(desired * rco_freq);
 
   /* check if it is possible to reach that target with prescaler and counter of
-   * spirit1 */
+   * spirit1.
+   */
 
   if (n / 0xff > 0xfd)
     {
@@ -878,18 +898,21 @@ void spirit_timer_calc_rxtimeout_values(FAR struct spirit_library_s *spirit,
 
   /* check if the error is minimum */
 
-  err = S_ABS((float)(*counter) * (*prescaler) * 1210000 / xtal_frequency - desired);
+  err = S_ABS((float)(*counter) * (*prescaler) * 1210000 /
+                     xtal_frequency - desired);
 
   if ((*counter) <= 254)
     {
-      if (S_ABS((float)((*counter) + 1) * (*prescaler) * 1210000 / xtal_frequency - desired) < err)
+      if (S_ABS((float)((*counter) + 1) * (*prescaler) * 1210000 /
+                        xtal_frequency - desired) < err)
         {
           (*counter)++;
         }
     }
 
   /* decrement prescaler and counter according to the logic of this timer in
-   * spirit1 */
+   * spirit1.
+   */
 
   (*prescaler)--;
   if ((*counter) > 1)
@@ -968,4 +991,3 @@ int spirit_timer_cmd_reload(FAR struct spirit_library_s *spirit)
 
   return spirit_command(spirit, COMMAND_LDC_RELOAD);
 }
-

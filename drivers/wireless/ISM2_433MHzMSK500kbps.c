@@ -118,7 +118,7 @@ const struct c1101_rfsettings_s cc1101_rfsettings_ISM2_433MHzMSK500kbps =
   .FREND0   = 0x10,  /* FREND0   Front End TX Configuration */
 
   .FSCAL3   = 0xea,  /* FSCAL3   Frequency Synthesizer Calibration */
-  .FSCAL2   = 0x2A,  /* FSCAL2   Frequency Synthesizer Calibration */
+  .FSCAL2   = 0x2a,  /* FSCAL2   Frequency Synthesizer Calibration */
   .FSCAL1   = 0x00,  /* FSCAL1   Frequency Synthesizer Calibration */
   .FSCAL0   = 0x1f,  /* FSCAL0   Frequency Synthesizer Calibration */
 

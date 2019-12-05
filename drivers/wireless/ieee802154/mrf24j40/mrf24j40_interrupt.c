@@ -61,6 +61,10 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
               uint8_t gts_num);
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: mrf24j40_irqwork_txnorm
  *
  * Description:
@@ -196,7 +200,7 @@ static void mrf24j40_irqwork_txgts(FAR struct mrf24j40_radio_s *dev,
 
   /* We are now done with the transaction */
 
-  dev->gts_busy[gts]= 0;
+  dev->gts_busy[gts] = 0;
 
   mrf24j40_dopoll_gts(dev);
 }
@@ -275,6 +279,7 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   dev->radiocb->rxframe(dev->radiocb, ind);
 
 done:
+
   /* Enable reception of next packet by flushing the fifo.
    * This is an MRF24J40 errata (no. 1).
    */
@@ -294,6 +299,10 @@ done:
       mrf24j40_setreg(dev->spi, MRF24J40_INTCON, reg);
     }
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: mrf24j40_irqworker
@@ -403,7 +412,7 @@ void mrf24j40_irqworker(FAR void *arg)
 
           mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
           mrf24j40_beacon_trigger(dev);
-          wlinfo("Beacon triggered. BSN: 0x%02X\n", dev->bsn-1);
+          wlinfo("Beacon triggered. BSN: 0x%02X\n", dev->bsn - 1);
         }
     }
 

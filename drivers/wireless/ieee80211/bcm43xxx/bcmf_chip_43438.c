@@ -67,7 +67,7 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
 {
   /* General chip stats */
 
-  .ram_size = 512*1024,
+  .ram_size = 512 * 1024,
 
   /* Backplane architecture */
 
@@ -83,6 +83,7 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
   },
 
   /* Firmware images */
+
   /* TODO find something smarter than using image_len references */
 
   .nvram_image         = (FAR uint8_t *)ap6212_nvram_image,

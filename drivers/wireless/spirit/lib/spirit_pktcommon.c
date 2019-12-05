@@ -628,7 +628,8 @@ int spirit_pktcommon_set_syncword(FAR struct spirit_library_s *spirit,
 uint8_t spirit_pktcommon_get_syncword(FAR struct spirit_library_s *spirit,
                                       enum spirit_pktsyncword_e syncwordno)
 {
-  uint8_t regaddr, regval;
+  uint8_t regaddr;
+  uint8_t regval;
 
   /* Check the parameters */
 
@@ -2020,7 +2021,7 @@ int spirit_pktcommon_enable_ctrl_filter(FAR struct spirit_library_s *spirit,
       else
         {
           regval &= ~PCKT_FLT_OPTIONS_CONTROL_FILTERING_MASK;
-       }
+        }
 
       /* Write the new value to the PCKT_FLT_OPTIONS register */
 

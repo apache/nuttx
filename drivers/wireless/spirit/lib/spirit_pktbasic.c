@@ -483,19 +483,19 @@ int spirit_pktbasic_set_format(FAR struct spirit_library_s *spirit)
 
   if (ret >= 0)
     {
-        /* Reads the PROTOCOL1 register */
+      /* Reads the PROTOCOL1 register */
 
-        ret = spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
-        if (ret >= 0)
-          {
-            /* Mask a reserved bit */
+      ret = spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
+      if (ret >= 0)
+        {
+          /* Mask a reserved bit */
 
-            regval &= ~0x20;
+          regval &= ~0x20;
 
-            /* Write the value to the register */
+          /* Write the value to the register */
 
-            ret = spirit_reg_write(spirit, PROTOCOL1_BASE, &regval, 1);
-          }
+          ret = spirit_reg_write(spirit, PROTOCOL1_BASE, &regval, 1);
+        }
     }
 
   return ret;

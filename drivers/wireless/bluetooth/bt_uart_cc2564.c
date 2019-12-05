@@ -115,7 +115,7 @@ static int cc2564_load(FAR const struct btuart_lowerhalf_s *lower,
   for (data = chipdata; *data++; data += length)
     {
       uint16_t opcode;
-      opcode = ((uint16_t)(*(data+1)) << 8) + *data;
+      opcode = ((uint16_t)(*(data + 1)) << 8) + *data;
 
       length = data[2] + sizeof(opcode) + sizeof(data[2]);
 

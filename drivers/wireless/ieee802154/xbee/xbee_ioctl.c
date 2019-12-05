@@ -19,8 +19,7 @@
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *
- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -118,33 +117,39 @@ int xbee_ioctl(XBEEHANDLE xbee, int cmd, unsigned long arg)
                                  &macarg->getreq.attrval);
             }
             break;
+
           case MAC802154IOC_MLME_SET_REQUEST:
             {
               ret = xbee_req_set(xbee, macarg->setreq.attr,
                                  &macarg->setreq.attrval);
             }
             break;
+
           case MAC802154IOC_MLME_START_REQUEST:
             {
               ret = xbee_req_start(xbee, &macarg->startreq);
             }
             break;
+
           case MAC802154IOC_MLME_ASSOC_REQUEST:
             {
               ret = xbee_req_associate(xbee, &macarg->assocreq);
             }
             break;
+
           case MAC802154IOC_MLME_RESET_REQUEST:
             {
               ret = xbee_req_reset(xbee, macarg->resetreq.resetattr);
             }
             break;
+
 #if 0
           case MAC802154IOC_MLME_ASSOC_RESPONSE:
             {
               ret = xbee_resp_associate(xbee, &macarg->assocresp);
             }
             break;
+
           case MAC802154IOC_MLME_DISASSOC_REQUEST:
             {
               ret = xbee_req_disassociate(xbee, &macarg->disassocreq);
@@ -156,12 +161,12 @@ int xbee_ioctl(XBEEHANDLE xbee, int cmd, unsigned long arg)
               ret = xbee_req_rxenable(xbee, &macarg->rxenabreq);
             }
             break;
+
           case MAC802154IOC_MLME_SCAN_REQUEST:
             {
               ret = xbee_req_scan(xbee, &macarg->scanreq);
             }
             break;
-
 
           case MAC802154IOC_MLME_POLL_REQUEST:
             {
@@ -169,11 +174,13 @@ int xbee_ioctl(XBEEHANDLE xbee, int cmd, unsigned long arg)
             }
             break;
 #endif
+
           default:
               wlerr("ERROR: Unrecognized cmd: %d\n", cmd);
               ret = -ENOTTY;
               break;
         }
     }
+
   return ret;
 }

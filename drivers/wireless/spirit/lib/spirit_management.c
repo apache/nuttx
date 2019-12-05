@@ -478,7 +478,7 @@ int spirit_management_txstrobe(FAR struct spirit_library_s *spirit)
           return ret;
         }
 
-     /* Enable VCO_L buffer */
+      /* Enable VCO_L buffer */
 
       tmp = 0x11;
       ret = spirit_reg_write(spirit, 0xa9, &tmp, 1);

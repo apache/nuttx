@@ -1016,8 +1016,9 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* Set radio frequency. Arg: Pointer to
-       * uint32_t frequency value in Hz ! */
+      /* Set radio frequency. Arg: Pointer to uint32_t frequency value in
+       * Hz.
+       */
 
       case WLIOC_SETRADIOFREQ:
         {
@@ -1028,8 +1029,9 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           break;
         }
 
-      /* Get current radio frequency. arg: Pointer
-       * to uint32_t frequency value in Hz! */
+      /* Get current radio frequency. arg: Pointer to uint32_t frequency
+       * value in Hz.
+       */
 
       case WLIOC_GETRADIOFREQ:
         {
@@ -1364,7 +1366,6 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
               wlinfo("Invalid LORA RX data!\n");
             }
 
-
           /* After receiving the data in RXSINGLE mode the chip goes into
            * STANBY mode
            */
@@ -1652,6 +1653,7 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
 
 errout:
+
   /* Return total length */
 
   return len;
@@ -1731,6 +1733,7 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
 
 errout:
+
   /* Return total length */
 
   return len;
@@ -2207,7 +2210,7 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
 
   /* Update mode */
 
-  setbits = ((opmode-1) << SX127X_CMN_OPMODE_MODE_SHIFT);
+  setbits = ((opmode - 1) << SX127X_CMN_OPMODE_MODE_SHIFT);
   clrbits = SX127X_CMN_OPMODE_MODE_MASK;
   sx127x_modregbyte(dev, SX127X_CMN_OPMODE, setbits, clrbits);
 
@@ -2545,11 +2548,15 @@ errout:
 
 static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
 {
-  DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
-              dev->modulation == SX127X_MODULATION_OOK);
-
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
+  uint8_t syncword[] =
+  {
+    0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+  };
+
+  DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
+              dev->modulation == SX127X_MODULATION_OOK);
 
   /* Set FDEV */
 
@@ -2567,10 +2574,9 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
   sx127x_fskook_seq_start(dev, false);
 
   /* Configure Sync Word
-   * REVISIT: FSK communication doesnt work if syncword is disabled!
+   * REVISIT: FSK communication doesn't work if syncword is disabled!
    */
 
-  uint8_t syncword[] = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
   sx127x_fskook_syncword_set(dev, syncword, 8);
 
   /* Configure bandwidth */
@@ -2970,7 +2976,7 @@ static int sx127x_lora_opmode_set(FAR struct sx127x_dev_s *dev,
   /* Update mode */
 
   sx127x_modregbyte(dev, SX127X_CMN_OPMODE,
-                    ((opmode-1) << SX127X_CMN_OPMODE_MODE_SHIFT),
+                    ((opmode - 1) << SX127X_CMN_OPMODE_MODE_SHIFT),
                     SX127X_CMN_OPMODE_MODE_MASK);
 
   sx127x_unlock(dev->spi);
@@ -3598,6 +3604,7 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
 #endif
 #endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
     }
+
 #ifdef CONFIG_LPWAN_SX127X_LORA
   if (modulation == SX127X_MODULATION_LORA)
     {
@@ -3999,10 +4006,10 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
           /* Configure output power */
 
-          setbits = (power-5) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
+          setbits = (power - 5) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
           clrbits = SX127X_CMN_PACFG_OUTPOWER_MASK;
 
-          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits );
+          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits);
         }
       else
         {
@@ -4012,10 +4019,10 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
           /* Configure output power */
 
-          setbits = (power-2) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
+          setbits = (power - 2) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
           clrbits = SX127X_CMN_PACFG_OUTPOWER_MASK;
 
-          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits );
+          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits);
         }
 
       /* Enable PA BOOST output */
@@ -4026,7 +4033,7 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
     {
       /* Configure output power and max power to 13.8 dBm */
 
-      setbits = ((power+1) << SX127X_CMN_PACFG_OUTPOWER_SHIFT);
+      setbits = ((power + 1) << SX127X_CMN_PACFG_OUTPOWER_SHIFT);
       setbits |= (5 << SX127X_CMN_PACFG_MAXPOWER_SHIFT);
       clrbits = (SX127X_CMN_PACFG_OUTPOWER_MASK | SX127X_CMN_PACFG_MAXPOWER_SHIFT);
 
@@ -4475,6 +4482,7 @@ static void sx127x_dumpregs(FAR struct sx127x_dev_s *dev)
           break;
         }
 #endif
+
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
       case SX127X_MODULATION_FSK:
       case SX127X_MODULATION_OOK:
@@ -4483,6 +4491,7 @@ static void sx127x_dumpregs(FAR struct sx127x_dev_s *dev)
           break;
         }
 #endif
+
       default:
         {
           wlinfo("Unknown SX127X modulation\n");

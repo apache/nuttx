@@ -19,8 +19,7 @@
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *
- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -144,7 +143,8 @@ static int xbee_interrupt(int irq, FAR void *context, FAR void *arg)
 
   if (work_available(&priv->attnwork))
     {
-      return work_queue(HPWORK, &priv->attnwork, xbee_attnworker, (FAR void *)priv, 0);
+      return work_queue(HPWORK, &priv->attnwork, xbee_attnworker,
+                        (FAR void *)priv, 0);
     }
 
   return OK;
@@ -194,11 +194,11 @@ static void xbee_attnworker(FAR void *arg)
   iobhead = iob;
 
   /* NOTE: There is a helpful side-effect to trying to get the SPI Lock here
-  * even when there is a write going on. That is, if the SPI write are on a
-  * thread with lower priority, trying to get the lock here should boost the
-  * priority of that thread, helping move along the low-level driver work
-  * that really should be happening in a high priority way anyway.
-  */
+   * even when there is a write going on. That is, if the SPI write are on a
+   * thread with lower priority, trying to get the lock here should boost
+   * the priority of that thread, helping move along the low-level driver
+   * work that really should be happening in a high priority way anyway.
+   */
 
   SPI_LOCK(priv->spi, 1);
   SPI_SETBITS(priv->spi, 8);
@@ -283,7 +283,6 @@ static void xbee_attnworker(FAR void *arg)
 
                           if (iob != NULL)
                             {
-
                               iob->io_flink  = NULL;
                               iob->io_len    = 0;
                               iob->io_offset = 0;
@@ -334,6 +333,7 @@ static void xbee_attnworker(FAR void *arg)
                 {
                   previob = previob->io_flink;
                 }
+
               previob->io_flink = NULL;
             }
 
@@ -493,11 +493,11 @@ static bool xbee_verify_checksum(FAR const struct iob_s *iob)
   /* Skip the start byte and frame length, but include the checksum */
 
   for (i = 3; i < iob->io_len; i++)
-  {
-    checksum += iob->io_data[i];
-  }
+    {
+      checksum += iob->io_data[i];
+    }
 
-  if (checksum != 0xFF)
+  if (checksum != 0xff)
     {
       wlwarn("Invalid checksum\n");
       return false;
@@ -572,9 +572,11 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                     }
                 }
 #endif
+
               wlinfo("Modem Status: %d\n", frame->io_data[frame->io_offset++]);
             }
             break;
+
           case XBEE_APIFRAME_ATRESPONSE:
             {
               frame->io_offset++; /* Skip over frame index */
@@ -633,9 +635,9 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                       wlinfo("Association Indication: %d\n",
                              frame->io_data[frame->io_offset]);
 
-                      /* 0xFF = No assocication status determined yet. */
+                      /* 0xff = No assocication status determined yet. */
 
-                      if (frame->io_data[frame->io_offset] != 0xFF &&
+                      if (frame->io_data[frame->io_offset] != 0xff &&
                           frame->io_data[frame->io_offset] != 0x13)
                         {
                           wd_cancel(priv->assocwd);
@@ -646,7 +648,8 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
 
                           if (frame->io_data[frame->io_offset] == 0)
                             {
-                              primitive->u.assocconf.status = IEEE802154_STATUS_SUCCESS;
+                              primitive->u.assocconf.status =
+                                IEEE802154_STATUS_SUCCESS;
 #ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
                               /* Upon successful association, we know that the
                                * channel and PAN ID give us a valid connection.
@@ -658,14 +661,15 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
 
                               if (work_available(&priv->backupwork))
                                 {
-                                  work_queue(LPWORK, &priv->backupwork, xbee_backup_worker,
-                                             (FAR void *)priv, 0);
+                                  work_queue(LPWORK, &priv->backupwork,
+                                             xbee_backup_worker, (FAR void *)priv, 0);
                                 }
 #endif
                             }
                           else
                             {
-                              primitive->u.assocconf.status = IEEE802154_STATUS_FAILURE;
+                              primitive->u.assocconf.status =
+                                IEEE802154_STATUS_FAILURE;
                             }
 
                           xbee_notify(priv, primitive);
@@ -689,7 +693,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                   else if (memcmp(command, "SP", 2) == 0)
                     {
                       wlinfo("Sleep Period: %dsec\n",
-                             frame->io_data[frame->io_offset]/100);
+                             frame->io_data[frame->io_offset] / 100);
                     }
                   else if (memcmp(command, "RR", 2) == 0)
                     {
@@ -715,7 +719,8 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                     }
                   else if (memcmp(command, "WR", 2) == 0)
                     {
-                      wlinfo("Write Complete: %d\n", frame->io_data[frame->io_offset]);
+                      wlinfo("Write Complete: %d\n",
+                             frame->io_data[frame->io_offset]);
                     }
                   else
                     {
@@ -734,12 +739,14 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                 }
             }
             break;
+
           case XBEE_APIFRAME_TXSTATUS:
             {
               xbee_process_txstatus(priv, frame->io_data[frame->io_offset],
                                     frame->io_data[frame->io_offset + 1]);
             }
             break;
+
           case XBEE_APIFRAME_RX_EADDR:
             {
               nextframe = frame->io_flink;
@@ -748,11 +755,13 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
               frame = nextframe;
 
               /* xbee_process_rxframe takes care of freeing the IOB or passing
-               * it along to the next highest layer */
+               * it along to the next highest layer.
+               */
 
               continue;
             }
             break;
+
           case XBEE_APIFRAME_RX_SADDR:
             {
               nextframe = frame->io_flink;
@@ -761,11 +770,13 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
               frame = nextframe;
 
               /* xbee_process_rxframe takes care of freeing the IOB or passing
-               * it along to the next highest layer */
+               * it along to the next highest layer.
+               */
 
               continue;
             }
             break;
+
           default:
             {
               /* This really should never happen since xbee_validateframe should
@@ -1137,15 +1148,16 @@ static void xbee_lockupcheck_worker(FAR void *arg)
  * Name: xbee_backup_worker
  *
  * Description:
- *    In the case that we need to reset the XBee to bring it out of a locked up
- *    state, we need to be able to restore it's previous state seemlessly to resume
- *    operation. In order to achieve this, we backup the parameters using the
- *    "WR" AT command. We do this at strategic points as we don't know what type
- *    of memory technology is being used and writing too often may reduce the lifetime
- *    of the device. The two key points chosen are upon association for endpoint nodes,
- *    and upon creating a new network for coordinator nodes.  These conditions
- *    indicate that the node is actively communicating on the network and that
- *    the channel and pan ID are now set for the network.
+ *    In the case that we need to reset the XBee to bring it out of a locked
+ *    up state, we need to be able to restore it's previous state seamlessly
+ *    to resume operation. In order to achieve this, we backup the
+ *    parameters using the "WR" AT command. We do this at strategic points
+ *    as we don't know what type of memory technology is being used and
+ *    writing too often may reduce the lifetime of the device. The two key
+ *    points chosen are upon association for endpoint nodes, and upon
+ *    creating a new network for coordinator nodes.  These conditions
+ *    indicate that the node is actively communicating on the network and
+ *    that the channel and pan ID are now set for the network.
  *
  ****************************************************************************/
 
@@ -1255,8 +1267,9 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
   priv->lower->enable(priv->lower, true);
 
-  /* Trigger a query to tell the XBee to operate in SPI mode. By default the XBee
-   * uses the UART interface. It switches automatically when a valid SPI frame is received.
+  /* Trigger a query to tell the XBee to operate in SPI mode. By default the
+   * XBee uses the UART interface. It switches automatically when a valid
+   * SPI frame is received.
    *
    * Use this opportunity to pull the extended address
    */
@@ -1395,7 +1408,8 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
                            * processing.
                            */
 
-                          iob->io_flink = iob_tryalloc(false, IOBUSER_WIRELESS_RAD802154);
+                          iob->io_flink =
+                            iob_tryalloc(false, IOBUSER_WIRELESS_RAD802154);
                           iob = iob->io_flink;
 
                           if (iob != NULL)
@@ -1445,6 +1459,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
                 {
                   previob = previob->io_flink;
                 }
+
               previob->io_flink = NULL;
             }
 
@@ -1481,7 +1496,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
 
   /* Relinquish control of the SPI Bus */
 
-  SPI_LOCK(priv->spi,0);
+  SPI_LOCK(priv->spi, 0);
 }
 
 /****************************************************************************

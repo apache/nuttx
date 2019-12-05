@@ -98,7 +98,7 @@ uint8_t spirit_fifo_get_txcount(FAR struct spirit_library_s *spirit)
 
   /* Build and return value */
 
-  return (regval & 0x7F);
+  return (regval & 0x7f);
 }
 
 /******************************************************************************
@@ -310,7 +310,7 @@ uint8_t spirit_fifo_get_txalmostfull(FAR struct spirit_library_s *spirit)
 
   /* Build and returns value */
 
-  return (regval & 0x7F);
+  return (regval & 0x7f);
 }
 
 /******************************************************************************

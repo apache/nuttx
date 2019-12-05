@@ -102,7 +102,7 @@
  * necessary to process pending interrupts whenever interrupts are re-enabled.
  */
 
- /****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -401,7 +401,7 @@ static const struct spirit_pktstack_init_s g_pktstack_init =
   SPIRIT_CONTROL_LENGTH,              /* ctrllen        selected in board.h */
   SPIRIT_EN_FEC,                      /* fec            selected in board.h */
   SPIRIT_EN_WHITENING                 /* datawhite      selected in board.h */
- };
+};
 
 /* LLP Configuration */
 
@@ -713,13 +713,13 @@ static void spirit_free_txhead(FAR struct spirit_driver_s *priv)
       priv->txtail = NULL;
     }
 
-   /* Free the IOB contained in the metadata container */
+  /* Free the IOB contained in the metadata container */
 
-   iob_free(pktmeta->pm_iob, IOBUSER_WIRELESS_PACKETRADIO);
+  iob_free(pktmeta->pm_iob, IOBUSER_WIRELESS_PACKETRADIO);
 
-   /* Then free the meta data container itself */
+  /* Then free the meta data container itself */
 
-   pktradio_metadata_free(pktmeta);
+  pktradio_metadata_free(pktmeta);
 }
 
 /****************************************************************************
@@ -1157,6 +1157,7 @@ static void spirit_interrupt_work(FAR void *arg)
   wlinfo("Pending: %08lx\n", *(FAR unsigned long *)&irqstatus);
 
   /* Process the Spirit1 interrupt */
+
   /* First check for errors */
 
   if (irqstatus.IRQ_RX_FIFO_ERROR != 0)
@@ -1439,18 +1440,18 @@ static void spirit_interrupt_work(FAR void *arg)
                * must be done on the LP worker thread with the network locked.
                */
 
-               pktmeta = pktradio_metadata_allocate();
-               if (pktmeta == NULL)
-                 {
-                   wlerr("ERROR: Failed to allocate metadata... dropping\n");
-                   NETDEV_RXDROPPED(&priv->radio.r_dev);
-                   iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
-                 }
-               else
-                 {
-                   /* Get the packet meta data.  This consists only of the
-                    * source and destination addresses.
-                    */
+              pktmeta = pktradio_metadata_allocate();
+              if (pktmeta == NULL)
+                {
+                  wlerr("ERROR: Failed to allocate metadata... dropping\n");
+                  NETDEV_RXDROPPED(&priv->radio.r_dev);
+                  iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
+                }
+              else
+                {
+                  /* Get the packet meta data.  This consists only of the
+                   * source and destination addresses.
+                   */
 
                   pktmeta->pm_iob             = iob;
 
@@ -1964,7 +1965,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
       /* We are up! */
 
       priv->ifup = true;
-  }
+    }
 
   return OK;
 
@@ -2352,24 +2353,24 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
        * IEEE 802.15.4 works.
        */
 
-       pktmeta = pktradio_metadata_allocate();
-       if (pktmeta == NULL)
-         {
-           wlerr("ERROR: Failed to allocate metadata... dropping\n");
-           NETDEV_RXDROPPED(&priv->radio.r_dev);
-           iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
-           continue;
-         }
+      pktmeta = pktradio_metadata_allocate();
+      if (pktmeta == NULL)
+        {
+          wlerr("ERROR: Failed to allocate metadata... dropping\n");
+          NETDEV_RXDROPPED(&priv->radio.r_dev);
+          iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
+          continue;
+        }
 
-       /* Save the IOB and addressing information in the newly allocated
-        * container.
-        */
+      /* Save the IOB and addressing information in the newly allocated
+       * container.
+       */
 
-       memcpy(&pktmeta->pm_src, &metain->pm_src,
-              sizeof(struct pktradio_addr_s));
-       memcpy(&pktmeta->pm_dest, &metain->pm_dest,
-              sizeof(struct pktradio_addr_s));
-       pktmeta->pm_iob  = iob;
+      memcpy(&pktmeta->pm_src, &metain->pm_src,
+             sizeof(struct pktradio_addr_s));
+      memcpy(&pktmeta->pm_dest, &metain->pm_dest,
+             sizeof(struct pktradio_addr_s));
+      pktmeta->pm_iob  = iob;
 
       /* Add the IOB container to tail of the queue of outgoing IOBs. */
 
@@ -2522,7 +2523,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
       return ret;
     }
 
-  ret =spirit_radio_set_palevel_maxindex(spirit, 0);
+  ret = spirit_radio_set_palevel_maxindex(spirit, 0);
   if (ret < 0)
     {
       wlerr("ERROR: spirit_radio_set_palevel_maxindex failed: %d\n", ret);
@@ -2595,7 +2596,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
     }
 
   ret = spirit_irq_enable(spirit, TX_DATA_SENT, S_ENABLE);
-   if (ret < 0)
+  if (ret < 0)
     {
       wlerr("ERROR: Enable TX_DATA_SENT failed: %d\n", ret);
       return ret;
@@ -2789,7 +2790,6 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
-
 
 int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
                              FAR const struct spirit_lower_s *lower)

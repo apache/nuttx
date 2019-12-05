@@ -203,6 +203,7 @@ static int uartwriteconf(FAR const struct btuart_lowerhalf_s *lower,
           ret = -ECOMM;
           goto exit_uartwriteconf;
         }
+
       gotlen += ret;
     }
 
@@ -288,10 +289,12 @@ static int load_bcm4343x_firmware(FAR const struct btuart_lowerhalf_s *lower)
     {
       0x04, 0x0e, 0x04, 0x01, g_hcd_write_command, g_hcd_command_byte2, 0x00
     };
+
   const uint8_t launch_resp[] =
     {
       0x04, 0x0e, 0x04, 0x01, g_hcd_launch_command, g_hcd_command_byte2, 0x00
     };
+
   const uint8_t download_resp[] =
     {
       0x04, 0x0e, 0x04, 0x01, g_hcd_patchram_command, g_hcd_command_byte2, 0x00

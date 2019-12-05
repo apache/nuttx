@@ -123,7 +123,7 @@ int spirit_pktmbus_get_setup(FAR struct spirit_library_s *spirit,
 
       mbusinit->preamblen = regval[0];
       mbusinit->postamblen = regval[1];
-      mbusinit->submode = (enum spirit_mbus_submode_e) (regval[2] & 0x0E);
+      mbusinit->submode = (enum spirit_mbus_submode_e) (regval[2] & 0x0e);
     }
 
   return ret;
@@ -158,7 +158,7 @@ int spirit_pktmbus_set_format(FAR struct spirit_library_s *spirit)
 
   /* Sets format bits. Also set to 0 the direct RX mode bits */
 
-  regval &= 0x0F;
+  regval &= 0x0f;
   regval |= ((uint8_t) PCKTCTRL3_PCKT_FRMT_MBUS);
 
   /* Writes value on the PCKTCTRL3 register */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * drivers/wireless/spirit/lib//spirit_spi.c
+ * drivers/wireless/spirit/lib/spirit_spi.c
  * NuttX SPIRIT SPI driver interface.
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -87,7 +87,7 @@
 #if defined(CONFIG_WL_SPIRIT_REGDEBUG) || defined(CONFIG_WL_SPIRIT_FIFODUMP)
 static void spirit_dump_buffer(FAR const uint8_t *buffer, unsigned int buflen)
 {
-  char outbuf[16*3 + 3]; /* 16 hex bytes + 2 space separator + NUL termination */
+  char outbuf[16 * 3 + 3]; /* 16 hex bytes + 2 space separator + NUL termination */
   FAR char *ptr;
   unsigned int i;
   unsigned int j;
