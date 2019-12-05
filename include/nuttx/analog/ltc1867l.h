@@ -101,7 +101,7 @@ begin_packed_struct struct ltc1867l_channel_config_s
 {
   uint8_t channel;                                                     /* This will be the channel number returned in struct adc_msg_s for a conversion */
   enum ltc1867l_analog_multiplexer_config_e analog_multiplexer_config; /* Analog multiplexer configuration */
-  enum ltc1867l_analog_input_mode_e analog_inputMode;                  /* Analog input mode */
+  enum ltc1867l_analog_input_mode_e analog_inputmode;                  /* Analog input mode */
 } end_packed_struct;
 
 /****************************************************************************

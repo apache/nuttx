@@ -100,6 +100,7 @@ static const struct file_operations dac_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /************************************************************************************
  * Name: dac_open
  *
@@ -264,7 +265,8 @@ static int dac_xmit(FAR struct dac_dev_s *dev)
  * Name: dac_write
  ************************************************************************************/
 
-static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen)
 {
   FAR struct inode      *inode = filep->f_inode;
   FAR struct dac_dev_s  *dev   = inode->i_private;
@@ -318,8 +320,8 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   while ((buflen - nsent) >= msglen)
     {
-      /* Check if adding this new message would over-run the drivers ability to enqueue
-       * xmit data.
+      /* Check if adding this new message would over-run the drivers ability
+       * to enqueue xmit data.
        */
 
       nexttail = fifo->af_tail + 1;
@@ -386,27 +388,30 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
       else if (msglen == 4)
         {
           fifo->af_buffer[fifo->af_tail].am_channel = buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data    = *(uint32_t *)&buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data   &= 0xffffff00;
+          fifo->af_buffer[fifo->af_tail].am_data =
+            *(FAR uint32_t *)&buffer[nsent];
+          fifo->af_buffer[fifo->af_tail].am_data &= 0xffffff00;
         }
       else if (msglen == 3)
         {
           fifo->af_buffer[fifo->af_tail].am_channel = buffer[nsent];
-          fifo->af_buffer[fifo->af_tail].am_data    = (*(uint16_t *)&buffer[nsent+1]);
-          fifo->af_buffer[fifo->af_tail].am_data  <<= 16;
+          fifo->af_buffer[fifo->af_tail].am_data =
+            (*(FAR uint16_t *)&buffer[nsent + 1]);
+          fifo->af_buffer[fifo->af_tail].am_data <<= 16;
         }
       else if (msglen == 2)
         {
           fifo->af_buffer[fifo->af_tail].am_channel = 0;
-          fifo->af_buffer[fifo->af_tail].am_data    = (*(uint16_t *)&buffer[nsent]);
-          fifo->af_buffer[fifo->af_tail].am_data  <<= 16;
+          fifo->af_buffer[fifo->af_tail].am_data =
+            (*(FAR uint16_t *)&buffer[nsent]);
+          fifo->af_buffer[fifo->af_tail].am_data <<= 16;
         }
       else if (msglen == 1)
-       {
+        {
           fifo->af_buffer[fifo->af_tail].am_channel = 0;
           fifo->af_buffer[fifo->af_tail].am_data    = buffer[nsent];
           fifo->af_buffer[fifo->af_tail].am_data  <<= 24;
-       }
+        }
 
       /* Increment the tail of the circular buffer */
 

@@ -71,8 +71,8 @@
 
 #define LMP92001_REG_TEST   0x01U
 
-#define LMP92001_REG_ID     0x0EU
-#define LMP92001_REG_VER    0x0FU
+#define LMP92001_REG_ID     0x0eU
+#define LMP92001_REG_VER    0x0fU
 
 #define LMP92001_REG_SGEN   0x10U
 #define LMP92001_REG_SGPI   0x11U
@@ -85,9 +85,9 @@
 #define LMP92001_REG_CINH   0x17U
 #define LMP92001_REG_CINL   0x18U
 #define LMP92001_REG_CAD1   0x19U
-#define LMP92001_REG_CAD2   0x1AU
-#define LMP92001_REG_CAD3   0x1BU
-#define LMP92001_REG_CTRIG  0x1CU
+#define LMP92001_REG_CAD2   0x1aU
+#define LMP92001_REG_CAD3   0x1bU
+#define LMP92001_REG_CTRIG  0x1cU
 
 #define LMP92001_REG_ADC1   0x20U
 #define LMP92001_REG_ADC2   0x21U
@@ -99,12 +99,12 @@
 #define LMP92001_REG_ADC8   0x27U
 #define LMP92001_REG_ADC9   0x28U
 #define LMP92001_REG_ADC10  0x29U
-#define LMP92001_REG_ADC11  0x2AU
-#define LMP92001_REG_ADC12  0x2BU
-#define LMP92001_REG_ADC13  0x2CU
-#define LMP92001_REG_ADC14  0x2DU
-#define LMP92001_REG_ADC15  0x2EU
-#define LMP92001_REG_ADC16  0x2FU
+#define LMP92001_REG_ADC11  0x2aU
+#define LMP92001_REG_ADC12  0x2bU
+#define LMP92001_REG_ADC13  0x2cU
+#define LMP92001_REG_ADC14  0x2dU
+#define LMP92001_REG_ADC15  0x2eU
+#define LMP92001_REG_ADC16  0x2fU
 #define LMP92001_REG_ADC17  0x30U
 
 #define LMP92001_REG_LIH1   0x40U
@@ -117,8 +117,8 @@
 #define LMP92001_REG_LIL2   0x47U
 #define LMP92001_REG_LIL3   0x48U
 #define LMP92001_REG_LIL9   0x49U
-#define LMP92001_REG_LIL10  0x4AU
-#define LMP92001_REG_LIL11  0x4BU
+#define LMP92001_REG_LIL10  0x4aU
+#define LMP92001_REG_LIL11  0x4bU
 
 #define LMP92001_REG_CREF   0x66U
 
@@ -132,17 +132,17 @@
 #define LMP92001_REG_DAC8   0x87U
 #define LMP92001_REG_DAC9   0x88U
 #define LMP92001_REG_DAC10  0x89U
-#define LMP92001_REG_DAC11  0x8AU
-#define LMP92001_REG_DAC12  0x8BU
+#define LMP92001_REG_DAC11  0x8aU
+#define LMP92001_REG_DAC12  0x8bU
 
 #define LMP92001_REG_DALL   0x90U
 
-#define LMP92001_REG_BLK0   0xF0U
-#define LMP92001_REG_BLK1   0xF1U
-#define LMP92001_REG_BLK2   0xF2U
-#define LMP92001_REG_BLK3   0xF3U
-#define LMP92001_REG_BLK4   0xF4U
-#define LMP92001_REG_BLK5   0xF5U
+#define LMP92001_REG_BLK0   0xf0U
+#define LMP92001_REG_BLK1   0xf1U
+#define LMP92001_REG_BLK2   0xf2U
+#define LMP92001_REG_BLK3   0xf3U
+#define LMP92001_REG_BLK4   0xf4U
+#define LMP92001_REG_BLK5   0xf5U
 
 #define LMP92001_SGEN_BUSY  (1 << 7U)
 #define LMP92001_SGEN_RDYN  (1 << 6U)
@@ -419,7 +419,7 @@ static int lmp92001_i2c_read(FAR struct lmp92001_dev_s *priv,
   /* Then perform the transfer. */
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
-    if (ret < 0)
+  if (ret < 0)
     {
       aerr("LMP92001 I2C transfer failed: %d", ret);
       return ret;
@@ -492,7 +492,7 @@ static int lmp92001_dac_updateall(FAR struct lmp92001_dev_s *priv,
 
   buffer[0] = LMP92001_REG_DALL;
   buffer[1] = (uint8_t)(value >> 8U);
-  buffer[2] = (uint8_t)(value & 0xFFU);
+  buffer[2] = (uint8_t)(value & 0xffu);
 
   ret = lmp92001_i2c_write(priv, buffer, BUFFER_SIZE);
   if (ret < 0)
@@ -607,15 +607,15 @@ static int lmp92001_dac_send(FAR struct dac_dev_s *dev,
    */
 
   buffer[0] = (msg->am_channel - 1) + LMP92001_REG_DAC1;
-  buffer[1] = (uint8_t)(msg->am_data >> 8U);
-  buffer[2] = (uint8_t)(msg->am_data & 0xFFU);
+  buffer[1] = (uint8_t)(msg->am_data >> 8u);
+  buffer[2] = (uint8_t)(msg->am_data & 0xffu);
 
   ret = lmp92001_i2c_write(priv, buffer, BUFFER_SIZE);
   if (ret < 0)
-  {
-    aerr("LMP92001 DAC send failed: %d", ret);
-    return ret;
-  }
+    {
+      aerr("LMP92001 DAC send failed: %d", ret);
+      return ret;
+    }
 
   dac_txdone(&g_dacdev);
 
@@ -795,9 +795,9 @@ static int lmp92001_adc_enablechannel(FAR struct lmp92001_dev_s *priv,
           return ret;
         }
 
-      cad1 |= channels & 0x000FFU;
-      cad2 |= (channels >> 8U) & 0x000FFU;
-      cad3 |= (channels >> 16U) & 0x1U;
+      cad1 |= channels & 0x000ffu;
+      cad2 |= (channels >> 8u) & 0x000ffu;
+      cad3 |= (channels >> 16u) & 0x1u;
 
       if (cad1 > 0)
         {
@@ -1363,7 +1363,6 @@ static int lmp92001_gpio_readpin(FAR struct ioexpander_dev_s *dev,
   *value = (bool)(regval >> pin) & 1U;
 
   return ret;
-
 }
 
 /****************************************************************************

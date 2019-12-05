@@ -234,7 +234,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
   int i;
   uint16_t command;
   uint16_t data;
-  int32_t dataToPost;
+  int32_t postdata;
   int ret = OK;
 
   if (cmd == ANIOC_TRIGGER)
@@ -250,7 +250,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
           if (i < priv->channel_config_count)
             {
               command = priv->channel_config[i].analog_multiplexer_config |
-                        priv->channel_config[i].analog_inputMode;
+                        priv->channel_config[i].analog_inputmode;
               command = command << 8;
             }
           else
@@ -265,18 +265,21 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           if (i > 0)
             {
-              if (priv->channel_config[i-1].analog_inputMode == LTC1867L_UNIPOLAR ||
-                  (priv->channel_config[i-1].analog_inputMode == LTC1867L_BIPOLAR &&
+              if (priv->channel_config[i - 1].analog_inputmode ==
+                  LTC1867L_UNIPOLAR ||
+                  (priv->channel_config[i - 1].analog_inputmode ==
+                   LTC1867L_BIPOLAR &&
                    data >= 0 && data <= 0x7fff))
                 {
-                  dataToPost = data;
+                  postdata = data;
                 }
               else
                 {
-                  dataToPost = -(0xffff - data) - 1;
+                  postdata = -(0xffff - data) - 1;
                 }
 
-              priv->cb->au_receive(dev, priv->channel_config[i-1].channel, dataToPost);
+              priv->cb->au_receive(dev, priv->channel_config[i - 1].channel,
+                                   postdata);
             }
         }
 
@@ -318,7 +321,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                       unsigned int devno,
-                      FAR struct ltc1867l_channel_config_s* channel_config,
+                      FAR struct ltc1867l_channel_config_s *channel_config,
                       int channel_config_count)
 {
   FAR struct ltc1867l_dev_s *adcpriv;

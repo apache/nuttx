@@ -55,6 +55,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The PGA112/PGA113 have a three-wire SPI digital interface; the
  * PGA116/PGA117 have a four-wire SPI digital interface. The PGA116/117 also
  * have daisy-chain capability (The PGA112/PGA113 can be used as the last device

@@ -143,7 +143,7 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
 
 static void comp_semtake(FAR sem_t *sem)
 {
- int ret;
+  int ret;
 
   do
     {
@@ -224,7 +224,7 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv            = NULL;
     }
 
- errout:
+errout:
   nxsem_post(&dev->ad_sem);
   return ret;
 }
@@ -389,7 +389,7 @@ static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
 /****************************************************************************
  * Name: comp_ioctl
-****************************************************************************/
+ ****************************************************************************/
 
 static int comp_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
