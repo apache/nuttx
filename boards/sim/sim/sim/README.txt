@@ -634,16 +634,8 @@ nsh
      can be made visible in the file system.  Because of that, the
      build in applications do not work as other examples.
 
-     For example trying to execute the hello builtin application will
-     fail:
+     The binfs filesystem will be mounted at /bin when the system starts up.
 
-       nsh> hello
-       nsh: hello: command not found
-       nsh>
-
-     Unless you first mount the BINFS file system:
-
-       nsh> mount -t binfs /bin
        nsh> ls /bin
        /bin:
          hello
@@ -1216,7 +1208,9 @@ ustream
 
   To use the test:
 
-    nsh> mount -t binfs /bin
     nsh> server &
     nsh> client
+
+  Note that the binfs file system is mounted at /bin when the system
+  starts up.
 

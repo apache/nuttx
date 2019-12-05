@@ -103,6 +103,16 @@ int sim_bringup(void)
 #endif
   int ret;
 
+#ifdef CONFIG_FS_BINFS
+  /* Mount the binfs file system */
+
+  ret = mount(NULL, "/bin", "binfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount binfs at /bin: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
