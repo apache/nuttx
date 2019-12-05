@@ -529,7 +529,6 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
 static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
 {
-
   /* Check if a bank has to be set and if the bank setting has changed.
    * For registers that are available on all banks, the bank command is set
    * to 0.
@@ -1556,7 +1555,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
            */
 
           if (priv->dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -2737,10 +2736,10 @@ static int enc_reset(FAR struct enc_driver_s *priv)
       return -ENODEV;
     }
 
-  /**
-   * Wait at least 256 μs for the PHY registers and PHY status bits to become
+  /* Wait at least 256 μs for the PHY registers and PHY status bits to become
    * available.
    */
+
   up_udelay(256);
 
   /* Initialize RX/TX buffers */

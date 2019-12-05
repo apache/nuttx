@@ -962,7 +962,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
-  enc_bmdump(ENC_WBM, buffer, buflen+1);
+  enc_bmdump(ENC_WBM, buffer, buflen + 1);
 }
 
 /****************************************************************************
@@ -1389,7 +1389,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
-   pkt_input(&priv->dev);
+  pkt_input(&priv->dev);
 #endif
 
   /* We only accept IP packets of the configured type and ARP packets */
@@ -1485,11 +1485,11 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
        * sent out on the network, the field  d_len will set to a value > 0.
        */
 
-       if (priv->dev.d_len > 0)
-         {
-           enc_transmit(priv);
-         }
-     }
+      if (priv->dev.d_len > 0)
+        {
+          enc_transmit(priv);
+        }
+    }
   else
 #endif
     {

@@ -420,6 +420,7 @@ static int lan91c111_transmit(FAR struct net_driver_s *dev)
    *
    * If odd size then last byte is included in ctl word.
    */
+
   pages = ((dev->d_len & ~1) + 6) >> 8;
 
   while (1)
@@ -536,6 +537,7 @@ static int lan91c111_txpoll(FAR struct net_driver_s *dev)
           arp_out(dev);
         }
 #endif /* CONFIG_NET_IPv4 */
+
 #ifdef CONFIG_NET_IPv6
       if (IFF_IS_IPv6(dev->d_flags))
         {
@@ -599,6 +601,7 @@ static void lan91c111_reply(FAR struct net_driver_s *dev)
           arp_out(dev);
         }
 #endif
+
 #ifdef CONFIG_NET_IPv6
       if (IFF_IS_IPv6(dev->d_flags))
         {
@@ -1321,7 +1324,7 @@ static uint32_t lan91c111_crc32(FAR const uint8_t *src, size_t len)
         }
     }
 
-    return crc;
+  return crc;
 }
 
 static int lan91c111_addmac(FAR struct net_driver_s *dev,

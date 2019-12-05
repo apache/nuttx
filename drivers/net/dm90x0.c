@@ -77,6 +77,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
  */
@@ -317,7 +318,7 @@ union rx_desc_u
 struct dm9x_driver_s
 {
   bool dm_bifup;               /* true:ifup false:ifdown */
-  bool dm_b100M;               /* true:speed == 100M; false:speed == 10M */
+  bool dm_b100m;               /* true:speed == 100M; false:speed == 10M */
   uint8_t dm_ntxpending;       /* Count of packets pending transmission */
   uint8_t ncrxpackets;         /* Number of continuous rx packets  */
   WDOG_ID dm_txpoll;           /* TX poll timer */
@@ -728,7 +729,7 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
    * mode, that can be 2 packets, otherwise it is a single packet.
    */
 
-  if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
+  if (priv->dm_ntxpending < 1 || (priv->dm_b100m && priv->dm_ntxpending < 2))
     {
       /* Increment count of packets transmitted */
 
@@ -838,7 +839,7 @@ static int dm9x_txpoll(FAR struct net_driver_s *dev)
            * packet.
            */
 
-          if (priv->dm_ntxpending > 1 || !priv->dm_b100M)
+          if (priv->dm_ntxpending > 1 || !priv->dm_b100m)
             {
               /* Returning a non-zero value will terminate the poll operation */
 
@@ -1004,7 +1005,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
                */
 
               if (priv->dm_dev.d_len > 0)
-               {
+                {
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -1184,19 +1185,20 @@ static void dm9x_interrupt_work(FAR void *arg)
 
               if (dm9x_phyread(priv, 0) & 0x2000)
                 {
-                  priv->dm_b100M = true;
+                  priv->dm_b100m = true;
                 }
               else
                 {
-                  priv->dm_b100M = false;
+                  priv->dm_b100m = false;
                 }
               break;
             }
+
           up_mdelay(1);
         }
 
       nerr("ERROR: delay: %dmS speed: %s\n",
-           i, priv->dm_b100M ? "100M" : "10M");
+           i, priv->dm_b100m ? "100M" : "10M");
     }
 
   /* Check if we received an incoming packet */
@@ -1410,7 +1412,7 @@ static void dm9x_poll_work(FAR void *arg)
    * mode, that can be 2 packets, otherwise it is a single packet.
    */
 
-  if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
+  if (priv->dm_ntxpending < 1 || (priv->dm_b100m && priv->dm_ntxpending < 2))
     {
       /* If so, update TCP timing states and poll the network for new XMIT data */
 
@@ -1528,7 +1530,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   /* Check link state and media speed (waiting up to 3s for link OK) */
 
-  priv->dm_b100M = false;
+  priv->dm_b100m = false;
   for (i = 0; i < 3000; i++)
     {
       netstatus = getreg(DM9X_NETS);
@@ -1540,15 +1542,17 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
           netstatus = getreg(DM9X_NETS);
           if ((netstatus & DM9X_NETS_SPEED) == 0)
             {
-              priv->dm_b100M = true;
+              priv->dm_b100m = true;
             }
+
           break;
         }
+
       i++;
       up_mdelay(1);
     }
 
-  ninfo("delay: %dmS speed: %s\n", i, priv->dm_b100M ? "100M" : "10M");
+  ninfo("delay: %dmS speed: %s\n", i, priv->dm_b100m ? "100M" : "10M");
 
   /* Set and activate a timer process */
 
@@ -1636,13 +1640,12 @@ static void dm9x_txavail_work(FAR void *arg)
   net_lock();
   if (priv->dm_bifup)
     {
-
       /* Check if there is room in the DM90x0 to hold another packet.  In 100M
        * mode, that can be 2 packets, otherwise it is a single packet.
        */
 
       if (priv->dm_ntxpending < 1 ||
-          (priv->dm_b100M && priv->dm_ntxpending < 2))
+          (priv->dm_b100m && priv->dm_ntxpending < 2))
         {
           /* If so, then poll the network for new XMIT data */
 
@@ -1881,17 +1884,19 @@ static void dm9x_reset(FAR struct dm9x_driver_s *priv)
 
   /* Wait up to 1 second for the link to be OK */
 
-  priv->dm_b100M = false;
+  priv->dm_b100m = false;
   for (i = 0; i < 1000; i++)
     {
       if (dm9x_phyread(priv, 0x1) & 0x4)
         {
-          if (dm9x_phyread(priv, 0) &0x2000)
+          if (dm9x_phyread(priv, 0) & 0x2000)
             {
-              priv->dm_b100M = true;
+              priv->dm_b100m = true;
             }
+
           break;
         }
+
       up_mdelay(1);
     }
 

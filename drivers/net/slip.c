@@ -631,7 +631,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 
         default:
           {
-            if (priv->rxlen < CONFIG_NET_SLIP_PKTSIZE+2)
+            if (priv->rxlen < CONFIG_NET_SLIP_PKTSIZE + 2)
               {
                 priv->rxbuf[priv->rxlen++] = ch;
               }

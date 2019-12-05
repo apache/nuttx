@@ -518,6 +518,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
             break;
 
           case STATE_DONT:
+
             /* Reply with a WONT */
 
             telnet_sendopt(priv, TELNET_WONT, ch);
@@ -554,6 +555,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
           /* Handle NAWS sub-option negotiation */
 
           case STATE_SB_NAWS:
+
             /* Update cols / rows based on received byte count */
 
             switch (priv->td_sb_count)

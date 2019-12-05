@@ -68,6 +68,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
  */
@@ -316,6 +317,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   priv->tx_pending++;
 
   /* Enable Tx polling */
+
   /* FIXME: enable interrupts */
 
   putreg32(1, &iobase->txpd);
@@ -750,7 +752,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
            */
 
           if (priv->ft_dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -789,6 +791,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
             }
         }
 #endif
+
       priv->rx_pointer = (priv->rx_pointer + 1) &
                          (CONFIG_FTMAC100_RX_DESC - 1);
 
@@ -1594,6 +1597,7 @@ int ftmac100_initialize(int intf)
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling ftmac100_ifdown().
    */
+
   ftmac100_reset(priv);
 
   /* Read the MAC address from the hardware into priv->ft_dev.d_mac.ether.ether_addr_octet */

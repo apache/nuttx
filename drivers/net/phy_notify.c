@@ -104,7 +104,7 @@
 struct phy_notify_s
 {
   bool assigned;
-  char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1];
+  char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN + 1];
   pid_t pid;
   struct sigevent event;
   struct sigwork_s work;

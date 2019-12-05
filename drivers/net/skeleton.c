@@ -1194,7 +1194,8 @@ int skel_initialize(int intf)
    * the device and/or calling skel_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->sk_dev.d_mac.ether.ether_addr_octet
+  /* Read the MAC address from the hardware into
+   * priv->sk_dev.d_mac.ether.ether_addr_octet
    * Applies only if the Ethernet MAC has its own internal address.
    */
 
