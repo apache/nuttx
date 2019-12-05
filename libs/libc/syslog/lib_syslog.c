@@ -77,7 +77,15 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
        * of structures in the NuttX syscalls does not work.
        */
 
-      (void)nx_vsyslog(priority, fmt, &ap);
+#ifdef va_copy
+      va_list copy;
+
+      va_copy(copy, ap);
+      nx_vsyslog(priority, fmt, &copy);
+      va_end(copy);
+#else
+      nx_vsyslog(priority, fmt, &ap);
+#endif
     }
 }
 
