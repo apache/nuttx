@@ -57,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
 
 #ifndef CONFIG_SST39VF_BASE_ADDRESS
@@ -85,6 +86,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This describes one chip in the SST39VF family */
 
 struct sst39vf_chip_s
@@ -125,11 +127,13 @@ struct sst39vf_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Low Level Helpers */
 
 static inline void sst39vf_flashwrite(FAR const struct sst39vf_wrinfo_s *wrinfo);
 static inline uint16_t sst39vf_flashread(uintptr_t address);
-static void sst39vf_writeseq(FAR const struct sst39vf_wrinfo_s *wrinfo, int nseq);
+static void sst39vf_writeseq(FAR const struct sst39vf_wrinfo_s *wrinfo,
+                             int nseq);
 static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv);
 static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
                                uintptr_t sectaddr);
@@ -159,8 +163,8 @@ static const struct sst39vf_chip_s g_sst39vf1601 =
   0x234b,                   /* chipid */
   /* 32,                       nblocks */
   512,                      /* nsectors */
-  /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */
+  /* 64 * 1024,                blocksize */
+  4 * 1024                  /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf1602 =
@@ -169,8 +173,8 @@ static const struct sst39vf_chip_s g_sst39vf1602 =
   0x234a,                   /* chipid */
   /* 32,                       nblocks */
   512,                      /* nsectors */
-  /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */
+  /* 64 * 1024,                blocksize */
+  4 * 1024                  /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf3201 =
@@ -179,8 +183,8 @@ static const struct sst39vf_chip_s g_sst39vf3201 =
   0x235b,                   /* chipid */
   /* 64,                       nblocks */
   1024,                     /* nsectors */
-  /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */
+  /* 64 * 1024,                blocksize */
+  4 * 1024                  /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf3202 =
@@ -189,8 +193,8 @@ static const struct sst39vf_chip_s g_sst39vf3202 =
   0x235a,                   /* chipid */
   /* 64,                       nblocks */
   1024,                     /* nsectors */
-  /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */
+  /* 64 * 1024,                blocksize */
+  4 * 1024                  /* sectorsize */
 };
 
 /* This structure holds the state of the MTD driver */

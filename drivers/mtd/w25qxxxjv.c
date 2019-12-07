@@ -268,9 +268,9 @@
 
 /* Cache flags **********************************************************************/
 
-#define W25QXXXJV_CACHE_VALID         (1 << 0)  /* 1=Cache has valid data */
-#define W25QXXXJV_CACHE_DIRTY         (1 << 1)  /* 1=Cache is dirty */
-#define W25QXXXJV_CACHE_ERASED        (1 << 2)  /* 1=Backing FLASH is erased */
+#define W25QXXXJV_CACHE_VALID       (1 << 0)  /* 1=Cache has valid data */
+#define W25QXXXJV_CACHE_DIRTY       (1 << 1)  /* 1=Cache is dirty */
+#define W25QXXXJV_CACHE_ERASED      (1 << 2)  /* 1=Backing FLASH is erased */
 
 #define IS_VALID(p)                 ((((p)->flags) & W25QXXXJV_CACHE_VALID) != 0)
 #define IS_DIRTY(p)                 ((((p)->flags) & W25QXXXJV_CACHE_DIRTY) != 0)

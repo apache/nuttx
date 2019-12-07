@@ -60,7 +60,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* Per the data sheet, the W25 parts can be driven with either SPI mode 0 (CPOL=0
  * and CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that other devices
  * can operate in mode 0 or 1.  So you may need to specify CONFIG_W25_SPIMODE to
@@ -98,6 +100,7 @@
 #define W25_JEDEC_ID               0x9f    /* JEDEC ID read                         */
 
 /* W25 Registers ********************************************************************/
+
 /* Read ID (RDID) register values */
 
 #define W25_MANUFACTURER           0xef   /* Winbond Serial Flash */
@@ -179,6 +182,7 @@
 #define W25_DUMMY                  0xa5
 
 /* Chip Geometries ******************************************************************/
+
 /* All members of the family support uniform 4K-byte sectors and 256 byte pages */
 
 #define W25_SECTOR_SHIFT           12        /* Sector size 1 << 12 = 4Kb */
@@ -919,7 +923,8 @@ static FAR uint8_t *w25_cacheread(struct w25_dev_s *priv, off_t sector)
 
       /* Read the erase block into the cache */
 
-      w25_byteread(priv, priv->sector, (esectno << W25_SECTOR_SHIFT), W25_SECTOR_SIZE);
+      w25_byteread(priv, priv->sector, (esectno << W25_SECTOR_SHIFT),
+                   W25_SECTOR_SIZE);
 
       /* Mark the sector as cached */
 
@@ -1083,14 +1088,16 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
   /* On this device, we can handle the block read just like the byte-oriented read */
 
 #ifdef CONFIG_W25_SECTOR512
-  nbytes = w25_read(dev, startblock << W25_SECTOR512_SHIFT, nblocks << W25_SECTOR512_SHIFT, buffer);
+  nbytes = w25_read(dev, startblock << W25_SECTOR512_SHIFT,
+                    nblocks << W25_SECTOR512_SHIFT, buffer);
   if (nbytes > 0)
     {
       nbytes >>= W25_SECTOR512_SHIFT;
     }
 
 #else
-  nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT, nblocks << W25_PAGE_SHIFT, buffer);
+  nbytes = w25_read(dev, startblock << W25_PAGE_SHIFT,
+                    nblocks << W25_PAGE_SHIFT, buffer);
   if (nbytes > 0)
     {
       nbytes >>= W25_PAGE_SHIFT;
@@ -1188,7 +1195,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
       /* Write the 1st partial-page */
 
       count = nbytes;
-      bytestowrite = W25_PAGE_SIZE - (offset & (W25_PAGE_SIZE-1));
+      bytestowrite = W25_PAGE_SIZE - (offset & (W25_PAGE_SIZE - 1));
       w25_bytewrite(priv, buffer, offset, bytestowrite);
 
       /* Update offset and count */
@@ -1238,7 +1245,8 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -1253,7 +1261,8 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_W25_SECTOR512
               geo->blocksize    = (1 << W25_SECTOR512_SHIFT);
               geo->erasesize    = (1 << W25_SECTOR512_SHIFT);
-              geo->neraseblocks = priv->nsectors << (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors <<
+                                  (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
 #else
               geo->blocksize    = W25_PAGE_SIZE;
               geo->erasesize    = W25_SECTOR_SIZE;
