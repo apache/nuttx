@@ -44,7 +44,6 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
@@ -54,6 +53,8 @@
 #include <arch/board/board.h>
 
 #include "nucleo-f4x1re.h"
+
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Public Functions

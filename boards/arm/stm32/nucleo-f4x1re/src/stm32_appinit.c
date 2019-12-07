@@ -41,9 +41,9 @@
 
 #include <stdint.h>
 
-#include <nuttx/board.h>
-
 #include "nucleo-f4x1re.h"
+
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions

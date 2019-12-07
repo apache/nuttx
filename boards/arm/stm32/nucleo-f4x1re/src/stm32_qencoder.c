@@ -43,12 +43,13 @@
 #include <debug.h>
 
 #include <nuttx/sensors/qencoder.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_qencoder.h"
 #include "nucleo-f4x1re.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Public Functions

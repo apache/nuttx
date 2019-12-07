@@ -43,7 +43,6 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
 #include "chip.h"
@@ -51,6 +50,8 @@
 #include "up_internal.h"
 #include "stm32.h"
 #include "nucleo-f4x1re.h"
+
+#include <arch/board/board.h>
 
 #ifndef CONFIG_ARCH_LEDS
 

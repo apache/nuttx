@@ -45,13 +45,14 @@
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
 
 #include "nucleo-f4x1re.h"
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
     defined(CONFIG_STM32_SPI3)

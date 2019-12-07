@@ -44,13 +44,14 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
 #include "nucleo-f4x1re.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_LEDS
 

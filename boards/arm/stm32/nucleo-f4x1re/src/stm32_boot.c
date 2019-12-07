@@ -43,13 +43,14 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "nucleo-f4x1re.h"
+
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Public Functions
