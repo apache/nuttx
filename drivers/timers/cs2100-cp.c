@@ -466,38 +466,38 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
    * a high-precision (b20) value.
    */
 
-  if (rudb24 < (1ull << (32+7)))
+  if (rudb24 < (1ull << (32 + 7)))
     {
       highmul = false;
 
       /* Brute force! */
 
-      if (rudb24 >= (1ull << (32+6)))
+      if (rudb24 >= (1ull << (32 + 6)))
         {
           rud  = (uint32_t)rudb24 >> 7;  /* RUD = RUDb20 / 8 */
           rmod = 3;                      /* Reff = 8 * RUD */
         }
-      else if (rudb24 >= (1ull << (32+5)))
+      else if (rudb24 >= (1ull << (32 + 5)))
         {
           rud  = (uint32_t)rudb24 >> 6;  /* RUD = RUDb20 / 4 */
           rmod = 3;                      /* Reff = 4 * RUD */
         }
-      else if (rudb24 >= (1ull << (32+4)))
+      else if (rudb24 >= (1ull << (32 + 4)))
         {
           rud  = (uint32_t)rudb24 >> 5;  /* RUD = RUDb20 / 2 */
           rmod = 1;                      /* Reff = 2 * RUD */
         }
-      else if (rudb24 >= (1ull << (32+3)))
+      else if (rudb24 >= (1ull << (32 + 3)))
         {
           rud  = (uint32_t)rudb24 >> 4;  /* RUD = RUDb20 */
           rmod = 0;                      /* Reff = RUD */
         }
-      else if (rudb24 >= (1ull << (32+2)))
+      else if (rudb24 >= (1ull << (32 + 2)))
         {
           rud  = (uint32_t)rudb24 >> 3;  /* RUD -> 2*RUDb20 */
           rmod = 4;                      /* Reff = RUD / 2 */
         }
-      else if (rudb24 >= (1ull << (32+1)))
+      else if (rudb24 >= (1ull << (32 + 1)))
         {
           rud  = (uint32_t)rudb24 >> 2;  /* RUD -> 4*RUDb20 */
           rmod = 5;                      /* Reff = RUD / 4 */
@@ -518,31 +518,31 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
    * a high-multiplication (b12) value.
    */
 
-  else if (rudb24 < (1ull << (32+12)))
+  else if (rudb24 < (1ull << (32 + 12)))
     {
       highmul = true;
 
-      if (rudb24 >= (1ull << (32+11)))
+      if (rudb24 >= (1ull << (32 + 11)))
         {
           rud  = (uint32_t)rudb24 >> 12;  /* RUD  = RUDb12 */
           rmod = 0;                       /* Reff = RUD */
         }
-      else if (rudb24 >= (1ull << (32+10)))
+      else if (rudb24 >= (1ull << (32 + 10)))
         {
           rud  = (uint32_t)rudb24 >> 11;  /* RUD  = 2*RUDb12 */
           rmod = 4;                       /* Reff = RUD / 2 */
         }
-      else if (rudb24 >= (1ull << (32+9)))
+      else if (rudb24 >= (1ull << (32 + 9)))
         {
           rud  = (uint32_t)rudb24 >> 10;  /* RUD  = 4*RUDb12 */
           rmod = 5;                       /* Reff = RUD / 4 */
         }
-      else if (rudb24 >= (1ull << (32+8)))
+      else if (rudb24 >= (1ull << (32 + 8)))
         {
           rud  = (uint32_t)rudb24 >> 9;  /* RUD  = 8*RUDb12 */
           rmod = 6;                       /* Reff = RUD / 8 */
         }
-      else /* if (rudb24 >= (1ull << (32+7))) */
+      else /* if (rudb24 >= (1ull << (32 + 7))) */
         {
           rud  = (uint32_t)rudb24 >> 8;  /* RUD  = 16*RUDb12 */
           rmod = 7;                       /* Reff = RUD / 16 */
@@ -739,19 +739,20 @@ int cs2100_disable(FAR const struct cs2100_config_s *config)
   return ret;
 }
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_dump
  *
  * Description:
  *   Dump CS2100-CP registers to the SysLog
  *
  * Input Parameters:
- *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *   config - CS2100-CP configuration (Needed only for I2C access: i2c and
+ *            i2caddr)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CS2100CP_DEBUG
 int cs2100_dump(FAR const struct cs2100_config_s *config)

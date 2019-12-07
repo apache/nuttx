@@ -189,11 +189,13 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
         {
           ferr("Read failed: %d\n");
         }
+
       bch->sector = sector;
 #if defined(CONFIG_BCH_ENCRYPTION)
       bch_cypher(bch, CYPHER_DECRYPT);
 #endif
     }
+
   return (int)ret;
 }
 

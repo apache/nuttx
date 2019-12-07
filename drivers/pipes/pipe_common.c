@@ -177,12 +177,12 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
       nxsem_init(&dev->d_rdsem, 0, 0);
       nxsem_init(&dev->d_wrsem, 0, 0);
 
-     /* The read/write wait semaphores are used for signaling and, hence,
-      * should not have priority inheritance enabled.
-      */
+      /* The read/write wait semaphores are used for signaling and, hence,
+       * should not have priority inheritance enabled.
+       */
 
-     nxsem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
-     nxsem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
 
       dev->d_bufsize = bufsize;
     }
@@ -240,7 +240,6 @@ int pipecommon_open(FAR struct file *filep)
           return -ENOMEM;
         }
     }
-
 
   /* If opened for writing, increment the count of writers on the pipe instance */
 
@@ -790,7 +789,7 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (dev == NULL)
     {
-       return -EBADF;
+      return -EBADF;
     }
 #endif
 

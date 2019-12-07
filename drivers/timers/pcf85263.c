@@ -55,7 +55,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* This RTC implementation supports only date/time RTC hardware */
 
 #ifndef CONFIG_RTC_DATETIME
@@ -80,6 +82,7 @@
 /************************************************************************************
  * Priviate Types
  ************************************************************************************/
+
 /* This structure describes the state of the PCF85263 chip.  Only a single RTC is
  * supported.
  */
@@ -100,6 +103,7 @@ volatile bool g_rtc_enabled = false;
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
 /* The state of the PCF85263 chip.  Only a single RTC is supported */
 
 static struct pcf85263_dev_s g_pcf85263;
@@ -328,6 +332,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
          (seconds & PCF85263_RTC_SECONDS_MASK));
 
   /* Format the return time */
+
   /* Return seconds (0-61) */
 
   tp->tm_sec = rtc_bcd2bin(buffer[0] & PCF85263_RTC_SECONDS_MASK);
@@ -410,23 +415,25 @@ int up_rtc_settime(FAR const struct timespec *tp)
       newtime++;
     }
 
- #ifdef CONFIG_LIBC_LOCALTIME
-   if (localtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: localtime_r failed\n")
-       return -EINVAL;
-     }
+#ifdef CONFIG_LIBC_LOCALTIME
+  if (localtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: localtime_r failed\n")
+      return -EINVAL;
+    }
+
 #else
-   if (gmtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: gmtime_r failed\n")
-       return -EINVAL;
-     }
+  if (gmtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: gmtime_r failed\n")
+      return -EINVAL;
+    }
 #endif
 
   rtc_dumptime(&tm, "New time");
 
   /* Construct the message */
+
   /* Write starting with the 100ths of seconds register */
 
   buffer[0] = PCF85263_RTC_100TH_SECONDS;

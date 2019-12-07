@@ -454,7 +454,8 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case PWMIOC_SETCHARACTERISTICS:
         {
-          FAR const struct pwm_info_s *info = (FAR const struct pwm_info_s *)((uintptr_t)arg);
+          FAR const struct pwm_info_s *info =
+            (FAR const struct pwm_info_s *)((uintptr_t)arg);
           DEBUGASSERT(info != NULL && lower->ops->start != NULL);
 
           pwm_dump("PWMIOC_SETCHARACTERISTICS", info, upper->started);

@@ -194,22 +194,22 @@ static int bch_close(FAR struct file *filep)
 
       if (bch->refs == 0 && bch->unlinked)
         {
-           /* Tear the driver down now. */
+          /* Tear the driver down now. */
 
-           ret = bchlib_teardown((FAR void *)bch);
+          ret = bchlib_teardown((FAR void *)bch);
 
-           /* bchlib_teardown() would only fail if there are outstanding
-            * references on the device.  Since we know that is not true, it
-            * should not fail at all.
-            */
+          /* bchlib_teardown() would only fail if there are outstanding
+           * references on the device.  Since we know that is not true, it
+           * should not fail at all.
+           */
 
-           DEBUGASSERT(ret >= 0);
-           if (ret >= 0)
-             {
-                /* Return without releasing the stale semaphore */
+          DEBUGASSERT(ret >= 0);
+          if (ret >= 0)
+            {
+              /* Return without releasing the stale semaphore */
 
-                return OK;
-             }
+              return OK;
+            }
         }
     }
 
@@ -250,6 +250,7 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
       break;
 
     default:
+
       /* Return EINVAL if the whence argument is invalid */
 
       bchlib_semgive(bch);

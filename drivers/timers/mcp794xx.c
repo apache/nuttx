@@ -64,6 +64,7 @@
 #define MCP794XX_OSCRUN_READ_RETRY  5  /* How many time to read OSCRUN status */
 
 /* Configuration ************************************************************/
+
 /* This RTC implementation supports only date/time RTC hardware */
 
 #ifndef CONFIG_RTC_DATETIME
@@ -344,6 +345,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
          (seconds & MCP794XX_RTCSEC_BCDMASK));
 
   /* Format the return time */
+
   /* Return seconds (0-59) */
 
   tp->tm_sec = rtc_bcd2bin(buffer[0] & MCP794XX_RTCSEC_BCDMASK);
@@ -431,18 +433,19 @@ int up_rtc_settime(FAR const struct timespec *tp)
       newtime++;
     }
 
- #ifdef CONFIG_LIBC_LOCALTIME
-   if (localtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: localtime_r failed\n");
-       return -EINVAL;
-     }
+#ifdef CONFIG_LIBC_LOCALTIME
+  if (localtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: localtime_r failed\n");
+      return -EINVAL;
+    }
+
 #else
-   if (gmtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: gmtime_r failed\n");
-       return -EINVAL;
-     }
+  if (gmtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: gmtime_r failed\n");
+      return -EINVAL;
+    }
 #endif
 
   rtc_dumptime(&newtm, "New time");
@@ -501,6 +504,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   while ((wkday & MCP794XX_RTCWKDAY_OSCRUN) != 0 && retries > 0);
 
   /* Construct the message */
+
   /* Write starting with the seconds register */
 
   buffer[0] = MCP794XX_REG_RTCSEC;

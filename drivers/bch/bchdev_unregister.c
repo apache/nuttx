@@ -65,8 +65,7 @@
  *
  * Description:
  *   Unregister character driver access to a block device that was created
- /
-*   by a previous call to bchdev_register().
+ *   by a previous call to bchdev_register().
  *
  ****************************************************************************/
 

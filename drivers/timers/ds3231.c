@@ -55,7 +55,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* This RTC implementation supports only date/time RTC hardware */
 
 #ifndef CONFIG_RTC_DATETIME
@@ -80,6 +82,7 @@
 /************************************************************************************
  * Priviate Types
  ************************************************************************************/
+
 /* This structure describes the state of the DS3231 chip.  Only a single RTC is
  * supported.
  */
@@ -100,6 +103,7 @@ volatile bool g_rtc_enabled = false;
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
 /* The state of the DS3231 chip.  Only a single RTC is supported */
 
 static struct ds3231_dev_s g_ds3231;
@@ -329,6 +333,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
          (seconds & DSXXXX_TIME_SEC_BCDMASK));
 
   /* Format the return time */
+
   /* Return seconds (0-61) */
 
   tp->tm_sec = rtc_bcd2bin(buffer[0] & DSXXXX_TIME_SEC_BCDMASK);
@@ -427,23 +432,25 @@ int up_rtc_settime(FAR const struct timespec *tp)
       newtime++;
     }
 
- #ifdef CONFIG_LIBC_LOCALTIME
-   if (localtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: localtime_r failed\n");
-       return -EINVAL;
-     }
+#ifdef CONFIG_LIBC_LOCALTIME
+  if (localtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: localtime_r failed\n");
+      return -EINVAL;
+    }
+
 #else
-   if (gmtime_r(&newtime, &newtm) == NULL)
-     {
-       rtcerr("ERROR: gmtime_r failed\n");
-       return -EINVAL;
-     }
+  if (gmtime_r(&newtime, &newtm) == NULL)
+    {
+      rtcerr("ERROR: gmtime_r failed\n");
+      return -EINVAL;
+    }
 #endif
 
   rtc_dumptime(&newtm, "New time");
 
   /* Construct the message */
+
   /* Write starting with the seconds regiser */
 
   buffer[0] = DSXXXX_TIME_SECR;
