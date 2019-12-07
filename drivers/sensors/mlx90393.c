@@ -334,11 +334,11 @@ static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
 
   /* Send the data high byte of the register */
 
-  SPI_SEND(dev->spi, (uint8_t) ((reg_data & 0xFF00) >> 8));
+  SPI_SEND(dev->spi, (uint8_t) ((reg_data & 0xff00) >> 8));
 
   /* Send the data low byte of the register */
 
-  SPI_SEND(dev->spi, (uint8_t) (reg_data & 0x00FF));
+  SPI_SEND(dev->spi, (uint8_t) (reg_data & 0x00ff));
 
   /* Send the register address which needs to be left shifted by 2 */
 
@@ -616,7 +616,8 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Since we support multiple MLX90393 devices are supported, we will need to
    * add this new instance to a list of device instances so that it can be
-   * found by the interrupt handler based on the received IRQ number. */
+   * found by the interrupt handler based on the received IRQ number.
+   */
 
   priv->flink = g_mlx90393_list;
   g_mlx90393_list = priv;

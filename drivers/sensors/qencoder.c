@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Debug ********************************************************************/
 
 /****************************************************************************
@@ -84,8 +85,10 @@ struct qe_upperhalf_s
 
 static int     qe_open(FAR struct file *filep);
 static int     qe_close(FAR struct file *filep);
-static ssize_t qe_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
-static ssize_t qe_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static ssize_t qe_read(FAR struct file *filep, FAR char *buffer,
+                       size_t buflen);
+static ssize_t qe_write(FAR struct file *filep, FAR const char *buffer,
+                        size_t buflen);
 static int     qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************

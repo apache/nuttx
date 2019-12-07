@@ -80,6 +80,7 @@ struct lm75_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int     lm75_i2c_write(FAR struct lm75_dev_s *priv,
@@ -102,7 +103,8 @@ static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
-static int     lm75_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static int     lm75_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data

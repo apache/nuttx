@@ -185,25 +185,25 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
       subaddr |= 0x80;
     }
 
-    /* Create message and send */
+  /* Create message and send */
 
-    struct i2c_msg_s msgv[2] =
+  struct i2c_msg_s msgv[2] =
+  {
     {
-      {
-        .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
-        .addr      = dev->address,
-        .flags     = 0,
-        .buffer    = &subaddr,
-        .length    = 1
-      },
-      {
-        .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
-        .addr      = dev->address,
-        .flags     = flags,
-        .buffer    = buf,
-        .length    = length
-      }
-    };
+      .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
+      .addr      = dev->address,
+      .flags     = 0,
+      .buffer    = &subaddr,
+      .length    = 1
+    },
+    {
+      .frequency = CONFIG_LIS331DL_I2C_FREQUENCY,
+      .addr      = dev->address,
+      .flags     = flags,
+      .buffer    = buf,
+      .length    = length
+    }
+  };
 
   retval = I2C_TRANSFER(dev->i2c, msgv, 2);
   if (retval >= 0)
@@ -326,9 +326,9 @@ int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev)
   dev->cr3 = 0;
 
   if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3)
-   {
-     return OK;
-   }
+    {
+      return OK;
+    }
 
   return ERROR;
 }
@@ -359,10 +359,10 @@ int lis331dl_getprecision(FAR struct lis331dl_dev_s * dev)
 {
   if (dev->cr1 & ST_LIS331DL_CR1_FS)
     {
-      return 9200/127;   /* typ. 9.2g full scale */
+      return 9200 / 127;   /* typ. 9.2g full scale */
     }
 
-  return 2300/127;       /* typ. 2.3g full scale */
+  return 2300 / 127;       /* typ. 2.3g full scale */
 }
 
 /****************************************************************************

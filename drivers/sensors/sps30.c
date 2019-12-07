@@ -84,9 +84,9 @@
 #define SPS30_CMD_READ_MEASUREMENT           0x0300
 #define SPS30_CMD_SET_AUTO_CLEANING_INTERVAL 0x8004
 #define SPS30_CMD_START_FAN_CLEANING         0x5607
-#define SPS30_CMD_READ_ARTICLE_CODE          0xD025
-#define SPS30_CMD_READ_SERIAL_NUMBER         0xD033
-#define SPS30_CMD_SOFT_RESET                 0xD304
+#define SPS30_CMD_READ_ARTICLE_CODE          0xd025
+#define SPS30_CMD_READ_SERIAL_NUMBER         0xd033
+#define SPS30_CMD_SOFT_RESET                 0xd304
 
 /****************************************************************************
  * Private
@@ -123,6 +123,7 @@ struct sps30_word_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* IO Helpers */
 
 #ifdef CONFIG_SPS30_I2C
@@ -220,6 +221,7 @@ static int sps30_do_transfer(FAR struct i2c_master_s *i2c,
       else
         {
           /* Some error. Try to reset I2C bus and keep trying. */
+
 #ifdef CONFIG_I2C_RESET
           if (retries == SPS30_I2C_RETRIES - 1)
             {
@@ -344,7 +346,8 @@ static uint8_t sps30_crc_word(uint16_t word)
     0x00, 0x31, 0x62, 0x53, 0xc4, 0xf5, 0xa6, 0x97,
     0xb9, 0x88, 0xdb, 0xea, 0x7d, 0x4c, 0x1f, 0x2e
   };
-  uint8_t crc = 0xFF;
+
+  uint8_t crc = 0xff;
 
   crc ^= word >> 8;
   crc = (crc << 4) ^ crc_table[crc >> 4];
@@ -667,6 +670,7 @@ static int sps30_open(FAR struct file *filep)
     uint32_t u32[8];
     char c[32];
   } code, sn;
+
   int ret;
 
   /* Get exclusive access */
@@ -1095,7 +1099,7 @@ int sps30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(i2c != NULL);
   DEBUGASSERT(addr == CONFIG_SPS30_ADDR);
-  DEBUGASSERT(sps30_crc_word(0xBEEF) == 0x92);
+  DEBUGASSERT(sps30_crc_word(0xbeef) == 0x92);
 
   /* Initialize the device structure */
 

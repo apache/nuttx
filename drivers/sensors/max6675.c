@@ -37,7 +37,7 @@
 /* NOTE: Some Maxim MAX6675 chips have an issue it report value 25% lower
  * of real temperature, for more info read this thread:
  * http://www.eevblog.com/forum/projects/max6675-temperature-error/
-*/
+ */
 
 /****************************************************************************
  * Included Files
@@ -208,8 +208,8 @@ static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer, size_t buf
   SPI_SELECT(priv->spi, SPIDEV_TEMPERATURE(0), false);
   max6675_unlock(priv->spi);
 
-  regval  = (regmsb & 0xFF00) >> 8;
-  regval |= (regmsb & 0xFF) << 8;
+  regval  = (regmsb & 0xff00) >> 8;
+  regval |= (regmsb & 0xff) << 8;
 
   sninfo("Read from MAX6675 = 0x%04X\n", regval);
 

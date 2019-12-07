@@ -202,7 +202,11 @@ static int t67xx_read16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
 {
   struct i2c_config_s config;
   uint8_t buf[5];
-  uint8_t rxbuf[4] = { 0 };
+  uint8_t rxbuf[4] =
+  {
+    0
+  };
+
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -221,8 +225,6 @@ static int t67xx_read16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
   buf[2] =  regaddr       & 0xff;
   buf[3] = 0;
   buf[4] = 1;
-
-  //sninfo("->[%d %d %d %d %d]\n", buf[0], buf[1], buf[2], buf[3], buf[4]);
 
   /* Write the Modbus read request. */
 
@@ -243,8 +245,6 @@ static int t67xx_read16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
       snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
-
-  //sninfo("<-[%d %d %d %d]\n", rxbuf[0], rxbuf[1], rxbuf[2], rxbuf[3]);
 
   if (rxbuf[0] != 4 || rxbuf[1] != 2)
     {
@@ -272,7 +272,11 @@ static int t67xx_write16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
 {
   struct i2c_config_s config;
   uint8_t buf[5];
-  uint8_t rxbuf[5] = { 0 };
+  uint8_t rxbuf[5] =
+  {
+    0
+  };
+
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -290,8 +294,6 @@ static int t67xx_write16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
   buf[2] =  regaddr        & 0xff;
   buf[3] = (regvalue >> 8) & 0xff;
   buf[4] =  regvalue       & 0xff;
-
-  //sninfo("->[%d %d %d %d %d]\n", buf[0], buf[1], buf[2], buf[3], buf[4]);
 
   /* Write the Modbus write request. */
 
@@ -319,8 +321,6 @@ static int t67xx_write16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
       snerr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
-
-  //sninfo("<-[%d %d %d %d %d]\n", rxbuf[0], rxbuf[1], rxbuf[2], rxbuf[3], rxbuf[4]);
 
   if (memcmp(rxbuf, buf, sizeof(rxbuf)) != 0)
     {
@@ -426,7 +426,6 @@ static bool has_time_passed(struct timespec curr,
   return (long)((start.tv_sec + secs_since_start) - curr.tv_sec) <= 0;
 }
 
-
 /****************************************************************************
  * Name: t67xx_read_gas_ppm
  *
@@ -439,7 +438,8 @@ static int t67xx_read_gas_ppm(FAR struct t67xx_dev_s *priv,
                               FAR struct t67xx_value_s *buffer)
 {
   uint16_t ppm;
-  bool warming_up, calibrating;
+  bool warming_up;
+  bool calibrating;
   struct timespec ts;
   int ret;
 

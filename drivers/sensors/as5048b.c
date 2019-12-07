@@ -69,6 +69,7 @@ struct as5048b_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
@@ -168,7 +169,8 @@ static int as5048b_readu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
 static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                            uint8_t regaddrlo, FAR uint16_t *regval)
 {
-  uint8_t hi, lo;
+  uint8_t hi;
+  uint8_t lo;
   int ret;
 
   /* Read the high 8 bits of the 13-bit value */

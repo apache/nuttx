@@ -347,6 +347,7 @@ static int adt7320_open(FAR struct file *filep)
       set_errno(ENODEV);
       return -ENODEV;
     }
+
   return OK;
 }
 

@@ -88,6 +88,7 @@
 #define PC1_ON          (1 << 7)
 
 /* CTRL_REG1: set resolution, g-range, data ready enable */
+
 /* Output resolution: 8-bit valid or 12-bit valid */
 
 #define RES_8BIT        0
@@ -104,6 +105,7 @@
 #define KXTJ9_G_8G      (1 << 4)
 
 /* Interrupt control register 1 bits */
+
 /* Set these during probe if using irq mode */
 
 #define KXTJ9_IEL       (1 << 3)

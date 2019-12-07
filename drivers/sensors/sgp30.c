@@ -106,6 +106,7 @@ struct sgp30_cmd_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* IO Helpers */
 
 static int sgp30_do_transfer(FAR struct i2c_master_s *i2c,
@@ -245,6 +246,7 @@ static int sgp30_do_transfer(FAR struct i2c_master_s *i2c,
       else
         {
           /* Some error. Try to reset I2C bus and keep trying. */
+
 #ifdef CONFIG_I2C_RESET
           if (retries == SGP30_I2C_RETRIES - 1)
             {
@@ -359,7 +361,8 @@ static uint8_t sgp30_crc_word(uint16_t word)
     0x00, 0x31, 0x62, 0x53, 0xc4, 0xf5, 0xa6, 0x97,
     0xb9, 0x88, 0xdb, 0xea, 0x7d, 0x4c, 0x1f, 0x2e
   };
-  uint8_t crc = 0xFF;
+
+  uint8_t crc = 0xff;
 
   crc ^= word >> 8;
   crc = (crc << 4) ^ crc_table[crc >> 4];
@@ -556,7 +559,8 @@ static int sgp30_open(FAR struct file *filep)
           ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
           if (ret < 0)
             {
-              sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n", ret);
+              sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n",
+                        ret);
             }
         }
       else
@@ -636,7 +640,8 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode = filep->f_inode;
   FAR struct sgp30_dev_s *priv = inode->i_private;
   ssize_t length = 0;
-  struct timespec ts, ts_sleep;
+  struct timespec ts;
+  struct timespec ts_sleep;
   struct sgp30_conv_data_s data;
   int ret;
 
@@ -893,7 +898,7 @@ static int sgp30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   sgp30_dbg("crc error\n");
                   ret = -EIO;
                 }
-              else if (sgp30_data_word_to_uint16(buf) != 0xD400)
+              else if (sgp30_data_word_to_uint16(buf) != 0xd400)
                 {
                   sgp30_dbg("self-test failed, 0x%04x\n",
                             sgp30_data_word_to_uint16(buf));
@@ -989,7 +994,7 @@ int sgp30_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(i2c != NULL);
   DEBUGASSERT(addr == CONFIG_SGP30_ADDR);
-  DEBUGASSERT(sgp30_crc_word(0xBEEF) == 0x92);
+  DEBUGASSERT(sgp30_crc_word(0xbeef) == 0x92);
 
   /* Initialize the device structure */
 

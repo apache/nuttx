@@ -268,6 +268,7 @@ static void write_register(FAR struct as726x_dev_s *priv, uint8_t addr,
   {
     0
   };
+
   int ret;
 
   config.frequency = CONFIG_AS726X_I2C_FREQUENCY;
@@ -295,7 +296,7 @@ static void as726x_write8(FAR struct as726x_dev_s *priv, uint8_t regaddr,
       status = read_register(priv, AS72XX_SLAVE_STATUS_REG);
       if ((status & AS72XX_SLAVE_TX_VALID) == 0)
         {
-         /* No inbound TX pending at slave. Okay to write now. */
+          /* No inbound TX pending at slave. Okay to write now. */
 
           break;
         }
@@ -441,7 +442,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->i2c = i2c;
   priv->addr = AS726X_I2C_ADDR;
 
-   /* Check HW version for AS7262 and AS7263 */
+  /* Check HW version for AS7262 and AS7263 */
 
   _sensor_version = as726x_read8(priv, AS726x_HW_VERSION);
   if (_sensor_version != 0x3e && _sensor_version != 0x3f)

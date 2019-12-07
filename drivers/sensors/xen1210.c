@@ -310,6 +310,7 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
                  (FAR void *)priv);
 
   /* Device initialization sequence */
+
   /* Power off */
 
   regval = (XEN1210_POWEROFF);
@@ -326,7 +327,7 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
   /* Test */
 
   regval  = (XEN1210_TEST);
-  regval |= 0x003A00;
+  regval |= 0x003a00;
 
   xen1210_putdata(priv, regval);
 
@@ -421,13 +422,13 @@ void xen1210_getdata(FAR struct xen1210_dev_s *priv)
   /* Read three times 3 bytes = 24 bits * 3 */
 
   SPI_RECVBLOCK(priv->spi, &regval, 3);
-  priv->sample.data_x = regval & 0xFFFFFF;
+  priv->sample.data_x = regval & 0xffffff;
 
   SPI_RECVBLOCK(priv->spi, &regval, 3);
-  priv->sample.data_y = regval & 0xFFFFFF;
+  priv->sample.data_y = regval & 0xffffff;
 
   SPI_RECVBLOCK(priv->spi, &regval, 3);
-  priv->sample.data_z = regval & 0xFFFFFF;
+  priv->sample.data_z = regval & 0xffffff;
 
   /* Deselect the XEN1210 */
 
@@ -472,6 +473,7 @@ void xen1210_putdata(FAR struct xen1210_dev_s *priv, uint32_t regval)
   SPI_SELECT(priv->spi, SPIDEV_ACCELEROMETER(0), true);
 
   /* We need to write to 3 sensors in the daisy-chain */
+
   /* Write three times 3 bytes */
 
   (void)SPI_SNDBLOCK(priv->spi, &regval, 3);

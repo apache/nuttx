@@ -139,7 +139,7 @@ static const struct file_operations g_fops =
 #  endif
 };
 
-static const struct lsm6dsl_ops_s g_LSM6DSLsensor_ops =
+static const struct lsm6dsl_ops_s g_lsm6dsl_sensor_ops =
 {
   lsm6dsl_sensor_config,
   lsm6dsl_sensor_start,
@@ -439,7 +439,7 @@ static int lsm6dsl_sensor_start(FAR struct lsm6dsl_dev_s *priv)
    * modifyreg with empty value!!!! Then read value first!!!
    */
 
-  lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x7C);
+  lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x7c);
   g_gyrofactor = 70;
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL6_C, 0x00);
@@ -493,7 +493,6 @@ static int lsm6dsl_sensor_stop(FAR struct lsm6dsl_dev_s *priv)
 
 static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 {
-
   int samples = 5;
   int i;
   int i2;
@@ -589,7 +588,7 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
       /* Gyro; power down accelero CTRL1_XL FS=2000dps,208Hz 2000dps=65535 */
 
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x00);
-      lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x5C);
+      lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x5c);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL3_C, 0x44);
       g_gyrofactor = (70 / 1000); /* 2000dps */
     }
@@ -898,7 +897,6 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
                                FAR struct lsm6dsl_sensor_data_s *sensor_data)
 {
-
   int16_t lo    = 0;
   int16_t lox   = 0;
   int16_t loxg  = 0;
@@ -1337,7 +1335,7 @@ int lsm6dsl_sensor_register(FAR const char *devpath,
 
   sninfo("Trying to register accel\n");
 
-  return lsm6dsl_register(devpath, i2c, addr, &g_LSM6DSLsensor_ops,
+  return lsm6dsl_register(devpath, i2c, addr, &g_lsm6dsl_sensor_ops,
                           LSM6DSL_OUTX_L_XL_SHIFT, sensor_data);
 }
 

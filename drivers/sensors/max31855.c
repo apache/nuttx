@@ -70,8 +70,8 @@
 #define MAX31855_SHORT_VCC     (1 << 2)
 #define MAX31855_SHORT_GND     (1 << 1)
 #define MAX31855_OPEN_CIRCUIT  (1 << 0)
-#define MAX31855_TEMP_COUPLE   0xFFFFC000
-#define MAX31855_TEMP_JUNCTION 0xFFF0
+#define MAX31855_TEMP_COUPLE   0xffffc000
+#define MAX31855_TEMP_JUNCTION 0xfff0
 
 struct max31855_dev_s
 {
@@ -222,10 +222,10 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  regval  = (regmsb & 0xFF000000) >> 24;
-  regval |= (regmsb & 0xFF0000) >> 8;
-  regval |= (regmsb & 0xFF00) << 8;
-  regval |= (regmsb & 0xFF) << 24;
+  regval  = (regmsb & 0xff000000) >> 24;
+  regval |= (regmsb & 0xff0000) >> 8;
+  regval |= (regmsb & 0xff00) << 8;
+  regval |= (regmsb & 0xff) << 24;
 
   sninfo("Read from MAX31855 = 0x%08X\n", regval);
 

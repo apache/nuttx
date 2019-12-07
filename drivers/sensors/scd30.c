@@ -84,7 +84,7 @@
 #define SCD30_CMD_SET_FRC               0x5204
 #define SCD30_CMD_SET_TEMP_OFFSET       0x5403
 #define SCD30_CMD_SET_ALT_COMPENSATION  0x5102
-#define SCD30_CMD_SOFT_RESET            0xD304
+#define SCD30_CMD_SOFT_RESET            0xd304
 
 #define SCD30_DEFAULT_MEASUREMENT_INTERVAL  2 /* seconds */
 #define SCD30_DEFAULT_PRESSURE_COMPENSATION 0
@@ -131,6 +131,7 @@ struct scd30_word_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* IO Helpers */
 
 #ifdef CONFIG_SCD30_I2C
@@ -226,6 +227,7 @@ static int scd30_do_transfer(FAR struct i2c_master_s *i2c,
       else
         {
           /* Some error. Try to reset I2C bus and keep trying. */
+
 #ifdef CONFIG_I2C_RESET
           if (retries == SCD30_I2C_RETRIES - 1)
             {
@@ -330,7 +332,8 @@ static uint8_t scd30_crc_word(uint16_t word)
     0x00, 0x31, 0x62, 0x53, 0xc4, 0xf5, 0xa6, 0x97,
     0xb9, 0x88, 0xdb, 0xea, 0x7d, 0x4c, 0x1f, 0x2e
   };
-  uint8_t crc = 0xFF;
+
+  uint8_t crc = 0xff;
 
   crc ^= word >> 8;
   crc = (crc << 4) ^ crc_table[crc >> 4];
@@ -1079,7 +1082,7 @@ int scd30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(i2c != NULL);
   DEBUGASSERT(addr == CONFIG_SCD30_ADDR);
-  DEBUGASSERT(scd30_crc_word(0xBEEF) == 0x92);
+  DEBUGASSERT(scd30_crc_word(0xbeef) == 0x92);
 
   /* Initialize the device structure */
 

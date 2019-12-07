@@ -149,7 +149,7 @@ static int bh1750fvi_read16(FAR struct bh1750fvi_dev_s *priv,
 
   /* Copy the content of the buffer to the location of the uint16_t pointer */
 
-  *regval = (uint16_t)((buffer[0]<<8) | (buffer[1]));
+  *regval = (uint16_t)((buffer[0] << 8) | (buffer[1]));
 
   sninfo("value: %08x ret: %d\n", *regval, ret);
   return OK;
@@ -246,8 +246,8 @@ static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  buffer[0] = lux & 0xFF;
-  buffer[1] = (lux & 0xFF00) >> 8;
+  buffer[0] = lux & 0xff;
+  buffer[1] = (lux & 0xff00) >> 8;
 
   add_sensor_randomness(lux);
 
@@ -357,7 +357,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
           uint8_t reg;
           DEBUGASSERT(ptr != NULL);
 
-          reg = BH1750FVI_MEASURE_TIMEH | ((*ptr & 0xE0) >> 5);
+          reg = BH1750FVI_MEASURE_TIMEH | ((*ptr & 0xe0) >> 5);
 
           ret = bh1750fvi_write8(priv, reg);
           if (ret < 0)
@@ -365,7 +365,7 @@ static int bh1750fvi_ioctl(FAR struct file *filep, int cmd,
               snerr("ERROR: Cannot Change Measure Time at MEASURE_TIMEH!\n");
             }
 
-          reg = BH1750FVI_MEASURE_TIMEL | (*ptr & 0x1F);
+          reg = BH1750FVI_MEASURE_TIMEL | (*ptr & 0x1f);
 
           ret = bh1750fvi_write8(priv, reg);
           if (ret < 0)

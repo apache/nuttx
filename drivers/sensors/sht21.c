@@ -99,6 +99,7 @@ struct sht21_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int sht21_access(FAR struct sht21_dev_s *priv,

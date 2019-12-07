@@ -308,8 +308,8 @@ static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
  * Name: l3gd20_read_temperature
  ****************************************************************************/
 
-static void l3gd20_read_temperature(FAR struct l3gd20_dev_s* dev,
-                                    uint8_t* temperature)
+static void l3gd20_read_temperature(FAR struct l3gd20_dev_s *dev,
+                                    FAR uint8_t *temperature)
 {
   /* Lock the SPI bus so that only one device can access it at the same time */
 
@@ -342,7 +342,7 @@ static void l3gd20_read_temperature(FAR struct l3gd20_dev_s* dev,
  * Name: l3gd20_interrupt_handler
  ****************************************************************************/
 
-static int l3gd20_interrupt_handler(int irq, FAR void* context)
+static int l3gd20_interrupt_handler(int irq, FAR void *context)
 {
   /* This function should be called upon a rising edge on the L3GD20 new data
    * interrupt pin since it signals that new data has been measured.
@@ -644,7 +644,8 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Since we support multiple L3GD20 devices, we will need to add this new
    * instance to a list of device instances so that it can be found by the
-   * interrupt handler based on the received IRQ number. */
+   * interrupt handler based on the received IRQ number.
+   */
 
   priv->flink   = g_l3gd20_list;
   g_l3gd20_list = priv;

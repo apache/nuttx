@@ -266,10 +266,10 @@ static uint8_t adxl372_read_register(FAR struct adxl372_dev_s *dev,
  * Name: adxl372_read_registerblk
  ******************************************************************************/
 
- static void adxl372_read_registerblk(FAR struct adxl372_dev_s *dev,
-                                      uint8_t reg_addr,
-                                      FAR uint8_t *reg_data,
-                                      uint8_t xfercnt)
+static void adxl372_read_registerblk(FAR struct adxl372_dev_s *dev,
+                                     uint8_t reg_addr,
+                                     FAR uint8_t *reg_data,
+                                     uint8_t xfercnt)
 {
   /* Lock the SPI bus so that only one device can access it at the same time */
 
@@ -288,7 +288,7 @@ static uint8_t adxl372_read_register(FAR struct adxl372_dev_s *dev,
 
   /* Write idle bytes while receiving the requested data */
 
-  while ( 0 != xfercnt-- )
+  while (0 != xfercnt--)
     {
       *reg_data++ = (uint8_t)SPI_SEND(dev->spi, 0xff);
     }
@@ -341,10 +341,10 @@ static void adxl372_write_register(FAR struct adxl372_dev_s *dev,
  * Name: adxl372_write_registerblk
  ****************************************************************************/
 
- static void adxl372_write_registerblk(FAR struct adxl372_dev_s *dev,
-                                       uint8_t reg_addr,
-                                       FAR uint8_t *reg_data,
-                                       uint8_t xfercnt)
+static void adxl372_write_registerblk(FAR struct adxl372_dev_s *dev,
+                                      uint8_t reg_addr,
+                                      FAR uint8_t *reg_data,
+                                      uint8_t xfercnt)
 {
   /* Lock the SPI bus so that only one device can access it at the same time */
 
@@ -363,7 +363,7 @@ static void adxl372_write_register(FAR struct adxl372_dev_s *dev,
 
   /* Transmit the content which should be written in the register block */
 
-  while ( 0 != xfercnt-- )
+  while (0 != xfercnt--)
     {
       SPI_SEND(dev->spi, *reg_data++);
     }
@@ -408,7 +408,7 @@ static void adxl372_reset(FAR struct adxl372_dev_s *dev)
 
   up_mdelay(5);
   wdcnt = 10;
-  while (wdcnt>0 && (0 != adxl372_read_register(dev, ADXL372_RESET)))
+  while (wdcnt > 0 && (0 != adxl372_read_register(dev, ADXL372_RESET)))
     {
       up_mdelay(1);
     }
@@ -587,7 +587,7 @@ static ssize_t adxl372_dvr_read(FAR void *instance_handle, FAR char *buffer,
   if (priv->seek_address == ADXL372_XDATA_H && buflen >= 6)
     {
       p1 = p2 = buffer;
-      for (i=0; i<3; i++)
+      for (i = 0; i < 3; i++)
         {
           un.d8[1] = *p1++;
           un.d8[0] = *p1++;
@@ -742,13 +742,13 @@ static void adxl372_dvr_exchange(FAR void *instance_handle,
   /* Unlock the SPI bus */
 
   SPI_LOCK(spi, false);
- }
+}
 
 /****************************************************************************
  * Name: adxl372_open
  ****************************************************************************/
 
- static int adxl372_open(FAR struct file *filep)
+static int adxl372_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct adxl372_dev_s *priv = inode->i_private;

@@ -119,8 +119,8 @@
 #define HTS221_I2C_RETRIES          10
 
 /****************************************************************************
-* Private Function Prototypes
-*****************************************************************************/
+ * Private Function Prototypes
+ *****************************************************************************/
 
 static int hts221_open(FAR struct file *filep);
 static int hts221_close(FAR struct file *filep);
@@ -133,8 +133,8 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
 
 /****************************************************************************
-* Private Types
-****************************************************************************/
+ * Private Types
+ ****************************************************************************/
 
 struct hts221_dev_s
 {
@@ -158,8 +158,8 @@ struct hts221_dev_s
 };
 
 /****************************************************************************
-* Private Data
-****************************************************************************/
+ * Private Data
+ ****************************************************************************/
 
 static const struct file_operations g_humidityops =
 {
@@ -176,8 +176,8 @@ static const struct file_operations g_humidityops =
 };
 
 /****************************************************************************
-* Private Functions
-****************************************************************************/
+ * Private Functions
+ ****************************************************************************/
 
 static int hts221_do_transfer(FAR struct hts221_dev_s *priv,
                               FAR struct i2c_msg_s *msgv,
@@ -196,6 +196,7 @@ static int hts221_do_transfer(FAR struct hts221_dev_s *priv,
       else
         {
           /* Some error. Try to reset I2C bus and keep trying. */
+
 #ifdef CONFIG_I2C_RESET
           if (retries == HTS221_I2C_RETRIES - 1)
             {
@@ -283,7 +284,11 @@ static int hts221_cfgr_resolution(FAR struct hts221_dev_s *priv,
   uint8_t value;
   const uint8_t addr = HTS221_AV_CONF;
   uint8_t regval = 0;
-  uint8_t cmd[2] = { 0 };
+  uint8_t cmd[2] =
+  {
+    0
+  };
+
   const uint8_t mask = 0x3f;
 
   ret = hts221_read_reg(priv, &addr, &regval);
@@ -315,7 +320,10 @@ static int hts221_config_ctrl_reg3(FAR struct hts221_dev_s *priv,
   uint8_t regval = 0;
   uint8_t addr = HTS221_CTRL_REG3;
   const uint8_t mask = 0xc4;
-  uint8_t data_to_write[2] = { 0 };
+  uint8_t data_to_write[2] =
+  {
+    0
+  };
 
   ret = hts221_read_reg(priv, &addr, &regval);
   hts221_dbg("CTRL_REG%d: 0x%02X\n", 3, regval);
@@ -353,7 +361,11 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
   uint8_t regval = 0;
   uint8_t addr = HTS221_CTRL_REG2;
   const uint8_t mask = 0x80;
-  uint8_t data_to_write[2] = { 0 };
+  uint8_t data_to_write[2] =
+  {
+    0
+  };
+
   int retries = 5;
 
   if (!settings->is_boot)
@@ -424,7 +436,10 @@ static int hts221_config_ctrl_reg1(FAR struct hts221_dev_s *priv,
   uint8_t regval = 0;
   uint8_t addr = HTS221_CTRL_REG1;
   const uint8_t mask = 0x87;
-  uint8_t data_to_write[2] = { 0 };
+  uint8_t data_to_write[2] =
+  {
+    0
+  };
 
   ret = hts221_read_reg(priv, &addr, &regval);
   hts221_dbg("CTRL_REG%d: 0x%02X\n", 1, regval);
@@ -434,8 +449,8 @@ static int hts221_config_ctrl_reg1(FAR struct hts221_dev_s *priv,
     }
 
   regval &= ~mask;
-  regval |= (uint8_t) (settings->odr & 0xFF);
-  regval |= (uint8_t) (settings->is_bdu ? HTS221_CTRL_REG1_BDU : 0);
+  regval |= (uint8_t)(settings->odr & 0xff);
+  regval |= (uint8_t)(settings->is_bdu ? HTS221_CTRL_REG1_BDU : 0);
 
   data_to_write[0] = addr;
   data_to_write[1] = regval;
@@ -476,6 +491,7 @@ static int hts221_power_on_off(FAR struct hts221_dev_s *priv, bool on)
     {
       regval &= ~HTS221_CTRL_REG1_PD;
     }
+
   data_to_write[0] = addr;
   data_to_write[1] = regval;
 
@@ -1064,9 +1080,9 @@ static bool hts221_sample(FAR struct hts221_dev_s *priv)
 
   ret = hts221_check_status(priv, &status);
   if (ret < 0)
-  {
-    return false;
-  }
+    {
+      return false;
+    }
 
   return status.is_humid_ready || status.is_temp_ready;
 }

@@ -91,8 +91,8 @@ struct hcsr04_dev_s
 };
 
 /****************************************************************************
-* Private Data
-****************************************************************************/
+ * Private Data
+ ****************************************************************************/
 
 static const struct file_operations g_hcsr04ops =
 {
@@ -292,7 +292,6 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     case SNIOC_READ_RAW_DATA:
-      //ret = hcsr04_read_raw_data(priv, (FAR hcsr04_raw_data_t *) arg);
       break;
 
 #ifdef CONFIG_HCSR04_DEBUG

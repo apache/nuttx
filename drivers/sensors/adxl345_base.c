@@ -263,12 +263,15 @@ static void adxl345_worker(FAR void *arg)
     {
       /* Read accelerometer data to sample */
 
-      priv->sample.data_x =  adxl345_getreg8(priv, ADXL345_DATAX1);
-      priv->sample.data_x = (priv->sample.data_x << 8) | adxl345_getreg8(priv, ADXL345_DATAX0);
-      priv->sample.data_y =  adxl345_getreg8(priv, ADXL345_DATAY1);
-      priv->sample.data_y = (priv->sample.data_y << 8) | adxl345_getreg8(priv, ADXL345_DATAY0);
-      priv->sample.data_z =  adxl345_getreg8(priv, ADXL345_DATAZ1);
-      priv->sample.data_z = (priv->sample.data_z << 8) | adxl345_getreg8(priv, ADXL345_DATAZ0);
+      priv->sample.data_x = adxl345_getreg8(priv, ADXL345_DATAX1);
+      priv->sample.data_x = (priv->sample.data_x << 8) |
+                            adxl345_getreg8(priv, ADXL345_DATAX0);
+      priv->sample.data_y = adxl345_getreg8(priv, ADXL345_DATAY1);
+      priv->sample.data_y = (priv->sample.data_y << 8) |
+                            adxl345_getreg8(priv, ADXL345_DATAY0);
+      priv->sample.data_z = adxl345_getreg8(priv, ADXL345_DATAZ1);
+      priv->sample.data_z = (priv->sample.data_z << 8) |
+                            adxl345_getreg8(priv, ADXL345_DATAZ0);
     }
 
   /* Re-enable the ADXL345 GPIO interrupt */
@@ -360,7 +363,7 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 
   /* Wait a bit to make the GOD of TIME happy */
 
-  nxsig_usleep(20*1000);
+  nxsig_usleep(20 * 1000);
 }
 
 /****************************************************************************

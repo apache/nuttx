@@ -375,7 +375,8 @@ static int lis3dsh_open(FAR struct file *filep)
 
   /* Enable - Measurement of X-, Y-, and Z-axis - Block data update for
    * accelerating data This should prevent race conditions when reading sensor
-   * data - fastest output data rate (ODR = 1600 Hz) */
+   * data - fastest output data rate (ODR = 1600 Hz).
+   */
 
   lis3dsh_write_register(priv,
                          LIS3DSH_CTRL_REG_4,

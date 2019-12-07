@@ -286,6 +286,7 @@ static const struct file_operations g_bmi160fops =
  * Description:
  *
  ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BMI160_SPI
 static inline void bmi160_configspi(FAR struct spi_dev_s *spi)
 {
@@ -647,6 +648,7 @@ static void bmi160_enable_stepcounter(FAR struct bmi160_dev_s *priv,
     {
       val &= ~STEP_CNT_EN;
     }
+
   bmi160_putreg8(priv, BMI160_STEP_CONFIG_1, val);
 
   sninfo("Step counter %sabled.\n", val & STEP_CNT_EN ? "en" : "dis");
@@ -755,6 +757,7 @@ int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
       snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
+
 #ifdef CONFIG_SENSORS_BMI160_I2C
   priv->i2c = dev;
   priv->addr = BMI160_I2C_ADDR;

@@ -253,6 +253,7 @@ static int lps25h_do_transfer(FAR struct lps25h_dev_s *dev,
       else
         {
           /* Some error. Try to reset I2C bus and keep trying. */
+
 #ifdef CONFIG_I2C_RESET
           if (retries == LPS25H_I2C_RETRIES - 1)
             {
@@ -450,6 +451,7 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
     }
 
 out:
+
   nxsem_post(&dev->devsem);
   return length;
 }
@@ -620,7 +622,7 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
 
   if (ret != OK)
     {
-       return -ETIMEDOUT;
+      return -ETIMEDOUT;
     }
 
   flags = enter_critical_section();

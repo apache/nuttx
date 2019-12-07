@@ -128,7 +128,7 @@ static const struct file_operations g_ina226fops =
 
 static int ina226_access(FAR struct ina226_dev_s *priv,
                          uint8_t start_register_address, bool reading,
-                         FAR uint8_t* register_value, uint8_t data_length)
+                         FAR uint8_t *register_value, uint8_t data_length)
 {
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
@@ -150,13 +150,13 @@ static int ina226_access(FAR struct ina226_dev_s *priv,
   sninfo("start_register_address: "
          "0x%02X data_length: %d register_value: 0x%02x (0x%04x) ret: %d\n",
          start_register_address, data_length, *register_value,
-         *((uint16_t*)register_value), ret);
+         *((FAR uint16_t *)register_value), ret);
 
   return ret;
 }
 
 static int ina226_read16(FAR struct ina226_dev_s *priv, uint8_t regaddr,
-                         FAR uint16_t* regvalue)
+                         FAR uint16_t *regvalue)
 {
   uint8_t buf[2];
 
@@ -205,10 +205,10 @@ static int ina226_readpower(FAR struct ina226_dev_s *priv,
 
   ret = ina226_read16(priv, INA226_REG_BUS_VOLTAGE, &reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ina226_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ina226_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   /* Convert register value to bus voltage */
 
@@ -218,10 +218,10 @@ static int ina226_readpower(FAR struct ina226_dev_s *priv,
 
   ret = ina226_read16(priv, INA226_REG_SHUNT_VOLTAGE, &reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ina226_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ina226_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   tmp = ((int64_t)(int16_t)reg);
 
@@ -229,9 +229,9 @@ static int ina226_readpower(FAR struct ina226_dev_s *priv,
    * I(uA) = U(uV)/R(ohms)
    *       = U(uV)/(R(uohms)/1000000)
    *       = U(uV) * 1000000 / R(uohms)
-   * 
+   *
    * U(uV) = tmp*2,5
-   * 
+   *
    * We use a temporary 64-bit accumulator to avoid overflows.
    */
 
@@ -394,10 +394,10 @@ int ina226_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   ret = ina226_write16(priv, INA226_REG_CONFIG,
                        priv->config | INA226_CONFIG_MODE_PWRDOWN);
   if (ret < 0)
-   {
-     snerr("ERROR: Failed to apply config: %d\n", ret);
-     goto errout;
-   }
+    {
+      snerr("ERROR: Failed to apply config: %d\n", ret);
+      goto errout;
+    }
 
   /* Register the character driver */
 

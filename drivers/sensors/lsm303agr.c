@@ -422,7 +422,7 @@ static bool lsm303agr_isbitset(int8_t b, int8_t m)
 
 static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv)
 {
-  /* readreg8 is not necessary to modify. Clearbits can be 0x00 or 0xFF */
+  /* readreg8 is not necessary to modify. Clearbits can be 0x00 or 0xff */
 
   uint8_t value;
 
@@ -441,15 +441,15 @@ static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv)
   /* Accelerometer config registers Turn on the accelerometer: 833Hz, +- 16g */
 
   lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG1_A, 0x77);
-  lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0xB0);
+  lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0xb0);
   g_accelerofactor = 11.72;
 
   /* Gyro config registers Turn on the gyro: FS=2000dps, ODR=833Hz Not using
    * modifyreg with empty value!!!! Then read value first!!!
-   * lsm303agr_modifyreg8(priv, lsm303agr_CTRL2_G, value, 0x7C);
+   * lsm303agr_modifyreg8(priv, lsm303agr_CTRL2_G, value, 0x7c);
    */
 
-  lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8C);
+  lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8c);
   g_magnetofactor = 1.5;
 
   return OK;
@@ -574,7 +574,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
   else
     {
       registershift = 0x40;
-      lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8C);
+      lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8c);
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_B_M, 0x02);
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x10);
       g_magnetofactor = 1;
@@ -878,7 +878,6 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
 static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
                                  FAR struct lsm303agr_sensor_data_s *sensor_data)
 {
-
   int16_t lo    = 0;
   int16_t lox   = 0;
   int16_t loxg  = 0;
@@ -1078,7 +1077,8 @@ static ssize_t lsm303agr_read(FAR struct file *filep,
             }
 
           /* The value is negative, so find its absolute value by taking the
-           * two's complement */
+           * two's complement.
+           */
 
           else if (data > 0x8000)
             {
@@ -1087,7 +1087,8 @@ static ssize_t lsm303agr_read(FAR struct file *filep,
             }
 
           /* The value is negative and can't be represented as a positive
-           * int16_t value */
+           * int16_t value.
+           */
 
           else
             {
@@ -1270,6 +1271,7 @@ static int lsm303agr_register(FAR const char *devpath,
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+
 int lsm303agr_sensor_register(FAR const char *devpath,
                               FAR struct i2c_master_s *i2c, uint8_t addr)
 {

@@ -406,10 +406,10 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
     }
 
   memset(dev->fifobuf, 0, LIS3DH_FIFOBUF_SIZE);
-  dev->fifobuf[0] = LIS3DH_OUT_X_L | 0xC0;
+  dev->fifobuf[0] = LIS3DH_OUT_X_L | 0xc0;
 
   SPI_SELECT(dev->spi, dev->config->spi_devid, true);
-  SPI_EXCHANGE(dev->spi, dev->fifobuf, dev->fifobuf, 1 + count*6);
+  SPI_EXCHANGE(dev->spi, dev->fifobuf, dev->fifobuf, 1 + count * 6);
   SPI_SELECT(dev->spi, dev->config->spi_devid, false);
 
   /* Unlock the SPI bus */
@@ -427,14 +427,14 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
       int16_t y_acc;
       int16_t z_acc;
 
-      x_raw = (uint16_t)dev->fifobuf[(i*6)+1] |
-              (uint16_t)dev->fifobuf[(i*6)+2] << 8;
+      x_raw = (uint16_t)dev->fifobuf[(i * 6) + 1] |
+              (uint16_t)dev->fifobuf[(i * 6) + 2] << 8;
 
-      y_raw = (uint16_t)dev->fifobuf[(i*6)+3] |
-              (uint16_t)dev->fifobuf[(i*6)+4] << 8;
+      y_raw = (uint16_t)dev->fifobuf[(i * 6) + 3] |
+              (uint16_t)dev->fifobuf[(i * 6) + 4] << 8;
 
-      z_raw = (uint16_t)dev->fifobuf[(i*6)+5] |
-              (uint16_t)dev->fifobuf[(i*6)+6] << 8;
+      z_raw = (uint16_t)dev->fifobuf[(i * 6) + 5] |
+              (uint16_t)dev->fifobuf[(i * 6) + 6] << 8;
 
       /* The sensor left justifies the data in the register, so we must
        * shift it to the right depending on the selected power mode
@@ -875,9 +875,8 @@ static ssize_t lis3dh_read(FAR struct file *filep, FAR char *buffer,
 
   data = (FAR struct lis3dh_sensor_data_s *)buffer;
 
-  for (remain=count;remain > 0;remain--)
+  for (remain = count; remain > 0; remain--)
     {
-
       /* Wait for data to be available in the queue */
 
       nxsem_wait(&priv->readsem);

@@ -155,7 +155,7 @@ static const struct file_operations g_ina3221fops =
 
 static int ina3221_access(FAR struct ina3221_dev_s *priv,
                           uint8_t start_register_address, bool reading,
-                          FAR uint8_t* register_value, uint8_t data_length)
+                          FAR uint8_t *register_value, uint8_t data_length)
 {
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
@@ -177,13 +177,13 @@ static int ina3221_access(FAR struct ina3221_dev_s *priv,
   sninfo("start_register_address: "
          "0x%02X data_length: %d register_value: 0x%02x (0x%04x) ret: %d\n",
          start_register_address, data_length, *register_value,
-         *((uint16_t*)register_value), ret);
+         *((FAR uint16_t *)register_value), ret);
 
   return ret;
 }
 
 static int ina3221_read16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
-                          FAR uint16_t* regvalue)
+                          FAR uint16_t *regvalue)
 {
   uint8_t buf[2];
 
@@ -241,10 +241,10 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
           ret = ina3221_read16(priv, (INA3221_REG_CH1_BUS_VOLTAGE + i * 2),
                                &reg);
           if (ret < 0)
-          {
-            snerr("ERROR: ina3221_read16 failed: %d\n", ret);
-            return ret;
-          }
+            {
+              snerr("ERROR: ina3221_read16 failed: %d\n", ret);
+              return ret;
+            }
 
           /* Convert register value to bus voltage */
 
@@ -258,10 +258,10 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
           ret = ina3221_read16(priv, (INA3221_REG_CH1_SHUNT_VOLTAGE + i * 2),
                                &reg);
           if (ret < 0)
-          {
-            snerr("ERROR: ina3221_read16 failed: %d\n", ret);
-            return ret;
-          }
+            {
+              snerr("ERROR: ina3221_read16 failed: %d\n", ret);
+              return ret;
+            }
 
           /* Convert register value to shunt voltage */
 
@@ -392,8 +392,7 @@ static int ina3221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ina3221_reCommits
-gister
+ * Name: ina3221_register
  *
  * Description:
  *   Register the INA3221 character device as 'devpath'

@@ -384,12 +384,12 @@ static int bmp280_initialize(FAR struct bmp280_dev_s *priv)
       return ret;
     }
 
-  priv->calib.t1 = (uint16_t)buf[1] << 8 | buf[0];
-  priv->calib.t2 = (int16_t) buf[3] << 8 | buf[2];
-  priv->calib.t3 = (int16_t) buf[5] << 8 | buf[4];
+  priv->calib.t1 = (uint16_t)buf[1]  << 8 | buf[0];
+  priv->calib.t2 = (int16_t) buf[3]  << 8 | buf[2];
+  priv->calib.t3 = (int16_t) buf[5]  << 8 | buf[4];
 
-  priv->calib.p1 = (uint16_t)buf[ 7] << 8 | buf[ 6];
-  priv->calib.p2 = (int16_t) buf[ 9] << 8 | buf[ 8];
+  priv->calib.p1 = (uint16_t)buf[7]  << 8 | buf[6];
+  priv->calib.p2 = (int16_t) buf[9]  << 8 | buf[8];
   priv->calib.p3 = (int16_t) buf[11] << 8 | buf[10];
   priv->calib.p4 = (int16_t) buf[13] << 8 | buf[12];
   priv->calib.p5 = (int16_t) buf[15] << 8 | buf[14];
@@ -486,10 +486,10 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
   (void) bmp280_compensate_temp(priv, temp);
 
   var1 = (priv->tempfine >> 1) - 64000;
-  var2 = (((var1 >> 2) * (var1 >> 2)) >> 11 ) * ((int32_t)c->p6);
+  var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t)c->p6);
   var2 = var2 + ((var1 * ((int32_t)c->p5)) << 1);
   var2 = (var2 >> 2) + (((int32_t)c->p4) << 16);
-  var1 = (((c->p3 * (((var1 >> 2) * (var1 >> 2)) >> 13 )) >> 3) +
+  var1 = (((c->p3 * (((var1 >> 2) * (var1 >> 2)) >> 13)) >> 3) +
           ((((int32_t)c->p2) * var1) >> 1)) >> 18;
   var1 = (((32768 + var1) * ((int32_t)c->p1)) >> 15);
 

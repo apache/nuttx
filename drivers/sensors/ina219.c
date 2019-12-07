@@ -145,7 +145,7 @@ static const struct file_operations g_ina219fops =
 
 static int ina219_access(FAR struct ina219_dev_s *priv,
                          uint8_t start_register_address, bool reading,
-                         FAR uint8_t* register_value, uint8_t data_length)
+                         FAR uint8_t *register_value, uint8_t data_length)
 {
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
@@ -167,13 +167,13 @@ static int ina219_access(FAR struct ina219_dev_s *priv,
   sninfo("start_register_address: "
          "0x%02X data_length: %d register_value: 0x%02x (0x%04x) ret: %d\n",
          start_register_address, data_length, *register_value,
-         *((uint16_t*)register_value), ret);
+         *((FAR uint16_t *)register_value), ret);
 
   return ret;
 }
 
 static int ina219_read16(FAR struct ina219_dev_s *priv, uint8_t regaddr,
-                         FAR uint16_t* regvalue)
+                         FAR uint16_t *regvalue)
 {
   uint8_t buf[2];
 
@@ -222,10 +222,10 @@ static int ina219_readpower(FAR struct ina219_dev_s *priv,
 
   ret = ina219_read16(priv, INA219_REG_BUS_VOLTAGE, &reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ina219_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ina219_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   /* Convert register value to bus voltage */
 
@@ -236,10 +236,10 @@ static int ina219_readpower(FAR struct ina219_dev_s *priv,
 
   ret = ina219_read16(priv, INA219_REG_SHUNT_VOLTAGE, &reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ina219_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ina219_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   /* Convert register value to shunt voltage */
 

@@ -650,9 +650,9 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 
   if (priv->gesture_data.total_gestures <= 4)
     {
-        snerr("ERROR: We don't have enough gesture: %d\n",
-              priv->gesture_data.total_gestures);
-        return false;
+      snerr("ERROR: We don't have enough gesture: %d\n",
+            priv->gesture_data.total_gestures);
+      return false;
     }
 
   /* Check to make sure our data isn't out of bounds */
@@ -711,144 +711,144 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
         }
     }
 
-    /* Calculate the first vs. last ratio of up/down and left/right */
+  /* Calculate the first vs. last ratio of up/down and left/right */
 
-    ud_ratio_first = ((u_first - d_first) * 100) / (u_first + d_first);
-    lr_ratio_first = ((l_first - r_first) * 100) / (l_first + r_first);
-    ud_ratio_last  = ((u_last  - d_last)  * 100) / (u_last  + d_last);
-    lr_ratio_last  = ((l_last  - r_last)  * 100) / (l_last  + r_last);
+  ud_ratio_first = ((u_first - d_first) * 100) / (u_first + d_first);
+  lr_ratio_first = ((l_first - r_first) * 100) / (l_first + r_first);
+  ud_ratio_last  = ((u_last  - d_last)  * 100) / (u_last  + d_last);
+  lr_ratio_last  = ((l_last  - r_last)  * 100) / (l_last  + r_last);
 
-    sninfo("Last Values: \n");
-    sninfo("U: %03d\n", u_last);
-    sninfo("D: %03d\n", d_last);
-    sninfo("L: %03d\n", l_last);
-    sninfo("R: %03d\n", r_last);
+  sninfo("Last Values: \n");
+  sninfo("U: %03d\n", u_last);
+  sninfo("D: %03d\n", d_last);
+  sninfo("L: %03d\n", l_last);
+  sninfo("R: %03d\n", r_last);
 
-    sninfo("Ratios: \n");
-    sninfo("UD Fi: %03d\n", ud_ratio_first);
-    sninfo("UD La: %03d\n", ud_ratio_last);
-    sninfo("LR Fi: %03d\n", lr_ratio_first);
-    sninfo("LR La: %03d\n", lr_ratio_last);
+  sninfo("Ratios: \n");
+  sninfo("UD Fi: %03d\n", ud_ratio_first);
+  sninfo("UD La: %03d\n", ud_ratio_last);
+  sninfo("LR Fi: %03d\n", lr_ratio_first);
+  sninfo("LR La: %03d\n", lr_ratio_last);
 
-    /* Determine the difference between the first and last ratios */
+  /* Determine the difference between the first and last ratios */
 
-    ud_delta = ud_ratio_last - ud_ratio_first;
-    lr_delta = lr_ratio_last - lr_ratio_first;
+  ud_delta = ud_ratio_last - ud_ratio_first;
+  lr_delta = lr_ratio_last - lr_ratio_first;
 
-    sninfo("Deltas: \n");
-    sninfo("UD: %03d\n", ud_delta);
-    sninfo("LR: %03d\n", lr_delta);
+  sninfo("Deltas: \n");
+  sninfo("UD: %03d\n", ud_delta);
+  sninfo("LR: %03d\n", lr_delta);
 
-    /* Accumulate the UD and LR delta values */
+  /* Accumulate the UD and LR delta values */
 
-    priv->gesture_ud_delta += ud_delta;
-    priv->gesture_lr_delta += lr_delta;
+  priv->gesture_ud_delta += ud_delta;
+  priv->gesture_lr_delta += lr_delta;
 
-    sninfo("Accumulations: \n");
-    sninfo("UD: %03d\n", priv->gesture_ud_delta);
-    sninfo("LR: %03d\n", priv->gesture_lr_delta);
+  sninfo("Accumulations: \n");
+  sninfo("UD: %03d\n", priv->gesture_ud_delta);
+  sninfo("LR: %03d\n", priv->gesture_lr_delta);
 
-    /* Determine U/D gesture */
+  /* Determine U/D gesture */
 
-    if (priv->gesture_ud_delta >= GESTURE_SENSITIVITY_1)
-      {
-        priv->gesture_ud_count = 1;
-      }
-    else
-      {
-        if (priv->gesture_ud_delta <= -GESTURE_SENSITIVITY_1)
-          {
-            priv->gesture_ud_count = -1;
-          }
-        else
-          {
-            priv->gesture_ud_count = 0;
-          }
-      }
+  if (priv->gesture_ud_delta >= GESTURE_SENSITIVITY_1)
+    {
+      priv->gesture_ud_count = 1;
+    }
+  else
+    {
+      if (priv->gesture_ud_delta <= -GESTURE_SENSITIVITY_1)
+        {
+          priv->gesture_ud_count = -1;
+        }
+      else
+        {
+          priv->gesture_ud_count = 0;
+        }
+    }
 
-    /* Determine L/R gesture */
+  /* Determine L/R gesture */
 
-    if (priv->gesture_lr_delta >= GESTURE_SENSITIVITY_1)
-      {
-        priv->gesture_lr_count = 1;
-      }
-    else
-      {
-        if (priv->gesture_lr_delta <= -GESTURE_SENSITIVITY_1)
-          {
-            priv->gesture_lr_count = -1;
-          }
-        else
-          {
-            priv->gesture_lr_count = 0;
-          }
-      }
+  if (priv->gesture_lr_delta >= GESTURE_SENSITIVITY_1)
+    {
+      priv->gesture_lr_count = 1;
+    }
+  else
+    {
+      if (priv->gesture_lr_delta <= -GESTURE_SENSITIVITY_1)
+        {
+          priv->gesture_lr_count = -1;
+        }
+      else
+        {
+          priv->gesture_lr_count = 0;
+        }
+    }
 
-    /* Determine Near/Far gesture */
+  /* Determine Near/Far gesture */
 
-    if ((priv->gesture_ud_count == 0) && (priv->gesture_lr_count == 0))
-      {
-        if ((abs(ud_delta) < GESTURE_SENSITIVITY_2) && \
-            (abs(lr_delta) < GESTURE_SENSITIVITY_2))
-          {
-            if ((ud_delta == 0) && (lr_delta == 0))
-              {
-                priv->gesture_near_count++;
-              }
-            else
-              {
-                if ((ud_delta != 0) || (lr_delta != 0))
-                  {
-                    priv->gesture_far_count++;
-                  }
-              }
+  if ((priv->gesture_ud_count == 0) && (priv->gesture_lr_count == 0))
+    {
+      if ((abs(ud_delta) < GESTURE_SENSITIVITY_2) && \
+          (abs(lr_delta) < GESTURE_SENSITIVITY_2))
+        {
+          if ((ud_delta == 0) && (lr_delta == 0))
+            {
+              priv->gesture_near_count++;
+            }
+          else
+            {
+              if ((ud_delta != 0) || (lr_delta != 0))
+                {
+                  priv->gesture_far_count++;
+                }
+            }
 
-            if ((priv->gesture_near_count >= 10) && \
-                (priv->gesture_far_count >= 2))
-              {
-                if ((ud_delta == 0) && (lr_delta == 0))
-                  {
-                    priv->gesture_state = NEAR_STATE;
-                  }
-                else
-                  {
-                    if ((ud_delta != 0) && (lr_delta != 0))
-                      {
-                        priv->gesture_state = FAR_STATE;
-                      }
-                  }
+          if ((priv->gesture_near_count >= 10) && \
+              (priv->gesture_far_count >= 2))
+            {
+              if ((ud_delta == 0) && (lr_delta == 0))
+                {
+                  priv->gesture_state = NEAR_STATE;
+                }
+              else
+                {
+                  if ((ud_delta != 0) && (lr_delta != 0))
+                    {
+                      priv->gesture_state = FAR_STATE;
+                    }
+                }
 
-                return true;
-              }
-          }
-      }
-    else
-      {
-        if ((abs(ud_delta) < GESTURE_SENSITIVITY_2) && \
-            (abs(lr_delta) < GESTURE_SENSITIVITY_2))
-          {
-            if ((ud_delta == 0) && (lr_delta == 0))
-              {
-                priv->gesture_near_count++;
-              }
+              return true;
+            }
+        }
+    }
+  else
+    {
+      if ((abs(ud_delta) < GESTURE_SENSITIVITY_2) && \
+          (abs(lr_delta) < GESTURE_SENSITIVITY_2))
+        {
+          if ((ud_delta == 0) && (lr_delta == 0))
+            {
+              priv->gesture_near_count++;
+            }
 
-            if (priv->gesture_near_count >= 10)
-              {
-                priv->gesture_ud_count = 0;
-                priv->gesture_lr_count = 0;
-                priv->gesture_ud_delta = 0;
-                priv->gesture_lr_delta = 0;
-              }
-          }
-      }
+          if (priv->gesture_near_count >= 10)
+            {
+              priv->gesture_ud_count = 0;
+              priv->gesture_lr_count = 0;
+              priv->gesture_ud_delta = 0;
+              priv->gesture_lr_delta = 0;
+            }
+        }
+    }
 
-    sninfo(" UD_CT: %03d\n", priv->gesture_ud_count);
-    sninfo(" LR_CT: %03d\n", priv->gesture_lr_count);
-    sninfo(" NEAR_CT: %03d\n", priv->gesture_near_count);
-    sninfo(" FAR_CT:  %03d\n", priv->gesture_far_count);
-    sninfo("----------------------\n");
+  sninfo(" UD_CT: %03d\n", priv->gesture_ud_count);
+  sninfo(" LR_CT: %03d\n", priv->gesture_lr_count);
+  sninfo(" NEAR_CT: %03d\n", priv->gesture_near_count);
+  sninfo(" FAR_CT:  %03d\n", priv->gesture_far_count);
+  sninfo("----------------------\n");
 
-    return false;
+  return false;
 }
 
 /****************************************************************************
@@ -1051,8 +1051,8 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
               for (i = 0; i < fifo_level; i++)
                 {
                    sninfo("U: %03d | D: %03d | L: %03d | R: %03d\n",
-                                               fifo_data[i], fifo_data[i+1],
-                                               fifo_data[i+2], fifo_data[i+3]);
+                          fifo_data[i], fifo_data[i + 1],
+                          fifo_data[i + 2], fifo_data[i + 3]);
                 }
 
               sninfo("\n");
@@ -1085,7 +1085,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
                     {
                       if (apds9960_decodegesture(priv))
                         {
-                            /* TODO: U-Turn Gestures */
+                          /* TODO: U-Turn Gestures */
                         }
                     }
 

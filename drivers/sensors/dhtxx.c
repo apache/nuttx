@@ -108,7 +108,7 @@ static bool dht_verify_checksum(FAR struct dhtxx_dev_s *priv);
 static bool dht_check_data(FAR struct dhtxx_sensor_data_s *data,
                            float min_hum, float max_hum,
                            float min_temp, float max_temp);
-static int  dht_parse_data(FAR struct dhtxx_dev_s *priv, 
+static int  dht_parse_data(FAR struct dhtxx_dev_s *priv,
                           FAR struct dhtxx_sensor_data_s *data);
 
 /* Character driver methods */
@@ -119,7 +119,7 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t dhtxx_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
-static int     dhtxx_ioctl(FAR struct file *filep, int cmd, 
+static int     dhtxx_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 
 /****************************************************************************
@@ -155,7 +155,7 @@ static const struct file_operations g_dhtxxfops =
 static void dht_standby_mode(FAR struct dhtxx_dev_s *priv)
 {
   priv->config->config_data_pin(priv->config, false);
-  priv->config->set_data_pin(priv->config, true);  
+  priv->config->set_data_pin(priv->config, true);
 }
 
 /****************************************************************************
@@ -252,10 +252,11 @@ static int dht_read_raw_data(FAR struct dhtxx_dev_s *priv)
   int64_t start_time;
   int64_t end_time;
   int64_t current_time;
-  uint8_t j, i;
+  uint8_t i;
+  uint8_t j;
 
-  j = 0U;
-  for (i = 0U; i < DHTXX_RESPONSE_BITS; i++)
+  j = 0u;
+  for (i = 0u; i < DHTXX_RESPONSE_BITS; i++)
     {
       /* Start of transmission begins with a ~50uS low. */
 
@@ -312,8 +313,8 @@ static bool dht_verify_checksum(FAR struct dhtxx_dev_s *priv)
 {
   uint8_t sum;
 
-  sum = (priv->raw_data[0] + priv->raw_data[1] + 
-         priv->raw_data[2] + priv->raw_data[3]) & 0xFFU;
+  sum = (priv->raw_data[0] + priv->raw_data[1] +
+         priv->raw_data[2] + priv->raw_data[3]) & 0xffu;
 
   return (sum == priv->raw_data[4]);
 }
@@ -351,7 +352,7 @@ static bool dht_check_data(FAR struct dhtxx_sensor_data_s *data,
  *
  ****************************************************************************/
 
-static int dht_parse_data(FAR struct dhtxx_dev_s *priv, 
+static int dht_parse_data(FAR struct dhtxx_dev_s *priv,
                           FAR struct dhtxx_sensor_data_s *data)
 {
   int ret = OK;
@@ -371,14 +372,14 @@ static int dht_parse_data(FAR struct dhtxx_dev_s *priv,
         {
           ret = -1;
         }
-      
+
     break;
 
     case DHTXX_DHT12:
       data->hum  = priv->raw_data[0] + priv->raw_data[1] * 0.1F;
 
-      data->temp = priv->raw_data[2] + (priv->raw_data[3] & 0x7FU) * 0.1F;
-      if (priv->raw_data[3] & 0x80U)
+      data->temp = priv->raw_data[2] + (priv->raw_data[3] & 0x7fu) * 0.1F;
+      if (priv->raw_data[3] & 0x80u)
         {
           data->temp *= -1;
         }
@@ -395,11 +396,11 @@ static int dht_parse_data(FAR struct dhtxx_dev_s *priv,
     case DHTXX_DHT22:
     case DHTXX_DHT33:
     case DHTXX_DHT44:
-      data->hum  = (priv->raw_data[0] << 8U | priv->raw_data[1]) * 0.1F;
+      data->hum  = (priv->raw_data[0] << 8u | priv->raw_data[1]) * 0.1F;
 
-      data->temp = (((priv->raw_data[2] & 0x7FU) << 8U) | 
+      data->temp = (((priv->raw_data[2] & 0x7fu) << 8u) |
                     priv->raw_data[3]) * 0.1F;
-      if (priv->raw_data[2] & 0x80U)
+      if (priv->raw_data[2] & 0x80u)
         {
           data->temp *= -1;
         }
@@ -467,15 +468,15 @@ static int dhtxx_close(FAR struct file *filep)
  * Name: dhtxx_read
  ****************************************************************************/
 
-static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer, 
+static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen)
 {
   int ret;
   FAR struct inode                *inode = filep->f_inode;
   FAR struct dhtxx_dev_s          *priv  = inode->i_private;
-  FAR struct dhtxx_sensor_data_s  *data  = 
+  FAR struct dhtxx_sensor_data_s  *data  =
              (FAR struct dhtxx_sensor_data_s *)buffer;
-  
+
   if (!buffer)
     {
       snerr("ERROR: Buffer is null.\n");
@@ -488,7 +489,7 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
       return -ENOSYS;
     }
 
-  memset(priv->raw_data, 0U, sizeof(priv->raw_data));
+  memset(priv->raw_data, 0u, sizeof(priv->raw_data));
 
   do
     {
@@ -530,6 +531,7 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
     }
 
 out:
+
   /* Done reading, set the sensor back to low mode. */
 
   dht_standby_mode(priv);
@@ -608,6 +610,7 @@ int dhtxx_register(FAR const char *devpath, FAR struct dhtxx_config_s *config)
       snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
+
   priv->config = config;
 
   /* Register the character driver */

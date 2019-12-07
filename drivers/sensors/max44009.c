@@ -714,7 +714,8 @@ static int max44009_read_data(FAR struct max44009_dev_s *priv,
     }
 
   /* Merge HBYTE and LBYTE to 16-bit integer:
-   *   --.--.--.--.E3.E2.E1.E0.M7.M6.M5.M4.M3.M2.M1.M0 */
+   *   --.--.--.--.E3.E2.E1.E0.M7.M6.M5.M4.M3.M2.M1.M0
+   */
 
   data->raw_value = (hvalue << 4) | (lvalue & 0xf);
 
@@ -850,7 +851,8 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
 
       /* This is a request to set up the poll.  Find an available slot for the
-       * poll structure reference */
+       * poll structure reference.
+       */
 
       for (i = 0; i < CONFIG_MAX44009_NPOLLWAITERS; i++)
         {
@@ -872,6 +874,7 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
           ret = -EBUSY;
           goto out;
         }
+
       if (priv->int_pending)
         {
           max44009_notify(priv);
@@ -889,7 +892,9 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
       *slot = NULL;
       fds->priv = NULL;
     }
+
 out:
+
   nxsem_post(&priv->dev_sem);
   return ret;
 }

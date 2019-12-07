@@ -63,6 +63,7 @@
 #endif
 
 /* Register Addresses *******************************************************/
+
 /* Accelerometer and gyroscope registers */
 
 #define LSM9DS1_ACT_THS                         0x04 /* Inactivity threshold */
@@ -143,6 +144,7 @@
 #define LSM9DS1_INT_THS_H_M                     0x33 /* Interrupt threshold high byte */
 
 /* Register Bit Definitions *************************************************/
+
 /* Inactivity threshold register */
 
 #define LSM9DS1_ACT_THS_ACT_THS_SHIFT           0 /* Inactivity threshold */
@@ -521,6 +523,7 @@ struct lsm9ds1_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int lsm9ds1_readreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,

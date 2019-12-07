@@ -66,6 +66,7 @@
 #endif
 
 /* Register Definitions *****************************************************/
+
 /* Register Addresses */
 
 #define MS58XX_RESET_REG 0x1e /* Reset Register */
@@ -138,6 +139,7 @@ struct ms58xx_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* CRC Calculation */
 
 static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcndx, uint16_t crcmask);
@@ -234,7 +236,7 @@ static uint8_t ms58xx_crc(FAR uint16_t *src, uint8_t crcndx, uint16_t crcmask)
         }
     }
 
-  n_rem = (0x000F & (n_rem >> 12));
+  n_rem = (0x000f & (n_rem >> 12));
   src[crcndx] = crc_read;
   return (n_rem ^ 0x00);
 }
@@ -417,7 +419,7 @@ static int ms58xx_setosr_1(FAR struct ms58xx_dev_s *priv, uint16_t osr)
 
       case 8192:
           priv->delay = 18080;
-          priv->osr   = 0xA;
+          priv->osr   = 0xa;
           break;
 
       default:
@@ -492,7 +494,7 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
     {
       case MS58XX_MODEL_MS5805_02:
       case MS58XX_MODEL_MS5837_30:
-          ret = ms58xx_setosr_1(priv,osr);
+          ret = ms58xx_setosr_1(priv, osr);
           break;
 
       case MS58XX_MODEL_MS5803_02:
@@ -501,7 +503,7 @@ static int ms58xx_setosr(FAR struct ms58xx_dev_s *priv, uint16_t osr)
       case MS58XX_MODEL_MS5803_14:
       case MS58XX_MODEL_MS5803_30:
       case MS58XX_MODEL_MS5806_02:
-          ret = ms58xx_setosr_2(priv,osr);
+          ret = ms58xx_setosr_2(priv, osr);
           break;
 
       default:
@@ -535,7 +537,7 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
     {
       case MS58XX_MODEL_MS5805_02:
       case MS58XX_MODEL_MS5837_30:
-        prom[MS58XX_PROM_LEN-1] = 0;
+        prom[MS58XX_PROM_LEN - 1] = 0;
         len--;
         crcindex = 0;
         crcshift = 12;

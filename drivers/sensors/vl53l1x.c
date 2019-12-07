@@ -758,6 +758,7 @@ static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
 
       average_distance = average_distance + distance;
     }
+
   vl53l1x_stopranging(priv);
 
   average_distance = average_distance / 50;

@@ -82,6 +82,7 @@ struct lm92_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int     lm92_i2c_write(FAR struct lm92_dev_s *priv,

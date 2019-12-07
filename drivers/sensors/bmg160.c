@@ -205,7 +205,7 @@ static void bmg160_write_register(FAR struct bmg160_dev_s *dev,
 
 static void bmg160_reset(FAR struct bmg160_dev_s *dev)
 {
-  bmg160_write_register(dev, BMG160_BGW_SOFTRESET_REG, 0xB6);
+  bmg160_write_register(dev, BMG160_BGW_SOFTRESET_REG, 0xb6);
 
   up_mdelay(100);
 }
@@ -220,7 +220,9 @@ static void bmg160_read_measurement_data(FAR struct bmg160_dev_s *dev)
 
   /* Read Gyroscope */
 
-  uint16_t x_gyr = 0, y_gyr = 0, z_gyr = 0;
+  uint16_t x_gyr = 0;
+  uint16_t y_gyr = 0;
+  uint16_t z_gyr = 0;
 
   bmg160_read_gyroscope_data(dev, &x_gyr, &y_gyr, &z_gyr);
 
@@ -588,7 +590,8 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Since we support multiple BMG160 devices, we will need to add this new
    * instance to a list of device instances so that it can be found by the
-   * interrupt handler based on the received IRQ number. */
+   * interrupt handler based on the received IRQ number.
+   */
 
   priv->flink = g_bmg160_list;
   g_bmg160_list = priv;

@@ -78,6 +78,7 @@ struct ltc4151_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int     ltc4151_read16(FAR struct ltc4151_dev_s *priv, uint8_t regaddr,
@@ -89,10 +90,12 @@ static int     ltc4151_readpower(FAR struct ltc4151_dev_s *priv,
 
 static int     ltc4151_open(FAR struct file *filep);
 static int     ltc4151_close(FAR struct file *filep);
-static ssize_t ltc4151_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t ltc4151_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
 static ssize_t ltc4151_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int     ltc4151_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static int     ltc4151_ioctl(FAR struct file *filep, int cmd,
+                             unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -118,7 +121,7 @@ static const struct file_operations g_ltc4151fops =
 
 static int ltc4151_read_reg(FAR struct ltc4151_dev_s *priv,
                             uint8_t start_register_address,
-                            FAR uint8_t* register_value, uint8_t data_length)
+                            FAR uint8_t *register_value, uint8_t data_length)
 {
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
@@ -137,14 +140,14 @@ static int ltc4151_read_reg(FAR struct ltc4151_dev_s *priv,
   sninfo("start_register_address: "
          "0x%02X data_length: %d register_value: 0x%02x (0x%04x) ret: %d\n",
          start_register_address, data_length, *register_value,
-         *((uint16_t*)register_value), ret);
+         *((FAR uint16_t *)register_value), ret);
   return ret;
 }
 
 static int ltc4151_read16(FAR struct ltc4151_dev_s *priv, uint8_t regaddr,
-                          FAR uint16_t* regvalue)
+                          FAR uint16_t *regvalue)
 {
-  int ret = ltc4151_read_reg(priv, regaddr, (uint8_t*)regvalue,
+  int ret = ltc4151_read_reg(priv, regaddr, (FAR uint8_t *)regvalue,
                              sizeof(*regvalue));
 
   /* Bytes are 8bit_msb.4bit_0.4bit_lsb = 16bit */
@@ -175,17 +178,17 @@ static int ltc4151_readpower(FAR struct ltc4151_dev_s *priv,
 
   ret = ltc4151_read16(priv, LTC4151_CURR_REG, &current_reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ltc4151_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ltc4151_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   ret = ltc4151_read16(priv, LTC4151_VOLT_REG, &volt_reg);
   if (ret < 0)
-  {
-    snerr("ERROR: ltc4151_read16 failed: %d\n", ret);
-    return ret;
-  }
+    {
+      snerr("ERROR: ltc4151_read16 failed: %d\n", ret);
+      return ret;
+    }
 
   /* Current is passed as delta voltage, to get the current divide it by the
    * used resistors resistance.

@@ -76,6 +76,7 @@ struct mb7040_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C Helpers */
 
 static int mb7040_measurerange(FAR struct mb7040_dev_s *priv);
