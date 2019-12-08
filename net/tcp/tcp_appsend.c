@@ -101,9 +101,13 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       /* Per RFC 1122:  "...there SHOULD be an ACK for at least every second
        * segment."
+       *
+       * NOTE: If there is a data payload or other flags to be sent with the
+       * outgoing packet, then we may as well include the ACK too.
        */
 
-      if (conn->rx_unackseg > 0)
+      if (conn->rx_unackseg > 0 || dev->d_sndlen > 0 ||
+          result != TCP_SNDACK)
         {
           /* Reset the delayed ACK state and send the ACK with this packet. */
 
@@ -111,20 +115,13 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
         }
       else
         {
-          /* Indicate that there is one un-ACKed segment and don't send the
-           * ACK on this pack.
+          /* This is only an ACK and there is no pending delayed ACK and
+           * no TX data is being sent.  Indicate that there is one un-ACKed
+           * segment and don't send anything now.
            */
 
-          result &= ~TCP_SNDACK;
           conn->rx_unackseg = 1;
-
-          /* A special case is if there are not other flags and no TCP TX
-           * data payload.  In this case, don't send anything.*/
-
-          if (result == 0 && dev->d_sndlen == 0)
-            {
-              return;
-            }
+          return;
         }
     }
 #endif
