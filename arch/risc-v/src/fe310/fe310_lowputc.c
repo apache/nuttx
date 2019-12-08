@@ -79,6 +79,8 @@
 #  endif
 #endif /* HAVE_CONSOLE */
 
+#define HFCLK 16000000 /* TODO */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -124,8 +126,14 @@ void fe310_lowsetup(void)
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
-  /* TODO: Configure the UART Baud Rate */
+  /* Configure the UART Baud Rate */
 
+  uint32_t div = HFCLK / 115200 - 1;
+  putreg32(div, FE310_CONSOLE_BASE + UART_DIV_OFFSET);
+
+  /* Enable TX */
+
+  putreg32(1, FE310_CONSOLE_BASE + UART_TXCTL_OFFSET);
 #endif /* HAVE_SERIAL_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */
 }

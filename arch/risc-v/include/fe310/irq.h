@@ -43,9 +43,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Machine Interrupt Enable bit in mstatus register */
+/* In mstatus register */
 
-#define MSTATUS_MIE  (0x1 << 3)
+#define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
+
+/* In mie (machine interrupt enable) register */
+
+#define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
+#define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
 
 /* Map RISC-V exception code to NuttX IRQ */
 

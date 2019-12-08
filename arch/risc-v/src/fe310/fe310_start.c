@@ -100,17 +100,20 @@ void __fe310_start(void)
       *dest++ = *src++;
     }
 
-  showprogress('A');
+  /* TODO: Setup PLL */
 
   /* Configure the UART so we can get debug output */
 
   fe310_lowsetup();
 
-  showprogress('B');
+  showprogress('A');
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
+
+  showprogress('B');
+
   /* Do board initialization */
 
   fe310_boardinitialize();

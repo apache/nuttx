@@ -52,12 +52,6 @@
 #include "fe310.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint32_t *g_current_regs;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -70,6 +64,11 @@ void up_irqinitialize(void)
   /* Disable Machine interrupts */
 
   (void)up_irq_save();
+
+  /* Disable all global interrupts */
+
+  putreg32(0x0, FE310_PLIC_ENABLE1);
+  putreg32(0x0, FE310_PLIC_ENABLE2);
 
   /* Colorize the interrupt stack for debug purposes */
 
@@ -120,8 +119,15 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
   int extirq;
+  uint32_t oldstat;
 
-  if (irq > FE310_IRQ_MEXT)
+  if (irq == FE310_IRQ_MTIMER)
+    {
+      /* Read mstatus & clear machine timer interrupt enable in mie */
+
+      asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
+    }
+  else if (irq > FE310_IRQ_MEXT)
     {
       extirq = irq - FE310_IRQ_MEXT;
       ASSERT(31 >= extirq); /* TODO */
@@ -143,8 +149,15 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   int extirq;
+  uint32_t oldstat;
 
-  if (irq > FE310_IRQ_MEXT)
+  if (irq == FE310_IRQ_MTIMER)
+    {
+      /* Read mstatus & set machine timer interrupt enable in mie */
+
+      asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
+    }
+  else if (irq > FE310_IRQ_MEXT)
     {
       extirq = irq - FE310_IRQ_MEXT;
       ASSERT(31 >= extirq); /* TODO */
@@ -224,18 +237,13 @@ void up_irq_restore(irqstate_t flags)
 irqstate_t up_irq_enable(void)
 {
   uint32_t oldstat;
-  uint32_t newstat;
-  uint32_t mie;
 
 #if 1
-  /* Enable MEIE (machine external interrupt enable)
-   * and MTIE (machine timer interrupt enable)
-   */
+  /* Enable MEIE (machine external interrupt enable) */
 
   /* TODO: should move to up_enable_irq() */
 
-  mie = 0x1 << 11 | 0x1 << 7;
-  asm volatile("csrw mie, %0" : /* no output */ : "r" (mie));
+  asm volatile("csrw mie, %0" : /* no output */ : "r"(MIE_MEIE));
 #endif
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
