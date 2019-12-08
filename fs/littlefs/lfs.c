@@ -858,7 +858,7 @@ relocate:
 
       LFS_DEBUG("Relocating %" PRIu32 " %" PRIu32 " to %" PRIu32 " %" PRIu32,
                 oldpair[0], oldpair[1], dir->pair[0], dir->pair[1]);
-      int err = lfs_relocate(lfs, oldpair, dir->pair);
+      err = lfs_relocate(lfs, oldpair, dir->pair);
       if (err)
         {
           return err;
