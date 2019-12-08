@@ -170,7 +170,7 @@ void mips_timer_initialize(void)
 
   putreg32((TIMER1_CON_TCKPS | TIMER1_CON_TCS), PIC32MZ_TIMER1_CON);
   putreg32(0, PIC32MZ_TIMER1_CNT);
-  putreg32(TIMER1_MATCH-1, PIC32MZ_TIMER1_PR);
+  putreg32(TIMER1_MATCH - 1, PIC32MZ_TIMER1_PR);
   putreg32(TIMER_CON_ON, PIC32MZ_TIMER1_CONSET);
 
   /* Configure the timer interrupt */

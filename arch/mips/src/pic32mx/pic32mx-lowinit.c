@@ -212,4 +212,3 @@ void pic32mx_lowinit(void)
   pic32mx_boardinitialize();
 }
 
-

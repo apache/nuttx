@@ -84,8 +84,8 @@
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
  *   2) up_vfork()and calls nxtask_vforksetup().
- *   3) nxtask_vforksetup() allocates and configures the child task's TCB.  This
- *      consists of:
+ *   3) nxtask_vforksetup() allocates and configures the child task's TCB.
+ *      this consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables

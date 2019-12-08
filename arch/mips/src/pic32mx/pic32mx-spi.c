@@ -108,19 +108,21 @@ static void     spi_putreg(FAR struct pic32mx_dev_s *priv,
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-static void     spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+static void     spi_sndblock(FAR struct spi_dev_s *dev,
+                             FAR const void *buffer, size_t nwords);
+static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                              size_t nwords);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI1
-
 static const struct spi_ops_s g_spi1ops =
 {
   .lock              = spi_lock,
@@ -147,7 +149,10 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct pic32mx_dev_s g_spi1dev =
 {
-  .spidev            = { &g_spi1ops },
+  .spidev            =
+  {
+    &g_spi1ops
+  },
   .base              = PIC32MX_SPI1_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   .vector            = PIC32MX_IRQ_SPI1,
@@ -182,7 +187,10 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct pic32mx_dev_s g_spi2dev =
 {
-  .spidev            = { &g_spi2ops },
+  .spidev            =
+  {
+    &g_spi2ops
+  },
   .base              = PIC32MX_SPI2_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   .vector            = PIC32MX_IRQ_SPI2,
@@ -217,7 +225,10 @@ static const struct spi_ops_s g_spi3ops =
 
 static struct pic32mx_dev_s g_spi3dev =
 {
-  .spidev            = { &g_spi3ops },
+  .spidev            =
+  {
+    &g_spi3ops
+  },
   .base              = PIC32MX_SPI3_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   .vector            = PIC32MX_IRQ_SPI4,
@@ -252,7 +263,10 @@ static const struct spi_ops_s g_spi4ops =
 
 static struct pic32mx_dev_s g_spi4dev =
 {
-  .spidev            = { &g_spi4ops },
+  .spidev            =
+  {
+    &g_spi4ops
+  },
   .base              = PIC32MX_SPI4_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   .vector            = PIC32MX_IRQ_SPI4,
@@ -287,7 +301,8 @@ static struct pic32mx_dev_s g_spi4dev =
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI_REGDEBUG
-static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
+static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
+                           unsigned int offset)
 {
   /* Last address, value, and count */
 
@@ -313,10 +328,11 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
     {
       if (count == 0xffffffff || ++count > 3)
         {
-           if (count == 4)
-             {
-               _info("...\n");
-             }
+          if (count == 4)
+            {
+              _info("...\n");
+            }
+
           return value;
         }
     }
@@ -325,20 +341,20 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
 
   else
     {
-       /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-       if (count > 3)
-         {
-           /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-           _info("[repeats %d more times]\n", count-3);
-         }
+          _info("[repeats %d more times]\n", count - 3);
+        }
 
-       /* Save the new address, value, and count */
+      /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       prevalue = value;
-       count    = 1;
+      prevaddr = addr;
+      prevalue = value;
+      count    = 1;
     }
 
   /* Show the register value read */
@@ -347,7 +363,8 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
   return value;
 }
 #else
-static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv, unsigned int offset)
+static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
+                           unsigned int offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -461,7 +478,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
   uint32_t divisor;
@@ -732,14 +750,16 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
@@ -760,20 +780,23 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
        * receive buffer is not empty.
        */
 
-     while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBE) != 0);
 #else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1.
+       * In normal mode, the SPIRBF bit will be set when receive data is
+       * available.
        */
 
-     while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBF) == 0);
 #endif
 
-     /* Read from the buffer register to clear the status bit */
+      /* Read from the buffer register to clear the status bit */
 
-     regval = spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
-     UNUSED(regval);
-     nwords--;
+      regval = spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
+      UNUSED(regval);
+      nwords--;
     }
 }
 
@@ -787,16 +810,18 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits > 8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
@@ -816,19 +841,22 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * receive buffer is not empty.
        */
 
-     while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBE) != 0);
 #else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1.
+       * In normal mode, the SPIRBF bit will be set when receive data is
+       * available.
        */
 
-     while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MX_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBF) == 0);
 #endif
 
-     /* Read the received data from the SPI Data Register */
+      /* Read the received data from the SPI Data Register */
 
-     *ptr++ = (uint8_t)spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
-     nwords--;
+      *ptr++ = (uint8_t)spi_getreg(priv, PIC32MX_SPI_BUF_OFFSET);
+      nwords--;
     }
 }
 
@@ -888,10 +916,10 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
     }
   else
 #endif
-   {
-     spierr("ERROR: Unsupported port: %d\n", port);
-     return NULL;
-   }
+    {
+      spierr("ERROR: Unsupported port: %d\n", port);
+      return NULL;
+    }
 
   /* Disable SPI interrupts */
 

@@ -138,7 +138,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           sched_suspend_scheduler(rtcb);
 
-         /* Are we in an interrupt handler? */
+          /* Are we in an interrupt handler? */
 
           if (g_current_regs)
             {
@@ -146,7 +146,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * Just copy the g_current_regs into the OLD rtcb.
                */
 
-               up_savestate(rtcb->xcp.regs);
+              up_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.

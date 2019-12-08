@@ -286,7 +286,8 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
                     {
                       /* Yes.. call the attached handler */
 
-                      status = handler(irq, context, handlers->handler[i].arg);
+                      status = handler(irq, context,
+                                       handlers->handler[i].arg);
 
                       /* Keep track of the status of the last handler that
                        * failed.
@@ -335,7 +336,8 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
                     {
                       /* Yes.. call the attached handler */
 
-                      status = handler(irq, context, handlers->handler[i].arg);
+                      status = handler(irq, context,
+                                       handlers->handler[i].arg);
 
                       /* Keep track of the status of the last handler that
                        * failed.
@@ -353,7 +355,6 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
 
           putreg32(pending, base + PIC32MZ_IOPORT_CNFCLR_OFFSET);
         }
-
     }
 
   /* Clear the pending interrupt */
@@ -599,7 +600,8 @@ void pic32mz_gpioirqenable(pinset_t pinset)
         {
           /* Enable edge detect. */
 
-          putreg32(IOPORT_CNCON_EDGEDETECT, base + PIC32MZ_IOPORT_CNCONSET_OFFSET);
+          putreg32(IOPORT_CNCON_EDGEDETECT,
+                   base + PIC32MZ_IOPORT_CNCONSET_OFFSET);
 
           if (pic32mz_edgemode(pinset) == GPIO_EDGE_RISING)
             {

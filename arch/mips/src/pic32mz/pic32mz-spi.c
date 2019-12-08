@@ -1063,14 +1063,16 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
        * receive buffer is not empty.
        */
 
-      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBE) != 0);
 #else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1.
+       * In normal mode, the SPIRBF bit will be set when receive data is
        * available.
        */
 
-      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBF) == 0);
 #endif
 
       /* Read from the buffer register to clear the status bit */
@@ -1135,13 +1137,16 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
        * receive buffer is not empty.
        */
 
-      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBE) != 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBE) != 0);
 #else
-      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1. In
-       * normal mode, the SPIRBF bit will be set when receive data is available.
+      /* Wait for the SPIRBF bit in the SPI Status Register to be set to 1.
+       * In normal mode, the SPIRBF bit will be set when receive data is
+       * available.
        */
 
-      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) == 0);
+      while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) &
+              SPI_STAT_SPIRBF) == 0);
 #endif
 
       /* Read from the buffer register to clear the status bit */

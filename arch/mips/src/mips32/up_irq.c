@@ -78,8 +78,8 @@ irqstate_t up_irq_save(void)
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the previous up_irq_enable state (i.e., the one previously returned
- *   by up_irq_save())
+ *   Restore the previous up_irq_enable state (i.e., the one previously
+ *   returned by up_irq_save())
  *
  * Input Parameters:
  *   state - The interrupt state to be restored.

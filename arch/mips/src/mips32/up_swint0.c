@@ -103,17 +103,20 @@ static void dispatch_syscall(void)
 {
 #  error "Missing logic"
 
-/* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
-/*  __asm__ __volatile__ */
-/* ( */
-/*   Save registers */
-/*   Get the base of the stub lookup table */
-/*   Get the offset of the stub for this syscall */
-/*   Load the entry of the stub for this syscall */
-/*   Call the stub */
-/*   Restore regsisters */
-/*   Return from the syscall */
-/* ); */
+  /* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
+
+#  if 0
+  __asm__ __volatile__
+  (
+    Save registers
+    Get the base of the stub lookup table
+    Get the offset of the stub for this syscall
+    Load the entry of the stub for this syscall
+    Call the stub
+    Restore regsisters
+    Return from the syscall
+  );
+#  endif
 }
 #endif
 
@@ -153,17 +156,18 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
     {
       /* R4=SYS_restore_context: This a restore context command:
        *
-       *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       *  void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
        *   R4 = SYS_restore_context
        *   R5 = restoreregs
        *
-       * In this case, we simply need to set g_current_regs to restore register
-       * area referenced in the saved R1. context == g_current_regs is the normal
-       * exception return.  By setting g_current_regs = context[R1], we force
-       * the return to the saved context referenced in R1.
+       * In this case, we simply need to set g_current_regs to restore the
+       * register area referenced in the saved R1. context == g_current_regs
+       * is the normal exception return.  By setting g_current_regs equals to
+       * context[R1], we force the return to the saved context referenced
+       * in R1.
        */
 
       case SYS_restore_context:

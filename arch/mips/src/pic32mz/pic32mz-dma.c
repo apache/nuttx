@@ -902,7 +902,7 @@ void pic32mz_dma_free(DMA_HANDLE handle)
   up_clrpend_irq(dmach->irq);
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_chcfg
  *
  * Description:
@@ -910,7 +910,7 @@ void pic32mz_dma_free(DMA_HANDLE handle)
  *   This config can be done during alloc, however if reconfig is needed,
  *   this functions should be used.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int pic32mz_dma_chcfg(DMA_HANDLE handle,
                       FAR const struct pic32mz_dma_chcfg_s *cfg)

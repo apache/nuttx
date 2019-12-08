@@ -103,28 +103,35 @@ static inline void up_registerdump(void)
   if (g_current_regs)
     {
       _alert("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
-            g_current_regs[REG_MFLO], g_current_regs[REG_MFHI], g_current_regs[REG_EPC],
-            g_current_regs[REG_STATUS]);
+            g_current_regs[REG_MFLO], g_current_regs[REG_MFHI],
+            g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
       _alert("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
-            g_current_regs[REG_AT], g_current_regs[REG_V0], g_current_regs[REG_V1],
-            g_current_regs[REG_A0], g_current_regs[REG_A1], g_current_regs[REG_A2],
+            g_current_regs[REG_AT], g_current_regs[REG_V0],
+            g_current_regs[REG_V1], g_current_regs[REG_A0],
+            g_current_regs[REG_A1], g_current_regs[REG_A2],
             g_current_regs[REG_A3]);
-      _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
-            g_current_regs[REG_T0], g_current_regs[REG_T1], g_current_regs[REG_T2],
-            g_current_regs[REG_T3], g_current_regs[REG_T4], g_current_regs[REG_T5],
+      _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x "
+             "T6:%08x T7:%08x\n",
+            g_current_regs[REG_T0], g_current_regs[REG_T1],
+            g_current_regs[REG_T2], g_current_regs[REG_T3],
+            g_current_regs[REG_T4], g_current_regs[REG_T5],
             g_current_regs[REG_T6], g_current_regs[REG_T7]);
-      _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
-            g_current_regs[REG_S0], g_current_regs[REG_S1], g_current_regs[REG_S2],
-            g_current_regs[REG_S3], g_current_regs[REG_S4], g_current_regs[REG_S5],
+      _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
+             "S6:%08x S7:%08x\n",
+            g_current_regs[REG_S0], g_current_regs[REG_S1],
+            g_current_regs[REG_S2], g_current_regs[REG_S3],
+            g_current_regs[REG_S4], g_current_regs[REG_S5],
             g_current_regs[REG_S6], g_current_regs[REG_S7]);
 #ifdef MIPS32_SAVE_GP
       _alert("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
-            g_current_regs[REG_T8], g_current_regs[REG_T9], g_current_regs[REG_GP],
-            g_current_regs[REG_SP], g_current_regs[REG_FP], g_current_regs[REG_RA]);
+            g_current_regs[REG_T8], g_current_regs[REG_T9],
+            g_current_regs[REG_GP], g_current_regs[REG_SP],
+            g_current_regs[REG_FP], g_current_regs[REG_RA]);
 #else
       _alert("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
-            g_current_regs[REG_T8], g_current_regs[REG_T9], g_current_regs[REG_SP],
-            g_current_regs[REG_FP], g_current_regs[REG_RA]);
+            g_current_regs[REG_T8], g_current_regs[REG_T9],
+            g_current_regs[REG_SP], g_current_regs[REG_FP],
+            g_current_regs[REG_RA]);
 #endif
     }
 }

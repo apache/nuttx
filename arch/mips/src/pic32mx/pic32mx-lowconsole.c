@@ -174,8 +174,8 @@ static void pic32mx_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
   uint32_t brg;
   unsigned int mode;
 
-  /* We want the largest value of BRG divisor possible (for the best accuracy).
-   * Subject to BRG <= 65536.
+  /* We want the largest value of BRG divisor possible
+   * (for the best accuracy), subject to BRG <= 65536.
    */
 
   tmp = BOARD_PBCLOCK / baudrate;
@@ -194,6 +194,7 @@ static void pic32mx_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
       brg  = (tmp + 8) >> 4;
       mode = PIC32MX_UART_MODECLR_OFFSET;
     }
+
   DEBUGASSERT(brg <= 65536);
 
   /* Set the BRG divisor */
@@ -236,15 +237,18 @@ void pic32mx_uartreset(uintptr_t uart_base)
 
 #ifdef HAVE_UART_DEVICE
 void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
-                           unsigned int parity, unsigned int nbits, bool stop2)
+                           unsigned int parity, unsigned int nbits,
+                           bool stop2)
 {
   /* Clear mode and sta bits */
 
   pic32mx_putreg(uart_base, PIC32MX_UART_MODECLR_OFFSET,
-                 UART_MODE_STSEL    | UART_MODE_PDSEL_MASK  | UART_MODE_BRGH   |
-                 UART_MODE_RXINV    | UART_MODE_WAKE        | UART_MODE_LPBACK |
-                 UART_MODE_UEN_MASK | UART_MODE_RTSMD       | UART_MODE_IREN   |
-                 UART_MODE_SIDL     | UART_MODE_ON);
+                 UART_MODE_STSEL    | UART_MODE_PDSEL_MASK |
+                 UART_MODE_BRGH     | UART_MODE_RXINV      |
+                 UART_MODE_WAKE     | UART_MODE_LPBACK     |
+                 UART_MODE_UEN_MASK | UART_MODE_RTSMD      |
+                 UART_MODE_IREN     | UART_MODE_SIDL       |
+                 UART_MODE_ON);
 
   /* Configure the FIFOs:
    *
@@ -252,19 +256,21 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
    *   TX: Interrupt on FIFO empty
    *   Invert transmit polarity.
    *
-   * NOTE that there are not many options on trigger TX interrupts.  The FIFO not
-   * full might generate better through-put but with a higher interrupt rate.  FIFO
-   * empty should lower the interrupt rate but result in a burstier output.  If
-   * you change this, please read the comment for acknowledging the interrupt in
-   * pic32mx-serial.c
+   * NOTE that there are not many options on trigger TX interrupts.
+   * The FIFO not full might generate better through-put but with a higher
+   * interrupt rate.  FIFO empty should lower the interrupt rate but result
+   * in a burstier output.  If you change this, please read the comment for
+   * acknowledging the interrupt in pic32mx-serial.c
    */
 
 #ifdef UART_STA_URXISEL_RXB6
   pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
-                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBE | UART_STA_URXISEL_RXB6);
+                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBE |
+                 UART_STA_URXISEL_RXB6);
 #else
   pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
-                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBE | UART_STA_URXISEL_RXB3);
+                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBE |
+                 UART_STA_URXISEL_RXB3);
 #endif
 
   /* Configure the FIFO interrupts */
@@ -348,11 +354,13 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for the transmit buffer not full */
 
-  while ((pic32mx_getreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_STA_OFFSET) & UART_STA_UTXBF) != 0);
+  while ((pic32mx_getreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_STA_OFFSET) &
+          UART_STA_UTXBF) != 0);
 
   /* Then write the character to the TX data register */
 
-  pic32mx_putreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_TXREG_OFFSET, (uint32_t)ch);
+  pic32mx_putreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_TXREG_OFFSET,
+                 (uint32_t)ch);
 #endif
 }
 

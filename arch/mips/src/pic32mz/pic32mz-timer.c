@@ -153,7 +153,8 @@ static inline void pic32mz_putreg(FAR struct pic32mz_timer_dev_s *dev,
                                   uint16_t offset, uint32_t value);
 static inline bool pic32mz_timer_mode32(FAR struct pic32mz_timer_dev_s *dev);
 static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset);
-static inline uint32_t pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev);
+static inline uint32_t
+  pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev);
 
 static void pic32mz_timer_stopinidle(FAR struct pic32mz_timer_dev_s *dev,
                                     bool stop);
@@ -606,7 +607,8 @@ static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset)
  *
  ****************************************************************************/
 
-static inline uint32_t pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev)
+static inline uint32_t
+  pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev)
 {
   uint32_t irq;
 
@@ -856,10 +858,10 @@ static void pic32mz_timer_setperiod(FAR struct pic32mz_timer_dev_s *dev,
 
   if (pic32mz_timer_mode32(dev))
     {
-      pic32mz_putreg(dev, PIC32MZ_TIMER_PR_OFFSET, period & 0x00000FFFF);
+      pic32mz_putreg(dev, PIC32MZ_TIMER_PR_OFFSET, period & 0x00000ffff);
 
       pic32mz_putreg(dev, pic32mz_timer_oddoffset(PIC32MZ_TIMER_PR_OFFSET),
-                     (period >> 16) & 0x00000FFFF);
+                     (period >> 16) & 0x00000ffff);
     }
   else
     {
@@ -898,7 +900,6 @@ static uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev)
     {
       return pic32mz_getreg(dev, PIC32MZ_TIMER_CNT_OFFSET);
     }
-
 }
 
 /****************************************************************************
@@ -919,11 +920,10 @@ static void pic32mz_timer_setcounter(FAR struct pic32mz_timer_dev_s *dev,
 
   if (pic32mz_timer_mode32(dev))
     {
-
-      pic32mz_putreg(dev, PIC32MZ_TIMER_CNT_OFFSET, count & 0x00000FFFF);
+      pic32mz_putreg(dev, PIC32MZ_TIMER_CNT_OFFSET, count & 0x00000ffff);
 
       pic32mz_putreg(dev, pic32mz_timer_oddoffset(PIC32MZ_TIMER_CNT_OFFSET),
-                     (count >> 16) & 0x00000FFFF);
+                     (count >> 16) & 0x00000ffff);
     }
   else
     {

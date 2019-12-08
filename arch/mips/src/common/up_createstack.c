@@ -210,5 +210,5 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       return OK;
     }
 
-   return ERROR;
+  return ERROR;
 }
