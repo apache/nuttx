@@ -44,7 +44,7 @@
 #include <nuttx/net/net.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef CONFIG_NET_RPMSG_DRV

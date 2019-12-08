@@ -51,7 +51,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* These SPI configuration options affect the form of the SPI interface:
  *
  * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
