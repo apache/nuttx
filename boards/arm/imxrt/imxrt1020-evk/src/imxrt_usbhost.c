@@ -57,8 +57,8 @@
 #include <imxrt_ehci.h>
 
 #include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_usbotg.h"
 #include "imxrt_periphclks.h"
-#include "imxrt_usbotg.h"
 #include "imxrt1020-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */

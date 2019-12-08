@@ -1,4 +1,4 @@
-/*****************************************************************************
+f/*****************************************************************************
  * boards/arm/imxrt/imxrt1020-evk/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -277,8 +277,8 @@
 
 /* USBOTG *********************************************************************/
 
-#define GPIO_USBOTG_ID      (GPIO_USB_OTG_ID_1 | GPIO_USBOTG_ID_DEFAULT)       /* AD_B1_11 */
-#define GPIO_USBOTG_PWR     (GPIO_USB_OTG_PWR_1 |IOMUX_USBOTG_PWR_DEFAULT)     /* AD_B1_10 */
+#define GPIO_USBOTG_ID      (GPIO_USB_OTG_ID_1 | IOMUX_USBOTG_ID_DEFAULT)      /* AD_B1_11 */
+#define GPIO_USBOTG_PWR     (GPIO_USB_OTG_PWR_1 | IOMUX_USBOTG_PWR_DEFAULT)    /* AD_B1_10 */
 #define GPIO_USBOTG_OC      (GPIO_USB_OTG_OC_1 | IOMUX_USBOTG_OC_DEFAULT)      /* AD_B1_12 */
 
 /*****************************************************************************
