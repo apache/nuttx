@@ -61,6 +61,7 @@
 
 #include "imxrt_gpio.h"
 #include "imxrt_iomuxc.h"
+#include "imxrt1020-evk.h"
 
 #include <arch/board/board.h>
 
