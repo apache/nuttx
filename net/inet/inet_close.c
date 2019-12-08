@@ -164,7 +164,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* Check if all outstanding bytes have been ACKed */
 
-      if (conn->unacked != 0 || !sq_empty(&conn->write_q))
+      if (conn->tx_unacked != 0 || !sq_empty(&conn->write_q))
         {
           /* No... we are still waiting for ACKs.  Drop any received data, but
            * do not yet report TCP_CLOSE in the response.

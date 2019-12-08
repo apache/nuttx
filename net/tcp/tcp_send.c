@@ -547,10 +547,10 @@ void tcp_reset(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: tcp_ack
+ * Name: tcp_synack
  *
  * Description:
- *   Send the SYN or SYNACK response.
+ *   Send the SYN, ACK, or SYNACK response.
  *
  * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
@@ -565,8 +565,8 @@ void tcp_reset(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-             uint8_t ack)
+void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
+                uint8_t ack)
 {
   struct tcp_hdr_s *tcp;
   uint16_t tcp_mss;
@@ -609,7 +609,7 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   tcp->flags      = ack;
 
-  /* We send out the TCP Maximum Segment Size option with our ack. */
+  /* We send out the TCP Maximum Segment Size option with our ACK. */
 
   tcp->optdata[0] = TCP_OPT_MSS;
   tcp->optdata[1] = TCP_OPT_MSS_LEN;

@@ -614,7 +614,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    * initial sequence number.
    */
 
-  conn->unacked          = 0;
+  conn->tx_unacked       = 0;
 
 #ifdef CONFIG_NET_SOCKOPTS
   /* Set the initial time for calculating timeouts */

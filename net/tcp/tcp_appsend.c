@@ -85,10 +85,49 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  /* Handle the result based on the application response */
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
+        result, dev->d_sndlen, conn->tx_unacked);
 
-  ninfo("result: %04x d_sndlen: %d conn->unacked: %d\n",
-        result, dev->d_sndlen, conn->unacked);
+#ifdef CONFIG_NET_TCP_DELAYED_ACK
+  /* Did the caller request that an ACK be sent? */
+
+  if ((result & TCP_SNDACK) != 0)
+    {
+      /* Yes.. Handle delayed acknowledgments */
+
+      /* Reset the ACK timer in any event. */
+
+      conn->rx_acktimer = 0;
+
+      /* Per RFC 1122:  "...there SHOULD be an ACK for at least every second
+       * segment."
+       */
+
+      if (conn->rx_unackseg > 0)
+        {
+          /* Reset the delayed ACK state and send the ACK with this packet. */
+
+          conn->rx_unackseg = 0;
+        }
+      else
+        {
+          /* Indicate that there is one un-ACKed segment and don't send the
+           * ACK on this pack.
+           */
+
+          result &= ~TCP_SNDACK;
+          conn->rx_unackseg = 1;
+
+          /* A special case is if there are not other flags and no TCP TX
+           * data payload.  In this case, don't send anything.*/
+
+          if (result == 0 && dev->d_sndlen == 0)
+            {
+              return;
+            }
+        }
+    }
+#endif
 
   /* Get the IP header length associated with the IP domain configured for
    * this TCP connection.
@@ -143,7 +182,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   else if ((result & TCP_CLOSE) != 0)
     {
       conn->tcpstateflags = TCP_FIN_WAIT_1;
-      conn->unacked       = 1;
+      conn->tx_unacked    = 1;
       conn->nrtx          = 0;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
@@ -172,10 +211,10 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * do not go through this path.
            */
 
-          conn->unacked += dev->d_sndlen;
+          conn->tx_unacked += dev->d_sndlen;
 
           /* The application cannot send more than what is allowed by the
-           * MSS (the minumum of the MSS and the available window).
+           * MSS (the minimum of the MSS and the available window).
            */
 
           DEBUGASSERT(dev->d_sndlen <= conn->mss);
@@ -183,6 +222,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       conn->nrtx = 0;
 #endif
+
       /* Then handle the rest of the operation just as for the rexmit case */
 
       tcp_rexmit(dev, conn, result);
@@ -213,8 +253,8 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  ninfo("result: %04x d_sndlen: %d conn->unacked: %d\n",
-        result, dev->d_sndlen, conn->unacked);
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
+        result, dev->d_sndlen, conn->tx_unacked);
 
   /* Get the IP header length associated with the IP domain configured for
    * this TCP connection.
@@ -247,7 +287,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (dev->d_sndlen > 0)
 #else
-  if (dev->d_sndlen > 0 && conn->unacked > 0)
+  if (dev->d_sndlen > 0 && conn->tx_unacked > 0)
 #endif
     {
       /* We always set the ACK flag in response packets adding the length of

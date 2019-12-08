@@ -557,29 +557,29 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           /* Increment the count of bytes sent, the number of unacked bytes,
            * and the total count of TCP packets sent.
            *
-           * NOTE: tcp_appsend() normally increments conn->unacked based on
+           * NOTE: tcp_appsend() normally increments conn->tx_unacked based on
            * the value of dev->d_sndlen.  However, dev->d_len is always
            * zero for 6LoWPAN since it does not send via the dev->d_buf
            * but, rather, uses a backdoor frame interface with the IEEE
            * 802.15.4 MAC.
            */
 
-          sinfo->s_sent   += sndlen;
-          conn->unacked   += sndlen;
+          sinfo->s_sent    += sndlen;
+          conn->tx_unacked += sndlen;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
           /* For compability with buffered send logic */
 
-          conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->unacked);
+          conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->tx_unacked);
 #endif
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.sent++;
 #endif
 
-          ninfo("Sent: acked=%d sent=%d buflen=%d unacked=%d\n",
+          ninfo("Sent: acked=%d sent=%d buflen=%d tx_unacked=%d\n",
                 sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen,
-                conn->unacked);
+                conn->tx_unacked);
         }
     }
 
@@ -612,7 +612,7 @@ end_wait:
 
   /* There are no outstanding, unacknowledged bytes */
 
-  conn->unacked        = 0;
+  conn->tx_unacked     = 0;
 
   /* Wake up the waiting thread */
 
@@ -710,7 +710,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
            * initial sequence number.
            */
 
-          conn->unacked     = 0;
+          conn->tx_unacked  = 0;
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 

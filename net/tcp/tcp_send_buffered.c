@@ -531,13 +531,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Yes.. Reset the number of bytes sent sent from the write buffer */
 
           sent = TCP_WBSENT(wrb);
-          if (conn->unacked > sent)
+          if (conn->tx_unacked > sent)
             {
-              conn->unacked -= sent;
+              conn->tx_unacked -= sent;
             }
           else
             {
-              conn->unacked = 0;
+              conn->tx_unacked = 0;
             }
 
           if (conn->sent > sent)
@@ -550,8 +550,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           TCP_WBSENT(wrb) = 0;
-          ninfo("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
-                wrb, TCP_WBSENT(wrb), conn->unacked, conn->sent);
+          ninfo("REXMIT: wrb=%p sent=%u, conn tx_unacked=%d sent=%d\n",
+                wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
 
           /* Increment the retransmit count on this write buffer. */
 
@@ -603,13 +603,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Reset the number of bytes sent sent from the write buffer */
 
           sent = TCP_WBSENT(wrb);
-          if (conn->unacked > sent)
+          if (conn->tx_unacked > sent)
             {
-              conn->unacked -= sent;
+              conn->tx_unacked -= sent;
             }
           else
             {
-              conn->unacked = 0;
+              conn->tx_unacked = 0;
             }
 
           if (conn->sent > sent)
@@ -622,8 +622,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           TCP_WBSENT(wrb) = 0;
-          ninfo("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
-                wrb, TCP_WBSENT(wrb), conn->unacked, conn->sent);
+          ninfo("REXMIT: wrb=%p sent=%u, conn tx_unacked=%d sent=%d\n",
+                wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
 
           /* Free any write buffers that have exceed the retry count */
 
@@ -767,8 +767,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        * number calculations.
        */
 
-      conn->unacked += sndlen;
-      conn->sent    += sndlen;
+      conn->tx_unacked += sndlen;
+      conn->sent       += sndlen;
 
       /* Below prediction will become true, unless retransmission occurrence */
 
@@ -780,8 +780,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            conn->sndseq_max = predicted_seqno;
         }
 
-      ninfo("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
-            wrb, TCP_WBNRTX(wrb), conn->unacked, conn->sent);
+      ninfo("SEND: wrb=%p nrtx=%u tx_unacked=%u sent=%u\n",
+            wrb, TCP_WBNRTX(wrb), conn->tx_unacked, conn->sent);
 
       /* Increment the count of bytes sent from this write buffer */
 

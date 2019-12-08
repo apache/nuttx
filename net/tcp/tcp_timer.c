@@ -61,6 +61,20 @@
 #include "tcp/tcp.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Per RFC 1122:  "... an ACK should not be excessively delayed; in
+ * particular, the delay MUST be less than 0.5 seconds ..."
+ *
+ * NOTE:  We only have 0.5 timing resolution here so the delay will be
+ * between 0.5 and 1.0 seconds, and may be delayed further, depending on the
+ * polling rate of the the driver (often 1 second).
+ */
+
+#define ACK_DELAY (1)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -187,7 +201,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * retransmit.
        */
 
-      if (conn->unacked > 0)
+      if (conn->tx_unacked > 0)
         {
           /* The connection has outstanding data */
 
@@ -315,14 +329,14 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                      * SYNACK.
                      */
 
-                    tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
+                    tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
                     goto done;
 
                   case TCP_SYN_SENT:
 
                     /* In the SYN_SENT state, we retransmit out SYN. */
 
-                    tcp_ack(dev, conn, TCP_SYN);
+                    tcp_synack(dev, conn, TCP_SYN);
                     goto done;
 
                   case TCP_ESTABLISHED:
@@ -454,7 +468,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                            * dummy byte that we just sent.
                            */
 
-                          conn->unacked++;
+                          conn->tx_unacked++;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
                           /* Increment the un-ACKed sequence number */
@@ -472,9 +486,40 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 }
 #endif
 
+#ifdef CONFIG_NET_TCP_DELAYED_ACK
+              /* Handle delayed acknowledgments.  Is there a segment with a
+               * delayed acknowledgment?
+               */
+
+              if (conn->rx_unackseg > 0)
+                {
+                  /* Increment the ACK delay. */
+
+                  conn->rx_acktimer += hsec;
+
+                  /* Per RFC 1122:  "...an ACK should not be excessively
+                   * delayed; in particular, the delay must be less than
+                   * 0.5 seconds..."
+                   */
+
+                  if (conn->rx_acktimer >= ACK_DELAY)
+                    {
+                      /* Reset the delayed ACK state and send the ACK
+                       * packet.
+                       */
+
+                      conn->rx_unackseg = 0;
+                      conn->rx_acktimer = 0;
+                      tcp_synack(dev, conn, TCP_ACK);
+                      goto done;
+                    }
+                }
+#endif
+
               /* There was no need for a retransmission and there was no
-               * need to probe the remote peer.  We poll the application for
-               * new outgoing data.
+               * need to probe the remote peer and there was no need to
+               * send a delayed ACK.  We poll the application for new
+               * outgoing data.
                */
 
               result = tcp_callback(dev, conn, TCP_POLL);

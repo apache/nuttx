@@ -295,7 +295,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
           /* Our response will be a SYNACK. */
 
-          tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
+          tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
           return;
         }
     }
@@ -416,7 +416,7 @@ found:
       (tcp->flags & (TCP_SYN | TCP_FIN | TCP_RST)) == 0 &&
       (conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED &&
       (dev->d_len == 0 || dev->d_len == 1) &&
-      conn->unacked <= 0)
+      conn->tx_unacked <= 0)
     {
       uint32_t ackseq;
       uint32_t rcvseq;
@@ -471,20 +471,20 @@ found:
    * data, calculate RTT estimations, and reset the retransmission timer.
    */
 
-  if ((tcp->flags & TCP_ACK) != 0 && conn->unacked > 0)
+  if ((tcp->flags & TCP_ACK) != 0 && conn->tx_unacked > 0)
     {
       uint32_t unackseq;
       uint32_t ackseq;
 
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
-       * data (unacked).
+       * data (tx_unacked).
        */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       unackseq = conn->sndseq_max;
 #else
-      unackseq = tcp_addsequence(conn->sndseq, conn->unacked);
+      unackseq = tcp_addsequence(conn->sndseq, conn->tx_unacked);
 #endif
 
       /* Get the sequence number of that has just been acknowledged by this
@@ -504,7 +504,7 @@ found:
         {
           /* Calculate the new number of outstanding, unacknowledged bytes */
 
-          conn->unacked = unackseq - ackseq;
+          conn->tx_unacked = unackseq - ackseq;
         }
       else
         {
@@ -517,11 +517,11 @@ found:
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
               nwarn("WARNING: ackseq > unackseq\n");
-              nwarn("         sndseq=%u unacked=%u unackseq=%u ackseq=%u\n",
-                    tcp_getsequence(conn->sndseq), conn->unacked, unackseq,
+              nwarn("         sndseq=%u tx_unacked=%u unackseq=%u ackseq=%u\n",
+                    tcp_getsequence(conn->sndseq), conn->tx_unacked, unackseq,
                     ackseq);
 
-              conn->unacked = 0;
+              conn->tx_unacked = 0;
             }
         }
 
@@ -530,8 +530,8 @@ found:
        * be beyond ackseq.
        */
 
-      ninfo("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
-            tcp_getsequence(conn->sndseq), ackseq, unackseq, conn->unacked);
+      ninfo("sndseq: %08x->%08x unackseq: %08x new tx_unacked: %d\n",
+            tcp_getsequence(conn->sndseq), ackseq, unackseq, conn->tx_unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
@@ -619,7 +619,7 @@ found:
             conn->sent          = 0;
             conn->sndseq_max    = 0;
 #endif
-            conn->unacked       = 0;
+            conn->tx_unacked    = 0;
             flags               = TCP_CONNECTED;
             ninfo("TCP state: TCP_ESTABLISHED\n");
 
@@ -639,7 +639,7 @@ found:
 
         if ((tcp->flags & TCP_CTL) == TCP_SYN)
           {
-            tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
+            tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
 
@@ -714,7 +714,7 @@ found:
             memcpy(conn->rcvseq, tcp->seqno, 4);
 
             net_incr32(conn->rcvseq, 1);
-            conn->unacked       = 0;
+            conn->tx_unacked    = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
             conn->isn           = tcp_getsequence(tcp->ackno);
@@ -770,7 +770,7 @@ found:
              * if the connection is going to be closed.
              */
 #if 0
-            if (conn->unacked > 0)
+            if (conn->tx_unacked > 0)
               {
                 goto drop;
               }
@@ -791,7 +791,7 @@ found:
             (void)tcp_callback(dev, conn, flags);
 
             conn->tcpstateflags = TCP_LAST_ACK;
-            conn->unacked       = 1;
+            conn->tx_unacked    = 1;
             conn->nrtx          = 0;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
             conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
@@ -943,7 +943,7 @@ found:
 
         if ((tcp->flags & TCP_FIN) != 0)
           {
-            if ((flags & TCP_ACKDATA) != 0 && conn->unacked == 0)
+            if ((flags & TCP_ACKDATA) != 0 && conn->tx_unacked == 0)
               {
                 conn->tcpstateflags = TCP_TIME_WAIT;
                 conn->timer         = 0;
@@ -960,7 +960,7 @@ found:
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
-        else if ((flags & TCP_ACKDATA) != 0 && conn->unacked == 0)
+        else if ((flags & TCP_ACKDATA) != 0 && conn->tx_unacked == 0)
           {
             conn->tcpstateflags = TCP_FIN_WAIT_2;
             ninfo("TCP state: TCP_FIN_WAIT_2\n");

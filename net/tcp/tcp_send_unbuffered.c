@@ -530,7 +530,7 @@ end_wait:
 
   /* There are no outstanding, unacknowledged bytes */
 
-  conn->unacked           = 0;
+  conn->tx_unacked        = 0;
 
   /* Wake up the waiting thread */
 
@@ -747,7 +747,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
            * initial sequence number.
            */
 
-          conn->unacked         = 0;
+          conn->tx_unacked      = 0;
 
           /* Set the initial time for calculating timeouts */
 

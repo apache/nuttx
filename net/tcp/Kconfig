@@ -20,6 +20,20 @@ config NET_TCP_NO_STACK
 
 if NET_TCP && !NET_TCP_NO_STACK
 
+config NET_TCP_DELAYED_ACK
+	bool "TCP/IP Delayed ACK"
+	default n
+	---help---
+		RFC 1122:  A host that is receiving a stream of TCP data segments
+		can increase efficiency in both the Internet and the hosts
+		by sending fewer than one ACK (acknowledgment) segment per data
+		segment received; this is known as a "delayed ACK".
+
+		TCP should implement a delayed ACK, but an ACK should not be
+		excessively delayed; in particular, the delay MUST be less than
+		0.5 seconds, and in a stream of full-sized segments there should
+		be an ACK for at least every second segments.
+
 config NET_TCP_KEEPALIVE
 	bool "TCP/IP Keep-alive support"
 	default n

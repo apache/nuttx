@@ -175,15 +175,19 @@ struct tcp_conn_s
   uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
   uint8_t  nrtx;          /* The number of retransmissions for the last
                            * segment sent */
+#ifdef CONFIG_NET_TCP_DELAYED_ACK
+  uint8_t  rx_unackseg;   /* Number of un-ACKed received segments */
+  uint8_t  rx_acktimer;   /* Time since last ACK sent (units: half-seconds) */
+#endif
   uint16_t lport;         /* The local TCP port, in network byte order */
   uint16_t rport;         /* The remoteTCP port, in network byte order */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
   uint16_t winsize;       /* Current window size of the connection */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  uint32_t unacked;       /* Number bytes sent but not yet ACKed */
+  uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
-  uint16_t unacked;       /* Number bytes sent but not yet ACKed */
+  uint16_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #endif
 
   /* If the TCP socket is bound to a local address, then this is
@@ -941,7 +945,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 void tcp_reset(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: tcp_ack
+ * Name: tcp_synack
  *
  * Description:
  *   Send the SYN or SYNACK response.
@@ -959,8 +963,8 @@ void tcp_reset(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-             uint8_t ack);
+void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
+                uint8_t ack);
 
 /****************************************************************************
  * Name: tcp_appsend
