@@ -171,17 +171,6 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Touchscreen definitions **************************************************/
-
-/* The IMXRT 1050/1060 have connectors for the LCD model RK043FN02H-CT.
- * It comes with the FT5336GQQ (FT5X06) touchscreen chip integrated.
- * FT5X06 is connected to the LPI2C1 bus.
- */
-
-/* LPI2C address of the FT5336GQQ touchscreen chip */
-
-#define FT5X06_I2C_ADDRESS  0x38
-
 /* Button definitions *******************************************************/
 
 /* The IMXRT board has one external user button
@@ -225,45 +214,9 @@
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
 #define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
-/* Buttons ****************************************************************/
-
-#define GPIO_SW        (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
-                        IOMUX_SW_DEFAULT | \
-                        GPIO_PORT5 | GPIO_PIN0 | )              /* WAKEUP */
-
-/* Test Pins **************************************************************/
-
-#define BOARD_NGPIOIN   0 /* Amount of GPIO Input pins */
-#define BOARD_NGPIOOUT  4 /* Amount of GPIO Output pins */
-#define BOARD_NGPIOINT  0 /* Amount of GPIO Input w/ Interruption pins */
-
-#define GPIO_GOUT1      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PORT1 | GPIO_PIN19)
-
-#define GPIO_GOUT2      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN18 | GPIO_PORT1)
-
-#define GPIO_GOUT3      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN10 | GPIO_PORT1)
-
-#define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
-                         GPIO_PIN9 | GPIO_PORT1)
-
-/* LED Disambiguation *******************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-#define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
-                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)  /* AD_BO_09 */
-#endif
-
 /* LCD *********************************************************************/
 
 #ifdef CONFIG_IMXRT_LCD
-/* Backlight */
-
-#  define GPIO_LCD_BL        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT2 | \
-                              GPIO_PIN31 | IOMUX_LCD_BL_DEFAULT)
-
 /* LCD controller */
 
 #  define GPIO_LCD_DATA23    GPIO_LCD_DATA23_1
@@ -313,17 +266,6 @@
 #define GPIO_ENET_TX_CLK     (GPIO_ENET_REF_CLK_2|\
                               IOMUX_ENET_TX_CLK_DEFAULT)                  /* GPIO_B1_10 */
 #define GPIO_ENET_TX_EN      (GPIO_ENET_TX_EN_1|IOMUX_ENET_EN_DEFAULT)    /* GPIO_B1_09 */
-#define GPIO_ENET_INT        (IOMUX_ENET_INT_DEFAULT | \
-                              GPIO_PORT1 | GPIO_PIN10)                    /* AD_B0_10 */
-#define GPIO_ENET_IRQ         IMXRT_IRQ_GPIO1_10
-#define GPIO_ENET_RST        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                              GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST_DEFAULT) /* AD_B0_09 */
-
-#ifdef CONFIG_ETH0_PHY_KSZ8081
-#  ifdef GPIO_LED
-#    warning LED interferes with ETH reset unless R323 is removed.
-#  endif
-#endif
 
 /* PIO Disambiguation *******************************************************/
 
@@ -361,33 +303,6 @@
 #define GPIO_LPSPI3_SCK      (GPIO_LPSPI3_SCK_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_00 */
 #define GPIO_LPSPI3_MISO     (GPIO_LPSPI3_SDI_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_02 */
 #define GPIO_LPSPI3_MOSI     (GPIO_LPSPI3_SDO_2|IOMUX_LPSPI_DEFAULT) /* GPIO_AD_B0_01 */
-#define IOMUX_LPSPI3_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                              _IOMUX_PULL_ENABLE)
-#define GPIO_LPSPI3_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
-                              GPIO_PORT1 | GPIO_PIN3 | IOMUX_LPSPI3_CS) /* GPIO_AD_B0_03 */
-
-/* LPSPI1 CS:  GPIO_SD_B0_01 */
-
-#define IOMUX_LPSPI1_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                              _IOMUX_PULL_ENABLE)
-#define GPIO_LPSPI1_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
-                              GPIO_PORT3 | GPIO_PIN13 | IOMUX_LPSPI1_CS)
-
-#define IOMUX_MMCSD_EN       (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
-                              IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
-                              _IOMUX_PULL_ENABLE)
-#define GPIO_MMCSD_EN        (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                              GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
-
-#define GPIO_FT5X06_INTR     IMXRT_IRQ_GPIO1_11
-
-#define IOMUX_FT5X06_RST     (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
-                              IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
-                              IOMUX_SLEW_SLOW)                            /* AD_B0_11 */
-#define GPIO_FT5X06_CTRSTn   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
-                              GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)  /* AD_B0_02 */
 
 /****************************************************************************
  * Public Types

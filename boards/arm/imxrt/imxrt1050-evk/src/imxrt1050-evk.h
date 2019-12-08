@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/imxrt/imxrt1050-evk/src/imxrt1050-evk.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,76 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* LEDs */
+
+#define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
+                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)       /* AD_BO_09 */
+
+/* Buttons ****************************************************************/
+
+#define GPIO_SW8       (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
+                        IOMUX_SW_DEFAULT | \
+                        GPIO_PORT5 | GPIO_PIN0 | )              /* WAKEUP */
+
+/* Test Pins **************************************************************/
+
+#define BOARD_NGPIOIN   0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT  4 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT  0 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_GOUT1      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PORT1 | GPIO_PIN19)
+
+#define GPIO_GOUT2      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PIN18 | GPIO_PORT1)
+
+#define GPIO_GOUT3      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PIN10 | GPIO_PORT1)
+
+#define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
+                         GPIO_PIN9 | GPIO_PORT1)
+
+/* Backlight */
+
+#define GPIO_LCD_BL     (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT2 | \
+                         GPIO_PIN31 | IOMUX_LCD_BL_DEFAULT)
+
+/* Ethernet */
+
+#define GPIO_ENET_INT   (IOMUX_ENET_INT_DEFAULT | \
+                         GPIO_PORT1 | GPIO_PIN10)                    /* AD_B0_10 */
+#define GPIO_ENET_IRQ   IMXRT_IRQ_GPIO1_10
+#define GPIO_ENET_RST   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                         GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST_DEFAULT)
+
+#ifdef CONFIG_ETH0_PHY_KSZ8081
+#ifdef GPIO_LED
+#warning LED interferes with ETH reset unless R323 is removed.
+#endif
+#endif
+
+/* LPSPI CS: */
+
+#define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI3_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                         GPIO_PORT1 | GPIO_PIN3 | IOMUX_LPSPI3_CS) /* GPIO_AD_B0_03 */
+
+/* LPSPI1 CS:  GPIO_SD_B0_01 */
+
+#define IOMUX_LPSPI1_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI1_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                         GPIO_PORT3 | GPIO_PIN13 | IOMUX_LPSPI1_CS)
+
+#define IOMUX_MMCSD_EN  (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_MMCSD_EN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                         GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
 
 /****************************************************************************
  * Public Types

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * boards/arm/imxrt/imxrt1020-evk/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *            Dave Marples <dave@marples.net>
@@ -201,25 +201,9 @@
 
 /* Pinning ******************************************************************/
 
-/* LEDs *********************************************************************/
-
-#define GPIO_USERLED    (IOMUX_LED_DEFAULT | GPIO_OUTPUT | \
-                         GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN5)  /* AD_B0_05 */
-
-/* Buttons ******************************************************************/
-
-#define GPIO_SWWAKE     (GPIO_INTERRUPT | GPIO_INT_FALLINGEDGE | \
-                         IOMUX_SWWAKE_DEFAULT | GPIO_PORT5 | GPIO_PIN0)  /* WAKE */
-
-/* ETH Disambiguation ********************************************************/
-
-#define GPIO_ENET_INT   (IOMUX_ENET_INT_DEFAULT | GPIO_INTERRUPT | \
-                         GPIO_INT_FALLINGEDGE |	GPIO_PORT1 | GPIO_PIN22) /* AD_B1_06 */
-#define GPIO_ENET_IRQ   IMXRT_IRQ_GPIO1_12
-
 /* Make sure these entries match to allow interrupts to be present */
 
-#define GPIO_ENET_GRP   IMXRT_GPIO1_16_31_IRQ
+#define GPIO_ENET_GRP       IMXRT_GPIO1_16_31_IRQ
 
 #ifndef GPIO_ENET_GRP
 #  ifdef CONFIG_IMXRT_ENET
@@ -236,8 +220,6 @@
 #define GPIO_ENET_RX_DATA01  GPIO_ENET_RX_DATA01_2 | IOMUX_ENET_DATA_DEFAULT
 #define GPIO_ENET_TX_DATA00  GPIO_ENET_TX_DATA00_2 | IOMUX_ENET_DATA_DEFAULT
 #define GPIO_ENET_TX_DATA01  GPIO_ENET_TX_DATA01_2 | IOMUX_ENET_DATA_DEFAULT
-#define GPIO_ENET_RST       (GPIO_OUTPUT | IOMUX_ENET_RST_DEFAULT | \
-                             GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN4 )  /* AD_B0_04, Inverted logic */
 
 /* LPI2Cs *******************************************************************/
 
@@ -268,18 +250,6 @@
 #define PIN_USDHC1_D3       (GPIO_USDHC1_DATA3_1 | IOMUX_USDHC1_DATAX_DEFAULT) /* SD_B0_01 */
 #define PIN_USDHC1_DCLK     (GPIO_USDHC1_CLK_1   | IOMUX_USDHC1_CLK_DEFAULT)   /* SD_B0_03 */
 #define PIN_USDHC1_CMD      (GPIO_USDHC1_CMD_1   | IOMUX_USDHC1_CMD_DEFAULT)   /* SD_B0_02 */
-#define PIN_USDHC1_CD       (IOMUX_VSD_DEFAULT | \
-                             GPIO_PORT3 | GPIO_PIN19 )                        /* SD_B0_06 */
-#define GPIO_VSDHIGH        (GPIO_OUTPUT | IOMUX_VSD_DEFAULT | GPIO_OUTPUT_ONE | \
-                             GPIO_PORT1 | GPIO_PIN22)                          /* AD_B1_07 */
-#define PIN_USDHC1_PWREN    (GPIO_OUTPUT | IOMUX_VSD_DEFAULT | GPIO_OUTPUT_ONE | \
-                             GPIO_PORT3 | GPIO_PIN24  )                        /* SD_B1_04 */
-
-/* USBOTG *********************************************************************/
-
-#define GPIO_USBOTG_ID      (GPIO_USB_OTG_ID_1 | IOMUX_USBOTG_ID_DEFAULT)      /* AD_B1_11 */
-#define GPIO_USBOTG_PWR     (GPIO_USB_OTG_PWR_1 | IOMUX_USBOTG_PWR_DEFAULT)    /* AD_B1_10 */
-#define GPIO_USBOTG_OC      (GPIO_USB_OTG_OC_1 | IOMUX_USBOTG_OC_DEFAULT)      /* AD_B1_12 */
 
 /*****************************************************************************
  * Public Types
