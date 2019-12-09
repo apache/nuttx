@@ -134,6 +134,17 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
           return;
         }
     }
+
+  /* If there are data to be sent in the same direction as the ACK before
+   * the second data packet is received and the delay timer expires, the ACK
+   * is piggybacked with the data segment and sent immediately.
+   */
+
+  else if (dev->d_sndlen > 0 && conn->rx_unackseg > 0)
+    {
+      result |= TCP_SNDACK;
+      conn->rx_unackseg = 0;
+    }
 #endif
 
   /* Get the IP header length associated with the IP domain configured for
