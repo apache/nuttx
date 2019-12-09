@@ -99,11 +99,21 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       conn->rx_acktimer = 0;
 
-      /* Per RFC 1122:  "...there SHOULD be an ACK for at least every second
-       * segment."
+      /* Per RFC 1122:  "...in a stream of full-sized segments there
+       * SHOULD be an ACK for at least every second segment."
        *
-       * NOTE: If there is a data payload or other flags to be sent with the
-       * outgoing packet, then we may as well include the ACK too.
+       * NOTES:
+       * 1. If there is a data payload or other flags to be sent with the
+       *    outgoing packet, then we may as well include the ACK too.
+       * 2. The RFC refers to full-size segments.  It is not clear what
+       *    "full-size" means.  Does that mean that the payload is the size
+       *    of the MSS?  Payload size is not considered other there being
+       *    a payload or or not.  Should there be some special action for
+       *    small payloads of size < MSS?
+       * 3. Experimentation shows that Windows and Linux behave somewhat
+       *    differently; they delay the ACKs for many more segments (6 or
+       *    more).  Delaying for more segments would provide less network
+       *    traffic and better performance but seems non-compliant.
        */
 
       if (conn->rx_unackseg > 0 || dev->d_sndlen > 0 ||
