@@ -719,11 +719,6 @@ logparser.c
     logparser _git_log.tmp >_changelog.txt
     rm -f _git_log.tmp
 
-mkimage.sh
-----------
-
-  The creates a downloadable image as needed with the rrload bootloader.
-
 indent.sh
 ---------
 

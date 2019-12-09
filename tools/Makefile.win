@@ -475,10 +475,6 @@ pass2deps: pass2dep $(NUTTXLIBS)
 
 pass2: pass2deps
 	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
-ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@echo "MK: $(NUTTXNAME).rr"
-	$(Q) $(TOPDIR)\tools\mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(NUTTXNAME).rr
-endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: $(NUTTXNAME).hex"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex

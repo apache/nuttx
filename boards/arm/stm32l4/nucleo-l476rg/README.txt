@@ -176,7 +176,6 @@ GNU Toolchain Options
   the default system x86 tool versions and these seem to work okay.  Disable all
   of the following to avoid using objcopy:
 
-    CONFIG_RRLOAD_BINARY=n
     CONFIG_INTELHEX_BINARY=n
     CONFIG_MOTOROLA_SREC=n
     CONFIG_RAW_BINARY=n

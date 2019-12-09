@@ -273,13 +273,6 @@ endmenu # Build Setup
 
 menu "Binary Output Formats"
 
-config RRLOAD_BINARY
-	bool "rrload binary format"
-	default n
-	---help---
-		Create nuttx.rr in the rrload binary format used with
-		BSPs from www.ridgerun.com using the tools/mkimage.sh script.
-
 config CXD56_BINARY
 	bool "spk binary format"
 	default n

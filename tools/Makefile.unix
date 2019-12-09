@@ -471,13 +471,6 @@ pass2: pass2deps
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
-ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@echo "MK: $(NUTTXNAME).rr"
-	$(Q) $(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(NUTTXNAME).rr
-	$(Q) if [ -w /tftpboot ] ; then \
-		cp -f $(NUTTXNAME).rr /tftpboot/$(NUTTXNAME).rr.$(CONFIG_ARCH); \
-	fi
-endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: $(NUTTXNAME).hex"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
