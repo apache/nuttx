@@ -113,7 +113,6 @@ static int  am335x_lcd_interrupt(int irq, void *context, void *arg);
 static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t frequency);
 static int  am335x_set_refclk(uint32_t frequency);
 static int  am335x_get_refclk(uint32_t *frequency);
-static int  am335x_lcdc_enableclk(void);
 
 /****************************************************************************
  * Private Data
@@ -409,7 +408,7 @@ static int am335x_set_refclk(uint32_t frequency)
           if (delta < 0)
             {
               delta    = -delta;
-           }
+            }
 
           if (delta < mindelta)
             {
@@ -422,7 +421,7 @@ static int am335x_set_refclk(uint32_t frequency)
             {
               break;
             }
-         }
+        }
     }
 
   putreg32(AM335X_CM_WKUP_CLKSEL_DPLL_DISP, (mul << 8) | (div - 1));
@@ -461,35 +460,6 @@ static int am335x_get_refclk(uint32_t *frequency)
 
   sysclk     = am335x_get_sysclk();
   *frequency = ((regval >> 8) & 0x7ff) * (sysclk / ((regval & 0x7f) + 1));
-  return OK;
-}
-
-/****************************************************************************
- * Name: am335x_lcdc_enableclk
- ****************************************************************************/
-
-static int am335x_lcdc_enableclk(void)
-{
-  /* Set MODULEMODE to ENABLE(2) */
-
-  putreg32(AM335X_CM_PER_LCDC_CLKCTRL, CM_WKUP_CLKCTRL_MODULEMODE_ENABLE);
-
-  /* Wait for MODULEMODE to reflect that it is enabled */
-
-  while ((getreg32(AM335X_CM_PER_LCDC_CLKCTRL) & CM_WKUP_CLKCTRL_MODULEMODE_MASK)
-         != CM_WKUP_CLKCTRL_MODULEMODE_ENABLE)
-    {
-      up_udelay(10);
-    }
-
-  /* Wait for IDLEST to become fully functional */
-
-  while ((getreg32(AM335X_CM_PER_LCDC_CLKCTRL) & CM_WKUP_CLKCTRL_IDLEST_MASK)
-         != CM_WKUP_CLKCTRL_IDLEST_FUNC)
-    {
-      up_udelay(10);
-    }
-
   return OK;
 }
 
@@ -630,21 +600,6 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
   if (ret < 0)
     {
       lcderr("ERROR:  Failed to attach LCDC interrupt.");
-    }
-
-  /* Set the initial reference clock to twice the VGA pixel clock for now. */
-
-  (void)am335x_set_refclk(2 * 25175000);
-
-  /* Enable clocking to the LCD peripheral. */
-
-  lcdinfo("Enable clocking to the LCD controller\n");
-
-  ret = am335x_lcdc_enableclk();
-  if (ret < 0)
-    {
-      lcderr("ERROR:  Failed to enable clocking\n");
-      return ret;
     }
 
   /* Adjust reference clock to get double of requested pixel clock frequency
@@ -910,7 +865,9 @@ void up_fbuninitialize(int display)
 #endif
 
   /* Reset/Disable the LCD controller */
+
   /* Disable clocking to the LCD peripheral */
+
   /* Detach and disable the LCDC interrupt */
 }
 

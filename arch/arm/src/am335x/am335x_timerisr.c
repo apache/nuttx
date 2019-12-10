@@ -136,9 +136,7 @@ void arm_timer_initialize(void)
 
   putreg32(TMR1MS_TIOCP_SOFT_RESET, AM335X_TMR1MS_TIOCP_CFG);
 
-  while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT))
-    {
-    }
+  while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT));
 
   putreg32(TMR_TPIR, AM335X_TMR1MS_TPIR);
   putreg32(TMR_TNIR, AM335X_TMR1MS_TNIR);
@@ -156,7 +154,7 @@ void arm_timer_initialize(void)
 
   /* Clear interrupt status */
 
-  regval = TMR1MS_IRQ_FlAG_MAT | TMR1MS_IRQ_FLAG_OVF |
+  regval = TMR1MS_IRQ_FLAG_MAT | TMR1MS_IRQ_FLAG_OVF |
            TMR1MS_IRQ_FLAG_TCAR;
   putreg32(regval, AM335X_TMR1MS_TISR);
 
@@ -177,9 +175,7 @@ void arm_timer_initialize(void)
 
   putreg32(TMR_TIOCP_SOFT_RESET, AM335X_TMR2_TIOCP_CFG);
 
-  while ((getreg32(AM335X_TMR2_TIOCP_CFG) & TMR_TIOCP_SOFT_RESET))
-    {
-    }
+  while ((getreg32(AM335X_TMR2_TIOCP_CFG) & TMR_TIOCP_SOFT_RESET));
 
   putreg32(TMR_TLDR, AM335X_TMR2_TLDR);
   putreg32(TMR_TCRR, AM335X_TMR2_TCRR);

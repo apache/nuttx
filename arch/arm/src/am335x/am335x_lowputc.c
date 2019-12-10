@@ -173,12 +173,16 @@ void up_lowputc(char ch)
 #if defined(HAVE_UART_DEVICE) && defined(HAVE_SERIAL_CONSOLE)
   /* Wait for the transmitter to be available */
 
-  while ((getreg32(CONSOLE_BASE+AM335X_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
+  while ((getreg32(CONSOLE_BASE + AM335X_UART_LSR_OFFSET) & UART_LSR_THRE) == 0)
+    {
+    }
 
   /* Send the character */
 
-  putreg32((uint32_t)ch, CONSOLE_BASE+AM335X_UART_THR_OFFSET);
-  while ((getreg32(CONSOLE_BASE+AM335X_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
+  putreg32((uint32_t)ch, CONSOLE_BASE + AM335X_UART_THR_OFFSET);
+  while ((getreg32(CONSOLE_BASE + AM335X_UART_LSR_OFFSET) & UART_LSR_THRE) == 0)
+    {
+    }
 #endif
 }
 
@@ -196,6 +200,7 @@ void am335x_lowsetup(void)
 {
 #ifdef HAVE_UART_DEVICE
   /* Enable power and clocking to the UART peripheral */
+
 #warning Missing logic
 
   /* Configure UART pins for the selected CONSOLE.  If there are multiple
@@ -223,8 +228,8 @@ void am335x_lowsetup(void)
   am335x_gpio_config(GPIO_UART5_RXD);
 #endif
 
-  /* Configure the console (only) */
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  /* Configure the console (only) */
 
 #if 0
   /* Performing Software Reset of the module. */
@@ -233,6 +238,7 @@ void am335x_lowsetup(void)
           CONSOLE_BASE + AM335X_UART_SYSC_OFFSET);
 
   /* Wait until the process of Module Reset is complete. */
+
   while (!(getreg32(CONSOLE_BASE + AM335X_UART_SYSS_OFFSET) & UART_SYSS_RESET_DONE))
     {
     }
@@ -261,7 +267,8 @@ void am335x_lowsetup(void)
 
   /* Clear FIFOs */
 
-  putreg32(UART_FCR_RFIFO_CLEAR | UART_FCR_TFIFO_CLEAR, CONSOLE_BASE + AM335X_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RFIFO_CLEAR | UART_FCR_TFIFO_CLEAR,
+           CONSOLE_BASE + AM335X_UART_FCR_OFFSET);
 
   /* Configure the FIFOs */
 
@@ -282,7 +289,7 @@ void am335x_lowsetup(void)
 #  warning Missing logic
 #endif
 
-  putreg32(UART_MDR1_MODE_16x, CONSOLE_BASE + AM335X_UART_MDR1_OFFSET);
+  putreg32(UART_MDR1_MODE_16X, CONSOLE_BASE + AM335X_UART_MDR1_OFFSET);
 #endif
 #endif /* HAVE_UART_DEVICE */
 }

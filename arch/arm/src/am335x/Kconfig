@@ -54,31 +54,31 @@ config AM335X_UART5
 	select UART5_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config AM335X_DMTIMER0
+config AM335X_TIMER0
 	bool "Timer 0"
 	default n
 
-config AM335X_DMTIMER2
+config AM335X_TIMER2
 	bool "Timer 2"
 	default n
 
-config AM335X_DMTIMER3
+config AM335X_TIMER3
 	bool "Timer 3"
 	default n
 
-config AM335X_DMTIMER4
+config AM335X_TIMER4
 	bool "Timer 4"
 	default n
 
-config AM335X_DMTIMER5
+config AM335X_TIMER5
 	bool "Timer 5"
 	default n
 
-config AM335X_DMTIMER6
+config AM335X_TIMER6
 	bool "Timer 6"
 	default n
 
-config AM335X_DMTIMER7
+config AM335X_TIMER7
 	bool "Timer 7"
 	default n
 
@@ -86,7 +86,7 @@ config AM335X_IRQ_WD
 	bool "Watchdog"
 	default n
 
-config AM335X_EDMA
+config AM335X_DMA
 	bool "Enhanced Direct Memory Access"
 	default n
 
@@ -121,15 +121,15 @@ config AM335X_USB1
 	bool "USB 1"
 	default n
 
-config AM335X_MMCHS0
+config AM335X_MMC0
 	bool "MMC/SD/SDIO0 High Speed Host Controller 0"
 	default n
 
-config AM335X_MMCHS1
+config AM335X_MMC1
 	bool "MMC/SD/SDIO0 High Speed Host Controller 1"
 	default n
 
-config AM335X_MMCHS2
+config AM335X_MMC2
 	bool "MMC/SD/SDIO0 High Speed Host Controller 2"
 	default n
 
@@ -153,20 +153,20 @@ config AM335X_MCASP1
 	bool "Multichannel Audio Serial Port 1"
 	default n
 
-config AM335X_DCAN0
+config AM335X_CAN0
 	bool "DCAN Bus 0 Controller"
 	default n
 
-config AM335X_DCAN1
+config AM335X_CAN1
 	bool "DCAN Bus 1 Controller"
 	default n
 
-config AM335X_MCSPI0
-	bool "MCSPI 0"
+config AM335X_SPI0
+	bool "Multichannel Serial Port Interface 0"
 	default n
 
-config AM335X_MCSPI1
-	bool "MCSPI 1"
+config AM335X_SPI1
+	bool "Multichannel Serial Port Interface 1"
 	default n
 
 config AM335X_IRQ_PERFMU

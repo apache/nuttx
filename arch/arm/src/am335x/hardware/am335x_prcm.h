@@ -51,6 +51,7 @@
 
 #define AM335X_CM_PER_L4LS_CLKSTCTRL_OFFSET             0x0000
 #define AM335X_CM_PER_L3S_CLKSTCTRL_OFFSET              0x0004
+#define AM335X_CM_PER_L4FW_CLKSTCTRL_OFFSET             0x0008
 #define AM335X_CM_PER_L3_CLKSTCTRL_OFFSET               0x000c
 #define AM335X_CM_PER_CPGMAC0_CLKCTRL_OFFSET            0x0014
 #define AM335X_CM_PER_LCDC_CLKCTRL_OFFSET               0x0018
@@ -68,6 +69,7 @@
 #define AM335X_CM_PER_SPI0_CLKCTRL_OFFSET               0x004c
 #define AM335X_CM_PER_SPI1_CLKCTRL_OFFSET               0x0050
 #define AM335X_CM_PER_L4LS_CLKCTRL_OFFSET               0x0060
+#define AM335X_CM_PER_L4FW_CLKCTRL_OFFSET               0x0064
 #define AM335X_CM_PER_MCASP1_CLKCTRL_OFFSET             0x0068
 #define AM335X_CM_PER_UART1_CLKCTRL_OFFSET              0x006c
 #define AM335X_CM_PER_UART2_CLKCTRL_OFFSET              0x0070
@@ -199,6 +201,7 @@
 
 #define AM335X_CM_PER_L4LS_CLKSTCTRL                    (AM335X_CM_PER_VADDR + AM335X_CM_PER_L4LS_CLKSTCTRL_OFFSET)
 #define AM335X_CM_PER_L3S_CLKSTCTRL                     (AM335X_CM_PER_VADDR + AM335X_CM_PER_L3S_CLKSTCTRL_OFFSET)
+#define AM335X_CM_PER_L4FW_CLKSTCTRL                    (AM335X_CM_PER_VADDR + AM335X_CM_PER_L4FW_CLKSTCTRL_OFFSET)
 #define AM335X_CM_PER_L3_CLKSTCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_L3_CLKSTCTRL_OFFSET)
 #define AM335X_CM_PER_CPGMAC0_CLKCTRL                   (AM335X_CM_PER_VADDR + AM335X_CM_PER_CPGMAC0_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_LCDC_CLKCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_LCDC_CLKCTRL_OFFSET)
@@ -216,6 +219,7 @@
 #define AM335X_CM_PER_SPI0_CLKCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_SPI0_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_SPI1_CLKCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_SPI1_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_L4LS_CLKCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_L4LS_CLKCTRL_OFFSET)
+#define AM335X_CM_PER_L4FW_CLKCTRL                      (AM335X_CM_PER_VADDR + AM335X_CM_PER_L4FW_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_MCASP1_CLKCTRL                    (AM335X_CM_PER_VADDR + AM335X_CM_PER_MCASP1_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_UART1_CLKCTRL                     (AM335X_CM_PER_VADDR + AM335X_CM_PER_UART1_CLKCTRL_OFFSET)
 #define AM335X_CM_PER_UART2_CLKCTRL                     (AM335X_CM_PER_VADDR + AM335X_CM_PER_UART2_CLKCTRL_OFFSET)
@@ -343,26 +347,104 @@
 #define AM335X_CM_CEFUSE_CLKSTCTRL                      (AM335X_CM_CEFUSE_VADDR + AM335X_CM_CEFUSE_CLKSTCTRL_OFFSET)
 #define AM335X_CM_CEFUSE_CLKCTRL                        (AM335X_CM_CEFUSE_VADDR + AM335X_CM_CEFUSE_CLKCTRL_OFFSET)
 
-/* Clock Module Register Bit Definitions **************************************************/
+/* Clock Module Register Bit Definitions ****************************************************/
 
-#define CM_WKUP_CLKCTRL_MODULEMODE_SHIFT                (0) /* Bits 0-1: Control the way mandatory clocks are managed */
-#define CM_WKUP_CLKCTRL_MODULEMODE_MASK                 (3 << CM_WKUP_CLKCTRL_MODULEMODE_SHIFT)
-#  define CM_WKUP_CLKCTRL_MODULEMODE_DISABLE            (0 << CM_WKUP_CLKCTRL_MODULEMODE_SHIFT) /* Module is disable by SW */
-#  define CM_WKUP_CLKCTRL_MODULEMODE_ENABLE             (2 << CM_WKUP_CLKCTRL_MODULEMODE_SHIFT) /* Module is explicitly enabled */
-#define CM_WKUP_CLKCTRL_IDLEST_SHIFT                    (16) /* Bits 16-17: Module idle status. */
-#define CM_WKUP_CLKCTRL_IDLEST_MASK                     (3 << CM_WKUP_CLKCTRL_IDLEST_SHIFT)
-#  define CM_WKUP_CLKCTRL_IDLEST_FUNC                   (0 << CM_WKUP_CLKCTRL_IDLEST_SHIFT) /* Module is fully functional, including OCP */
-#  define CM_WKUP_CLKCTRL_IDLEST_TRANS                  (1 << CM_WKUP_CLKCTRL_IDLEST_SHIFT) /* Module is performing transition: wakeup, or sleep, or sleep abortion */
-#  define CM_WKUP_CLKCTRL_IDLEST_IDLE                   (2 << CM_WKUP_CLKCTRL_IDLEST_SHIFT) /* Module is in Idle mode (only OCP part) */
-#  define CM_WKUP_CLKCTRL_IDLEST_DISABLED               (3 << CM_WKUP_CLKCTRL_IDLEST_SHIFT) /* Module is disabled and cannot be accessed */
-#define CM_WKUP_CLKCTRL_STBYST                          (1 << 18) /* Bit 18: Module standby status. */
+#define CM_CLKSTCTRL_CLKTRCTRL_SHIFT                    (0)  /* Bits 0-1: Controls the clock state transition of the clock domain */
+#define CM_CLKSTCTRL_CLKTRCTRL_MASK                     (3 << CM_CLKSTCTRL_CLKTRCTRL_SHIFT)
+#  define CM_CLKSTCTRL_CLKTRCTRL_NO_SLEEP               (0 << CM_CLKSTCTRL_CLKTRCTRL_SHIFT)  /* Sleep transition cannot be initiated. Wakeup transition may however occur */
+#  define CM_CLKSTCTRL_CLKTRCTRL_SW_SLEEP               (1 << CM_CLKSTCTRL_CLKTRCTRL_SHIFT)  /* Start a software forced sleep transition on the domain. */
+#  define CM_CLKSTCTRL_CLKTRCTRL_SW_WKUP                (2 << CM_CLKSTCTRL_CLKTRCTRL_SHIFT)  /* Start a software forced wake-up transition on the domain */
 
-#define CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT                 (0) /* Bits 0-2: Mux select line for DMTIMER_1MS clock */
+#define CM_CLKCTRL_MODULEMODE_SHIFT                     (0)  /* Bits 0-1: Control the way mandatory clocks are managed */
+#define CM_CLKCTRL_MODULEMODE_MASK                      (3 << CM_CLKCTRL_MODULEMODE_SHIFT)
+#  define CM_CLKCTRL_MODULEMODE_DISABLE                 (0 << CM_CLKCTRL_MODULEMODE_SHIFT)  /* Module is disable by SW */
+#  define CM_CLKCTRL_MODULEMODE_ENABLE                  (2 << CM_CLKCTRL_MODULEMODE_SHIFT)  /* Module is explicitly enabled */
+#define CM_CLKCTRL_IDLEST_SHIFT                         (16)  /* Bits 16-17: Module idle status. */
+#define CM_CLKCTRL_IDLEST_MASK                          (3 << CM_CLKCTRL_IDLEST_SHIFT)
+#  define CM_CLKCTRL_IDLEST_FUNC                        (0 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is fully functional, including OCP */
+#  define CM_CLKCTRL_IDLEST_TRANS                       (1 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is performing transition: wakeup, or sleep, or sleep abortion */
+#  define CM_CLKCTRL_IDLEST_IDLE                        (2 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is in Idle mode (only OCP part) */
+#  define CM_CLKCTRL_IDLEST_DISABLED                    (3 << CM_CLKCTRL_IDLEST_SHIFT)  /* Module is disabled and cannot be accessed */
+#define CM_CLKCTRL_STBYST                               (1 << 18) /* Bit 18: Module standby status. */
+
+#define CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT                 (0)  /* Bits 0-2: Mux select line for DMTIMER_1MS clock */
 #define CM_DPLL_DMTIMER1MS_CLKSEL_MASK                  (7 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)
-#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC             (0 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Select CLK_M_OSC clock */
-#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32KHZ             (1 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Select CLK_32KHZ clock */
-#  define CM_DPLL_DMTIMER1_CLKSEL_TCLKIN                (2 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Select TCLKIN clock */
-#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_RC32K             (3 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Select CLK_RC32K clock */
-#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32768             (4 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT) /* Selects the CLK_32768 from 32KHz Crystal Osc */
+#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_M_OSC             (0 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Select CLK_M_OSC clock */
+#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32KHZ             (1 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Select CLK_32KHZ clock */
+#  define CM_DPLL_DMTIMER1_CLKSEL_TCLKIN                (2 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Select TCLKIN clock */
+#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_RC32K             (3 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Select CLK_RC32K clock */
+#  define CM_DPLL_DMTIMER1_CLKSEL_CLK_32768             (4 << CM_DPLL_DMTIMER1MS_CLKSEL_SHIFT)  /* Selects the CLK_32768 from 32KHz Crystal Osc */
+
+#define CM_PER_L4LS_CLKSTCTRL_L4LS_GCLK                 (1 << 8)  /* State of the L4LS_GCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_UART_GFCLK                (1 << 10)  /* State of the UART_GFCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_CAN_CLK                   (1 << 11)  /* State of the CAN_CLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER7_GCLK               (1 << 13)  /* State of the TIMER7 CLKTIMER clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER2_GCLK               (1 << 14)  /* State of the TIMER2 CLKTIMER clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER3_GCLK               (1 << 15)  /* State of the TIMER3 CLKTIMER clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER4_GCLK               (1 << 16)  /* State of the TIMER4 CLKTIMER clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_LCDC_GCLK                 (1 << 17)  /* State of the LCD clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_GPIO_1_GDBCLK             (1 << 19)  /* State of the GPIO1_GDBCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_GPIO_2_GDBCLK             (1 << 20)  /* State of the GPIO2_GDBCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_GPIO_3_GDBCLK             (1 << 21)  /* State of the GPIO3_GDBCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_I2C_FCLK                  (1 << 24)  /* State of the I2C_FCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_SPI_GCLK                  (1 << 25)  /* State of the SPI_GCLK clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER5_GCLK               (1 << 27)  /* State of the TIMER5 CLKTIMER clock in the domain */
+#define CM_PER_L4LS_CLKSTCTRL_TIMER6_GCLK               (1 << 28)  /* State of the TIMER6 CLKTIMER clock in the domain */
+
+#define CM_PER_L3S_CLKSTCTRL_L3S_GCLK                   (1 << 3)  /* State of the L3S_GCLK clock in the domain */
+
+#define CM_PER_L3_CLKSTCTRL_EMIF_GCLK                   (1 << 2)  /* State of the EMIF_GCLK clock in the domain */
+#define CM_PER_L3_CLKSTCTRL_MMC_FCLK                    (1 << 3)  /* State of the MMC_GCLK clock in the domain */
+#define CM_PER_L3_CLKSTCTRL_L3_GCLK                     (1 << 4)  /* State of the L3_GCLK clock in the domain */
+#define CM_PER_L3_CLKSTCTRL_CPTS_RFT_GCLK               (1 << 6)  /* State of the CPTS_RFT_GCLK clock in the domain */
+#define CM_PER_L3_CLKSTCTRL_MCASP_GCLK                  (1 << 7)  /* State of the MCASP_GCLK clock in the domain */
+
+#define CM_PER_L4HS_CLKSTCTRL_L4HS_GCLK                 (1 << 3)  /* State of the L4HS_GCLK clock in the domain */
+#define CM_PER_L4HS_CLKSTCTRL_CPSW_250MHZ_GCLK          (1 << 4)  /* State of the CPSW_250MHZ_GCLK clock in the domain */
+#define CM_PER_L4HS_CLKSTCTRL_CPSW_50MHZ_GCLK           (1 << 5)  /* State of the CPSW_50MHZ_GCLK clock in the domain */
+#define CM_PER_L4HS_CLKSTCTRL_CPSW_5MHZ_GCLK            (1 << 6)  /* State of the CPSW_5MHZ_GCLK clock in the domain */
+
+#define CM_PER_OCPWP_L3_CLKSTCTRL_OCPWP_L3_GCLK         (1 << 4)  /* State of the OCPWP L3 clock in the domain */
+#define CM_PER_OCPWP_L3_CLKSTCTRL_OCPWP_L4_GCLK         (1 << 5)  /* State of the OCPWP L4 clock in the domain */
+
+#define CM_PER_PRU_ICSS_CLKSTCTRL_PRU_ICSS_OCP_GCLK     (1 << 4)  /* State of the PRU-ICSS OCP clock in the domain */
+#define CM_PER_PRU_ICSS_CLKSTCTRL_PRU_ICSS_IEP_GCLK     (1 << 5)  /* State of the PRU-ICSS IEP clock in the domain */
+#define CM_PER_PRU_ICSS_CLKSTCTRL_PRU_ICSS_UART_GCLK    (1 << 6)  /* State of the PRU-ICSS UART clock in the domain */
+
+#define CM_PER_CPSW_CLKSTCTRL_CPSW_125MHz_GCLK          (1 << 4)  /* State of the CPSW 125 MHz OCP clock in the domain */
+
+#define CM_PER_LCDC_CLKSTCTRL_LCDC_L3_OCP_GCLK          (1 << 4)  /* State of the LCDC L3 OCP clock in the domain */
+#define CM_PER_LCDC_CLKSTCTRL_LCDC_L4_OCP_GCLK          (1 << 5)  /* State of the LCDC L4 OCP clock in the domain */
+
+#define CM_PER_CLK_24MHZ_CLKSTCTRL_CLK_24MHZ_GCLK       (1 << 4)  /* State of the 24MHz clock in the domain */
+
+#define CM_WKUP_CLKSTCTRL_L4_WKUP_GCLK                  (1 << 2)  /* State of the L4_WKUP clock in the domain */
+#define CM_WKUP_CLKSTCTRL_SR_SYSCLK                     (1 << 3)  /* State of the SMARTREFGLEX SYSCLK clock in the domain */
+#define CM_WKUP_CLKSTCTRL_WDT1_GCLK                     (1 << 4)  /* State of the WDT1_GCLK clock in the domain */
+#define CM_WKUP_CLKSTCTRL_GPIO0_GDBCLK                  (1 << 8)  /* State of the WKUPGPIO_DBGICLK clock in the domain */
+#define CM_WKUP_CLKSTCTRL_TIMER0_GCLK                   (1 << 10)  /* State of the WKUPTIMER_GCLK clock in the domain */
+#define CM_WKUP_CLKSTCTRL_I2C0_GFCLK                    (1 << 11)  /* State of the I2C0 clock in the domain */
+#define CM_WKUP_CLKSTCTRL_UART0_GFCLK                   (1 << 12)  /* State of the UART0 clock in the domain */
+#define CM_WKUP_CLKSTCTRL_TIMER1_GCLK                   (1 << 13)  /* State of the TIMER1 clock in the domain */
+#define CM_WKUP_CLKSTCTRL_ADC_FCLK                      (1 << 14)  /* State of the ADC clock in the domain */
+
+#define CM_L3_AON_CLKSTCTRL_DBGSYSCLK                   (1 << 2)  /* State of the Debugss sysclk clock in the domain */
+#define CM_L3_AON_CLKSTCTRL_L3_AON_GCLK                 (1 << 3)  /* State of the L3_AON clock in the domain */
+#define CM_L3_AON_CLKSTCTRL_DEBUG_CLKA                  (1 << 4)  /* State of the Debugss CLKA clock in the domain */
+
+#define CM_L4_WKUP_AON_CLKSTCTRL_L4_WKUP_AON_GCLK       (1 << 2)  /* State of the L4_WKUP clock in the domain */
+
+#define CM_MPU_CLKSTCTRL_MPU_CLK                        (1 << 2)  /* State of the MPU clock in the domain */
+
+#define CM_RTC_CLKSTCTRL_L4_RTC_GCLK                    (1 << 8)  /* State of the L4 RTC clock in the domain */
+#define CM_RTC_CLKSTCTRL_RTC_32KCLK                     (1 << 9)  /* State of the 32K RTC clock in the domain */
+
+#define CM_GFX_L3_CLKSTCTRL_GFX_L3_GCLK                 (1 << 8)  /* State of the GFX_L3_GCLK clock in the domain */
+#define CM_GFX_L3_CLKSTCTRL_GFX_FCLK                    (1 << 9)  /* State of the GFX_GCLK clock in the domain */
+
+#define CM_GFX_L4LS_GFX_CLKSTCTRL_L4LS_GFX_GCLK         (1 << 8)  /* State of the L4_LS clock in the domain */
+
+#define CM_CEFUSE_CLKSTCTRL_L4_CEFUSE_GICLK             (1 << 8)  /* State of the L4_CEFUSE_GCLK clock in the domain */
+#define CM_CEFUSE_CLKSTCTRL_CUST_EFUSE_SYS_CLK          (1 << 9)  /* State of the Cust_Efuse_SYSCLK clock in the domain */
 
 #endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_PRCM_H */

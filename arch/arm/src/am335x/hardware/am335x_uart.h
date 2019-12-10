@@ -377,10 +377,10 @@
 /* UART Mode Definition 1 Register */
 
 #define UART_MDR1_MODE_SHIFT         (0)  /* Bits 0-2: Operation Mode Selection */
-#  define UART_MDR1_MODE_16x         (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
+#  define UART_MDR1_MODE_16X         (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
 #  define UART_MDR1_MODE_SIR         (1 << UART_MDR1_MODE_SHIFT)  /* SIR mode */
-#  define UART_MDR1_MODE_16xAUTO     (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */
-#  define UART_MDR1_MODE_13x         (3 << UART_MDR1_MODE_SHIFT)  /* UART 13x mode */
+#  define UART_MDR1_MODE_16XAUTO     (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */
+#  define UART_MDR1_MODE_13X         (3 << UART_MDR1_MODE_SHIFT)  /* UART 13x mode */
 #  define UART_MDR1_MODE_MIR         (4 << UART_MDR1_MODE_SHIFT)  /* MIR Mode */
 #  define UART_MDR1_MODE_FIR         (5 << UART_MDR1_MODE_SHIFT)  /* FIR Mode */
 #  define UART_MDR1_MODE_CIR         (6 << UART_MDR1_MODE_SHIFT)  /* CIR Mode */

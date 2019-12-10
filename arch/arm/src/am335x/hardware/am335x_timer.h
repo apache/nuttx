@@ -169,7 +169,7 @@
 
 #define TMR1MS_TISTAT                   (1 << 0) /* Bit 0: Internal reset monitoring */
 
-#define TMR1MS_IRQ_FlAG_MAT             (1 << 0) /* Bit 0: IRQ flag for Match */
+#define TMR1MS_IRQ_FLAG_MAT             (1 << 0) /* Bit 0: IRQ flag for Match */
 #define TMR1MS_IRQ_FLAG_OVF             (1 << 1) /* Bit 1: IRQ flag for Overflow */
 #define TMR1MS_IRQ_FLAG_TCAR            (1 << 2) /* Bit 2: IRQ flag for Capture */
 

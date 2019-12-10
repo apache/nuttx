@@ -118,9 +118,7 @@ void up_irqinitialize(void)
   /* Wait for the reset to complete */
 
   while ((getreg32(AM335X_INTC_SYSSTATUS) & INTC_SYSSTATUS_RESETDONE) !=
-         INTC_SYSSTATUS_RESETDONE)
-    {
-    }
+         INTC_SYSSTATUS_RESETDONE);
 
   /* Enable any interrupt generation by setting priority threshold */
 
@@ -168,6 +166,7 @@ void up_irqinitialize(void)
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
+
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
 #if 1 /* Use PEND registers instead */
@@ -192,6 +191,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   int startirq;
   int lastirq;
   int irq;
+
 #if 0
   /* Check each PEND register for pending interrupts.  Since the unused
    * interrupts are disabled, we do not have to be concerned about which
@@ -267,6 +267,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
         }
     }
 #endif
+
   return regs;
 #endif
 }

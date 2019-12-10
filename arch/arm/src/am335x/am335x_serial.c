@@ -823,7 +823,7 @@ static int up_setup(struct uart_dev_s *dev)
 #  warning Missing logic
 #endif
 
-  up_serialout(priv, AM335X_UART_MDR1_OFFSET, UART_MDR1_MODE_16x);
+  up_serialout(priv, AM335X_UART_MDR1_OFFSET, UART_MDR1_MODE_16X);
 
 #endif
   return OK;
