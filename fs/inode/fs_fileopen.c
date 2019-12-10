@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_fileopen.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,8 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   va_list ap;
   int ret;
   int fd;
+
+  DEBUGASSERT(filep != NULL && path != NULL);
 
   /* At present, this is just a placeholder.  It is just a wrapper around
    * nx_open() followed by a called to file_detach().  Ideally, this should

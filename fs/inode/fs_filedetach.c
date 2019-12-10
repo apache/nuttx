@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/inode/fs_filedetach.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,6 +113,8 @@ int file_detach(int fd, FAR struct file *filep)
 {
   FAR struct filelist *list;
   FAR struct file *parent;
+
+  DEBUGASSERT(filep != NULL);
 
   /* Verify the file descriptor range */
 
