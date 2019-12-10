@@ -51,7 +51,7 @@
 /* Address of the CPU0 IDLE thread */
 
 uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
-  __attribute__((aligned(16) section(".noinit")));
+  __attribute__((aligned(16), section(".noinit")));
 
 /****************************************************************************
  * Public Functions
