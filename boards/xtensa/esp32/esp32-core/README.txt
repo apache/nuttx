@@ -86,18 +86,22 @@ ESP32 Toolchain
   BSP.  The steps to build toolchain with crosstool-NG on Linux are as
   follows:
 
-    git clone -b xtensa-1.22.x https://github.com/espressif/crosstool-NG.git
+    git clone https://github.com/espressif/crosstool-NG.git
     cd crosstool-NG
-    ./bootstrap && ./configure --prefix=$PWD && make install
+    git checkout esp-2019r2
+    git submodule update --init
+
+    ./bootstrap && ./configure --enable-local && make
+
     ./ct-ng xtensa-esp32-elf
     ./ct-ng build
+
     chmod -R u+w builds/xtensa-esp32-elf
 
-  These steps are given in setup guide in ESP-IDF repository:
-  https://github.com/espressif/esp-idf/blob/master/docs/linux-setup.rst#alternative-step-1-compile-the-toolchain-from-source-using-crosstool-ng
+    export PATH="crosstool-NG/builds/xtensa-esp32-elf/bin:$PATH"
 
-  NOTE: The xtensa-esp32-elf configuration is only available in the
-  xtensa-1.22.x branch.
+  These steps are given in setup guide in ESP-IDF repository:
+  https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html
 
 Memory Map
 ==========
