@@ -201,9 +201,9 @@ struct imxrt_dev_s
   int (*do_sdio_card)(void *);   /* SDIO card ISR */
   void *do_sdio_arg;             /* arg for SDIO card ISR */
 
-  /* Direct address of this instances registers */
-
-  uint32_t addr;
+  uint32_t addr;                 /* Base address of this instances */
+  uint32_t sw_cd_gpio;           /* If a non USDHCx CD pin is used, this is its GPIO */
+  uint32_t cd_invert;            /* If true invert the CD pin */
 };
 
 /* Register logging support */
@@ -376,6 +376,12 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
 #ifdef CONFIG_IMXRT_USDHC1
   {
     .addr               = IMXRT_USDHC1_BASE,
+#if defined(PIN_USDHC1_CD_GPIO)
+    .sw_cd_gpio         = PIN_USDHC1_CD_GPIO,
+#endif
+#if defined(CONFIG_IMXRT_USDHC1_INVERT_CD)
+    .cd_invert         = true,
+#endif
     .dev                =
     {
 #ifdef CONFIG_SDIO_MUXBUS
@@ -428,6 +434,12 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
 #ifdef CONFIG_IMXRT_USDHC2
   {
     .addr               = IMXRT_USDHC2_BASE,
+#if defined(PIN_USDHC2_CD_GPIO)
+    .sw_cd_gpio         = PIN_USDHC2_CD_GPIO,
+#endif
+#if defined(CONFIG_IMXRT_USDHC2_INVERT_CD)
+    .cd_invert         = true,
+#endif
     .dev                =
     {
 #ifdef CONFIG_SDIO_MUXBUS
@@ -1449,18 +1461,28 @@ static sdio_capset_t imxrt_capabilities(FAR struct sdio_dev_s *dev)
 static sdio_statset_t imxrt_status(FAR struct sdio_dev_s *dev)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev;
+  bool present = false;
 
-#if defined(CONFIG_MMCSD_HAVE_CARDDETECT) && defined(PIN_USDHC1_CD)
-
-  /* Note that a CD pin is only supported on port1 for now - just check this
-   * if appropriately for more.
+  /* Board did not use one of the GPIO_USDHCn_CD pins
+   * but instead a GPIO was used and defined in board.h
+   * as PIN_USDHCx_CD_GPIO
    */
 
-  if (!imxrt_gpio_read(PIN_USDHC1_CD))
-#else
-  if ((getreg32(priv->addr + IMXRT_USDHC_PRSSTAT_OFFSET) &
-       USDHC_PRSSTAT_CINS) != 0)
-#endif
+  if (priv->sw_cd_gpio != 0)
+    {
+      present = priv->cd_invert ^ !imxrt_gpio_read(priv->sw_cd_gpio);
+    }
+  else
+    {
+  /* This register reflects the state of CD no matter if it's a separate pin
+   * or DAT3
+   */
+
+      present = ((getreg32(priv->addr + IMXRT_USDHC_PRSSTAT_OFFSET) &
+                USDHC_PRSSTAT_CINS) != 0) ^ priv->cd_invert;
+    }
+
+  if (present)
     {
       priv->cdstatus |= SDIO_STATUS_PRESENT;
     }
@@ -2015,7 +2037,8 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
    * to complete.
    */
 
-  if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & USDHC_RESPERR_INTS) != 0)
+  if ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) &
+       USDHC_RESPERR_INTS) != 0)
     {
       modifyreg32(priv->addr + IMXRT_USDHC_SYSCTL_OFFSET, 0,
                   USDHC_SYSCTL_RSTC);
@@ -3076,8 +3099,15 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
       (void)imxrt_config_gpio(PIN_USDHC1_CMD);
 #endif
 
-#if defined(CONFIG_MMCSD_HAVE_CARDDETECT) && defined(PIN_USDHC1_CD)
+#if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
+#  if defined(PIN_USDHC1_CD)
       (void)imxrt_config_gpio(PIN_USDHC1_CD);
+#  else
+      if (priv->sw_cd_gpio != 0)
+        {
+          (void)imxrt_config_gpio(priv->sw_cd_gpio);
+        }
+#  endif
 #endif
 
       imxrt_clockall_usdhc1();
@@ -3089,18 +3119,30 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
       (void)imxrt_config_gpio(PIN_USDHC2_DCLK);
       (void)imxrt_config_gpio(PIN_USDHC2_CMD);
 
-#if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D4) || defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
+#  if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D4) || defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
       (void)imxrt_config_gpio(PIN_USDHC2_D1);
       (void)imxrt_config_gpio(PIN_USDHC2_D2);
       (void)imxrt_config_gpio(PIN_USDHC2_D3);
-#endif
+#  endif
 
-#if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
+#  if defined(CONFIG_IMXRT_USDHC2_WIDTH_D1_D8)
       (void)imxrt_config_gpio(PIN_USDHC2_D4);
       (void)imxrt_config_gpio(PIN_USDHC2_D5);
       (void)imxrt_config_gpio(PIN_USDHC2_D6);
       (void)imxrt_config_gpio(PIN_USDHC2_D7);
-#endif
+#  endif
+
+#  if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
+#    if defined(PIN_USDHC2_CD)
+      (void)imxrt_config_gpio(PIN_USDHC2_CD);
+#    else
+      if (priv->sw_cd_gpio != 0)
+        {
+          (void)imxrt_config_gpio(priv->sw_cd_gpio);
+        }
+#    endif
+#  endif
+
       imxrt_clockall_usdhc2();
       break;
 #endif

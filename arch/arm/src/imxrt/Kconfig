@@ -1024,6 +1024,18 @@ config IMXRT_USDHC1_WIDTH_D1_D4
 	bool "Four bit"
 endchoice
 
+config IMXRT_USDHC1_INVERT_CD
+	bool "Invert the USDHC1 CD"
+	default n
+	depends on IMXRT_USDHC1
+	---help---
+		If the board defines PIN_USDHC1_CD the CD_B input to the USDHC it is
+		assumed to be active low. Selecting IMXRT_USDHC1_INVERT_CD will make it
+		active high.
+
+		If the board defines PIN_USDHC1_CD_GPIO it is assumed to be active low.
+		Selecting IMXRT_USDHC1_INVERT_CD will make it active high.
+
 choice
 	depends on IMXRT_USDHC2
 	prompt "Bus width for USDHC2"
@@ -1038,6 +1050,18 @@ config IMXRT_USDHC2_WIDTH_D1_D4
 config IMXRT_USDHC2_WIDTH_D1_D8
 	bool "Eight bit"
 endchoice
+
+config IMXRT_USDHC2_INVERT_CD
+	bool "Invert the USDHC2 CD"
+	default n
+	depends on IMXRT_USDHC2
+	---help---
+		If the board defines PIN_USDHC2_CD the CD_B input to the USDHC it is
+		assumed to be active low. Selecting IMXRT_USDHC_INVERT_CD will make it
+		active high.
+
+		If the board defines PIN_USDHC2_CD_GPIO it is assumed to be active low.
+		Selecting IMXRT_USDHC2_INVERT_CD will make it active high.
 
 endmenu # USDHC Configuration
 
