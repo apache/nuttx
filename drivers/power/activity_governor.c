@@ -78,7 +78,7 @@ struct pm_domain_state_s
   /* recommended - The recommended state based on the governor policy
    * mndex       - The index to the next slot in the memory[] array to use.
    * mcnt        - A tiny counter used only at start up.  The actual
-   *               algorithm cannot be applied until CONFIG_PM_MEMORY
+   *               algorithm cannot be applied until CONFIG_PM_GOVERNOR_MEMORY
    *               samples have been collected.
    */
 
@@ -96,7 +96,8 @@ struct pm_domain_state_s
    * length of the "memory", Ai is the weight applied to each value, and X is
    * the current activity.
    *
-   * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
+   * CONFIG_PM_GOVERNOR_MEMORY provides the memory for the algorithm.
+   *   Default: 2
    * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
    */
 
@@ -136,9 +137,9 @@ struct pm_activity_governor_s
 
   const int32_t pmexitthresh[3];
 
-  /* CONFIG_PM_MEMORY is the total number of time slices (including the
-   * current time slice).  The history of previous values is then
-   * CONFIG_PM_MEMORY-1.
+  /* CONFIG_PM_GOVERNOR_MEMORY is the total number of time slices (including
+   * the current time slice).  The history of previous values is then
+   * CONFIG_PM_GOVERNOR_MEMORY-1.
    */
 
 #if CONFIG_PM_GOVERNOR_MEMORY > 1
@@ -393,7 +394,7 @@ static void governor_update(int domain, int16_t accum)
 
   /* No smoothing */
 
-  Y = accum;
+  y = accum;
 #endif
 
   /* First check if increased activity should cause us to return to the

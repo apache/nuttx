@@ -85,7 +85,7 @@ config PM_GOVERNOR_SLICEMS
 		interval is applied to an averaging algorithm to determine the
 		activity level.
 
-		CONFIG_GOVERNOR_PM_SLICEMS provides the duration of that time slice in
+		CONFIG_PM_GOVERNOR_SLICEMS provides the duration of that time slice in
 		milliseconds.  Default: 100 Milliseconds
 
 config PM_GOVERNOR_MEMORY
@@ -99,54 +99,55 @@ config PM_GOVERNOR_MEMORY
 		activity.  These weights may be negative and a limited to the
 		range of int16_t.
 
-		  CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
-		  CONFIG_PM_COEFn provides weight for each sample.  Default: 1
+		  CONFIG_PM_GOVERNOR_MEMORY provides the memory for the algorithm.
+		    Default: 2
+		  CONFIG_PM_GOVERNOR_COEFn provides weight for each sample.  Default: 1
 
-		Setting CONFIG_PM_MEMORY=1 disables all smoothing.
+		Setting CONFIG_PM_GOVERNOR_MEMORY=1 disables all smoothing.
 
 config PM_GOVERNOR_COEFN
 	int "PM coefficient"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY.
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY.
 
 config PM_GOVERNOR_COEF1
 	int "PM coefficient 1"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY.
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY.
 
 config PM_GOVERNOR_COEF2
 	int "PM coefficient 2"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
 
-		Ignored if CONFIG_PM_MEMORY <= 2
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 2
 
 config PM_GOVERNOR_COEF3
 	int "PM coefficient 3"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
 
-		Ignored if CONFIG_PM_MEMORY <= 3
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 3
 
 config PM_GOVERNOR_COEF4
 	int "PM coefficient 4"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
 
-		Ignored if CONFIG_PM_MEMORY <= 4
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 4
 
 config PM_GOVERNOR_COEF5
 	int "PM coefficient 5"
 	default 1
 	---help---
-		See help associated with CONFIG_PM_MEMORY
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
 
-		Ignored if CONFIG_PM_MEMORY <= 5
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 5
 
 config PM_GOVERNOR_IDLEENTER_THRESH
 	int "PM IDLE enter threshold"
@@ -159,7 +160,7 @@ config PM_GOVERNOR_IDLEENTER_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: <=1: Essentially no activity
 
@@ -174,7 +175,7 @@ config PM_GOVERNOR_IDLEEXIT_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: >=2: Active
 
@@ -189,7 +190,7 @@ config PM_GOVERNOR_IDLEENTER_COUNT
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: Thirty IDLE slices to enter IDLE mode from normal
 
@@ -204,7 +205,7 @@ config PM_GOVERNOR_STANDBYENTER_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: <=1: Essentially no activity
 
@@ -219,7 +220,7 @@ config PM_GOVERNOR_STANDBYEXIT_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: >=2: Active
 
@@ -234,7 +235,7 @@ config PM_GOVERNOR_STANDBYENTER_COUNT
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: Fifty IDLE slices to enter STANDBY mode from IDLE
 
@@ -249,7 +250,7 @@ config PM_GOVERNOR_SLEEPENTER_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: <=1: Essentially no activity
 
@@ -264,7 +265,7 @@ config PM_GOVERNOR_SLEEPEXIT_THRESH
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: >=2: Active
 
@@ -279,7 +280,7 @@ config PM_GOVERNOR_SLEEPENTER_COUNT
 		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
 
 		Resuming to normal state, on the other hand, is usually immediate and
-		controlled by wakeup conditions established by the platform.  The PM
+		controlled by wakeup conditions established by the platform.
 
 		Default: Fifty IDLE slices to enter SLEEP mode from STANDBY
 
