@@ -230,8 +230,12 @@ static void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
 
 static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
 {
+  irqstate_t flags = enter_critical_section();
+
   priv->im = im;
   up_serialout(priv, UART_IE_OFFSET, im);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -240,6 +244,8 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
 
 static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 {
+  irqstate_t flags = enter_critical_section();
+
   /* Return the current interrupt mask value */
 
   if (im)
@@ -251,6 +257,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 
   priv->im = 0;
   up_serialout(priv, UART_IE_OFFSET, 0);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -273,9 +280,9 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, UART_RXCTL_OFFSET, 1);
 
-  /* Enable TX */
+  /* Set TX watermark levl to 1 Enable TX */
 
-  up_serialout(priv, UART_TXCTL_OFFSET, 1);
+  up_serialout(priv, UART_TXCTL_OFFSET, 1 << 16 | 1);
 
   return OK;
 }
@@ -309,7 +316,7 @@ static void up_shutdown(struct uart_dev_s *dev)
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   interrupts are not enabled until the txint() and rxint() are called.
  *
  ****************************************************************************/
 
@@ -376,23 +383,28 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
   uint32_t           status;
+  int                passes;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
 
-  /* Retrieve interrupt pending status */
+  /* Loop until there are no characters to be transferred or,
+   * until we have been looping for a long time.
+   */
 
-  status = up_serialin(priv, UART_IP_OFFSET);
-
-  if (status & UART_IP_RXWM)
+  for (passes = 0; passes < 256; passes++)
     {
-      /* Process incoming bytes */
+      /* Retrieve interrupt pending status */
 
-      uart_recvchars(dev);
-    }
+      status = up_serialin(priv, UART_IP_OFFSET);
 
-  if (status & UART_IP_TXWM)
-    {
+      if (status & UART_IP_RXWM)
+        {
+          /* Process incoming bytes */
+
+          uart_recvchars(dev);
+        }
+
       /* Process outgoing bytes */
 
       uart_xmitchars(dev);
@@ -449,6 +461,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags = enter_critical_section();
 
   if (enable)
     {
@@ -462,6 +475,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
 
   up_serialout(priv, UART_IE_OFFSET, priv->im);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -545,7 +559,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
  * Name: up_txready
  *
  * Description:
- *   Return true if the tranmsit data register is empty
+ *   Return true if the tranmsit data register is not full
  *
  ****************************************************************************/
 
@@ -553,7 +567,7 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
-  /* Return TRUE if the Transmit buffer register is not full */
+  /* Return TRUE if the TX FIFO is not full */
 
   return (up_serialin(priv, UART_TXDATA_OFFSET) & UART_TX_FULL) == 0;
 }
@@ -570,9 +584,9 @@ static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
-  /* Return TRUE if the Transmit shift register is empty */
+  /* Return TRUE if the TX wartermak is pending */
 
-  return (up_serialin(priv, UART_TXDATA_OFFSET) & UART_TX_FULL) != 0;
+  return (up_serialin(priv, UART_IP_OFFSET) & UART_IP_TXWM) == 1;
 }
 
 /****************************************************************************

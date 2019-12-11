@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/fe310_memorymap.h
+ * arch/risc-v/src/fe310/hardware/fe310_prci.h
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -30,33 +30,24 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include "hardware/fe310_memorymap.h"
-#include "hardware/fe310_uart.h"
-#include "hardware/fe310_clint.h"
-#include "hardware/fe310_plic.h"
-#include "hardware/fe310_prci.h"
+#ifndef __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PRCI_H
+#define __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PRCI_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Idle thread stack starts from _ebss */
+#define FE310_HFROSCCFG (FE310_PRCI_BASE + 0x00)
+#define FE310_HFXOSCCFG (FE310_PRCI_BASE + 0x04)
+#define FE310_PLLCFG    (FE310_PRCI_BASE + 0x08)
+#define FE310_PLLOUTDIV (FE310_PRCI_BASE + 0x0c)
 
-#ifndef __ASSEMBLY__
-#define FE310_IDLESTACK_BASE  (uint32_t)&_ebss
-#else
-#define FE310_IDLESTACK_BASE  _ebss
-#endif
+#define HFXOSCCFG_HFXOSCEN  (0x1 << 30)
+#define HFXOSCCFG_HFXOSCRDY (0x1 << 31)
 
-#define FE310_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
-#define FE310_IDLESTACK_TOP  (FE310_IDLESTACK_BASE + FE310_IDLESTACK_SIZE)
+#define PLLCFG_PLLSEL       (0x1 << 16)
+#define PLLCFG_PLLREFSEL    (0x1 << 17)
+#define PLLCFG_PLLBYPASS    (0x1 << 18)
+#define PLLCFG_PLLLOCK      (0x1 << 31)
 
-#endif  /* _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H */
-
+#endif /* __ARCH_RISCV_SRC_FE310_HARDWARE_FE310_PRCI_H */

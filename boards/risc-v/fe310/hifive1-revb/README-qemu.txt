@@ -10,19 +10,20 @@
   $ make
   $ sudo make install
 
-3. Modify flash origin address
+3. Modify defconfig
 
-index 559c1813b8..a67c37b576 100644
---- a/boards/risc-v/fe310/hifive1-revb/scripts/ld.script
-+++ b/boards/risc-v/fe310/hifive1-revb/scripts/ld.script
-@@ -35,7 +35,7 @@
-
- MEMORY
- {
--  flash (rx) : ORIGIN = 0x20010000, LENGTH = 4096K
-+  flash (rx) : ORIGIN = 0x20400000, LENGTH = 4096K
-   sram (rwx) : ORIGIN = 0x80000000, LENGTH = 16K
- }
+index c449421741..5a76600785 100644
+--- a/boards/risc-v/fe310/hifive1-revb/configs/nsh/defconfig
++++ b/boards/risc-v/fe310/hifive1-revb/configs/nsh/defconfig
+@@ -14,7 +14,7 @@ CONFIG_ARCH_BOARD="hifive1-revb"
+ CONFIG_ARCH_BOARD_HIFIVE1_REVB=y
+ CONFIG_ARCH_CHIP="fe310"
+ CONFIG_ARCH_CHIP_FE310=y
+-CONFIG_ARCH_CHIP_FE310_G002=y
++CONFIG_ARCH_CHIP_FE310_QEMU=y
+ CONFIG_ARCH_INTERRUPTSTACK=1536
+ CONFIG_ARCH_RISCV=y
+ CONFIG_ARCH_STACKDUMP=y
 
 4. Configure and build NuttX
 

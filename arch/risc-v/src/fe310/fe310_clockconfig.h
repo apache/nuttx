@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/fe310_memorymap.h
+ * arch/arm/src/fe310/fe310_clockconfig.h
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -14,6 +14,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,33 +33,48 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_FE310_FE310_CLOCKCONFIG_H
+#define __ARCH_RISCV_SRC_FE310_FE310_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/fe310_memorymap.h"
-#include "hardware/fe310_uart.h"
-#include "hardware/fe310_clint.h"
-#include "hardware/fe310_plic.h"
-#include "hardware/fe310_prci.h"
+#include "fe310_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Idle thread stack starts from _ebss */
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#define FE310_IDLESTACK_BASE  (uint32_t)&_ebss
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#define FE310_IDLESTACK_BASE  _ebss
+#define EXTERN extern
 #endif
 
-#define FE310_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
-#define FE310_IDLESTACK_TOP  (FE310_IDLESTACK_BASE + FE310_IDLESTACK_SIZE)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#endif  /* _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H */
+EXTERN uint32_t fe310_get_hfclk(void);
+EXTERN void fe310_clockconfig(void);
 
+#if defined(__cplusplus)
+}
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_FE310_FE310_CLOCKCONFIG_H */

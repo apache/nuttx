@@ -49,6 +49,7 @@
 #include "fe310_config.h"
 #include "hardware/fe310_memorymap.h"
 #include "hardware/fe310_uart.h"
+#include "fe310_clockconfig.h"
 #include "fe310.h"
 
 /****************************************************************************
@@ -78,8 +79,6 @@
 #    define HAVE_UART
 #  endif
 #endif /* HAVE_CONSOLE */
-
-#define HFCLK 16000000 /* TODO */
 
 /****************************************************************************
  * Public Functions
@@ -128,7 +127,13 @@ void fe310_lowsetup(void)
 
   /* Configure the UART Baud Rate */
 
-  uint32_t div = HFCLK / 115200 - 1;
+  uint32_t hfclk = fe310_get_hfclk();
+  uint32_t div;
+
+  div  = hfclk / 1152; /* NOTE: To avoid a bug with debugger */
+  div /= 100;
+  div -= 1;
+
   putreg32(div, FE310_CONSOLE_BASE + UART_DIV_OFFSET);
 
   /* Enable TX */

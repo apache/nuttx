@@ -17,12 +17,14 @@ config ARCH_CHIP_FE310_G002
 	---help---
 		FE310, RV32IMAC 16KB SRAM
 
-endchoice
-
-config FE310_G002
-	bool
-	default y
+config ARCH_CHIP_FE310_QEMU
+	bool "FE310_QEMU"
 	select FE310_HAVE_UART0
+	select FE310_HAVE_GPIO
+	---help---
+		FE310, RV32IMAC 16KB SRAM
+
+endchoice
 
 menu "FE310 Peripheral Support"
 

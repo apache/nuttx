@@ -31,6 +31,5 @@
 
 5. TODO
 
-  Configure PLL
   Support GPIO/SPI/I2C/RTC/WDT/PWM
   Support RISC-V User mode

@@ -38,6 +38,7 @@
 
 #include <arch/board/board.h>
 
+#include "fe310_clockconfig.h"
 #include "fe310.h"
 #include "chip.h"
 
@@ -100,7 +101,9 @@ void __fe310_start(void)
       *dest++ = *src++;
     }
 
-  /* TODO: Setup PLL */
+  /* Setup PLL */
+
+  fe310_clockconfig();
 
   /* Configure the UART so we can get debug output */
 
