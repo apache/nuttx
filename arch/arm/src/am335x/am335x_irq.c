@@ -118,7 +118,9 @@ void up_irqinitialize(void)
   /* Wait for the reset to complete */
 
   while ((getreg32(AM335X_INTC_SYSSTATUS) & INTC_SYSSTATUS_RESETDONE) !=
-         INTC_SYSSTATUS_RESETDONE);
+         INTC_SYSSTATUS_RESETDONE)
+    {
+    }
 
   /* Enable any interrupt generation by setting priority threshold */
 

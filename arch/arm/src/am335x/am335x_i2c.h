@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/am335x/beaglebone-black/src/am335x_bringup.c
+ * arch/arm/src/am335x/am335x_i2c.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
+ *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,105 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_AM335X_AM335X_I2C_H
+#define __ARCH_ARM_SRC_AM335X_AM335X_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/mount.h>
-#include <debug.h>
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#include "beaglebone-black.h"
-
-#include "am335x_i2c.h"
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#if defined(CONFIG_I2C_DRIVER) && (defined(CONFIG_AM335X_I2C0) || \
-    defined(CONFIG_AM335X_I2C1) || defined(CONFIG_AM335X_I2C2))
-static void am335x_i2c_register(int bus)
-{
-  FAR struct i2c_master_s *i2c;
-  int ret;
-
-  i2c = am335x_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
-          am335x_i2cbus_uninitialize(i2c);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: am335x_bringup
+ * Name: am335x_i2cbus_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-int am335x_bringup(void)
-{
-  int ret = OK;
+FAR struct i2c_master_s *am335x_i2cbus_initialize(int port);
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
+/****************************************************************************
+ * Name: am335x_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the am335x_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
+int am335x_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_AM335X_I2C0)
-  am335x_i2c_register(0);
-#endif
-
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_AM335X_I2C1)
-  am335x_i2c_register(1);
-#endif
-
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_AM335X_I2C2)
-  am335x_i2c_register(2);
-#endif
-
-  UNUSED(ret);
-  return ret;
-}
+#endif /* __ARCH_ARM_SRC_AM335X_AM335X_I2C_H */

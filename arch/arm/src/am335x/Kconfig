@@ -133,16 +133,8 @@ config AM335X_MMC2
 	bool "MMC/SD/SDIO0 High Speed Host Controller 2"
 	default n
 
-config AM335X_I2C0
-	bool "Multi-master I2C Controller 0"
-	default n
-
-config AM335X_I2C1
-	bool "Multi-master I2C Controller 1"
-	default n
-
-config AM335X_I2C2
-	bool "Multi-master I2C Controller 2"
+config AM335X_I2C
+	bool
 	default n
 
 config AM335X_MCASP0
@@ -360,4 +352,24 @@ config AM335X_LCDC_PIXCLK_INVERT
 	default y
 
 endmenu # LCD Configuration
+
+menu "I2C Peripherals"
+
+menuconfig AM335X_I2C0
+	bool "Multi-master I2C Controller 0"
+	default n
+	select AM335X_I2C
+
+menuconfig AM335X_I2C1
+	bool "Multi-master I2C Controller 1"
+	default n
+	select AM335X_I2C
+
+menuconfig AM335X_I2C2
+	bool "Multi-master I2C Controller 2"
+	default n
+	select AM335X_I2C
+
+endmenu # I2C Peripherals
+
 endif # ARCH_CHIP_AM335X

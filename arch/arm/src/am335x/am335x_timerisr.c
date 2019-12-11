@@ -51,15 +51,17 @@
 #include "up_arch.h"
 #include "hardware/am335x_timer.h"
 
+#include "am335x_sysclk.h"
+
 #define USE_TIMER1MS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Timer clock selects system clock CLK_M_OSC (24MHz) */
+/* Timer clock selects system clock CLK_M_OSC */
 
-#  define TMR_CLOCK             (24000000ll)
+#  define TMR_CLOCK             ((int64_t)am335x_get_sysclk())
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -136,7 +138,9 @@ void arm_timer_initialize(void)
 
   putreg32(TMR1MS_TIOCP_SOFT_RESET, AM335X_TMR1MS_TIOCP_CFG);
 
-  while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT));
+  while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT))
+    {
+    }
 
   putreg32(TMR_TPIR, AM335X_TMR1MS_TPIR);
   putreg32(TMR_TNIR, AM335X_TMR1MS_TNIR);
@@ -175,7 +179,9 @@ void arm_timer_initialize(void)
 
   putreg32(TMR_TIOCP_SOFT_RESET, AM335X_TMR2_TIOCP_CFG);
 
-  while ((getreg32(AM335X_TMR2_TIOCP_CFG) & TMR_TIOCP_SOFT_RESET));
+  while ((getreg32(AM335X_TMR2_TIOCP_CFG) & TMR_TIOCP_SOFT_RESET))
+    {
+    }
 
   putreg32(TMR_TLDR, AM335X_TMR2_TLDR);
   putreg32(TMR_TCRR, AM335X_TMR2_TCRR);

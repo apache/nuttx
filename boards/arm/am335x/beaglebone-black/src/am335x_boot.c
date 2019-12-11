@@ -119,6 +119,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  return am335x_bringup();
+  am335x_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

@@ -130,6 +130,14 @@
  *                                      PR1_PRU1_PRU_R31_15/GPIO1_11
  */
 
+/* I2Cs *********************************************************************/
+
+#define GPIO_I2C1_SCL       GPIO_I2C1_SCL_2
+#define GPIO_I2C1_SCL       GPIO_I2C1_SDA_2
+
+#define GPIO_I2C2_SCL       GPIO_I2C2_SCL_1
+#define GPIO_I2C2_SCL       GPIO_I2C2_SDA_1
+
 /****************************************************************************
  * Assembly Language Macros
  ****************************************************************************/
@@ -138,4 +146,5 @@
   .macro  config_sdram
   .endm
 #endif /* __ASSEMBLY__ */
+
 #endif  /* __BOARDS_ARM_AM335X_BEAGLEBONE_BLACK_INCLUDE_BOARD_H */

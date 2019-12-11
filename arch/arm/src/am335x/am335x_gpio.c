@@ -313,7 +313,6 @@ static int am335x_gpio_configinput(gpio_pinset_t pinset)
 
   /* Configure pin pad settings */
 
-  index   = ((pinset & GPIO_PADCTL_MASK) >> GPIO_PADCTL_SHIFT);
   regaddr = AM335X_PADCTL_ADDRESS(index);
   muxset  = (pinmux_pinset_t)((pinset & GPIO_PINMUX_MASK) >> GPIO_PINMUX_SHIFT);
   return am335x_pinmux_configure(regaddr, muxset);
@@ -461,4 +460,37 @@ bool am335x_gpio_read(gpio_pinset_t pinset)
   value = am335x_gpio_getinput(port, pin);
   leave_critical_section(flags);
   return value;
+}
+
+/************************************************************************************
+ * Name: am335x_periph_gpio
+ *
+ * Description:
+ *   Return GPIO pinset that correspond to provided peripheral pinset.
+ *
+ ************************************************************************************/
+
+gpio_pinset_t am335x_periph_gpio(gpio_pinset_t pinset)
+{
+  unsigned int index;
+  int port;
+  int pin;
+
+  if ((pinset & GPIO_MODE_MASK) == GPIO_PERIPH)
+    {
+      index = ((pinset & GPIO_PADCTL_MASK) >> GPIO_PADCTL_SHIFT);
+      for (port = 0; port < AM335X_GPIO_NPORTS; port++)
+        {
+          for (pin = 0; pin < AM335X_GPIO_NPINS; pin++)
+            {
+              if (index == g_gpio_padctl[port][pin])
+                {
+                  return (GPIO_INPUT | (port << GPIO_PORT_SHIFT) |
+                          (pin << GPIO_PIN_SHIFT));
+                }
+            }
+        }
+    }
+
+  return GPIO_MODE_MASK;
 }
