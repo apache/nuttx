@@ -247,7 +247,7 @@ static void am335x_peripheral_enable(void)
   putreg32(CM_CLKCTRL_MODULEMODE_ENABLE, AM335X_CM_PER_GPIO3_CLKCTRL);
   while ((getreg32(AM335X_CM_PER_GPIO3_CLKCTRL) &
          (CM_CLKCTRL_MODULEMODE_MASK | CM_CLKCTRL_IDLEST_MASK))
-         != (CM_CLKCTRL_MODULEMODE_ENABLE | CM_CLKCTRL_IDLEST_FUNC));
+         != (CM_CLKCTRL_MODULEMODE_ENABLE | CM_CLKCTRL_IDLEST_FUNC))
     {
     }
 
@@ -566,7 +566,7 @@ static void am335x_peripheral_enable(void)
     {
     }
 
-  while ((getreg32(AM335X_CM_PER_L4LS_CLKSTCTRL) & per_l4ls) != per_l4ls);
+  while ((getreg32(AM335X_CM_PER_L4LS_CLKSTCTRL) & per_l4ls) != per_l4ls)
     {
     }
 }
