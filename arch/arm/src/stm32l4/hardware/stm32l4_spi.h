@@ -49,11 +49,7 @@
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
-#if defined(CONFIG_STM32L4_STM32F40XX)
-#  define STM32L4_SPI_CLK_MAX     37500000UL
-#else
-#  define STM32L4_SPI_CLK_MAX     40000000UL
-#endif
+#define STM32L4_SPI_CLK_MAX      40000000UL
 
 /* Register Offsets *****************************************************************/
 
