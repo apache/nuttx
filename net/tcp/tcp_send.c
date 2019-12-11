@@ -552,6 +552,10 @@ void tcp_reset(FAR struct net_driver_s *dev)
  * Description:
  *   Send the SYN, ACK, or SYNACK response.
  *
+ *   - SYN and SYNACK are sent only from the TCP state machine.
+ *   - ACK may be sent alone only if delayed ACKs are enabled and the ACK
+ *     delay timeout occurs.
+ *
  * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP connection structure holding connection information
