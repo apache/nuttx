@@ -1587,10 +1587,6 @@ FAR struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
           (void)imxrt_config_gpio(GPIO_LPSPI1_MISO);
           (void)imxrt_config_gpio(GPIO_LPSPI1_MOSI);
 
-          putreg32(0x1, IMXRT_INPUT_LPSPI1_SCK);
-          putreg32(0x1, IMXRT_INPUT_LPSPI1_SDI);
-          putreg32(0x1, IMXRT_INPUT_LPSPI1_SDO);
-
           /* Set up default configuration: Master, 8-bit, etc. */
 
           imxrt_lpspi_bus_initialize(priv);
