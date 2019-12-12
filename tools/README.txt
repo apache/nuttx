@@ -78,13 +78,6 @@ discover.py
   Example script for discovering devices in the local network.
   It is the counter part to apps/netutils/discover
 
-gen_getrev.sh
--------------
-
-  Creates a GIT revision string and echos the string to stdout.  This is
-  used by the top-level Makefile to generate part of the information in
-  the .version file.
-
 gencromfs.c
 -----------
 

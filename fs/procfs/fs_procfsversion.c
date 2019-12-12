@@ -220,13 +220,7 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-#ifdef CONFIG_GIT_REVISION_STR
-      linesize = snprintf(attr->line, VERSION_LINELEN,
-                          "NuttX version %s %s\n"
-                          "%s\n",
-                          CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD,
-                          CONFIG_GIT_REVISION_STR);
-#elif defined(__DATE__) && defined(__TIME__)
+#if defined(__DATE__) && defined(__TIME__)
       linesize = snprintf(attr->line, VERSION_LINELEN,
                           "NuttX version %s %s %s %s\n",
                           CONFIG_VERSION_STRING, CONFIG_VERSION_BUILD,

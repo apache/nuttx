@@ -36,13 +36,12 @@ WD=`pwd`
 
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|-h] [-b <build>] [-s <version-string>] -v <major.minor> <outfile-path>"
+USAGE="USAGE: $0 [-d|-h] [-b <build>] [-v <major.minor>] <outfile-path>"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
 unset BUILD
 unset OUTFILE
-unset VERSION_STRING
 
 while [ ! -z "$1" ]; do
 	case $1 in
@@ -52,10 +51,6 @@ while [ ! -z "$1" ]; do
 		;;
 	-d )
 		set -x
-		;;
-	-s )
-		shift
-		VERSION_STRING=$1
 		;;
 	-v )
 		shift
@@ -90,6 +85,10 @@ done
 
 OUTFILE=$1
 
+if [ -z ${VERSION} ] ; then
+	VERSION=`git tag --sort=taggerdate | tail -1 | cut -d'-' -f2`
+fi
+
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
@@ -106,12 +105,6 @@ if [ -z ${OUTFILE} ] ; then
 	exit 1
 fi
 
-# If the version string was not provided, then set it to the version
-
-if [ -z "${VERSION_STRING}" ]; then
-	VERSION_STRING=${VERSION}
-fi
-
 # Get the major and minor version numbers
 
 MAJOR=`echo ${VERSION} | cut -d'.' -f1`
@@ -126,15 +119,13 @@ MINOR=`echo ${VERSION} | cut -d'.' -f2`
 # Get GIT information (if not provided on the command line)
 
 if [ -z "${BUILD}" ]; then
-	GITINFO=`git log 2>/dev/null | head -1`
-	if [ -z "${GITINFO}" ]; then
+	BUILD=`git log --oneline -1 | cut -d' ' -f1 2>/dev/null`
+	if [ -z "${BUILD}" ]; then
 		echo "GIT version information is not available"
 		exit 3
 	fi
-	BUILD=`echo ${GITINFO} | cut -d' ' -f2`
-	if [ -z "${BUILD}" ]; then
-		echo "GIT build information not found"
-		exit 4
+	if [ -n "`git diff-index --name-only HEAD | head -1`" ]; then
+		BUILD=${BUILD}-dirty
 	fi
 fi
 
@@ -143,7 +134,7 @@ fi
 
 echo "#!/bin/bash" >${OUTFILE}
 echo "" >>${OUTFILE}
-echo "CONFIG_VERSION_STRING=\"${VERSION_STRING}\"" >>${OUTFILE}
+echo "CONFIG_VERSION_STRING=\"${VERSION}\"" >>${OUTFILE}
 echo "CONFIG_VERSION_MAJOR=${MAJOR}" >>${OUTFILE}
 echo "CONFIG_VERSION_MINOR=${MINOR}" >>${OUTFILE}
 echo "CONFIG_VERSION_BUILD=\"${BUILD}\"" >>${OUTFILE}
