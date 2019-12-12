@@ -82,24 +82,27 @@
 
 /* Interrupt wait timeout in seconds and milliseconds */
 
-#if !defined(CONFIG_IMXRT_I2CTIMEOSEC) && !defined(CONFIG_IMXRT_I2CTIMEOMS)
-#  define CONFIG_IMXRT_I2CTIMEOSEC 0
-#  define CONFIG_IMXRT_I2CTIMEOMS  500   /* Default is 500 milliseconds */
-#elif !defined(CONFIG_IMXRT_I2CTIMEOSEC)
-#  define CONFIG_IMXRT_I2CTIMEOSEC 0     /* User provided milliseconds */
-#elif !defined(CONFIG_IMXRT_I2CTIMEOMS)
-#  define CONFIG_IMXRT_I2CTIMEOMS  0     /* User provided seconds */
+#if !defined(CONFIG_IMXRT_LPI2C_TIMEOSEC) && \
+    !defined(CONFIG_IMXRT_LPI2C_TIMEOMS)
+#  define CONFIG_IMXRT_LPI2C_TIMEOSEC 0
+#  define CONFIG_IMXRT_LPI2C_TIMEOMS  500   /* Default is 500 milliseconds */
+#elif !defined(CONFIG_IMXRT_LPI2C_TIMEOSEC)
+#  define CONFIG_IMXRT_LPI2C_TIMEOSEC 0     /* User provided milliseconds */
+#elif !defined(CONFIG_IMXRT_LPI2C_TIMEOMS)
+#  define CONFIG_IMXRT_LPI2C_TIMEOMS  0     /* User provided seconds */
 #endif
 
 /* Interrupt wait time timeout in system timer ticks */
 
-#ifndef CONFIG_IMXRT_I2CTIMEOTICKS
-#  define CONFIG_IMXRT_I2CTIMEOTICKS \
-    (SEC2TICK(CONFIG_IMXRT_I2CTIMEOSEC) + MSEC2TICK(CONFIG_IMXRT_I2CTIMEOMS))
+#ifndef CONFIG_IMXRT_LPI2C_TIMEOTICKS
+#  define CONFIG_IMXRT_LPI2C_TIMEOTICKS \
+     (SEC2TICK(CONFIG_IMXRT_LPI2C_TIMEOSEC) + \
+      MSEC2TICK(CONFIG_IMXRT_LPI2C_TIMEOMS))
 #endif
 
-#ifndef CONFIG_IMXRT_I2C_DYNTIMEO_STARTSTOP
-#  define CONFIG_IMXRT_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_IMXRT_I2CTIMEOTICKS)
+#ifndef CONFIG_IMXRT_LPI2C_DYNTIMEO_STARTSTOP
+#  define CONFIG_IMXRT_LPI2C_DYNTIMEO_STARTSTOP \
+     TICK2USEC(CONFIG_IMXRT_LPI2C_TIMEOTICKS)
 #endif
 
 /* Debug ********************************************************************/
@@ -238,9 +241,9 @@ static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
                                          uint32_t setbits);
 static inline void imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv);
 
-#ifdef CONFIG_IMXRT_I2C_DYNTIMEO
+#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
 static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
-#endif /* CONFIG_IMXRT_I2C_DYNTIMEO */
+#endif /* CONFIG_IMXRT_LPI2C_DYNTIMEO */
 
 static inline int  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv);
 static inline void imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv);
@@ -531,7 +534,7 @@ static inline void imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_IMXRT_I2C_DYNTIMEO
+#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
 static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
@@ -548,7 +551,7 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_IMXRT_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return (useconds_t)(CONFIG_IMXRT_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -609,13 +612,13 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
 
       /* Calculate a time in the future */
 
-#if CONFIG_IMXRT_I2CTIMEOSEC > 0
-      abstime.tv_sec += CONFIG_IMXRT_I2CTIMEOSEC;
+#if CONFIG_IMXRT_LPI2C_TIMEOSEC > 0
+      abstime.tv_sec += CONFIG_IMXRT_LPI2C_TIMEOSEC;
 #endif
 
       /* Add a value proportional to the number of bytes in the transfer */
 
-#ifdef CONFIG_IMXRT_I2C_DYNTIMEO
+#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
       abstime.tv_nsec += 1000 * imxrt_lpi2c_tousecs(priv->msgc, priv->msgv);
       if (abstime.tv_nsec >= 1000 * 1000 * 1000)
         {
@@ -623,8 +626,8 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 
-#elif CONFIG_IMXRT_I2CTIMEOMS > 0
-      abstime.tv_nsec += CONFIG_IMXRT_I2CTIMEOMS * 1000 * 1000;
+#elif CONFIG_IMXRT_LPI2C_TIMEOMS > 0
+      abstime.tv_nsec += CONFIG_IMXRT_LPI2C_TIMEOMS * 1000 * 1000;
       if (abstime.tv_nsec >= 1000 * 1000 * 1000)
         {
           abstime.tv_sec++;
@@ -683,10 +686,10 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
 
   /* Get the timeout value */
 
-#ifdef CONFIG_IMXRT_I2C_DYNTIMEO
+#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
   timeout = USEC2TICK(imxrt_lpi2c_tousecs(priv->msgc, priv->msgv));
 #else
-  timeout = CONFIG_IMXRT_I2CTIMEOTICKS;
+  timeout = CONFIG_IMXRT_LPI2C_TIMEOTICKS;
 #endif
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
@@ -742,10 +745,10 @@ static inline void imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv)
 
   /* Select a timeout */
 
-#ifdef CONFIG_IMXRT_I2C_DYNTIMEO
-  timeout = USEC2TICK(CONFIG_IMXRT_I2C_DYNTIMEO_STARTSTOP);
+#ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
+  timeout = USEC2TICK(CONFIG_IMXRT_LPI2C_DYNTIMEO_STARTSTOP);
 #else
-  timeout = CONFIG_IMXRT_I2CTIMEOTICKS;
+  timeout = CONFIG_IMXRT_LPI2C_TIMEOTICKS;
 #endif
 
   /* Wait as stop might still be in progress; but stop might also

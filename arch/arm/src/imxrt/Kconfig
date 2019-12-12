@@ -999,6 +999,41 @@ config IMXRT_SRAM_HEAPOFFSET
 endmenu  # i.MX RT Heap Configuration
 endmenu # Memory Configuration
 
+menu "LPI2C Configuration"
+	depends on IMXRT_LPI2C
+
+config IMXRT_LPI2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on IMXRT_LPI2C
+
+config IMXRT_LPI2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on IMXRT_LPI2C_DYNTIMEO
+
+config IMXRT_LPI2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on IMXRT_LPI2C_DYNTIMEO
+
+config IMXRT_LPI2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on IMXRT_LPI2C
+
+config IMXRT_LPI2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on IMXRT_LPI2C && !IMXRT_LPI2C_DYNTIMEO
+
+config IMXRT_LPI2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on IMXRT_LPI2C && !IMXRT_LPI2C_DYNTIMEO
+
+endmenu # LPI2C Configuration
+
 menu "USDHC Configuration"
 	depends on IMXRT_USDHC
 
