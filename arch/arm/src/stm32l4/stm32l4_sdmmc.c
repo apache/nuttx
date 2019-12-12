@@ -94,7 +94,7 @@
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
- *   CONFIG_SDMMMC_DMAPRIO - SDMMC DMA priority.  This can be selecte if
+ *   CONFIG_SDMMC_DMAPRIO - SDMMC DMA priority.  This can be selected if
  *     CONFIG_STM32L4_SDMMC_DMA is enabled.
  *   CONFIG_CONFIG_STM32L4_SDMMC_XFRDEBUG - Enables some very low-level
  *     debug output.  This also requires CONFIG_DEBUG_FS and
@@ -1575,7 +1575,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                       stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
                     }
 
-                  /* Otherwise, just disable futher transfer interrupts and
+                  /* Otherwise, just disable further transfer interrupts and
                    * wait for the DMA complete event.
                    */
 

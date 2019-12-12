@@ -3213,7 +3213,7 @@
 	  strings by strerror().
 	* arch/arm/src/stm32/stm32_usbotghost.c:  Finally... the USB OTG FS
 	  appears to handle NAKing correctly.
-	* configs/stm32f4discovery/*:  Added and verifed support for USB OTG FS
+	* configs/stm32f4discovery/*:  Added and verified support for USB OTG FS
 	  host on the STM32F4Discovery board.
 	* configs/*/defconfig: Remove configuration documentation from config
 	  files.  It is redundant, error-prone, and difficult to maintain.
@@ -10053,7 +10053,7 @@
 	  stm32_stdclockconfig() in stm32fxxxxx_rcc.c.  Doing this I checked
 	  the possible uses of the LSI and the LSE sources: the LSI can be used
 	  for RTC and/or the IWDG, while the LSE only for the RTC (and to output
-	  the MCO1 pin). This change is not verifed for any other platforms.
+	  the MCO1 pin). This change is not verified for any other platforms.
 	  From Leo Aloe3132
 	* Rename arch_nshinitialize() to board_app_initialize() (2015-03-30).
 	* ./*.mk, configs/.gitignore, Makefile, boardctl.c, include/nuttx/fs/ioctl,
@@ -19507,7 +19507,7 @@
 	  USART_CR3. This was not being done, so calls to TIOCSSINGLEWIRE were
 	  silently failing.
 	  This change checks the state of UE in USART_CR1, clears the UE bit
-	  before writing HDSEL, then re-enables it if neccesary.  From Kurt
+	  before writing HDSEL, then re-enables it if necessary.  From Kurt
 	  Kiefer (2018-06-14).
 	* drivers/sensors:  Add support for Telair T6713 carbon dioxide
 	  sensor.  From Juha Niskanen (2018-06-15).
@@ -20035,7 +20035,7 @@
 	  the STM32 RTC and use an external RTC you cannot because the external
 	  RTC also depends on the global CONFIG_RTC.  The solution is to add a
 	  new CONFIG_STM32xx_RTC configuration option the permits to you select
-	  or deselect the STM32 RTC but still be able to selecte the external
+	  or deselect the STM32 RTC but still be able to select the external
 	  RTC.  From Gregory Nutt (2018-08-08).
 	* configs/stm32f4discovery/scripts/ld.script:  Missing
 	  EXTERN(_vectors)  From Gregory Nutt (2018-08-08).
@@ -26538,7 +26538,7 @@
 	  automatically if the NuttX math library is selected.  From Gregory
 	  Nutt (2019-09-16).
 	* boards/arm/cxd56xx/spresense/include/board_pinconfig.h:  Add board
-	  specific pin configurations of CXD5602 pins to fit Spresense board. 
+	  specific pin configurations of CXD5602 pins to fit Spresense board.
 	  From Takayoshi Koizumi (2019-09-16).
 	* boards/arm/cxd56xx/spresense/Kconfig:  Add a configuration to select
 	  if an extension board is attached to the SPresence.  If there is no
@@ -26708,7 +26708,7 @@
 	    extension board.  From Alin Jerpelea (2019-09-26).
 	* arch\arm\src\stm32h7\Kconfig:  Add the CRC option in KConfig.  From
 	  Eduard Niesner (2019-09-27).
-	* arch/arm/src/stm32l4/stm32l4_dumpgpio.c: Fix using wrong GPIO enable register. 
+	* arch/arm/src/stm32l4/stm32l4_dumpgpio.c: Fix using wrong GPIO enable register.
 	  From Juha Niskanen (2019-09-27).
 	* boards/arm/stm32/stm32f429i-disco/include/board.h:  Remove forbidden STM32
 	  header file inclusions.  Fix some coding standard issues.  From Gregory Nutt
@@ -26826,7 +26826,7 @@
 	  other SMP architectures as well.  From Gregory Nutt (2019-10-04).
 	* sched/wdog/wd_start.c:  Back out a kludge-workaround for an SDCC
 	  compiler problem fix back in Feb 2017.  That workaround now appears to
-	  conflict with newer GCC versions using unsupport warning options. 
+	  conflict with newer GCC versions using unsupport warning options.
 	  From Gregory Nutt (2019-10-04).
 	* drivers/wireless/bluetooth/bt_uart_bcm4343x.c:  BCM4343x HCIUART
 	  support.  From Dave Marples (2019-10-04).
@@ -26835,7 +26835,7 @@
 	  (2019-10-04).
 	* boards/arm/tiva/tm4c123g-launchpad/: SPI CAN functionality on
 	  TM4C123GXL - ek-tm4c123gxl_spi_can.  From DisruptiveNL (2019-10-05).
-	* arch/sim/src/sim/up_hostfs.c:   hostfs skip '.' and '..' in readdir' 
+	* arch/sim/src/sim/up_hostfs.c:   hostfs skip '.' and '..' in readdir'
 	  From Xiang Xiao (2019-10-07).
 	* tools/mkromfsimg.sh:  Use sed to add const to ROMFS declarations so
 	  that they like in FLASH not RAM.  From Bernd Walter (2019-10-07).
@@ -26854,7 +26854,7 @@
 	    overflow on some calculations.
 	  From Daniel Pereira Volpato (2019-10-07).
 	* boards/arm/stm32f0l0g0/nucleo-g070rb/include/board.h: Add TIMx clock
-	  frequencies boards/arm/stm32f0l0g0/nucleo-g070rb: Enable basic timers 
+	  frequencies boards/arm/stm32f0l0g0/nucleo-g070rb: Enable basic timers
 	  From Daniel Pereira Volpato (2019-10-07).
 	* drivers/wireless/bluetooth/bt_uart_bcm4343x.c:  Fix small a small bug
 	  found during testing.
@@ -26944,7 +26944,7 @@
 	  be ignored.  From liuhaitao (2019-10-17).
 	* tools/LibTargets.mk:  Make libapps.a by the default target.  From
 	  Xiang Xiao (2019-10-17).
-	* include/nuttx/timers/pwm.h:  Correct some typos. 
+	* include/nuttx/timers/pwm.h:  Correct some typos.
 	  arch/arm/src/stm32f0l0g0: Add PWM support.  From Daniel Pereira
 	  Volpato (2019-10-17).
 	* boards/arm/stm32f0l0g0/nucleo-g070rb: Add PWM support and GPIO_TIM3_*
@@ -27010,7 +27010,7 @@
 	* stm32f4dis with gs2200m:
 	  - drivers: wireless: Add SPI_SELECT() to _read/write_data() in gs2200m.c
 	  - boards: stm32f4discovery: Add support for gs2200m.  NOTE: GS2200M
-	    for Spresense works with mikroe STM32F4 Discovery Shield (slot3) 
+	    for Spresense works with mikroe STM32F4 Discovery Shield (slot3)
 	    From Masayuki Ishikawa (2019-10-22).
 	* STM32H7:  Flash driver and Serious BUG fixes:
 	  - arch/arm/Kconfig:Add ARCH_HAVE_PROGMEM for STM32H7
@@ -27126,7 +27126,7 @@
 	  (2019-10-26).
 	* tools/nxstyle.c:  Eliminate false alarms when checking for alignment
 	  of comments to the right of code.  Fix check for C++ style comments so
-	  that strings like http:// and https:// do not generate false alarms. 
+	  that strings like http:// and https:// do not generate false alarms.
 	  From Gregory Nutt (2019-10-27).
 	* boards/arm/sama5/sama5d4-ek/src/sam_appinit.c:  Fix error found in
 	  build testing.  Bad conditional compilation for
@@ -27459,7 +27459,7 @@
 	  imx1060-evk to remove compilation warnings about duplicated
 	  definitions. No functional changes.  From Dave Marples (2019-11-10).
 	* arch/sim/src/sim/up_simuart.c:  Remove CONFIG_SIM_UART_DATAPOST for
-	  arch/sim.  It's very dangerous to call NuttX API from simuart_thread. 
+	  arch/sim.  It's very dangerous to call NuttX API from simuart_thread.
 	  From Xiang Xiao (2019-11-10).
 	* arch/sim/src/sim:  Replace all CONFIG_DEV_CONSOLE with USE_DEVCONSOLE
 	  for arch/sim and compile up_devconsole.c conditionally.  From Xiang
@@ -27499,7 +27499,7 @@
 	* arch/arm/src/imxrt/imxrt_idle.c:  Y'all remember that conversation we
 	  had about why WFI might have been disabled on imxrt? Well, looks like
 	  we found the reason:
-	  - https://github.com/zephyrproject-rtos/zephyr/pull/8535/commits: 
+	  - https://github.com/zephyrproject-rtos/zephyr/pull/8535/commits:
 	    "The imxrt1050 is configured to use SYSTICK for the kernel timer, but
 	    SYSTICK cannot wake up the soc from low-power modes. Disable
 	    low-power modes on this soc until we have support for an alternative

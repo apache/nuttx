@@ -310,7 +310,7 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
  *
  * Description:
  *   Remove the next note from the tail of the circular buffer.  The note
- *   is also removed from the circular buffer to make room for futher notes.
+ *   is also removed from the circular buffer to make room for further notes.
  *
  * Input Parameters:
  *   buffer - Location to return the next note

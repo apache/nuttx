@@ -182,7 +182,7 @@ nxstyle: nxstyle$(HOSTEXEEXT)
 endif
 
 # initialconfig - Create a barebones .config file sufficient only for
-# instantiating the symbolic links necesary to do a real configuration
+# instantiating the symbolic links necessary to do a real configuration
 # from scratch.
 
 initialconfig$(HOSTEXEEXT): initialconfig.c

@@ -144,9 +144,9 @@ to a particular configuration.
      as of this writing. See discussion in include/nuttx/spi/slave.h and
      in the section entitle "SPI Slave" below.
 
-  9. A QSPI FLASH driver was added and verifed on 2015-11-10.  This driver
+  9. A QSPI FLASH driver was added and verified on 2015-11-10.  This driver
      operated in the memory mapped Serial Memory Mode (SMM).  See the
-     "S25FL116K QuadSPI FLASH" section below for futher information.
+     "S25FL116K QuadSPI FLASH" section below for further information.
 
  10. On-chip FLASH support as added and verified on 2015-11-13.  See the
      "Program FLASH Access" section below for further information.
@@ -174,7 +174,7 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     ------ ------ ------- ------- --------
 
     In this configuration, an external RS232 driver can also be used
-    instead of the shield.  Simply connext as follows:
+    instead of the shield.  Simply connect as follows:
 
     --------- -----------
     Arduino   RS-232
@@ -489,7 +489,7 @@ The configuration data device will appear at /dev/config.
 S25FL116K QuadSPI FLASH
 ====================
 
-A QSPI FLASH driver was added and verifed on 2015-11-07.  This driver
+A QSPI FLASH driver was added and verified on 2015-11-07.  This driver
 operated in the memory mapped Serial Memory Mode (SMM).  These
 configuration options were enabled to test QSPI:
 
@@ -575,7 +575,7 @@ wrapped as a character driver and available as /dev/mtd0.
 
 Program FLASH Access
 ====================
-An on-chip FLASH driver was added and verifed on 2015-11-13.  These
+An on-chip FLASH driver was added and verified on 2015-11-13.  These
 configuration options were enabled to test the on-chip FLASH support:
 
   CONFIG_MTD_PROGMEM=y
@@ -767,9 +767,9 @@ Cache-Related Issues
 
 I- and D-Caches can be enabled but the D-Cache must be enabled in write-
 through mode.  This is to work around issues with the RX and TX descriptors
-with are 8-bytes in size.  But the D-Cache cache line size is 32-bytes.
+which are 8-bytes in size.  But the D-Cache cache line size is 32-bytes.
 That means that you cannot reload, clean or invalidate a descriptor without
-also effecting three neighboring descriptors. Setting write through mode
+also affecting three neighboring descriptors.  Setting write through mode
 eliminates the need for cleaning the D-Cache.  If only reloading and
 invalidating are done, then there is no problem.
 
@@ -1191,7 +1191,7 @@ the connectors worked.  Let me share this so that, perhaps, I can save you
 the same embarrassment:
 
 - The maXTouch Xplained Pro has an Omron XF2M-5015-1A connector.  There is a
-  black bar at back (toward the baord).  Raise that bar and insert the cable
+  black bar at back (toward the board).  Raise that bar and insert the cable
   with the contacts away from the board.  Lower that bar to lock the cable
   in place.
 

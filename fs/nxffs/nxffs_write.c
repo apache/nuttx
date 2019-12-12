@@ -835,7 +835,7 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume
- *   size - The size of the object to be verifed.
+ *   size - The size of the object to be verified.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is

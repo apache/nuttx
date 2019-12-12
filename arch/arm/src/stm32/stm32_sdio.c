@@ -93,7 +93,7 @@
  *   CONFIG_STM32_SDIO_WIDTH_D1_ONLY - This may be selected to force the
  *     driver operate with only a single data line (the default is to use
  *     all 4 SD data lines).
- *   CONFIG_SDM_DMAPRIO - SDIO DMA priority.  This can be selecte if
+ *   CONFIG_SDM_DMAPRIO - SDIO DMA priority.  This can be selected if
  *     CONFIG_STM32_SDIO_DMA is enabled.
  *   CONFIG_SDIO_XFRDEBUG - Enables some very low-level debug output
  *     This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
@@ -1468,7 +1468,7 @@ static int stm32_interrupt(int irq, void *context, FAR void *arg)
                       stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
                     }
 
-                  /* Otherwise, just disable futher transfer interrupts and
+                  /* Otherwise, just disable further transfer interrupts and
                    * wait for the DMA complete event.
                    */
 

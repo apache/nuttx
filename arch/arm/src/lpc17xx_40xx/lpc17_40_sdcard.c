@@ -1280,7 +1280,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                       lpc17_40_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
                     }
 
-                  /* Otherwise, just disable futher transfer interrupts and
+                  /* Otherwise, just disable further transfer interrupts and
                    * wait for the DMA complete event.
                    */
 

@@ -8787,7 +8787,7 @@ detailed bugfix information):
         stm32fxxxxx_rcc.c.  Doing this I checked the possible uses of the
         LSI and the LSE sources: the LSI can be used for RTC and/or the
         IWDG, while the LSE only for the RTC (and to output the MCO1 pin).
-        This change is not verifed for any other platforms.  From Leo
+        This change is not verified for any other platforms.  From Leo
         Aloe3132
 
     * Tiva Drivers:
@@ -19459,7 +19459,7 @@ detailed bugfix information):
         use an external RTC you cannot because the external RTC also
         depends on the global CONFIG_RTC.  The solution is to add a new
         CONFIG_STM32xx_RTC configuration option the permits to you select
-        or deselect the STM32 RTC but still be able to selecte the external
+        or deselect the STM32 RTC but still be able to select the external
         RTC.  From Gregory Nutt.
       - STM32 F3 I2C:  Fix compile error with I2C reset.  From Juha
         Niskanen.
@@ -19467,7 +19467,7 @@ detailed bugfix information):
         must be disabled in order to write HDSEL in USART_CR3. This was not
         being done, so calls to TIOCSSINGLEWIRE were silently failing.
         This change checks the state of UE in USART_CR1, clears the UE bit
-        before writing HDSEL, then re-enables it if neccesary.  From Kurt
+        before writing HDSEL, then re-enables it if necessary.  From Kurt
         Kiefer.
       - STM32 F7 DMA:  DMA macros did not account for the increase from 8
         to 16 DMA channels.  From Gregory Nutt.

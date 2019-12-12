@@ -62,7 +62,7 @@ Version 5.2.1
 
 Version 5.3.0
 
-  I verifed compilation using 5.30 on June 2, 2019.  To use this version,
+  I verified compilation using 5.30 on June 2, 2019.  To use this version,
   I had to make spurious modification to the implementation of gmtimer() to
   work around an internal compiler error.  I have still not verified that
   are no errors in the compiled code.

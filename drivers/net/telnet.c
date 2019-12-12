@@ -628,7 +628,7 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
   register int index;
   bool ret = false;
 
-  /* Ignore carriage returns (we will put these in automatically as necesary) */
+  /* Ignore carriage returns (we will put these in automatically as necessary) */
 
   if (ch != ISO_cr)
     {

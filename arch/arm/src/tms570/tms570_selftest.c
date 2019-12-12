@@ -242,7 +242,7 @@ void tms570_memtest_selftest(void)
  * Name: tms570_memtest_start
  *
  * Description:
- *   Start the memory test on the selecte set of RAMs.  This test does not
+ *   Start the memory test on the selected set of RAMs.  This test does not
  *   return until the memory test is completed.
  *
  * Input Parameters:

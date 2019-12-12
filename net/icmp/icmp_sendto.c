@@ -410,7 +410,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
    * packets from the read-ahead buffer.
    *
    * REVISIT:  How to we free up any lingering reponses if there are no
-   * futher pings?
+   * further pings?
    */
 
   icmp = (FAR struct icmp_hdr_s *)buf;

@@ -9,7 +9,7 @@
  *   Dec. 18, 2012
  *
  * Some of this driver was developed with input from NXP sample code for
- * the LPCXpresso-LPC54628 baord.  That sample code as a compatible BSD
+ * the LPCXpresso-LPC54628 board.  That sample code as a compatible BSD
  * license:
  *
  *   Copyright (c) 2016, Freescale Semiconductor, Inc.

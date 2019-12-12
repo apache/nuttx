@@ -574,9 +574,9 @@ A: Yes with the following modifications to the procedure above.
        gdb> mon go
 
    That will restart U-Boot and you have to press ENTER in the terminal
-   window to stop U-Boot.  Restarting U-Boot is a necesary part of the
+   window to stop U-Boot.  Restarting U-Boot is a necessary part of the
    restart process because you need to put the hardware back in its initial
-   state before running NuttX
+   state before running NuttX.
 
    Then this will restart the debug session just as before:
 

@@ -140,7 +140,7 @@ void arm_timer_initialize(void)
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
 #ifndef USE_STDBY_CLOCK
-  /* Note that is should not be neccesary to set the SYSTICK clock source:
+  /* Note that it should not be necessary to set the SYSTICK clock source:
    * "The CLKSOURCE bit in SysTick Control and Status register is always set
    *  to select the core clock."
    *

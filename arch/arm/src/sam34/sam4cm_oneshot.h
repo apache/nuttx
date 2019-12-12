@@ -84,8 +84,8 @@ struct sam_oneshot_s
                                        * the callback */
 #ifdef CONFIG_SAM34_FREERUN
   volatile uint32_t start_count;      /* Stores the value of the freerun counter,
-                                       * at each start of the onshot timer. Is neccesary
-                                       * to find out if the onshot counter was updated
+                                       * at each start of the oneshot timer. Is necessary
+                                       * to find out if the oneshot counter was updated
                                        * correctly at the time of the call to
                                        * sam_oneshot_cancel or not. */
 #endif

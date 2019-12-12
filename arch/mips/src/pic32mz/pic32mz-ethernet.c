@@ -179,8 +179,8 @@
 
 /* Debug Configuration *****************************************************/
 
-/* Register/Descriptor debug -- can only happen of CONFIG_DEBUG_FEATURES is
- * selecte. This will probably generate much more output than you care to see.
+/* Register/Descriptor debug -- can only happen if CONFIG_DEBUG_FEATURES is
+ * selected. This will probably generate much more output than you care to see.
  */
 
 #ifndef CONFIG_DEBUG_FEATURES
