@@ -901,7 +901,6 @@ static uint32_t imxrt_lpspi_setfrequency(FAR struct spi_dev_s *dev,
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
 
   uint32_t men;
-  uint32_t regval;
   uint32_t pll_freq;
   uint32_t pll3_div;
   uint32_t src_freq = 0;
@@ -986,14 +985,12 @@ static uint32_t imxrt_lpspi_setfrequency(FAR struct spi_dev_s *dev,
 
       /* Write the best values in the CCR register */
 
-      regval = imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_CCR_OFFSET);
-      regval &= ~LPSPI_CCR_SCKDIV_MASK;
-      regval |= LPSPI_CCR_SCKDIV(best_scaler);
-      imxrt_lpspi_putreg32(priv, IMXRT_LPSPI_CCR_OFFSET, regval);
+      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CCR_OFFSET,
+                              LPSPI_CCR_SCKDIV_MASK,
+                              LPSPI_CCR_SCKDIV(best_scaler));
 
       imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET,
-                              LPSPI_TCR_PRESCALE_MASK, 0);
-      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET, 0,
+                              LPSPI_TCR_PRESCALE_MASK,
                               LPSPI_TCR_PRESCALE(best_prescaler));
 
       priv->frequency = frequency;
@@ -1120,7 +1117,6 @@ static void imxrt_lpspi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
-  uint32_t regval;
   uint32_t men;
   int savbits = nbits;
 
@@ -1144,11 +1140,9 @@ static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
           imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CR_OFFSET, LPSPI_CR_MEN, 0);
         }
 
-      regval = imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_TCR_OFFSET);
-      regval &= ~LPSPI_TCR_FRAMESZ_MASK;
-      regval |= LPSPI_TCR_FRAMESZ(nbits - 1);
-
-      imxrt_lpspi_putreg32(priv, IMXRT_LPSPI_TCR_OFFSET, regval);
+      imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET,
+                              LPSPI_TCR_FRAMESZ_MASK,
+                              LPSPI_TCR_FRAMESZ(nbits - 1));
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
