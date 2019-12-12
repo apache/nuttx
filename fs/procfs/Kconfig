@@ -80,7 +80,7 @@ config FS_PROCFS_EXCLUDE_UPTIME
 
 config FS_PROCFS_EXCLUDE_VERSION
 	bool "Exclude version"
-	default y
+	default n
 
 config FS_PROCFS_EXCLUDE_CPULOAD
 	bool "Exclude CPU load"
