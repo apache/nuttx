@@ -205,11 +205,15 @@
 #define I2C_IRQ_RDR                             (1 << 13)  /* Bit 13:  Receive draining IRQ */
 #define I2C_IRQ_XDR                             (1 << 14)  /* Bit 14:  Transmit draining IRQ */
 
-#define I2C_IRQ_ERRORMASK (I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_AERR | I2C_IRQ_XUDF | I2C_IRQ_ROVR | I2C_IRQ_BB)
+#define I2C_IRQ_ERRORMASK (I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_AERR | I2C_IRQ_XUDF | I2C_IRQ_ROVR)
+
+#define I2C_STS_CLEARMASK (I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_ARDY | I2C_IRQ_RRDY | I2C_IRQ_XRDY \
+                           | I2C_IRQ_GC | I2C_IRQ_STC | I2C_IRQ_AERR | I2C_IRQ_BF | I2C_IRQ_AAS \
+                           | I2C_IRQ_XUDF | I2C_IRQ_ROVR | I2C_IRQ_BB | I2C_IRQ_RDR | I2C_IRQ_XDR)
 
 #define I2C_ICR_CLEARMASK (I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_ARDY | I2C_IRQ_RRDY | I2C_IRQ_XRDY \
                            | I2C_IRQ_GC | I2C_IRQ_STC | I2C_IRQ_AERR | I2C_IRQ_BF | I2C_IRQ_AAS \
-                           | I2C_IRQ_XUDF | I2C_IRQ_ROVR | I2C_IRQ_BB | I2C_IRQ_RDR | I2C_IRQ_XDR)
+                           | I2C_IRQ_XUDF | I2C_IRQ_ROVR | I2C_IRQ_RDR | I2C_IRQ_XDR)
 
 #define I2C_WE_AL                               (1 << 0)  /* Bit 0:  Arbitration lost */
 #define I2C_WE_NACK                             (1 << 1)  /* Bit 1:  No acknowledgment */

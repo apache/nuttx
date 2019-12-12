@@ -76,7 +76,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define AM335X_I2C_PI_SYS_CLK       (48000000)
+#define AM335X_I2C_SCLK             (48000000)
 
 /* Configuration ********************************************************************/
 
@@ -524,7 +524,7 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
     {
       if ((priv->flags & I2C_M_READ) != 0)
         {
-          regval = I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_RRDY \
+          regval = I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_RRDY
                    | I2C_IRQ_XRDY | I2C_IRQ_AERR | I2C_IRQ_BF;
           am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_SET_OFFSET, regval);
         }
@@ -534,6 +534,10 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
                    | I2C_IRQ_AERR | I2C_IRQ_BF;
           am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_SET_OFFSET, regval);
         }
+
+      /* Force generate bus free interrupt to start transmission */
+
+      am335x_i2c_putreg(priv, AM335X_I2C_IRQ_STAT_RAW_OFFSET, I2C_IRQ_BF);
     }
 
   /* Enable Interrupts when slave mode */
@@ -625,11 +629,6 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
   timeout = CONFIG_AM335X_I2CTIMEOTICKS;
 #endif
 
-  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
-   * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_timedwait() sleeps.
-   */
-
   priv->intstate = INTSTATE_WAITING;
   start = clock_systimer();
 
@@ -700,7 +699,7 @@ static inline void am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
       /* Check for Bus Free condition */
 
       regval = am335x_i2c_getreg(priv, AM335X_I2C_IRQ_STAT_RAW_OFFSET);
-      if ((regval & (I2C_IRQ_AL | I2C_IRQ_NACK | I2C_IRQ_BF)) != 0)
+      if ((regval & I2C_IRQ_BB) == 0)
         {
           return;
         }
@@ -893,9 +892,10 @@ static void am335x_i2c_tracedump(FAR struct am335x_i2c_priv_s *priv)
 static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
                                 uint32_t frequency)
 {
-  uint32_t src_freq = AM335X_I2C_PI_SYS_CLK;
+  uint32_t src_freq = AM335X_I2C_SCLK;
   uint32_t men;
   uint32_t prescale = 0;
+  uint32_t scl = 0;
   uint32_t scl_low = 0;
   uint32_t scl_hi = 0;
   uint32_t best_prescale = 0;
@@ -923,35 +923,36 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
 
           /* I2C bus clock is Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5)) */
 
-          for (prescale = 0; prescale < 256; prescale++)
+          for (scl = 14; scl < 522; scl += 2)
             {
-              for (scl_low = 0; scl_low < 256; scl_low++)
+              for (prescale = 3; prescale < 256; prescale++)
                 {
-                  for (scl_hi = 0; scl_hi < 256; scl_hi++)
+                  scl_low = (scl / 2) - 7;
+                  scl_hi = (scl / 2) - 5;
+
+                  computed_rate = src_freq / (prescale + 1);
+                  computed_rate /= scl_low + 7 + scl_hi + 5;
+
+                  if (frequency > computed_rate)
                     {
-                      computed_rate = src_freq / (prescale + 1);
-                      computed_rate /= scl_low + 7 + scl_hi + 5;
+                      abs_error = frequency - computed_rate;
+                    }
+                  else
+                    {
+                      abs_error = computed_rate - frequency;
+                    }
 
-                      if (frequency > computed_rate)
-                        {
-                          abs_error = frequency - computed_rate;
-                        }
-                      else
-                        {
-                          abs_error = computed_rate - frequency;
-                        }
+                  if (abs_error < best_error)
+                    {
+                      best_prescale = prescale;
+                      best_scl_low = scl_low;
+                      best_scl_hi = scl_hi;
+                      best_error = abs_error;
 
-                      if (abs_error < best_error)
+                      if (abs_error == 0)
                         {
-                          best_prescale = prescale;
-                          best_scl_low = scl_low;
-                          best_scl_hi = scl_hi;
-                          best_error = abs_error;
-
-                          if (abs_error == 0)
-                            {
-                              break;
-                            }
+                          scl = 522;
+                          break;
                         }
                     }
                 }
@@ -992,7 +993,7 @@ static inline void am335x_i2c_sendstart(FAR struct am335x_i2c_priv_s *priv,
 
   /* Generate START condition and send the address */
 
-  regval = am335x_i2c_getreg(priv, AM335X_I2C_CON_OFFSET) | I2C_CON_STT;
+  regval = am335x_i2c_getreg(priv, AM335X_I2C_CON_OFFSET) | I2C_CON_STT | I2C_CON_MST;
 
   if ((priv->flags & I2C_M_READ) != 0)
     {
@@ -1254,11 +1255,9 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
 #endif
     }
 
-#ifndef CONFIG_I2C_POLLED
   /* Clear interrupt status */
 
   am335x_i2c_putreg(priv, AM335X_I2C_IRQ_STAT_OFFSET, status);
-#endif
 
   priv->status = status;
   return OK;
@@ -1309,16 +1308,16 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
 
   /* Disable auto-idle mode */
 
-  am335x_i2c_modifyreg(priv, AM335X_I2C_SYSC_OFFSET, 0, I2C_SYSC_AUTOIDLE);
+  am335x_i2c_modifyreg(priv, AM335X_I2C_SYSC_OFFSET, I2C_SYSC_AUTOIDLE, 0);
 
   /* Force a frequency update */
 
   priv->frequency = 0;
   am335x_i2c_setclock(priv, 100000);
 
+#ifndef CONFIG_I2C_POLLED
   /* Attach ISRs */
 
-#ifndef CONFIG_I2C_POLLED
   irq_attach(priv->config->irq, am335x_i2c_isr, priv);
   up_enable_irq(priv->config->irq);
 #endif
@@ -1326,6 +1325,10 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
   /* Enable I2C module */
 
   am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET, 0, I2C_CON_EN);
+
+  /* Select free running mode */
+
+  am335x_i2c_modifyreg(priv, AM335X_I2C_SYSTEST_OFFSET, 0, I2C_SYSTEST_FREE);
 
   /* Wait for I2C module comes out of reset */
 
@@ -1380,7 +1383,6 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
                                FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct am335x_i2c_priv_s *priv = (struct am335x_i2c_priv_s *)dev;
-  uint32_t status = 0;
 
   int ret = 0;
 
@@ -1396,6 +1398,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Clear any pending error interrupts */
 
+  am335x_i2c_putreg(priv, AM335X_I2C_IRQ_STAT_OFFSET, I2C_STS_CLEARMASK);
   am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET, I2C_ICR_CLEARMASK);
 
   /* Old transfers are done */
@@ -1429,47 +1432,46 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
   if (am335x_i2c_sem_waitdone(priv) < 0)
     {
-      status = am335x_i2c_getreg(priv, AM335X_I2C_IRQ_STAT_RAW_OFFSET);
       ret = -ETIMEDOUT;
 
-      i2cerr("ERROR: Timed out: IRQ_RAW: status: 0x%x\n", status);
+      i2cerr("ERROR: Timed out: IRQ_RAW: status: 0x%x\n", priv->status);
     }
 
   /* Check for error status conditions */
 
-  if ((status & I2C_IRQ_ERRORMASK) != 0)
+  else if ((priv->status & I2C_IRQ_ERRORMASK) != 0)
     {
       /* I2C_IRQ_ERRORMASK is the 'OR' of the following individual bits: */
 
-      if (status & I2C_IRQ_AL)
+      if (priv->status & I2C_IRQ_AL)
         {
           /* Arbitration Lost (master mode) */
 
           i2cerr("Arbitration lost\n");
           ret = -EAGAIN;
         }
-      else if (status & I2C_IRQ_NACK)
+      else if (priv->status & I2C_IRQ_NACK)
         {
           /* Acknowledge Failure */
 
           i2cerr("Ack failure\n");
           ret = -ENXIO;
         }
-      else if (status & (I2C_IRQ_XUDF | I2C_IRQ_ROVR))
+      else if (priv->status & (I2C_IRQ_XUDF | I2C_IRQ_ROVR))
         {
           /* Overrun/Underrun */
 
           i2cerr("Overrun/Underrun status\n");
           ret = -EIO;
         }
-      else if (status & I2C_IRQ_AERR)
+      else if (priv->status & I2C_IRQ_AERR)
         {
           /* Access Error in reception or transmission */
 
           i2cerr("Access Error\n");
           ret = -EPROTO;
         }
-      else if (status & I2C_IRQ_BB)
+      else if (priv->status & I2C_IRQ_BB)
         {
           /* Bus busy Error */
 
