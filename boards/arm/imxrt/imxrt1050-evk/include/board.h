@@ -91,6 +91,14 @@
  * Set USB1 PLL (PLL3) to fOut    = (24Mhz * 20)
  *                         480Mhz = (24Mhz * 20)
  *
+ * Set LPSPI PLL3 PFD0 to fOut    = (480Mhz / 12 * 18)
+ *                        720Mhz  = (480Mhz / 12 * 18)
+ *                         90Mhz  = (720Mhz / LSPI_PODF_DIVIDER)
+ *
+ * Set LPI2C PLL3 / 8 to   fOut   = (480Mhz / 8)
+ *                         60Mhz  = (480Mhz / 8)
+ *                         12Mhz  = (60Mhz / LSPI_PODF_DIVIDER)
+ *
  * These clock frequencies can be verified via the CCM_CLKO1 pin and sending
  * the appropriate clock to it with something like;
  *
@@ -110,6 +118,13 @@
 #define IMXRT_SEMC_PODF_DIVIDER    8
 #define IMXRT_LPSPI_CLK_SELECT     CCM_CBCMR_LPSPI_CLK_SEL_PLL3_PFD0
 #define IMXRT_LSPI_PODF_DIVIDER    8
+
+#define IMXRT_LPSPI_CLK_SELECT     CCM_CBCMR_LPSPI_CLK_SEL_PLL3_PFD0
+#define IMXRT_LSPI_PODF_DIVIDER    8
+
+#define IMXRT_LPI2C_CLK_SELECT     CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M
+#define IMXRT_LSI2C_PODF_DIVIDER   5
+
 #define IMXRT_USDHC1_CLK_SELECT    CCM_CSCMR1_USDHC1_CLK_SEL_PLL2_PFD0
 #define IMXRT_USDHC1_PODF_DIVIDER  2
 

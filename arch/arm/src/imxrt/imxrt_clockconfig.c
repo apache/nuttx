@@ -513,7 +513,7 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCDR1);
   reg &= ~CCM_CSCDR1_UART_CLK_PODF_MASK;
-  reg |= CCM_CSCDR1_UART_CLK_PODF(0);
+  reg |= CCM_CSCDR1_UART_CLK_PODF(CCM_PODF_FROM_DIVISOR(1));
   putreg32(reg, IMXRT_CCM_CSCDR1);
 
 #ifdef CONFIG_IMXRT_LPI2C
@@ -521,14 +521,14 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_SEL;
-  reg |= CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M;
+  reg |= IMXRT_LPI2C_CLK_SELECT;
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
   /* Set LPI2C divider to 5  for 12 Mhz */
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
-  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5 - 1);
+  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_LSI2C_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
 #endif
@@ -538,7 +538,7 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CBCMR);
   reg &= ~CCM_CBCMR_LPSPI_CLK_SEL_MASK;
-  reg |= CCM_CBCMR_LPSPI_CLK_SEL_PLL3_PFD0;
+  reg |= IMXRT_LPSPI_CLK_SELECT;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
   /* Set LPSPI divider to IMXRT_LSPI_PODF_DIVIDER */
