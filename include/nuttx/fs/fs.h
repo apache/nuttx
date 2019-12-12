@@ -1012,8 +1012,8 @@ int fs_getfilep(int fd, FAR struct file **filep);
  *   called from applications.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
  *
  ****************************************************************************/
 
