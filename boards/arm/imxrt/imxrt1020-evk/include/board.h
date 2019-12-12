@@ -264,6 +264,13 @@
 #define PIN_USDHC1_DCLK     (GPIO_USDHC1_CLK_1   | IOMUX_USDHC1_CLK_DEFAULT)   /* SD_B0_03 */
 #define PIN_USDHC1_CMD      (GPIO_USDHC1_CMD_1   | IOMUX_USDHC1_CMD_DEFAULT)   /* SD_B0_02 */
 
+/* N.B. This is not using a USDHC CD_B input but a regular GPIO.  The
+ * post-fix _GPIO enables GPIO testing logic in the USDHC driver.
+ */
+
+#define PIN_USDHC1_CD_GPIO  (IOMUX_VSD_DEFAULT | \
+                             GPIO_PORT3 | GPIO_PIN19 )                        /* SD_B0_06 */
+
 /*****************************************************************************
  * Public Types
  *****************************************************************************/
