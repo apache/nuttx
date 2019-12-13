@@ -1364,6 +1364,10 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
           if (priv->intstate == INTSTATE_WAITING)
             {
+              /* Update Status once at the end */
+
+              priv->status = status;
+
               /* inform the thread that transfer is complete
                * and wake it up
                */
@@ -1372,6 +1376,7 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
               priv->intstate = INTSTATE_DONE;
             }
 #else
+          priv->status = status;
           priv->intstate = INTSTATE_DONE;
 #endif
           /* Mark that this transaction stopped */
@@ -1412,6 +1417,10 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
           if (priv->intstate == INTSTATE_WAITING)
             {
+              /* Update Status once at the end */
+
+              priv->status = status;
+
               /* inform the thread that transfer is complete
                * and wake it up
                */
@@ -1420,11 +1429,11 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
               priv->intstate = INTSTATE_DONE;
             }
 #else
+          priv->status = status;
           priv->intstate = INTSTATE_DONE;
 #endif
     }
 
-  priv->status = status;
   return OK;
 }
 
