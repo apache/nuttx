@@ -36,14 +36,25 @@
 
 TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
 -include $(TOPDIR)/.config
--include $(TOPDIR)/.version
 include $(TOPDIR)/tools/Config.mk
 -include $(TOPDIR)/Make.defs
 
-# In case .version file does not exist
+# GIT directory present
+
+GIT_DIR = $(if $(wildcard $(TOPDIR)$(DELIM).git),y,)
+
+# In case we cannot get version information from GIT
+
+ifneq ($(GIT_DIR),y)
+-include $(TOPDIR)/.version
+
+# In case the version file does not exist
 
 CONFIG_VERSION_STRING ?= "0.0"
 CONFIG_VERSION_BUILD ?= "0"
+
+VERSION_ARG = -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD)
+endif
 
 # Control build verbosity
 #
@@ -89,10 +100,6 @@ BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_C
 endif
 
 COMMON_DIR = $(if $(wildcard $(BOARD_DIR)/common/Makefile),y,)
-
-# GIT directory present
-
-GIT_DIR = $(if $(wildcard $(TOPDIR)$(DELIM).git),y,)
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ../apps.  Ultimately, the application
@@ -269,7 +276,7 @@ tools/mkversion$(HOSTEXEEXT):
 
 $(TOPDIR)/.version:
 	$(Q) echo "Create .version"
-	$(Q) tools/version.sh -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD) .version
+	$(Q) tools/version.sh $(VERSION_ARG) .version
 	$(Q) chmod 755 .version
 
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
