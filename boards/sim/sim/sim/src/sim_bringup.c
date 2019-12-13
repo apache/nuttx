@@ -202,6 +202,26 @@ int sim_bringup(void)
                      ret);
             }
 
+#elif defined(CONFIG_FS_LITTLEFS)
+          /* Register the MTD driver so that it can be accessed from the VFS */
+
+          ret = register_mtddriver("/dev/rammtd", mtd, 0755, NULL);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n",
+                     ret);
+            }
+
+          /* Mount the LittleFS file system */
+
+          ret = mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0, "autoformat");
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: Failed to mount LittleFS at /mnt/lfs: %d\n",
+                     ret);
+            }
+
 #elif defined(CONFIG_FS_NXFFS)
           /* Initialize to provide NXFFS on the MTD interface */
 
