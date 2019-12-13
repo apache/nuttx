@@ -103,11 +103,16 @@
 
 /* These must match the definitions in include/sys/types.h */
 
-typedef uintptr_t    nuttx_size_t;
-typedef int32_t      nuttx_off_t;
-typedef unsigned int nuttx_mode_t;
 typedef int16_t      nuttx_blksize_t;
+typedef int16_t      nuttx_gid_t;
+typedef int16_t      nuttx_uid_t;
+typedef uint16_t     nuttx_dev_t;
+typedef uint16_t     nuttx_ino_t;
+typedef uint16_t     nuttx_nlink_t;
+typedef int32_t      nuttx_off_t;
 typedef uint32_t     nuttx_blkcnt_t;
+typedef unsigned int nuttx_mode_t;
+typedef uintptr_t    nuttx_size_t;
 
 /* These must match the definition in include/time.h */
 
@@ -139,13 +144,19 @@ struct nuttx_statfs_s
 
 struct nuttx_stat_s
 {
-  nuttx_mode_t    st_mode;    /* File type, atributes, and access mode bits */
+  nuttx_dev_t     st_dev;     /* Device ID of device containing file */
+  nuttx_ino_t     st_ino;     /* File serial number */
+  nuttx_mode_t    st_mode;    /* File type, attributes, and access mode bits */
+  nuttx_nlink_t   st_nlink;   /* Number of hard links to the file */
+  nuttx_uid_t     st_uid;     /* User ID of file */
+  nuttx_gid_t     st_gid;     /* Group ID of file */
+  nuttx_dev_t     st_rdev;    /* Device ID (if file is character or block special) */
   nuttx_off_t     st_size;    /* Size of file/directory, in bytes */
-  nuttx_blksize_t st_blksize; /* Blocksize used for filesystem I/O */
-  nuttx_blkcnt_t  st_blocks;  /* Number of blocks allocated */
   nuttx_time_t    st_atim;    /* Time of last access */
   nuttx_time_t    st_mtim;    /* Time of last modification */
   nuttx_time_t    st_ctim;    /* Time of last status change */
+  nuttx_blksize_t st_blksize; /* Block size used for filesystem I/O */
+  nuttx_blkcnt_t  st_blocks;  /* Number of blocks allocated */
 };
 
 #endif /* __SIM__ */

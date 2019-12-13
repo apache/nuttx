@@ -235,13 +235,19 @@ static int hostfs_rpmsg_stat_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0)
     {
+      buf->st_dev     = rsp->buf.st_dev;
+      buf->st_ino     = rsp->buf.st_ino;
       buf->st_mode    = rsp->buf.st_mode;
+      buf->st_nlink   = rsp->buf.st_nlink;
+      buf->st_uid     = rsp->buf.st_uid;
+      buf->st_gid     = rsp->buf.st_gid;
+      buf->st_rdev    = rsp->buf.st_rdev;
       buf->st_size    = B2C(rsp->buf.st_size);
-      buf->st_blksize = B2C(rsp->buf.st_blksize);
-      buf->st_blocks  = rsp->buf.st_blocks;
       buf->st_atime   = rsp->buf.st_atime;
       buf->st_mtime   = rsp->buf.st_mtime;
       buf->st_ctime   = rsp->buf.st_ctime;
+      buf->st_blksize = B2C(rsp->buf.st_blksize);
+      buf->st_blocks  = rsp->buf.st_blocks;
     }
 
   nxsem_post(&cookie->sem);
