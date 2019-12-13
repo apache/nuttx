@@ -64,26 +64,27 @@
 
 /* Wireless identification */
 
-#define SIOCSIWCOMMIT       _WLIOC(0x0001)  /* Commit pending changes to driver */
-#define SIOCGIWNAME         _WLIOC(0x0002)  /* Get name of wireless protocol */
+#define SIOCSIWCOMMIT       _WLIOC(0x0000)  /* Commit pending changes to driver */
+#define SIOCGIWNAME         _WLIOC(0x0001)  /* Get name of wireless protocol */
 
 /* Basic Operations */
 
-#define SIOCSIWNWID         _WLIOC(0x0003)  /* Set network ID (pre-802.11) */
-#define SIOCGIWNWID         _WLIOC(0x0004)  /* Get network ID (the cell) */
-#define SIOCSIWFREQ         _WLIOC(0x0005)  /* Set channel/frequency (Hz) */
-#define SIOCGIWFREQ         _WLIOC(0x0006)  /* Get channel/frequency (Hz) */
-#define SIOCSIWMODE         _WLIOC(0x0007)  /* Set operation mode */
-#define SIOCGIWMODE         _WLIOC(0x0008)  /* Get operation mode */
-#define SIOCSIWSENS         _WLIOC(0x0009)  /* Set sensitivity (dBm) */
-#define SIOCGIWSENS         _WLIOC(0x000a)  /* Get sensitivity (dBm) */
+#define SIOCSIWNWID         _WLIOC(0x0002)  /* Set network ID (pre-802.11) */
+#define SIOCGIWNWID         _WLIOC(0x0003)  /* Get network ID (the cell) */
+#define SIOCSIWFREQ         _WLIOC(0x0004)  /* Set channel/frequency (Hz) */
+#define SIOCGIWFREQ         _WLIOC(0x0005)  /* Get channel/frequency (Hz) */
+#define SIOCSIWMODE         _WLIOC(0x0006)  /* Set operation mode */
+#define SIOCGIWMODE         _WLIOC(0x0007)  /* Get operation mode */
+#define SIOCSIWSENS         _WLIOC(0x0008)  /* Set sensitivity (dBm) */
+#define SIOCGIWSENS         _WLIOC(0x0009)  /* Get sensitivity (dBm) */
 
 /* Informational */
 
+#define SIOCSIWRANGE        _WLIOC(0x000a)  /* Unused */
 #define SIOCGIWRANGE        _WLIOC(0x000b)  /* Get range of parameters */
-#define SIOCGIWPRIV         _WLIOC(0x000c)  /* Get private ioctl interface info */
-#define SIOCGIWRANGE        _WLIOC(0x000d)  /* Get range of parameters */
-#define SIOCGIWPRIV         _WLIOC(0x000e)  /* Get private ioctl interface info */
+#define SIOCSIWPRIV         _WLIOC(0x000c)  /* Unused */
+#define SIOCGIWPRIV         _WLIOC(0x000d)  /* Get private ioctl interface info */
+#define SIOCSIWSTATS        _WLIOC(0x000e)  /* Unused */
 #define SIOCGIWSTATS        _WLIOC(0x000f)  /* Get wireless stats */
 
 /* Spy support (statistics per MAC address - used for Mobile IP support) */
@@ -97,60 +98,61 @@
 
 #define SIOCSIWAP           _WLIOC(0x0014)  /* Set access point MAC addresses */
 #define SIOCGIWAP           _WLIOC(0x0015)  /* Get access point MAC addresses */
-#define SIOCGIWAPLIST       _WLIOC(0x0016)  /* Deprecated in favor of scanning */
-#define SIOCSIWSCAN         _WLIOC(0x0017)  /* Trigger scanning (list cells) */
-#define SIOCGIWSCAN         _WLIOC(0x0018)  /* Get scanning results */
+                                            /* 0x0016:  See SIOCSIWMLME */
+#define SIOCGIWAPLIST       _WLIOC(0x0017)  /* Deprecated in favor of scanning */
+#define SIOCSIWSCAN         _WLIOC(0x0018)  /* Trigger scanning (list cells) */
+#define SIOCGIWSCAN         _WLIOC(0x0019)  /* Get scanning results */
 
 /* 802.11 specific support */
 
-#define SIOCSIWESSID        _WLIOC(0x0019)  /* Set ESSID (network name) */
-#define SIOCGIWESSID        _WLIOC(0x001a)  /* Get ESSID */
-#define SIOCSIWNICKN        _WLIOC(0x001b)  /* Set node name/nickname */
-#define SIOCGIWNICKN        _WLIOC(0x001c)  /* Get node name/nickname */
+#define SIOCSIWESSID        _WLIOC(0x001a)  /* Set ESSID (network name) */
+#define SIOCGIWESSID        _WLIOC(0x001b)  /* Get ESSID */
+#define SIOCSIWNICKN        _WLIOC(0x001c)  /* Set node name/nickname */
+#define SIOCGIWNICKN        _WLIOC(0x001d)  /* Get node name/nickname */
 
-#define SIOCSIWRATE         _WLIOC(0x001d)  /* Set default bit rate (bps) */
-#define SIOCGIWRATE         _WLIOC(0x001e)  /* Get default bit rate (bps) */
-#define SIOCSIWRTS          _WLIOC(0x001f)  /* Set RTS/CTS threshold (bytes) */
-#define SIOCGIWRTS          _WLIOC(0x0010)  /* Get RTS/CTS threshold (bytes) */
-#define SIOCSIWFRAG         _WLIOC(0x0011)  /* Set fragmentation thr (bytes) */
-#define SIOCGIWFRAG         _WLIOC(0x0022)  /* Get fragmentation thr (bytes) */
-#define SIOCSIWTXPOW        _WLIOC(0x0023)  /* Set transmit power (dBm) */
-#define SIOCGIWTXPOW        _WLIOC(0x0024)  /* Get transmit power (dBm) */
-#define SIOCSIWRETRY        _WLIOC(0x0025)  /* Set retry limits and lifetime */
-#define SIOCGIWRETRY        _WLIOC(0x0026)  /* Get retry limits and lifetime */
+#define SIOCSIWRATE         _WLIOC(0x0020)  /* Set default bit rate (bps) */
+#define SIOCGIWRATE         _WLIOC(0x0021)  /* Get default bit rate (bps) */
+#define SIOCSIWRTS          _WLIOC(0x0022)  /* Set RTS/CTS threshold (bytes) */
+#define SIOCGIWRTS          _WLIOC(0x0023)  /* Get RTS/CTS threshold (bytes) */
+#define SIOCSIWFRAG         _WLIOC(0x0024)  /* Set fragmentation thr (bytes) */
+#define SIOCGIWFRAG         _WLIOC(0x0025)  /* Get fragmentation thr (bytes) */
+#define SIOCSIWTXPOW        _WLIOC(0x0026)  /* Set transmit power (dBm) */
+#define SIOCGIWTXPOW        _WLIOC(0x0027)  /* Get transmit power (dBm) */
+#define SIOCSIWRETRY        _WLIOC(0x0028)  /* Set retry limits and lifetime */
+#define SIOCGIWRETRY        _WLIOC(0x0029)  /* Get retry limits and lifetime */
 
 /* Encoding */
 
-#define SIOCSIWENCODE       _WLIOC(0x0027)  /* Set encoding token & mode */
-#define SIOCGIWENCODE       _WLIOC(0x0028)  /* Get encoding token & mode */
+#define SIOCSIWENCODE       _WLIOC(0x002a)  /* Set encoding token & mode */
+#define SIOCGIWENCODE       _WLIOC(0x002b)  /* Get encoding token & mode */
 
 /* Power saving */
 
-#define SIOCSIWPOWER        _WLIOC(0x0029)  /* Set Power Management settings */
-#define SIOCGIWPOWER        _WLIOC(0x002a)  /* Get Power Management settings */
+#define SIOCSIWPOWER        _WLIOC(0x002c)  /* Set Power Management settings */
+#define SIOCGIWPOWER        _WLIOC(0x002d)  /* Get Power Management settings */
 
 /* WPA : Generic IEEE 802.11 information element */
 
-#define SIOCSIWGENIE        _WLIOC(0x002b)  /* Set generic IE */
-#define SIOCGIWGENIE        _WLIOC(0x002c)  /* Get generic IE */
+#define SIOCSIWGENIE        _WLIOC(0x0030)  /* Set generic IE */
+#define SIOCGIWGENIE        _WLIOC(0x0031)  /* Get generic IE */
 
 /* WPA : IEEE 802.11 MLME requests */
 
-#define SIOCSIWMLME         _WLIOC(0x002d)  /* Request MLME operation */
+#define SIOCSIWMLME         _WLIOC(0x0016)  /* Request MLME operation */
 
 /* WPA : Authentication mode parameters */
 
-#define SIOCSIWAUTH         _WLIOC(0x002e)  /* Set authentication mode params */
-#define SIOCGIWAUTH         _WLIOC(0x002f)  /* Get authentication mode params */
+#define SIOCSIWAUTH         _WLIOC(0x0032)  /* Set authentication mode params */
+#define SIOCGIWAUTH         _WLIOC(0x0033)  /* Get authentication mode params */
 
 /* WPA : Extended version of encoding configuration */
 
-#define SIOCSIWENCODEEXT    _WLIOC(0x0030)  /* Set encoding token & mode */
-#define SIOCGIWENCODEEXT    _WLIOC(0x0031)  /* Get encoding token & mode */
+#define SIOCSIWENCODEEXT    _WLIOC(0x0034)  /* Set encoding token & mode */
+#define SIOCGIWENCODEEXT    _WLIOC(0x0035)  /* Get encoding token & mode */
 
 /* WPA2 : PMKSA cache management */
 
-#define SIOCSIWPMKSA        _WLIOC(0x0032)  /* PMKSA cache operation */
+#define SIOCSIWPMKSA        _WLIOC(0x0036)  /* PMKSA cache operation */
 
 /* Device-specific network IOCTL commands ******************************************/
 
@@ -278,10 +280,12 @@
 
 /* Transmit Power flags available */
 
-#define IW_TXPOW_DBM        0  /* Value is in dBm */
-#define IW_TXPOW_MWATT      1  /* Value is in mW */
-#define IW_TXPOW_RELATIVE   2  /* Value is in arbitrary units */
-#define IW_TXPOW_NFLAGS     3
+#define IW_TXPOW_TYPE       0x00ff  /* Type of value */
+#  define IW_TXPOW_DBM      0x0000  /* Value is in dBm */
+#  define IW_TXPOW_MWATT    0x0001  /* Value is in mW */
+#  define IW_TXPOW_RELATIVE 0x0002  /* Value is in arbitrary units */
+#define IW_TXPOW_RANGE      0x1000  /* Range of value between min/max */
+#define IW_TXPOW_NFLAGS     IW_TXPOW_RANGE
 
 /* Scan-related */
 
@@ -317,8 +321,6 @@
 #define IW_SCAN_CAPA_TYPE    0x20
 #define IW_SCAN_CAPA_TIME    0x40
 
-#define IW_SCAN_MAX_DATA     4096 /* Maximum size of returned data */
-
 /* SIOCSIWAUTH/SIOCGIWAUTH struct iw_param flags */
 
 #define IW_AUTH_INDEX   0x0FFF
@@ -341,6 +343,8 @@
 #define IW_AUTH_RX_UNENCRYPTED_EAPOL 8
 #define IW_AUTH_ROAMING_CONTROL      9
 #define IW_AUTH_PRIVACY_INVOKED      10
+#define IW_AUTH_CIPHER_GROUP_MGMT    11
+#define IW_AUTH_MFP                  12
 
 /* IW_AUTH_WPA_VERSION values (bit field) */
 
@@ -355,6 +359,7 @@
 #define IW_AUTH_CIPHER_TKIP          0x00000004
 #define IW_AUTH_CIPHER_CCMP          0x00000008
 #define IW_AUTH_CIPHER_WEP104        0x00000010
+#define IW_AUTH_CIPHER_AES_CMAC      0x00000020
 
 /* IW_AUTH_KEY_MGMT values (bit field) */
 
@@ -383,6 +388,8 @@
 #define IW_ENCODE_ALG_WEP            1
 #define IW_ENCODE_ALG_TKIP           2
 #define IW_ENCODE_ALG_CCMP           3
+#define IW_ENCODE_ALG_PMK            4
+#define IW_ENCODE_ALG_AES_CMAC       5
 
 /************************************************************************************
  * Public Types

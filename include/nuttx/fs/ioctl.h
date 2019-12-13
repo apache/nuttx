@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/ioctl.h
  *
- *   Copyright (C) 2008, 2009, 2011-2014, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2008, 2009, 2011-2014, 2017-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -72,7 +72,7 @@
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 #define _LCDIOCBASE     (0x1100) /* LCD character driver ioctl commands */
 #define _SLCDIOCBASE    (0x1200) /* Segment LCD ioctl commands */
-#define _WLIOCBASE      (0x1300) /* Wireless modules ioctl network commands */
+                                 /* 0x1300: Not used */
 #define _WLCIOCBASE     (0x1400) /* Wireless modules ioctl character driver commands */
 #define _CFGDIOCBASE    (0x1500) /* Config Data device (app config) ioctl commands */
 #define _TCIOCBASE      (0x1600) /* Timer ioctl commands */
@@ -97,6 +97,7 @@
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
 #define _RPTUNBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
+#define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
 
@@ -343,13 +344,6 @@
 #define _SLCDIOCVALID(c)  (_IOC_TYPE(c)==_SLCDIOCBASE)
 #define _SLCDIOC(nr)      _IOC(_SLCDIOCBASE,nr)
 
-/* Wireless driver networki ioctl definitions *******************************/
-
-/* (see nuttx/include/wireless/wireless.h */
-
-#define _WLIOCVALID(c)    (_IOC_TYPE(c)==_WLIOCBASE)
-#define _WLIOC(nr)        _IOC(_WLIOCBASE,nr)
-
 /* Wireless driver character driver ioctl definitions ***********************/
 /* (see nuttx/include/wireless/ioctl.h */
 
@@ -511,6 +505,13 @@
 
 #define _RPTUNIOCVALID(c)   (_IOC_TYPE(c)==_RPTUNBASE)
 #define _RPTUNIOC(nr)       _IOC(_RPTUNBASE,nr)
+
+/* Wireless driver network ioctl definitions ********************************/
+
+/* (see nuttx/include/wireless/wireless.h */
+
+#define _WLIOCVALID(c)    (_IOC_TYPE(c)==_WLIOCBASE)
+#define _WLIOC(nr)        _IOC(_WLIOCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 
