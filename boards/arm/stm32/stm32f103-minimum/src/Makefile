@@ -69,6 +69,10 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += stm32_zerocross.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += stm32_lcd_backpack.c
+endif
+
 ifeq ($(CONFIG_LEDS_APA102),y)
   CSRCS += stm32_apa102.c
 endif

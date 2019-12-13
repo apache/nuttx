@@ -165,6 +165,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LCD_BACKPACK
+  ret = stm32_lcd_backpack_init("/dev/slcd0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_ZEROCROSS
   /* Configure the zero-crossing driver */
 

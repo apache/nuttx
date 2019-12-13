@@ -441,6 +441,18 @@ int stm32_mcp2515initialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
+ * Name: stm32_lcd_backpack_init
+ *
+ * Description:
+ *   Initialize and register the PCF8574 LCD Backpack driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LCD_BACKPACK
+int stm32_lcd_backpack_init(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
