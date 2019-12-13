@@ -1245,11 +1245,17 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
   imxrt_lpi2c_tracenew(priv, status);
 
-  /* Continue with either sending or reading data */
+  /* After an error we can get an SDF  */
+
+  if (priv->intstate == INTSTATE_DONE && (status & LPI2C_MSR_SDF) != 0)
+    {
+      imxrt_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+      imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MSR_OFFSET, LPI2C_MSR_SDF);
+    }
 
   /* Check if there is more bytes to send */
 
-  if (((priv->flags & I2C_M_READ) == 0) && (status & LPI2C_MSR_TDF) != 0)
+  else if (((priv->flags & I2C_M_READ) == 0) && (status & LPI2C_MSR_TDF) != 0)
     {
       if (priv->dcnt > 0)
         {
