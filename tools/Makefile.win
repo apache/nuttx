@@ -38,7 +38,7 @@ export SHELL=cmd
 TOPDIR := ${shell echo %CD%}
 -include $(TOPDIR)\.config
 -include $(TOPDIR)/.version
--include $(TOPDIR)\tools\Config.mk
+include $(TOPDIR)\tools\Config.mk
 -include $(TOPDIR)\Make.defs
 
 # In case .version file does not exist

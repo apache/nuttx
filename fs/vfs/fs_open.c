@@ -120,9 +120,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   if ((oflags & (O_WRONLY | O_CREAT)) != 0)
     {
-      va_start(ap, oflags);
       mode = va_arg(ap, mode_t);
-      va_end(ap);
     }
 #endif
 
