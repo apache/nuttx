@@ -138,6 +138,14 @@
 #define GPIO_I2C2_SCL       GPIO_I2C2_SCL_1
 #define GPIO_I2C2_SCL       GPIO_I2C2_SDA_1
 
+/* CANs *********************************************************************/
+
+#define GPIO_DCAN0_RX       GPIO_DCAN0_RX_3
+#define GPIO_DCAN0_TX       GPIO_DCAN0_TX_3
+
+#define GPIO_DCAN1_RX       GPIO_DCAN1_RX_3
+#define GPIO_DCAN1_TX       GPIO_DCAN1_TX_3
+
 /****************************************************************************
  * Assembly Language Macros
  ****************************************************************************/

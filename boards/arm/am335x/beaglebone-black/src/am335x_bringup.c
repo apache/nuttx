@@ -49,6 +49,7 @@
 #include "beaglebone-black.h"
 
 #include "am335x_i2c.h"
+#include "am335x_can.h"
 
 /****************************************************************************
  * Private Functions
@@ -75,6 +76,52 @@ static void am335x_i2c_register(int bus)
           am335x_i2cbus_uninitialize(i2c);
         }
     }
+}
+#endif
+
+#if defined(CONFIG_CAN) && (defined(CONFIG_AM335X_CAN0) || defined(CONFIG_AM335X_CAN1))
+static void am335x_can_register(void)
+{
+  FAR struct can_dev_s *can;
+  int ret;
+
+#ifdef CONFIG_AM335X_CAN0
+  can = am335x_can_initialize(0);
+  if (can == NULL)
+    {
+      syslog(LOG_ERR, "Failed to get DCAN0 interface\n");
+    }
+  else
+    {
+      ret = can_register("/dev/can0", can);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "can_register failed: %d\n", ret);
+          am335x_can_uninitialize(can);
+        }
+    }
+#endif
+
+#ifdef CONFIG_AM335X_CAN1
+  can = am335x_can_initialize(1);
+  if (can == NULL)
+    {
+      syslog(LOG_ERR, "Failed to get DCAN1 interface\n");
+    }
+  else
+    {
+#ifdef CONFIG_AM335X_CAN0
+      ret = can_register("/dev/can1", can);
+#else
+      ret = can_register("/dev/can0", can);
+#endif
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "can_register failed: %d\n", ret);
+          am335x_can_uninitialize(can);
+        }
+    }
+#endif
 }
 #endif
 
@@ -130,6 +177,10 @@ int am335x_bringup(void)
 
 #if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_AM335X_I2C2)
   am335x_i2c_register(2);
+#endif
+
+#if defined(CONFIG_CAN) && (defined(CONFIG_AM335X_CAN0) || defined(CONFIG_AM335X_CAN1))
+  am335x_can_register();
 #endif
 
   UNUSED(ret);

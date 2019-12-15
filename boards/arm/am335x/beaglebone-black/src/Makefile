@@ -44,10 +44,6 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += am335x_appinit.c
 endif
 
-ifeq ($(CONFIG_CAN),y)
-CSRCS += am335x_can.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += am335x_buttons.c
 endif

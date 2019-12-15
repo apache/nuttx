@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *************************************************************************/
 
 #define AM335X_DCAN_CTL_OFFSET          0x0000 /* CAN Control Register */
 #define AM335X_DCAN_ES_OFFSET           0x0004 /* Error and Status Register */
@@ -119,7 +119,7 @@
 #define AM335X_DCAN_IFDATB_OFFSET(n)    (0x0114 + ((unsigned int)(n) - 1) * 0x20)
 #define AM335X_DCAN_IF3UPD_OFFSET(n)    (0x0160 + ((((unsigned int)(n) - 1) >> 5) << 2))
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***************************************************************/
 
 #define AM335X_DCAN0_CTL                (AM335X_DCAN0_VADDR + AM335X_DCAN_CTL_OFFSET)
 #define AM335X_DCAN0_ES                 (AM335X_DCAN0_VADDR + AM335X_DCAN_ES_OFFSET)
@@ -261,7 +261,7 @@
 #define AM335X_DCAN1_IFDATB(n)          (AM335X_DCAN1_VADDR + AM335X_DCAN_IFDATB_OFFSET(n))
 #define AM335X_DCAN1_IF3UPD(n)          (AM335X_DCAN1_VADDR + AM335X_DCAN_IF3UPD_OFFSET(n))
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions ***********************************************************/
 
 #define DCAN_CTL_INIT                   (1 << 0)  /* Bit 0:  Initialization mode */
 #define DCAN_CTL_IE0                    (1 << 1)  /* Bit 1:  Interrupt line 0 enable */
@@ -323,6 +323,7 @@
 
 #define DCAN_INT_LINE0_SHIFT            (0)  /* Bits 0-15:  Interrupt Line 0 Identifier */
 #define DCAN_INT_LINE0_MASK             (65535 << DCAN_INT_LINE0_SHIFT)
+#  define DCAN_INT_LINE0_STATUS         (32768 << DCAN_INT_LINE0_SHIFT)
 #define DCAN_INT_LINE1_SHIFT            (16)  /* Bits 16-23:  Interrupt Line 1 Identifier */
 #define DCAN_INT_LINE1_MASK             (255 << DCAN_INT_LINE1_SHIFT)
 
@@ -356,13 +357,14 @@
 
 #define DCAN_IFCMD_MSG_NUM_SHIFT        (0)  /* Bits 0-7:  Number of message object in message RAM which is used for data transfer */
 #define DCAN_IFCMD_MSG_NUM_MASK         (0xff << DCAN_IFCMD_MSG_NUM_SHIFT)
+#  define DCAN_IFCMD_MSG_NUM(n)         (((unsigned int)(n) & DCAN_IFCMD_MSG_NUM_MASK) << DCAN_IFCMD_MSG_NUM_SHIFT)
 #define DCAN_IFCMD_DMA_ACTIVE           (1 << 14)  /* Bit 14:  Activation of DMA feature for subsequent internal IF update */
 #define DCAN_IFCMD_BUSY                 (1 << 15)  /* Bit 15:  Busy flag */
-#define DCAN_IFCMD_DATA_B               (1 << 16)  /* Bit 16:  Access Data Bytes 4 to 7 */
-#define DCAN_IFCMD_DATA_A               (1 << 17)  /* Bit 17:  Access Data Bytes 0 to 3 */
+#define DCAN_IFCMD_DATAB                (1 << 16)  /* Bit 16:  Access Data Bytes 4 to 7 */
+#define DCAN_IFCMD_DATAA                (1 << 17)  /* Bit 17:  Access Data Bytes 0 to 3 */
 #define DCAN_IFCMD_TX_RQST_NEWDAT       (1 << 18)  /* Bit 18:  Access transmission request bit */
 #define DCAN_IFCMD_CLR_INTPND           (1 << 19)  /* Bit 19:  Clear interrupt pending bit */
-#define DCAN_IFCMD_CONTROL              (1 << 20)  /* Bit 20:  Access control bits */
+#define DCAN_IFCMD_CTL                  (1 << 20)  /* Bit 20:  Access control bits */
 #define DCAN_IFCMD_ARB                  (1 << 21)  /* Bit 21:  Access arbitration bits */
 #define DCAN_IFCMD_MASK                 (1 << 22)  /* Bit 22:  Access mask bits */
 #define DCAN_IFCMD_WR_RD                (1 << 23)  /* Bit 23:  Write/Read direction */
@@ -373,7 +375,7 @@
 #define DCAN_IFMSK_MXTD                 (1 << 31)  /* Bit 31:  Mask extended identifier */
 
 #define DCAN_IFARB_ID_SHIFT             (0)  /* Bits 0-28:  Message identifier */
-#define DCAN_IFARB_ID_MASK              (0x1fffffff << DCAN_IFCMD_MSK_SHIFT)
+#define DCAN_IFARB_ID_MASK              (0x1fffffff << DCAN_IFARB_ID_SHIFT)
 #define DCAN_IFARB_DIR                  (1 << 29)  /* Bit 29:  Message direction */
 #define DCAN_IFARB_XTD                  (1 << 30)  /* Bit 30:  Extended identifier */
 #define DCAN_IFARB_MSG_VAL              (1 << 31)  /* Bit 31:  Message valid */

@@ -372,7 +372,7 @@ static void am335x_peripheral_enable(void)
   per_l4ls |= CM_PER_L4LS_CLKSTCTRL_UART_GCLK;
 #endif
 
-#if defined(CONFIG_AM335X_DCAN0)
+#if defined(CONFIG_AM335X_CAN0)
   putreg32(CM_CLKCTRL_MODULEMODE_ENABLE, AM335X_CM_PER_DCAN0_CLKCTRL);
   while ((getreg32(AM335X_CM_PER_DCAN0_CLKCTRL) &
          (CM_CLKCTRL_MODULEMODE_MASK | CM_CLKCTRL_IDLEST_MASK))
@@ -383,7 +383,7 @@ static void am335x_peripheral_enable(void)
   per_l4ls |= CM_PER_L4LS_CLKSTCTRL_CAN_CLK;
 #endif
 
-#if defined(CONFIG_AM335X_DCAN1)
+#if defined(CONFIG_AM335X_CAN1)
   putreg32(CM_CLKCTRL_MODULEMODE_ENABLE, AM335X_CM_PER_DCAN1_CLKCTRL);
   while ((getreg32(AM335X_CM_PER_DCAN1_CLKCTRL) &
          (CM_CLKCTRL_MODULEMODE_MASK | CM_CLKCTRL_IDLEST_MASK))
