@@ -111,9 +111,9 @@ static void am335x_can_register(void)
   else
     {
 #ifdef CONFIG_AM335X_CAN0
-      ret = can_register("/dev/can1", can);
-#else
       ret = can_register("/dev/can0", can);
+#else
+      ret = can_register("/dev/can1", can);
 #endif
       if (ret < 0)
         {
