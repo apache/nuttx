@@ -36,7 +36,7 @@
  *
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
  ************************************************************************************/
 
@@ -72,16 +72,16 @@
 #if defined(CONFIG_AM335X_I2C0) || defined(CONFIG_AM335X_I2C1) || \
     defined(CONFIG_AM335X_I2C2)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define AM335X_I2C_SCLK             (48000000)
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
- * CPU-intensive polling will be used.
+/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
+ ( Instead, CPU-intensive polling will be used.
  */
 
 /* Interrupt wait timeout in seconds and milliseconds */
@@ -106,11 +106,11 @@
 #  define CONFIG_AM335X_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_AM335X_I2CTIMEOTICKS)
 #endif
 
-/* Debug ****************************************************************************/
+/* Debug ********************************************************************/
 
-/* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
- * debug interface syslog() but does not require that any other debug
- * is enabled.
+/* I2C event trace logic.  NOTE:  trace uses the internal, non-standard,
+ * low-leveldebug interface syslog() but does not require that any other
+ * debug is enabled.
  */
 
 #ifndef CONFIG_I2C_TRACE
@@ -135,9 +135,9 @@
                          PINMUX_PULL_UP_DISABLE | PINMUX_RX_ENABLE | \
                          GPIO_OUTPUT | GPIO_OUTPUT_ONE)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Interrupt state */
 
@@ -220,9 +220,9 @@ struct am335x_i2c_priv_s
   uint32_t status;             /* End of transfer SR2|SR1 status */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t am335x_i2c_getreg(FAR struct am335x_i2c_priv_s *priv,
                                          uint16_t offset);
@@ -238,14 +238,15 @@ static useconds_t am335x_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_AM335X_I2C_DYNTIMEO */
 
 static inline int  am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv);
-static inline void am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv);
+static inline bool am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv);
 static inline void am335x_i2c_sem_post(FAR struct am335x_i2c_priv_s *priv);
 static inline void am335x_i2c_sem_init(FAR struct am335x_i2c_priv_s *priv);
 static inline void am335x_i2c_sem_destroy(FAR struct am335x_i2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
 static void am335x_i2c_tracereset(FAR struct am335x_i2c_priv_s *priv);
-static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv, uint32_t status);
+static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv,
+                                uint32_t status);
 static void am335x_i2c_traceevent(FAR struct am335x_i2c_priv_s *priv,
                                   enum am335x_trace_e event, uint32_t parm);
 static void am335x_i2c_tracedump(FAR struct am335x_i2c_priv_s *priv);
@@ -272,9 +273,9 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 static int am335x_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Trace events strings */
 
@@ -397,17 +398,17 @@ static struct am335x_i2c_priv_s am335x_i2c2_priv =
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_getreg
  *
  * Description:
  *   Get a 32-bit register value by offset
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t am335x_i2c_getreg(FAR struct am335x_i2c_priv_s *priv,
                                          uint16_t offset)
@@ -415,13 +416,13 @@ static inline uint32_t am335x_i2c_getreg(FAR struct am335x_i2c_priv_s *priv,
   return getreg32(priv->config->base + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_putreg
  *
  * Description:
  *  Put a 32-bit register value by offset
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_putreg(FAR struct am335x_i2c_priv_s *priv,
                                      uint16_t offset, uint32_t value)
@@ -429,13 +430,13 @@ static inline void am335x_i2c_putreg(FAR struct am335x_i2c_priv_s *priv,
   putreg32(value, priv->config->base + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_modifyreg
  *
  * Description:
  *   Modify a 32-bit register value by offset
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
                                         uint16_t offset, uint32_t clearbits,
@@ -444,13 +445,13 @@ static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
   modifyreg32(priv->config->base + offset, clearbits, setbits);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_wait
  *
  * Description:
  *   Take the exclusive access, waiting as necessary
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -471,13 +472,14 @@ static inline void am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
   while (ret == -EINTR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_tousecs
  *
  * Description:
- *   Return a micro-second delay based on the number of bytes left to be processed.
+ *   Return a micro-second delay based on the number of bytes left to be
+ *   processed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
 static useconds_t am335x_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
@@ -500,13 +502,13 @@ static useconds_t am335x_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_waitdone
  *
  * Description:
  *   Wait for a transfer to complete
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
 static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
@@ -660,15 +662,15 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_waitstop
  *
  * Description:
  *   Wait for a STOP to complete
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
+static inline bool am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
 {
   clock_t start;
   clock_t elapsed;
@@ -701,7 +703,7 @@ static inline void am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
       regval = am335x_i2c_getreg(priv, AM335X_I2C_IRQ_STAT_RAW_OFFSET);
       if ((regval & I2C_IRQ_BB) == 0)
         {
-          return;
+          return true;
         }
     }
 
@@ -714,28 +716,29 @@ static inline void am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
    */
 
   i2cinfo("Timeout with Status Register: %x\n", regval);
+  return false;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_post
  *
  * Description:
  *   Release the mutual exclusion semaphore
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sem_post(struct am335x_i2c_priv_s *priv)
 {
   nxsem_post(&priv->sem_excl);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_init
  *
  * Description:
  *   Initialize semaphores
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sem_init(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -751,13 +754,13 @@ static inline void am335x_i2c_sem_init(FAR struct am335x_i2c_priv_s *priv)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sem_destroy
  *
  * Description:
  *   Destroy semaphores.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sem_destroy(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -767,13 +770,13 @@ static inline void am335x_i2c_sem_destroy(FAR struct am335x_i2c_priv_s *priv)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_trace*
  *
  * Description:
  *   I2C trace instrumentation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRACE
 static void am335x_i2c_traceclear(FAR struct am335x_i2c_priv_s *priv)
@@ -796,7 +799,8 @@ static void am335x_i2c_tracereset(FAR struct am335x_i2c_priv_s *priv)
   am335x_i2c_traceclear(priv);
 }
 
-static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv, uint32_t status)
+static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv,
+                                uint32_t status)
 {
   struct am335x_trace_s *trace = &priv->trace[priv->tndx];
 
@@ -881,13 +885,13 @@ static void am335x_i2c_tracedump(FAR struct am335x_i2c_priv_s *priv)
 }
 #endif /* CONFIG_I2C_TRACE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_setclock
  *
  * Description:
  *   Set the I2C clock
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
                                 uint32_t frequency)
@@ -918,7 +922,8 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
           men = am335x_i2c_getreg(priv, AM335X_I2C_CON_OFFSET) & I2C_CON_EN;
           if (men)
             {
-              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET, I2C_CON_EN, 0);
+              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET,
+                                   I2C_CON_EN, 0);
             }
 
           /* I2C bus clock is Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5)) */
@@ -968,7 +973,8 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
 
           if (men)
             {
-              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET, 0, I2C_CON_EN);
+              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET,
+                                   0, I2C_CON_EN);
             }
 
           /* Save the new I2C frequency */
@@ -978,13 +984,13 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sendstart
  *
  * Description:
  *   Send the START conditions/force Master mode
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sendstart(FAR struct am335x_i2c_priv_s *priv,
                                         uint16_t address)
@@ -993,7 +999,8 @@ static inline void am335x_i2c_sendstart(FAR struct am335x_i2c_priv_s *priv,
 
   /* Generate START condition and send the address */
 
-  regval = am335x_i2c_getreg(priv, AM335X_I2C_CON_OFFSET) | I2C_CON_STT | I2C_CON_MST;
+  regval = am335x_i2c_getreg(priv, AM335X_I2C_CON_OFFSET) | I2C_CON_STT |
+                                   I2C_CON_MST;
 
   if ((priv->flags & I2C_M_READ) != 0)
     {
@@ -1018,13 +1025,13 @@ static inline void am335x_i2c_sendstart(FAR struct am335x_i2c_priv_s *priv,
   am335x_i2c_putreg(priv, AM335X_I2C_CON_OFFSET, regval);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_sendstop
  *
  * Description:
  *   Send the STOP conditions
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void am335x_i2c_sendstop(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -1048,13 +1055,13 @@ static inline uint32_t am335x_i2c_getstatus(FAR struct am335x_i2c_priv_s *priv)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_isr_process
  *
  * Description:
  *  Common Interrupt Service Routine
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
 {
@@ -1090,7 +1097,7 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
 #ifdef CONFIG_I2C_POLLED
           leave_critical_section(flags);
 #endif
-          if ((priv->msgc <= 0) && (priv->dcnt == 0))
+          if ((priv->dcnt == 0) && ((priv->flags & I2C_M_NOSTOP) == 0))
             {
               am335x_i2c_sendstop(priv);
             }
@@ -1143,7 +1150,7 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
           priv->dcnt     = priv->msgv->length;
           priv->flags    = priv->msgv->flags;
 
-          if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
+          if ((priv->flags & I2C_M_NOSTART) == 0)
             {
               am335x_i2c_traceevent(priv, I2CEVENT_STARTRESTART, priv->msgc);
               am335x_i2c_sendstart(priv, priv->msgv->addr);
@@ -1161,12 +1168,15 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
               /* Stop TX interrupt */
 
-              am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET, I2C_IRQ_XRDY);
-              am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_SET_OFFSET, I2C_IRQ_RRDY);
+              am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET,
+                                I2C_IRQ_XRDY);
+              am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_SET_OFFSET,
+                                I2C_IRQ_RRDY);
 #endif
               /* Set I2C in read mode */
 
-              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET, I2C_CON_TRX, 0);
+              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET,
+                                   I2C_CON_TRX, 0);
               am335x_i2c_putreg(priv, AM335X_I2C_CNT_OFFSET, priv->dcnt);
             }
           else
@@ -1174,10 +1184,12 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
               /* Send the first byte from tx buffer */
 
               am335x_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET, 0, I2C_CON_TRX);
+              am335x_i2c_modifyreg(priv, AM335X_I2C_CON_OFFSET,
+                                   0, I2C_CON_TRX);
 
-              /* No interrupts or context switches should occur in the following
-               * sequence. Otherwise, additional bytes may be sent by the device.
+              /* No interrupts or context switches should occur in the
+               * following sequence. Otherwise, additional bytes may be sent
+               * by the device.
                */
 
 #ifdef CONFIG_I2C_POLLED
@@ -1192,7 +1204,7 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
 #ifdef CONFIG_I2C_POLLED
               leave_critical_section(flags);
 #endif
-              if ((priv->msgc <= 0) && (priv->dcnt == 0))
+              if ((priv->dcnt == 0) && ((priv->flags & I2C_M_NOSTOP) == 0))
                 {
                   am335x_i2c_sendstop(priv);
                 }
@@ -1205,7 +1217,8 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
           /* Check is there thread waiting for this event (there should be) */
 
 #ifndef CONFIG_I2C_POLLED
-          am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET, I2C_ICR_CLEARMASK);
+          am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET,
+                            I2C_ICR_CLEARMASK);
 
           if (priv->intstate == INTSTATE_WAITING)
             {
@@ -1239,7 +1252,8 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
       am335x_i2c_traceevent(priv, I2CEVENT_ERROR, 0);
 
 #ifndef CONFIG_I2C_POLLED
-      am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET, I2C_ICR_CLEARMASK);
+      am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET,
+                        I2C_ICR_CLEARMASK);
 
       if (priv->intstate == INTSTATE_WAITING)
         {
@@ -1263,13 +1277,13 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_isr
  *
  * Description:
  *   Common I2C interrupt service routine
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
 static int am335x_i2c_isr(int irq, void *context, FAR void *arg)
@@ -1281,13 +1295,13 @@ static int am335x_i2c_isr(int irq, void *context, FAR void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_init
  *
  * Description:
  *   Setup the I2C hardware, ready for operation with defaults
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -1339,13 +1353,13 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_deinit
  *
  * Description:
  *   Shutdown the I2C hardware
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int am335x_i2c_deinit(FAR struct am335x_i2c_priv_s *priv)
 {
@@ -1367,24 +1381,23 @@ static int am335x_i2c_deinit(FAR struct am335x_i2c_priv_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Device Driver Operations
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_transfer
  *
  * Description:
  *   Generic I2C transfer function
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
                                FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct am335x_i2c_priv_s *priv = (struct am335x_i2c_priv_s *)dev;
-
-  int ret = 0;
+  int ret = -EBUSY;
 
   DEBUGASSERT(count > 0);
 
@@ -1394,111 +1407,118 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Wait for any STOP in progress */
 
-  am335x_i2c_sem_waitstop(priv);
-
-  /* Clear any pending error interrupts */
-
-  am335x_i2c_putreg(priv, AM335X_I2C_IRQ_STAT_OFFSET, I2C_STS_CLEARMASK);
-  am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET, I2C_ICR_CLEARMASK);
-
-  /* Old transfers are done */
-
-  /* Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
-   * overwrite stale data.
-   */
-
-  priv->dcnt  = 0;
-  priv->ptr   = NULL;
-
-  priv->msgv  = msgs;
-  priv->msgc  = count;
-  priv->flags = msgs->flags;
-
-  i2cinfo("Flags %x, len %d \n", msgs->flags, msgs->length);
-
-  /* Reset I2C trace logic */
-
-  am335x_i2c_tracereset(priv);
-
-  /* Set I2C clock frequency */
-
-  am335x_i2c_setclock(priv, msgs->frequency);
-
-  priv->status = 0;
-
-  /* Wait for an ISR, if there was a timeout, fetch latest status to get
-   * the BUSY flag.
-   */
-
-  if (am335x_i2c_sem_waitdone(priv) < 0)
+  if (am335x_i2c_sem_waitstop(priv))
     {
-      ret = -ETIMEDOUT;
+      /* Clear any pending error interrupts */
 
-      i2cerr("ERROR: Timed out: IRQ_RAW: status: 0x%x\n", priv->status);
-    }
+      am335x_i2c_putreg(priv, AM335X_I2C_IRQ_STAT_OFFSET,
+                        I2C_STS_CLEARMASK);
+      am335x_i2c_putreg(priv, AM335X_I2C_IRQ_EN_CLR_OFFSET,
+                        I2C_ICR_CLEARMASK);
 
-  /* Check for error status conditions */
+      /* Old transfers are done */
 
-  else if ((priv->status & I2C_IRQ_ERRORMASK) != 0)
-    {
-      /* I2C_IRQ_ERRORMASK is the 'OR' of the following individual bits: */
+      /* Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
+       * overwrite stale data.
+       */
 
-      if (priv->status & I2C_IRQ_AL)
+      priv->dcnt  = 0;
+      priv->ptr   = NULL;
+
+      priv->msgv  = msgs;
+      priv->msgc  = count;
+      priv->flags = msgs->flags;
+
+      i2cinfo("Flags %x, len %d \n", msgs->flags, msgs->length);
+
+      /* Reset I2C trace logic */
+
+      am335x_i2c_tracereset(priv);
+
+      /* Set I2C clock frequency */
+
+      am335x_i2c_setclock(priv, msgs->frequency);
+
+      priv->status = 0;
+
+      /* Wait for an ISR, if there was a timeout, fetch latest status to get
+       * the BUSY flag.
+       */
+
+      if (am335x_i2c_sem_waitdone(priv) < 0)
         {
-          /* Arbitration Lost (master mode) */
+          ret = -ETIMEDOUT;
 
-          i2cerr("Arbitration lost\n");
-          ret = -EAGAIN;
+          i2cerr("ERROR: Timed out: IRQ_RAW: status: 0x%x\n", priv->status);
         }
-      else if (priv->status & I2C_IRQ_NACK)
-        {
-          /* Acknowledge Failure */
 
-          i2cerr("Ack failure\n");
-          ret = -ENXIO;
-        }
-      else if (priv->status & (I2C_IRQ_XUDF | I2C_IRQ_ROVR))
-        {
-          /* Overrun/Underrun */
+      /* Check for error status conditions */
 
-          i2cerr("Overrun/Underrun status\n");
-          ret = -EIO;
-        }
-      else if (priv->status & I2C_IRQ_AERR)
+      else if ((priv->status & I2C_IRQ_ERRORMASK) != 0)
         {
-          /* Access Error in reception or transmission */
+          /* I2C_IRQ_ERRORMASK is the 'OR' of the following individual bits: */
 
-          i2cerr("Access Error\n");
-          ret = -EPROTO;
-        }
-      else if (priv->status & I2C_IRQ_BB)
-        {
-          /* Bus busy Error */
+          if (priv->status & I2C_IRQ_AL)
+            {
+              /* Arbitration Lost (master mode) */
 
-          i2cerr("Bus busy error\n");
-          ret = -EIO;
+              i2cerr("Arbitration lost\n");
+              ret = -EAGAIN;
+            }
+          else if (priv->status & I2C_IRQ_NACK)
+            {
+              /* Acknowledge Failure */
+
+              i2cerr("Ack failure\n");
+              ret = -ENXIO;
+            }
+          else if (priv->status & (I2C_IRQ_XUDF | I2C_IRQ_ROVR))
+            {
+              /* Overrun/Underrun */
+
+              i2cerr("Overrun/Underrun status\n");
+              ret = -EIO;
+            }
+          else if (priv->status & I2C_IRQ_AERR)
+            {
+              /* Access Error in reception or transmission */
+
+              i2cerr("Access Error\n");
+              ret = -EPROTO;
+            }
+          else if (priv->status & I2C_IRQ_BB)
+            {
+              /* Bus busy Error */
+
+              i2cerr("Bus busy error\n");
+              ret = -EIO;
+            }
+          else
+            {
+              i2cerr("Unspecified error\n");
+              ret = -EINTR;
+            }
         }
       else
         {
-          i2cerr("Unspecified error\n");
-          ret = -EINTR;
+          ret = OK;
         }
+
+      /* Dump the trace result */
+
+      am335x_i2c_tracedump(priv);
+
+      /* Ensure that any ISR happening after we finish can't overwrite any user data */
+
+      priv->dcnt = 0;
+      priv->ptr = NULL;
     }
-
-  /* Dump the trace result */
-
-  am335x_i2c_tracedump(priv);
-
-  /* Ensure that any ISR happening after we finish can't overwrite any user data */
-
-  priv->dcnt = 0;
-  priv->ptr = NULL;
 
   am335x_i2c_sem_post(priv);
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2c_reset
  *
  * Description:
@@ -1510,7 +1530,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int am335x_i2c_reset(FAR struct i2c_master_s *dev)
@@ -1625,17 +1645,17 @@ out:
 }
 #endif /* CONFIG_I2C_RESET */
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2cbus_initialize
  *
  * Description:
  *   Initialize one I2C bus
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct i2c_master_s *am335x_i2cbus_initialize(int port)
 {
@@ -1682,13 +1702,13 @@ FAR struct i2c_master_s *am335x_i2cbus_initialize(int port)
   return (struct i2c_master_s *)priv;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_i2cbus_uninitialize
  *
  * Description:
  *   Uninitialize an I2C bus
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int am335x_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
