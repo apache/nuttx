@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/sam_adc.h
+ * boards/arm/samd2l2/arduino-m0/src/sam_bringup.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Alexander Vasiljev <alexvasiljev@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,61 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <sys/types.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
 
 #include "sam_config.h"
-#include "sam_port.h"
-
-#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "hardware/samd_adc.h"
-#elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "hardware/saml_adc.h"
-#else
-#  error Unrecognized SAMD/L architecture
-#endif
+#include "arduino_m0.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_adcinitialize
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_bringup
  *
  * Description:
- *   Initialize the ADC. See sam_adc.c for more details.
- *
- * Input Parameters:
- *   genclk      - Number of the Clock Generator to use.
- *
- * Returned Value:
- *   Valid ADC device structure reference on success; a NULL on failure
+ *   Bring up board features
  *
  ****************************************************************************/
 
-struct adc_dev_s;
-struct adc_dev_s *sam_adcinitialize(int genclk);
+int sam_bringup(void)
+{
+  int ret = OK;
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+  /* Configure the ADC driver */
+
+#ifdef CONFIG_SAMD2L2_ADC
+  ret = sam_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize the ADC driver: %d\n", ret);
+      return ret;
+    }
 #endif
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
+
+  return ret;
+}

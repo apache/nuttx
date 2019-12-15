@@ -1,8 +1,8 @@
-/****************************************************************************
- * arch/arm/src/samd2l2/sam_adc.h
+/************************************************************************************
+ * arch/arm/src/samd2l2/adc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Alexander Vasiljev <alexvasiljev@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,63 +31,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "sam_config.h"
-#include "sam_port.h"
-
-#if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "hardware/samd_adc.h"
-#elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "hardware/saml_adc.h"
-#else
-#  error Unrecognized SAMD/L architecture
-#endif
+#ifndef __ARCH_ARM_SRC_SAMD2L2_ADC_H
+#define __ARCH_ARM_SRC_SAMD2L2_ADC_H
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/* IOCTL definitions */
+
+#define SAMD_ADC_IOCTL_START       0 /* start adc conversion */
+#define SAMD_ADC_IOCTL_STOP        1 /* stop adc conversion */
+#define SAMD_ADC_IOCTL_SET_PARAMS  2 /* set parameters when adc is stopped */
+#define SAMD_ADC_IOCTL_GET_PARAMS  3 /* get parameters */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct sam_adc_param_s
 {
-#else
-#define EXTERN extern
-#endif
+  uint8_t samplen;      /* sampling time length */
+  uint8_t prescaler;    /* prescaler configuration */
+  uint8_t averaging;    /* number of samples to be collected */
+};
 
-/****************************************************************************
- * Name: sam_adcinitialize
- *
- * Description:
- *   Initialize the ADC. See sam_adc.c for more details.
- *
- * Input Parameters:
- *   genclk      - Number of the Clock Generator to use.
- *
- * Returned Value:
- *   Valid ADC device structure reference on success; a NULL on failure
- *
- ****************************************************************************/
-
-struct adc_dev_s;
-struct adc_dev_s *sam_adcinitialize(int genclk);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
+#endif /* __ARCH_ARM_SRC_SAMD2L2_ADC_H */

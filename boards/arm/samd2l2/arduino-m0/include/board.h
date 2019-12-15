@@ -470,6 +470,24 @@
 
 #define BOARD_SERCOM5_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
+/* ADC definitions **********************************************************/
+
+#define BOARD_ADC_GCLKGEN        0
+
+/* We are using PA3 as Analog Input */
+
+#define PORT_AIN1                PORT_AIN1_1
+#define BOARD_ADC_INPUT1         1
+#define BOARD_ADC_NUM_CHANNELS   1
+
+/* The negative input is the internal GND */
+
+#define BOARD_ADC_NEG            ADC_INPUTCTRL_MUXNEG_GND
+
+/* The VREF is the INTVCC1 = 1/2 VDDANA */
+
+#define BOARD_ADC_REF            ADC_REFCTRL_REFSEL_INTVCC1
+
 /* USB definitions **********************************************************/
 
 /* This is the source clock generator for the GCLK_USB clock

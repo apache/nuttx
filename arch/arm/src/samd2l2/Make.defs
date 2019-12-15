@@ -91,6 +91,10 @@ ifeq ($(CONFIG_ARCH_IRQPRIO),y)
 CHIP_CSRCS += sam_irqprio.c
 endif
 
+ifeq ($(CONFIG_SAMD2L2_ADC),y)
+CHIP_CSRCS += sam_adc.c
+endif
+
 ifeq ($(CONFIG_SAMD2L2_DMAC),y)
 CHIP_CSRCS += sam_dmac.c
 endif

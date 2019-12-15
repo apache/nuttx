@@ -98,6 +98,32 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sam_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int sam_bringup(void);
+
+/************************************************************************************
+ * Name: sam_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+int sam_adc_setup(void);
+
+/****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
