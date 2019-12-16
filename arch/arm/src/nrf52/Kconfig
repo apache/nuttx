@@ -15,14 +15,14 @@ config ARCH_CHIP_NRF52832
 	select ARCH_FAMILY_NRF52
 	select ARCH_FAMILY_NRF52832
 	#select NRF52_HAVE_I2C_MASTER
-	#select NRF52_HAVE_UART
 
 config ARCH_CHIP_NRF52840
 	bool "NRF52840"
 	select ARCH_FAMILY_NRF52
 	select ARCH_FAMILY_NRF52840
 	#select NRF52_HAVE_I2C_MASTER
-	#select NRF52_HAVE_UART
+	select NRF52_HAVE_UART1
+	select NRF52_HAVE_PORT1
 
 endchoice # NRF52 Chip Selection
 
@@ -42,8 +42,6 @@ config ARCH_FAMILY_NRF52840
 
 # Peripheral support
 
-# Peripheral Selection
-
 config NRF52_HAVE_I2C_MASTER
 	bool
 	default n
@@ -52,7 +50,17 @@ config NRF52_HAVE_SPI_MASTER
 	bool
 	default n
 
-config NRF52_HAVE_UART
+config NRF52_HAVE_UART1
+	bool
+	default n
+
+config NRF52_HAVE_PORT1
+	bool
+	default n
+
+# Peripheral Selection
+
+config NRF52_UART
 	bool
 	default n
 
@@ -72,7 +80,14 @@ config NRF52_UART0
 	bool "UART0"
 	default n
 	select UART0_SERIALDRIVER
-	select NRF52_HAVE_UART
+	select NRF52_UART
+
+config NRF52_UART1
+	bool "UART1"
+	default n
+	depends on NRF52_HAVE_UART1
+	select UART1_SERIALDRIVER
+	select NRF52_UART
 
 config NRF52_RNG
 	bool "Random Generator"

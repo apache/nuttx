@@ -152,6 +152,10 @@ static const struct uart_ops_s g_uart_ops =
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
+#ifdef HAVE_UART1
+static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#endif
 
 /* This describes the state of the NRF52 UART0 port. */
 
@@ -173,6 +177,8 @@ static struct nrf52_dev_s g_uart0priv =
 #ifdef CONFIG_UART0_OFLOWCONTROL
     .oflow        = true,
 #endif
+    .txpin        = BOARD_UART0_TX_PIN,
+    .rxpin        = BOARD_UART0_RX_PIN,
   }
 };
 
@@ -193,8 +199,57 @@ static uart_dev_t g_uart0port =
 };
 #endif
 
-#define CONSOLE_DEV         g_uart0port /* UART0 is console */
-#define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+/* This describes the state of the NRF52 UART1 port. */
+
+#ifdef HAVE_UART1
+static struct nrf52_dev_s g_uart1priv =
+{
+  .uartbase       = NRF52_UART1_BASE,
+  .irq            = NRF52_IRQ_UART1,
+  .rx_available   = false,
+  .tx_gpio        = BOARD_UART1_TX_PIN,
+  .rx_gpio        = BOARD_UART1_RX_PIN,
+  .config         =
+  {
+    .baud         = CONFIG_UART1_BAUD,
+    .parity       = CONFIG_UART1_PARITY,
+    .bits         = CONFIG_UART1_BITS,
+    .stopbits2    = CONFIG_UART1_2STOP,
+#ifdef CONFIG_UART1_IFLOWCONTROL
+    .iflow        = true,
+#endif
+#ifdef CONFIG_UART1_OFLOWCONTROL
+    .oflow        = true,
+#endif
+    .txpin        = BOARD_UART1_TX_PIN,
+    .rxpin        = BOARD_UART1_RX_PIN,
+  }
+};
+
+static uart_dev_t g_uart1port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART1_RXBUFSIZE,
+    .buffer = g_uart1rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART1_TXBUFSIZE,
+    .buffer = g_uart1txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart1priv,
+};
+#endif
+
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#  define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#  define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#elif CONFIG_UART1_SERIAL_CONSOLE
+#  define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#  define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -225,6 +280,8 @@ static int nrf52_setup(struct uart_dev_s *dev)
 
 #endif
 
+  /* TODO: configure UART if not selected as console */
+
   return OK;
 }
 
@@ -240,6 +297,8 @@ static int nrf52_setup(struct uart_dev_s *dev)
 static void nrf52_shutdown(struct uart_dev_s *dev)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
+
+  /* TODO: release uart pins */
 
   /* Disable interrupts */
   /* Reset hardware and disable Rx and Tx */

@@ -678,24 +678,37 @@ config ARCH_BOARD_NTOSD_DM320
 		STATUS: This port is code complete, verified, and included in the
 		NuttX 0.2.1 release.
 
-config ARCH_BOARD_NRF52_PCA10040
-	bool "NRF52 PCA10040 eval board"
+config ARCH_BOARD_NRF52832_DK
+	bool "Nordic nRF52832 Development Kit (PCA10040)"
 	depends on ARCH_CHIP_NRF52
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	---help---
-		PCA10040 Evaluation board
+		This option selects the Nordic nRF52832 Development Kit (PCA10040)
 
-config ARCH_BOARD_NRF52_GENERIC
-	bool "Generic NRF52832 board"
+config ARCH_BOARD_NRF52_FEATHER
+	bool "Adafruit NRF52 Feather board"
 	depends on ARCH_CHIP_NRF52
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	---help---
-		NuttX port to the a generic NRF52832 board.  Support is in place for
-		the NRF PCA10040 board from Nordic Semiconductor or for the Adafruit
-		NRF52 feather and can be simply extended to other board based on the
-		NRF52832 MCU.
+		This option selects the Adafruit nRF52832 Feather board
+
+config ARCH_BOARD_NRF52840_DK
+	bool "Nordic nRF52840 Development Kit (PCA10056)"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This option selects the Nordic nRF52840 Development Kit (PCA10056)
+
+config ARCH_BOARD_NRF52840_DONGLE
+	bool "Nordic nRF52840 Dongle (PCA10059)"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This option selects the Nordic nRF52840 Dongle (PCA10059)
 
 config ARCH_BOARD_NUTINY_NUC120
 	bool "Nuvoton NuTiny NUC120"
@@ -2041,7 +2054,10 @@ config ARCH_BOARD
 	default "misoc"                    if ARCH_BOARD_MISOC_QEMU || ARCH_BOARD_MISOC_VERILATOR
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
-	default "nrf52-generic"            if ARCH_BOARD_NRF52_GENERIC
+	default "nrf52-feather"            if ARCH_BOARD_NRF52_FEATHER
+	default "nrf52832-dk"              if ARCH_BOARD_NRF52832_DK
+	default "nrf52840-dk"              if ARCH_BOARD_NRF52840_DK
+	default "nrf52840-dongle"          if ARCH_BOARD_NRF52840_DONGLE
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
@@ -2355,8 +2371,14 @@ endif
 if ARCH_BOARD_MOXA
 source "boards/arm/moxart/moxa/Kconfig"
 endif
-if ARCH_BOARD_NRF52_GENERIC
-source "boards/arm/nrf52/nrf52-generic/Kconfig"
+if ARCH_BOARD_NRF52_FEATHER
+source "boards/arm/nrf52/nrf52-feather/Kconfig"
+endif
+if ARCH_BOARD_NRF52832_DK
+source "boards/arm/nrf52/nrf52832-dk/Kconfig"
+endif
+if ARCH_BOARD_NRF52840_DK
+source "boards/arm/nrf52/nrf52840-dk/Kconfig"
 endif
 if ARCH_BOARD_NUTINY_NUC120
 source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"

@@ -101,7 +101,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += nrf52_idle.c
 endif
 
-ifeq ($(CONFIG_NRF52_HAVE_UART),y)
+ifeq ($(CONFIG_NRF52_UART),y)
 CHIP_CSRCS += nrf52_serial.c
 endif
 

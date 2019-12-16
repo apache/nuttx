@@ -57,9 +57,14 @@
 /* Map logical UART names (Just for simplicity of naming) */
 
 #undef HAVE_UART0
+#undef HAVE_UART1
 
 #ifdef CONFIG_NRF52_UART0
 #  define HAVE_UART0 1
+#endif
+
+#ifdef CONFIG_NRF52_UART1
+#  define HAVE_UART1 1
 #endif
 
 /* Check if we have a UART device */
@@ -71,12 +76,21 @@
 #  define HAVE_UART_DEVICE 1
 #endif
 
+#if defined(HAVE_UART1)
+#  define HAVE_UART_DEVICE 1
+#endif
+
 /* Is there a serial console? There should be at most one defined. */
 
 #undef HAVE_UART_CONSOLE
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(HAVE_UART0)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_UART_CONSOLE 1
+#endif
+
+#if defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(HAVE_UART1)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #endif
 

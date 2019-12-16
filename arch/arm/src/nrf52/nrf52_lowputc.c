@@ -60,11 +60,23 @@
 
 #ifdef HAVE_UART_CONSOLE
 
-#define CONSOLE_BASE     NRF52_UART0_BASE
-#define CONSOLE_BAUD     CONFIG_UART0_BAUD
-#define CONSOLE_BITS     CONFIG_UART0_BITS
-#define CONSOLE_PARITY   CONFIG_UART0_PARITY
-#define CONSOLE_2STOP    CONFIG_UART0_2STOP
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#  define CONSOLE_BASE     NRF52_UART0_BASE
+#  define CONSOLE_BAUD     CONFIG_UART0_BAUD
+#  define CONSOLE_BITS     CONFIG_UART0_BITS
+#  define CONSOLE_PARITY   CONFIG_UART0_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART0_2STOP
+#  define CONSOLE_TX_PIN   BOARD_UART0_TX_PIN
+#  define CONSOLE_RX_PIN   BOARD_UART0_RX_PIN
+#elif CONFIG_UART1_SERIAL_CONSOLE
+#  define CONSOLE_BASE     NRF52_UART1_BASE
+#  define CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define CONSOLE_BITS     CONFIG_UART1_BITS
+#  define CONSOLE_PARITY   CONFIG_UART1_PARITY
+#  define CONSOLE_2STOP    CONFIG_UART1_2STOP
+#  define CONSOLE_TX_PIN   BOARD_UART1_TX_PIN
+#  define CONSOLE_RX_PIN   BOARD_UART1_RX_PIN
+#endif
 
 /****************************************************************************
  * Private Data
@@ -84,8 +96,8 @@ static const struct uart_config_s g_console_config=
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   .oflow     = CONSOLE_OFLOW,
 #endif
-  .txpin     = BOARD_UART0_TX_PIN,
-  .rxpin     = BOARD_UART0_RX_PIN,
+  .txpin     = CONSOLE_TX_PIN,
+  .rxpin     = CONSOLE_RX_PIN,
 };
 #endif /* HAVE_UART_CONSOLE */
 

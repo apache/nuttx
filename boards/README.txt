@@ -435,10 +435,17 @@ boards/hc/mcs92s12ne6/ne64badge
   STATUS:  Under development.  The port is code-complete but has
   not yet been fully tested.
 
-boards/arm/nrf52/nrf52-generic
-  NuttX port to the a generic NRF52.  Support is in place for the NRF
-  PCA10040 board from Nordic Semiconductor or for the Adafruit NRF52
-  feather, both featuring the NRF52832 MCU.
+boards/arm/nrf52/nrf52-feather
+  Nuttx port to the Adafruit nRF52832 Feather board
+
+boards/arm/nrf52/nrf52832-dk
+  Nuttx port to the Nordic nRF52832 Development Kit (PCA10040)
+
+boards/arm/nrf52/nrf52840-dk
+	Nuttx port to the Nordic nRF52840 Development Kit (PCA10056)
+
+boards/arm/nrf52/nrf52840-dongle
+  Nuttx port to the Nordic nRF52840 Dongle (PCA10059)
 
 boards/arm/dm320/ntosd-dm320
   This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-nuttx-elf
