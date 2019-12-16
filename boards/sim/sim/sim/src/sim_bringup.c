@@ -214,7 +214,7 @@ int sim_bringup(void)
 
           /* Mount the LittleFS file system */
 
-          ret = mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0, "autoformat");
+          ret = mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0, "forceformat");
           if (ret < 0)
             {
               syslog(LOG_ERR,
