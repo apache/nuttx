@@ -194,14 +194,14 @@ struct fb_vtable_s g_fbobject =
 static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
                            FAR struct fb_videoinfo_s *vinfo)
 {
-  _info("vtable=%p vinfo=%p\n", vtable, vinfo);
+  ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -212,14 +212,14 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
 static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                            FAR struct fb_planeinfo_s *pinfo)
 {
-  _info("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -233,7 +233,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
   int len;
   int i;
 
-  _info("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
+  ginfo("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
     {
       for (i = cmap->first, len = 0; i < 256 && len < cmap->len; i++, len++)
@@ -250,7 +250,7 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -265,13 +265,13 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
 #ifdef CONFIG_SIM_X11FB
   return up_x11cmap(cmap->first, cmap->len, cmap->red, cmap->green, cmap->blue, NULL);
 #else
-  _info("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
+  ginfo("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
     {
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 #endif
 }
@@ -285,24 +285,24 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s
 static int up_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib)
 {
-  _info("vtable=%p attrib=%p\n", vtable, attrib);
+  ginfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
       attrib->fmt      = FB_FMT;
 #endif
-      _info("pos:      (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
+      ginfo("pos:      (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
       attrib->pos      = g_cpos;
 #ifdef CONFIG_FB_HWCURSORSIZE
       attrib->mxsize.h = CONFIG_SIM_FBHEIGHT;
       attrib->mxsize.w = CONFIG_SIM_FBWIDTH;
-      _info("size:     (h=%d, w=%d)\n", g_csize.h, g_csize.w);
+      ginfo("size:     (h=%d, w=%d)\n", g_csize.h, g_csize.w);
       attrib->size     = g_csize;
 #endif
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -315,33 +315,33 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 static int up_setcursor(FAR struct fb_vtable_s *vtable,
                        FAR struct fb_setcursor_s *setttings)
 {
-  _info("vtable=%p setttings=%p\n", vtable, setttings);
+  ginfo("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
     {
-      _info("flags:   %02x\n", settings->flags);
+      ginfo("flags:   %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
           g_cpos = settings->pos;
-          _info("pos:     (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
+          ginfo("pos:     (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
           g_csize = settings->size;
-          _info("size:    (h:%d, w:%d)\n", g_csize.h, g_csize.w);
+          ginfo("size:    (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
-          _info("image:   (h:%d, w:%d) @ %p\n",
+          ginfo("image:   (h:%d, w:%d) @ %p\n",
                settings->img.height, settings->img.width, settings->img.image);
         }
 #endif
       return OK;
     }
 
-  _err("ERROR: Returning EINVAL\n");
+  gerr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
