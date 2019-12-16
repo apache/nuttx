@@ -193,7 +193,6 @@ static int up_x11untraperrors(void)
 
 static void up_x11uninitX(void)
 {
-  fprintf(stderr, "Uninitializing X\n");
   if (g_x11initialized)
     {
 #ifndef CONFIG_SIM_X11NOSHM
@@ -397,7 +396,6 @@ int up_x11initialize(unsigned short width, unsigned short height,
         {
           depth = 32;
         }
-      printf("Pixel bpp is %d bits (using %d)\n", windowAttributes.depth, depth);
 
       *bpp    = depth;
       *stride = (depth * width / 8);

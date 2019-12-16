@@ -182,15 +182,6 @@ static void up_init_smartfs(void)
 
 void up_initialize(void)
 {
-#ifdef CONFIG_NET
-  /* The real purpose of the following is to make sure that syslog
-   * is drawn into the link.  It is needed by up_tapdev which is linked
-   * separately.
-   */
-
-  syslog(LOG_INFO, "SIM: Initializing\n");
-#endif
-
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any
