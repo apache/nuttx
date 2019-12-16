@@ -84,7 +84,7 @@
 
 /* UART console configuration */
 
-static const struct uart_config_s g_console_config=
+static const struct uart_config_s g_console_config =
 {
   .baud      = CONSOLE_BAUD,
   .parity    = CONSOLE_PARITY,
@@ -116,11 +116,11 @@ static const struct uart_config_s g_console_config=
 #ifdef HAVE_UART_DEVICE
 static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 {
-  uint32_t br = 0x01D7E000;  /* 268.444444 */
+  uint32_t br = 0x01d7e000;  /* 268.444444 */
 
   if (config->baud == 115200)
     {
-      br = 0x01D7E000;
+      br = 0x01d7e000;
     }
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
@@ -204,14 +204,15 @@ void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
 void nrf52_usart_disable(uintptr_t base)
 {
   /* Disable interrupts */
+
   /* Disable the UART */
 
   putreg32(1, base + NRF52_UART_TASKS_STOPRX_OFFSET);
   putreg32(1, base + NRF52_UART_TASKS_STOPTX_OFFSET);
   putreg32(NRF52_UART_ENABLE_DISABLE, base + NRF52_UART_ENABLE_OFFSET);
 
-  putreg32(0xFFFFFFFF, base + NRF52_UART_PSELTXD_OFFSET);
-  putreg32(0xFFFFFFFF, base + NRF52_UART_PSELRXD_OFFSET);
+  putreg32(0xffffffff, base + NRF52_UART_PSELTXD_OFFSET);
+  putreg32(0xffffffff, base + NRF52_UART_PSELRXD_OFFSET);
 }
 #endif
 
@@ -229,7 +230,7 @@ void up_lowputc(char ch)
   putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STARTTX_OFFSET);
   putreg32(0, CONSOLE_BASE + NRF52_UART_EVENTS_TXDRDY_OFFSET);
   putreg32(ch, CONSOLE_BASE + NRF52_UART_TXD_OFFSET);
-  while (getreg32(CONSOLE_BASE + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0 )
+  while (getreg32(CONSOLE_BASE + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0)
     {
     }
 

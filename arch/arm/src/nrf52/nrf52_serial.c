@@ -71,6 +71,7 @@
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -193,7 +194,7 @@ static uart_dev_t g_uart0port =
   {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
@@ -301,6 +302,7 @@ static void nrf52_shutdown(struct uart_dev_s *dev)
   /* TODO: release uart pins */
 
   /* Disable interrupts */
+
   /* Reset hardware and disable Rx and Tx */
 
   nrf52_usart_disable(priv->uartbase);
@@ -513,12 +515,11 @@ static void nrf52_send(struct uart_dev_s *dev, int ch)
   putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTTX_OFFSET);
 
   putreg32(ch, priv->uartbase + NRF52_UART_TXD_OFFSET);
-  while (getreg32(priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0 )
+  while (getreg32(priv->uartbase + NRF52_UART_EVENTS_TXDRDY_OFFSET) == 0)
     {
     }
 
   putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPTX_OFFSET);
-
 }
 
 /****************************************************************************

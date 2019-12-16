@@ -50,6 +50,7 @@
  ************************************************************************************/
 
 /* Configuration *********************************************************************/
+
 /* Make sure that no unsupported UART, I2C master, or SPI master peripherals are
  * enabled.
  */
