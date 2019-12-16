@@ -63,28 +63,6 @@
  * Public Functions
  ****************************************************************************/
 
-#define NEED_FRAMEBUFFER 1
-
-/* If we are using the X11 touchscreen simulation, then the frame buffer
- * initialization will need to be done here.
- */
-
-#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-#  undef NEED_FRAMEBUFFER
-#endif
-
-/* Currently the only case we need to initialize the framebuffer here is
- * when we are testing the framebuffer character driver.
- */
-
-#ifndef CONFIG_VIDEO_FB
-#  undef NEED_FRAMEBUFFER
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /****************************************************************************
  * Name: sam_bringup
  *
@@ -270,7 +248,7 @@ int sim_bringup(void)
   sim_ajoy_initialize();
 #endif
 
-#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+#if defined(CONFIG_NX) && defined(CONFIG_SIM_TOUCHSCREEN)
   /* Initialize the touchscreen */
 
   ret = sim_tsc_setup(0);
@@ -278,9 +256,9 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: sim_tsc_setup failed: %d\n", ret);
     }
-#endif
+#else
 
-#ifdef NEED_FRAMEBUFFER
+#  ifdef CONFIG_VIDEO_FB
   /* Initialize and register the simulated framebuffer driver */
 
   ret = fb_register(0, 0);
@@ -288,6 +266,18 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
+#  endif
+
+#  ifdef CONFIG_SIM_TOUCHSCREEN
+  /* Initialize the touchscreen */
+
+  ret = sim_tsc_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_tsc_initialize failed: %d\n", ret);
+    }
+#  endif
+
 #endif
 
 #ifdef CONFIG_IEEE802154_LOOPBACK
