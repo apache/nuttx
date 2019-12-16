@@ -138,23 +138,13 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
 /* SVC call with SYS_ call number and three parameters */
 
+static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4);
 static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3)
 {
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3)
-    : "memory"
-  );
-
-  return reg0;
+  return sys_call4(nbr, parm1, parm2, parm3, 0);
 }
 
 /* SVC call with SYS_ call number and four parameters.
@@ -189,27 +179,15 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
  * NOTE the nonstandard parameter passing:  parm4 and parm5 are in R4 and R5
  */
 
+static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5,
+                                  uintptr_t parm6);
 static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
                                   uintptr_t parm4, uintptr_t parm5)
 {
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg5 __asm__("r5") = (long)(parm5);
-  register long reg4 __asm__("r4") = (long)(parm4);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5)
-    : "memory"
-  );
-
-  return reg0;
+  return sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, 0);
 }
 
 /* SVC call with SYS_ call number and six parameters.
