@@ -40,16 +40,13 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <assert.h>
 
 #include <nuttx/init.h>
-#include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/power/pm.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
@@ -103,12 +100,6 @@ int main(int argc, char **argv, char **envp)
       nx_start();
 #endif
     }
-
-#ifdef USE_DEVCONSOLE
-  /* Restore the original terminal mode and return the exit code */
-
-  simuart_terminate();
-#endif
 
   return g_exitcode;
 }

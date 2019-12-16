@@ -40,6 +40,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include <termios.h>
 #include <pthread.h>
 #include <errno.h>
@@ -111,6 +112,17 @@ static void setrawmode(void)
   raw.c_cflag |= CS8;
 
   (void)tcsetattr(0, TCSANOW, &raw);
+}
+
+/****************************************************************************
+ * Name: restoremode
+ ****************************************************************************/
+
+static void restoremode(void)
+{
+  /* Restore the original terminal mode */
+
+  (void)tcsetattr(0, TCSANOW, &g_cooked);
 }
 
 /****************************************************************************
@@ -212,6 +224,10 @@ void simuart_start(void)
 
   setrawmode();
 
+  /* Restore the original terminal mode before exit */
+
+  atexit(restoremode);
+
   /* Start the simulated UART thread -- all default settings; no error
    * checking.
    */
@@ -298,13 +314,3 @@ bool simuart_checkc(void)
   return g_uarthead != g_uarttail;
 }
 
-/****************************************************************************
- * Name: simuart_terminate
- ****************************************************************************/
-
-void simuart_terminate(void)
-{
-  /* Restore the original terminal mode */
-
-  (void)tcsetattr(0, TCSANOW, &g_cooked);
-}
