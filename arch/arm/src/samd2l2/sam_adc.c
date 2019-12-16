@@ -57,16 +57,17 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/kmalloc.h>
 
-#include <arch/board/board.h>
+#include <arch/chip/sam_adc.h>
 
 #include "up_arch.h"
-#include "adc.h"
 #include "sam_adc.h"
 #include "sam_pinmap.h"
 #include "sam_gclk.h"
 #include "sam_port.h"
 #include "sam_fuses.h"
 #include "samd_periphclks.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Private Function Prototypes

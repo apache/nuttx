@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samd2l2/adc.h
+ * arch/arm/src/samd2l2/sam_adc.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_ADC_H
-#define __ARCH_ARM_SRC_SAMD2L2_ADC_H
+#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
+#define __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,4 +58,4 @@ struct sam_adc_param_s
   uint8_t averaging;    /* number of samples to be collected */
 };
 
-#endif /* __ARCH_ARM_SRC_SAMD2L2_ADC_H */
+#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
