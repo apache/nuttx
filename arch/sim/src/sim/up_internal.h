@@ -306,7 +306,7 @@ unsigned long up_getwalltime(void);
 
 #ifdef CONFIG_SIM_X11FB
 int up_x11initialize(unsigned short width, unsigned short height,
-                     void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                     void **fbmem, size_t *fblen, unsigned char *bpp,
                      unsigned short *stride);
 #ifdef CONFIG_FB_CMAP
 int up_x11cmap(unsigned short first, unsigned short len,

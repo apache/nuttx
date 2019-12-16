@@ -359,7 +359,7 @@ shmerror:
  ****************************************************************************/
 
 int up_x11initialize(unsigned short width, unsigned short height,
-                     void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                     void **fbmem, size_t *fblen, unsigned char *bpp,
                      unsigned short *stride)
 {
   XWindowAttributes windowAttributes;
