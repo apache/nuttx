@@ -156,8 +156,8 @@
 
 /* Device-specific network IOCTL commands ******************************************/
 
-#define WL_NETFIRST         0x0001          /* First network command */
-#define WL_NNETCMDS         0x0032          /* Number of network commands */
+#define WL_NETFIRST         0x0000          /* First network command */
+#define WL_NNETCMDS         0x0037          /* Number of network commands */
 
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
