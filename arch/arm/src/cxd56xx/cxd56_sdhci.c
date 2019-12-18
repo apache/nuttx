@@ -119,13 +119,8 @@
 #  define CONFIG_CXD56_SD1BIT_FREQ 20000000  /* 20MHz SD 1-bit, normal clocking */
 #endif
 #ifndef CONFIG_CXD56_SD4BIT_FREQ
-#  define CONFIG_CXD56_SD4BIT_FREQ 25000000  /* 25MHz SD 4-bit, normal clocking */
+#  define CONFIG_CXD56_SD4BIT_FREQ 50000000  /* SDR25 SD 4-bit, normal clocking */
 #endif
-#ifndef CONFIG_CXD56_HSSD4BIT_FREQ
-#  define CONFIG_CXD56_HSSD4BIT_FREQ 50000000  /* 50MHz SD 4-bit, highspeed clocking */
-#endif
-
-#define CXD56_SDIO_BASECLK_FREQ (cxd56_get_sdio_baseclock()*2)
 
 /* Timing */
 
