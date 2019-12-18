@@ -359,7 +359,7 @@ static void cisif_ycc_nstorage_int(uint8_t code)
   uint32_t size;
 
   size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-  g_ycc_notify_callback_func (0, size, g_storage_addr);
+  g_ycc_notify_callback_func(0, size, g_storage_addr);
   cisif_reg_write(CISIF_YCC_DREAD_CONT, size);
 }
 
