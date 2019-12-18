@@ -39,7 +39,7 @@
 
 #include <stdint.h>
 
-#include "hardware/cxd56_dmac_common.h"
+#include "cxd56_dmac_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
