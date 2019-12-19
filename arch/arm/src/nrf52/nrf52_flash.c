@@ -324,7 +324,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
-
   /* Get flash ready and begin flashing */
 
   for (addr += NRF52_FLASH_BASE; count; count -= 4, pword++, addr += 4)

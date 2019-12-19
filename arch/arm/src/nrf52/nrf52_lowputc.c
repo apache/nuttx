@@ -116,11 +116,11 @@ static const struct uart_config_s g_console_config =
 #ifdef HAVE_UART_DEVICE
 static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 {
-  uint32_t br = 0x01d7e000;  /* 268.444444 */
+  uint32_t br = 0;
 
   if (config->baud == 115200)
     {
-      br = 0x01d7e000;
+      br = UART_BAUDRATE_115200;
     }
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
@@ -135,7 +135,7 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
  * Name: nrf52_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
+ *   Called at the very beginning of _start. Performs low level initialization
  *   including setup of the console UART.  This UART initialization is done
  *   early so that the serial console is available for debugging very early in
  *   the boot sequence.
@@ -165,7 +165,9 @@ void nrf52_lowsetup(void)
 #ifdef HAVE_UART_DEVICE
 void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
 {
-  uint32_t pin;
+  uint32_t pin    = 0;
+  uint32_t port   = 0;
+  uint32_t regval = 0;
 
   putreg32(1, base + NRF52_UART_TASKS_STOPRX_OFFSET);
   putreg32(1, base + NRF52_UART_TASKS_STOPTX_OFFSET);
@@ -175,17 +177,30 @@ void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
 
   nrf52_setbaud(base, config);
 
-  /* Config and select pins for uart */
+  /* Config GPIO pins for uart */
 
   nrf52_gpio_config(config->txpin);
   nrf52_gpio_config(config->rxpin);
 
-  pin = (config->txpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  putreg32(pin, base + NRF52_UART_PSELTXD_OFFSET);
-  pin = (config->rxpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  putreg32(pin, base + NRF52_UART_PSELRXD_OFFSET);
+  /* Setect TX pins for UART */
 
-  /* Enable */
+  pin = (config->txpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (config->txpin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+
+  regval = (pin << UART_PSELTXD_PIN_SHIFT);
+  regval |= (port << UART_PSELTXD_PORT_SHIFT);
+  putreg32(regval, base + NRF52_UART_PSELTXD_OFFSET);
+
+  /* Setect RX pins for UART */
+
+  pin = (config->rxpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (config->rxpin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+
+  regval = (pin << UART_PSELRXD_PIN_SHIFT);
+  regval |= (port << UART_PSELRXD_PORT_SHIFT);
+  putreg32(regval, base + NRF52_UART_PSELRXD_OFFSET);
+
+  /* Enable UART */
 
   putreg32(NRF52_UART_ENABLE_ENABLE, base + NRF52_UART_ENABLE_OFFSET);
 }

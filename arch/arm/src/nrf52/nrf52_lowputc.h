@@ -99,14 +99,14 @@ void nrf52_lowsetup(void);
 void nrf52_usart_configure(uintptr_t base, FAR const struct uart_config_s *config);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: nrf52_usart_disable
  *
  * Description:
  *   Disable a UART.  it will be necessary to again call
  *   nrf52_usart_configure() in order to use this UART channel again.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void nrf52_usart_disable(uintptr_t base);

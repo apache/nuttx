@@ -70,6 +70,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* How many UARTs are supported */
+
+#ifdef HAVE_UART1
+#  define NRF52_NUART 2
+#else
+#  define NRF52_NUART 1
+#endif
+
 /* Some sanity checks *******************************************************/
 
 /* Is there at least one UART enabled and configured as a RS-232 device? */
@@ -88,6 +96,14 @@
  * always be ttyS0.  If there is no console then will use the lowest
  * numbered UART.
  */
+
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+#  define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#  define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#elif CONFIG_UART1_SERIAL_CONSOLE
+#  define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#  define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#endif
 
 /****************************************************************************
  * Private Types
@@ -208,8 +224,6 @@ static struct nrf52_dev_s g_uart1priv =
   .uartbase       = NRF52_UART1_BASE,
   .irq            = NRF52_IRQ_UART1,
   .rx_available   = false,
-  .tx_gpio        = BOARD_UART1_TX_PIN,
-  .rx_gpio        = BOARD_UART1_RX_PIN,
   .config         =
   {
     .baud         = CONFIG_UART1_BAUD,
@@ -244,13 +258,17 @@ static uart_dev_t g_uart1port =
 };
 #endif
 
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
-#  define CONSOLE_DEV         g_uart0port /* UART0 is console */
-#  define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
-#elif CONFIG_UART1_SERIAL_CONSOLE
-#  define CONSOLE_DEV         g_uart1port /* UART1 is console */
-#  define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+/* This table lets us iterate over the configured UARTs */
+
+static struct uart_dev_s * const g_uart_devs[NRF52_NUART] =
+{
+#ifdef HAVE_UART0
+  [0] = &g_uart0port,
 #endif
+#ifdef HAVE_UART1
+  [1] = &g_uart1port
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -268,17 +286,19 @@ static uart_dev_t g_uart1port =
 static int nrf52_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  /* struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv; */
+  struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
 
-  /* Configure the UART as an RS-232 UART */
+  /* TODO: Configure the UART as an RS-232 UART */
 
   /* REVISIT: If nrf52_usart_configure() called 2nd time uart stops working.
    * Rx interrupt keeps firing.
    * configuring is done on __start
+   *
+   * UPDATE 19.12.2019: No problems described above were observed,
+   * but just in case we leave the above note for some time.
    */
 
-  /* nrf52_usart_configure(priv->uartbase, &priv->config); */
-
+  nrf52_usart_configure(priv->uartbase, &priv->config);
 #endif
 
   /* TODO: configure UART if not selected as console */
@@ -317,9 +337,10 @@ static void nrf52_shutdown(struct uart_dev_s *dev)
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).
+ *   The RX and TX interrupts are not enabled until the txint() and rxint()
+ *   methods are called.
  *
  ****************************************************************************/
 
@@ -357,7 +378,7 @@ static void nrf52_detach(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  putreg32(NRF52_UART_INTENSET_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
+  putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
   up_disable_irq(priv->irq);
 
   /* Detach from the interrupt(s) */
@@ -464,20 +485,18 @@ static void nrf52_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
-      putreg32(NRF52_UART_INTENSET_RXDRDY,
-               priv->uartbase + NRF52_UART_INTENSET_OFFSET);
+      putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENSET_OFFSET);
       putreg32(1, priv->uartbase + NRF52_UART_TASKS_STARTRX_OFFSET);
 
 #endif
     }
   else
     {
-      putreg32(NRF52_UART_INTENSET_RXDRDY,
-               priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
+      putreg32(UART_INT_RXDRDY, priv->uartbase + NRF52_UART_INTENCLR_OFFSET);
       putreg32(1, priv->uartbase + NRF52_UART_TASKS_STOPRX_OFFSET);
     }
 }
@@ -636,6 +655,10 @@ void nrf52_earlyserialinit(void)
 
 void up_serialinit(void)
 {
+  unsigned minor = 0;
+  unsigned i     = 0;
+  char devname[16];
+
 #ifdef HAVE_UART_CONSOLE
   /* Register the serial console */
 
@@ -643,6 +666,33 @@ void up_serialinit(void)
 #endif
 
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  minor = 1;
+
+  /* Register all remaining UARTs */
+
+  strcpy(devname, "/dev/ttySx");
+
+  for (i = 0; i < NRF52_NUART; i++)
+    {
+      /* Don't create a device for non-configured ports. */
+
+      if (g_uart_devs[i] == 0)
+        {
+          continue;
+        }
+
+      /* Don't create a device for the console - we did that above */
+
+      if (g_uart_devs[i]->isconsole)
+        {
+          continue;
+        }
+
+      /* Register USARTs as devices in increasing order */
+
+      devname[9] = '0' + minor++;
+      (void)uart_register(devname, g_uart_devs[i]);
+    }
 }
 
 /****************************************************************************

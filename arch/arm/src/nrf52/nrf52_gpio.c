@@ -242,6 +242,13 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
   unsigned int port;
   uint32_t offset;
 
+  /* Get port and pin number */
+
+  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+
+  /* Get register address */
+
   if (value)
     {
       offset = nrf52_gpio_regget(port, NRF52_GPIO_OUTSET_OFFSET);
@@ -251,8 +258,7 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
       offset = nrf52_gpio_regget(port, NRF52_GPIO_OUTCLR_OFFSET);
     }
 
-  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  /* Put register value */
 
   putreg32(1 << pin, offset);
 }
@@ -272,10 +278,17 @@ bool nrf52_gpio_read(nrf52_pinset_t pinset)
   uint32_t regval;
   uint32_t offset;
 
-  offset = nrf52_gpio_regget(port, NRF52_GPIO_IN_OFFSET);
+  /* Get port and pin number */
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+
+  /* Get register address */
+
+  offset = nrf52_gpio_regget(port, NRF52_GPIO_IN_OFFSET);
+
+  /* Get register value */
+
   regval = getreg32(offset);
 
   return (regval >> pin) & 1UL;

@@ -69,6 +69,8 @@
 #define NRF52_WDT_RR6_OFFSET              0x0618  /* Reload request 6 */
 #define NRF52_WDT_RR7_OFFSET              0x061c  /* Reload request 7 */
 
+/* WDT Register Addresses **************************************************************************/
+
 #define NRF52_WDT_TASKS_START             (NRF52_WDT_BASE + NRF52_WDT_TASKS_START_OFFSET)
 #define NRF52_WDT_EVENTS_TIMEOUT          (NRF52_WDT_BASE + NRF52_WDT_EVENTS_TIMEOUT_OFFSET)
 #define NRF52_WDT_INTENSET                (NRF52_WDT_BASE + NRF52_WDT_INTENSET_OFFSET)
@@ -86,8 +88,6 @@
 #define NRF52_WDT_RR5                     (NRF52_WDT_BASE + NRF52_WDT_RR5_OFFSET)
 #define NRF52_WDT_RR6                     (NRF52_WDT_BASE + NRF52_WDT_RR6_OFFSET)
 #define NRF52_WDT_RR7                     (NRF52_WDT_BASE + NRF52_WDT_RR7_OFFSET)
-
-/* WDT Register Addresses **************************************************************************/
 
 /* UART Register Bitfield Definitions **************************************************************/
 

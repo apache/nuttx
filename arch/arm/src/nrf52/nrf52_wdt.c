@@ -360,8 +360,8 @@ static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of
+ *            the "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Values:
@@ -420,8 +420,8 @@ static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
  * Returned Values:
@@ -511,16 +511,17 @@ int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
 
   nrf52_clock_init();
 
-  /* Select the lower power external 32,768Hz (Low-Speed External, LSE) oscillator
-   * as RTC Clock Source and enable the Clock.
+  /* Select the lower power external 32,768Hz (Low-Speed External, LSE)
+   * oscillator as RTC Clock Source and enable the Clock.
    */
 
-   nrf52_clock_lsclk_start();
+  nrf52_clock_lsclk_start();
 #endif
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  handle = watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  handle = watchdog_register(devpath,
+                             (FAR struct watchdog_lowerhalf_s *)priv);
   return (handle != NULL) ? OK : -ENODEV;
 }
 

@@ -87,15 +87,17 @@
 #define NRF52_IRQ_FPU           (NRF52_IRQ_EXTINT+38)  /* FPU interrupt */
 
 #if defined(CONFIG_ARCH_FAMILY_NRF52840)
-#define NRF52_IRQ_USBD          (NRF52_IRQ_EXTINT+39)  /* USB device */
-#define NRF52_IRQ_UARTE1        (NRF52_IRQ_EXTINT+40)  /* UARTE 1 */
-#define NRF52_IRQ_QSPI          (NRF52_IRQ_EXTINT+41)  /* Quad SPI */
-#define NRF52_IRQ_PWM3          (NRF52_IRQ_EXTINT+45)  /* Pulse Width Modulation Unit 3 */
-#define NRF52_IRQ_SPIM3         (NRF52_IRQ_EXTINT+47)  /* SPI Master 3 */
+#  define NRF52_IRQ_USBD        (NRF52_IRQ_EXTINT+39)  /* USB device */
+#  define NRF52_IRQ_UART1       (NRF52_IRQ_EXTINT+40)  /* UART/UARTE 1 */
+#  define NRF52_IRQ_QSPI        (NRF52_IRQ_EXTINT+41)  /* Quad SPI */
+#  define NRF52_IRQ_PWM3        (NRF52_IRQ_EXTINT+45)  /* Pulse Width Modulation Unit 3 */
+#  define NRF52_IRQ_SPIM3       (NRF52_IRQ_EXTINT+47)  /* SPI Master 3 */
+#endif
 
-#define NRF52_IRQ_NEXTINT       (48)
+#if defined(CONFIG_ARCH_FAMILY_NRF52840)
+#  define NRF52_IRQ_NEXTINT     (48)
 #else
-#define NRF52_IRQ_NEXTINT       (39)
+#  define NRF52_IRQ_NEXTINT     (39)
 #endif
 
 #define NRF52_IRQ_NIRQS         (NRF52_IRQ_EXTINT+NRF52_IRQ_NEXTINT)
