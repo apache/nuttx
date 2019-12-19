@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56/cxd56_irq.c
+ * arch/arm/src/cxd56xx/cxd56_irq.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

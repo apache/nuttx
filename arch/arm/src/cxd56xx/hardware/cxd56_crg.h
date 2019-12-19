@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_CRG_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_CRG_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_CRG_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_CRG_H
 
 /********************************************************************************************
  * Included Files

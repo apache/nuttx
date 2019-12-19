@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_USB_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_USB_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_USBDEV_H
+#define __ARCH_ARM_SRC_CXD56XX_CXD56_USBDEV_H
 
 /****************************************************************************
  * Included Files

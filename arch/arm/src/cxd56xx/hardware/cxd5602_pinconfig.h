@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H
 
 /********************************************************************************************
  * Included Files
@@ -656,4 +656,4 @@
 
 #endif /* CONFIG_CXD56_CUSTOM_PINCONFIG */
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H */

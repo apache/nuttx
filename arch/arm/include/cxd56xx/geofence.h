@@ -230,4 +230,4 @@ struct cxd56_geofence_status_s
 }
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_ARCH_CXD56XX_GEOFENCE_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_GEOFENCE_H */

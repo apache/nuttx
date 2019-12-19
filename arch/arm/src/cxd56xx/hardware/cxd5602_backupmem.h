@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_BACKUPMEM_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_BACKUPMEM_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_BACKUPMEM_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_BACKUPMEM_H
 
 /********************************************************************************************
  * Included Files
@@ -84,4 +84,4 @@ typedef struct {
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_BACKUPMEM_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_BACKUPMEM_H */

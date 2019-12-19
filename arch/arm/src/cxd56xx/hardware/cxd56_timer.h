@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_TIMER_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_TIMER_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_TIMER_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_TIMER_H
 
 /****************************************************************************************
  * Included Files
@@ -114,4 +114,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_TIMER_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_TIMER_H */
