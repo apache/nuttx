@@ -44,7 +44,9 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -130,11 +132,18 @@ void up_disable_irq(int irq)
   else if (irq > FE310_IRQ_MEXT)
     {
       extirq = irq - FE310_IRQ_MEXT;
-      ASSERT(31 >= extirq); /* TODO */
 
       /* Clear enable bit for the irq */
 
-      modifyreg32(FE310_PLIC_ENABLE1, 1 << extirq, 0);
+      if (0 <= extirq && extirq <= 63)
+        {
+          modifyreg32(FE310_PLIC_ENABLE1 + (4 * (extirq / 32)),
+                      1 << (extirq % 32), 0);
+        }
+      else
+        {
+          ASSERT(false);
+        }
     }
 }
 
@@ -160,11 +169,18 @@ void up_enable_irq(int irq)
   else if (irq > FE310_IRQ_MEXT)
     {
       extirq = irq - FE310_IRQ_MEXT;
-      ASSERT(31 >= extirq); /* TODO */
 
       /* Set enable bit for the irq */
 
-      modifyreg32(FE310_PLIC_ENABLE1, 0, 1 << extirq);
+      if (0 <= extirq && extirq <= 63)
+        {
+          modifyreg32(FE310_PLIC_ENABLE1 + (4 * (extirq / 32)),
+                      0, 1 << (extirq % 32));
+        }
+      else
+        {
+          ASSERT(false);
+        }
     }
 }
 
@@ -191,6 +207,7 @@ uint32_t up_get_newintctx(void)
 
 void up_ack_irq(int irq)
 {
+  board_autoled_on(LED_CPU);
 }
 
 /****************************************************************************

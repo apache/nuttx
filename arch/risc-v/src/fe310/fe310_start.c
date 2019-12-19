@@ -34,6 +34,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdint.h>
+
 #include <nuttx/config.h>
 
 #include <arch/board/board.h>

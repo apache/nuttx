@@ -47,7 +47,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "group/group.h"
+#include "fe310_gpio.h"
+#include "fe310.h"
 
 /****************************************************************************
  * Public Data
@@ -68,12 +69,13 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
   uint32_t  irq = (vector >> 27) | (vector & 0xf);
   uint32_t *mepc = regs;
 
+  /* Firstly, check if the irq is machine external interrupt */
+
   if (FE310_IRQ_MEXT == irq)
     {
-      /* Read & write FE310_PLIC_CLAIM to clear pending */
-
       uint32_t val = getreg32(FE310_PLIC_CLAIM);
-      putreg32(val, FE310_PLIC_CLAIM);
+
+      /* Add the value to nuttx irq which is offset to the mext */
 
       irq += val;
     }
@@ -84,6 +86,10 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
     {
       *mepc += 4;
     }
+
+  /* Acknowledge the interrupt */
+
+  up_ack_irq(irq);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -100,6 +106,20 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+
+  if (FE310_IRQ_MEXT <= irq)
+    {
+      /* If the irq is from GPIO, clear pending bit in the GPIO */
+
+      if (FE310_IRQ_GPIO0 <= irq && irq <= FE310_IRQ_GPIO31)
+        {
+          fe310_gpio_clearpending(irq - FE310_IRQ_GPIO0);
+        }
+
+      /* Then write PLIC_CLAIM to clear pending in PLIC */
+
+      putreg32(irq - FE310_IRQ_MEXT, FE310_PLIC_CLAIM);
+    }
 #endif
 
   /* If a context switch occurred while processing the interrupt then

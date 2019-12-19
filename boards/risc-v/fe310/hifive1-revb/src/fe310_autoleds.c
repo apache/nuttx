@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/fe310_memorymap.h
+ * boards/risc-v/fe310/hifive1-revb/src/fe310_autoleds.c
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -14,6 +14,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,34 +33,57 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/fe310_memorymap.h"
-#include "hardware/fe310_uart.h"
-#include "hardware/fe310_clint.h"
-#include "hardware/fe310_gpio.h"
-#include "hardware/fe310_plic.h"
-#include "hardware/fe310_prci.h"
+#include <nuttx/config.h>
+
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "fe310_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Idle thread stack starts from _ebss */
+#define GPIO_LED   (GPIO_MODE_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN5)
 
-#ifndef __ASSEMBLY__
-#define FE310_IDLESTACK_BASE  (uint32_t)&_ebss
-#else
-#define FE310_IDLESTACK_BASE  _ebss
-#endif
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#define FE310_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
-#define FE310_IDLESTACK_TOP  (FE310_IDLESTACK_BASE + FE310_IDLESTACK_SIZE)
+/****************************************************************************
+ * Name: board_autoled_initialize
+ ****************************************************************************/
 
-#endif  /* _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H */
+void board_autoled_initialize(void)
+{
+  fe310_gpio_config(GPIO_LED);
+}
 
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (LED_CPU == led)
+    {
+      fe310_gpio_write(GPIO_LED, true);
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (LED_CPU == led)
+    {
+      fe310_gpio_write(GPIO_LED, false);
+    }
+}

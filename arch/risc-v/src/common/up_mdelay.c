@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/fe310_memorymap.h
+ *  arch/risc-v/src/common/up_mdelay.c
  *
- *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
- *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
+ *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,6 +14,9 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -30,34 +33,38 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/fe310_memorymap.h"
-#include "hardware/fe310_uart.h"
-#include "hardware/fe310_clint.h"
-#include "hardware/fe310_gpio.h"
-#include "hardware/fe310_plic.h"
-#include "hardware/fe310_prci.h"
+#include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/* Idle thread stack starts from _ebss */
+/****************************************************************************
+ * Name: up_mdelay
+ *
+ * Description:
+ *   Delay inline for the requested number of milliseconds.
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *
+ ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#define FE310_IDLESTACK_BASE  (uint32_t)&_ebss
-#else
-#define FE310_IDLESTACK_BASE  _ebss
-#endif
+void up_mdelay(unsigned int milliseconds)
+{
+  volatile unsigned int i;
+  volatile unsigned int j;
 
-#define FE310_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
-#define FE310_IDLESTACK_TOP  (FE310_IDLESTACK_BASE + FE310_IDLESTACK_SIZE)
-
-#endif  /* _ARCH_RISCV_SRC_FE310_FE310_MEMORYMAP_H */
-
+  for (i = 0; i < milliseconds; i++)
+    {
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
+    }
+}

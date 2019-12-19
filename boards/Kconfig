@@ -300,6 +300,9 @@ config ARCH_BOARD_GAPUINO
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
 	depends on ARCH_CHIP_FE310
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the port of NuttX to the SiFive HiFive1
 		Rev B board.  This board features the RISC-V FE310-G002

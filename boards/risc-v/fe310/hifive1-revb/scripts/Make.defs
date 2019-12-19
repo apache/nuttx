@@ -77,12 +77,14 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ASARCHCPUFLAGS += -Wa,-g
 endif
 
+MAXOPTIMIZATION = -Os
+
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ARCHCPUFLAGS = -march=rv32imac -mabi=ilp32
-ARCHCFLAGS = -fno-builtin
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -105,13 +107,7 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs -melf32lriscv
-endif
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g -melf32lriscv
-endif
-
+LDFLAGS += --gc-sections -melf32lriscv
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/fe310/hifive1-revb/src/fe310_boot.c
+ * boards/risc-v/fe310/hifive1-revb/src/fe310_buttons.c
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -38,40 +38,132 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <nuttx/arch.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include "fe310_gpio.h"
+#include "fe310.h"
+#include "hifive1-revb.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define GPIO_BTN (GPIO_MODE_INIRQ | GPIO_INT_BOTH | GPIO_PULLUP | GPIO_PIN23)
+#define BTN_IRQ  FE310_IRQ_GPIO23
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fe310_boardinitialize
+ * Name: board_button_initialize
  *
  * Description:
- *   All FE310 architectures must provide the following entry point.
- *   This entry point is called early in the intitialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state of
+ *   all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void fe310_boardinitialize(void)
+void board_button_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
-#endif
+  fe310_gpio_config(GPIO_BTN);
 }
+
+/****************************************************************************
+ * Name: board_buttons
+ *
+ * Description:
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT  definitions in board.h for the meaning of each bit.
+ *
+ ****************************************************************************/
+
+uint32_t board_buttons(void)
+{
+  uint8_t ret = 0;
+  int i = 0;
+  int n = 0;
+
+  bool b0 = fe310_gpio_read(GPIO_BTN);
+
+  for (i = 0; i < 10; i++)
+    {
+      up_mdelay(1); /* TODO */
+
+      bool b1 = fe310_gpio_read(GPIO_BTN);
+
+      if (b0 == b1)
+        {
+          n++;
+        }
+      else
+        {
+          n = 0;
+        }
+
+      if (3 == n)
+        {
+          break;
+        }
+
+      b0 = b1;
+    }
+
+  iinfo("b=%d n=%d \n", b0, n);
+
+  /* Low value means that the button is pressed */
+
+  if (!b0)
+    {
+      ret = 0x1;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_button_irq
+ *
+ * Description:
+ *   board_button_irq() may be called to register an interrupt handler that
+ *   will be called when a button is depressed or released.  The ID value is
+ *   a button enumeration value that uniquely identifies a button resource.
+ *   See the BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret = -EINVAL;
+  ASSERT(id == 0);
+
+  if (NULL != irqhandler)
+    {
+      /* Attach the new button handler. */
+
+      ret = irq_attach(BTN_IRQ, irqhandler, arg);
+
+      /* Then make sure that interrupts are enabled on the pin */
+
+      up_enable_irq(BTN_IRQ);
+    }
+  else
+    {
+      up_disable_irq(BTN_IRQ);
+    }
+
+  return ret;
+}
+#endif

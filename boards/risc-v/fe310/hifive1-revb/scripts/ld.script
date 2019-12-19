@@ -82,7 +82,7 @@ SECTIONS
     .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
-        *(.sdata .sdata.*)
+        *(.sdata .sdata.* .sdata2.*)
         *(.gnu.linkonce.d.*)
         *(.gnu.linkonce.s.*)
         CONSTRUCTORS

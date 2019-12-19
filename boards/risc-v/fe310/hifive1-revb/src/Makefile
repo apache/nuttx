@@ -41,4 +41,12 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += fe310_appinit.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += fe310_autoleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += fe310_buttons.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

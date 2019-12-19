@@ -42,11 +42,21 @@
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include "fe310.h"
+#define NUM_BUTTONS       1
+
+#define LED_STARTED       0  /* N/A */
+#define LED_HEAPALLOCATE  1  /* N/A */
+#define LED_IRQSENABLED   2  /* N/A */
+#define LED_STACKCREATED  3  /* N/A */
+#define LED_INIRQ         4  /* N/A */
+#define LED_SIGNAL        5  /* N/A */
+#define LED_ASSERTION     6  /* N/A */
+#define LED_PANIC         7  /* N/A */
+#define LED_CPU           8  /* LED */
 
 /****************************************************************************
  * Public Types

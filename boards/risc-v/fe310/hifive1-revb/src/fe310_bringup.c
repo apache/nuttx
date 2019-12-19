@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
 
 #include "fe310.h"
 
@@ -68,6 +69,16 @@ int fe310_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      serr("ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

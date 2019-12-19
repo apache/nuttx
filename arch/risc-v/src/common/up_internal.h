@@ -161,6 +161,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 /* IRQ initialization *******************************************************/
 
 void up_irqinitialize(void);
+void up_ack_irq(int irq);
+
 void up_copystate(uint32_t *dest, uint32_t *src);
 void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);

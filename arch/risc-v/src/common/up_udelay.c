@@ -1,10 +1,8 @@
 /****************************************************************************
- *  arch/risc-v/src/fe310/fe310_idle.c
+ *  arch/risc-v/src/common/up_udelay.c
  *
- *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
- *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
- *
- * Based on arch/risc-v/src/common/up_idle.c
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,47 +38,80 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
+#include <sys/types.h>
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
-#include "up_internal.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
+ * Name: up_udelay
  *
  * Description:
- *   up_idle() is the logic that will be executed when their is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing loop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
  *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
  *
  ****************************************************************************/
 
-void up_idle(void)
+void up_udelay(useconds_t microseconds)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
+  volatile int i;
+
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
    */
 
-  nxsched_process_timer();
-#else
+  while (microseconds > 1000)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
+        {
+        }
 
-  board_autoled_off(LED_CPU);
+      microseconds -= 1000;
+    }
 
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
+  while (microseconds > 100)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+        {
+        }
 
-  asm("WFI");
+      microseconds -= 100;
+    }
 
-#endif
+  while (microseconds > 10)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
+
+      microseconds -= 10;
+    }
+
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
+
+      microseconds--;
+    }
 }
