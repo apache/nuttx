@@ -35,12 +35,6 @@
 
 -include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_LIBCXX),y)
-LIBXX=libcxx
-else
-LIBXX=libxx
-endif
-
 # Sources
 
 ASRCS =
@@ -93,7 +87,7 @@ CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS)
 OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
 
-BIN = $(LIBXX)$(LIBEXT)
+BIN = libxx$(LIBEXT)
 
 all: $(BIN)
 .PHONY: depend clean distclean

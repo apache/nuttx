@@ -63,7 +63,7 @@ USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
+USERLIBS += staging$(DELIM)libxx$(LIBEXT)
 endif
 
 # Add libraries for network support
