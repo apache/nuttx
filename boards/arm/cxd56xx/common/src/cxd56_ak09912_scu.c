@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_ak09912_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

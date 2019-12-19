@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/cxd56xx/spresense/nsh/Make.defs
+# boards/arm/cxd56xx/spresense/scripts/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

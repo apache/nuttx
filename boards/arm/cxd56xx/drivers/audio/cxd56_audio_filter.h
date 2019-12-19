@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_filter.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_filter.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_FILTER_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_FILTER_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_FILTER_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_FILTER_H
 
 /***************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ void cxd56_audio_filter_set_dnc(cxd56_audio_dnc_id_t id,
 void cxd56_audio_filter_set_deq(bool en,
                                 FAR cxd56_audio_deq_coef_t *deq);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_FILTER_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_FILTER_H */

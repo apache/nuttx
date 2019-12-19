@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_irq.c
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_irq.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
