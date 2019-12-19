@@ -847,7 +847,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
        * progress, we will missing TCP time state updates?
        */
 
-      devif_timer(dev, net_rpmsg_drv_txpoll);
+      devif_timer(dev, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

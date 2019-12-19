@@ -770,7 +770,7 @@ static void misoc_net_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->misoc_net_dev, misoc_net_txpoll);
+  (void)devif_timer(&priv->misoc_net_dev, MISOC_NET_WDDELAY, misoc_net_txpoll);
 
   /* Setup the watchdog poll timer again */
 

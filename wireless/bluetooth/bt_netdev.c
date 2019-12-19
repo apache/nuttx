@@ -542,7 +542,7 @@ static void btnet_txpoll_work(FAR void *arg)
 
   /* Then perform the poll */
 
-  (void)devif_timer(&priv->bd_dev.r_dev, btnet_txpoll_callback);
+  (void)devif_timer(&priv->bd_dev.r_dev, TXPOLL_WDDELAY, btnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 

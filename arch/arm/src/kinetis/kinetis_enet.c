@@ -1083,7 +1083,7 @@ static void kinetis_poll_work(FAR void *arg)
        * in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, kinetis_txpoll);
+      (void)devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */

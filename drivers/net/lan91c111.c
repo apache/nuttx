@@ -1027,7 +1027,7 @@ static void lan91c111_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      devif_timer(dev, lan91c111_txpoll);
+      devif_timer(dev, LAN91C111_WDDELAY, lan91c111_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

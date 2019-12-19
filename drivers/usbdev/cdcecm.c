@@ -699,7 +699,7 @@ static void cdcecm_poll_work(FAR void *arg)
    * become available.
    */
 
-  (void)devif_timer(&self->dev, cdcecm_txpoll);
+  (void)devif_timer(&self->dev, CDCECM_WDDELAY, cdcecm_txpoll);
 
   /* Setup the watchdog poll timer again */
 

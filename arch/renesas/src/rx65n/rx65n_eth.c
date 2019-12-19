@@ -2176,7 +2176,7 @@ static void rx65n_poll_work(FAR void *arg)
           /* Update TCP timing states and poll the network for new XMIT data.
            */
 
-          (void)devif_timer(dev, rx65n_txpoll);
+          (void)devif_timer(dev, CLK_TCK, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

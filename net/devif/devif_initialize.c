@@ -44,9 +44,6 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <stdint.h>
-
-#include <nuttx/clock.h>
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
@@ -95,10 +92,6 @@ uint8_t g_reassembly_timer;
 
 void devif_initialize(void)
 {
-  /* Initialize the time of the last timer poll */
-
-  g_polltime = clock_systimer();
-
   /* Initialize callback support */
 
   devif_callback_init();

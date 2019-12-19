@@ -77,14 +77,6 @@ enum devif_packet_type
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Time of last poll */
-
-clock_t g_polltime;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -770,55 +762,28 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *
  ****************************************************************************/
 
-int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
+int devif_timer(FAR struct net_driver_s *dev, int delay, devif_poll_callback_t callback)
 {
-  clock_t now;
-  clock_t elapsed;
+  int hsec = TICK2HSEC(delay);
   int bstop = false;
 
-  /* Get the elapsed time since the last poll in units of half seconds
-   * (truncating).
-   */
-
-  now     = clock_systimer();
-  elapsed = now - g_polltime;
-
-  /* Process time-related events only when more than one half second elapses. */
-
-  if (elapsed >= TICK_PER_HSEC)
-    {
-      /* Calculate the elpased time in units of half seconds (truncating to
-       * number of whole half seconds).
-       */
-
-      int hsec = (int)(elapsed / TICK_PER_HSEC);
-
-      /* Update the current poll time (truncating to the last half second
-       * boundary to avoid error build-up).
-       */
-
-      g_polltime += (TICK_PER_HSEC * (clock_t)hsec);
-
-      /* Perform periodic activitives that depend on hsec > 0 */
-
 #ifdef CONFIG_NET_IPv4_REASSEMBLY
-      /* Increment the timer used by the IP reassembly logic */
+  /* Increment the timer used by the IP reassembly logic */
 
-      if (g_reassembly_timer != 0 &&
-          g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
-        {
-          g_reassembly_timer += hsec;
-        }
+  if (g_reassembly_timer != 0 &&
+      g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
+    {
+      g_reassembly_timer += hsec;
+    }
 #endif
 
 #ifdef NET_TCP_HAVE_STACK
-      /* Traverse all of the active TCP connections and perform the
-       * timer action.
-       */
+  /* Traverse all of the active TCP connections and perform the
+   * timer action.
+   */
 
-      bstop = devif_poll_tcp_timer(dev, callback, hsec);
+  bstop = devif_poll_tcp_timer(dev, callback, hsec);
 #endif
-    }
 
   /* If possible, continue with a normal poll checking for pending
    * network driver actions.

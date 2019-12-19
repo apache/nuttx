@@ -1230,7 +1230,7 @@ static void s32k1xx_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, s32k1xx_txpoll);
+      (void)devif_timer(&priv->dev, S32K1XX_WDDELAY, s32k1xx_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */

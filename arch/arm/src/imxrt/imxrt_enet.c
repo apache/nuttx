@@ -1231,7 +1231,7 @@ static void imxrt_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, imxrt_txpoll);
+      (void)devif_timer(&priv->dev, IMXRT_WDDELAY, imxrt_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */

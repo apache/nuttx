@@ -1480,7 +1480,7 @@ static void lpc17_40_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->lp_dev, lpc17_40_txpoll);
+      (void)devif_timer(&priv->lp_dev, LPC17_40_WDDELAY, lpc17_40_txpoll);
     }
 
   /* Simulate a fake receive to relaunch the data exchanges when a receive

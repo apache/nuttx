@@ -1278,7 +1278,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_timer(&priv->pd_dev, pic32mx_txpoll);
+          (void)devif_timer(&priv->pd_dev, PIC32MX_WDDELAY, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 

@@ -1928,7 +1928,7 @@ static void ez80emac_poll_work(FAR void *arg)
   /* Poll the network for new XMIT data */
 
   net_lock();
-  (void)devif_timer(&priv->dev, ez80emac_txpoll);
+  (void)devif_timer(&priv->dev, EMAC_WDDELAY, ez80emac_txpoll);
 
   /* Setup the watchdog poll timer again */
 

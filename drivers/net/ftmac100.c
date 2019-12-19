@@ -1130,7 +1130,7 @@ static void ftmac100_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->ft_dev, ftmac100_txpoll);
+  (void)devif_timer(&priv->ft_dev, FTMAC100_WDDELAY, ftmac100_txpoll);
 
   /* Setup the watchdog poll timer again */
 

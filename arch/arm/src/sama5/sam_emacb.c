@@ -2169,7 +2169,7 @@ static void sam_poll_work(FAR void *arg)
     {
       /* Update TCP timing states and poll the network for new XMIT data. */
 
-      (void)devif_timer(dev, sam_txpoll);
+      (void)devif_timer(dev, SAM_WDDELAY, sam_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

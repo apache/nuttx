@@ -1064,7 +1064,7 @@ static void rndis_pollworker(FAR void *arg)
 
   if (rndis_allocnetreq(priv))
     {
-      devif_timer(&priv->netdev, rndis_txpoll);
+      devif_timer(&priv->netdev, RNDIS_WDDELAY, rndis_txpoll);
 
       if (priv->net_req != NULL)
         {

@@ -2169,7 +2169,7 @@ static void lpc43_poll_work(FAR void *arg)
           /* Update TCP timing states and poll for new XMIT data.
            */
 
-          (void)devif_timer(dev, lpc43_txpoll);
+          (void)devif_timer(dev, LPC43_WDDELAY, lpc43_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
