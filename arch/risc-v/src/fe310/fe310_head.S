@@ -59,6 +59,10 @@ __start:
   lui  sp, %hi(FE310_IDLESTACK_TOP)
   addi sp, sp, %lo(FE310_IDLESTACK_TOP)
 
+  /* Disable all interrupts (i.e. timer, external) in mie */
+
+  csrw mie, zero
+
   /* Initialize the Machine Trap Vector */
 
   lui  t0, %hi(__trap_vec)

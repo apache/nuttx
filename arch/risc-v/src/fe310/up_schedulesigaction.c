@@ -146,6 +146,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_epc        = g_current_regs[REG_EPC];
+              tcb->xcp.saved_int_ctx    = g_current_regs[REG_INT_CTX];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled

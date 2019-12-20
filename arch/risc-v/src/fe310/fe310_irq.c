@@ -260,7 +260,7 @@ irqstate_t up_irq_enable(void)
 
   /* TODO: should move to up_enable_irq() */
 
-  asm volatile("csrw mie, %0" : /* no output */ : "r"(MIE_MEIE));
+  asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MEIE));
 #endif
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
