@@ -254,7 +254,7 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
   ret = psock_sendto(psock, buf, len, flags, to, tolen);
   if (ret < 0)
     {
-      set_errno((int)-ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 

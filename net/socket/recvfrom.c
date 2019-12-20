@@ -226,18 +226,23 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
+  FAR struct socket *psock;
   ssize_t ret;
 
   /* recvfrom() is a cancellation point */
 
   (void)enter_cancellation_point();
 
-  /* Let nx_recvfrom and psock_recvfrom() do all of the work */
+  /* Get the underlying socket structure */
 
-  ret = nx_recvfrom(sockfd, buf, len, flags, from, fromlen);
+  psock = sockfd_socket(sockfd);
+
+  /* Let psock_recvfrom() do all of the work */
+
+  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 
