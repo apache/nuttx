@@ -143,7 +143,8 @@ static void stm32_i2ctool(void)
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y && CONFIG_NSH_ARCHINIT:
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y
+ *     && CONFIG_NSH_ARCHINIT:
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -184,7 +185,6 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -206,7 +206,8 @@ int stm32_bringup(void)
   ret = stm32_timer_driver_setup("/dev/timer0", 6);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM6: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM6: %d\n",
+             ret);
     }
 #endif
 
@@ -214,7 +215,8 @@ int stm32_bringup(void)
   ret = stm32_timer_driver_setup("/dev/timer1", 7);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM7: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_timer_driver_setup failed. TIM7: %d\n",
+             ret);
     }
 
 #endif

@@ -62,7 +62,8 @@
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.  This should be of the form
+ *             /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Value:
