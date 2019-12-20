@@ -214,6 +214,11 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* I2C */
+
+#define GPIO_I2C1_SCL       GPIO_I2C1_SCL_3      /* PB8  */
+#define GPIO_I2C1_SDA       GPIO_I2C1_SDA_3      /* PB9  */
+
 /* TIM */
 
 #define GPIO_TIM1_CH1OUT    GPIO_TIM1_CH1OUT_1   /* PA8  */
