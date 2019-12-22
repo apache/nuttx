@@ -1368,6 +1368,15 @@ Build Targets and Options
     Removes derived object files, archives, executables, and temporary
     files, but retains the configuration and context files and directories.
 
+  check_format
+
+    Will run nxstyle to check compliance with the NuttX coding standard on
+    the files the have been changed relative to master.  This feature is only
+    available if 1) git is installed and 2) the changed files are located in
+    the local git repository and have been committed. The benefit of this
+    flow is that commits that only effect formatting changes do not over
+    shadow code changes. As of this writting this is a Unix only feature.
+
   distclean
 
     Does 'clean' then also removes all configuration and context files.

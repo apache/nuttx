@@ -194,7 +194,7 @@ BIN       = $(NUTTXNAME)$(EXEEXT)
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 ifeq ($(GIT_DIR),y)
-.PHONY: $(TOPDIR)/.version
+.PHONY: $(TOPDIR)/.version check_format
 endif
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
@@ -323,6 +323,15 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # .config: tools/initialconfig$(HOSTEXEEXT)
 # 	$(Q) echo "No .config file found, creating one"
 # 	$(Q) tools/initialconfig$(HOSTEXEEXT)
+
+# make it easy to see what is happening
+
+COLOR_BLUE = \033[0;94m
+NO_COLOR   = \033[m
+
+define colorecho
++@echo -e '${COLOR_BLUE}${1} ${NO_COLOR}'
+endef
 
 # Link the arch/<arch-name>/include directory to include/arch
 
@@ -696,4 +705,14 @@ endif
 apps_distclean:
 ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C "$(TOPDIR)/$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
+endif
+
+ifeq ($(GIT_DIR),y)
+tools/nxstyle$(EXEEXT): tools/nxstyle.c
+	$(Q) $(MAKE) -C tools -f Makefile.host nxstyle$(EXEEXT)
+
+check_format: tools/nxstyle$(EXEEXT)
+	$(call colorecho,'Checking NuttX formatting with nxstyle')
+	@$(TOPDIR)/tools/check_code_style.sh
+	@cd "$(SRC_DIR)" && git diff --check
 endif
