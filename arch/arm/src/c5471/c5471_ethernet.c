@@ -1778,7 +1778,7 @@ static void c5471_poll_work(FAR void *arg)
     {
       /* If so, update TCP timing states and poll the network for new XMIT data */
 
-      (void)devif_timer(&priv->c_dev, c5471_txpoll);
+      (void)devif_timer(&priv->c_dev, C5471_WDDELAY, c5471_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

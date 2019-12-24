@@ -193,6 +193,7 @@ static int  macnet_rxframe(FAR struct macnet_driver_s *maccb,
                            FAR struct ieee802154_data_ind_s *ind);
 
 /* Network interface support ************************************************/
+
 /* Common TX logic */
 
 static int  macnet_txpoll_callback(FAR struct net_driver_s *dev);
@@ -579,7 +580,7 @@ static void macnet_txpoll_work(FAR void *arg)
 
   /* Then perform the poll */
 
-  (void)devif_timer(&priv->md_dev.r_dev, macnet_txpoll_callback);
+  (void)devif_timer(&priv->md_dev.r_dev, TXPOLL_WDDELAY, macnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
@@ -1438,6 +1439,7 @@ int mac802154netdev_register(MACHANDLE mac)
   return macnet_ifdown(&priv->md_dev.r_dev);
 
 errout:
+
   /* Release wdog timers */
 
   wd_delete(priv->md_txpoll);

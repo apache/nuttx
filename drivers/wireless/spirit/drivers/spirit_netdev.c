@@ -1812,7 +1812,7 @@ static void spirit_txpoll_work(FAR void *arg)
       /* Perform the periodic poll */
 
       priv->needpoll = false;
-      (void)devif_timer(&priv->radio.r_dev, spirit_txpoll_callback);
+      (void)devif_timer(&priv->radio.r_dev, SPIRIT_WDDELAY, spirit_txpoll_callback);
 
       /* Setup the watchdog poll timer again */
 

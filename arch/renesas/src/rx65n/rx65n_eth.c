@@ -169,6 +169,7 @@
  * be used, however, if time stamping and/or IPv4 checksum offload is
  * supported.
  */
+
 #undef CONFIG_RX65N_ETH_ENHANCEDDESC
 #undef CONFIG_RX65N_ETH_HWCHECKSUM
 
@@ -257,7 +258,7 @@
  * interrupt.
  */
 
-#define ETHER_CFG_AL1_INT_PRIORTY                   (15)     
+#define ETHER_CFG_AL1_INT_PRIORTY                   (15)
 
 /* Use LINKSTA signal for detect link status changes
  * 0 = unused  (use PHY-LSI status register)
@@ -380,6 +381,10 @@
 #define  TFS1_CD            (0x00000002)
 #define  TFS0_TRO           (0x00000001)
 
+/* DMA descriptor buffer alignment to 32 bytes */
+
+#define NX_ALIGN32 __attribute__((aligned(32)))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -401,12 +406,12 @@ struct eth_txdesc_s
 struct eth_rxdesc_s
 {
   volatile uint32_t rdes0;   /* Indicates receive frame status */
-  
-  /* Indicates receive buffer length when reception is completed, 
-   * the receive frame length is return back 
+
+  /* Indicates receive buffer length when reception is completed,
+   * the receive frame length is return back
    */
-   
-  volatile uint32_t rdes1;   
+
+  volatile uint32_t rdes1;
   volatile uint32_t rdes2;   /* Indicates the start address of  the receive buffer  */
   volatile uint32_t rdes3;   /* next descriptor address pointer */
 };
@@ -457,7 +462,7 @@ struct rx65n_ethmac_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-#define NX_ALIGN32 __attribute__((aligned(32))) /* DMA descriptor buffer alignment to 32 bytes */
+
 NX_ALIGN32 static struct rx65n_ethmac_s g_rx65nethmac[RX65N_NETHERNET];
 
 /****************************************************************************
@@ -1090,6 +1095,7 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
  *   interrupt handling logic.
  *
  ****************************************************************************/
+
 static int rx65n_txpoll(struct net_driver_s *dev)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)dev->
@@ -1201,6 +1207,7 @@ static int rx65n_txpoll(struct net_driver_s *dev)
  *   Global interrupts are disabled by interrupt handling logic.
  *
  ****************************************************************************/
+
 static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
 {
   FAR struct net_driver_s *dev = &priv->dev;
@@ -1257,6 +1264,7 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
  * Returned Value:
  *   None
  ****************************************************************************/
+
 static void rx65n_enableint(FAR struct rx65n_ethmac_s *priv, uint32_t ierbit)
 {
   uint32_t regval;
@@ -1325,16 +1333,17 @@ static void rx65n_freesegment(FAR struct rx65n_ethmac_s *priv,
   rxdesc = rxfirst;
   for (i = 0; i < segments; i++)
     {
-          /* Check last descriptor */
+      /* Check last descriptor */
 
-          if (rxdesc->rdes0 & RDLE)
-            {
-              rxdesc->rdes0 |= RACT;
-            }
-          else
-            {
-              rxdesc->rdes0 = RACT;
-            }
+      if (rxdesc->rdes0 & RDLE)
+        {
+          rxdesc->rdes0 |= RACT;
+        }
+      else
+        {
+          rxdesc->rdes0 = RACT;
+        }
+
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
@@ -1457,7 +1466,8 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
               /* Get the Frame Length of the received packet: substruct 4
                * bytes of the CRC
                */
-                          dev->d_len = ((rxdesc->rdes1 & 0x0000ffff));
+
+              dev->d_len = ((rxdesc->rdes1 & 0x0000ffff));
 
               /* Get a buffer from the free list.  We don't even check if
                * this is successful because we already assure the free
@@ -1841,6 +1851,7 @@ static void rx65n_freeframe(FAR struct rx65n_ethmac_s *priv)
  *   Global interrupts are disabled by the watchdog logic.
  *
  ****************************************************************************/
+
 static void rx65n_txdone(FAR struct rx65n_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
@@ -1883,6 +1894,7 @@ static void rx65n_txdone(FAR struct rx65n_ethmac_s *priv)
  *   Ethernet interrupts are disabled
  *
  ****************************************************************************/
+
 static void rx65n_interrupt_work(FAR void *arg)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
@@ -2176,7 +2188,7 @@ static void rx65n_poll_work(FAR void *arg)
           /* Update TCP timing states and poll the network for new XMIT data.
            */
 
-          (void)devif_timer(dev, rx65n_txpoll);
+          (void)devif_timer(dev, CLK_TCK, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2469,6 +2481,7 @@ static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
  * Assumptions:
  *
  ****************************************************************************/
+
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 /* Currently Not supported, Need to update this code when support added */
 
@@ -2758,6 +2771,7 @@ static int rx65n_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         ret = -ENOTTY;
         break;
     }
+
   return ret;
 }
 #endif /* CONFIG_NETDEV_IOCTL */
@@ -3807,8 +3821,10 @@ static int rx65n_phyinit(FAR struct rx65n_ethmac_s *priv)
     }
 #endif
 #endif
-  error_with_reset_timeout:
-  error_with_auto_neg_timeout:
+
+error_with_reset_timeout:
+error_with_auto_neg_timeout:
+
   return ret;
 }
 

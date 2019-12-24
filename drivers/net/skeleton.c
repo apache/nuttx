@@ -740,7 +740,7 @@ static void skel_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->sk_dev, skel_txpoll);
+  (void)devif_timer(&priv->sk_dev, skeleton_WDDELAY, skel_txpoll);
 
   /* Setup the watchdog poll timer again */
 

@@ -2005,7 +2005,7 @@ static void enc_pollworker(FAR void *arg)
        * is a transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, enc_txpoll);
+      (void)devif_timer(&priv->dev, ENC_WDDELAY, enc_txpoll);
     }
 
   /* Release lock on the SPI bus and the network */

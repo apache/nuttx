@@ -530,7 +530,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->d_dev, emac_txpoll);
+  (void)devif_timer(&priv->d_dev, HCS12_WDDELAY, emac_txpoll);
 
   /* Setup the watchdog poll timer again */
 

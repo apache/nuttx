@@ -1416,7 +1416,7 @@ static void dm9x_poll_work(FAR void *arg)
     {
       /* If so, update TCP timing states and poll the network for new XMIT data */
 
-      (void)devif_timer(&priv->dm_dev, dm9x_txpoll);
+      (void)devif_timer(&priv->dm_dev, DM9X_WDDELAY, dm9x_txpoll);
     }
 
   /* Setup the watchdog poll timer again */

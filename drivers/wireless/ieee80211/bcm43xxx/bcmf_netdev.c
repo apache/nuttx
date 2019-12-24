@@ -618,7 +618,7 @@ static void bcmf_poll_work(FAR void *arg)
 
   priv->bc_dev.d_buf = priv->cur_tx_frame->data;
   priv->bc_dev.d_len = 0;
-  (void)devif_timer(&priv->bc_dev, bcmf_txpoll);
+  (void)devif_timer(&priv->bc_dev, BCMF_WDDELAY, bcmf_txpoll);
 
   /* Setup the watchdog poll timer again */
 

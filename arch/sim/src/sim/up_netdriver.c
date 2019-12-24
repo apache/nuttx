@@ -263,7 +263,7 @@ void netdriver_loop(void)
                */
 
               if (g_sim_dev.d_len > 0)
-               {
+                {
                   /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -306,10 +306,10 @@ void netdriver_loop(void)
             }
           else
 #endif
-           {
-             NETDEV_RXDROPPED(&g_sim_dev);
-             nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
-           }
+            {
+              NETDEV_RXDROPPED(&g_sim_dev);
+              nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
+            }
         }
       else
         {
@@ -322,7 +322,7 @@ void netdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      devif_timer(&g_sim_dev, sim_txpoll);
+      devif_timer(&g_sim_dev, MSEC2TICK(g_periodic_timer.interval), sim_txpoll);
     }
 
   sched_unlock();

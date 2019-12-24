@@ -2380,7 +2380,7 @@ static void stm32_poll_work(void *arg)
           /* Update TCP timing states and poll the network for new XMIT data.
            */
 
-          (void)devif_timer(dev, stm32_txpoll);
+          (void)devif_timer(dev, STM32_WDDELAY, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

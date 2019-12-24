@@ -1218,7 +1218,7 @@ static void tiva_poll_work(void *arg)
        * data.
        */
 
-      (void)devif_timer(&priv->ld_dev, tiva_txpoll);
+      (void)devif_timer(&priv->ld_dev, TIVA_WDDELAY, tiva_txpoll);
 
       /* Setup the watchdog poll timer again */
 

@@ -434,7 +434,7 @@ static void lo_poll_work(FAR void *arg)
 
   /* And perform the poll */
 
-  (void)devif_timer(&priv->lo_radio.r_dev, lo_loopback);
+  (void)devif_timer(&priv->lo_radio.r_dev, LO_WDDELAY, lo_loopback);
 
   /* Setup the watchdog poll timer again */
 

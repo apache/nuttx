@@ -611,7 +611,7 @@ static void xbeenet_txpoll_work(FAR void *arg)
 
   /* Then perform the poll */
 
-  (void)devif_timer(&priv->xd_dev.r_dev, xbeenet_txpoll_callback);
+  (void)devif_timer(&priv->xd_dev.r_dev, TXPOLL_WDDELAY, xbeenet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 

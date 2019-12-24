@@ -234,7 +234,7 @@ static void lo_poll_work(FAR void *arg)
 
   net_lock();
   priv->lo_txdone = false;
-  (void)devif_timer(&priv->lo_dev, lo_txpoll);
+  (void)devif_timer(&priv->lo_dev, LO_WDDELAY, lo_txpoll);
 
   /* Was something received and looped back? */
 

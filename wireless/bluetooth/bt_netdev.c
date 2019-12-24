@@ -157,6 +157,7 @@ static void btnet_hci_disconnected(FAR struct bt_conn_s *conn,
               FAR void *context);
 
 /* Network interface support ************************************************/
+
 /* Common TX logic */
 
 static int  btnet_txpoll_callback(FAR struct net_driver_s *netdev);
@@ -542,7 +543,7 @@ static void btnet_txpoll_work(FAR void *arg)
 
   /* Then perform the poll */
 
-  (void)devif_timer(&priv->bd_dev.r_dev, btnet_txpoll_callback);
+  (void)devif_timer(&priv->bd_dev.r_dev, TXPOLL_WDDELAY, btnet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
@@ -1132,6 +1133,7 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout:
+
   /* Release wdog timers */
 
   wd_delete(priv->bd_txpoll);

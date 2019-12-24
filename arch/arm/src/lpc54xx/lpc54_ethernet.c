@@ -1731,7 +1731,7 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv)
       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
       if (priv->eth_dev.d_buf != NULL)
         {
-          (void)devif_timer(&priv->eth_dev, lpc54_eth_txpoll);
+          (void)devif_timer(&priv->eth_dev, LPC54_WDDELAY, lpc54_eth_txpoll);
 
           /* Make sure that the Tx buffer remaining after the poll is
            * freed.

@@ -846,7 +846,7 @@ static void tun_poll_work(FAR void *arg)
       /* If so, poll the network for new XMIT data. */
 
       priv->dev.d_buf = priv->read_buf;
-      (void)devif_timer(&priv->dev, tun_txpoll);
+      (void)devif_timer(&priv->dev, TUN_WDDELAY, tun_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
