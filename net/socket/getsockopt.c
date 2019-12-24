@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/getsockopt.c
  *
- *   Copyright (C) 2007-2009, 2012, 2014, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2012, 2014, 2017-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -261,10 +261,21 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
+      case SO_ERROR:      /* Reports and clears error status. */
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          *(FAR int *)value = (int)psock->s_error;
+          psock->s_error = 0;
+        }
+        break;
+
       /* The following are not yet implemented (return values other than {0,1) */
 
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
-      case SO_ERROR:      /* Reports and clears error status. */
       case SO_LINGER:     /* Lingers on a close() if data is present */
       case SO_RCVBUF:     /* Sets receive buffer size */
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */

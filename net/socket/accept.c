@@ -302,7 +302,7 @@ errout_with_socket:
 errout:
   leave_cancellation_point();
 
-  set_errno(errcode);
+  _SO_SETERRNO(psock, errcode);
   return ERROR;
 }
 

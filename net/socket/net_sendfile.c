@@ -131,7 +131,7 @@ ssize_t net_sendfile(int outfd, FAR struct file *infile, FAR off_t *offset,
   if (psock != NULL || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
-      set_errno(EBADF);
+      _SO_SETERRNO(psock, EBADF);
       return ERROR;
     }
 
@@ -152,7 +152,7 @@ ssize_t net_sendfile(int outfd, FAR struct file *infile, FAR off_t *offset,
 
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 

@@ -131,6 +131,23 @@
 #define _SO_GETVALID(o)  (((unsigned int)(o)) <= _SO_MAXOPT)
 #define _SO_SETVALID(o)  ((((unsigned int)(o)) <= _SO_MAXOPT) && !_SO_GETONLY(o))
 
+/* Macro to set socket errors */
+
+#ifdef CONFIG_NET_SOCKOPTS
+#  define _SO_SETERRNO(s,e) \
+    do \
+      { \
+        if (s != NULL) \
+          { \
+            s->s_error = (int16_t)e; \
+          } \
+        set_errno(e); \
+      } \
+    while (0)
+#else
+#  define _SO_SETERRNO(s,e) set_errno(e)
+#endif /* CONFIG_NET_SOCKOPTS */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

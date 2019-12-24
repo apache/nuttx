@@ -164,7 +164,7 @@ int listen(int sockfd, int backlog)
           errcode = EBADF;
         }
 
-      set_errno(errcode);
+      _SO_SETERRNO(psock, errcode);
       return ERROR;
     }
 
@@ -175,7 +175,7 @@ int listen(int sockfd, int backlog)
   ret = psock_listen(psock, backlog);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 

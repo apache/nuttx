@@ -159,7 +159,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
   ret = psock_bind(psock, addr, addrlen);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 
