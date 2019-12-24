@@ -171,6 +171,18 @@
 #  undef CONFIG_CONFIG_STM32F7_SDMMC_XFRDEBUG
 #endif
 
+#ifdef CONFIG_SDMMC1_SDIO_PULLUP
+#  define SDMMC1_SDIO_PULL(g)  (((g) & ~GPIO_PUPD_MASK) | GPIO_PULLUP)
+#else
+#  define SDMMC1_SDIO_PULL(g)  (((g) & ~GPIO_PUPD_MASK) | GPIO_FLOAT)
+#endif
+
+#ifdef CONFIG_SDMMC2_SDIO_PULLUP
+#  define SDMMC2_SDIO_PULL(g)  (((g) & ~GPIO_PUPD_MASK) | GPIO_PULLUP)
+#else
+#  define SDMMC2_SDIO_PULL(g)  (((g) & ~GPIO_PUPD_MASK) | GPIO_FLOAT)
+#endif
+
 /* Friendly CLKCR bit re-definitions ****************************************/
 
 #define STM32_CLKCR_RISINGEDGE    (0)
@@ -423,7 +435,6 @@ struct stm32_dev_s
 
   /* Misc */
 
-  uint32_t           pullup;     /* GPIO pull-up option */
   uint32_t           blocksize;  /* Current block size */
 };
 
@@ -640,7 +651,7 @@ struct stm32_dev_s g_sdmmcdev1 =
   .base              = STM32_SDMMC1_BASE,
   .nirq              = STM32_IRQ_SDMMC1,
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-  .d0_gpio           = GPIO_SDMMC1_D0,
+  .d0_gpio           = SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0),
 #endif
 #ifdef CONFIG_STM32F7_SDMMC1_DMAPRIO
   .dmapri            = CONFIG_STM32F7_SDMMC1_DMAPRIO,
@@ -653,12 +664,6 @@ struct stm32_dev_s g_sdmmcdev1 =
   .sdiomode          = false,
 #endif
   .do_sdio_card      = NULL,
-#endif
-
-#ifdef CONFIG_SDMMC1_SDIO_PULLUP
-  .pullup            = GPIO_PULLUP,
-#else
-  .pullup            = 0,
 #endif
 };
 #endif
@@ -708,7 +713,7 @@ struct stm32_dev_s g_sdmmcdev2 =
   .base              = STM32_SDMMC2_BASE,
   .nirq              = STM32_IRQ_SDMMC2,
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-  .d0_gpio           = GPIO_SDMMC2_D0,
+  .d0_gpio           = SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0),
 #endif
 #ifdef CONFIG_STM32F7_SDMMC2_DMAPRIO
   .dmapri            = CONFIG_STM32F7_SDMMC2_DMAPRIO,
@@ -721,12 +726,6 @@ struct stm32_dev_s g_sdmmcdev2 =
   .sdiomode          = false,
 #endif
   .do_sdio_card      = NULL,
-#endif
-
-#ifdef CONFIG_SDMMC2_SDIO_PULLUP
-  .pullup            = GPIO_PULLUP,
-#else
-  .pullup            = 0,
 #endif
 };
 #endif
@@ -899,8 +898,9 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       waitmask &= ~SDIOWAIT_WRCOMPLETE;
 
-      pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-      pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
+      pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK | \
+                                GPIO_PUPD_MASK);
+      pinset |= (GPIO_INPUT | GPIO_EXTI);
 
       /* Arm the SDMMC_D Ready and install Isr */
 
@@ -3425,14 +3425,14 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        */
 
 #  ifndef CONFIG_SDIO_MUXBUS
-      stm32_configgpio(GPIO_SDMMC1_D0 | priv->pullup);
+      stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0));
 #  ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
-      stm32_configgpio(GPIO_SDMMC1_D1 | priv->pullup);
-      stm32_configgpio(GPIO_SDMMC1_D2 | priv->pullup);
-      stm32_configgpio(GPIO_SDMMC1_D3 | priv->pullup);
+      stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D1));
+      stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D2));
+      stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_D3));
 #  endif
       stm32_configgpio(GPIO_SDMMC1_CK);
-      stm32_configgpio(GPIO_SDMMC1_CMD | priv->pullup);
+      stm32_configgpio(SDMMC1_SDIO_PULL(GPIO_SDMMC1_CMD));
 #  endif
     }
   else
@@ -3462,14 +3462,14 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
        */
 
 #  ifndef CONFIG_SDIO_MUXBUS
-      stm32_configgpio(GPIO_SDMMC2_D0 | priv->pullup);
+      stm32_configgpio(SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0));
 #  ifndef CONFIG_SDMMC2_WIDTH_D1_ONLY
-      stm32_configgpio(GPIO_SDMMC2_D1 | priv->pullup);
-      stm32_configgpio(GPIO_SDMMC2_D2 | priv->pullup);
-      stm32_configgpio(GPIO_SDMMC2_D3 | priv->pullup);
+      stm32_configgpio(SDMMC2_SDIO_PULL(GPIO_SDMMC2_D1));
+      stm32_configgpio(SDMMC2_SDIO_PULL(GPIO_SDMMC2_D2));
+      stm32_configgpio(SDMMC2_SDIO_PULL(GPIO_SDMMC2_D3));
 #  endif
       stm32_configgpio(GPIO_SDMMC2_CK);
-      stm32_configgpio(GPIO_SDMMC2_CMD | priv->pullup);
+      stm32_configgpio(SDMMC2_SDIO_PULL(GPIO_SDMMC2_CMD));
 #  endif
     }
   else
