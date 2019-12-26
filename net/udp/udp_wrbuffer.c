@@ -116,6 +116,7 @@ void udp_wrbuffer_initialize(void)
     }
 
   nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_UDP_NWRBCHAINS);
+  nxsem_setprotocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -146,7 +147,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
    * buffer
    */
 
-  DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem)); /* TODO: Handle EINTR. */
+  while (net_lockedwait(&g_wrbuffer.sem) < 0);
 
   /* Now, we are guaranteed to have a write buffer structure reserved
    * for us in the free list.

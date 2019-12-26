@@ -76,7 +76,7 @@ static void txdrain_worker(FAR void *arg)
 
   /* Then just post the semaphore, waking up tcp_txdrain() */
 
-  sem_post(waitsem);
+  nxsem_post(waitsem);
 }
 
 /****************************************************************************
@@ -114,6 +114,7 @@ int tcp_txdrain(FAR struct socket *psock,
   /* Initialize the wait semaphore */
 
   nxsem_init(&waitsem, 0, 0);
+  nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
 
   /* The following needs to be done with the network stable */
 
