@@ -5,4 +5,106 @@
 
 if ARCH_BOARD_NUCLEO_L432KC
 
+menu "U[S]ART Pin Layouts"
+	depends on STM32L4_USART1 || STM32L4_USART2 || STM32L4_LPUART1
+
+comment "USART1 is disabled. (Enable it under: System Type -> STM32L4 Peripheral Support)"
+	depends on !STM32L4_USART1
+
+choice
+	depends on STM32L4_USART1
+	prompt "USART1 RX pin"
+	default ARCH_BOARD_USART1_RX_PA10
+	---help---
+        This pin can be one of the following:
+        PA10: CN9 pin 3, CN10 pin 33
+        PB7 : CN7 pin 21
+
+config ARCH_BOARD_USART1_RX_PA10
+	bool "PA10: CN9 pin 3, CN10 pin 33"
+
+config ARCH_BOARD_USART1_RX_PB7
+	bool "PB7: CN7 pin 21"
+
+endchoice
+
+choice
+	depends on STM32L4_USART1
+	prompt "USART1 TX pin"
+	default ARCH_BOARD_USART1_TX_PA9
+	---help---
+        This pin can be one of the following:
+        PA9: CN5 pin 1, CN10 pin 21
+        PB6: CN5 pin 3, CN10 pin 17
+
+config ARCH_BOARD_USART1_TX_PA9
+	bool "PA9: CN5 pin 1, CN10 pin 21"
+
+config ARCH_BOARD_USART1_TX_PB6
+	bool "PB6: CN5 pin 3, CN10 pin 17"
+
+endchoice
+
+comment "USART2 is disabled. (Enable it under: System Type -> STM32L4 Peripheral Support)"
+	depends on !STM32L4_USART2
+
+choice
+	depends on STM32L4_USART2
+	prompt "USART2 RX pin"
+	default ARCH_BOARD_USART2_RX_PA15
+	---help---
+        This pin can be one of the following:
+        PA3
+        PA15 (connected to ST-Link)
+
+config ARCH_BOARD_USART2_RX_PA3
+	bool "PA3"
+
+config ARCH_BOARD_USART2_RX_PA15
+	bool "PA15"
+
+endchoice
+
+choice
+	depends on STM32L4_USART2
+	prompt "USART2 TX pin"
+	default ARCH_BOARD_USART2_TX_PA2
+	---help---
+        This pin can only be:
+        PA2 (connected to ST-Link)
+
+config ARCH_BOARD_USART2_TX_PA2
+	bool "PA2"
+
+endchoice
+
+comment "LPUART1 is disabled. (Enable it under: System Type -> STM32L4 Peripheral Support)"
+	depends on !STM32L4_LPUART1
+
+choice
+	depends on STM32L4_LPUART1
+	prompt "LPUART1 RX pin"
+	default ARCH_BOARD_LPUART1_RX_PA3
+	---help---
+        This pin can only be PA3.
+
+config ARCH_BOARD_LPUART1_RX_PA3
+	bool "PA3"
+
+endchoice
+
+choice
+	depends on STM32L4_LPUART1
+	prompt "LPUART1 TX pin"
+	default ARCH_BOARD_LPUART1_TX_PA2
+	---help---
+        This pin can only be PA2.
+
+config ARCH_BOARD_LPUART1_TX_PA2
+	bool "PA2"
+
+endchoice
+
+endmenu
+
 endif # ARCH_BOARD_NUCLEO_L432KC
