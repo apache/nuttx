@@ -243,7 +243,6 @@
 #define IW_MODE_SECOND      5    /* Secondary master/repeater (backup) */
 #define IW_MODE_MONITOR     6    /* Passive monitor (listen only) */
 #define IW_MODE_MESH        7    /* Mesh (IEEE 802.11s) network */
-#define IW_MODE_NFLAGS      8
 
 /* Statistics flags (bitmask in updated) */
 
@@ -274,7 +273,6 @@
 
 #define IW_FREQ_AUTO        0    /* Let the driver decides */
 #define IW_FREQ_FIXED       1    /* Force a specific value */
-#define IW_FREQ_NFLAGS      2
 
 #define IW_MAX_FREQUENCIES  32   /* Max. frequencies in struct iw_range */
 
@@ -285,7 +283,6 @@
 #  define IW_TXPOW_MWATT    0x0001  /* Value is in mW */
 #  define IW_TXPOW_RELATIVE 0x0002  /* Value is in arbitrary units */
 #define IW_TXPOW_RANGE      0x1000  /* Range of value between min/max */
-#define IW_TXPOW_NFLAGS     IW_TXPOW_RANGE
 
 /* Scan-related */
 
