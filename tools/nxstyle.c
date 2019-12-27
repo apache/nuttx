@@ -43,18 +43,20 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <libgen.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LINE_SIZE    512
+#define LINE_SIZE      512
 
-#define FATAL(m)       message(FATAL, (m), 0, 0)
+#define FATAL(m, l, o) message(FATAL, (m), (l), (o))
 #define FATALFL(m,s)   message(FATAL, (m), -1, -1)
-#define WARN(m, l, o)  message(WARN, (m), (l), (0))
-#define ERROR(m, l, o) message(ERROR, (m), (l), (0))
-#define INFO(m, l, o)  message(INFO, (m), (l), (0))
+#define WARN(m, l, o)  message(WARN, (m), (l), (o))
+#define ERROR(m, l, o) message(ERROR, (m), (l), (o))
+#define INFO(m, l, o)  message(INFO, (m), (l), (o))
 
 /****************************************************************************
  * Private types
@@ -87,6 +89,7 @@ enum file_e
  * Private data
  ****************************************************************************/
 
+static bool g_gonogo           = false;
 static int g_status            = 0;
 static char *g_file_name       = "";
 static enum file_e g_file_type = UNKNOWN;
@@ -95,10 +98,17 @@ static enum file_e g_file_type = UNKNOWN;
  * Private Functions
  ****************************************************************************/
 
-static void show_usage(char *progname, int exitcode)
+static void show_usage(char *progname, int exitcode, char *what)
 {
-  fprintf(stderr, "Usage:  %s [-m <maxline>] <filename>\n", progname);
-  fprintf(stderr, "        %s -h\n", progname);
+  if (what)
+    {
+      fprintf(stderr, "%s\n", what);
+    }
+
+  fprintf(stderr, "Usage:  %s [-m <maxline>] [-s] [-g] <filename>\n", basename(progname));
+  fprintf(stderr, "        %s -h this help\n", basename(progname));
+  fprintf(stderr, "        %s -s silent\n", basename(progname));
+  fprintf(stderr, "        %s -g go no go output only\n", basename(progname));
   exit(exitcode);
 }
 
@@ -112,18 +122,17 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
       g_status |= 1;
     }
 
-  if (lineno == 0 && ndx == 0)
+  if (!g_gonogo)
     {
-      fprintf(out, "%s\n", text);
-    }
-  else if (lineno == -1 && ndx == -1)
-    {
-      fprintf(out, "%s: %s\n", text, g_file_name);
-    }
-  else
-    {
-      fprintf(out, "%s:%d:%d: %s: %s\n", g_file_name, lineno, ndx,
-              class_text[class], text);
+      if (lineno == -1 && ndx == -1)
+        {
+          fprintf(out, "%s:%s: %s\n", class_text[class], text,  g_file_name);
+        }
+      else
+        {
+          fprintf(out, "%s:%d:%d: %s: %s\n", g_file_name, lineno, ndx,
+                  class_text[class], text);
+        }
     }
 
   return g_status;
@@ -202,53 +211,75 @@ int main(int argc, char **argv, char **envp)
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
   int maxline;          /* Lines longer that this generate warnings */
+  bool silent;          /* Used with go not go test option */
   int n;
   int i;
+  int c;
+  extern char *optarg;
+  extern int optopt;
+  extern int optind;
 
-  maxline  = 78;
-  filename = argv[1];
+  g_gonogo    = false;
+  maxline     = 78;
+  filename    = argv[1];
+  silent      = false;
+
+  if (argc < 2)
+    {
+      show_usage(argv[0], 1, "No file name given.");
+    }
+
+  while ((c = getopt(argc, argv, ":hsgm:")) != -1)
+    {
+      switch (c)
+      {
+      case 'm':
+        maxline = atoi(optarg);
+        if (maxline < 1)
+          {
+            show_usage(argv[0], 1, "Bad value for <maxline>.");
+          }
+        break;
+
+      case 's':
+          silent = true;
+          break;
+
+      case 'g':
+          g_gonogo = true;
+          break;
+
+      case 'h':
+        show_usage(argv[0], 0, NULL);
+        break;
+
+      case ':':
+        show_usage(argv[0], 1, "Missing argument.");
+        break;
+
+      case '?':
+        show_usage(argv[0], 1, "Unrecognized option.");
+        break;
+
+      default:
+        show_usage(argv[0], 0, NULL);
+        break;
+      }
+  }
+
+  if (optind < argc - 1 || argv[optind] == NULL)
+    {
+      show_usage(argv[0], 1, "No file name given.");
+    }
+
+  filename = argv[optind];
   g_file_name = filename;
-
-  /* Usage:  nxstyle [-m <maxline>] <filename>
-   *         nxstyle -h
-   */
-
-  if (argc == 4)
-    {
-      if (strcmp(argv[1], "-m") != 0)
-        {
-          FATAL("Unrecognized argument");
-          show_usage(argv[0], 1);
-        }
-
-      maxline = atoi(argv[2]);
-      if (maxline < 1)
-        {
-          FATAL("Bad value for <maxline>\n");
-          show_usage(argv[0], 1);
-        }
-
-      filename = argv[3];
-      g_file_name = filename;
-      printf("%s", g_file_name);
-    }
-  else if (argc == 2)
-    {
-      if (strcmp(argv[1], "-h") == 0)
-        {
-          show_usage(argv[0], 0);
-        }
-    }
-  else
-    {
-      FATAL("Invalid number of arguments\n");
-      show_usage(argv[0], 1);
-    }
-
   instream = fopen(filename, "r");
+
   if (!instream)
     {
-      FATALFL("Failed to open", argv[1]);
+      g_gonogo = false;
+      FATALFL("Failed to open", filename);
       return 1;
     }
 
@@ -260,7 +291,7 @@ int main(int argc, char **argv, char **envp)
 
   if (ext == 0)
     {
-      printf("No file extension\n");
+      WARN("No file extension", 0 , 0);
     }
   else if (strcmp(ext, ".h") == 0)
     {
@@ -1939,15 +1970,24 @@ int main(int argc, char **argv, char **envp)
 
   if (!bfunctions && !hdrfile)
     {
-      FATAL("\"Private/Public Functions\" not found!\n"
-            " File could not be checked");
+      FATAL("\"Private/Public Functions\" not found!"
+            " File was not be checked", lineno, 1);
     }
 
   if (ncomment > 0 || bstring)
     {
-      FATAL("Comment or string found at end of file\n");
+      FATAL("Comment or string found at end of file", lineno, 1);
     }
 
   fclose(instream);
+  if (g_gonogo)
+    {
+      if (!silent)
+        {
+          fprintf(stderr, "%s: %s nxstyle check\n", g_file_name,
+                  g_status == 0 ? "PASSED" : "FAILED");
+        }
+    }
+
   return g_status;
 }
