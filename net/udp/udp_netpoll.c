@@ -41,13 +41,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <poll.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
@@ -144,19 +143,11 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 #if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
 static inline void udp_iob_work(FAR void *arg)
 {
-  FAR struct work_notifier_entry_s *entry;
-  FAR struct work_notifier_s *ninfo;
   FAR struct udp_poll_s *pinfo;
   FAR struct socket *psock;
   FAR struct pollfd *fds;
 
-  entry = (FAR struct work_notifier_entry_s *)arg;
-  DEBUGASSERT(entry != NULL);
-
-  ninfo = &entry->info;
-  DEBUGASSERT(ninfo->arg != NULL);
-
-  pinfo = (FAR struct udp_poll_s *)ninfo->arg;
+  pinfo = (FAR struct udp_poll_s *)arg;
   DEBUGASSERT(pinfo->psock != NULL && pinfo->fds != NULL);
 
   psock = pinfo->psock;
@@ -185,12 +176,6 @@ static inline void udp_iob_work(FAR void *arg)
           pinfo->key = iob_notifier_setup(LPWORK, udp_iob_work, pinfo);
         }
     }
-
-  /* Protocol for the use of the IOB notifier is that we free the argument
-   * after the notification has been processed.
-   */
-
-  kmm_free(arg);
 }
 #endif
 
