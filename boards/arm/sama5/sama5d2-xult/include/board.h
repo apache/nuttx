@@ -235,7 +235,7 @@
  *   PIN  NAME    PIO  FUNCTION
  *   ---- ------- -------------
  *    7   URXD2   PD4 UART2
- *    8   URXD2   PD5 UART2
+ *    8   UTXD2   PD5 UART2
  *   ---- ------- -------------
  */
 
@@ -249,7 +249,7 @@
  *   PIN  NAME    PIO  FUNCTION
  *   ---- ------- -------------
  *    27   URXD3  PB11 UART3
- *    28   URXD3  PB12 UART3
+ *    28   UTXD3  PB12 UART3
  *   ---- ------- -------------
  */
 
