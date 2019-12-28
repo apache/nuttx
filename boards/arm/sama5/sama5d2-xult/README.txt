@@ -489,7 +489,7 @@ Serial Console
     ---- ------------------------ -------------
 
   Standard UART on Arduino connector (J21) is FLEXCOM4.
-  Terminologicy: FLEXCOM is the same as USART in previous SAMA5D versions.
+  Terminology: FLEXCOM is the same as USART in previous SAMA5D versions.
 
     ---- ------- -------------
     J21  BOARD      SAMA5D2
