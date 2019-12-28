@@ -334,6 +334,10 @@ int board_lcd_initialize(void)
 {
   FAR struct lpm013m091a_lcd_s *priv = &g_lcddev;
   FAR struct spi_dev_s *spi;
+#if defined(CONFIG_CXD56_DMAC)
+  DMA_HANDLE            hdl;
+  dma_config_t          conf;
+#endif
 
   lcdinfo("Initializing lcd\n");
 
@@ -346,6 +350,29 @@ int board_lcd_initialize(void)
           return -ENODEV;
         }
       priv->spi = spi;
+
+#if defined(CONFIG_CXD56_DMAC)
+      /* DMA settings */
+
+      hdl = cxd56_dmachannel(DISPLAY_DMA_TXCH, DISPLAY_DMA_TX_MAXSIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DISPLAY_DMA_TXCH_CFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(DISPLAY_SPI, CXD56_SPI_DMAC_CHTYPE_TX,
+                              hdl, &conf);
+        }
+      hdl = cxd56_dmachannel(DISPLAY_DMA_RXCH, DISPLAY_DMA_RX_MAXSIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DISPLAY_DMA_RXCH_CFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(DISPLAY_SPI, CXD56_SPI_DMAC_CHTYPE_RX,
+                              hdl, &conf);
+        }
+#endif
 
       /* Reset LPM013M091A */
 
