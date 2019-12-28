@@ -313,7 +313,15 @@ nxstyle.c
   standard.  This program is completely ignorant of C syntax; it simply
   performs crude pattern matching to check the file.
 
-  Usage: nxstyle <path-to-file-to-check>
+  Prints formatted messages that are classified as info, warn, error, 
+  fatal. In a parsable format that can be used by editors and IDEs.
+
+  Usage: nxstyle [-m <maxline>] [-s] [-g] <path-to-file-to-check>
+         Where -m <maxline> is the maximum line length allowed
+         Where -s  silent prints not output, returns 0 for OK and 1
+                   for any errors.
+         Where -g  go-no-go output only prints PASS/FAIL gor a 
+                   given file.
 
   See also indent.sh and uncrustify.cfg
 
