@@ -41,9 +41,10 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip.h>
 
 #if defined(CONFIG_STM32L4_STM32L4X2)
+
+#include "stm32l4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

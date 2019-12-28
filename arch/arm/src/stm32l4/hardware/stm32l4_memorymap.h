@@ -36,6 +36,8 @@
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_MEMORYMAP_H
 
+#include <nuttx/config.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/

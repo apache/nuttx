@@ -42,10 +42,7 @@
  * Included Files
  ************************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-
-#include "chip.h"
+#include "stm32l4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
