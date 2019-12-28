@@ -119,8 +119,8 @@
 #    define TTYS0_DEV           g_uart1port  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port  /* UART2 is console */
-#    define TTYS0_DEV           g_uart1port  /* UART2 is ttyS0 */
+#    define CONSOLE_DEV         g_uart2port  /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port  /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart1port  /* UART3 is console */
@@ -194,7 +194,7 @@
 #  define TTYS1_DEV           g_uart1port  /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART2) && !defined(UART2_ASSIGNED)
-#  define TTYS1_DEV           g_uart1port  /* UART2 is ttyS1 */
+#  define TTYS1_DEV           g_uart2port  /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port  /* UART3 is ttyS1 */
