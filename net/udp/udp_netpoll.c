@@ -54,25 +54,6 @@
 #include "socket/socket.h"
 #include "udp/udp.h"
 
-#ifdef HAVE_UDP_POLL
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This is an allocated container that holds the poll-related information */
-
-struct udp_poll_s
-{
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
-  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
-  struct pollfd *fds;              /* Needed to handle poll events */
-  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  int16_t key;                     /* Needed to cancel pending notification */
-#endif
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -249,17 +230,21 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  /* Allocate a container to hold the poll information */
-
-  info = (FAR struct udp_poll_s *)kmm_malloc(sizeof(struct udp_poll_s));
-  if (!info)
-    {
-      return -ENOMEM;
-    }
-
   /* Some of the  following must be atomic */
 
   net_lock();
+
+  /* Find a container to hold the poll information */
+
+  info = conn->pollinfo;
+  while (info->psock != NULL)
+    {
+      if (++info >= &conn->pollinfo[CONFIG_NET_UDP_NPOLLWAITERS])
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+    }
 
   /* Get the device that will provide the provide the NETDEV_DOWN event.
    * NOTE: in the event that the local socket is bound to INADDR_ANY, the
@@ -311,6 +296,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   fds->priv = (FAR void *)info;
 
+#ifdef CONFIG_NET_UDP_READAHEAD
   /* Check for read data availability now */
 
   if (!IOB_QEMPTY(&conn->readahead))
@@ -319,6 +305,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       fds->revents |= (POLLRDNORM & fds->events);
     }
+#endif
 
   if (psock_udp_cansend(psock) >= 0)
     {
@@ -350,11 +337,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  net_unlock();
-  return OK;
-
 errout_with_lock:
-  kmm_free(info);
   net_unlock();
   return ret;
 }
@@ -408,9 +391,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Release the callback */
 
-      net_lock();
       udp_callback_free(info->dev, conn, info->cb);
-      net_unlock();
 
       /* Release the poll/select data slot */
 
@@ -418,10 +399,8 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Then free the poll info container */
 
-      kmm_free(info);
+      info->psock = NULL;
     }
 
   return OK;
 }
-
-#endif /* !HAVE_UDP_POLL */

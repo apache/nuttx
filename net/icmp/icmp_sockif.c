@@ -445,7 +445,6 @@ int icmp_listen(FAR struct socket *psock, int backlog)
 static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
-#ifdef CONFIG_MM_IOB
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
@@ -460,9 +459,6 @@ static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
 
       return icmp_pollteardown(psock, fds);
     }
-#else
-  return -ENOSYS;
-#endif /* CONFIG_MM_IOB */
 }
 
 /****************************************************************************

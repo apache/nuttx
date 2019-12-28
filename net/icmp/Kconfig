@@ -25,6 +25,7 @@ if NET_ICMP && !NET_ICMP_NO_STACK
 config NET_ICMP_SOCKET
 	bool "IPPROTO_ICMP socket support"
 	default n
+	select MM_IOB
 	---help---
 		Enable support for IPPROTO_ICMP sockets.  These sockets are needed
 		for application level support for sending ECHO (ping) requests and
@@ -35,7 +36,10 @@ if NET_ICMP_SOCKET
 config NET_ICMP_NCONNS
 	int "Max ICMP packet sockets"
 	default 4
-	depends on MM_IOB
+
+config NET_ICMP_NPOLLWAITERS
+	int "Number of ICMP poll waiters"
+	default 1
 
 endif # NET_ICMP_SOCKET
 endif # NET_ICMP && !NET_ICMP_NO_STACK

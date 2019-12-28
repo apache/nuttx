@@ -55,6 +55,10 @@ config NET_UDP_CONNS
 	---help---
 		The maximum amount of open concurrent UDP sockets
 
+config NET_UDP_NPOLLWAITERS
+	int "Number of UDP poll waiters"
+	default 1
+
 config NET_UDP_READAHEAD
 	bool "Enable UDP/IP read-ahead buffering"
 	default y

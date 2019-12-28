@@ -42,10 +42,7 @@ NET_CSRCS += icmp_input.c
 
 ifeq ($(CONFIG_NET_ICMP_SOCKET),y)
 SOCK_CSRCS += icmp_sockif.c icmp_poll.c icmp_conn.c icmp_sendto.c
-SOCK_CSRCS += icmp_recvfrom.c
-ifeq ($(CONFIG_MM_IOB),y)
-SOCK_CSRCS += icmp_netpoll.c
-endif
+SOCK_CSRCS += icmp_recvfrom.c icmp_netpoll.c
 endif
 
 # Include ICMP build support

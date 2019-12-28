@@ -43,27 +43,11 @@
 #include <poll.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
-#include <devif/devif.h>
+#include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "icmpv6/icmpv6.h"
-
-#ifdef CONFIG_MM_IOB
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This is an allocated container that holds the poll-related information */
-
-struct icmpv6_poll_s
-{
-  FAR struct socket *psock;        /* IPPROTO_ICMP6 socket structure */
-  FAR struct pollfd *fds;          /* Needed to handle poll events */
-  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-};
 
 /****************************************************************************
  * Private Functions
@@ -178,17 +162,23 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   DEBUGASSERT(conn != NULL && fds != NULL);
 
-  /* Allocate a container to hold the poll information */
-
-  info = (FAR struct icmpv6_poll_s *)kmm_malloc(sizeof(struct icmpv6_poll_s));
-  if (!info)
-    {
-      return -ENOMEM;
-    }
-
   /* Some of the following must be atomic */
 
   net_lock();
+
+  /* Find a container to hold the poll information */
+
+  info = conn->pollinfo;
+  while (info->psock != NULL)
+    {
+      if (++info >= &conn->pollinfo[CONFIG_NET_ICMPv6_NPOLLWAITERS])
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+    }
+
+  /* Allocate a ICMP callback structure */
 
   cb = icmpv6_callback_alloc(conn->dev, conn);
   if (cb == NULL)
@@ -247,11 +237,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       nxsem_post(fds->sem);
     }
 
-  net_unlock();
-  return OK;
-
 errout_with_lock:
-  kmm_free(info);
   net_unlock();
   return ret;
 }
@@ -291,9 +277,7 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       /* Release the callback */
 
-      net_lock();
       icmpv6_callback_free(conn->dev, conn, info->cb);
-      net_unlock();
 
       /* Release the poll/select data slot */
 
@@ -301,10 +285,8 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Then free the poll info container */
 
-      kmm_free(info);
+      info->psock = NULL;
     }
 
   return OK;
 }
-
-#endif /* !CONFIG_MM_IOB */

@@ -43,10 +43,7 @@ NET_CSRCS += icmpv6_linkipaddr.c
 
 ifeq ($(CONFIG_NET_ICMPv6_SOCKET),y)
 SOCK_CSRCS += icmpv6_sockif.c icmpv6_conn.c icmpv6_sendto.c
-SOCK_CSRCS += icmpv6_recvfrom.c
-ifeq ($(CONFIG_MM_IOB),y)
-SOCK_CSRCS += icmpv6_netpoll.c
-endif
+SOCK_CSRCS += icmpv6_recvfrom.c icmpv6_netpoll.c
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)

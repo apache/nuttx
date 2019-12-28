@@ -26,6 +26,7 @@ if NET_ICMPv6 && !NET_ICMPv6_NO_STACK
 config NET_ICMPv6_SOCKET
 	bool "IPPROTO_ICMP6 socket support"
 	default n
+	select MM_IOB
 	---help---
 		Enable support for IPPROTO_ICMP6 sockets.  These sockets are needed
 		for application level support for sending ICMPv7 ECHO requests and
@@ -203,7 +204,10 @@ if NET_ICMPv6_SOCKET
 config NET_ICMPv6_NCONNS
 	int "Max ICMPv6 packet sockets"
 	default 4
-	depends on MM_IOB
+
+config NET_ICMPv6_NPOLLWAITERS
+	int "Number of ICMPv6 poll waiters"
+	default 1
 
 endif # NET_ICMPv6_SOCKET
 

@@ -956,29 +956,29 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
 static inline int inet_pollsetup(FAR struct socket *psock,
                                  FAR struct pollfd *fds)
 {
-#ifdef HAVE_TCP_POLL
+#ifdef NET_TCP_HAVE_STACK
   if (psock->s_type == SOCK_STREAM)
     {
       return tcp_pollsetup(psock, fds);
     }
   else
-#endif /* HAVE_TCP_POLL */
-#ifdef HAVE_UDP_POLL
+#endif /* NET_TCP_HAVE_STACK */
+#ifdef NET_UDP_HAVE_STACK
   if (psock->s_type != SOCK_STREAM)
     {
       return udp_pollsetup(psock, fds);
     }
   else
-#endif /* HAVE_UDP_POLL */
+#endif /* NET_UDP_HAVE_STACK */
     {
       return -ENOSYS;
     }
 }
-#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+#endif /* NET_TCP_HAVE_STACK || NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Name: inet_pollteardown
@@ -996,29 +996,29 @@ static inline int inet_pollsetup(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
 static inline int inet_pollteardown(FAR struct socket *psock,
                                     FAR struct pollfd *fds)
 {
-#ifdef HAVE_TCP_POLL
+#ifdef NET_TCP_HAVE_STACK
   if (psock->s_type == SOCK_STREAM)
     {
       return tcp_pollteardown(psock, fds);
     }
   else
-#endif /* HAVE_TCP_POLL */
-#ifdef HAVE_UDP_POLL
+#endif /* NET_TCP_HAVE_STACK */
+#ifdef NET_UDP_HAVE_STACK
   if (psock->s_type == SOCK_DGRAM)
     {
       return udp_pollteardown(psock, fds);
     }
   else
-#endif /* HAVE_UDP_POLL */
+#endif /* NET_UDP_HAVE_STACK */
     {
       return -ENOSYS;
     }
 }
-#endif /* HAVE_TCP_POLL || HAVE_UDP_POLL */
+#endif /* NET_TCP_HAVE_STACK || NET_UDP_HAVE_STACK */
 
 /****************************************************************************
  * Name: inet_poll
@@ -1041,7 +1041,7 @@ static inline int inet_pollteardown(FAR struct socket *psock,
 static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                      bool setup)
 {
-#if defined(HAVE_TCP_POLL) || defined(HAVE_UDP_POLL)
+#if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
 
   /* Check if we are setting up or tearing down the poll */
 
@@ -1061,7 +1061,7 @@ static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
     {
       return -ENOSYS;
     }
-#endif /* HAVE_TCP_POLL || !HAVE_UDP_POLL */
+#endif /* NET_TCP_HAVE_STACK || !NET_UDP_HAVE_STACK */
 }
 
 /****************************************************************************

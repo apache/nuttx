@@ -23,6 +23,10 @@ config NET_USRSOCK_CONNS
 		Note: Usrsock daemon can impose additional restrictions for
 		maximum number of concurrent connections supported.
 
+config NET_USRSOCK_NPOLLWAITERS
+	int "Number of usrsock poll waiters"
+	default 1
+
 config NET_USRSOCK_NO_INET
 	bool "Disable PF_INET for usrsock"
 	default n

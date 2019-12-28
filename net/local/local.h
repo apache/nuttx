@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 #define HAVE_LOCAL_POLL 1
-#define LOCAL_ACCEPT_NPOLLWAITERS 2
+#define LOCAL_NPOLLWAITERS 2
 
 /* Packet format in FIFO:
  *
@@ -168,10 +168,11 @@ struct local_conn_s
 
 #ifdef HAVE_LOCAL_POLL
   /* The following is a list if poll structures of threads waiting for
-   * socket accept events.
+   * socket events.
    */
 
-  struct pollfd *lc_accept_fds[LOCAL_ACCEPT_NPOLLWAITERS];
+  struct pollfd *lc_accept_fds[LOCAL_NPOLLWAITERS];
+  struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 #endif
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
