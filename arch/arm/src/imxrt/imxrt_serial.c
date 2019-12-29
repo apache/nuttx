@@ -258,6 +258,7 @@
  * UART 5-8 could be the console.  One of UART5-8 has already been
  * assigned to ttys0, 1, 2, 3, or 4.
  */
+
 #if defined(CONFIG_IMXRT_LPUART5) && !defined(UART5_ASSIGNED)
 #  define TTYS5_DEV           g_uart5port /* LPUART5 is ttyS5 */
 #  define UART5_ASSIGNED      1
@@ -541,7 +542,7 @@ static struct uart_dev_s g_uart2port =
   {
     .size       = CONFIG_LPUART2_TXBUFSIZE,
     .buffer     = g_uart2txbuffer,
-   },
+  },
   .ops          = &g_uart_ops,
   .priv         = &g_uart2priv,
 };
@@ -922,11 +923,11 @@ static int imxrt_setup(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
+  int ret;
   struct uart_config_s config =
   {
     0
   };
-  int ret;
 
   /* Configure the UART */
 
@@ -1552,32 +1553,29 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
+
         /* Should not get here */
 
         break;
