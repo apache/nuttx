@@ -1122,6 +1122,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
   struct inode *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
+  irqstate_t flags;
 #endif
   int ret   = OK;
 
@@ -1296,6 +1297,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
+            flags  = spin_lock_irqsave();
             imxrt_disableuartint(priv, &ie);
             ret = imxrt_setup(dev);
 
@@ -1303,6 +1305,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             imxrt_restoreuartint(priv, ie);
             priv->ie = ie;
+            spin_unlock_irqrestore(flags);
           }
       }
       break;
