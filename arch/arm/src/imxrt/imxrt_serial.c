@@ -1198,9 +1198,11 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
             termiosp->c_cflag |= CS8;
             break;
 
+#if defined(CS9)
           case 9:
-            termiosp->c_cflag |= CS8 /* CS9 */;
+            termiosp->c_cflag |= CS9;
             break;
+#endif
           }
       }
       break;
@@ -1252,7 +1254,8 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
           case CS8:
             nbits = 8;
             break;
-#if 0
+
+#if defined(CS9)
           case CS9:
             nbits = 9;
             break;
