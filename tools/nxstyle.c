@@ -1976,7 +1976,7 @@ int main(int argc, char **argv, char **envp)
 
   if (ncomment > 0 || bstring)
     {
-      FATAL("Comment or string found at end of file", lineno, 1);
+      ERROR("Comment or string found at end of file", lineno, 1);
     }
 
   fclose(instream);
