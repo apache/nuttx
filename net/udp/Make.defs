@@ -52,7 +52,7 @@ else
 SOCK_CSRCS += udp_psock_sendto_unbuffered.c
 endif
 
-ifeq ($(CONFIG_UDP_NOTIFIER),y)
+ifeq ($(CONFIG_NET_UDP_NOTIFIER),y)
 SOCK_CSRCS += udp_notifier.c
 ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
 SOCK_CSRCS += udp_txdrain.c

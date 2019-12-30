@@ -173,7 +173,7 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
 {
   /* Check if all write buffers have been sent and ACKed */

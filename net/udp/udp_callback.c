@@ -234,7 +234,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
       return 0;
     }
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
   /* Provided notification(s) that additional UDP read-ahead data is
    * available.
    */

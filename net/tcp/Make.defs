@@ -52,7 +52,7 @@ ifeq ($(CONFIG_NET_SENDFILE),y)
 SOCK_CSRCS += tcp_sendfile.c
 endif
 
-ifeq ($(CONFIG_TCP_NOTIFIER),y)
+ifeq ($(CONFIG_NET_TCP_NOTIFIER),y)
 SOCK_CSRCS += tcp_notifier.c
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 SOCK_CSRCS += tcp_txdrain.c

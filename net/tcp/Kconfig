@@ -78,7 +78,7 @@ config NET_MAX_LISTENPORTS
 	---help---
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
-config TCP_NOTIFIER
+config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n
 	depends on SCHED_WORKQUEUE

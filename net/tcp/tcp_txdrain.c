@@ -48,7 +48,7 @@
 
 #include "tcp/tcp.h"
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 
 /****************************************************************************
  * Private Functions
@@ -180,4 +180,4 @@ int tcp_txdrain(FAR struct socket *psock,
   return ret;
 }
 
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS && CONFIG_TCP_NOTIFIER */
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS && CONFIG_NET_TCP_NOTIFIER */

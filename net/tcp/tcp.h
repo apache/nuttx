@@ -49,7 +49,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -1594,7 +1594,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_readahead_notifier_setup(worker_t worker,
                                  FAR struct tcp_conn_s *conn,
                                  FAR void *arg);
@@ -1627,7 +1627,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_writebuffer_notifier_setup(worker_t worker,
                                    FAR struct tcp_conn_s *conn,
                                    FAR void *arg);
@@ -1658,7 +1658,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_disconnect_notifier_setup(worker_t worker,
                                   FAR struct tcp_conn_s *conn,
                                   FAR void *arg);
@@ -1683,7 +1683,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_notifier_teardown(int key);
 #endif
 
@@ -1708,7 +1708,7 @@ int tcp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_NET_TCP_NOTIFIER)
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1733,7 +1733,7 @@ void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1752,7 +1752,7 @@ void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1772,7 +1772,7 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 struct timespec;
 int tcp_txdrain(FAR struct socket *psock,
                 FAR const struct timespec *abstime);

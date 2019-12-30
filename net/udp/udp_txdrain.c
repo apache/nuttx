@@ -48,7 +48,7 @@
 
 #include "udp/udp.h"
 
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
 
 /****************************************************************************
  * Private Functions
@@ -145,4 +145,4 @@ int udp_txdrain(FAR struct socket *psock,
   return ret;
 }
 
-#endif /* CONFIG_NET_UDP_WRITE_BUFFERS && CONFIG_UDP_NOTIFIER */
+#endif /* CONFIG_NET_UDP_WRITE_BUFFERS && CONFIG_NET_UDP_NOTIFIER */

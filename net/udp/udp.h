@@ -53,7 +53,7 @@
 #  include <nuttx/mm/iob.h>
 #endif
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -712,7 +712,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_readahead_notifier_setup(worker_t worker,
                                  FAR struct udp_conn_s *conn,
                                  FAR void *arg);
@@ -744,7 +744,7 @@ int udp_readahead_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_writebuffer_notifier_setup(worker_t worker,
                                    FAR struct udp_conn_s *conn,
                                    FAR void *arg);
@@ -769,7 +769,7 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_notifier_teardown(int key);
 #endif
 
@@ -793,7 +793,7 @@ int udp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_NET_UDP_NOTIFIER)
 void udp_readahead_signal(FAR struct udp_conn_s *conn);
 #endif
 
@@ -818,7 +818,7 @@ void udp_readahead_signal(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
 void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
 #endif
 
@@ -838,7 +838,7 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
 struct timespec;
 int udp_txdrain(FAR struct socket *psock,
                 FAR const struct timespec *abstime);

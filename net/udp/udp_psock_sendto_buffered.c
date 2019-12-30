@@ -162,7 +162,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
           psock->s_sndcb->event = NULL;
           wrb = NULL;
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
           /* Notify any waiters that the write buffers have been drained. */
 
           udp_writebuffer_signal(conn);
