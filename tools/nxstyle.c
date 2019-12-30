@@ -271,7 +271,6 @@ int main(int argc, char **argv, char **envp)
 
   /* Are we parsing a header file? */
 
-  g_file_type = UNKNOWN;
   ext         = strrchr(g_file_name, '.');
 
   if (ext == 0)
