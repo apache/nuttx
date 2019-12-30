@@ -316,7 +316,7 @@ nxstyle.c
   Prints formatted messages that are classified as info, warn, error, 
   fatal. In a parsable format that can be used by editors and IDEs.
 
-  Usage: nxstyle [-m <maxline>] [-v <levele>] <filename>
+  Usage: nxstyle [-m <maxline>] [-v <level>] <filename>
         nxstyle -h this help
         nxstyle -v <level> where level is
                    0 - no output

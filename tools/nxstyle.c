@@ -109,7 +109,7 @@ static void show_usage(char *progname, int exitcode, char *what)
       fprintf(stderr, "%s\n", what);
     }
 
-  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <levele>] <filename>\n", basename(progname));
+  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <level>] <filename>\n", basename(progname));
   fprintf(stderr, "        %s -h this help\n", basename(progname));
   fprintf(stderr, "        %s -v <level> where level is\n", basename(progname));
   fprintf(stderr, "                   0 - no output\n");
