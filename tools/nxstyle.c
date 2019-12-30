@@ -219,11 +219,6 @@ int main(int argc, char **argv, char **envp)
   maxline   = 78;
   silent    = false;
 
-  if (argc < 2)
-    {
-      show_usage(argv[0], 1, "No file name given.");
-    }
-
   while ((c = getopt(argc, argv, ":hsgm:")) != -1)
     {
       switch (c)
