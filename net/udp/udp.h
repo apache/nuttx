@@ -448,6 +448,27 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void);
 #endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
 
 /****************************************************************************
+ * Name: udp_wrbuffer_tryalloc
+ *
+ * Description:
+ *   Try to allocate a UDP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from UDP logic when a buffer
+ *   of UDP data is about to be sent if the socket is non-blocking. Returns
+ *   immediately if allocation fails.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void);
+#endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
+
+/****************************************************************************
  * Name: udp_wrbuffer_release
  *
  * Description:
