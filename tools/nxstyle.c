@@ -89,10 +89,11 @@ enum file_e
  * Private data
  ****************************************************************************/
 
-static bool g_gonogo           = false;
-static int g_status            = 0;
 static char *g_file_name       = "";
 static enum file_e g_file_type = UNKNOWN;
+static int  g_maxline          = 78;
+static int  g_status           = 0;
+static int  g_verbose          = 2;
 
 /****************************************************************************
  * Private Functions
@@ -105,10 +106,12 @@ static void show_usage(char *progname, int exitcode, char *what)
       fprintf(stderr, "%s\n", what);
     }
 
-  fprintf(stderr, "Usage:  %s [-m <maxline>] [-s] [-g] <filename>\n", basename(progname));
+  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <levele>] <filename>\n", basename(progname));
   fprintf(stderr, "        %s -h this help\n", basename(progname));
-  fprintf(stderr, "        %s -s silent\n", basename(progname));
-  fprintf(stderr, "        %s -g go no go output only\n", basename(progname));
+  fprintf(stderr, "        %s -v <level> where level is\n", basename(progname));
+  fprintf(stderr, "                   0 - no output\n");
+  fprintf(stderr, "                   1 - PASS/FAIL\n");
+  fprintf(stderr, "                   2 - output each line (default)\n");
   exit(exitcode);
 }
 
@@ -122,7 +125,7 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
       g_status |= 1;
     }
 
-  if (!g_gonogo)
+  if (g_verbose == 2)
     {
       if (lineno == -1 && ndx == -1)
         {
@@ -209,34 +212,28 @@ int main(int argc, char **argv, char **envp)
   int rbrace_lineno;    /* Last line containing a right brace */
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
-  int maxline;          /* Lines longer that this generate warnings */
-  bool silent;          /* Used with go not go test option */
   int n;
   int i;
   int c;
 
-  g_gonogo  = false;
-  maxline   = 78;
-  silent    = false;
-
-  while ((c = getopt(argc, argv, ":hsgm:")) != -1)
+  while ((c = getopt(argc, argv, ":hv:gm:")) != -1)
     {
       switch (c)
       {
       case 'm':
-        maxline = atoi(optarg);
-        if (maxline < 1)
+        g_maxline = atoi(optarg);
+        if (g_maxline < 1)
           {
             show_usage(argv[0], 1, "Bad value for <maxline>.");
           }
         break;
 
-      case 's':
-          silent = true;
-          break;
-
-      case 'g':
-          g_gonogo = true;
+      case 'v':
+        g_verbose = atoi(optarg);
+        if (g_verbose < 0 || g_verbose > 2)
+          {
+            show_usage(argv[0], 1, "Bad value for <level>.");
+          }
           break;
 
       case 'h':
@@ -267,7 +264,6 @@ int main(int argc, char **argv, char **envp)
 
   if (!instream)
     {
-      g_gonogo = false;
       FATALFL("Failed to open", g_file_name);
       return 1;
     }
@@ -1735,7 +1731,7 @@ int main(int argc, char **argv, char **envp)
 
           /* Check for long lines */
 
-          if (n > maxline)
+          if (n > g_maxline)
             {
               if (g_file_type == C_SOURCE)
                 {
@@ -1969,13 +1965,10 @@ int main(int argc, char **argv, char **envp)
     }
 
   fclose(instream);
-  if (g_gonogo)
+  if (g_verbose == 1)
     {
-      if (!silent)
-        {
-          fprintf(stderr, "%s: %s nxstyle check\n", g_file_name,
-                  g_status == 0 ? "PASSED" : "FAILED");
-        }
+      fprintf(stderr, "%s: %s nxstyle check\n", g_file_name,
+              g_status == 0 ? "PASSED" : "FAILED");
     }
 
   return g_status;
