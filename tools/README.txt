@@ -320,7 +320,7 @@ nxstyle.c
          Where -m <maxline> is the maximum line length allowed
          Where -s  silent prints not output, returns 0 for OK and 1
                    for any errors.
-         Where -g  go-no-go output only prints PASS/FAIL gor a 
+         Where -g  go-no-go output only prints PASS/FAIL for a 
                    given file.
 
   See also indent.sh and uncrustify.cfg
