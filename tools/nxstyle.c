@@ -215,9 +215,6 @@ int main(int argc, char **argv, char **envp)
   int n;
   int i;
   int c;
-  extern char *optarg;
-  extern int optopt;
-  extern int optind;
 
   g_gonogo    = false;
   maxline     = 78;
