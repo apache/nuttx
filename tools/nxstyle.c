@@ -148,8 +148,7 @@ static void check_spaces_left(char *line, int lineno, int ndx)
    * expression or follow a right parentheses in the case of a cast.
    */
 
-  if (ndx > 0 && line[ndx - 1] != ' ' && line[ndx - 1] !=
-      '(' && line[ndx - 1] != ')')
+  if (ndx-- > 0 && line[ndx] != ' ' && line[ndx] != '(' && line[ndx] != ')')
     {
        ERROR("Operator/assignment must be preceded with whitespace",
              lineno, ndx);
