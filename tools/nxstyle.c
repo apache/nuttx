@@ -50,6 +50,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NXSTYLE_VERSION "0.01"
+
 #define LINE_SIZE      512
 
 #define FATAL(m, l, o) message(FATAL, (m), (l), (o))
@@ -101,6 +103,7 @@ static int  g_verbose          = 2;
 
 static void show_usage(char *progname, int exitcode, char *what)
 {
+  fprintf(stderr, "%s version %s\n\n", basename(progname), NXSTYLE_VERSION);
   if (what)
     {
       fprintf(stderr, "%s\n", what);
