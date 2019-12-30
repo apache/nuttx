@@ -194,7 +194,6 @@ int main(int argc, char **argv, char **envp)
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
-  bool hdrfile;         /* True: File is a header file */
   bool bexternc;        /* True: Within 'extern "C"' */
   bool brhcomment;      /* True: Comment to the right of code */
   bool prevbrhcmt;      /* True: previous line had comment to the right of code */
@@ -272,7 +271,6 @@ int main(int argc, char **argv, char **envp)
 
   /* Are we parsing a header file? */
 
-  hdrfile     = false;
   g_file_type = UNKNOWN;
   ext         = strrchr(g_file_name, '.');
 
@@ -282,7 +280,6 @@ int main(int argc, char **argv, char **envp)
     }
   else if (strcmp(ext, ".h") == 0)
     {
-      hdrfile = true;
       g_file_type = C_HEADER;
     }
   else if (strcmp(ext, ".c") == 0)
@@ -1951,7 +1948,7 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-  if (!bfunctions && !hdrfile)
+  if (!bfunctions && g_file_type == C_SOURCE)
     {
       ERROR("\"Private/Public Functions\" not found!"
             " File was not be checked", lineno, 1);
