@@ -176,7 +176,6 @@ int main(int argc, char **argv, char **envp)
 {
   FILE *instream;       /* File input stream */
   char line[LINE_SIZE]; /* The current line being examined */
-  char *filename;       /* Name of the file to open */
   char buffer[100];     /* Localy format error strings */
   char *lptr;           /* Temporary pointer into line[] */
   char *ext;            /* Temporary file extension */
@@ -216,10 +215,9 @@ int main(int argc, char **argv, char **envp)
   int i;
   int c;
 
-  g_gonogo    = false;
-  maxline     = 78;
-  filename    = argv[1];
-  silent      = false;
+  g_gonogo  = false;
+  maxline   = 78;
+  silent    = false;
 
   if (argc < 2)
     {
@@ -269,14 +267,13 @@ int main(int argc, char **argv, char **envp)
       show_usage(argv[0], 1, "No file name given.");
     }
 
-  filename = argv[optind];
-  g_file_name = filename;
-  instream = fopen(filename, "r");
+  g_file_name = argv[optind];
+  instream = fopen(g_file_name, "r");
 
   if (!instream)
     {
       g_gonogo = false;
-      FATALFL("Failed to open", filename);
+      FATALFL("Failed to open", g_file_name);
       return 1;
     }
 
@@ -284,7 +281,7 @@ int main(int argc, char **argv, char **envp)
 
   hdrfile     = false;
   g_file_type = UNKNOWN;
-  ext         = strrchr(filename, '.');
+  ext         = strrchr(g_file_name, '.');
 
   if (ext == 0)
     {
