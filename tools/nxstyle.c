@@ -1970,7 +1970,7 @@ int main(int argc, char **argv, char **envp)
 
   if (!bfunctions && !hdrfile)
     {
-      FATAL("\"Private/Public Functions\" not found!"
+      ERROR("\"Private/Public Functions\" not found!"
             " File was not be checked", lineno, 1);
     }
 
