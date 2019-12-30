@@ -286,10 +286,6 @@ int main(int argc, char **argv, char **envp)
     {
       g_file_type = C_SOURCE;
     }
-  else
-    {
-      printf("Unrecognized file extension: \"%s\"\n", ext + 1);
-    }
 
   btabs          = false; /* True: TAB characters found on the line */
   bcrs           = false; /* True: Carriable return found on the line */
