@@ -51,11 +51,12 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
+
 /* MIPS requires at least a 4-byte stack alignment.  For floating point use,
  * however, the stack must be aligned to 8-byte addresses.
  */
 
-#ifdef CONFIG_LIBC_FLOATINGPOINT
+#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
 #  define STACK_ALIGNMENT   8
 #else
 #  define STACK_ALIGNMENT   4
@@ -134,10 +135,10 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Reset the initial stack pointer */
 
-  tcb->xcp.regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+  tcb->xcp.regs[REG_SP] = (uintptr_t)tcb->adj_stack_ptr;
 
   /* And return the pointer to the allocated region */
 
-  return (FAR void *)(topaddr + sizeof(uint32_t));
+  return (FAR void *)(topaddr);
 }
 

@@ -53,6 +53,10 @@
 #  include <arch/rv32im/irq.h>
 #endif
 
+#if defined(CONFIG_ARCH_RV64GC)
+#  include <arch/rv64gc/irq.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

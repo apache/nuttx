@@ -16,6 +16,12 @@ config ARCH_CHIP_FE310
 	---help---
 		SiFive FE310 processor (E31 RISC-V Core with MAC extensions).
 
+config ARCH_CHIP_K210
+	bool "Kendryte K210"
+	select ARCH_RV64GC
+	---help---
+		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
+
 config ARCH_CHIP_NR5
 	bool "NEXT NanoRisc5"
 	select ARCH_RV32IM
@@ -39,13 +45,19 @@ config ARCH_RV32IM
 	bool
 	default n
 
+config ARCH_RV64GC
+	bool
+	default n
+
 config ARCH_FAMILY
 	string
-	default "rv32im"	if ARCH_RM32IM
+	default "rv32im"	if ARCH_RV32IM
+	default "rv64gc"	if ARCH_RV64GC
 
 config ARCH_CHIP
 	string
 	default "fe310"		if ARCH_CHIP_FE310
+	default "k210"		if ARCH_CHIP_K210
 	default "nr5m100"	if ARCH_CHIP_NR5
 	default "gap8"		if ARCH_CHIP_GAP8
 
@@ -62,8 +74,14 @@ config NR5_MPU
 if ARCH_RV32IM
 source arch/risc-v/src/rv32im/Kconfig
 endif
+if ARCH_RV64GC
+source arch/risc-v/src/rv64gc/Kconfig
+endif
 if ARCH_CHIP_FE310
 source arch/risc-v/src/fe310/Kconfig
+endif
+if ARCH_CHIP_K210
+source arch/risc-v/src/k210/Kconfig
 endif
 if ARCH_CHIP_NR5
 source arch/risc-v/src/nr5m100/Kconfig

@@ -69,7 +69,11 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
+#ifdef CONFIG_ARCH_RV64GC
+#define up_savestate(regs)    up_copystate(regs, (uint64_t*)g_current_regs)
+#else
 #define up_savestate(regs)    up_copystate(regs, (uint32_t*)g_current_regs)
+#endif
 #define up_restorestate(regs) (g_current_regs = regs)
 
 /* Determine which (if any) console driver to use.  If a console is enabled
@@ -113,8 +117,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_ARCH_RV64GC
+EXTERN volatile uint64_t *g_current_regs;
+EXTERN uintptr_t g_idle_topstack;
+#else
 EXTERN volatile uint32_t *g_current_regs;
 EXTERN uint32_t g_idle_topstack;
+#endif
 
 /* Address of the saved user stack pointer */
 
@@ -163,7 +172,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 void up_irqinitialize(void);
 void up_ack_irq(int irq);
 
+#ifdef CONFIG_ARCH_RV64GC
+void up_copystate(uint64_t *dest, uint64_t *src);
+#else
 void up_copystate(uint32_t *dest, uint32_t *src);
+#endif
+
 void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
