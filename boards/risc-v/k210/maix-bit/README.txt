@@ -1,0 +1,35 @@
+1. Download and install toolchain and openocd-k210
+
+  $ curl https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
+
+2. Build openocd-k210
+
+  $ git clone https://github.com/kendryte/openocd-kendryte
+  $ cd openocd-kendryte
+  $ ./bootstrap & ./configure & make
+
+3. Configure and build NuttX
+
+  $ mkdir ./nuttx; cd ./nuttx
+  $ git clone https://bitbucket.org/nuttx/nuttx.git
+  $ git clone https://bitbucket.org/nuttx/apps.git
+  $ cd nuttx
+  $ make distclean
+  $ ./tools/configure.sh maix-bit:nsh
+  $ make V=1
+
+4. Download and run the nuttx from SRAM (not SPI-Flash)
+
+  $ picocom -b 115200 /dev/ttyUSB0
+  $ sudo ./src/openocd -s ./tcl -f ./tcl/kendryte.cfg -m 0
+  $ riscv64-unknown-elf-gdb ./nuttx
+  (gdb) target extended-remote :3333
+  (gdb) load nuttx
+  (gdb) c
+
+5. TODO
+
+  PLL setting (currently CPU clock freq is assumed to be 416MHz)
+  Boot from SPI-Flash
+  Support peripherals such as GPIO/SPI/I2C/...
+  Support RISC-V User mode
