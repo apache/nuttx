@@ -85,20 +85,38 @@
  *        PB6   CN5 pin 3, CN10 pin 17
  */
 
-#if 1
+#if defined(CONFIG_ARCH_BOARD_USART1_RX_PA10)
 #  define GPIO_USART1_RX GPIO_USART1_RX_1    /* PA10 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
-#else
+#elif defined(CONFIG_ARCH_BOARD_USART1_RX_PB7)
 #  define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_USART1_TX_PA9)
+#  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
+#elif defined(CONFIG_ARCH_BOARD_USART1_TX_PB6)
 #  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
 #endif
 
 /* USART2: Connected to STLInk Debug via PA2(TX), PA15(RX) */
 
-#define GPIO_USART2_RX   GPIO_USART2_RX_2    /* PA15 */
+#if defined(CONFIG_ARCH_BOARD_USART2_RX_PA3)
+#  define GPIO_USART2_RX   GPIO_USART2_RX_1  /* PA3 */
+#elif defined(CONFIG_ARCH_BOARD_USART2_RX_PA15)
+#  define GPIO_USART2_RX   GPIO_USART2_RX_2  /* PA15 */
+#endif
 #define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
+
+/* LPUART1 */
+
+#if defined(CONFIG_ARCH_BOARD_LPUART1_RX_PA3)
+#  define GPIO_LPUART1_RX GPIO_LPUART1_RX_1   /* PA3  */
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_LPUART1_TX_PA2)
+#  define GPIO_LPUART1_TX GPIO_LPUART1_TX_1   /* PA2 */
+#endif
 
 /* I2C
  *
