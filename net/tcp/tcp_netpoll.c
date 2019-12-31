@@ -113,7 +113,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       /* A poll is a sign that we are free to send data. */
 
-      else if ((flags & TCP_POLL) != 0 && psock_tcp_cansend(info->psock) >= 0)
+      else if (psock_tcp_cansend(info->psock) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -135,77 +135,6 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   return flags;
 }
-
-/****************************************************************************
- * Name: tcp_iob_work
- *
- * Description:
- *   Work thread callback function execute when an IOB because available.
- *
- * Input Parameters:
- *   psock - Socket state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-static inline void tcp_iob_work(FAR void *arg)
-{
-  FAR struct tcp_poll_s *pinfo;
-  FAR struct socket *psock;
-  FAR struct pollfd *fds;
-
-  pinfo = (FAR struct tcp_poll_s *)arg;
-  DEBUGASSERT(pinfo->psock != NULL && pinfo->fds != NULL);
-
-  psock = pinfo->psock;
-  fds   = pinfo->fds;
-
-  /* Verify that we still have a connection */
-
-  if (!_SS_ISCONNECTED(psock->s_flags) && !_SS_ISLISTENING(psock->s_flags))
-    {
-      /* Don't report more than once.  Might happen in a race condition */
-
-      if ((fds->revents & (POLLERR | POLLHUP)) == 0)
-        {
-          /* We were previously connected but lost the connection either due
-           * to a graceful shutdown by the remote peer or because of some
-           * exceptional event.
-           */
-
-          fds->revents |= (POLLERR | POLLHUP);
-          nxsem_post(fds->sem);
-        }
-    }
-
-  /* Handle a race condition.  Check if we have already posted the POLLOUT
-   * event.  If so, don't do it again and don't setup notification again.
-   */
-
-  else if ((fds->events & POLLWRNORM) != 0 &&
-           (fds->revents & POLLWRNORM) == 0)
-    {
-      /* Check if we are now able to send */
-
-      if (psock_tcp_cansend(psock) >= 0)
-        {
-          /* Yes.. then signal the poll logic */
-
-          fds->revents |= POLLWRNORM;
-          nxsem_post(fds->sem);
-        }
-      else
-        {
-          /* No.. ask for the IOB free notification again */
-
-          pinfo->key = iob_notifier_setup(LPWORK, tcp_iob_work, pinfo);
-        }
-    }
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -273,9 +202,6 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   info->psock  = psock;
   info->fds    = fds;
   info->cb     = cb;
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  info->key    = 0;
-#endif
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
@@ -374,20 +300,6 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       nxsem_post(fds->sem);
     }
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  /* If (1) revents == 0, (2) write buffering is enabled, and (3) the
-   * POLLOUT event is needed, then setup to receive a notification when an
-   * IOB is freed.
-   */
-
-  else if ((fds->events & POLLOUT) != 0)
-    {
-      /* Ask for the IOB free notification */
-
-      info->key = iob_notifier_setup(LPWORK, tcp_iob_work, info);
-    }
-#endif
-
 errout_with_lock:
   net_unlock();
   return ret;
@@ -429,17 +341,6 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-      /* Cancel any pending IOB free notification */
-
-      if (info->key > 0)
-        {
-          /* Ask for the IOB free notification */
-
-          iob_notifier_teardown(info->key);
-        }
-#endif
-
       /* Release the callback */
 
       tcp_callback_free(conn, info->cb);

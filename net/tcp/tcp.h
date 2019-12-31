@@ -130,9 +130,6 @@ struct tcp_poll_s
   FAR struct socket *psock;        /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  int16_t key;                     /* Needed to cancel pending notification */
-#endif
 };
 
 struct tcp_conn_s
@@ -159,10 +156,10 @@ struct tcp_conn_s
    *   TCP_NEWDATA - May be cleared to indicate that the data was consumed
    *                 and that no further process of the new data should be
    *                 attempted.
-   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
-   *                 to indicate that an ACK should be included in the response.
-   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set, then
-   *                 dev->d_len should also be cleared).
+   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set to
+   *                 indicate that an ACK should be included in the response.
+   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set,
+   *                 then dev->d_len should also be cleared).
    */
 
   FAR struct devif_callback_s *list;
@@ -282,7 +279,8 @@ struct tcp_conn_s
    */
 
   FAR void *accept_private;
-  int (*accept)(FAR struct tcp_conn_s *listener, FAR struct tcp_conn_s *conn);
+  int (*accept)(FAR struct tcp_conn_s *listener,
+                FAR struct tcp_conn_s *conn);
 
   /* The following is a list of poll structures of threads waiting for
    * socket events.
@@ -550,7 +548,8 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
  *
  ****************************************************************************/
 
-int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr *addr);
 
 /****************************************************************************
  * Name: psock_tcp_connect
@@ -559,7 +558,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr);
  *   Perform a TCP connection
  *
  * Input Parameters:
- *   psock - A reference to the socket structure of the socket to be connected
+ *   psock - A reference to the structure of the socket to be connected
  *   addr  - The address of the remote server to connect to
  *
  * Returned Value:
@@ -1251,7 +1250,8 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
  * Input Parameters:
  *   psock    The listening TCP socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr'
+ *            Return: returned size of 'addr'
  *   newconn  The new, accepted TCP connection structure
  *
  * Returned Value:
