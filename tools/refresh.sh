@@ -123,7 +123,7 @@ CHIPLIST="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
   lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
   nuc1xx rx65n s32k1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
   stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
-  pic32mz lm32 mor1kx m32262f8 sh7032 fe310 gap8 nr5m100 sim qemu esp32 z16f2811
+  pic32mz lm32 mor1kx m32262f8 sh7032 fe310 k210 gap8 nr5m100 sim qemu esp32 z16f2811
   ez80 z180 z8 z80"
 
 for ARCH in ${ARCHLIST}; do
