@@ -107,9 +107,6 @@ struct udp_poll_s
   FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  int16_t key;                     /* Needed to cancel pending notification */
-#endif
 };
 
 struct udp_conn_s
@@ -298,7 +295,8 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
  *
  ****************************************************************************/
 
-int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
+int udp_connect(FAR struct udp_conn_s *conn,
+                FAR const struct sockaddr *addr);
 
 /****************************************************************************
  * Name: udp_close
@@ -688,9 +686,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
-                         size_t len, int flags, FAR const struct sockaddr *to,
-                         socklen_t tolen);
+ssize_t psock_udp_sendto(FAR struct socket *psock,
+                         FAR const void *buf, size_t len, int flags,
+                         FAR const struct sockaddr *to, socklen_t tolen);
 
 /****************************************************************************
  * Name: udp_pollsetup
@@ -797,8 +795,8 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  *
  * Description:
  *   Eliminate a UDP read-ahead notification previously setup by
- *   udp_readahead_notifier_setup().  This function should only be called if the
- *   notification should be aborted prior to the notification.  The
+ *   udp_readahead_notifier_setup().  This function should only be called if
+ *   the notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
@@ -825,7 +823,7 @@ int udp_notifier_teardown(int key);
  *   When read-ahead data becomes available, *all* of the workers waiting
  *   for read-ahead data will be executed.  If there are multiple workers
  *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call udp_readahead_notifier_setup() once again.
+ *   data. Others will need to call udp_readahead_notifier_setup once again.
  *
  * Input Parameters:
  *   conn  - The UDP connection where read-ahead data was just buffered.
