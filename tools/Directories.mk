@@ -72,12 +72,6 @@ CLEANDIRS += $(APPDIR)
 endif
 endif
 
-ifeq ($(CONFIG_LIBCXX),y)
-LIBXX=libcxx
-else
-LIBXX=libxx
-endif
-
 KERNDEPDIRS += sched drivers boards $(ARCH_SRC)
 KERNDEPDIRS += fs binfmt
 CONTEXTDIRS = boards $(APPDIR)

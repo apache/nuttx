@@ -74,7 +74,7 @@ endif
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libxx$(LIBEXT)
 endif
 
 # Add library for application support.
