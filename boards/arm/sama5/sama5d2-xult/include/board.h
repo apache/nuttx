@@ -228,6 +228,34 @@
 #define PIO_UART1_RXD     PIO_UART1_RXD_1
 #define PIO_UART1_TXD     PIO_UART1_TXD_1
 
+/* Standard UART on Arduino connector (J22) is UART2.
+ *
+ *   ---- ------- -------------
+ *   J22  BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    7   URXD2   PD4 UART2 URXD2
+ *    8   UTXD2   PD5 UART2 UTXD2
+ *   ---- ------- -------------
+ */
+
+#define PIO_UART2_RXD     PIO_UART2_RXD_2
+#define PIO_UART2_TXD     PIO_UART2_TXD_2
+
+/* Standard UART on Arduino connector (J17) is UART3.
+ *
+ *   ---- ------- -------------
+ *   J17  BOARD      SAMA5D2
+ *   PIN  NAME    PIO  FUNCTION
+ *   ---- ------- -------------
+ *    27   URXD3  PB11 UART3 URXD3
+ *    28   UTXD3  PB12 UART3 UTXD3
+ *   ---- ------- -------------
+ */
+
+#define PIO_UART3_RXD     PIO_UART3_RXD_1
+#define PIO_UART3_TXD     PIO_UART3_TXD_1
+
 /* Standard UART on Arduino connector (J21) is FLEXCOM4.
  *
  *   ---- ------- -------------

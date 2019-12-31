@@ -119,16 +119,16 @@
 #    define TTYS0_DEV           g_uart1port  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port  /* UART2 is console */
-#    define TTYS0_DEV           g_uart1port  /* UART2 is ttyS0 */
+#    define CONSOLE_DEV         g_uart2port  /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port  /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port  /* UART3 is console */
-#    define TTYS0_DEV           g_uart1port  /* UART3 is ttyS0 */
+#    define CONSOLE_DEV         g_uart3port  /* UART3 is console */
+#    define TTYS0_DEV           g_uart3port  /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
 #elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port  /* UART4 is console */
-#    define TTYS0_DEV           g_uart1port  /* UART4 is ttyS0 */
+#    define CONSOLE_DEV         g_uart4port  /* UART4 is console */
+#    define TTYS0_DEV           g_uart4port  /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart0port /* USART0 is console */
@@ -159,13 +159,13 @@
 #    define TTYS0_DEV           g_uart1port  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #  elif defined(CONFIG_SAMA5_UART2)
-#    define TTYS0_DEV           g_uart1port  /* UART2 is ttyS0 */
+#    define TTYS0_DEV           g_uart2port  /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
 #  elif defined(CONFIG_SAMA5_UART3)
-#    define TTYS0_DEV           g_uart1port  /* UART3 is ttyS0 */
+#    define TTYS0_DEV           g_uart3port  /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
 #  elif defined(CONFIG_SAMA5_UART4)
-#    define TTYS0_DEV           g_uart1port  /* UART4 is ttyS0 */
+#    define TTYS0_DEV           g_uart4port  /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
 #  elif defined(CONFIG_USART0_SERIALDRIVER)
 #    define TTYS0_DEV           g_usart0port /* USART0 is ttyS0 */
@@ -194,13 +194,13 @@
 #  define TTYS1_DEV           g_uart1port  /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART2) && !defined(UART2_ASSIGNED)
-#  define TTYS1_DEV           g_uart1port  /* UART2 is ttyS1 */
+#  define TTYS1_DEV           g_uart2port  /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS1_DEV           g_uart1port  /* UART3 is ttyS1 */
+#  define TTYS1_DEV           g_uart3port  /* UART3 is ttyS1 */
 #  define UART3_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS1_DEV           g_uart1port  /* UART4 is ttyS1 */
+#  define TTYS1_DEV           g_uart4port  /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS1_DEV           g_usart0port /* USART0 is ttyS1 */
@@ -228,13 +228,13 @@
 #  define TTYS2_DEV           g_uart1port  /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART2) && !defined(UART2_ASSIGNED)
-#  define TTYS2_DEV           g_uart1port  /* UART2 is ttyS2 */
+#  define TTYS2_DEV           g_uart2port  /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS2_DEV           g_uart1port  /* UART3 is ttyS2 */
+#  define TTYS2_DEV           g_uart2port  /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS2_DEV           g_uart1port  /* UART4 is ttyS2 */
+#  define TTYS2_DEV           g_uart4port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS2_DEV           g_usart0port /* USART0 is ttyS2 */
@@ -259,10 +259,10 @@
  */
 
 #if defined(CONFIG_SAMA5_UART2) && !defined(UART2_ASSIGNED)
-#  define TTYS3_DEV           g_uart1port  /* UART2 is ttyS3 */
+#  define TTYS3_DEV           g_uart2port  /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS3_DEV           g_uart1port  /* UART3 is ttyS3 */
+#  define TTYS3_DEV           g_uart3port  /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart1port  /* UART4 is ttyS3 */
@@ -290,10 +290,10 @@
  */
 
 #if defined(CONFIG_SAMA5_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS4_DEV           g_uart1port  /* UART3 is ttyS4 */
+#  define TTYS4_DEV           g_uart3port  /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS4_DEV           g_uart1port  /* UART4 is ttyS4 */
+#  define TTYS4_DEV           g_uart4port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS4_DEV           g_usart0port /* USART0 is ttyS4 */

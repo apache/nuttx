@@ -64,7 +64,7 @@ DRAMBOOT, AT25BOOT, SRAMBOOT
 
   The boards/arm/sama5/sama5d4-xult/README.txt also describes variants AT25BOOT and
   SRAMBOOT.  This have not yet been ported to the SAMA5D2-XULT, but are
-  available if they are usefult too you.
+  available if they are useful too you.
 
 Running NuttX from SDRAM
 ========================
@@ -203,7 +203,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
      http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot#Build_U_Boot_from_sources
 
-     A pre-Built binay image is available here:
+     A pre-Built binary image is available here:
 
      ftp://www.at91.com/pub/uboot/u-boot-v2013.07/u-boot-sama5d3_xplained-v2013.07-at91-r1.bin
 
@@ -237,7 +237,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
      - Press the "Send File" button
      - Close SAM-BA, remove the USB Device cable.
 
-  You should now be able to interrupt with U-Boot vie the DBGU interface.
+  You should now be able to interrupt with U-Boot via the DBGU interface.
 
   Load NuttX with U-Boot on AT91 boards
   -------------------------------------
