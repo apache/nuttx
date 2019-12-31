@@ -1188,7 +1188,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_TCPBACKLOG
 bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
 #else
-#  define tcp_backlogavailable(c) (false);
+#  define tcp_backlogavailable(c) (false)
 #endif
 
 /****************************************************************************
