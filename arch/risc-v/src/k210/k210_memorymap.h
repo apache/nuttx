@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/risc-v/src/k210/k210_memorymap.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -16,9 +14,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,61 +30,32 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
+#ifndef _ARCH_RISCV_SRC_K210_K210_MEMORYMAP_H
+#define _ARCH_RISCV_SRC_K210_K210_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
-
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include "hardware/k210_memorymap.h"
+#include "hardware/k210_uart.h"
+#include "hardware/k210_clint.h"
+#include "hardware/k210_plic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
+#define K210_IDLESTACK_BASE  (uintptr_t)&_ebss
 #else
-#define EXTERN extern
+#define K210_IDLESTACK_BASE  _ebss
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
+#define K210_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)
+#define K210_IDLESTACK_TOP  (K210_IDLESTACK_BASE + K210_IDLESTACK_SIZE)
 
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
+#endif  /* _ARCH_RISCV_SRC_K210_K210_MEMORYMAP_H */
 

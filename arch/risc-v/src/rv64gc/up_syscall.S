@@ -1,10 +1,13 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/riscv/src/rv64gc/up_syscall.S
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Modified for RISC-V:
+ *
+ *   Copyright (C) 2016 Ken Pettit. All rights reserved.
+ *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,61 +38,75 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
-
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Symbols
+ ****************************************************************************/
+
+	.file	"up_syscall0.S"
+	.global sys_call0
+	.global sys_call1
+	.global sys_call2
+	.global sys_call3
+	.global sys_call4
+	.global sys_call5
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: up_syscall0, up_syscall1, up_syscall2, up_syscall3
+ *
+ * Description:
+ *   up_syscall0 - System call SYS_ argument and no additional parameters.
+ *   up_syscall1 - System call SYS_ argument and one additional parameter.
+ *   up_syscall2 - System call SYS_ argument and two additional parameters.
+ *   up_syscall3 - System call SYS_ argument and three additional parameters.
+ *   up_syscall4 - System call SYS_ argument and four additional parameters.
+ *   up_syscall5 - System call SYS_ argument and five additional parameters.
+ *
+ * Assumption:
+ *   All interrupts are disabled except for the software interrupts.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+	.text
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+sys_call0:	/* a0 holds the syscall number */
+sys_call1:	/* a0 holds the syscall number, argument in a1 */
+sys_call2:	/* a0 holds the syscall number, arguments in a1 and a2 */
+sys_call3:	/* a0 holds the syscall number, arguments in a1, a2, and a3 */
+sys_call4:	/* a0 holds the syscall number, arguments in a1, a2, a3 and a4 */
+sys_call5:	/* a0 holds the syscall number, arguments in a1, a2, a3, a4 and a5 */
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
+	/* Issue the ECALL opcode to perform a SW interrupt to the OS */
 
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
+   ecall
+
+	/* The actual interrupt may not a occur for a few more cycles.  Let's
+	 * put a few nop's here in hope that the SW interrupt occurs during
+	 * the sequence of nops.
+	 */
+
+	nop
+	nop
+
+	/* Then return with the result of the software interrupt in v0 */
+
+	ret
+	nop
 

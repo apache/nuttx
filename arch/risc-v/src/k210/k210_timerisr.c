@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/risc-v/src/k210/k210_timerisr.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,61 +33,113 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
+#include <stdint.h>
+#include <time.h>
+#include <debug.h>
 
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+
+#include "k210.h"
+#include "k210_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define getreg64(a)   (*(volatile uint64_t *)(a))
+#define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
+
+#define TICK_COUNT ((k210_get_cpuclk() / 50) / TICK_PER_SEC)
+
 /****************************************************************************
- * Public Types
+ * Private Data
+ ****************************************************************************/
+
+static bool _b_tick_started = false;
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
+ * Name:  k210_reload_mtimecmp
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+static void k210_reload_mtimecmp(void)
 {
-#else
-#define EXTERN extern
-#endif
+  irqstate_t flags = spin_lock_irqsave();
 
-#undef EXTERN
-#ifdef __cplusplus
+  uint64_t current;
+  uint64_t next;
+
+  if (!_b_tick_started)
+    {
+      _b_tick_started = true;
+      current = getreg64(K210_CLINT_MTIME);
+    }
+  else
+    {
+      current = getreg64(K210_CLINT_MTIMECMP);
+    }
+
+  uint64_t tick = TICK_COUNT;
+  next = current + tick;
+
+  putreg64(next, K210_CLINT_MTIMECMP);
+
+  spin_unlock_irqrestore(flags);
 }
-#endif
-#endif
 
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
+/****************************************************************************
+ * Name:  k210_timerisr
+ ****************************************************************************/
+
+static int k210_timerisr(int irq, void *context, FAR void *arg)
+{
+  k210_reload_mtimecmp();
+
+  /* Process timer interrupt */
+
+  nxsched_process_timer();
+  return 0;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: riscv_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
+
+void riscv_timer_initialize(void)
+{
+#if 1
+  /* Attach timer interrupt handler */
+
+  (void)irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
+
+  /* Reload CLINT mtimecmp */
+
+  k210_reload_mtimecmp();
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(K210_IRQ_MTIMER);
+#endif
+}
 

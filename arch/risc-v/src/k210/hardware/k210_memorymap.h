@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/irq.h
+ * arch/risc-v/src/k210/hardware/k210_memorymap.h
  *
- *   Copyright (C) 2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,45 +30,20 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_IRQ_H
-#define __ARCH_RISCV_INCLUDE_IRQ_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-/* Include RISC-V architecture-specific IRQ definitions */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-#  include <arch/rv32im/irq.h>
-#endif
-
-#if defined(CONFIG_ARCH_RV64GC)
-#  include <arch/rv64gc/irq.h>
-#endif
+#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
+#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-typedef uint32_t  irqstate_t;
+/* Register Base Address ****************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#define K210_CLINT_BASE   0x02000000
+#define K210_PLIC_BASE    0x0c000000
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#define K210_UART0_BASE   0x38000000
+#define K210_GPIO_BASE    0x38001000
 
-#endif /* __ARCH_RISCV_INCLUDE_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H */
+

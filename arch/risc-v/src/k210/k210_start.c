@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/risc-v/src/k210/k210_init.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -16,9 +14,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,61 +30,104 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
+#include <arch/board/board.h>
 
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include "k210_clockconfig.h"
+#include "k210.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
+#endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
+ * linker script. _ebss lies at the end of the BSS region. The idle task
+ * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
+ * The IDLE thread is the thread that the system boots on and, eventually,
+ * becomes the IDLE, do nothing task that runs only when there is nothing
+ * else to run.  The heap continues from there until the end of memory.
+ * g_idle_topstack is a read-only variable the provides this computed
+ * address.
+ */
+
+uintptr_t g_idle_topstack = K210_IDLESTACK_TOP;
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: k210_start
+ ****************************************************************************/
+
+void __k210_start(void)
 {
-#else
-#define EXTERN extern
+  const uint32_t *src;
+  uint32_t *dest;
+
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = &_sbss; dest < &_ebss; )
+    {
+      *dest++ = 0;
+    }
+
+  /* Move the initialized data section from his temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+    {
+      *dest++ = *src++;
+    }
+
+  /* Setup PLL */
+
+  k210_clockconfig();
+
+  /* Configure the UART so we can get debug output */
+
+  k210_lowsetup();
+
+  showprogress('A');
+
+#ifdef USE_EARLYSERIALINIT
+  up_earlyserialinit();
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+  showprogress('B');
+
+  /* Do board initialization */
+
+  k210_boardinitialize();
+
+  showprogress('C');
+
+  /* Call nx_start() */
+
+  nx_start();
+
+  /* Shouldn't get here */
+
+  for (; ; );
 }
-#endif
-#endif
-
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
-

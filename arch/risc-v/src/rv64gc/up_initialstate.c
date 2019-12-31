@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/risc-v/src/rv64gc/up_initialstate.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,61 +33,89 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
+#include <sys/types.h>
+#include <stdint.h>
+#include <string.h>
 
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include <nuttx/arch.h>
+#include <arch/irq.h>
+
+#include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Name: up_initial_state
+ *
+ * Description:
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
+ *
+ *   This function must setup the initial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+void up_initial_state(struct tcb_s *tcb)
 {
-#else
-#define EXTERN extern
+  struct xcptcontext *xcp = &tcb->xcp;
+  uint32_t regval;
+
+  /* Initialize the initial exception register context structure */
+
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
+   * beginning of the stack region.  Some functions may want to store data on
+   * the caller's stack and it might be good to reserve some space.  However,
+   * only the start function would do that and we have control over that one
+   */
+
+  xcp->regs[REG_SP]      = (uintptr_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
+  xcp->regs[REG_EPC]     = (uintptr_t)tcb->start;
+
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
+   */
+
+#ifdef CONFIG_PIC
+#  warning "Missing logic"
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+  /* Set privileged- or unprivileged-mode, depending on how NuttX is
+   * configured and what kind of thread is being started.
+   *
+   * If the kernel build is not selected, then all threads run in
+   * privileged thread mode.
+   */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  warning "Missing logic"
+#endif
+
+  /* Set the initial value of the interrupt context register.
+   *
+   * Since various RISC-V platforms use different interrupt
+   * methodologies, the value of the interrupt context is
+   * part specific.
+   *
+   */
+
+  regval = up_get_newintctx();
+  xcp->regs[REG_INT_CTX] = regval;
 }
-#endif
-#endif
-
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
 

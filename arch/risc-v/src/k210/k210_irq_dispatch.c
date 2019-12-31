@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/risc-v/src/k210/k210_irq_dispatch.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -16,9 +14,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,61 +30,92 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
+#include <stdint.h>
+#include <assert.h>
 
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "up_arch.h"
+#include "up_internal.h"
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+#include "group/group.h"
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+volatile uint64_t * g_current_regs;
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * k210_dispatch_irq
+ ****************************************************************************/
+
+void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 {
+  uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
+  uint64_t *mepc = regs;
+
+  if (K210_IRQ_MEXT == irq)
+    {
+      /* Read & write K210_PLIC_CLAIM to clear pending */
+
+      uint32_t val = getreg32(K210_PLIC_CLAIM);
+      putreg32(val, K210_PLIC_CLAIM);
+
+      irq += val;
+    }
+
+  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+
+  if (K210_IRQ_ECALLM == irq)
+    {
+      *mepc += 4;
+    }
+
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC();
 #else
-#define EXTERN extern
+  /* Nested interrupts are not supported */
+
+  DEBUGASSERT(g_current_regs == NULL);
+
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * CURRENT_REGS is also used to manage interrupt level context switches.
+   */
+
+  g_current_regs = regs;
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+  /* If a context switch occurred while processing the interrupt then
+   * g_current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = (uint64_t *)g_current_regs;
+  g_current_regs = NULL;
+
+  /* Set machine previous privilege mode to machine mode */
+
+  *(regs + REG_INT_CTX_NDX) |= 0x3 << 11;
+
+  return regs;
 }
-#endif
-#endif
-
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
 

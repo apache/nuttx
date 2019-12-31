@@ -1,10 +1,8 @@
 /****************************************************************************
- * arch/risc-v/include/syscall.h
+ * arch/arm/src/k210/k210_clockconfig.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified 2016 by Ken Pettit for RISC-V architecture.
+ *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,26 +33,14 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_RISCV_INCLUDE_SYSCALL_H
-#define __ARCH_RISCV_INCLUDE_SYSCALL_H
+#ifndef __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H
+#define __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include RISC-V architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_RV32IM
-# include <arch/rv32im/syscall.h>
-#endif
-
-#ifdef CONFIG_ARCH_RV64GC
-# include <arch/rv64gc/syscall.h>
-#endif
+#include "k210_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,19 +50,12 @@
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -85,11 +64,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+EXTERN uint32_t k210_get_cpuclk(void);
+EXTERN void k210_clockconfig(void);
+
+#if defined(__cplusplus)
 }
 #endif
-#endif
+#undef EXTERN
 
-#endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
-
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_K210_K210_CLOCKCONFIG_H */
