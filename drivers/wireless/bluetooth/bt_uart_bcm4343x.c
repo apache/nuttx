@@ -471,7 +471,7 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
   ret = bt_netdev_register(&upper->dev);
   if (ret < 0)
     {
-      wlerr("ERROR: bt_driver_register failed: %d\n", ret);
+      wlerr("ERROR: bt_netdev_register failed: %d\n", ret);
       kmm_free(upper);
     }
 

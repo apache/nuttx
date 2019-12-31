@@ -271,5 +271,5 @@ int btnull_register(void)
 {
   /* Register the driver with the Bluetooth stack */
 
-  return bt_driver_register(&g_bt_null);
+  return bt_netdev_register(&g_bt_null);
 }
