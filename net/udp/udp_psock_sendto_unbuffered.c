@@ -458,10 +458,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are
    * ready.
@@ -565,10 +561,6 @@ errout_with_lock:
   /* Release the semaphore */
 
   nxsem_destroy(&state.st_sem);
-
-  /* Set the socket state back to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Unlock the network and return the result of the sendto() operation */
 

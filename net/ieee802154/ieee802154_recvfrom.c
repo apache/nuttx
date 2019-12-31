@@ -385,10 +385,6 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
   (void)nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
   (void)nxsem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
 
-  /* Set the socket state to receiving */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
-
   /* Set up the callback in the connection */
 
   state.ir_cb = ieee802154_callback_alloc(&radio->r_dev, conn);
@@ -416,9 +412,6 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
       ret = -EBUSY;
     }
 
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   nxsem_destroy(&state.ir_sem);
 
 errout_with_lock:

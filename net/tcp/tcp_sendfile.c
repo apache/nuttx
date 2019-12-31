@@ -562,10 +562,6 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are
    * ready.
@@ -642,10 +638,6 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
       net_lockedwait(&state.snd_sem);
     }
   while (state.snd_sent >= 0 && state.snd_acked < state.snd_flen);
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   tcp_callback_free(conn, state.snd_ackcb);
 

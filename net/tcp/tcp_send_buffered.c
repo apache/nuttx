@@ -994,10 +994,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_tcp_send", buf, len);
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   if (len > 0)
     {
       /* Allocate a write buffer.  Careful, the network will be momentarily
@@ -1123,10 +1119,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       send_txnotify(psock, conn);
       net_unlock();
     }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Check for errors.  Errors are signaled by negative errno values
    * for the send length

@@ -410,10 +410,6 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 #endif
 
-  /* Set the socket state to receiving */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
-
   /* Set up the callback in the connection */
 
   state.pr_cb = pkt_callback_alloc(dev, conn);
@@ -440,10 +436,6 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       ret = -EBUSY;
     }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
 errout_with_state:
   net_unlock();

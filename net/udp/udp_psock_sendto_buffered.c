@@ -694,10 +694,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_udp_send", buf, len);
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   if (len > 0)
     {
       /* Allocate a write buffer.  Careful, the network will be momentarily
@@ -824,10 +820,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       net_unlock();
     }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Return the number of bytes that will be sent */
 

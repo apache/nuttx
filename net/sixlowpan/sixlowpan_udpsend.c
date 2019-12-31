@@ -302,10 +302,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
       return (ssize_t)ret;
     }
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* If routable, then call sixlowpan_send() to format and send the 6LoWPAN
    * packet.
    */
@@ -324,9 +320,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
     }
 
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return (ssize_t)ret;
 }
 
