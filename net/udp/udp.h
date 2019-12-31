@@ -53,7 +53,7 @@
 #  include <nuttx/mm/iob.h>
 #endif
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -64,12 +64,6 @@
  ****************************************************************************/
 
 #define NET_UDP_HAVE_STACK 1
-
-/* Conditions for support UDP poll/select operations */
-
-#ifdef CONFIG_NET_UDP_READAHEAD
-#  define HAVE_UDP_POLL
-#endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
 /* UDP write buffer dump macros */
@@ -99,10 +93,28 @@
  * Public Type Definitions
  ****************************************************************************/
 
+struct sockaddr;      /* Forward reference */
+struct socket;        /* Forward reference */
+struct net_driver_s;  /* Forward reference */
+struct pollfd;        /* Forward reference */
+
 /* Representation of a UDP connection */
 
 struct devif_callback_s;  /* Forward reference */
 struct udp_hdr_s;         /* Forward reference */
+
+/* This is a container that holds the poll-related information */
+
+struct udp_poll_s
+{
+  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
+  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  int16_t key;                     /* Needed to cancel pending notification */
+#endif
+};
 
 struct udp_conn_s
 {
@@ -151,6 +163,12 @@ struct udp_conn_s
   sq_queue_t write_q;             /* Write buffering for UDP packets */
   FAR struct net_driver_s *dev;   /* Last device */
 #endif
+
+  /* The following is a list of poll structures of threads waiting for
+   * socket events.
+   */
+
+  struct udp_poll_s pollinfo[CONFIG_NET_UDP_NPOLLWAITERS];
 };
 
 /* This structure supports UDP write buffering.  It is simply a container
@@ -184,11 +202,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-struct sockaddr;      /* Forward reference */
-struct socket;        /* Forward reference */
-struct net_driver_s;  /* Forward reference */
-struct pollfd;        /* Forward reference */
 
 /****************************************************************************
  * Name: udp_initialize
@@ -653,9 +666,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-#ifdef HAVE_UDP_POLL
 int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
 
 /****************************************************************************
  * Name: udp_pollteardown
@@ -673,9 +684,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef HAVE_UDP_POLL
 int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
 
 /****************************************************************************
  * Name: udp_readahead_notifier_setup
@@ -703,7 +712,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_readahead_notifier_setup(worker_t worker,
                                  FAR struct udp_conn_s *conn,
                                  FAR void *arg);
@@ -735,7 +744,7 @@ int udp_readahead_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_writebuffer_notifier_setup(worker_t worker,
                                    FAR struct udp_conn_s *conn,
                                    FAR void *arg);
@@ -760,7 +769,7 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 int udp_notifier_teardown(int key);
 #endif
 
@@ -784,7 +793,7 @@ int udp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_NET_UDP_NOTIFIER)
 void udp_readahead_signal(FAR struct udp_conn_s *conn);
 #endif
 
@@ -809,7 +818,7 @@ void udp_readahead_signal(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
 void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
 #endif
 
@@ -829,7 +838,7 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_UDP_NOTIFIER)
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
 struct timespec;
 int udp_txdrain(FAR struct socket *psock,
                 FAR const struct timespec *abstime);

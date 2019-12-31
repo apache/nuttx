@@ -88,8 +88,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        int flags, FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
-  ssize_t ret;
-
   /* Verify that non-NULL pointers were passed */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -111,10 +109,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       return -EBADF;
     }
 
-  /* Set the socket state to receiving */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
-
   /* Let logic specific to this address family handle the recvfrom()
    * operation.
    */
@@ -122,12 +116,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   DEBUGASSERT(psock->s_sockif != NULL &&
              psock->s_sockif->si_recvfrom != NULL);
 
-  ret = psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-  return ret;
+  return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
 }
 
 /****************************************************************************

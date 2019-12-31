@@ -145,7 +145,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags)
 {
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
   uint16_t orig = flags;
 #endif
 
@@ -203,7 +203,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
       flags = devif_conn_event(dev, conn, flags, conn->connevents);
     }
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
   /* Provide notification(s) if the TCP connection has been lost. */
 
   if ((orig & TCP_DISCONN_EVENTS) != 0)
@@ -287,7 +287,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
       return 0;
     }
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
   /* Provide notification(s) that additional TCP read-ahead data is
    * available.
    */

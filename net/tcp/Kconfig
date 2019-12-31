@@ -55,6 +55,10 @@ config NET_TCP_CONNS
 	---help---
 		Maximum number of TCP/IP connections (all tasks)
 
+config NET_TCP_NPOLLWAITERS
+	int "Number of TCP poll waiters"
+	default 1
+
 config NET_TCP_RTO
 	int "RTO of TCP/IP connections"
 	default 3
@@ -74,7 +78,7 @@ config NET_MAX_LISTENPORTS
 	---help---
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
-config TCP_NOTIFIER
+config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n
 	depends on SCHED_WORKQUEUE

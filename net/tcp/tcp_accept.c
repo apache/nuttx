@@ -264,10 +264,6 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   else
 #endif
     {
-      /* Set the socket state to accepting */
-
-      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_ACCEPT);
-
       /* Perform the TCP accept operation */
 
       /* Initialize the state structure.  This is done with the network
@@ -305,10 +301,6 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       conn->accept         = NULL;
 
       nxsem_destroy(&state. acpt_sem);
-
-      /* Set the socket state to idle */
-
-      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
       /* Check for a errors.  Errors are signalled by negative errno values
        * for the send length.

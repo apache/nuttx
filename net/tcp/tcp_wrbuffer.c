@@ -119,6 +119,7 @@ void tcp_wrbuffer_initialize(void)
     }
 
   nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
+  nxsem_setprotocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -149,7 +150,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
    * buffer
    */
 
-  DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem)); /* TODO: Handle EINTR. */
+  while (net_lockedwait(&g_wrbuffer.sem) < 0);
 
   /* Now, we are guaranteed to have a write buffer structure reserved
    * for us in the free list.
@@ -207,11 +208,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_tryalloc(void)
    * buffer
    */
 
-  if (tcp_wrbuffer_test() == OK)
-    {
-      DEBUGVERIFY(net_lockedwait(&g_wrbuffer.sem));
-    }
-  else
+  if (nxsem_trywait(&g_wrbuffer.sem) != OK)
     {
       return NULL;
     }

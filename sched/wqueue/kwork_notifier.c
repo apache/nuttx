@@ -56,8 +56,40 @@
 #ifdef CONFIG_WQUEUE_NOTIFIER
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure describes one notification list entry.  It is cast-
+ * compatible with struct work_notifier_s.  This structure is an allocated
+ * container for the user notification data.   It is allocated because it
+ * must persist until the work is executed.
+ */
+
+struct work_notifier_entry_s
+{
+  /* This must appear at the beginning of the structure.  A reference to
+   * the struct work_notifier_entry_s instance must be cast-compatible with
+   * struct dq_entry_s.
+   */
+
+  struct work_s work;           /* Used for scheduling the work */
+
+  /* User notification information */
+
+  struct work_notifier_s info;  /* The notification info */
+
+  /* Additional payload needed to manage the notification */
+
+  int16_t key;                  /* Unique ID for the notification */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* This is a doubly linked list of free notifications. */
+
+static dq_queue_t g_notifier_free;
 
 /* This is a doubly linked list of pending notifications.  When an event
  * occurs available, *all* of the waiters for that event in this list will
@@ -147,6 +179,30 @@ static int16_t work_notifier_key(void)
 }
 
 /****************************************************************************
+ * Name: work_notifier_worker
+ *
+ * Description:
+ *   Forward to the real worker and free the notification.
+ *
+ ****************************************************************************/
+
+static void work_notifier_worker(FAR void *arg)
+{
+  FAR struct work_notifier_entry_s *notifier =
+    (FAR struct work_notifier_entry_s *)arg;
+
+  /* Forward to the real worker */
+
+  notifier->info.worker(notifier->info.arg);
+
+  /* Put the notification to the free list */
+
+  while (nxsem_wait(&g_notifier_sem) < 0);
+  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+  nxsem_post(&g_notifier_sem);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -185,9 +241,16 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
       return ret;
     }
 
-  /* Allocate a new notification entry */
+  /* Try to get the entry from the free list */
 
-  notifier = kmm_malloc(sizeof(struct work_notifier_entry_s));
+  notifier = (FAR struct work_notifier_entry_s *)dq_remfirst(&g_notifier_free);
+  if (notifier == NULL)
+    {
+      /* Allocate a new notification entry */
+
+      notifier = kmm_malloc(sizeof(struct work_notifier_entry_s));
+    }
+
   if (notifier == NULL)
     {
       ret = -ENOMEM;
@@ -269,9 +332,9 @@ int work_notifier_teardown(int key)
 
       dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
 
-      /* Free the notification */
+      /* Put the notification to the free list */
 
-      kmm_free(notifier);
+      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
       ret = OK;
     }
 
@@ -359,8 +422,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
            * responsible for freeing the allocated memory.
            */
 
-          (void)work_queue(info->qid, &notifier->work, info->worker,
-                           entry, 0);
+          (void)work_queue(info->qid, &notifier->work,
+                           work_notifier_worker, entry, 0);
         }
     }
 

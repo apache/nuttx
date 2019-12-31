@@ -47,7 +47,7 @@
 
 #include "udp/udp.h"
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
 
 /****************************************************************************
  * Public Functions
@@ -254,4 +254,4 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn)
 }
 #endif
 
-#endif /* CONFIG_UDP_NOTIFIER */
+#endif /* CONFIG_NET_UDP_NOTIFIER */

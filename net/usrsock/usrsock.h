@@ -86,6 +86,13 @@ enum usrsock_conn_state_e
   USRSOCK_CONN_STATE_CONNECTING,
 };
 
+struct usrsock_poll_s
+{
+  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+};
+
 struct usrsock_conn_s
 {
   /* Common prologue of all connection structures. */
@@ -126,6 +133,12 @@ struct usrsock_conn_s
       size_t pos;            /* Writer position on input buffer */
     } datain;
   } resp;
+
+  /* The following is a list of poll structures of threads waiting for
+   * socket events.
+   */
+
+  struct usrsock_poll_s pollinfo[CONFIG_NET_USRSOCK_NPOLLWAITERS];
 };
 
 struct usrsock_reqstate_s

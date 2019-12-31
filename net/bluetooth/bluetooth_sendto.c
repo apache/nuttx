@@ -283,10 +283,6 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
       return -ENODEV;
     }
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* Perform the send operation */
 
   /* Initialize the state structure. This is done with the network locked
@@ -344,10 +340,6 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   nxsem_destroy(&state.is_sem);
   net_unlock();
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Check for a errors, Errors are signaled by negative errno values
    * for the send length

@@ -46,13 +46,9 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/net/net.h>
-
 #include "tcp/tcp.h"
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 
 /****************************************************************************
  * Private Functions
@@ -74,25 +70,13 @@
 
 static void txdrain_worker(FAR void *arg)
 {
-  /* The entire notifier entry is passed to us.  That is because we are
-   * responsible for disposing of the entry via kmm_free() when we are
-   * finished with it.
-   */
+  FAR sem_t *waitsem = (FAR sem_t *)arg;
 
-  FAR struct work_notifier_entry_s *notifier =
-    (FAR struct work_notifier_entry_s *)arg;
-  FAR sem_t *waitsem;
-
-  DEBUGASSERT(notifier != NULL && notifier->info.arg != NULL);
-  waitsem = (FAR sem_t *)notifier->info.arg;
-
-  /* Free the notifier entry */
-
-  kmm_free(notifier);
+  DEBUGASSERT(waitsem != NULL);
 
   /* Then just post the semaphore, waking up tcp_txdrain() */
 
-  sem_post(waitsem);
+  nxsem_post(waitsem);
 }
 
 /****************************************************************************
@@ -130,6 +114,7 @@ int tcp_txdrain(FAR struct socket *psock,
   /* Initialize the wait semaphore */
 
   nxsem_init(&waitsem, 0, 0);
+  nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
 
   /* The following needs to be done with the network stable */
 
@@ -195,4 +180,4 @@ int tcp_txdrain(FAR struct socket *psock,
   return ret;
 }
 
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS && CONFIG_TCP_NOTIFIER */
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS && CONFIG_NET_TCP_NOTIFIER */

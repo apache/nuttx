@@ -55,6 +55,10 @@ config NET_UDP_CONNS
 	---help---
 		The maximum amount of open concurrent UDP sockets
 
+config NET_UDP_NPOLLWAITERS
+	int "Number of UDP poll waiters"
+	default 1
+
 config NET_UDP_READAHEAD
 	bool "Enable UDP/IP read-ahead buffering"
 	default y
@@ -109,15 +113,15 @@ config NET_UDP_WRBUFFER_DUMP
 
 endif # NET_UDP_WRITE_BUFFERS
 
-config UDP_NOTIFIER
+config NET_UDP_NOTIFIER
 	bool "Support UDP read-ahead notifications"
 	default n
 	depends on SCHED_WORKQUEUE
 	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of UDP read-ahead notifier logic that will execute a
-		worker function on the high priority work queue when read-ahead data
-		is available.  This is is a general purpose notifier, but was
+		worker function on the low priority work queue when read-ahead data
+		is available.  This is a general purpose notifier, but was
 		developed specifically to support poll() logic where the poll must
 		wait for read-ahead data to become available.
 

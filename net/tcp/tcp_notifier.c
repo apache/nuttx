@@ -49,7 +49,7 @@
 
 #include "tcp/tcp.h"
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 
 /****************************************************************************
  * Public Functions
@@ -330,4 +330,4 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn)
   return work_notifier_signal(WORK_TCP_DISCONNECT, conn);
 }
 
-#endif /* CONFIG_TCP_NOTIFIER */
+#endif /* CONFIG_NET_TCP_NOTIFIER */

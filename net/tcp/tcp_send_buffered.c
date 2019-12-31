@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
- *   Copyright (C) 2007-2014, 2016-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Jason Jiang  <jasonj@live.cn>
  *
@@ -84,6 +84,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If both IPv4 and IPv6 support are both enabled, then we will need to build
  * in some additional domain selection support.
  */
@@ -173,7 +174,7 @@ static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
 {
   /* Check if all write buffers have been sent and ACKed */
@@ -994,10 +995,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_tcp_send", buf, len);
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   if (len > 0)
     {
       /* Allocate a write buffer.  Careful, the network will be momentarily
@@ -1123,10 +1120,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       send_txnotify(psock, conn);
       net_unlock();
     }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Check for errors.  Errors are signaled by negative errno values
    * for the send length

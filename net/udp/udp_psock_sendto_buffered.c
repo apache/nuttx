@@ -80,6 +80,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If both IPv4 and IPv6 support are both enabled, then we will need to build
  * in some additional domain selection support.
  */
@@ -162,7 +163,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
           psock->s_sndcb->event = NULL;
           wrb = NULL;
 
-#ifdef CONFIG_UDP_NOTIFIER
+#ifdef CONFIG_NET_UDP_NOTIFIER
           /* Notify any waiters that the write buffers have been drained. */
 
           udp_writebuffer_signal(conn);
@@ -694,10 +695,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_udp_send", buf, len);
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   if (len > 0)
     {
       /* Allocate a write buffer.  Careful, the network will be momentarily
@@ -824,10 +821,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       net_unlock();
     }
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
   /* Return the number of bytes that will be sent */
 

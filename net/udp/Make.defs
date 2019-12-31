@@ -52,11 +52,8 @@ else
 SOCK_CSRCS += udp_psock_sendto_unbuffered.c
 endif
 
-ifeq ($(CONFIG_NET_UDP_READAHEAD),y)
-SOCK_CSRCS += udp_netpoll.c
-ifeq ($(CONFIG_UDP_NOTIFIER),y)
+ifeq ($(CONFIG_NET_UDP_NOTIFIER),y)
 SOCK_CSRCS += udp_notifier.c
-endif
 ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
 SOCK_CSRCS += udp_txdrain.c
 endif
@@ -65,7 +62,7 @@ endif
 # Transport layer
 
 NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c
-NET_CSRCS += udp_callback.c udp_ipselect.c
+NET_CSRCS += udp_callback.c udp_ipselect.c udp_netpoll.c
 
 # UDP write buffering
 

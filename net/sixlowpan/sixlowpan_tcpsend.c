@@ -854,10 +854,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       return (ssize_t)ret;
     }
 
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
   /* Send the TCP packets, breaking down the potential large user buffer
    * into smaller packets that can be reassembled in the allocated MTU
    * packet buffer.
@@ -874,14 +870,9 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send_packet() failed: %d\n", ret);
-
-      psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
       return (ssize_t)ret;
     }
 
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
   return (ssize_t)buflen;
 }
 

@@ -49,7 +49,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
 
@@ -60,12 +60,6 @@
  ****************************************************************************/
 
 #define NET_TCP_HAVE_STACK 1
-
-/* Conditions for support TCP poll/select operations */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-#  define HAVE_TCP_POLL
-#endif
 
 /* Allocate a new TCP data callback */
 
@@ -110,6 +104,11 @@
  * Public Type Definitions
  ****************************************************************************/
 
+struct file;      /* Forward reference */
+struct sockaddr;  /* Forward reference */
+struct socket;    /* Forward reference */
+struct pollfd;    /* Forward reference */
+
 /* Representation of a TCP connection.
  *
  * The tcp_conn_s structure is used for identifying a connection. All
@@ -123,6 +122,18 @@ struct net_driver_s;      /* Forward reference */
 struct devif_callback_s;  /* Forward reference */
 struct tcp_backlog_s;     /* Forward reference */
 struct tcp_hdr_s;         /* Forward reference */
+
+/* This is a container that holds the poll-related information */
+
+struct tcp_poll_s
+{
+  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  int16_t key;                     /* Needed to cancel pending notification */
+#endif
+};
 
 struct tcp_conn_s
 {
@@ -274,6 +285,12 @@ struct tcp_conn_s
 
   FAR void *accept_private;
   int (*accept)(FAR struct tcp_conn_s *listener, FAR struct tcp_conn_s *conn);
+
+  /* The following is a list of poll structures of threads waiting for
+   * socket events.
+   */
+
+  struct tcp_poll_s pollinfo[CONFIG_NET_TCP_NPOLLWAITERS];
 };
 
 /* This structure supports TCP write buffering */
@@ -334,11 +351,6 @@ EXTERN struct net_driver_s *g_netdevices;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-struct file;      /* Forward reference */
-struct sockaddr;  /* Forward reference */
-struct socket;    /* Forward reference */
-struct pollfd;    /* Forward reference */
 
 /****************************************************************************
  * Name: tcp_initialize
@@ -1535,9 +1547,7 @@ void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
  *
  ****************************************************************************/
 
-#ifdef HAVE_TCP_POLL
 int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
 
 /****************************************************************************
  * Name: tcp_pollteardown
@@ -1555,9 +1565,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef HAVE_TCP_POLL
 int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
 
 /****************************************************************************
  * Name: tcp_readahead_notifier_setup
@@ -1586,7 +1594,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_readahead_notifier_setup(worker_t worker,
                                  FAR struct tcp_conn_s *conn,
                                  FAR void *arg);
@@ -1619,7 +1627,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_writebuffer_notifier_setup(worker_t worker,
                                    FAR struct tcp_conn_s *conn,
                                    FAR void *arg);
@@ -1650,7 +1658,7 @@ int tcp_writebuffer_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_disconnect_notifier_setup(worker_t worker,
                                   FAR struct tcp_conn_s *conn,
                                   FAR void *arg);
@@ -1675,7 +1683,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 int tcp_notifier_teardown(int key);
 #endif
 
@@ -1700,7 +1708,7 @@ int tcp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_NET_TCP_NOTIFIER)
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1725,7 +1733,7 @@ void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1744,7 +1752,7 @@ void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TCP_NOTIFIER
+#ifdef CONFIG_NET_TCP_NOTIFIER
 void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1764,7 +1772,7 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_TCP_NOTIFIER)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
 struct timespec;
 int tcp_txdrain(FAR struct socket *psock,
                 FAR const struct timespec *abstime);

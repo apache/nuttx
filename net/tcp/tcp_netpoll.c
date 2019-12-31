@@ -41,37 +41,18 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <poll.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
-
-#ifdef HAVE_TCP_POLL
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This is an allocated container that holds the poll-related information */
-
-struct tcp_poll_s
-{
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
-  struct pollfd *fds;              /* Needed to handle poll events */
-  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
-  int16_t key;                     /* Needed to cancel pending notification */
-#endif
-};
 
 /****************************************************************************
  * Private Functions
@@ -172,19 +153,11 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
 static inline void tcp_iob_work(FAR void *arg)
 {
-  FAR struct work_notifier_entry_s *entry;
-  FAR struct work_notifier_s *ninfo;
   FAR struct tcp_poll_s *pinfo;
   FAR struct socket *psock;
   FAR struct pollfd *fds;
 
-  entry = (FAR struct work_notifier_entry_s *)arg;
-  DEBUGASSERT(entry != NULL);
-
-  ninfo = &entry->info;
-  DEBUGASSERT(ninfo->arg != NULL);
-
-  pinfo = (FAR struct tcp_poll_s *)ninfo->arg;
+  pinfo = (FAR struct tcp_poll_s *)arg;
   DEBUGASSERT(pinfo->psock != NULL && pinfo->fds != NULL);
 
   psock = pinfo->psock;
@@ -231,12 +204,6 @@ static inline void tcp_iob_work(FAR void *arg)
           pinfo->key = iob_notifier_setup(LPWORK, tcp_iob_work, pinfo);
         }
     }
-
-  /* Protocol for the use of the IOB notifier is that we free the argument
-   * after the notification has been processed.
-   */
-
-  kmm_free(arg);
 }
 #endif
 
@@ -276,17 +243,21 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  /* Allocate a container to hold the poll information */
-
-  info = (FAR struct tcp_poll_s *)kmm_malloc(sizeof(struct tcp_poll_s));
-  if (!info)
-    {
-      return -ENOMEM;
-    }
-
   /* Some of the  following must be atomic */
 
   net_lock();
+
+  /* Find a container to hold the poll information */
+
+  info = conn->pollinfo;
+  while (info->psock != NULL)
+    {
+      if (++info >= &conn->pollinfo[CONFIG_NET_TCP_NPOLLWAITERS])
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+    }
 
   /* Allocate a TCP/IP callback structure */
 
@@ -331,14 +302,14 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   fds->priv    = (FAR void *)info;
 
-#ifdef CONFIG_NET_TCPBACKLOG
+#ifdef CONFIG_NET_TCP_READAHEAD
   /* Check for read data or backlogged connection availability now */
 
   if (!IOB_QEMPTY(&conn->readahead) || tcp_backlogavailable(conn))
 #else
-  /* Check for read data availability now */
+  /* Check for backlogged connection now */
 
-  if (!IOB_QEMPTY(&conn->readahead))
+  if (tcp_backlogavailable(conn))
 #endif
     {
       /* Normal data may be read without blocking. */
@@ -423,11 +394,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  net_unlock();
-  return OK;
-
 errout_with_lock:
-  kmm_free(info);
   net_unlock();
   return ret;
 }
@@ -481,9 +448,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Release the callback */
 
-      net_lock();
       tcp_callback_free(conn, info->cb);
-      net_unlock();
 
       /* Release the poll/select data slot */
 
@@ -491,10 +456,8 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Then free the poll info container */
 
-      kmm_free(info);
+      info->psock = NULL;
     }
 
   return OK;
 }
-
-#endif /* HAVE_TCP_POLL */

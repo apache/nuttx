@@ -53,20 +53,8 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
-#include <nuttx/kmalloc.h>
 
 #include "usrsock/usrsock.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct usrsock_poll_s
-{
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
-  struct pollfd *fds;              /* Needed to handle poll events */
-  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-};
 
 /****************************************************************************
  * Private Functions
@@ -182,16 +170,19 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  /* Allocate a container to hold the poll information */
-
-  info = (FAR struct usrsock_poll_s *)
-    kmm_malloc(sizeof(struct usrsock_poll_s));
-  if (!info)
-    {
-      return -ENOMEM;
-    }
-
   net_lock();
+
+  /* Find a container to hold the poll information */
+
+  info = conn->pollinfo;
+  while (info->psock != NULL)
+    {
+      if (++info >= &conn->pollinfo[CONFIG_NET_USRSOCK_NPOLLWAITERS])
+        {
+          ret = -ENOMEM;
+          goto errout_unlock;
+        }
+    }
 
   /* Allocate a usrsock callback structure */
 
@@ -199,7 +190,6 @@ static int usrsock_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   if (cb == NULL)
     {
       ret = -EBUSY;
-      kmm_free(info); /* fds->priv not set, so we need to free info here. */
       goto errout_unlock;
     }
 
@@ -338,9 +328,7 @@ static int usrsock_pollteardown(FAR struct socket *psock,
     {
       /* Release the callback */
 
-      net_lock();
       devif_conn_callback_free(NULL, info->cb, &conn->list);
-      net_unlock();
 
       /* Release the poll/select data slot */
 
@@ -348,7 +336,7 @@ static int usrsock_pollteardown(FAR struct socket *psock,
 
       /* Then free the poll info container */
 
-      kmm_free(info);
+      info->psock = NULL;
     }
 
   return OK;
