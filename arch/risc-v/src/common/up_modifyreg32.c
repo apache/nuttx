@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits)
+void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits)
 {
   irqstate_t flags;
   uint32_t   regval;

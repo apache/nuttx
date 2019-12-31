@@ -60,7 +60,7 @@
  * however, the stack must be aligned to 8-byte addresses.
  */
 
-#ifdef CONFIG_LIBC_FLOATINGPOINT
+#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
 #  define STACK_ALIGNMENT   8
 #else
 #  define STACK_ALIGNMENT   4
@@ -181,7 +181,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 4;
 
       /* The MIPS stack must be aligned at word (4 byte) boundaries; for
        * floating point use, the stack must be aligned to 8-byte addresses.
@@ -190,7 +190,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
-      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+      size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr + 4;
 
       /* Save the adjusted stack values in the struct tcb_s */
 

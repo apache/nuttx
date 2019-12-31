@@ -77,7 +77,7 @@ extern "C"
 
 /* Atomic modification of registers */
 
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
 
 #undef EXTERN
 #if defined(__cplusplus)
