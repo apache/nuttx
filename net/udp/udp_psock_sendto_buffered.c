@@ -697,18 +697,27 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (len > 0)
     {
+      net_lock();
+
       /* Allocate a write buffer.  Careful, the network will be momentarily
        * unlocked here.
        */
 
-      net_lock();
-      wrb = udp_wrbuffer_alloc();
+      if (_SS_ISNONBLOCK(psock->s_flags))
+        {
+          wrb = udp_wrbuffer_tryalloc();
+        }
+      else
+        {
+          wrb = udp_wrbuffer_alloc();
+        }
+
       if (wrb == NULL)
         {
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          ret = -ENOMEM;
+          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
           goto errout_with_lock;
         }
 
