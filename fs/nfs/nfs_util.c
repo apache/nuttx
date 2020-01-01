@@ -128,21 +128,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
 
 void nfs_semtake(struct nfsmount *nmp)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&nmp->nm_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&nmp->nm_sem);
 }
 
 /****************************************************************************

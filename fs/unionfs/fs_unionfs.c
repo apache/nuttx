@@ -253,23 +253,14 @@ const struct mountpt_operations unionfs_operations =
 
 static int unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint)
 {
-  int ret;
-
-  do
+  if (noint)
     {
-      ret = nxsem_wait(&ui->ui_exclsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-          if (!noint)
-            {
-              return ret;
-            }
-        }
+      return nxsem_wait_uninterruptible(&ui->ui_exclsem);
     }
-  while (ret == -EINTR);
-
-  return ret;
+  else
+    {
+      return nxsem_wait(&ui->ui_exclsem);
+    }
 }
 
 /****************************************************************************

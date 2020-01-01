@@ -1443,7 +1443,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
   inode = filep->f_inode;
   priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -1491,7 +1491,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
 
 _success:
 _err:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 #endif /* if !defined(CONFIG_DISABLE_SIGNAL) && \
           (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0) */
   return ret;
@@ -1949,7 +1949,7 @@ static int cxd56_gnss_wait_notify(FAR sem_t *sem, time_t waitsec)
 
   timeout.tv_sec += waitsec; /* <waitsec> seconds timeout for wait */
 
-  return sem_timedwait(sem, &timeout);
+  return nxsem_timedwait(sem, &timeout);
 }
 
 /****************************************************************************
@@ -2110,7 +2110,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data, FAR void *userdata)
   int                          i;
   int                          ret;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return;
@@ -2137,7 +2137,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data, FAR void *userdata)
       GD_SetNotifyMask(sigtype, FALSE);
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 }
 
 #endif /* if !defined(CONFIG_DISABLE_SIGNAL) && \
@@ -2192,7 +2192,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
            */
 
           priv->notify_data = dtype;
-          sem_post(&priv->syncsem);
+          nxsem_post(&priv->syncsem);
         }
       return;
 
@@ -2220,7 +2220,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
       break;
     }
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return;
@@ -2233,11 +2233,11 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
         {
           fds->revents |= POLLIN;
           gnssinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 
 #if !defined(CONFIG_DISABLE_SIGNAL) && \
   (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
@@ -2267,7 +2267,7 @@ static void cxd56_gnss_cpufifoapi_signalhandler(uint32_t data,
   FAR struct cxd56_gnss_dev_s *priv = (FAR struct cxd56_gnss_dev_s *)userdata;
 
   priv->apiret = CXD56_CPU1_GET_DATA((int)data);
-  sem_post(&priv->apiwait);
+  nxsem_post(&priv->apiwait);
 
   return;
 }
@@ -2302,15 +2302,14 @@ static int cxd56_gnss_cpufifo_api(FAR struct file *filep, unsigned int api,
   type = CXD56_GNSS_CPUFIFOAPI_SET_DATA(api, data);
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CPUFIFOAPI, type);
 
-  ret = sem_wait(&priv->apiwait);
+  ret = nxsem_wait(&priv->apiwait);
   if (ret < 0)
     {
-      /* If sem_wait returns -EINTR, there is a possibility that the signal
+      /* If nxsem_wait returns -EINTR, there is a possibility that the signal
        * for GNSS set with CXD56_GNSS_IOCTL_SIGNAL_SET is unmasked
        * by SIG_UNMASK in the signal mask.
        */
 
-      ret = -errno;
       _warn("Cannot wait GNSS semaphore %d\n", ret);
       goto _err;
     }
@@ -2438,7 +2437,7 @@ static int cxd56_gnss_open(FAR struct file *filep)
   inode = filep->f_inode;
   priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -2446,7 +2445,7 @@ static int cxd56_gnss_open(FAR struct file *filep)
 
   if (priv->num_open == 0)
     {
-      ret = sem_init(&priv->syncsem, 0, 0);
+      ret = nxsem_init(&priv->syncsem, 0, 0);
       if (ret < 0)
         {
           goto _err0;
@@ -2485,7 +2484,7 @@ static int cxd56_gnss_open(FAR struct file *filep)
           goto _err2;
         }
 
-      sem_destroy(&priv->syncsem);
+      nxsem_destroy(&priv->syncsem);
     }
 
   priv->num_open++;
@@ -2497,10 +2496,10 @@ _err2:
 #endif
   PM_SleepCpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_COLD);
 _err1:
-  sem_destroy(&priv->syncsem);
+  nxsem_destroy(&priv->syncsem);
 _err0:
 _success:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -2527,7 +2526,7 @@ static int cxd56_gnss_close(FAR struct file *filep)
   inode = filep->f_inode;
   priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -2548,7 +2547,7 @@ static int cxd56_gnss_close(FAR struct file *filep)
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -2674,7 +2673,7 @@ static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
       return -EINVAL;
     }
 
-  ret = sem_wait(&priv->ioctllock);
+  ret = nxsem_wait(&priv->ioctllock);
   if (ret < 0)
     {
       return ret;
@@ -2682,7 +2681,7 @@ static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
 
   ret = g_cmdlist[cmd](filep, arg);
 
-  sem_post(&priv->ioctllock);
+  nxsem_post(&priv->ioctllock);
 
   return ret;
 }
@@ -2715,7 +2714,7 @@ static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
   priv  = (FAR struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -2766,7 +2765,7 @@ static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -2848,21 +2847,21 @@ static int cxd56_gnss_register(FAR const char *devpath)
 
   memset(priv, 0, sizeof(struct cxd56_gnss_dev_s));
 
-  ret = sem_init(&priv->devsem, 0, 1);
+  ret = nxsem_init(&priv->devsem, 0, 1);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss devsem!\n");
       goto _err0;
     }
 
-  ret = sem_init(&priv->apiwait, 0, 0);
+  ret = nxsem_init(&priv->apiwait, 0, 0);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss apiwait!\n");
       goto _err0;
     }
 
-  ret = sem_init(&priv->ioctllock, 0, 1);
+  ret = nxsem_init(&priv->ioctllock, 0, 1);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss ioctllock!\n");

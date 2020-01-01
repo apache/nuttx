@@ -142,8 +142,6 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
    * meaning that some other unblocked signal was caught.
    */
 
-  DEBUGASSERT(ret < 0 && (ret == -EAGAIN || ret == -EINTR));
-
   if (ret == -EAGAIN)
     {
       /* The timeout "error" is the normal, successful result */

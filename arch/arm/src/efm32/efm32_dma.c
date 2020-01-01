@@ -336,7 +336,6 @@ DMA_HANDLE efm32_dmachannel(void)
   struct dma_channel_s *dmach;
   unsigned int chndx;
   uint32_t bit;
-  int ret;
 
   /* Take a count from from the channel counting semaphore.  We may block
    * if there are no free channels.  When we get the count, then we can
@@ -344,35 +343,11 @@ DMA_HANDLE efm32_dmachannel(void)
    * reserved for us.
    */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_dmac.chansem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_dmac.chansem);
 
   /* Get exclusive access to the DMA channel list */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_dmac.exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_dmac.exclsem);
 
   /* Search for an available DMA channel */
 

@@ -874,19 +874,7 @@ static int mbr3108_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   use_count = priv->cref + 1;
   if (use_count == 1)
@@ -948,7 +936,6 @@ static int mbr3108_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct mbr3108_dev_s *priv;
   int use_count;
-  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -956,19 +943,7 @@ static int mbr3108_close(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   use_count = priv->cref - 1;
   if (use_count == 0)

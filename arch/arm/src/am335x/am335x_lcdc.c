@@ -585,7 +585,7 @@ int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel)
 
   /* Initialize the device state singleton */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
   memcpy(&priv->panel, panel, sizeof(struct am335x_panel_info_s));
 
   /* Save framebuffer information */

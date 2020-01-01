@@ -173,14 +173,7 @@ static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
 
 void spawn_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************

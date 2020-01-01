@@ -181,21 +181,7 @@ static struct dma_desc_s g_dma_desc[CONFIG_SAMD2L2_DMAC_NDESC]
 
 static void sam_takechsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_chsem);
 }
 
 static inline void sam_givechsem(void)
@@ -214,21 +200,7 @@ static inline void sam_givechsem(void)
 #if CONFIG_SAMD2L2_DMAC_NDESC > 0
 static void sam_takedsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_dsem);
 }
 
 static inline void sam_givedsem(void)

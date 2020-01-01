@@ -203,21 +203,7 @@ static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 
 static void slip_semtake(FAR struct slip_driver_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->waitsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 #define slip_semgive(p) nxsem_post(&(p)->waitsem);

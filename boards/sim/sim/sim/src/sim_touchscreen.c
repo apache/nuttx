@@ -135,7 +135,7 @@ static FAR void *sim_listener(FAR void *arg)
       if (!g_simtc.connected)
         {
           g_simtc.connected = true;
-          sem_post(&g_simtc.eventsem);
+          nxsem_post(&g_simtc.eventsem);
           ginfo("Connected\n");
         }
     }
@@ -233,7 +233,7 @@ int sim_tsc_setup(int minor)
            * are connected.
            */
 
-           (void)sem_wait(&g_simtc.eventsem);
+           (void)nxsem_wait(&g_simtc.eventsem);
         }
     }
   else

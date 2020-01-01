@@ -546,19 +546,7 @@ static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
 
 static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->locksem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->locksem);
 }
 
 /****************************************************************************

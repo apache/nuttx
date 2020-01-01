@@ -1371,19 +1371,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 
 static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->locksem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->locksem);
 }
 
 /****************************************************************************
@@ -1549,7 +1537,6 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       ret = nxsem_wait(&priv->txfsem);
       leave_critical_section(flags);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret < 0);
 }

@@ -222,21 +222,7 @@ static const struct file_operations g_pty_fops =
 
 static void pty_semtake(FAR struct pty_devpair_s *devpair)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&devpair->pp_exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&devpair->pp_exclsem);
 }
 
 /****************************************************************************

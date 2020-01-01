@@ -1684,7 +1684,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
   priv->lower = lower;
   priv->page  = HDMI_NO_PAGE;
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize the TDA19988 */
 

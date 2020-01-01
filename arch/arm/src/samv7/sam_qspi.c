@@ -892,17 +892,15 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
       /* Wait for the DMA complete */
 
-      ret = nxsem_wait(&priv->dmawait);
+      ret = nxsem_wait_uninterruptible(&priv->dmawait);
 
       /* Cancel the watchdog timeout */
 
       (void)wd_cancel(priv->dmadog);
 
-      /* Check if we were awakened by an error of some kind.  EINTR is not a
-       * failure.  That simply means that the wait was awakened by a signal.
-       */
+      /* Check if we were awakened by an error of some kind. */
 
-      if (ret < 0 && ret != -EINTR)
+      if (ret < 0)
         {
           DEBUGPANIC();
           return ret;
@@ -1060,24 +1058,11 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;

@@ -184,21 +184,7 @@ static struct s32k1xx_edmatcd_s g_tcd_pool[CONFIG_S32K1XX_EDMA_NTCD]
 
 static void s32k1xx_takechsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.chsem);
 }
 
 static inline void s32k1xx_givechsem(void)
@@ -217,21 +203,7 @@ static inline void s32k1xx_givechsem(void)
 #if CONFIG_S32K1XX_EDMA_NTCD > 0
 static void s32k1xx_takedsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.dsem);
 }
 
 static inline void s32k1xx_givedsem(void)

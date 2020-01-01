@@ -443,11 +443,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           /* Wait for completion of request. */
 
-          while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
-            {
-              DEBUGASSERT(ret == -EINTR);
-            }
-
+          net_lockedwait_uninterruptible(&state.reqstate.recvsem);
           ret = state.reqstate.result;
 
           DEBUGASSERT(state.valuelen <= inaddrlen);

@@ -250,21 +250,7 @@ static inline void dmast_putreg(struct stm32_dma_s *dmast, uint32_t offset, uint
 
 static void stm32_dmatake(FAR struct stm32_dma_s *dmast)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&dmast->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dmast->sem);
 }
 
 static inline void stm32_dmagive(FAR struct stm32_dma_s *dmast)

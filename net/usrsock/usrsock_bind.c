@@ -209,11 +209,7 @@ int usrsock_bind(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      while ((ret = net_lockedwait(&state.recvsem)) < 0)
-        {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
-
+      net_lockedwait_uninterruptible(&state.recvsem);
       ret = state.result;
     }
 

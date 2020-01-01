@@ -144,12 +144,7 @@ static int     nand_ioctl(struct mtd_dev_s *dev, int cmd,
 
 static int nand_lock(FAR struct nand_dev_s *nand)
 {
-  int errcode;
-  int ret;
-
-  ret = nxsem_wait(&nand->exclsem);
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(&nand->exclsem);
 }
 
 /****************************************************************************

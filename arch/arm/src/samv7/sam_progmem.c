@@ -187,21 +187,7 @@ static sem_t g_page_sem;
 
 static void page_buffer_lock(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_page_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_page_sem);
 }
 
 #define page_buffer_unlock() nxsem_post(&g_page_sem)

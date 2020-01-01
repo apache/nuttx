@@ -382,12 +382,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
           ierr("ERROR: nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -485,7 +480,6 @@ static void max11802_worker(FAR void *arg)
   uint16_t                      xdiff;
   uint16_t                      ydiff;
   bool                          pendown;
-  int                           ret;
   int                           tags, tags2;
 
   DEBUGASSERT(priv != NULL);
@@ -513,17 +507,7 @@ static void max11802_worker(FAR void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* This should only fail if the wait was cancelled by an signal
-       * (and the worker thread will receive a lot of signals).
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -763,9 +747,6 @@ static int max11802_open(FAR struct file *filep)
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -820,9 +801,6 @@ static int max11802_close(FAR struct file *filep)
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -881,10 +859,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was cancelled by an signal */
-
       ierr("ERROR: nxsem_wait: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -994,9 +969,6 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1053,9 +1025,6 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

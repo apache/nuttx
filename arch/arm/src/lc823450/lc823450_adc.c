@@ -226,9 +226,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
   uint8_t i;
   uint32_t div;
 
-#ifndef CONFIG_ADC_POLLED
-  int ret;
-#else
+#ifdef CONFIG_ADC_POLLED
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -263,19 +261,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
   while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
     ;
 #else
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&inst->sem_isr);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&inst->sem_isr);
 #endif
 
 #ifdef CONFIG_ADC_POLLED
@@ -293,21 +279,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
 
 static inline void lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&inst->sem_excl);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&inst->sem_excl);
 }
 
 /****************************************************************************

@@ -175,21 +175,7 @@ const struct mountpt_operations hostfs_operations =
 
 void hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(fs->fs_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(fs->fs_sem);
 }
 
 /****************************************************************************

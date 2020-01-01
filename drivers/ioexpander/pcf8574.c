@@ -154,21 +154,7 @@ static const struct ioexpander_ops_s g_pcf8574_ops =
 
 static void pcf8574_lock(FAR struct pcf8574_dev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 #define pcf8574_unlock(p) nxsem_post(&(p)->exclsem)

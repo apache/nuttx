@@ -629,7 +629,6 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 #ifndef CONFIG_SPI_POLLWAIT
   irqstate_t flags;
   uint32_t regval;
-  int ret;
 #endif
   int ntxd;
 
@@ -683,13 +682,9 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
    * with the transfer, so it should be safe with no timeout.
    */
 
-  do
-    {
-      /* Wait to be signaled from the interrupt handler */
+  /* Wait to be signaled from the interrupt handler */
 
-      ret = nxsem_wait(&priv->waitsem);
-    }
-  while (ret < 0 && ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->waitsem);
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -798,19 +793,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      do
-        {
-          /* Take the semaphore (perhaps waiting) */
-
-          ret = nxsem_wait(&priv->exclsem);
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;

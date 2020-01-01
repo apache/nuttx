@@ -127,19 +127,10 @@ int mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
     {
       /* Wait for the semaphore to be posted */
 
-      while ((ret = net_lockedwait(&group->sem)) < 0)
+      ret = net_lockedwait_uninterruptible(&group->sem);
+      if (ret < 0)
         {
-          /* The only error that should occur from net_lockedwait() is if
-           * the wait is awakened by a signal or, perhaps, canceled.
-           */
-
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-          if (ret != -EINTR)
-            {
-              break;
-            }
-
-          ret = OK;
+          break;
         }
     }
 

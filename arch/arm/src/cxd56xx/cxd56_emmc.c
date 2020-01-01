@@ -132,15 +132,12 @@ struct cxd56_emmc_state_s g_emmcdev;
 
 static void emmc_takesem(FAR sem_t *sem)
 {
-  while (sem_wait(sem) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(sem);
 }
 
 static void emmc_givesem(FAR sem_t *sem)
 {
-  sem_post(sem);
+  nxsem_post(sem);
 }
 
 static void emmc_cmdstarted(void)
@@ -908,8 +905,8 @@ int cxd56_emmcinitialize(void)
   priv = &g_emmcdev;
 
   memset(priv, 0, sizeof(struct cxd56_emmc_state_s));
-  sem_init(&priv->excsem, 0, 1);
-  sem_init(&g_waitsem, 0, 0);
+  nxsem_init(&priv->excsem, 0, 1);
+  nxsem_init(&g_waitsem, 0, 0);
 
   ret = emmc_hwinitialize();
   if (ret != OK)

@@ -427,11 +427,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         {
           /* Wait for completion of request. */
 
-          while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
-            {
-              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-            }
-
+          net_lockedwait_uninterruptible(&state.reqstate.recvsem);
           ret = state.reqstate.result;
 
           DEBUGASSERT(ret <= (ssize_t)len);

@@ -361,15 +361,11 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
 
           /* Wait for a message to be sent */
 
-          do
+          ret = nxsem_wait_uninterruptible(&fifo->af_sem);
+          if (ret < 0)
             {
-              ret = nxsem_wait(&fifo->af_sem);
-              if (ret < 0 && ret != -EINTR)
-                {
-                  goto return_with_irqdisabled;
-                }
+              goto return_with_irqdisabled;
             }
-          while (ret < 0);
 
           /* Re-check the FIFO state */
 

@@ -402,7 +402,7 @@ static void ak09912_wd_timeout(int argc, uint32_t arg, ...)
 {
   struct ak09912_dev_s *priv = (struct ak09912_dev_s *) arg;
   irqstate_t flags = enter_critical_section();
-  sem_post(&priv->wait);
+  nxsem_post(&priv->wait);
   leave_critical_section(flags);
 }
 
@@ -426,7 +426,7 @@ static int ak09912_read_mag_uncomp_data(FAR struct ak09912_dev_s *priv,
   state = ak09912_getreg8(priv, AK09912_ST1);
   while (! (state & 0x1))
     {
-      sem_wait(&priv->wait);
+      nxsem_wait(&priv->wait);
     }
 
   wd_cancel(priv->wd);
@@ -688,7 +688,7 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->freq = AK09912_FREQ;
   priv->compensated = ENABLE_COMPENSATED;
   priv->wd = wd_create();
-  sem_init(&priv->wait, 0, 0);
+  nxsem_init(&priv->wait, 0, 0);
 
   /* set default noice suppression filter. */
 

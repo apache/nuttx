@@ -159,15 +159,12 @@ static struct iccdev_s *g_cpumsg[NCPUS];
 
 static void icc_semtake(sem_t *semid)
 {
-  while (sem_wait(semid) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(semid);
 }
 
 static void icc_semgive(sem_t *semid)
 {
-  sem_post(semid);
+  nxsem_post(semid);
 }
 
 static FAR struct iccdev_s *icc_getprotocol(int protoid)
@@ -362,7 +359,7 @@ static FAR struct iccdev_s *icc_devnew(void)
 
   priv->rxtimeout = wd_create();
 
-  sem_init(&priv->rxwait, 0, 0);
+  nxsem_init(&priv->rxwait, 0, 0);
 
   /* Initialize receive queue and free list */
 

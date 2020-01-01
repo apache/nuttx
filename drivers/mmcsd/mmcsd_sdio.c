@@ -283,23 +283,11 @@ static const struct block_operations g_bops =
 
 static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 {
-  int ret;
-
   /* Take the semaphore, giving exclusive access to the driver (perhaps
    * waiting)
    */
 
-  do
-    {
-      ret = nxsem_wait(&priv->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->sem);
 
   /* Lock the bus if mutually exclusive access to the SDIO bus is required
    * on this platform.

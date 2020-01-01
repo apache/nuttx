@@ -140,34 +140,14 @@ static const struct file_operations g_serialops =
 
 static int uart_takesem(FAR sem_t *sem, bool errout)
 {
-  int ret;
-
-  do
+  if (errout)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-      if (ret < 0)
-        {
-          /* The only case that an error should occur here is if the wait was
-           * awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-
-          /* When the signal is received, should we errout? Or should we just
-           * continue waiting until we have the semaphore?
-           */
-
-          if (errout)
-            {
-              return ret;
-            }
-        }
+      return nxsem_wait(sem);
     }
-  while (ret == -EINTR);
-
-  return ret;
+  else
+    {
+      return nxsem_wait_uninterruptible(sem);
+    }
 }
 
 /************************************************************************************

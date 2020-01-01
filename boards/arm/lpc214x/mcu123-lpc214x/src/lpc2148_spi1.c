@@ -180,24 +180,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&g_exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&g_exclsem);
     }
   else
     {
-      (void)nxsem_post(&g_exclsem);
-      ret = OK;
+      ret = nxsem_post(&g_exclsem);
     }
 
   return ret;

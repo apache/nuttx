@@ -213,21 +213,7 @@ static struct pic32mz_dmac_s g_dmac =
 
 static void pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&dmac->chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dmac->chsem);
 }
 
 /****************************************************************************

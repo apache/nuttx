@@ -439,21 +439,7 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
 
 static void ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&eedev->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&eedev->sem);
 }
 
 /****************************************************************************

@@ -290,18 +290,12 @@ static void ft80x_interrupt_work(FAR void *arg)
   FAR struct ft80x_dev_s *priv = (FAR struct ft80x_dev_s *)arg;
   uint32_t intflags;
   uint32_t regval;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
 
   /* Get exclusive access to the device structures */
 
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret < 0);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 
   /* Get the set of pending interrupts.  Note that simply reading this
    * register is sufficient to clear all pending interrupts.
@@ -444,7 +438,7 @@ static void ft80x_destroy(FAR struct ft80x_dev_s *priv)
 
   /* Then free our container */
 
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   kmm_free(priv);
 }
 #endif
@@ -1539,7 +1533,7 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
 
   /* Initialize the mutual exclusion semaphore */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize the FT80x */
 
@@ -1582,7 +1576,7 @@ errout_with_interrupts:
   lower->attach(lower, NULL, NULL);
 
 errout_with_sem:
-  sem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->exclsem);
   return ret;
 }
 

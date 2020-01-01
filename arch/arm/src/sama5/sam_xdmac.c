@@ -644,21 +644,7 @@ static struct sam_xdmac_s g_xdmac1 =
 
 static void sam_takechsem(struct sam_xdmac_s *xdmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&xdmac->chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&xdmac->chsem);
 }
 
 static inline void sam_givechsem(struct sam_xdmac_s *xdmac)
@@ -676,21 +662,7 @@ static inline void sam_givechsem(struct sam_xdmac_s *xdmac)
 
 static void sam_takedsem(struct sam_xdmac_s *xdmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&xdmac->dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&xdmac->dsem);
 }
 
 static inline void sam_givedsem(struct sam_xdmac_s *xdmac)

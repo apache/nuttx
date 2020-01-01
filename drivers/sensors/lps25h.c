@@ -343,17 +343,7 @@ static int lps25h_open(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&dev->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dev->devsem);
 
   dev->config->set_power(dev->config, true);
   ret = lps25h_read_reg8(dev, &addr, &value);
@@ -382,17 +372,7 @@ static int lps25h_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&dev->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dev->devsem);
 
   dev->config->irq_enable(dev->config, false);
   dev->irqenabled = false;
@@ -415,17 +395,7 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&dev->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dev->devsem);
 
   ret = lps25h_configure_dev(dev);
   if (ret < 0)
@@ -570,51 +540,38 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
           abstime.tv_nsec -= 1000 * 1000 * 1000;
         }
 
-      while ((ret = nxsem_timedwait(&dev->waitsem, &abstime)) < 0)
-        {
-          if (ret == -EINTR)
-            {
-              continue;
-            }
-          else if (ret == -ETIMEDOUT)
-            {
-              uint8_t reg = LPS25H_CTRL_REG2;
-              uint8_t value;
-
-              /* In 'AN4450 - Hardware and software guidelines for use of
-               * LPS25H pressure sensors' - '4.3 One-shot mode measurement
-               * sequence', one-shot mode example is given where interrupt line
-               * is not used, but CTRL_REG2 is polled until ONE_SHOT bit is
-               * unset (as it is self-clearing). Check ONE_SHOT bit status here
-               * to see if we just missed interrupt.
-               */
-
-              ret = lps25h_read_reg8(dev, &reg, &value);
-              if (ret < 0)
-                {
-                  break;
-                }
-
-              if ((value & LPS25H_ONE_SHOT) == 0)
-                {
-                  /* One-shot completed. */
-
-                  ret = OK;
-                  break;
-                }
-            }
-          else
-            {
-              /* Some unknown mystery error */
-
-              DEBUGASSERT(false);
-              return ret;
-            }
-        }
-
+      ret = nxsem_timedwait_uninterruptible(&dev->waitsem, &abstime);
       if (ret == OK)
         {
           break;
+        }
+      else if (ret == -ETIMEDOUT)
+        {
+          uint8_t reg = LPS25H_CTRL_REG2;
+          uint8_t value;
+
+          /* In 'AN4450 - Hardware and software guidelines for use of
+           * LPS25H pressure sensors' - '4.3 One-shot mode measurement
+           * sequence', one-shot mode example is given where interrupt line
+           * is not used, but CTRL_REG2 is polled until ONE_SHOT bit is
+           * unset (as it is self-clearing). Check ONE_SHOT bit status here
+           * to see if we just missed interrupt.
+           */
+
+          ret = lps25h_read_reg8(dev, &reg, &value);
+          if (ret == OK && (value & LPS25H_ONE_SHOT) == 0)
+            {
+              /* One-shot completed. */
+
+              break;
+            }
+        }
+      else
+        {
+          /* Some unknown mystery error */
+
+          DEBUGASSERT(false);
+          return ret;
         }
 
       lps25h_dbg("Retrying one-shot measurement: retries=%d\n", retries);
@@ -746,17 +703,7 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&dev->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dev->devsem);
 
   switch (cmd)
     {

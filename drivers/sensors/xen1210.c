@@ -177,7 +177,6 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
       /* This should only happen if the wait was canceled by an signal */
 
       snerr("Failed: Cannot get exclusive access to driver structure!\n");
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

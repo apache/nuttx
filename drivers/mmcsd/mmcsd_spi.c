@@ -356,8 +356,6 @@ static const struct mmcsd_cmdinfo_s g_acmd41 = {ACMD41, MMCSD_CMDRESP_R1, 0xff};
 
 static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 {
-  int ret;
-
   /* Get exclusive access to the SPI bus (if necessary) */
 
   (void)SPI_LOCK(slot->spi, true);
@@ -375,19 +373,7 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
    * SPI_LOCK is also implemented as a semaphore).
    */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&slot->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&slot->sem);
 }
 
 /****************************************************************************

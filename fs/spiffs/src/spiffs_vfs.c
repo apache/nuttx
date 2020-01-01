@@ -195,19 +195,7 @@ static void spiffs_lock_reentrant(FAR struct spiffs_sem_s *rsem)
 
   else
     {
-      int ret;
-
-      do
-        {
-          ret = nxsem_wait(&rsem->sem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret >= 0 || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&rsem->sem);
 
       /* No we hold the semaphore */
 

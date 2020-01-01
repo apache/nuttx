@@ -73,7 +73,6 @@ static int local_waitlisten(FAR struct local_conn_s *server)
       ret = net_lockedwait(&server->lc_waitsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           return ret;
         }
     }

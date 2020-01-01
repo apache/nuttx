@@ -1415,9 +1415,7 @@ static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
               state->rxwaiting = true;
               do
                 {
-                  int ret = nxsem_wait(&state->rxwait);
-                  DEBUGASSERT(ret == 0 || ret == -EINTR);
-                  UNUSED(ret);
+                  nxsem_wait_uninterruptible(&state->rxwait);
                 }
               while (state->rxwaiting);
             }
@@ -1568,9 +1566,7 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
           state->txwaiting = true;
           do
             {
-              int ret = nxsem_wait(&state->txwait);
-              DEBUGASSERT(ret == 0 || ret == -EINTR);
-              UNUSED(ret);
+              nxsem_wait_uninterruptible(&state->txwait);
             }
           while (state->txwaiting);
 

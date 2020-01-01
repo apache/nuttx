@@ -509,7 +509,6 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
   if (ret < 0)
     {
       snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

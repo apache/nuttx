@@ -366,14 +366,7 @@ cs43l22_writereg(FAR struct cs43l22_dev_s *priv, uint8_t regaddr,
 
 static void cs43l22_takesem(sem_t * sem)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /************************************************************************************

@@ -416,14 +416,7 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
 static void wm8904_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /************************************************************************************

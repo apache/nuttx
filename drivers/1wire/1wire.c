@@ -248,19 +248,7 @@ void onewire_sem_wait(FAR struct onewire_master_s *master)
 
   else
     {
-      int ret;
-
-      do
-        {
-          ret = nxsem_wait(&master->devsem.sem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&master->devsem.sem);
 
       /* Now we hold the semaphore */
 

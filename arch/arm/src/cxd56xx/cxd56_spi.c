@@ -428,21 +428,12 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&priv->exclsem) != 0)
-        {
-          /* The only case that an error should occur here is if the wait was
-           * awakened by a signal.
-           */
-
-          ASSERT(errno == EINTR);
-        }
+      return nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)sem_post(&priv->exclsem);
+      return nxsem_post(&priv->exclsem);
     }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -1174,7 +1165,7 @@ FAR struct spi_dev_s *cxd56_spibus_initialize(int port)
           return NULL;
         }
 #endif
-      sem_init(&priv->dmasem, 0, 0);
+      nxsem_init(&priv->dmasem, 0, 0);
     }
 #endif
 
@@ -1199,7 +1190,7 @@ FAR struct spi_dev_s *cxd56_spibus_initialize(int port)
           return NULL;
         }
 #endif
-      sem_init(&priv->dmasem, 0, 0);
+      nxsem_init(&priv->dmasem, 0, 0);
     }
 #endif
 
@@ -1240,7 +1231,7 @@ FAR struct spi_dev_s *cxd56_spibus_initialize(int port)
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
-  sem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_CXD56_SPI3_SCUSEQ
   /* Enable the SPI, but not enable port 3 when SCU support enabled.
@@ -1471,7 +1462,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data)
       spierr("dma error\n");
     }
 
-  (void)sem_post(&priv->dmasem);
+  (void)nxsem_post(&priv->dmasem);
 }
 
 /****************************************************************************
@@ -1493,7 +1484,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data)
       spierr("dma error\n");
     }
 
-  (void)sem_post(&priv->dmasem);
+  (void)nxsem_post(&priv->dmasem);
 }
 
 /****************************************************************************
@@ -1554,7 +1545,7 @@ static void spi_dmatxwait(FAR struct cxd56_spidev_s *priv)
 {
   uint32_t val;
 
-  if (sem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }
@@ -1578,7 +1569,7 @@ static void spi_dmarxwait(FAR struct cxd56_spidev_s *priv)
 {
   uint32_t val;
 
-  if (sem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }
@@ -1602,12 +1593,12 @@ static void spi_dmatrxwait(FAR struct cxd56_spidev_s *priv)
 {
   uint32_t val;
 
-  if (sem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }
 
-  if (sem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }

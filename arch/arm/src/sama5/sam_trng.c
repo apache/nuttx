@@ -254,8 +254,6 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
   ret = nxsem_wait(&g_trngdev.exclsem);
   if (ret < 0)
     {
-      /* This is probably -EINTR meaning that we were awakened by a signal */
-
       return ret;
     }
 

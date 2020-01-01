@@ -610,21 +610,11 @@ static int scd30_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct scd30_dev_s *priv  = inode->i_private;
-  int ret;
+  int ret = OK;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* Increment the count of open references on the driver */
 
@@ -659,21 +649,10 @@ static int scd30_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct scd30_dev_s *priv  = inode->i_private;
-  int ret;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* Decrement the count of open references on the driver */
 
@@ -716,17 +695,7 @@ static ssize_t scd30_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -796,17 +765,7 @@ static int scd30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -1013,24 +972,13 @@ static int scd30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int scd30_unlink(FAR struct inode *inode)
 {
   FAR struct scd30_dev_s *priv;
-  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct scd30_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* Are there open references to the driver data structure? */
 
@@ -1047,7 +995,7 @@ static int scd30_unlink(FAR struct inode *inode)
 
   priv->unlinked = true;
   nxsem_post(&priv->devsem);
-  return ret;
+  return OK;
 }
 #endif
 

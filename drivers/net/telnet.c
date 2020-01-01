@@ -712,7 +712,6 @@ static int telnet_open(FAR struct file *filep)
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       goto errout;
     }
 
@@ -762,7 +761,6 @@ static int telnet_close(FAR struct file *filep)
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       goto errout;
     }
 
@@ -901,13 +899,9 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
               return 0;
             }
 
-          do
-            {
-              /* Wait for new data (or error) */
+          /* Wait for new data (or error) */
 
-              ret = nxsem_wait(&priv->td_iosem);
-            }
-          while (ret == -EINTR);
+          nxsem_wait_uninterruptible(&priv->td_iosem);
 
           /* poll fds.revents contains last poll status in case of error */
 
@@ -1060,7 +1054,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * priority inheritance.
    */
 
-  sem_setprotocol(&priv->td_iosem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->td_iosem, SEM_PRIO_NONE);
 
   priv->td_state     = STATE_NORMAL;
   priv->td_crefs     = 0;
@@ -1103,16 +1097,12 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * Get exclusive access to the minor counter.
    */
 
-  do
+  ret = nxsem_wait_uninterruptible(&g_telnet_common.tc_exclsem);
+  if (ret < 0)
     {
-      ret = nxsem_wait(&g_telnet_common.tc_exclsem);
-      if (ret < 0 && ret != -EINTR)
-        {
-          nerr("ERROR: nxsem_wait failed: %d\n", ret);
-          goto errout_with_clone;
-        }
+      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      goto errout_with_clone;
     }
-  while (ret == -EINTR);
 
   /* Loop until the device name is verified to be unique. */
 
@@ -1165,7 +1155,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
        * priority inheritance.
        */
 
-      sem_setprotocol(&g_iosem, SEM_PRIO_NONE);
+      nxsem_setprotocol(&g_iosem, SEM_PRIO_NONE);
 
       /* Start the I/O thread */
 

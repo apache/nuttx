@@ -970,9 +970,6 @@ static int nrf24l01_open(FAR struct file *filep)
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1017,9 +1014,6 @@ static int nrf24l01_close(FAR struct file *filep)
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1053,9 +1047,6 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1106,9 +1097,6 @@ static ssize_t nrf24l01_write(FAR struct file *filep, FAR const char *buffer,
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1140,9 +1128,6 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -1404,9 +1389,6 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = nxsem_wait(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -2076,9 +2058,6 @@ ssize_t nrf24l01_recv(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
   int ret = nxsem_wait(&dev->sem_rx);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 

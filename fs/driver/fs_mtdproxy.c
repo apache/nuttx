@@ -96,17 +96,7 @@ static FAR char *unique_blkdev(void)
     {
       /* Get the semaphore protecting the path number */
 
-      do
-        {
-          ret = nxsem_wait(&g_devno_sem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_devno_sem);
 
       /* Get the next device number and release the semaphore */
 

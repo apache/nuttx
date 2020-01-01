@@ -369,7 +369,6 @@ static void usbmsc_putle32(uint8_t *buf, uint32_t val)
 static void usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 {
   irqstate_t flags;
-  int ret;
 
   /* We must hold the SCSI lock to call this function */
 
@@ -393,9 +392,7 @@ static void usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   do
     {
-      ret = nxsem_wait(&priv->thwaitsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-      UNUSED(ret); /* Eliminate warnings when debug is off */
+      nxsem_wait_uninterruptible(&priv->thwaitsem);
     }
   while (priv->thwaiting);
 
@@ -2855,12 +2852,5 @@ void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv)
 
 void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(&priv->thlock);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->thlock);
 }

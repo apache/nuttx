@@ -323,16 +323,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
 
 static void ee24xx_semtake(FAR struct ee24xx_dev_s *eedev)
 {
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&eedev->sem) != 0)
-    {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(errno == EINTR || errno == ECANCELED);
-    }
+  nxsem_wait_uninterruptible(&eedev->sem);
 }
 
 /****************************************************************************
@@ -344,7 +335,7 @@ static void ee24xx_semtake(FAR struct ee24xx_dev_s *eedev)
 
 static inline void ee24xx_semgive(FAR struct ee24xx_dev_s *eedev)
 {
-  sem_post(&eedev->sem);
+  nxsem_post(&eedev->sem);
 }
 
 /****************************************************************************
@@ -818,7 +809,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
       return -ENOMEM;
     }
 
-  sem_init(&eedev->sem, 0, 1);
+  nxsem_init(&eedev->sem, 0, 1);
 
   eedev->freq     = CONFIG_EE24XX_FREQUENCY;
   eedev->i2c      = bus;

@@ -227,19 +227,12 @@ static char g_gcmdbuf[256] __attribute__ ((aligned(16)));
 
 static int ip_semtake(sem_t * id)
 {
-  while (sem_wait(id) != 0)
-    {
-      if (errno == EINTR)
-        {
-          return -EINTR;
-        }
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 static void ip_semgive(sem_t * id)
 {
-  sem_post(id);
+  nxsem_post(id);
 }
 
 static int intr_handler_ROT(int irq, FAR void *context, FAR void *arg)
@@ -383,21 +376,21 @@ static void *set_halt_cmd(void *cmdbuf)
 
 void imageproc_initialize(void)
 {
-  sem_init (&g_rotexc, 0, 1);
-  sem_init (&g_rotwait, 0, 0);
-  sem_init (&g_geexc, 0, 1);
-  sem_setprotocol (&g_rotwait, SEM_PRIO_NONE);
+  nxsem_init(&g_rotexc, 0, 1);
+  nxsem_init(&g_rotwait, 0, 0);
+  nxsem_init(&g_geexc, 0, 1);
+  nxsem_setprotocol(&g_rotwait, SEM_PRIO_NONE);
 
-  cxd56_ge2dinitialize (GEDEVNAME);
+  cxd56_ge2dinitialize(GEDEVNAME);
 
-  g_gfd = open (GEDEVNAME, O_RDWR);
+  g_gfd = open(GEDEVNAME, O_RDWR);
 
-  putreg32 (1, ROT_INTR_CLEAR);
-  putreg32 (0, ROT_INTR_ENABLE);
-  putreg32 (1, ROT_INTR_DISABLE);
+  putreg32(1, ROT_INTR_CLEAR);
+  putreg32(0, ROT_INTR_ENABLE);
+  putreg32(1, ROT_INTR_DISABLE);
 
-  irq_attach (CXD56_IRQ_ROT, intr_handler_ROT, NULL);
-  up_enable_irq (CXD56_IRQ_ROT);
+  irq_attach(CXD56_IRQ_ROT, intr_handler_ROT, NULL);
+  up_enable_irq(CXD56_IRQ_ROT);
 }
 
 void imageproc_finalize(void)
@@ -413,9 +406,9 @@ void imageproc_finalize(void)
 
   cxd56_ge2duninitialize(GEDEVNAME);
 
-  sem_destroy(&g_rotwait);
-  sem_destroy(&g_rotexc);
-  sem_destroy(&g_geexc);
+  nxsem_destroy(&g_rotwait);
+  nxsem_destroy(&g_rotexc);
+  nxsem_destroy(&g_geexc);
 }
 
 void imageproc_convert_yuv2rgb(uint8_t * ibuf, uint32_t hsize, uint32_t vsize)
@@ -512,7 +505,7 @@ int imageproc_resize(uint8_t * ibuf, uint16_t ihsize,
   ret = ip_semtake(&g_geexc);
   if (ret)
     {
-      return ret;               /* -EINTR */
+      return ret;
     }
 
   /* Create descriptor to graphics engine */
@@ -613,7 +606,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf, uint16_t ihsize,
   ret = ip_semtake(&g_geexc);
   if (ret)
     {
-      return ret;               /* -EINTR */
+      return ret;
     }
 
   /* Create descriptor to graphics engine */

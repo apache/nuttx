@@ -235,7 +235,7 @@ static void clock_semtake(sem_t *id)
 {
   if (!up_interrupt_context())
     {
-      sem_wait(id);
+      nxsem_wait(id);
     }
 }
 
@@ -243,7 +243,7 @@ static void clock_semgive(sem_t *id)
 {
   if (!up_interrupt_context())
     {
-      sem_post(id);
+      nxsem_post(id);
     }
 }
 

@@ -655,21 +655,7 @@ static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits, uint32_t set
 
 static void stm32_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -1121,13 +1107,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
        * wait here.
        */
 
-      ret = nxsem_wait(&chan->waitsem);
-
-      /* nxsem_wait should succeed.  But it is possible that we could be
-       * awakened by a signal too.
-       */
-
-      DEBUGASSERT(ret == OK || get_errno() == EINTR);
+      nxsem_wait_uninterruptible(&chan->waitsem);
     }
   while (chan->waiter);
 

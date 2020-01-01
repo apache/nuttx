@@ -1292,14 +1292,7 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
 
 static inline void usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(&priv->thsynch);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->thsynch);
 }
 
 /****************************************************************************

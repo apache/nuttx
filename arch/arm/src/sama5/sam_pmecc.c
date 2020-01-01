@@ -1236,14 +1236,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 #if NAND_NPMECC_BANKS > 1
 void pmecc_lock(void)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(&g_pmecc.exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_pmecc.exclsem);
 }
 #endif
 

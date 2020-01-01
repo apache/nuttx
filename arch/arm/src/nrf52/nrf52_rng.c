@@ -143,11 +143,11 @@ static int nrf52_rng_initialize(void)
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
-  sem_init(&g_rngdev.rd_sem, 0, 0);
-  sem_setprotocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
+  nxsem_init(&g_rngdev.rd_sem, 0, 0);
+  nxsem_setprotocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
 
-  sem_init(&g_rngdev.excl_sem, 0, 1);
-  sem_setprotocol(&g_rngdev.excl_sem, SEM_PRIO_NONE);
+  nxsem_init(&g_rngdev.excl_sem, 0, 1);
+  nxsem_setprotocol(&g_rngdev.excl_sem, SEM_PRIO_NONE);
 
   _info("Ready to stop\n");
   nrf52_rng_stop();
@@ -182,7 +182,7 @@ static int nrf52_rng_irqhandler(int irq, FAR void *context, FAR void *arg)
       if (priv->rd_count == priv->buflen)
         {
           nrf52_rng_stop();
-          sem_post(&priv->rd_sem);
+          nxsem_post(&priv->rd_sem);
         }
     }
 
@@ -216,10 +216,9 @@ static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
   FAR struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   ssize_t read_len;
 
-  if (sem_wait(&priv->excl_sem) != OK)
+  if (nxsem_wait(&priv->excl_sem) != OK)
     {
-      errno = EBUSY;
-      return -errno;
+      return -EBUSY;
     }
 
   priv->rd_buf = (uint8_t *) buffer;
@@ -230,7 +229,7 @@ static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
 
   nrf52_rng_start();
 
-  sem_wait(&priv->rd_sem);
+  nxsem_wait(&priv->rd_sem);
   read_len = priv->rd_count;
 
   if (priv->rd_count > priv->buflen)
@@ -241,7 +240,7 @@ static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
 
   /* Now , got data, and release rd_sem for next read */
 
-  sem_post(&priv->excl_sem);
+  nxsem_post(&priv->excl_sem);
 
   return read_len;
 }

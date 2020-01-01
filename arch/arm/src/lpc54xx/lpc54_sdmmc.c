@@ -274,7 +274,7 @@ static void lpc54_putreg(uint32_t val, uint32_t addr);
 /* Low-level helpers ********************************************************/
 
 static void lpc54_takesem(struct lpc54_dev_s *priv);
-#define     lpc54_givesem(priv) (sem_post(&priv->waitsem))
+#define     lpc54_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void lpc54_setclock(uint32_t clkdiv);
 static inline void lpc54_sdcard_clock(bool enable);
 static int  lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg);
@@ -530,16 +530,7 @@ static void lpc54_putreg(uint32_t val, uint32_t addr)
 
 static void lpc54_takesem(struct lpc54_dev_s *priv)
 {
-  /* Take the semaphore (perhaps waiting) */
-
-  while (sem_wait(&priv->waitsem) != 0)
-    {
-      /* The only case that an error should occr here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(errno == EINTR || errno == ECANCELED);
-    }
+  nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2837,13 +2828,13 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 
   /* Initialize semaphores */
 
-  sem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
-  sem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Create a watchdog timer */
 

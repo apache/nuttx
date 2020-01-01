@@ -133,18 +133,7 @@ static const struct block_operations g_bops =
 
 static int loop_semtake(FAR struct loop_struct_s *dev)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  ret = nxsem_wait(&dev->sem);
-
-  /* The only case that an error should occur here is if the wait was
-   * awakened by a signal.
-   */
-
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(&dev->sem);
 }
 
 /****************************************************************************

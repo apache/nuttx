@@ -500,21 +500,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
 
 void up_rngreseed(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_rng.rd_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_rng.rd_sem);
 
   if (g_rng.rd_newentr >= MIN_SEED_NEW_ENTROPY_WORDS)
     {
@@ -563,22 +549,7 @@ void up_randompool_initialize(void)
 
 void getrandom(FAR void *bytes, size_t nbytes)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_rng.rd_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
-
+  nxsem_wait_uninterruptible(&g_rng.rd_sem);
   rng_buf_internal(bytes, nbytes);
   nxsem_post(&g_rng.rd_sem);
 }

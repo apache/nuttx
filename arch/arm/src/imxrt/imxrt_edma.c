@@ -185,21 +185,7 @@ static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
 
 static void imxrt_takechsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.chsem);
 }
 
 static inline void imxrt_givechsem(void)
@@ -218,21 +204,7 @@ static inline void imxrt_givechsem(void)
 #if CONFIG_IMXRT_EDMA_NTCD > 0
 static void imxrt_takedsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.dsem);
 }
 
 static inline void imxrt_givedsem(void)

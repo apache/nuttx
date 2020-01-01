@@ -437,24 +437,11 @@ static void spi_dma_timeout(int argc, uint32_t arg1, ...)
 static void spi_dmarxwait(struct efm32_spidev_s *priv)
 {
   irqstate_t flags;
-  int ret;
 
   /* Take the semaphore (perhaps waiting). */
 
   flags = enter_critical_section();
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->rxdmasem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->rxdmasem);
 
   /* Cancel the timeout only if both the RX and TX transfers have completed */
 
@@ -480,24 +467,11 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
 static void spi_dmatxwait(struct efm32_spidev_s *priv)
 {
   irqstate_t flags;
-  int ret;
 
   /* Take the semaphore (perhaps waiting). */
 
   flags = enter_critical_section();
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->txdmasem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->txdmasem);
 
   /* Cancel the timeout only if both the RX and TX transfers have completed */
 
@@ -755,27 +729,15 @@ static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv)
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)dev;
+  int ret;
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;

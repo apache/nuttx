@@ -88,11 +88,6 @@ int nxterm_resize(NXTERM handle, FAR const struct nxgl_size_s *size)
   ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      /* The only expected error is if the wait failed because of it was
-       * interrupted by a signal or if the thread was canceled.
-       */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
