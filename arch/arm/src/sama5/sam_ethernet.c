@@ -96,6 +96,62 @@ static inline void up_gmac_initialize(void)
 #endif
 
 /****************************************************************************
+ * Function: up_emac_initialize
+ *
+ * Description:
+ *   Initialize the EMAC driver
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_EMACA)
+static inline void up_emac_initialize(void)
+{
+  int ret;
+
+  /* Initialize the EMAC driver */
+
+  ret = sam_emac_initialize();
+  if (ret < 0)
+    {
+      nerr("ERROR: up_emac_initialize failed: %d\n", ret);
+    }
+}
+#elif defined(CONFIG_SAMA5_EMACB)
+static inline void up_emac_initialize(void)
+{
+  int ret;
+
+#if defined(CONFIG_SAMA5_EMAC0)
+  /* Initialize the EMAC0 driver */
+
+  ret = sam_emac_initialize(EMAC0_INTF);
+  if (ret < 0)
+    {
+      nerr("ERROR: up_emac_initialize(EMAC0) failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_SAMA5_EMAC1)
+  /* Initialize the EMAC1 driver */
+
+  ret = sam_emac_initialize(EMAC1_INTF);
+  if (ret < 0)
+    {
+      nerr("ERROR: up_emac_initialize(EMAC1) failed: %d\n", ret);
+    }
+#endif
+}
+#else
+#  define up_emac_initialize()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -104,7 +160,9 @@ static inline void up_gmac_initialize(void)
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   low-level initialization logic in up_initialize.c.  If both the EMAC
+ *   and GMAC are enabled, then this single entry point must initialize
+ *   both.
  *
  * Input Parameters:
  *   None.
@@ -118,8 +176,15 @@ static inline void up_gmac_initialize(void)
 
 void up_netinitialize(void)
 {
+  /* The first device registered with be ETH0 and the second ETH1 */
 
+#ifdef CONFIG_SAMA5_GMAC_ISETH0
   up_gmac_initialize();
+  up_emac_initialize();
+#else
+  up_emac_initialize();
+  up_gmac_initialize();
+#endif
 }
 
 #endif /* CONFIG_NET */
