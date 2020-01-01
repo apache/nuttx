@@ -138,6 +138,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)lpc4088_devkit_bringup();
+  lpc4088_devkit_bringup();
 }
 #endif

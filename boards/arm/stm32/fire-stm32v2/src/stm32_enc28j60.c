@@ -164,8 +164,8 @@ static void up_enable(FAR const struct enc_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
-                           priv->handler, priv->arg);
+  stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
+                     priv->handler, priv->arg);
 }
 
 /* REVISIT:  Since the interrupt is completely torn down, not just disabled,
@@ -175,8 +175,8 @@ static void up_enable(FAR const struct enc_lower_s *lower)
 
 static void up_disable(FAR const struct enc_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
-                           NULL, NULL);
+  stm32_gpiosetevent(GPIO_ENC28J60_INTR, false, true, true,
+                     NULL, NULL);
 }
 
 /****************************************************************************

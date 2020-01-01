@@ -428,7 +428,7 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
 
    /* Ignore errors from the setup command (because it is not ACKed) */
 
-   (void)I2C_TRANSFER(priv->i2c, &msg, 1);
+   I2C_TRANSFER(priv->i2c, &msg, 1);
 
    /* Now activate the A/D converter */
 
@@ -615,7 +615,7 @@ static void tsc2007_worker(FAR void *arg)
        *  in the cases previously listed."
        */
 
-      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_X);
+      tsc2007_activate(priv, TSC2007_ACTIVATE_X);
       y = tsc2007_transfer(priv, TSC2007_MEASURE_Y);
 
 
@@ -624,7 +624,7 @@ static void tsc2007_worker(FAR void *arg)
        *  process provides the X and Y coordinates to the associated processor."
        */
 
-      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Y);
+      tsc2007_activate(priv, TSC2007_ACTIVATE_Y);
       x = tsc2007_transfer(priv, TSC2007_MEASURE_X);
 
       /* "... To determine pen or finger touch, the pressure of the touch must be
@@ -643,14 +643,14 @@ static void tsc2007_worker(FAR void *arg)
        * Read Z1 and Z2 values.
        */
 
-      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
+      tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
       z1 = tsc2007_transfer(priv, TSC2007_MEASURE_Z1);
-      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
+      tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
       z2 = tsc2007_transfer(priv, TSC2007_MEASURE_Z2);
 
       /* Power down ADC and enable PENIRQ */
 
-     (void)tsc2007_transfer(priv, TSC2007_ENABLE_PENIRQ);
+     tsc2007_transfer(priv, TSC2007_ENABLE_PENIRQ);
 
       /* Now calculate the pressure using the first method, reduced to:
        *
@@ -1262,7 +1262,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &tsc2007_fops, 0666, priv);

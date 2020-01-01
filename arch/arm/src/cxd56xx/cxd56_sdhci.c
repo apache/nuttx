@@ -1066,7 +1066,7 @@ static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1270,8 +1270,8 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
       putreg32(getreg32(CXD56_SDHCI_IRQSTATEN) & (~SDHCI_INT_CINT),
                         CXD56_SDHCI_IRQSTATEN);
       work_cancel(HPWORK, &priv->cbwork);
-      (void)work_queue(HPWORK, &priv->cbwork,
-                      (worker_t)cxd56_sdhci_irq_handler, &priv->dev, 0);
+      work_queue(HPWORK, &priv->cbwork,
+                 (worker_t)cxd56_sdhci_irq_handler, &priv->dev, 0);
     }
 #endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 
@@ -2138,7 +2138,7 @@ static int cxd56_sdio_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -3207,8 +3207,8 @@ static void cxd56_sdio_callback(void *arg)
 
           work_cancel(HPWORK, &priv->cbwork);
           mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
-                           priv->cbarg, delay);
+          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                     priv->cbarg, delay);
         }
       else
         {

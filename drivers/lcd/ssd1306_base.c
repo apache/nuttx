@@ -771,7 +771,7 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
         {
           /* Do power on. */
 
-          (void)priv->board_priv->set_vcc(true);
+          priv->board_priv->set_vcc(true);
         }
 
       if (!priv->is_conf)

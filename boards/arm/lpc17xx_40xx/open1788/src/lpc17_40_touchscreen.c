@@ -169,7 +169,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t handler)
 {
   /* Attach then enable the touchscreen interrupt handler */
 
-  (void)irq_attach(LPC17_40_IRQ_PENIRQ, handler, NULL);
+  irq_attach(LPC17_40_IRQ_PENIRQ, handler, NULL);
   return OK;
 }
 
@@ -282,12 +282,12 @@ int open1788_tsc_setup(int minor)
 
   /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
 
-  (void)lpc17_40_configgpio(GPIO_TC_PENIRQ);
+  lpc17_40_configgpio(GPIO_TC_PENIRQ);
 
   /* Configure the XPT2046 BUSY pin as a normal input. */
 
 #ifndef XPT2046_NO_BUSY
-  (void)lpc17_40_configgpio(GPIO_TC_BUSY);
+  lpc17_40_configgpio(GPIO_TC_BUSY);
 #endif
 
   /* Get an instance of the SPI interface */

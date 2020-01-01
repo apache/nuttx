@@ -452,7 +452,7 @@ static int vnc_start_server(int display)
 
   /* Format the kernel thread arguments (ASCII.. yech) */
 
-  (void)itoa(display, str, 10);
+  itoa(display, str, 10);
   argv[0] = str;
   argv[1] = NULL;
 

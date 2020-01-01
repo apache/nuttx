@@ -339,7 +339,7 @@ int open(FAR const char *path, int oflags, ...)
 
   /* open() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nx_vopen() do most of the work */
 

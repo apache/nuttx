@@ -100,7 +100,7 @@ void board_button_initialize(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
   /* Configure GPIO interrupts */
 
-  (void)tiva_gpioirqinitialize();
+  tiva_gpioirqinitialize();
 #endif
 }
 

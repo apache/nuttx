@@ -724,7 +724,7 @@ FAR struct onewire_master_s *
 
   /* Register to receive power management callbacks */
 
-  (void)pm_register(&master->pm_cb);
+  pm_register(&master->pm_cb);
 #endif
 
   return master;

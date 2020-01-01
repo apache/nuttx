@@ -98,8 +98,6 @@ static sem_t g_cdsem;
 
 static void *stm32_cd_thread(void *arg)
 {
-  (void)arg;
-
   spiinfo("INFO: Runnig card detect thread\n");
   while (1)
     {
@@ -199,7 +197,7 @@ int stm32_mmcsd_initialize(int minor)
       return rv;
     }
 
-  (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
+  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
 
   nxsem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);

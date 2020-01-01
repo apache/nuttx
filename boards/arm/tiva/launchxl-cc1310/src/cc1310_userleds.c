@@ -58,8 +58,8 @@
 
 void board_userled_initialize(void)
 {
-  (void)tiva_configgpio(&g_gpio_gled);
-  (void)tiva_configgpio(&g_gpio_rled);
+  tiva_configgpio(&g_gpio_gled);
+  tiva_configgpio(&g_gpio_rled);
 }
 
 /****************************************************************************

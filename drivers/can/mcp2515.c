@@ -358,7 +358,7 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
   int i;
 #endif
 
-  (void)SPI_LOCK(config->spi, true);
+  SPI_LOCK(config->spi, true);
 
   /* Select the MCP2515 */
 
@@ -366,11 +366,11 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Send the READ command */
 
-  (void)SPI_SEND(config->spi, MCP2515_READ);
+  SPI_SEND(config->spi, MCP2515_READ);
 
   /* Send register to read and get the next bytes read back */
 
-  (void)SPI_SEND(config->spi, regaddr);
+  SPI_SEND(config->spi, regaddr);
   SPI_RECVBLOCK(config->spi, buffer, len);
 
   /* Deselect the MCP2515 */
@@ -379,7 +379,7 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(config->spi, false);
+  SPI_LOCK(config->spi, false);
 
 #ifdef CONFIG_CANBUS_REGDEBUG
   for (i = 0; i < len; i++)
@@ -393,7 +393,7 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
 {
   FAR struct mcp2515_config_s *config = priv->config;
 
-  (void)SPI_LOCK(config->spi, true);
+  SPI_LOCK(config->spi, true);
 
   /* Select the MCP2515 */
 
@@ -409,7 +409,7 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(config->spi, false);
+  SPI_LOCK(config->spi, false);
 }
 
 /****************************************************************************
@@ -441,7 +441,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
     }
 #endif
 
-  (void)SPI_LOCK(config->spi, true);
+  SPI_LOCK(config->spi, true);
 
   /* Select the MCP2515 */
 
@@ -449,11 +449,11 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Send the READ command */
 
-  (void)SPI_SEND(config->spi, MCP2515_WRITE);
+  SPI_SEND(config->spi, MCP2515_WRITE);
 
   /* Send initial register to be written */
 
-  (void)SPI_SEND(config->spi, regaddr);
+  SPI_SEND(config->spi, regaddr);
   SPI_SNDBLOCK(config->spi, buffer, len);
 
   /* Deselect the MCP2515 */
@@ -462,7 +462,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(config->spi, false);
+  SPI_LOCK(config->spi, false);
 }
 
 /****************************************************************************
@@ -490,7 +490,7 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
     MCP2515_BITMOD, regaddr, mask, value
   };
 
-  (void)SPI_LOCK(config->spi, true);
+  SPI_LOCK(config->spi, true);
 
   /* Select the MCP2515 */
 
@@ -504,7 +504,7 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(config->spi, false);
+  SPI_LOCK(config->spi, false);
 }
 
 /****************************************************************************
@@ -1829,7 +1829,7 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * called from the tasking level.
    */
 
-  (void)can_txdone(dev);
+  can_txdone(dev);
   return OK;
 }
 
@@ -2268,7 +2268,7 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
            * data in mcp2515_send().
            */
 
-          (void)can_txready(dev);
+          can_txready(dev);
 #endif
         }
       else if ((pending & priv->txints) != 0)
@@ -2498,7 +2498,7 @@ FAR struct mcp2515_can_s *
   SPI_SETFREQUENCY(config->spi, CONFIG_MCP2515_SPI_SCK_FREQUENCY);
   SPI_SETMODE(config->spi, MCP2515_SPI_MODE);
   SPI_SETBITS(config->spi, 8);
-  (void)SPI_HWFEATURES(config->spi, 0);
+  SPI_HWFEATURES(config->spi, 0);
 
   /* Perform one time data initialization */
 

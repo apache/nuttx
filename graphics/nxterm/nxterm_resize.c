@@ -98,6 +98,6 @@ int nxterm_resize(NXTERM handle, FAR const struct nxgl_size_s *size)
   priv->wndo.wsize.w = size->w;
   priv->wndo.wsize.h = size->h;
 
-  (void)nxterm_sempost(priv);
+  nxterm_sempost(priv);
   return true;
 }

@@ -87,7 +87,7 @@ uint32_t up_critmon_gettime(void)
 uint32_t up_critmon_gettime(void)
 {
   struct timespec ts;
-  (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+  clock_gettime(CLOCK_MONOTONIC, &ts);
   return (uint32_t)ts.tv_nsec;
 }
 #endif

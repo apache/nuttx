@@ -185,7 +185,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* mq_receive() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nxmq_receive do all of the work */
 

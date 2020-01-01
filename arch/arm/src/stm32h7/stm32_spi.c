@@ -868,7 +868,7 @@ static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->rxsem);
+  nxsem_post(&priv->rxsem);
 }
 #endif
 
@@ -883,7 +883,7 @@ static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static inline void spi_dmatxwakeup(FAR struct stm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->txsem);
+  nxsem_post(&priv->txsem);
 }
 #endif
 

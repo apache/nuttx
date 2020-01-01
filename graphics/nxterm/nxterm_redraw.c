@@ -114,5 +114,5 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
       nxterm_fillchar(priv, rect, &priv->bm[i]);
     }
 
-  (void)nxterm_sempost(priv);
+  nxterm_sempost(priv);
 }

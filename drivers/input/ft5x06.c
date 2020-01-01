@@ -351,7 +351,7 @@ static void ft5x06_data_worker(FAR void *arg)
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Exit, re-starting the poll. */
 
-  (void)wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout, 1, priv);
+  wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout, 1, priv);
 
 #else
   /* Exit, re-enabling FT5x06 interrupts */
@@ -751,7 +751,7 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Stop the poll timer */
 
-  (void)wd_cancel(priv->polltimer);
+  wd_cancel(priv->polltimer);
 
 #else
   FAR const struct ft5x06_config_s *config = priv->config;
@@ -1189,7 +1189,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &ft5x06_fops, 0666, priv);
@@ -1216,7 +1216,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
 errout_with_timer:
 #ifdef CONFIG_FT5X06_POLLMODE
-  (void)wd_delete(priv->polltimer);
+  wd_delete(priv->polltimer);
 
 errout_with_priv:
 #endif

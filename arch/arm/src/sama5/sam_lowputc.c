@@ -412,82 +412,82 @@ void sam_lowsetup(void)
    */
 
 #ifdef CONFIG_SAMA5_UART0
-  (void)sam_configpio(PIO_UART0_RXD);
-  (void)sam_configpio(PIO_UART0_TXD);
+  sam_configpio(PIO_UART0_RXD);
+  sam_configpio(PIO_UART0_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_UART1
-  (void)sam_configpio(PIO_UART1_RXD);
-  (void)sam_configpio(PIO_UART1_TXD);
+  sam_configpio(PIO_UART1_RXD);
+  sam_configpio(PIO_UART1_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_UART2
-  (void)sam_configpio(PIO_UART2_RXD);
-  (void)sam_configpio(PIO_UART2_TXD);
+  sam_configpio(PIO_UART2_RXD);
+  sam_configpio(PIO_UART2_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_UART3
-  (void)sam_configpio(PIO_UART3_RXD);
-  (void)sam_configpio(PIO_UART3_TXD);
+  sam_configpio(PIO_UART3_RXD);
+  sam_configpio(PIO_UART3_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_UART4
-  (void)sam_configpio(PIO_UART4_RXD);
-  (void)sam_configpio(PIO_UART4_TXD);
+  sam_configpio(PIO_UART4_RXD);
+  sam_configpio(PIO_UART4_TXD);
 #endif
 
 #if defined(CONFIG_USART0_SERIALDRIVER) && defined(CONFIG_SAMA5_USART0)
-  (void)sam_configpio(PIO_USART0_RXD);
-  (void)sam_configpio(PIO_USART0_TXD);
+  sam_configpio(PIO_USART0_RXD);
+  sam_configpio(PIO_USART0_TXD);
 #ifdef CONFIG_USART0_OFLOWCONTROL
-  (void)sam_configpio(PIO_USART0_CTS);
+  sam_configpio(PIO_USART0_CTS);
 #endif
 #ifdef CONFIG_USART0_IFLOWCONTROL
-  (void)sam_configpio(PIO_USART0_RTS);
+  sam_configpio(PIO_USART0_RTS);
 #endif
 #endif
 
 #if defined(CONFIG_USART1_SERIALDRIVER) && defined(CONFIG_SAMA5_USART1)
-  (void)sam_configpio(PIO_USART1_RXD);
-  (void)sam_configpio(PIO_USART1_TXD);
+  sam_configpio(PIO_USART1_RXD);
+  sam_configpio(PIO_USART1_TXD);
 #ifdef CONFIG_USART1_OFLOWCONTROL
-  (void)sam_configpio(PIO_USART1_CTS);
+  sam_configpio(PIO_USART1_CTS);
 #endif
 #ifdef CONFIG_USART1_IFLOWCONTROL
-  (void)sam_configpio(PIO_USART1_RTS);
+  sam_configpio(PIO_USART1_RTS);
 #endif
 #endif
 
 #if defined(CONFIG_USART2_SERIALDRIVER) && defined(CONFIG_SAMA5_USART2)
-  (void)sam_configpio(PIO_USART2_RXD);
-  (void)sam_configpio(PIO_USART2_TXD);
+  sam_configpio(PIO_USART2_RXD);
+  sam_configpio(PIO_USART2_TXD);
 #ifdef CONFIG_USART2_OFLOWCONTROL
-  (void)sam_configpio(PIO_USART2_CTS);
+  sam_configpio(PIO_USART2_CTS);
 #endif
 #ifdef CONFIG_USART2_IFLOWCONTROL
-  (void)sam_configpio(PIO_USART2_RTS);
+  sam_configpio(PIO_USART2_RTS);
 #endif
 #endif
 
 #if defined(CONFIG_USART3_SERIALDRIVER) && defined(CONFIG_SAMA5_USART3)
-  (void)sam_configpio(PIO_USART3_RXD);
-  (void)sam_configpio(PIO_USART3_TXD);
+  sam_configpio(PIO_USART3_RXD);
+  sam_configpio(PIO_USART3_TXD);
 #ifdef CONFIG_USART3_OFLOWCONTROL
-  (void)sam_configpio(PIO_USART3_CTS);
+  sam_configpio(PIO_USART3_CTS);
 #endif
 #ifdef CONFIG_USART3_IFLOWCONTROL
-  (void)sam_configpio(PIO_USART3_RTS);
+  sam_configpio(PIO_USART3_RTS);
 #endif
 #endif
 
 #if defined(CONFIG_USART4_SERIALDRIVER) && defined(CONFIG_SAMA5_USART4)
-  (void)sam_configpio(PIO_USART4_RXD);
-  (void)sam_configpio(PIO_USART4_TXD);
+  sam_configpio(PIO_USART4_RXD);
+  sam_configpio(PIO_USART4_TXD);
 #ifdef CONFIG_USART4_OFLOWCONTROL
-  (void)sam_configpio(PIO_USART4_CTS);
+  sam_configpio(PIO_USART4_CTS);
 #endif
 #ifdef CONFIG_USART4_IFLOWCONTROL
-  (void)sam_configpio(PIO_USART4_RTS);
+  sam_configpio(PIO_USART4_RTS);
 #endif
 #endif
 
@@ -501,57 +501,57 @@ void sam_lowsetup(void)
    */
 
 #if defined(CONFIG_USART0_SERIALDRIVER) && defined(CONFIG_SAMA5_FLEXCOM0_USART)
-  (void)sam_configpio(PIO_FLEXCOM0_IO0);
-  (void)sam_configpio(PIO_FLEXCOM0_IO1);
+  sam_configpio(PIO_FLEXCOM0_IO0);
+  sam_configpio(PIO_FLEXCOM0_IO1);
 #ifdef CONFIG_USART0_OFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM0_IO3);
+  sam_configpio(PIO_FLEXCOM0_IO3);
 #endif
 #ifdef CONFIG_USART0_IFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM0_IO4);
+  sam_configpio(PIO_FLEXCOM0_IO4);
 #endif
 #endif
 
 #if defined(CONFIG_USART1_SERIALDRIVER) && defined(CONFIG_SAMA5_FLEXCOM1_USART)
-  (void)sam_configpio(PIO_FLEXCOM1_IO0);
-  (void)sam_configpio(PIO_FLEXCOM1_IO1);
+  sam_configpio(PIO_FLEXCOM1_IO0);
+  sam_configpio(PIO_FLEXCOM1_IO1);
 #ifdef CONFIG_USART1_OFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM1_IO3);
+  sam_configpio(PIO_FLEXCOM1_IO3);
 #endif
 #ifdef CONFIG_USART1_IFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM1_IO4);
+  sam_configpio(PIO_FLEXCOM1_IO4);
 #endif
 #endif
 
 #if defined(CONFIG_USART2_SERIALDRIVER) && defined(CONFIG_SAMA5_FLEXCOM2_USART)
-  (void)sam_configpio(PIO_FLEXCOM2_IO0);
-  (void)sam_configpio(PIO_FLEXCOM2_IO1);
+  sam_configpio(PIO_FLEXCOM2_IO0);
+  sam_configpio(PIO_FLEXCOM2_IO1);
 #ifdef CONFIG_USART2_OFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM2_IO3);
+  sam_configpio(PIO_FLEXCOM2_IO3);
 #endif
 #ifdef CONFIG_USART2_IFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM2_IO4);
+  sam_configpio(PIO_FLEXCOM2_IO4);
 #endif
 #endif
 
 #if defined(CONFIG_USART3_SERIALDRIVER) && defined(CONFIG_SAMA5_FLEXCOM3_USART)
-  (void)sam_configpio(PIO_FLEXCOM3_IO0);
-  (void)sam_configpio(PIO_FLEXCOM3_IO1);
+  sam_configpio(PIO_FLEXCOM3_IO0);
+  sam_configpio(PIO_FLEXCOM3_IO1);
 #ifdef CONFIG_USART3_OFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM3_IO3);
+  sam_configpio(PIO_FLEXCOM3_IO3);
 #endif
 #ifdef CONFIG_USART3_IFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM3_IO4);
+  sam_configpio(PIO_FLEXCOM3_IO4);
 #endif
 #endif
 
 #if defined(CONFIG_USART4_SERIALDRIVER) && defined(CONFIG_SAMA5_FLEXCOM4_USART)
-  (void)sam_configpio(PIO_FLEXCOM4_IO0);
-  (void)sam_configpio(PIO_FLEXCOM4_IO1);
+  sam_configpio(PIO_FLEXCOM4_IO0);
+  sam_configpio(PIO_FLEXCOM4_IO1);
 #ifdef CONFIG_USART4_OFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM4_IO3);
+  sam_configpio(PIO_FLEXCOM4_IO3);
 #endif
 #ifdef CONFIG_USART4_IFLOWCONTROL
-  (void)sam_configpio(PIO_FLEXCOM4_IO4);
+  sam_configpio(PIO_FLEXCOM4_IO4);
 #endif
 #endif
 

@@ -1258,7 +1258,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, STM32_TXTIMEOUT, stm32_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txtimeout, STM32_TXTIMEOUT, stm32_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1422,7 +1422,7 @@ static void stm32_dopoll(struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          (void)devif_poll(dev, stm32_txpoll);
+          devif_poll(dev, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2380,7 +2380,7 @@ static void stm32_poll_work(void *arg)
           /* Update TCP timing states and poll the network for new XMIT data.
            */
 
-          (void)devif_timer(dev, STM32_WDDELAY, stm32_txpoll);
+          devif_timer(dev, STM32_WDDELAY, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2397,7 +2397,7 @@ static void stm32_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -2431,7 +2431,7 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
     }
   else
     {
-      (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+      wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
     }
 }
 
@@ -2479,7 +2479,7 @@ static int stm32_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -3911,7 +3911,7 @@ static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)stm32_addmac(dev, mac);
+  stm32_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -3919,7 +3919,7 @@ static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
    * packets.
    */
 
-  (void)stm32_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  stm32_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -3928,7 +3928,7 @@ static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
    * packets.
    */
 
-  (void)stm32_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  stm32_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
@@ -4182,7 +4182,7 @@ int stm32_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 }
 
@@ -4209,7 +4209,7 @@ int stm32_ethinitialize(int intf)
 #if STM32F7_NETHERNET == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)stm32_ethinitialize(0);
+  stm32_ethinitialize(0);
 }
 #endif
 

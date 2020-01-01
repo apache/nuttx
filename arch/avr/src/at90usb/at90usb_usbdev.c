@@ -1255,7 +1255,7 @@ static void avr_usbreset(void)
 
   /* EndPoint 0 initialization */
 
-  (void)avr_ep0configure();
+  avr_ep0configure();
 
   /* Enable VBUS interrupts */
 
@@ -1845,7 +1845,7 @@ static inline void avr_epNinterrupt(void)
 
                   /* Handle the IN request queue */
 
-                  (void)avr_epINqueue(privep);
+                  avr_epINqueue(privep);
                 }
             }
           else
@@ -1862,7 +1862,7 @@ static inline void avr_epNinterrupt(void)
 
                   /* Handle the OUT request queue */
 
-                  (void)avr_epOUTqueue(privep);
+                  avr_epOUTqueue(privep);
                 }
             }
         }
@@ -2042,7 +2042,7 @@ static inline void avr_geneor(void)
 
   /* Configure endpoint 0 */
 
-  (void)avr_ep0configure();
+  avr_ep0configure();
 
   /* Reset endpoint status */
 

@@ -481,7 +481,7 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
       serr("ERROR: waitpid failed: %d\n", errno);
     }
 #else
-  (void)waitpid(pid, &rc, 0);
+  waitpid(pid, &rc, 0);
 #endif
 
   sched_unlock();

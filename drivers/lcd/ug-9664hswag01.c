@@ -401,9 +401,9 @@ static void ug_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_UG9664HSWAG01_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_UG9664HSWAG01_FREQUENCY
-  (void)SPI_SETFREQUENCY(spi, CONFIG_UG9664HSWAG01_FREQUENCY);
+  SPI_SETFREQUENCY(spi, CONFIG_UG9664HSWAG01_FREQUENCY);
 #endif
 }
 
@@ -612,9 +612,9 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Set the starting position for the run */
 
-  (void)SPI_SEND(priv->spi, SSD1305_SETPAGESTART+page);         /* Set the page start */
-  (void)SPI_SEND(priv->spi, SSD1305_SETCOLL + (devcol & 0x0f)); /* Set the low column */
-  (void)SPI_SEND(priv->spi, SSD1305_SETCOLH + (devcol >> 4));   /* Set the high column */
+  SPI_SEND(priv->spi, SSD1305_SETPAGESTART+page);         /* Set the page start */
+  SPI_SEND(priv->spi, SSD1305_SETCOLL + (devcol & 0x0f)); /* Set the low column */
+  SPI_SEND(priv->spi, SSD1305_SETCOLH + (devcol >> 4));   /* Set the high column */
 
   /* Select data transfer */
 
@@ -622,7 +622,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Then transfer all of the data */
 
-  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
+  SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
 
   /* Unlock and de-select the device */
 
@@ -864,7 +864,7 @@ static int ug_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display off */
 
-      (void)SPI_SEND(priv->spi, SSD1305_DISPOFF);       /* Display off */
+      SPI_SEND(priv->spi, SSD1305_DISPOFF);       /* Display off */
 
       /* Remove power to the device */
 
@@ -877,14 +877,14 @@ static int ug_setpower(struct lcd_dev_s *dev, int power)
 
       if (power == UG_POWER_DIM)
         {
-          (void)SPI_SEND(priv->spi, SSD1305_DISPONDIM); /* Display on, dim mode */
+          SPI_SEND(priv->spi, SSD1305_DISPONDIM); /* Display on, dim mode */
         }
       else /* if (power > UG_POWER_DIM) */
         {
-          (void)SPI_SEND(priv->spi, SSD1305_DISPON);    /* Display on, normal mode */
+          SPI_SEND(priv->spi, SSD1305_DISPON);    /* Display on, normal mode */
           power = UG_POWER_ON;
         }
-      (void)SPI_SEND(priv->spi, SSD1305_DISPRAM);       /* Resume to RAM content display */
+      SPI_SEND(priv->spi, SSD1305_DISPRAM);       /* Resume to RAM content display */
 
       /* Restore power to the device */
 
@@ -941,8 +941,8 @@ static int ug_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  (void)SPI_SEND(priv->spi, SSD1305_SETCONTRAST);  /* Set contrast control register */
-  (void)SPI_SEND(priv->spi, contrast);             /* Data 1: Set 1 of 256 contrast steps */
+  SPI_SEND(priv->spi, SSD1305_SETCONTRAST);  /* Set contrast control register */
+  SPI_SEND(priv->spi, contrast);             /* Data 1: Set 1 of 256 contrast steps */
   priv->contrast = contrast;
 
   /* Unlock and de-select the device */
@@ -983,9 +983,9 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      (void)SPI_SEND(priv->spi, SSD1305_SETPAGESTART+i);
-      (void)SPI_SEND(priv->spi, SSD1305_SETCOLL + (UG_XOFFSET & 0x0f));
-      (void)SPI_SEND(priv->spi, SSD1305_SETCOLH + (UG_XOFFSET >> 4));
+      SPI_SEND(priv->spi, SSD1305_SETPAGESTART+i);
+      SPI_SEND(priv->spi, SSD1305_SETCOLL + (UG_XOFFSET & 0x0f));
+      SPI_SEND(priv->spi, SSD1305_SETCOLH + (UG_XOFFSET >> 4));
 
       /* Select data transfer */
 
@@ -993,7 +993,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
        /* Then transfer all 96 columns of data */
 
-       (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * UG_XRES], UG_XRES);
+       SPI_SNDBLOCK(priv->spi, &priv->fb[page * UG_XRES], UG_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -1053,43 +1053,43 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
 
   /* Configure the device */
 
-  (void)SPI_SEND(spi, SSD1305_SETCOLL + 2);       /* Set low column address */
-  (void)SPI_SEND(spi, SSD1305_SETCOLH + 2);       /* Set high column address */
-  (void)SPI_SEND(spi, SSD1305_SETSTARTLINE+0);    /* Display start set */
-  (void)SPI_SEND(spi, SSD1305_SCROLL_STOP);       /* Stop horizontal scroll */
-  (void)SPI_SEND(spi, SSD1305_SETCONTRAST);       /* Set contrast control register */
-  (void)SPI_SEND(spi, 0x32);                      /* Data 1: Set 1 of 256 contrast steps */
-  (void)SPI_SEND(spi, SSD1305_SETBRIGHTNESS);     /* Brightness for color bank */
-  (void)SPI_SEND(spi, 0x80);                      /* Data 1: Set 1 of 256 contrast steps */
-  (void)SPI_SEND(spi, SSD1305_MAPCOL131);         /* Set segment re-map */
-  (void)SPI_SEND(spi, SSD1305_DISPNORMAL);        /* Set normal display */
+  SPI_SEND(spi, SSD1305_SETCOLL + 2);       /* Set low column address */
+  SPI_SEND(spi, SSD1305_SETCOLH + 2);       /* Set high column address */
+  SPI_SEND(spi, SSD1305_SETSTARTLINE+0);    /* Display start set */
+  SPI_SEND(spi, SSD1305_SCROLL_STOP);       /* Stop horizontal scroll */
+  SPI_SEND(spi, SSD1305_SETCONTRAST);       /* Set contrast control register */
+  SPI_SEND(spi, 0x32);                      /* Data 1: Set 1 of 256 contrast steps */
+  SPI_SEND(spi, SSD1305_SETBRIGHTNESS);     /* Brightness for color bank */
+  SPI_SEND(spi, 0x80);                      /* Data 1: Set 1 of 256 contrast steps */
+  SPI_SEND(spi, SSD1305_MAPCOL131);         /* Set segment re-map */
+  SPI_SEND(spi, SSD1305_DISPNORMAL);        /* Set normal display */
 //(void)SPI_SEND(spi, SSD1305_DISPINVERTED);      /* Set inverse display */
-  (void)SPI_SEND(spi, SSD1305_SETMUX);            /* Set multiplex ratio */
-  (void)SPI_SEND(spi, 0x3f);                      /* Data 1: MUX ratio -1: 15-63 */
-  (void)SPI_SEND(spi, SSD1305_SETOFFSET);         /* Set display offset */
-  (void)SPI_SEND(spi, 0x40);                      /* Data 1: Vertical shift by COM: 0-63 */
-  (void)SPI_SEND(spi, SSD1305_MSTRCONFIG);        /* Set dc-dc on/off */
-  (void)SPI_SEND(spi, SSD1305_MSTRCONFIG_EXTVCC); /* Data 1: Select external Vcc */
-  (void)SPI_SEND(spi, SSD1305_SETCOMREMAPPED);    /* Set com output scan direction */
-  (void)SPI_SEND(spi, SSD1305_SETDCLK);           /* Set display clock divide
+  SPI_SEND(spi, SSD1305_SETMUX);            /* Set multiplex ratio */
+  SPI_SEND(spi, 0x3f);                      /* Data 1: MUX ratio -1: 15-63 */
+  SPI_SEND(spi, SSD1305_SETOFFSET);         /* Set display offset */
+  SPI_SEND(spi, 0x40);                      /* Data 1: Vertical shift by COM: 0-63 */
+  SPI_SEND(spi, SSD1305_MSTRCONFIG);        /* Set dc-dc on/off */
+  SPI_SEND(spi, SSD1305_MSTRCONFIG_EXTVCC); /* Data 1: Select external Vcc */
+  SPI_SEND(spi, SSD1305_SETCOMREMAPPED);    /* Set com output scan direction */
+  SPI_SEND(spi, SSD1305_SETDCLK);           /* Set display clock divide
                                                    * ratio/oscillator/frequency */
-  (void)SPI_SEND(spi, 15 << SSD1305_DCLKFREQ_SHIFT | 0 << SSD1305_DCLKDIV_SHIFT);
-  (void)SPI_SEND(spi, SSD1305_SETCOLORMODE);      /* Set area color mode on/off & low power
+  SPI_SEND(spi, 15 << SSD1305_DCLKFREQ_SHIFT | 0 << SSD1305_DCLKDIV_SHIFT);
+  SPI_SEND(spi, SSD1305_SETCOLORMODE);      /* Set area color mode on/off & low power
                                                    * display mode */
-  (void)SPI_SEND(spi, SSD1305_COLORMODE_MONO | SSD1305_POWERMODE_LOW);
-  (void)SPI_SEND(spi, SSD1305_SETPRECHARGE);      /* Set pre-charge period */
-  (void)SPI_SEND(spi, 15 << SSD1305_PHASE2_SHIFT | 1 << SSD1305_PHASE1_SHIFT);
-  (void)SPI_SEND(spi, SSD1305_SETCOMCONFIG);      /* Set COM configuration */
-  (void)SPI_SEND(spi, SSD1305_COMCONFIG_ALT);     /* Data 1, Bit 4: 1=Alternative COM pin configuration */
-  (void)SPI_SEND(spi, SSD1305_SETVCOMHDESEL);     /* Set VCOMH deselect level */
-  (void)SPI_SEND(spi, SSD1305_VCOMH_x7p7);        /* Data 1: ~0.77 x Vcc  */
-  (void)SPI_SEND(spi, SSD1305_SETLUT);            /* Set look up table for area color */
-  (void)SPI_SEND(spi, 0x3f);                      /* Data 1: Pulse width: 31-63 */
-  (void)SPI_SEND(spi, 0x3f);                      /* Data 2: Color A: 31-63 */
-  (void)SPI_SEND(spi, 0x3f);                      /* Data 3: Color B: 31-63 */
-  (void)SPI_SEND(spi, 0x3f);                      /* Data 4: Color C: 31-63 */
-  (void)SPI_SEND(spi, SSD1305_DISPON);            /* Display on, normal mode */
-  (void)SPI_SEND(spi, SSD1305_DISPRAM);           /* Resume to RAM content display */
+  SPI_SEND(spi, SSD1305_COLORMODE_MONO | SSD1305_POWERMODE_LOW);
+  SPI_SEND(spi, SSD1305_SETPRECHARGE);      /* Set pre-charge period */
+  SPI_SEND(spi, 15 << SSD1305_PHASE2_SHIFT | 1 << SSD1305_PHASE1_SHIFT);
+  SPI_SEND(spi, SSD1305_SETCOMCONFIG);      /* Set COM configuration */
+  SPI_SEND(spi, SSD1305_COMCONFIG_ALT);     /* Data 1, Bit 4: 1=Alternative COM pin configuration */
+  SPI_SEND(spi, SSD1305_SETVCOMHDESEL);     /* Set VCOMH deselect level */
+  SPI_SEND(spi, SSD1305_VCOMH_x7p7);        /* Data 1: ~0.77 x Vcc  */
+  SPI_SEND(spi, SSD1305_SETLUT);            /* Set look up table for area color */
+  SPI_SEND(spi, 0x3f);                      /* Data 1: Pulse width: 31-63 */
+  SPI_SEND(spi, 0x3f);                      /* Data 2: Color A: 31-63 */
+  SPI_SEND(spi, 0x3f);                      /* Data 3: Color B: 31-63 */
+  SPI_SEND(spi, 0x3f);                      /* Data 4: Color C: 31-63 */
+  SPI_SEND(spi, SSD1305_DISPON);            /* Display on, normal mode */
+  SPI_SEND(spi, SSD1305_DISPRAM);           /* Resume to RAM content display */
 
   /* Let go of the SPI lock and de-select the device */
 

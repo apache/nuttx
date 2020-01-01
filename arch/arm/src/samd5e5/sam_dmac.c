@@ -184,7 +184,7 @@ static void sam_takechsem(void)
 
 static inline void sam_givechsem(void)
 {
-  (void)nxsem_post(&g_chsem);
+  nxsem_post(&g_chsem);
 }
 
 /****************************************************************************
@@ -203,7 +203,7 @@ static void sam_takedsem(void)
 
 static inline void sam_givedsem(void)
 {
-  (void)nxsem_post(&g_dsem);
+  nxsem_post(&g_dsem);
 }
 #endif
 
@@ -782,11 +782,11 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vectors */
 
-  (void)irq_attach(SAM_IRQ_DMACH0, sam_dmainterrupt, NULL);
-  (void)irq_attach(SAM_IRQ_DMACH1, sam_dmainterrupt, NULL);
-  (void)irq_attach(SAM_IRQ_DMACH2, sam_dmainterrupt, NULL);
-  (void)irq_attach(SAM_IRQ_DMACH3, sam_dmainterrupt, NULL);
-  (void)irq_attach(SAM_IRQ_DMACH4_31, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMACH0, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMACH1, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMACH2, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMACH3, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMACH4_31, sam_dmainterrupt, NULL);
 
   /* Set the LPRAM DMA descriptor table addresses.  These can only be
    * written when the DMAC is disabled.

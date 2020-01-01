@@ -81,7 +81,6 @@ static struct usbhost_connection_s *g_usbconn;
 
 static void* usbhost_detect(void *arg)
 {
-  (void)arg;
   struct usbhost_hubport_s *hport;
 
   uinfo("INFO: Starting usb detect thread\n");

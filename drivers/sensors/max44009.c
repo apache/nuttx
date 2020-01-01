@@ -288,7 +288,7 @@ static int max44009_close(FAR struct file *filep)
 
       /* Last user, do power off. */
 
-      (void)priv->config->set_power(priv->config, false);
+      priv->config->set_power(priv->config, false);
       priv->cref = use_count;
     }
   else

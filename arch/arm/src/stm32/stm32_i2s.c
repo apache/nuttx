@@ -1152,7 +1152,7 @@ static void i2s_rx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)i2s_rxdma_setup(priv);
+      i2s_rxdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1294,7 +1294,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->rx.dog);
+  wd_cancel(priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1544,7 +1544,7 @@ static void i2s_tx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)i2s_txdma_setup(priv);
+      i2s_txdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1674,7 +1674,7 @@ static void i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->tx.dog);
+  wd_cancel(priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 

@@ -868,7 +868,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           if (inactive)
             {
-              (void)can_xmit(dev);
+              can_xmit(dev);
             }
 
           /* Wait for a message to be sent */
@@ -911,7 +911,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   if (inactive)
     {
-      (void)can_xmit(dev);
+      can_xmit(dev);
     }
 
   /* Return the number of bytes that were sent */
@@ -1483,7 +1483,7 @@ int can_txdone(FAR struct can_dev_s *dev)
 
       /* Send the next message in the FIFO */
 
-      (void)can_xmit(dev);
+      can_xmit(dev);
 
       /* Are there any threads waiting for space in the TX FIFO? */
 

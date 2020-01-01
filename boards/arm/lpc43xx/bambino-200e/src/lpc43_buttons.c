@@ -190,7 +190,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
         {
           /* Attach then enable the new interrupt handler */
 
-          (void)irq_attach(irq, irqhandler, arg);
+          irq_attach(irq, irqhandler, arg);
           up_enable_irq(irq);
         }
       else
@@ -198,7 +198,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           /* Disable then detach the old interrupt handler */
 
           up_disable_irq(irq);
-          (void)irq_detach(irq);
+          irq_detach(irq);
         }
 
       leave_critical_section(flags);

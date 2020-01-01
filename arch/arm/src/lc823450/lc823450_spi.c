@@ -431,14 +431,14 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
     {
       for (i = 0; i < nwords; i++)
         {
-          (void)spi_send(dev, *buf16++);
+          spi_send(dev, *buf16++);
         }
     }
   else
     {
       for (i = 0; i < nwords; i++)
         {
-          (void)spi_send(dev, *buf++);
+          spi_send(dev, *buf++);
         }
     }
 #endif /* CONFIG_LC823450_SPI_DMA */

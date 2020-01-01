@@ -67,6 +67,6 @@ void nxmq_release(FAR struct task_group_s *group)
 {
   while (group->tg_msgdesq.head)
     {
-      (void)nxmq_close_group((mqd_t)group->tg_msgdesq.head, group);
+      nxmq_close_group((mqd_t)group->tg_msgdesq.head, group);
     }
 }

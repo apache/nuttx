@@ -913,7 +913,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
       /* Take exclusive access to data buffer */
 
-      (void)nxsem_wait(&priv->td_exclsem);
+      nxsem_wait(&priv->td_exclsem);
 
       /* Process the buffered telnet data */
 
@@ -1297,7 +1297,7 @@ static int telnet_io_main(int argc, FAR char** argv)
               priv->fds.events  = POLLIN | POLLHUP | POLLERR;
               priv->fds.revents = 0;
 
-              (void)psock_poll(&priv->td_psock, &priv->fds, TRUE);
+              psock_poll(&priv->td_psock, &priv->fds, TRUE);
             }
         }
 
@@ -1307,7 +1307,7 @@ static int telnet_io_main(int argc, FAR char** argv)
        * to include/remove client sockets from polling
        */
 
-      (void)nxsem_wait(&g_iosem);
+      nxsem_wait(&g_iosem);
 
       /* Revisit each client in the g_telnet_clients[] array */
 

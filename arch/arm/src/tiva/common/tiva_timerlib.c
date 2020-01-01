@@ -1854,8 +1854,8 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
   up_disable_irq(attr->irq[TIMER16A]);
   up_disable_irq(attr->irq[TIMER16B]);
 
-  (void)irq_detach(attr->irq[TIMER16A]);
-  (void)irq_detach(attr->irq[TIMER16B]);
+  irq_detach(attr->irq[TIMER16A]);
+  irq_detach(attr->irq[TIMER16B]);
 
   /* Enable power and clocking to the GPTM module
    *
@@ -2030,8 +2030,8 @@ void tiva_gptm_release(TIMER_HANDLE handle)
   up_disable_irq(attr->irq[TIMER16A]);
   up_disable_irq(attr->irq[TIMER16B]);
 
-  (void)irq_detach(attr->irq[TIMER16A]);
-  (void)irq_detach(attr->irq[TIMER16B]);
+  irq_detach(attr->irq[TIMER16A]);
+  irq_detach(attr->irq[TIMER16B]);
 
   /* Reset the time to be certain that it is in the disabled state */
 

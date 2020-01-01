@@ -711,7 +711,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1175,7 +1175,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
        * harmless (other than the slight performance hit).
        */
 
-      (void)tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+      tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
 #endif
 
       /* We need look at the Master Control/Status register to determine the cause
@@ -1490,7 +1490,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
    */
 
 #ifndef CONFIG_I2C_POLLED
-  (void)irq_attach(config->irq, tiva_i2c_interrupt, priv);
+  irq_attach(config->irq, tiva_i2c_interrupt, priv);
   up_enable_irq(config->irq);
 #endif
 

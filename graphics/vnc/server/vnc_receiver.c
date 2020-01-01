@@ -516,6 +516,6 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
                   uint8_t buttons)
 {
   DEBUGASSERT(arg != NULL);
-  (void)nx_mousein((NXHANDLE)arg, x, y, buttons);
+  nx_mousein((NXHANDLE)arg, x, y, buttons);
 }
 #endif

@@ -1179,8 +1179,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       /* Flush any pending interrupts/transfers */
 
-      (void)spi_getreg(priv, SAM_SPI_SR_OFFSET);
-      (void)spi_getreg(priv, SAM_SPI_RDR_OFFSET);
+      spi_getreg(priv, SAM_SPI_SR_OFFSET);
+      spi_getreg(priv, SAM_SPI_RDR_OFFSET);
 
       /* Initialize the SPI semaphore that enforces mutually exclusive
        * access to the SPI registers.

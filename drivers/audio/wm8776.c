@@ -745,8 +745,8 @@ static int wm8776_start(FAR struct audio_lowerhalf_s *dev)
 
   pthread_attr_init(&tattr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  (void)pthread_attr_setschedparam(&tattr, &sparam);
-  (void)pthread_attr_setstacksize(&tattr, CONFIG_WM8776_WORKER_STACKSIZE);
+  pthread_attr_setschedparam(&tattr, &sparam);
+  pthread_attr_setstacksize(&tattr, CONFIG_WM8776_WORKER_STACKSIZE);
 
   audinfo("Starting worker thread\n");
   ret = pthread_create(&priv->threadid, &tattr, wm8776_workerthread,
@@ -1230,7 +1230,7 @@ repeat:
             break;
         }
 
-      (void)mq_getattr(priv->mq, &attr);
+      mq_getattr(priv->mq, &attr);
 
       /* If there is a message in the queue, process it */
 

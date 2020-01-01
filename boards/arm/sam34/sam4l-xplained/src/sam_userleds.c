@@ -79,7 +79,7 @@
 
 void board_userled_initialize(void)
 {
-  (void)sam_configgpio(GPIO_LED0);
+  sam_configgpio(GPIO_LED0);
 }
 
 /****************************************************************************

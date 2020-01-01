@@ -154,7 +154,7 @@ static inline int dlremove(FAR void *handle)
 #if CONFIG_MODLIB_MAXDEPEND > 0
   /* Eliminate any dependencies that this module has on other modules */
 
-  (void)modlib_undepend(modp);
+  modlib_undepend(modp);
 #endif
   modlib_registry_unlock();
 

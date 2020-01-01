@@ -493,7 +493,7 @@ static int lcd_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* dummy read */
 
-  (void)read_data();
+  read_data();
 
   for (i = 0; i < npixels; i++)
     {

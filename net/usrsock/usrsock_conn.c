@@ -90,7 +90,7 @@ static void _usrsock_semtake(FAR sem_t *sem)
 
 static void _usrsock_semgive(FAR sem_t *sem)
 {
-  (void)nxsem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -246,7 +246,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 {
   int ret = -EBUSY;
 
-  (void)nxsem_init(&pstate->recvsem, 0, 0);
+  nxsem_init(&pstate->recvsem, 0, 0);
   nxsem_setprotocol(&pstate->recvsem, SEM_PRIO_NONE);
 
   pstate->conn   = conn;

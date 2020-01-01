@@ -340,7 +340,7 @@ DMA_HANDLE cxd56_udmachannel(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(CXD56_IRQ_DMA_A_0 + ch, cxd56_dmac_interrupt, NULL);
+  irq_attach(CXD56_IRQ_DMA_A_0 + ch, cxd56_dmac_interrupt, NULL);
 
   /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
 

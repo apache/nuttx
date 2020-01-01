@@ -377,7 +377,7 @@ static void spi_rxflush(const struct efm32_spiconfig_s *config)
     {
       /* Read and discard the data */
 
-      (void)spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
+      spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
     }
 }
 
@@ -496,7 +496,7 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
 #ifdef CONFIG_EFM32_SPI_DMA
 static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->rxdmasem);
+  nxsem_post(&priv->rxdmasem);
 }
 #endif
 
@@ -511,7 +511,7 @@ static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv)
 #ifdef CONFIG_EFM32_SPI_DMA
 static inline void spi_dmatxwakeup(struct efm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->txdmasem);
+  nxsem_post(&priv->txdmasem);
 }
 #endif
 
@@ -1617,8 +1617,8 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   /* Initialized semaphores used to wait for DMA completion */
 
-  (void)nxsem_init(&priv->rxdmasem, 0, 0);
-  (void)nxsem_init(&priv->txdmasem, 0, 0);
+  nxsem_init(&priv->rxdmasem, 0, 0);
+  nxsem_init(&priv->txdmasem, 0, 0);
 
   /* These semaphores are used for signaling and, hence, should not have
    * priority inheritance enabled.

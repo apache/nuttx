@@ -1292,7 +1292,7 @@ static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* Disable event-related interrupts and save wakeup event */
 
@@ -1915,7 +1915,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
        */
 
       sam_putreg(priv, 0xffffffff, SAM_HSMCI_IDR_OFFSET);
-      (void)sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
+      sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
 
       /* Enable HSMCI interrupts at the NVIC.  They can now be enabled at
        * the HSMCI controller as needed.
@@ -2329,11 +2329,11 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   /* Clearing (most) pending interrupt status by reading the status register */
 
-  (void)sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
+  sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
 
   /* Cancel any watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
@@ -2694,7 +2694,7 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
    * pending after this point must be valid event indications.
    */
 
-  (void)sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
+  sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
 
   /* Wait interrupts are configured here, but not enabled until
    * sam_eventwait() is called.  Why?  Because the XFRDONE interrupt is

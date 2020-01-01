@@ -232,7 +232,7 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
 
       nsaved = tcp_datahandler(conn, buffer, buflen);
 #else
-      (void)tcp_datahandler(conn, buffer, buflen);
+      tcp_datahandler(conn, buffer, buflen);
 #endif
 
       /* There are complicated buffering issues that are not addressed fully
@@ -287,7 +287,7 @@ static inline void inet_udp_newdata(FAR struct net_driver_s *dev,
 {
   /* Take as much data from the packet as we can */
 
-  (void)inet_recvfrom_newdata(dev, pstate);
+  inet_recvfrom_newdata(dev, pstate);
 
   /* Indicate no data in the buffer */
 
@@ -359,7 +359,7 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
 
           /* And free the I/O buffer chain */
 
-          (void)iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+          iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
         }
       else
         {
@@ -368,8 +368,8 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
            * buffer queue).
            */
 
-          (void)iob_trimhead_queue(&conn->readahead, recvlen,
-                                   IOBUSER_NET_TCP_READAHEAD);
+          iob_trimhead_queue(&conn->readahead, recvlen,
+                             IOBUSER_NET_TCP_READAHEAD);
         }
     }
 }
@@ -458,7 +458,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
     }
 }
 #endif
@@ -1099,8 +1099,8 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
-  (void)nxsem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
+  nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
+  nxsem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
   pstate->ir_buflen    = len;
   pstate->ir_buffer    = buf;

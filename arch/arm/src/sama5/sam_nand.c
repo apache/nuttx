@@ -694,7 +694,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.cmddone);
 #endif
@@ -737,7 +737,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear CMDDONE status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.cmddone = false;
 #endif
 }
@@ -780,7 +780,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.xfrdone);
 #endif
@@ -823,7 +823,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear XFRDONE status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.xfrdone = false;
 #endif
 }
@@ -866,7 +866,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.rbedge);
 #endif
@@ -909,7 +909,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear RBEDGE0 status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.rbedge = false;
 #endif
 }

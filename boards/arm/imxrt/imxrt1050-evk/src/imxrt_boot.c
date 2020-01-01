@@ -87,6 +87,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)imxrt_bringup();
+  imxrt_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

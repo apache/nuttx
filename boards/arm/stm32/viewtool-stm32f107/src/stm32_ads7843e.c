@@ -201,8 +201,8 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     {
       /* Configure the EXTI interrupt using the saved handler */
 
-      (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
-                               priv->handler, NULL);
+      stm32_gpiosetevent(GPIO_LCDTP_IRQ, true, true, true,
+                         priv->handler, NULL);
     }
   else
     {
@@ -212,8 +212,8 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
        * the EXTI is de-configured will not pend but will be lost.
        */
 
-     (void)stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
-                              NULL, NULL);
+     stm32_gpiosetevent(GPIO_LCDTP_IRQ, false, false, false,
+                        NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -269,7 +269,7 @@ int stm32_tsc_setup(int minor)
 
   /* Configure the XPT2046 interrupt pin as an input */
 
-  (void)stm32_configgpio(GPIO_LCDTP_IRQ);
+  stm32_configgpio(GPIO_LCDTP_IRQ);
 
   /* Get an instance of the SPI interface for the touchscreen chip select */
 

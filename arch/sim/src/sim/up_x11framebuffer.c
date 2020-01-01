@@ -135,13 +135,13 @@ static inline int up_x11createframe(void)
   /* Release queued events on the display */
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-  (void)XAllowEvents(g_display, AsyncBoth, CurrentTime);
+  XAllowEvents(g_display, AsyncBoth, CurrentTime);
 
   /* Grab mouse button 1, enabling mouse-related events */
 
-  (void)XGrabButton(g_display, Button1, AnyModifier, g_window, 1,
-                    ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
-                    GrabModeAsync, GrabModeAsync, None, None);
+  XGrabButton(g_display, Button1, AnyModifier, g_window, 1,
+              ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
+              GrabModeAsync, GrabModeAsync, None, None);
 #endif
 
   gcval.graphics_exposures = 0;

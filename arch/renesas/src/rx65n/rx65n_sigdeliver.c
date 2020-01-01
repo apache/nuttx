@@ -118,7 +118,7 @@ void up_sigdeliver(void)
    */
 
   sinfo("Resuming\n");
-  (void)up_irq_save();
+  up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of

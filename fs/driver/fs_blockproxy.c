@@ -221,7 +221,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
   return fd;
 
 errout_with_bchdev:
-  (void)unlink(chardev);
+  unlink(chardev);
 
 errout_with_chardev:
   kmm_free(chardev);

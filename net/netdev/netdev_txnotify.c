@@ -81,7 +81,7 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
     {
       /* Notify the device driver that new TX data is available. */
 
-      (void)dev->d_txavail(dev);
+      dev->d_txavail(dev);
     }
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -115,7 +115,7 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
     {
       /* Notify the device driver that new TX data is available. */
 
-      (void)dev->d_txavail(dev);
+      dev->d_txavail(dev);
     }
 }
 #endif /* CONFIG_NET_IPv6 */
@@ -142,7 +142,7 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev)
     {
       /* Notify the device driver that new TX data is available. */
 
-      (void)dev->d_txavail(dev);
+      dev->d_txavail(dev);
     }
 }
 

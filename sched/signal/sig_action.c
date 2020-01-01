@@ -287,7 +287,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
     {
       /* We will be replacing the default action (or ignoring it) */
 
-      (void)nxsig_default(rtcb, signo, false);
+      nxsig_default(rtcb, signo, false);
     }
 #endif
 

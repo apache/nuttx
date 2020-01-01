@@ -504,7 +504,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
 
   /* Erase all pages in the cluster */
 
-  (void)efc_unlock(page, SAMV7_PAGE_PER_CLUSTER);
+  efc_unlock(page, SAMV7_PAGE_PER_CLUSTER);
 
   /* Get FARG field for EPA command:
    *
@@ -666,7 +666,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   /* Make sure that the FLASH is unlocked */
 
-  (void)efc_unlock(page, SAMV7_BYTE2PAGE(buflen + SAMV7_PAGE_MASK));
+  efc_unlock(page, SAMV7_BYTE2PAGE(buflen + SAMV7_PAGE_MASK));
 
   /* Loop until all of the data has been written */
 

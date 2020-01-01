@@ -94,7 +94,7 @@ int tiva_tmp100_initialize(FAR const char *devpath)
   ret = lm75_register(devpath, i2c, TMP100_I2CADDR);
   if (ret < 0)
     {
-      (void)tiva_i2cbus_uninitialize(i2c);
+      tiva_i2cbus_uninitialize(i2c);
     }
 
   return ret;

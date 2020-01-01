@@ -79,7 +79,7 @@ int up_memfault(int irq, FAR void *context, FAR void *arg)
 {
   /* Dump some memory management fault info */
 
-  (void)up_irq_save();
+  up_irq_save();
   _alert("PANIC!!! Memory Management Fault:\n");
   mfinfo("  IRQ: %d context: %p\n", irq, context);
   _alert("  CFAULTS: %08x MMFAR: %08x\n",

@@ -135,5 +135,5 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devnull_register(void)
 {
-  (void)register_driver("/dev/null", &devnull_fops, 0666, NULL);
+  register_driver("/dev/null", &devnull_fops, 0666, NULL);
 }

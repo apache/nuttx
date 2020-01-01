@@ -312,7 +312,7 @@ static void debug(const char *fmt, ...)
   if (g_debug)
     {
       va_start(ap, fmt);
-      (void)vprintf(fmt, ap);
+      vprintf(fmt, ap);
       va_end(ap);
     }
 }

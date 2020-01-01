@@ -664,7 +664,7 @@ static int uart_close(FAR struct file *filep)
    * a potential memory leak by ignoring signals in this case.
    */
 
-  (void)uart_takesem(&dev->closesem, false);
+  uart_takesem(&dev->closesem, false);
   if (dev->open_count > 1)
     {
       dev->open_count--;
@@ -686,7 +686,7 @@ static int uart_close(FAR struct file *filep)
     {
       /* Now we wait for the transmit buffer(s) to clear */
 
-      (void)uart_tcdrain(dev, 4 * TICK_PER_SEC);
+      uart_tcdrain(dev, 4 * TICK_PER_SEC);
     }
 
   /* Free the IRQ and disable the UART */
@@ -1035,7 +1035,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
        * crossed.  It will probably deactivate RX flow control.
        */
 
-      (void)uart_rxflowcontrol(dev, nbuffered, false);
+      uart_rxflowcontrol(dev, nbuffered, false);
     }
 #else
   /* Is the RX buffer empty? */
@@ -1044,7 +1044,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
     {
       /* Deactivate RX flow control. */
 
-      (void)uart_rxflowcontrol(dev, 0, false);
+      uart_rxflowcontrol(dev, 0, false);
     }
 #endif
 #endif
@@ -1345,7 +1345,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
                   /* De-activate RX flow control. */
 
-                  (void)uart_rxflowcontrol(dev, 0, false);
+                  uart_rxflowcontrol(dev, 0, false);
 #endif
                 }
 
@@ -1523,7 +1523,7 @@ static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        */
 
       eventset = 0;
-      (void)uart_takesem(&dev->xmit.sem, false);
+      uart_takesem(&dev->xmit.sem, false);
 
       ndx = dev->xmit.head + 1;
       if (ndx >= dev->xmit.size)
@@ -1545,7 +1545,7 @@ static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * would be a little awkward).
        */
 
-      (void)uart_takesem(&dev->recv.sem, false);
+      uart_takesem(&dev->recv.sem, false);
       if (dev->recv.head != dev->recv.tail)
        {
          eventset |= (fds->events & POLLIN);
@@ -1669,7 +1669,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
       /* Yes... wake it up */
 
       dev->recvwaiting = false;
-      (void)nxsem_post(&dev->recvsem);
+      nxsem_post(&dev->recvsem);
     }
 
   /* Notify all poll/select waiters that they can read from the recv buffer */
@@ -1707,7 +1707,7 @@ void uart_datasent(FAR uart_dev_t *dev)
       /* Yes... wake it up */
 
       dev->xmitwaiting = false;
-      (void)nxsem_post(&dev->xmitsem);
+      nxsem_post(&dev->xmitsem);
     }
 
   /* Notify all poll/select waiters that they can write to xmit buffer */
@@ -1759,7 +1759,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           /* Yes... wake it up */
 
           dev->xmitwaiting = false;
-          (void)nxsem_post(&dev->xmitsem);
+          nxsem_post(&dev->xmitsem);
         }
 
       /* Is there a thread waiting for read data?  */
@@ -1769,7 +1769,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
           /* Yes... wake it up */
 
           dev->recvwaiting = false;
-          (void)nxsem_post(&dev->recvsem);
+          nxsem_post(&dev->recvsem);
         }
 
       /* Notify all poll/select waiters that a hangup occurred */

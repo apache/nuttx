@@ -107,7 +107,7 @@ int psock_local_bind(FAR struct socket *psock,
 
           /* Copy the path into the connection structure */
 
-          (void)strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1);
+          strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1);
           conn->lc_path[UNIX_PATH_MAX - 1] = '\0';
           conn->lc_instance_id = -1;
         }

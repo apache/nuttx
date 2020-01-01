@@ -145,7 +145,7 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
 {
   int ret;
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
@@ -156,12 +156,12 @@ static void pn532_lock(FAR struct spi_dev_s *spi)
       ctlserr("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
     }
 
-  (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
+  SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
 static void pn532_unlock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 static inline void pn532_configspi(FAR struct spi_dev_s *spi)
@@ -179,7 +179,7 @@ static inline void pn532_configspi(FAR struct spi_dev_s *spi)
       ctlserr("ERROR: SPI_HWFEATURES failed to set bit order: %d\n", ret);
     }
 
-  (void)SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
+  SPI_SETFREQUENCY(spi, CONFIG_PN532_SPI_FREQ);
 }
 
 static inline void pn532_select(FAR struct pn532_dev_s *dev)
@@ -316,7 +316,7 @@ static int pn532_wait_rx_ready(FAR struct pn532_dev_s *dev, int timeout)
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   ts.tv_sec += 1;
-  (void)nxsem_timedwait(dev->sem_rx, &ts);
+  nxsem_timedwait(dev->sem_rx, &ts);
 #endif
 
   /* TODO: Handle Exception bits 2, 3 */
@@ -848,9 +848,6 @@ static inline int (FAR struct pn532_dev_s *dev, xcpt_t isr)
 
 static int irq_handler(int irq, FAR void *context)
 {
-  (void)irq;
-  (void)context;
-
   ctlsinfo("*IRQ*\n");
   work_queue(HPWORK, &g_dev->irq_work, pn532_worker, dev, 0);
 
@@ -973,7 +970,7 @@ static ssize_t _write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = inode->i_private;
 
-  (void) dev;
+  UNUSED(dev);
 
   return -ENOSYS;
 }

@@ -201,14 +201,14 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
       if (simgpint->callback != NULL)
         {
           gpioinfo("Start 1 second timer\n");
-          (void)wd_start(simgpint->wdog, SEC2TICK(1),
-                         (wdentry_t)sim_interrupt, 1, (wdparm_t)dev);
+          wd_start(simgpint->wdog, SEC2TICK(1),
+                   (wdentry_t)sim_interrupt, 1, (wdparm_t)dev);
         }
     }
   else
     {
        gpioinfo("Cancel 1 second timer\n");
-      (void)wd_cancel(simgpint->wdog);
+      wd_cancel(simgpint->wdog);
     }
 
   return OK;
@@ -231,9 +231,9 @@ int sim_gpio_initialize(void)
   g_gpint.wdog = wd_create();
   DEBUGASSERT(g_gpint.wdog != NULL);
 
-  (void)gpio_pin_register(&g_gpin.gpio, g_gpin.id);
-  (void)gpio_pin_register(&g_gpout.gpio, g_gpout.id);
-  (void)gpio_pin_register(&g_gpint.simgpio.gpio, g_gpint.simgpio.id);
+  gpio_pin_register(&g_gpin.gpio, g_gpin.id);
+  gpio_pin_register(&g_gpout.gpio, g_gpout.id);
+  gpio_pin_register(&g_gpint.simgpio.gpio, g_gpint.simgpio.id);
   return 0;
 }
 #endif /* CONFIG_EXAMPLES_GPIO && !CONFIG_GPIO_LOWER_HALF */

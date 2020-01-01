@@ -453,7 +453,7 @@ void altmdm_unregister(FAR void *handle)
 
       altmdm_uninitialize(priv);
 
-      (void)unregister_driver(priv->path);
+      unregister_driver(priv->path);
 
       kmm_free(priv->path);
       kmm_free(priv);

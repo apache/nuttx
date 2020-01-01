@@ -84,7 +84,7 @@ void net_initlist(FAR struct socketlist *list)
 {
   /* Initialize the list access mutex */
 
-  (void)nxsem_init(&list->sl_sem, 0, 1);
+  nxsem_init(&list->sl_sem, 0, 1);
 }
 
 /****************************************************************************
@@ -114,13 +114,13 @@ void net_releaselist(FAR struct socketlist *list)
       FAR struct socket *psock = &list->sl_sockets[ndx];
       if (psock->s_crefs > 0)
         {
-          (void)psock_close(psock);
+          psock_close(psock);
         }
     }
 
   /* Destroy the semaphore */
 
-  (void)nxsem_destroy(&list->sl_sem);
+  nxsem_destroy(&list->sl_sem);
 }
 
 /****************************************************************************

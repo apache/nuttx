@@ -954,7 +954,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   /* Cancel the missing pen up timer */
 
-  (void)wd_cancel(priv->wdog);
+  wd_cancel(priv->wdog);
 
   /* Check for pen up or down from the TSC_STA ibit n the STMPE811_TSC_CTRL register. */
 
@@ -1094,8 +1094,8 @@ ignored:
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
-      (void)wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
-                     1, (uint32_t)((uintptr_t)priv));
+      wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
+               1, (uint32_t)((uintptr_t)priv));
     }
 
   /*  Reset and clear all data in the FIFO */

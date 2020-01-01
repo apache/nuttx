@@ -219,7 +219,7 @@ void avr_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AVR32_IRQ_RTC, (xcpt_t)at32uc3_timerisr, NULL);
+  irq_attach(AVR32_IRQ_RTC, (xcpt_t)at32uc3_timerisr, NULL);
 
   /* Enable RTC interrupts */
 

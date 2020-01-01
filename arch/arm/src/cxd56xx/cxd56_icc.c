@@ -251,9 +251,9 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
 #  ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
       value.sival_ptr = priv->sigdata;
-      (void)sigqueue(priv->pid, priv->signo, value);
+      sigqueue(priv->pid, priv->signo, value);
 #  else
-      (void)sigqueue(priv->pid, priv->signo, priv->sigdata);
+      sigqueue(priv->pid, priv->signo, priv->sigdata);
 #  endif
     }
 #endif

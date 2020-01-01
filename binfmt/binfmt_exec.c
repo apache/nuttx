@@ -204,7 +204,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 
 errout_with_lock:
   sched_unlock();
-  (void)unload_module(bin);
+  unload_module(bin);
 errout_with_argv:
   binfmt_freeargv(bin);
 errout_with_bin:

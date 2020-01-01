@@ -1435,7 +1435,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   fs->lu_work   = &work[SPIFFS_GEO_PAGE_SIZE(fs)];
   fs->mtd_work  = &work[2 * SPIFFS_GEO_PAGE_SIZE(fs)];
 
-  (void)nxsem_init(&fs->exclsem.sem, 0, 1);
+  nxsem_init(&fs->exclsem.sem, 0, 1);
 
   /* Check the file system */
 

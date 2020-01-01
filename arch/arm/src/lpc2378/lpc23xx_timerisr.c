@@ -189,7 +189,7 @@ void arm_timer_initialize(void)
 #ifdef CONFIG_VECTORED_INTERRUPTS
   up_attach_vector(IRQ_SYSTIMER, ???, (vic_vector_t) lpc23xx_timerisr);
 #else
-  (void)irq_attach(IRQ_SYSTIMER, (xcpt_t)lpc23xx_timerisr, NULL);
+  irq_attach(IRQ_SYSTIMER, (xcpt_t)lpc23xx_timerisr, NULL);
 #endif
 
   /* And enable the system timer interrupt */

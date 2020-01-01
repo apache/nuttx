@@ -475,7 +475,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
             {
               berr("Exported symbol \"%s\" not found\n", symname);
 #ifdef CONFIG_ARCH_ADDRENV
-              (void)nxflat_addrenv_restore(loadinfo);
+              nxflat_addrenv_restore(loadinfo);
 #endif
               return -ENOENT;
             }

@@ -129,7 +129,7 @@ uint32_t * irq_dispatch_all(uint32_t *regs, uint32_t irqmask)
          * thread at the head of the ready-to-run list.
          */
 
-        (void)group_addrenv(NULL);
+        group_addrenv(NULL);
 #endif
       }
 #endif

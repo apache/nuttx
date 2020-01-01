@@ -201,7 +201,7 @@ static void spirit_lock(FAR struct spi_dev_s *spi)
    * SPI bus
    */
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * Spirit (it might have gotten configured for a different device while
@@ -216,8 +216,8 @@ static void spirit_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_WL_SPIRIT_SPIFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_WL_SPIRIT_SPIFREQUENCY);
 }
 
 /******************************************************************************
@@ -241,7 +241,7 @@ static void spirit_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /******************************************************************************
@@ -427,7 +427,7 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
 
   /* Write the register value */
 
-  (void)SPI_SEND(spirit->spi, regval);
+  SPI_SEND(spirit->spi, regval);
 
   /* Deselect the Spirit device and return the result */
 

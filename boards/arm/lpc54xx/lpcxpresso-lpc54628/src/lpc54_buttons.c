@@ -83,7 +83,7 @@ static int board_button_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Acknowledge the button interrupt */
 
-  (void)lpc54_gpio_ackedge(irq);
+  lpc54_gpio_ackedge(irq);
 
   /* Transfer control to the attached interrupt handler */
 
@@ -125,7 +125,7 @@ void board_button_initialize(void)
        */
 
       g_button_irq = lpc54_gpio_irqno(GPIO_BUTTON_USER);
-      (void)irq_attach(g_button_irq, board_button_interrupt, NULL);
+      irq_attach(g_button_irq, board_button_interrupt, NULL);
 #endif
     }
 }

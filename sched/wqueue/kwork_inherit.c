@@ -123,7 +123,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
            * sched_unblock() processing.
            */
 
-          (void)nxsched_setpriority(wtcb, reqprio);
+          nxsched_setpriority(wtcb, reqprio);
         }
       else
         {
@@ -160,7 +160,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
        * sched_unlock() processing.
        */
 
-      (void)nxsched_setpriority(wtcb, reqprio);
+      nxsched_setpriority(wtcb, reqprio);
     }
 #endif
 }
@@ -223,7 +223,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
           /* Reset the worker's priority back to the base priority. */
 
-          (void)nxsched_reprioritize(wtcb, wtcb->base_priority);
+          nxsched_reprioritize(wtcb, wtcb->base_priority);
         }
 
       /* There are multiple pending priority levels. The worker thread's
@@ -304,7 +304,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
        * priority.
        */
 
-      (void)nxsched_reprioritize(wtcb, wtcb->base_priority);
+      nxsched_reprioritize(wtcb, wtcb->base_priority);
 #endif
     }
 }

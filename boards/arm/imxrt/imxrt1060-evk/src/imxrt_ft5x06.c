@@ -157,7 +157,7 @@ static void imxrt_ft5x06_enable(FAR const struct ft5x06_config_s *config,
 #ifndef CONFIG_FT5X06_POLLMODE
 static void imxrt_ft5x06_clear(FAR const struct ft5x06_config_s *config)
 {
-  (void)imxrt_gpio_ackedge(g_ft5x06_irq);
+  imxrt_gpio_ackedge(g_ft5x06_irq);
 }
 #endif
 

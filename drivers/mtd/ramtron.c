@@ -421,7 +421,7 @@ static void ramtron_lock(FAR struct ramtron_dev_s *priv)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -431,8 +431,8 @@ static void ramtron_lock(FAR struct ramtron_dev_s *priv)
 
   SPI_SETMODE(dev, SPIDEV_MODE3);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, priv->speed);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, priv->speed);
 }
 
 /************************************************************************************
@@ -441,7 +441,7 @@ static void ramtron_lock(FAR struct ramtron_dev_s *priv)
 
 static inline void ramtron_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -465,7 +465,7 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_RDID);
+  SPI_SEND(priv->dev, RAMTRON_RDID);
 
   /* Read the first six manufacturer ID bytes. */
 
@@ -536,7 +536,7 @@ static int ramtron_waitwritecomplete(struct ramtron_dev_s *priv)
 
   /* Send "Read Status Register (RDSR)" command */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_RDSR);
+  SPI_SEND(priv->dev, RAMTRON_RDSR);
 
   /* Loop as long as the memory is busy with a write cycle, but limit the
    * cycles.
@@ -583,7 +583,7 @@ static void ramtron_writeenable(struct ramtron_dev_s *priv)
 
   /* Send "Write Enable (WREN)" command */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_WREN);
+  SPI_SEND(priv->dev, RAMTRON_WREN);
 
   /* Deselect the FLASH */
 
@@ -601,11 +601,11 @@ static inline void ramtron_sendaddr(const struct ramtron_dev_s *priv, uint32_t a
 
   if (priv->part->addr_len == 3)
     {
-      (void)SPI_SEND(priv->dev, (addr >> 16) & 0xff);
+      SPI_SEND(priv->dev, (addr >> 16) & 0xff);
     }
 
-  (void)SPI_SEND(priv->dev, (addr >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, addr & 0xff);
+  SPI_SEND(priv->dev, (addr >> 8) & 0xff);
+  SPI_SEND(priv->dev, addr & 0xff);
 }
 
 /************************************************************************************
@@ -627,7 +627,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
    * improve performance.
    */
 
-  (void)ramtron_waitwritecomplete(priv);
+  ramtron_waitwritecomplete(priv);
 #endif
 
   /* Enable the write access to the FLASH */
@@ -640,7 +640,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
 
   /* Send "Page Program (PP)" command */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_WRITE);
+  SPI_SEND(priv->dev, RAMTRON_WRITE);
 
   /* Send the page offset high byte first. */
 
@@ -839,7 +839,7 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
    * improve performance.
    */
 
-  (void)ramtron_waitwritecomplete(priv);
+  ramtron_waitwritecomplete(priv);
 #endif
 
   /* Select this FLASH part */
@@ -848,7 +848,7 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
   /* Send "Read from Memory " instruction */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_READ);
+  SPI_SEND(priv->dev, RAMTRON_READ);
 
   /* Send the page offset high byte first. */
 
@@ -866,7 +866,7 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
    * enable state
    */
 
-  (void)SPI_SEND(priv->dev, RAMTRON_RDSR);
+  SPI_SEND(priv->dev, RAMTRON_RDSR);
   status = SPI_SEND(priv->dev, RAMTRON_DUMMY);
   if ((status & ~RAMTRON_SR_SRWD) == 0)
     {

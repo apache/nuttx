@@ -83,13 +83,13 @@ static void _up_assert(int errorcode) /* noreturn_function */
 {
   /* Flush any buffered SYSLOG data */
 
-  (void)syslog_flush();
+  syslog_flush();
 
   /* Are we in an interrupt handler or the idle task? */
 
   if (up_interrupt_context() || running_task()->flink == NULL)
     {
-       (void)up_irq_save();
+       up_irq_save();
         for (;;)
           {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
@@ -159,7 +159,7 @@ void up_assert(void)
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -183,12 +183,12 @@ void up_assert(void)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), running_task(), filename, lineno);

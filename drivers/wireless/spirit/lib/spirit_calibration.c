@@ -252,7 +252,7 @@ uint8_t spirit_calib_get_vcocal(FAR struct spirit_library_s *spirit)
 
   /* Reads the register value */
 
-  (void)spirit_reg_read(spirit, RCO_VCO_CALIBR_OUT0_BASE, &regval, 1);
+  spirit_reg_read(spirit, RCO_VCO_CALIBR_OUT0_BASE, &regval, 1);
 
   /* Build and return the VCO calibration data value */
 
@@ -318,7 +318,7 @@ uint8_t spirit_calib_get_vcotxcal(FAR struct spirit_library_s *spirit)
 
   /* Reads the register containing the calibration data word used in TX mode */
 
-  (void)spirit_reg_read(spirit, RCO_VCO_CALIBR_IN1_BASE, &regval, 1);
+  spirit_reg_read(spirit, RCO_VCO_CALIBR_IN1_BASE, &regval, 1);
 
   /* Mask the VCO_CALIBR_TX field and returns the value */
 
@@ -384,7 +384,7 @@ uint8_t spirit_calib_get_vcorxcal(FAR struct spirit_library_s *spirit)
 
   /* Reads the register containing the calibration data word used in TX mode */
 
-  (void)spirit_reg_read(spirit, RCO_VCO_CALIBR_IN0_BASE, &regval, 1);
+  spirit_reg_read(spirit, RCO_VCO_CALIBR_IN0_BASE, &regval, 1);
 
   /* Mask the VCO_CALIBR_RX field and returns the value */
 
@@ -467,11 +467,11 @@ enum spirit_vcowin_e
 
   /* Reads the register containing the REFWORD value */
 
-  (void)spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval1, 1);
+  spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval1, 1);
 
   /* Reads the Xtal configuration */
 
-  (void)spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval2, 1);
+  spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval2, 1);
 
   /* Mask the REFWORD field */
 
@@ -595,7 +595,7 @@ enum spirit_vcoselect_e spirit_calib_get_vco(FAR struct spirit_library_s *spirit
 {
   uint8_t regval;
 
-  (void)spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
+  spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
 
   regval = (regval >> 1) & 0x3;
   if (regval == 0x01)

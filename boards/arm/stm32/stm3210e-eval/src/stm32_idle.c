@@ -177,7 +177,7 @@ static int stm32_alarm_exti(int irq, FAR void *context, FAR void *arg)
 #if defined(CONFIG_PM) && defined(CONFIG_RTC_ALARM)
 static void stm32_exti_cancel(void)
 {
-  (void)stm32_exti_alarm(false, false, false, NULL, NULL);
+  stm32_exti_alarm(false, false, false, NULL, NULL);
 }
 #endif
 
@@ -201,12 +201,12 @@ static int stm32_rtc_alarm(time_t tv_sec, time_t tv_nsec, bool exti)
     {
       /* TODO: Make sure that that is no pending EXTI interrupt */
 
-      (void)stm32_exti_alarm(true, true, true, stm32_alarm_exti, NULL);
+      stm32_exti_alarm(true, true, true, stm32_alarm_exti, NULL);
     }
 
   /* Configure the RTC alarm to Auto Wake the system */
 
-  (void)up_rtc_gettime(&alarmtime);
+  up_rtc_gettime(&alarmtime);
 
   alarmtime.tv_sec  += tv_sec;
   alarmtime.tv_nsec += tv_nsec;
@@ -301,7 +301,7 @@ static void stm32_idlepm(void)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
+          pm_changestate(PM_IDLE_DOMAIN, oldstate);
 
           /* No state change... */
 
@@ -354,7 +354,7 @@ static void stm32_idlepm(void)
 
             /* Enter the STM32 stop mode */
 
-            (void)stm32_pmstop(false);
+            stm32_pmstop(false);
 
             /* We have been re-awakened by some even:  A button press?
              * An alarm?  Cancel any pending alarm and resume the normal
@@ -393,7 +393,7 @@ static void stm32_idlepm(void)
 
             /* Enter the STM32 standby mode */
 
-            (void)stm32_pmstandby();
+            stm32_pmstandby();
           }
           break;
 

@@ -518,8 +518,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout_expiry,
+           1, (wdparm_t)priv);
   return OK;
 }
 
@@ -831,7 +831,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
    * new XMIT data
    */
 
-  (void)devif_poll(&priv->dev, kinetis_txpoll);
+  devif_poll(&priv->dev, kinetis_txpoll);
 }
 
 /****************************************************************************
@@ -1001,12 +1001,12 @@ static void kinetis_txtimeout_work(FAR void *arg)
    * hardware reset.
    */
 
-  (void)kinetis_ifdown(&priv->dev);
-  (void)kinetis_ifup(&priv->dev);
+  kinetis_ifdown(&priv->dev);
+  kinetis_ifup(&priv->dev);
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, kinetis_txpoll);
+  devif_poll(&priv->dev, kinetis_txpoll);
   net_unlock();
 }
 
@@ -1083,13 +1083,13 @@ static void kinetis_poll_work(FAR void *arg)
        * in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
+      devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */
 
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
+           1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1231,8 +1231,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry, 1,
+           (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1347,7 +1347,7 @@ static void kinetis_txavail_work(FAR void *arg)
            * XMIT data.
            */
 
-          (void)devif_poll(&priv->dev, kinetis_txpoll);
+          devif_poll(&priv->dev, kinetis_txpoll);
         }
     }
 
@@ -2240,11 +2240,11 @@ int kinetis_netinitialize(int intf)
    * the device and/or calling kinetis_ifdown().
    */
 
-  (void)kinetis_ifdown(&priv->dev);
+  kinetis_ifdown(&priv->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 }
 
@@ -2262,7 +2262,7 @@ int kinetis_netinitialize(int intf)
 #if CONFIG_KINETIS_ENETNETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)kinetis_netinitialize(0);
+  kinetis_netinitialize(0);
 }
 #endif
 

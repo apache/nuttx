@@ -178,7 +178,7 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
    * SPI bus
    */
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * MAX11802 (it might have gotten configured for a different device while
@@ -187,8 +187,8 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
 }
 
 /****************************************************************************
@@ -212,7 +212,7 @@ static void max11802_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /****************************************************************************
@@ -231,7 +231,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
 
   /* Send the command */
 
-  (void)SPI_SEND(priv->spi, cmd);
+  SPI_SEND(priv->spi, cmd);
 
   /* Read the data */
 
@@ -464,7 +464,7 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
 static void max11802_wdog(int argc, uint32_t arg1, ...)
 {
   FAR struct max11802_dev_s *priv = (FAR struct max11802_dev_s *)((uintptr_t)arg1);
-  (void)max11802_schedule(priv);
+  max11802_schedule(priv);
 }
 
 /****************************************************************************
@@ -503,7 +503,7 @@ static void max11802_worker(FAR void *arg)
 
   /* Start coordinate measurement */
 
-  (void)max11802_sendcmd(priv, MAX11802_CMD_MEASUREXY, &tags);
+  max11802_sendcmd(priv, MAX11802_CMD_MEASUREXY, &tags);
 
   /* Get exclusive access to the driver data structure */
 
@@ -568,8 +568,8 @@ static void max11802_worker(FAR void *arg)
 
        iinfo("Previous pen up event still in buffer\n");
        max11802_notify(priv);
-       (void)wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-                      (uint32_t)priv);
+       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+                (uint32_t)priv);
        goto ignored;
     }
   else
@@ -608,8 +608,8 @@ static void max11802_worker(FAR void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      (void)wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-                     (uint32_t)priv);
+      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+               (uint32_t)priv);
 
       /* Check if data is valid */
 
@@ -1184,39 +1184,39 @@ int max11802_register(FAR struct spi_dev_s *spi,
   /* Configure MAX11802 registers */
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_MODE);
+  SPI_SEND(priv->spi, MAX11802_CMD_MODE_WR);
+  SPI_SEND(priv->spi, MAX11802_MODE);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_AVG_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_AVG);
+  SPI_SEND(priv->spi, MAX11802_CMD_AVG_WR);
+  SPI_SEND(priv->spi, MAX11802_AVG);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_SAMPLE_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_SAMPLE);
+  SPI_SEND(priv->spi, MAX11802_CMD_SAMPLE_WR);
+  SPI_SEND(priv->spi, MAX11802_SAMPLE);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_TIMING_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_TIMING);
+  SPI_SEND(priv->spi, MAX11802_CMD_TIMING_WR);
+  SPI_SEND(priv->spi, MAX11802_TIMING);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_DELAY_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_DELAY);
+  SPI_SEND(priv->spi, MAX11802_CMD_DELAY_WR);
+  SPI_SEND(priv->spi, MAX11802_DELAY);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_PULL_WR);
-  (void)SPI_SEND(priv->spi, MAX11802_PULL);
+  SPI_SEND(priv->spi, MAX11802_CMD_PULL_WR);
+  SPI_SEND(priv->spi, MAX11802_PULL);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   /* Test that the device access was successful. */
 
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), true);
-  (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
+  SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
   ret = SPI_SEND(priv->spi, 0);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
@@ -1232,7 +1232,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &max11802_fops, 0666, priv);

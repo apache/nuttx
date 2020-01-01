@@ -1851,14 +1851,14 @@ void up_serialinit(void)
   /* Register the console */
 
 #if CONSOLE_USART > 0
-  (void)uart_register("/dev/console", &g_uart_devs[CONSOLE_USART - 1]->dev);
+  uart_register("/dev/console", &g_uart_devs[CONSOLE_USART - 1]->dev);
 
 #ifndef CONFIG_STM32F0L0G0_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
 
-  (void)uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_USART - 1]->dev);
+  uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_USART - 1]->dev);
   minor = 1;
 #endif
 
@@ -1889,7 +1889,7 @@ void up_serialinit(void)
       /* Register USARTs as devices in increasing order */
 
       devname[9] = '0' + minor++;
-      (void)uart_register(devname, &g_uart_devs[i]->dev);
+      uart_register(devname, &g_uart_devs[i]->dev);
     }
 #endif /* HAVE UART */
 }

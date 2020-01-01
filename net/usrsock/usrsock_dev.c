@@ -298,7 +298,7 @@ static void usrsockdev_semtake(FAR sem_t *sem)
 
 static void usrsockdev_semgive(FAR sem_t *sem)
 {
-  (void)nxsem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -556,7 +556,7 @@ static ssize_t usrsockdev_handle_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
     }
 
   return sizeof(*hdr);
@@ -626,7 +626,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
 
       ret = sizeof(*datahdr);
       goto unlock_out;
@@ -900,7 +900,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
           /* Done with data response. */
 
-          (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+          usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
         }
     }
 
@@ -1249,8 +1249,8 @@ void usrsockdev_register(void)
   nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
   nxsem_setprotocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
 
-  (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
-                        &g_usrsockdev);
+  register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
+                  &g_usrsockdev);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

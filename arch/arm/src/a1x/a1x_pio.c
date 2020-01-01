@@ -163,7 +163,7 @@ static int a1x_pio_interrupt(int irq, void *context)
             {
               /* Yes.. dispatch the interrupt */
 
-              (void)arm_doirq(irq, regs);
+              arm_doirq(irq, regs);
             }
 
           irq++;

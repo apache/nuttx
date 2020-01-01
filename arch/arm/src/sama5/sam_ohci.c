@@ -1576,8 +1576,8 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
    */
 
   memset(edctrl, 0, sizeof(struct sam_ed_s));
-  (void)sam_ep0configure(&rhport->drvr, &rhport->ep0, 0,
-                         rhport->hport.hport.speed, 8);
+  sam_ep0configure(&rhport->drvr, &rhport->ep0, 0,
+                   rhport->hport.hport.speed, 8);
 
   edctrl->hw.ctrl  |= ED_CONTROL_K;
   edctrl->eplist    = &rhport->ep0;

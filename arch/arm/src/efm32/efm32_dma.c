@@ -297,7 +297,7 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt, NULL);
+  irq_attach(EFM32_IRQ_DMA, efm32_dmac_interrupt, NULL);
 
   /* Enable the DMA controller */
 

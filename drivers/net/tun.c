@@ -780,7 +780,7 @@ static void tun_txdone(FAR struct tun_device_s *priv)
   /* Then poll the network for new XMIT data */
 
   priv->dev.d_buf = priv->read_buf;
-  (void)devif_poll(&priv->dev, tun_txpoll);
+  devif_poll(&priv->dev, tun_txpoll);
 }
 
 /****************************************************************************
@@ -818,12 +818,12 @@ static void tun_poll_work(FAR void *arg)
       /* If so, poll the network for new XMIT data. */
 
       priv->dev.d_buf = priv->read_buf;
-      (void)devif_timer(&priv->dev, TUN_WDDELAY, tun_txpoll);
+      devif_timer(&priv->dev, TUN_WDDELAY, tun_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
 
   net_unlock();
   tun_unlock(priv);
@@ -901,8 +901,8 @@ static int tun_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry,
+           1, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;
@@ -982,7 +982,7 @@ static void tun_txavail_work(FAR void *arg)
       /* Poll the network for new XMIT data */
 
       priv->dev.d_buf = priv->read_buf;
-      (void)devif_poll(&priv->dev, tun_txpoll);
+      devif_poll(&priv->dev, tun_txpoll);
     }
 
   net_unlock();
@@ -1180,7 +1180,7 @@ static int tun_dev_uninit(FAR struct tun_device_s *priv)
 
   /* Remove the device from the OS */
 
-  (void)netdev_unregister(&priv->dev);
+  netdev_unregister(&priv->dev);
 
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->read_wait_sem);
@@ -1219,7 +1219,7 @@ static int tun_close(FAR struct file *filep)
   tundev_lock(tun);
 
   tun->free_tuns |= (1 << intf);
-  (void)tun_dev_uninit(priv);
+  tun_dev_uninit(priv);
 
   tundev_unlock(tun);
 
@@ -1323,7 +1323,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       priv->read_wait = true;
       tun_unlock(priv);
-      (void)nxsem_wait(&priv->read_wait_sem);
+      nxsem_wait(&priv->read_wait_sem);
       tun_lock(priv);
     }
 
@@ -1498,7 +1498,7 @@ int tun_initialize(void)
 
   g_tun.free_tuns = (1 << CONFIG_TUN_NINTERFACES) - 1;
 
-  (void)register_driver("/dev/tun", &g_tun_file_ops, 0644, &g_tun);
+  register_driver("/dev/tun", &g_tun_file_ops, 0644, &g_tun);
   return OK;
 }
 

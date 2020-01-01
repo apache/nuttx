@@ -550,7 +550,7 @@ static inline void spi_drain(FAR struct str71x_spidev_s *priv)
 
   do
     {
-      (void)spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
+      spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
     }
   while ((spi_getreg(priv, STR71X_BSPI_CSR2_OFFSET) & STR71X_BSPICSR2_RFNE) != 0);
 }
@@ -867,7 +867,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
         {
           /* Yes.. Read and discard */
 
-          (void)spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
+          spi_getreg(priv, STR71X_BSPI_RXR_OFFSET);
         }
 
       /* There is a race condition where TFNE may go false just before

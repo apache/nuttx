@@ -1103,7 +1103,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, LPC43_TXTIMEOUT, lpc43_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txtimeout, LPC43_TXTIMEOUT, lpc43_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1267,7 +1267,7 @@ static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          (void)devif_poll(dev, lpc43_txpoll);
+          devif_poll(dev, lpc43_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2169,7 +2169,7 @@ static void lpc43_poll_work(FAR void *arg)
           /* Update TCP timing states and poll for new XMIT data.
            */
 
-          (void)devif_timer(dev, LPC43_WDDELAY, lpc43_txpoll);
+          devif_timer(dev, LPC43_WDDELAY, lpc43_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2186,7 +2186,7 @@ static void lpc43_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -2261,8 +2261,8 @@ static int lpc43_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1,
-                (uint32_t)priv);
+  wd_start(priv->txpoll, LPC43_WDDELAY, lpc43_poll_expiry, 1,
+           (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -3612,7 +3612,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)lpc43_addmac(dev, mac);
+  lpc43_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -3620,7 +3620,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
    * packets.
    */
 
-  (void)lpc43_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  lpc43_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -3629,7 +3629,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
    * packets.
    */
 
-  (void)lpc43_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  lpc43_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
@@ -3857,7 +3857,7 @@ static inline int lpc43_ethinitialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 }
 
@@ -3881,7 +3881,7 @@ static inline int lpc43_ethinitialize(void)
 #ifndef CONFIG_NETDEV_LATEINIT
 void up_netinitialize(void)
 {
-  (void)lpc43_ethinitialize();
+  lpc43_ethinitialize();
 }
 #endif
 

@@ -510,7 +510,7 @@ int loteardown(FAR const char *devname)
 
   if (dev->devfile.f_inode != NULL)
     {
-      (void)file_close(&dev->devfile);
+      file_close(&dev->devfile);
     }
 
   kmm_free(dev);

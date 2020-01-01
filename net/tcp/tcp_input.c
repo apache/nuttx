@@ -379,7 +379,7 @@ found:
 
       if (listener != NULL)
         {
-          (void)tcp_callback(dev, listener, TCP_ABORT);
+          tcp_callback(dev, listener, TCP_ABORT);
         }
 
       goto drop;
@@ -731,7 +731,7 @@ found:
 
         /* Inform the application that the connection failed */
 
-        (void)tcp_callback(dev, conn, TCP_ABORT);
+        tcp_callback(dev, conn, TCP_ABORT);
 
         /* The connection is closed after we send the RST */
 
@@ -788,7 +788,7 @@ found:
                 flags |= TCP_NEWDATA;
               }
 
-            (void)tcp_callback(dev, conn, flags);
+            tcp_callback(dev, conn, flags);
 
             conn->tcpstateflags = TCP_LAST_ACK;
             conn->tx_unacked    = 1;
@@ -926,7 +926,7 @@ found:
             conn->tcpstateflags = TCP_CLOSED;
             ninfo("TCP_LAST_ACK TCP state: TCP_CLOSED\n");
 
-            (void)tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_CLOSE);
           }
         break;
 
@@ -956,7 +956,7 @@ found:
               }
 
             net_incr32(conn->rcvseq, 1);
-            (void)tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }
@@ -988,7 +988,7 @@ found:
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1);
-            (void)tcp_callback(dev, conn, TCP_CLOSE);
+            tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
           }

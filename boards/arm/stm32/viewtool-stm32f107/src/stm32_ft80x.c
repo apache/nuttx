@@ -208,8 +208,8 @@ static void ft80x_enable(FAR const struct ft80x_config_s *lower,
     {
       /* Configure the EXTI interrupt using the saved handler */
 
-      (void)stm32_gpiosetevent(GPIO_FT80X_INT, true, true, true,
-                               priv->handler, priv->arg);
+      stm32_gpiosetevent(GPIO_FT80X_INT, true, true, true,
+                         priv->handler, priv->arg);
     }
   else
     {
@@ -219,8 +219,8 @@ static void ft80x_enable(FAR const struct ft80x_config_s *lower,
        * the EXTI is de-configured will not pend but will be lost.
        */
 
-     (void)stm32_gpiosetevent(GPIO_FT80X_INT, false, false, false,
-                              NULL, NULL);
+     stm32_gpiosetevent(GPIO_FT80X_INT, false, false, false,
+                        NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -282,8 +282,8 @@ int stm32_ft80x_setup(void)
    * output.  Device is initially powered down.
    */
 
-  (void)stm32_configgpio(GPIO_FT80X_INT);
-  (void)stm32_configgpio(GPIO_FT80_PD);
+  stm32_configgpio(GPIO_FT80X_INT);
+  stm32_configgpio(GPIO_FT80_PD);
 
   /* Get an instance of the SPI interface for the touchscreen chip select */
 

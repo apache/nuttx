@@ -136,7 +136,7 @@ int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
         }
     }
 
-  (void)net_closeroute_ipv4(&fshandle);
+  net_closeroute_ipv4(&fshandle);
   return ret;
 }
 #endif
@@ -205,7 +205,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
         }
     }
 
-  (void)net_closeroute_ipv6(&fshandle);
+  net_closeroute_ipv6(&fshandle);
   return ret;
 }
 #endif

@@ -83,8 +83,8 @@ void wd_recover(FAR struct tcb_s *tcb)
   flags = enter_critical_section();
   if (tcb->waitdog)
     {
-      (void)wd_cancel(tcb->waitdog);
-      (void)wd_delete(tcb->waitdog);
+      wd_cancel(tcb->waitdog);
+      wd_delete(tcb->waitdog);
       tcb->waitdog = NULL;
     }
 

@@ -919,7 +919,7 @@ static void usbmsc_lununinitialize(struct usbmsc_lun_s *lun)
     {
       /* Close the block driver */
 
-      (void)close_blockdriver(lun->inode);
+      close_blockdriver(lun->inode);
     }
 
   memset(lun, 0, sizeof(struct usbmsc_lun_s));

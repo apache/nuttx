@@ -75,31 +75,31 @@ void stm32_spidev_initialize(void)
    */
 
 #ifdef CONFIG_MTD_W25
-  (void)stm32_configgpio(FLASH_SPI1_CS);      /* FLASH chip select */
+  stm32_configgpio(FLASH_SPI1_CS);      /* FLASH chip select */
 #endif
 
 #ifdef CONFIG_CAN_MCP2515
-  (void)stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
+  stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
 #endif
 
 #ifdef CONFIG_CL_MFRC522
-  (void)stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
+  stm32_configgpio(GPIO_CS_MFRC522);    /* MFRC522 chip select */
 #endif
 
 #if defined(CONFIG_SENSORS_MAX6675)
-  (void)stm32_configgpio(GPIO_MAX6675_CS);    /* MAX6675 chip select */
+  stm32_configgpio(GPIO_MAX6675_CS);    /* MAX6675 chip select */
 #endif
 
 #ifdef CONFIG_LCD_MAX7219
-  (void)stm32_configgpio(STM32_LCD_CS);       /* MAX7219 chip select */
+  stm32_configgpio(STM32_LCD_CS);       /* MAX7219 chip select */
 #endif
 
 #ifdef CONFIG_LCD_ST7567
-  (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
+  stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
 #endif
 
 #ifdef CONFIG_LCD_PCD8544
-  (void)stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
+  stm32_configgpio(STM32_LCD_CS);       /* ST7567 chip select */
 #endif
 
 #ifdef CONFIG_WL_NRF24L01
@@ -271,7 +271,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
        *  data bits are data or a command.
        */
 
-      (void)stm32_gpiowrite(STM32_LCD_RS, !cmd);
+      stm32_gpiowrite(STM32_LCD_RS, !cmd);
 
       return OK;
     }
@@ -284,7 +284,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
        *  data bits are data or a command.
        */
 
-      (void)stm32_gpiowrite(STM32_LCD_CD, !cmd);
+      stm32_gpiowrite(STM32_LCD_CD, !cmd);
 
       return OK;
     }

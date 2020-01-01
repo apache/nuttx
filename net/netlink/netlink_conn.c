@@ -95,7 +95,7 @@ static void _netlink_semtake(FAR sem_t *sem)
 
 static void _netlink_semgive(FAR sem_t *sem)
 {
-  (void)nxsem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************

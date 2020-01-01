@@ -112,7 +112,7 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
 
       /* Then re-draw the frame */
 
-      (void)nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
+      nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
     }
 #endif
 

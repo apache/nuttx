@@ -219,11 +219,11 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   return OK;
 
 errout_with_outfd:
-  (void)file_close(&client->lc_outfile);
+  file_close(&client->lc_outfile);
   client->lc_outfile.f_inode = NULL;
 
 errout_with_fifos:
-  (void)local_release_fifos(client);
+  local_release_fifos(client);
   client->lc_state = LOCAL_STATE_BOUND;
   return ret;
 }

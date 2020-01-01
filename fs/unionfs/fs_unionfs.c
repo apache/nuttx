@@ -805,8 +805,8 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
 
   /* Unbind the contained file systems */
 
-  (void)unionfs_unbind_child(&ui->ui_fs[0]);
-  (void)unionfs_unbind_child(&ui->ui_fs[1]);
+  unionfs_unbind_child(&ui->ui_fs[0]);
+  unionfs_unbind_child(&ui->ui_fs[1]);
 
   /* Free any allocated prefix strings */
 
@@ -937,7 +937,7 @@ static int unionfs_close(FAR struct file *filep)
 
   /* Get exclusive access to the file system data structures */
 
-  (void)unionfs_semtake(ui, false);
+  unionfs_semtake(ui, false);
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
   uf = (FAR struct unionfs_file_s *)filep->f_priv;
@@ -1611,7 +1611,7 @@ static int unionfs_closedir(FAR struct inode *mountpt,
 
   /* Get exclusive access to the file system data structures */
 
-  (void)unionfs_semtake(ui, true);
+  unionfs_semtake(ui, true);
 
   DEBUGASSERT(dir);
   fu = &dir->u.unionfs;
@@ -2066,7 +2066,7 @@ static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Get exclusive access to the file system data structures */
 
-  (void)unionfs_semtake(ui, true);
+  unionfs_semtake(ui, true);
 
   /* Mark the file system as unmounted. */
 
@@ -2745,8 +2745,8 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
    * this logic calls inode_release() in the unionfs_destroy() function.
    */
 
-  (void)inode_remove(fspath1);
-  (void)inode_remove(fspath2);
+  inode_remove(fspath1);
+  inode_remove(fspath2);
 
   *handle = ui;
   return OK;

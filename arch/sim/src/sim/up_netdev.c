@@ -55,6 +55,6 @@
 unsigned long up_getwalltime(void)
 {
   struct timeval tm;
-  (void)gettimeofday(&tm, NULL);
+  gettimeofday(&tm, NULL);
   return tm.tv_sec*1000 + tm.tv_usec/1000;
 }

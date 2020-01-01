@@ -370,7 +370,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   /* Detach and disable the PHY interrupt */
 
   phy_semtake();
-  (void)arch_phy_irq(intf, NULL, NULL, NULL);
+  arch_phy_irq(intf, NULL, NULL, NULL);
 
   /* Cancel any pending notification */
 

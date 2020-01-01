@@ -226,7 +226,7 @@ static void pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac)
 
 static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac)
 {
-  (void)nxsem_post(&dmac->chsem);
+  nxsem_post(&dmac->chsem);
 }
 
 /****************************************************************************
@@ -757,7 +757,7 @@ void weak_function up_dma_initialize(void)
 
       /* Attach DMA interrupt vectors. */
 
-      (void)irq_attach(dmach->irq, pic32mz_dma_interrupt, NULL);
+      irq_attach(dmach->irq, pic32mz_dma_interrupt, NULL);
 
       /* Disable the DMA channel. */
 

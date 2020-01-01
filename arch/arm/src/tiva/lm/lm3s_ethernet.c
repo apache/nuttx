@@ -579,8 +579,8 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->ld_txtimeout, TIVA_TXTIMEOUT,
-                     tiva_txtimeout_expiry, 1, (uint32_t)priv);
+      wd_start(priv->ld_txtimeout, TIVA_TXTIMEOUT,
+               tiva_txtimeout_expiry, 1, (uint32_t)priv);
       ret = OK;
     }
 
@@ -736,7 +736,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           while (wordlen--)
             {
-              (void)tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
+              tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
             }
 
           /* Check for another packet */
@@ -945,7 +945,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
+  devif_poll(&priv->ld_dev, tiva_txpoll);
 }
 
 /****************************************************************************
@@ -1139,7 +1139,7 @@ static void tiva_txtimeout_work(void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
+  devif_poll(&priv->ld_dev, tiva_txpoll);
   net_unlock();
 }
 
@@ -1218,12 +1218,12 @@ static void tiva_poll_work(void *arg)
        * data.
        */
 
-      (void)devif_timer(&priv->ld_dev, TIVA_WDDELAY, tiva_txpoll);
+      devif_timer(&priv->ld_dev, TIVA_WDDELAY, tiva_txpoll);
 
       /* Setup the watchdog poll timer again */
 
-      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                     1, priv);
+      wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+               1, priv);
     }
 
   net_unlock();
@@ -1407,8 +1407,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-                 1, (uint32_t)priv);
+  wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
+           1, (uint32_t)priv);
 
   priv->ld_bifup = true;
   leave_critical_section(flags);
@@ -1534,7 +1534,7 @@ static void tiva_txavail_work(void *arg)
        * for new Tx data
        */
 
-      (void)devif_poll(&priv->ld_dev, tiva_txpoll);
+      devif_poll(&priv->ld_dev, tiva_txpoll);
     }
 
   net_unlock();
@@ -1735,7 +1735,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->ld_dev, NET_LL_ETHERNET);
+  netdev_register(&priv->ld_dev, NET_LL_ETHERNET);
   return OK;
 }
 
@@ -1753,7 +1753,7 @@ static inline int tiva_ethinitialize(int intf)
 #if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)tiva_ethinitialize(0);
+  tiva_ethinitialize(0);
 }
 #endif
 

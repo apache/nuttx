@@ -55,7 +55,7 @@ double floor(double x)
    * -2.0 -2.0  -2.0
    */
 
-  (void)modf(x, &modx);
+  modf(x, &modx);
   if (x < 0.0 && x < modx)
     {
       modx -= 1.0;

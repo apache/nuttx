@@ -273,7 +273,7 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
    * SPI bus
    */
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * NRF24L01 (it might have gotten configured for a different device while
@@ -283,8 +283,8 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_WIRELESS(0), true);
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS(0), false);
 }
 
@@ -309,7 +309,7 @@ static void nrf24l01_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /****************************************************************************
@@ -335,8 +335,8 @@ static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_WIRELESS(0), true);  /* Useful ? */
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, NRF24L01_SPIFREQ);
   SPI_SELECT(spi, SPIDEV_WIRELESS(0), false);
 }
 
@@ -509,7 +509,7 @@ static uint8_t nrf24l01_setregbit(FAR struct nrf24l01_dev_s *dev,
 static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
                     FAR uint8_t *buffer, uint8_t buflen)
 {
-  (void)nxsem_wait(&dev->sem_fifo);
+  nxsem_wait(&dev->sem_fifo);
   while (dev->fifo_len + buflen + 1 > CONFIG_WL_NRF24L01_RXFIFO_LEN)
     {
       /* TODO: Set fifo overrun flag ! */
@@ -546,7 +546,7 @@ static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
   uint8_t pktlen;
   uint8_t i;
 
-  (void)nxsem_wait(&dev->sem_fifo);
+  nxsem_wait(&dev->sem_fifo);
 
   /* sem_rx contains count of inserted packets in FIFO, but FIFO can
    * overflow - fail smart.
@@ -1421,7 +1421,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      (void)nxsem_wait(&dev->sem_fifo);
+      nxsem_wait(&dev->sem_fifo);
       if (dev->fifo_len > 0)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */

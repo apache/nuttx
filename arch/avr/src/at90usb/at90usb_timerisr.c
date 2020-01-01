@@ -168,7 +168,7 @@ void avr_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AT90USB_IRQ_T1COMPA, (xcpt_t)at90usb_timerisr, NULL);
+  irq_attach(AT90USB_IRQ_T1COMPA, (xcpt_t)at90usb_timerisr, NULL);
 
   /* Enable the interrupt on compare match A */
 

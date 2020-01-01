@@ -266,7 +266,7 @@ static void debug(const char *fmt, ...)
   if (g_debug)
     {
       va_start(ap, fmt);
-      (void)vfprintf(stderr, fmt, ap);
+      vfprintf(stderr, fmt, ap);
       va_end(ap);
     }
 }
@@ -284,7 +284,7 @@ static void error(const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  (void)vfprintf(stderr, fmt, ap);
+  vfprintf(stderr, fmt, ap);
   va_end(ap);
 }
 
@@ -301,7 +301,7 @@ static void output(const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  (void)vfprintf(g_outfile, fmt, ap);
+  vfprintf(g_outfile, fmt, ap);
   va_end(ap);
 }
 
@@ -318,7 +318,7 @@ static void body(const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  (void)vfprintf(g_bodyfile, fmt, ap);
+  vfprintf(g_bodyfile, fmt, ap);
   va_end(ap);
 }
 
@@ -335,7 +335,7 @@ static void appendix(const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  (void)vfprintf(g_apndxfile, fmt, ap);
+  vfprintf(g_apndxfile, fmt, ap);
   va_end(ap);
 }
 
@@ -365,7 +365,7 @@ static void append_file(const char *filename)
 
   while ((ch = getc(stream)) != EOF)
     {
-      (void)putc(ch, g_outfile);
+      putc(ch, g_outfile);
     }
 
   /* Close and remove the file */
@@ -2574,7 +2574,7 @@ int main(int argc, char **argv, char **envp)
 
   now = time(NULL);
   ptm = localtime(&now);
-  (void)strftime(g_scratch, SCRATCH_SIZE, "%B %d, %Y", ptm);
+  strftime(g_scratch, SCRATCH_SIZE, "%B %d, %Y", ptm);
 
   /* Output header boilerplater */
 

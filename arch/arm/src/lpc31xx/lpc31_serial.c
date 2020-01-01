@@ -792,9 +792,9 @@ void up_earlyserialinit(void)
 void up_serialinit(void)
 {
 #if defined(CONFIG_UART_SERIAL_CONSOLE)
-  (void)uart_register("/dev/console", &g_uartport);
+  uart_register("/dev/console", &g_uartport);
 #endif
-  (void)uart_register("/dev/ttyS0", &g_uartport);
+  uart_register("/dev/ttyS0", &g_uartport);
 }
 
 /****************************************************************************

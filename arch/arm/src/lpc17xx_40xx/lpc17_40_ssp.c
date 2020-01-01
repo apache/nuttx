@@ -657,7 +657,7 @@ static void ssp_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
         {
           /* Yes.. Read and discard */
 
-          (void)ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
+          ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
         }
 
       /* There is a race condition where TFE may go true just before
@@ -983,7 +983,7 @@ FAR struct spi_dev_s *lpc17_40_sspbus_initialize(int port)
   ssp_putreg(priv, LPC17_40_SSP_CR1_OFFSET, regval | SSP_CR1_SSE);
   for (i = 0; i < LPC17_40_SSP_FIFOSZ; i++)
     {
-      (void)ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
+      ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
     }
 
   return &priv->spidev;
@@ -1025,7 +1025,7 @@ void ssp_flush(FAR struct spi_dev_s *dev)
 
   do
     {
-      (void)ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
+      ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
     }
   while (ssp_getreg(priv, LPC17_40_SSP_SR_OFFSET) & SSP_SR_RNE);
 }

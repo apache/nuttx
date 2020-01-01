@@ -190,15 +190,15 @@ static void stm32_ft5x06_enable(FAR const struct ft5x06_config_s *config,
     {
       /* Configure the EXTI interrupt using the SAVED handler */
 
-      (void)stm32_gpiosetevent(GPIO_TP_INT, true, false, true,
-                               g_priv_config.handler, g_priv_config.arg);
+      stm32_gpiosetevent(GPIO_TP_INT, true, false, true,
+                         g_priv_config.handler, g_priv_config.arg);
     }
   else
     {
       /* Configure the EXTI interrupt with a NULL handler to disable it */
 
-     (void)stm32_gpiosetevent(GPIO_TP_INT, false, false, false,
-                              NULL, NULL);
+     stm32_gpiosetevent(GPIO_TP_INT, false, false, false,
+                        NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -283,7 +283,7 @@ int stm32_tsc_setup(int minor)
 
   /* Configure the FT5X06 interrupt pin as an input */
 
-  (void)stm32_configgpio(GPIO_TP_INT);
+  stm32_configgpio(GPIO_TP_INT);
 
   /* Get an instance of the I2C interface */
 

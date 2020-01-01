@@ -604,7 +604,7 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1516,8 +1516,8 @@ static int imxrt_lpi2c_init(FAR struct imxrt_lpi2c_priv_s *priv)
 
   /* Configure pins */
 
-  (void)imxrt_config_gpio(priv->config->scl_pin);
-  (void)imxrt_config_gpio(priv->config->sda_pin);
+  imxrt_config_gpio(priv->config->scl_pin);
+  imxrt_config_gpio(priv->config->sda_pin);
 
   /* Enable power and reset the peripheral */
 

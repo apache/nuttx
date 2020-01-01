@@ -371,7 +371,7 @@ static int stm32_bbsram_open(FAR struct file *filep)
 static int stm32_bbsram_internal_close(FAR struct bbsramfh_s *bbf)
 {
   bbf->dirty = 0;
-  (void)clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
+  clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
   bbf->crc = stm32_bbsram_crc(bbf);
   stm32_bbsram_ecc_workaround(bbf);
   BBSRAM_DUMP(bbf, "close done");

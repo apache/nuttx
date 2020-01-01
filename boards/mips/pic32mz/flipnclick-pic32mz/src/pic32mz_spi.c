@@ -71,8 +71,8 @@ void weak_function pic32mz_spidev_initialize(void)
 #ifdef HAVE_SSD1306
   /* Configure the SSD1306 chip select and command/data GPIOs */
 
-  (void)pic32mz_configgpio(GPIO_SSD1306_CS);
-  (void)pic32mz_configgpio(GPIO_SSD1306_DC);
+  pic32mz_configgpio(GPIO_SSD1306_CS);
+  pic32mz_configgpio(GPIO_SSD1306_DC);
 #endif
 }
 

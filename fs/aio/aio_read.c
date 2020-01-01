@@ -137,7 +137,7 @@ static void aio_read_worker(FAR void *arg)
 
   /* Signal the client */
 
-  (void)aio_signal(pid, aiocbp);
+  aio_signal(pid, aiocbp);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   /* Restore the low priority worker thread default priority */

@@ -833,8 +833,8 @@ static void pca9555_irqworker(void *arg)
                 {
                   /* Yes.. perform the callback */
 
-                  (void)pca->cb[i].cbfunc(&pca->dev, match,
-                                          pca->cb[i].cbarg);
+                  pca->cb[i].cbfunc(&pca->dev, match,
+                                    pca->cb[i].cbarg);
                 }
             }
         }

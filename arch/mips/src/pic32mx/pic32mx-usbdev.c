@@ -1013,7 +1013,7 @@ static void pic32mx_rqrestart(int argc, uint32_t arg1, ...)
 #ifndef CONFIG_USBDEV_NOWRITEAHEAD
               privreq->inflight[1] = 0;
 #endif
-              (void)pic32mx_wrrequest(priv, privep);
+              pic32mx_wrrequest(priv, privep);
             }
         }
     }
@@ -1031,8 +1031,8 @@ static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv, uint8_t epno)
 
   /* And start (or re-start) the watchdog timer */
 
-  (void)wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1,
-                 (uint32_t)priv);
+  wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1,
+           (uint32_t)priv);
 }
 
 /****************************************************************************
@@ -1283,7 +1283,7 @@ static int pic32mx_wrrequest(struct pic32mx_usbdev_s *priv, struct pic32mx_ep_s 
        * queued
        */
 
-      (void)pic32mx_wrstart(priv, privep);
+      pic32mx_wrstart(priv, privep);
     }
 #else
   UNUSED(ret);
@@ -1757,7 +1757,7 @@ static void pic32mx_eptransfer(struct pic32mx_usbdev_s *priv, uint8_t epno,
         {
           /* If that succeeds, then try to set up another OUT transfer. */
 
-          (void)pic32mx_rdrequest(priv, privep);
+          pic32mx_rdrequest(priv, privep);
         }
 #else
       UNUSED(ret);
@@ -1777,7 +1777,7 @@ static void pic32mx_eptransfer(struct pic32mx_usbdev_s *priv, uint8_t epno,
 
       /* Handle additional queued write requests */
 
-      (void)pic32mx_wrrequest(priv, privep);
+      pic32mx_wrrequest(priv, privep);
     }
 }
 
@@ -2636,7 +2636,7 @@ static void pic32mx_ep0transfer(struct pic32mx_usbdev_s *priv, uint16_t ustat)
       /* Stall EP0 */
 
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_EP0SETUPSTALLED), priv->ctrlstate);
-      (void)pic32mx_epstall(&priv->eplist[EP0].ep, false);
+      pic32mx_epstall(&priv->eplist[EP0].ep, false);
     }
 }
 
@@ -3417,7 +3417,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (!privep->stalled)
         {
-          (void)pic32mx_wrrequest(priv, privep);
+          pic32mx_wrrequest(priv, privep);
         }
     }
 
@@ -3436,7 +3436,7 @@ static int pic32mx_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (!privep->stalled)
         {
-          (void)pic32mx_rdrequest(priv, privep);
+          pic32mx_rdrequest(priv, privep);
         }
     }
 
@@ -3776,7 +3776,7 @@ static void pic32mx_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
 
   /* Disable the endpoint */
 
-  (void)pic32mx_epdisable(ep);
+  pic32mx_epdisable(ep);
 
   /* Mark the endpoint as available */
 

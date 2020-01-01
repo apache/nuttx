@@ -277,7 +277,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
       ret = notifier->key;
     }
 
-  (void)nxsem_post(&g_notifier_sem);
+  nxsem_post(&g_notifier_sem);
   return ret;
 }
 
@@ -338,7 +338,7 @@ int work_notifier_teardown(int key)
       ret = OK;
     }
 
-  (void)nxsem_post(&g_notifier_sem);
+  nxsem_post(&g_notifier_sem);
   return ret;
 }
 
@@ -416,13 +416,13 @@ void work_notifier_signal(enum work_evtype_e evtype,
            * responsible for freeing the allocated memory.
            */
 
-          (void)work_queue(info->qid, &notifier->work,
-                           work_notifier_worker, entry, 0);
+          work_queue(info->qid, &notifier->work,
+                     work_notifier_worker, entry, 0);
         }
     }
 
   sched_unlock();
-  (void)nxsem_post(&g_notifier_sem);
+  nxsem_post(&g_notifier_sem);
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */

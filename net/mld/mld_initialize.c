@@ -97,7 +97,7 @@ void mld_devinit(struct net_driver_s *dev)
    * probably is not relevant here.
    */
 
-  (void)mld_grpalloc(dev, g_ipv6_allnodes);
+  mld_grpalloc(dev, g_ipv6_allnodes);
 
   /* Allow the MLD messages at the MAC level */
 

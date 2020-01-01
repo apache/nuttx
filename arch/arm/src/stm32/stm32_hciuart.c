@@ -1799,7 +1799,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
            * good byte will be lost.
            */
 
-          (void)hciuart_getreg32(config, STM32_USART_RDR_OFFSET);
+          hciuart_getreg32(config, STM32_USART_RDR_OFFSET);
 #endif
         }
 

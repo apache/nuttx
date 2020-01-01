@@ -115,7 +115,7 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
   /* Attach the inter-CPU interrupt. */
 
-  (void)irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_fromcpu0_interrupt, NULL);
+  irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_fromcpu0_interrupt, NULL);
 
   /* Enable the inter 0 CPU interrupts. */
 
@@ -202,7 +202,7 @@ void xtensa_appcpu_start(void)
 
   /* Initialize CPU interrupts */
 
-  (void)esp32_cpuint_initialize();
+  esp32_cpuint_initialize();
 
   /* Attach and emable internal interrupts */
 

@@ -243,8 +243,8 @@ int sam_tsc_setup(int minor)
 
   /* Configure and enable the ADS7843E interrupt pin as an input */
 
-  (void)sam_configgpio(GPIO_TCS_BUSY);
-  (void)sam_configgpio(GPIO_TCS_IRQ);
+  sam_configgpio(GPIO_TCS_BUSY);
+  sam_configgpio(GPIO_TCS_IRQ);
 
   /* Configure the PIO interrupt */
 

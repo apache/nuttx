@@ -86,7 +86,7 @@
 
 #define SYS_restore_context (1)
 #define up_fullcontextrestore(restoreregs) \
-  (void)sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
 
 /* SYS call 2:
  *
@@ -95,7 +95,7 @@
 
 #define SYS_switch_context (2)
 #define up_switchcontext(saveregs, restoreregs) \
-  (void)sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
 #ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:

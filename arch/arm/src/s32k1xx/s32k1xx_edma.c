@@ -189,7 +189,7 @@ static void s32k1xx_takechsem(void)
 
 static inline void s32k1xx_givechsem(void)
 {
-  (void)nxsem_post(&g_edma.chsem);
+  nxsem_post(&g_edma.chsem);
 }
 
 /****************************************************************************
@@ -208,7 +208,7 @@ static void s32k1xx_takedsem(void)
 
 static inline void s32k1xx_givedsem(void)
 {
-  (void)nxsem_post(&g_edma.dsem);
+  nxsem_post(&g_edma.dsem);
 }
 #endif
 
@@ -267,7 +267,7 @@ static void s32k1xx_tcd_free(struct s32k1xx_edmatcd_s *tcd)
 
   flags = spin_lock_irqsave();
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  (void)s32k1xx_givedsem();
+  s32k1xx_givedsem();
   spin_unlock_irqrestore(flags);
 }
 #endif
@@ -748,27 +748,27 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vectors. */
 
-  (void)irq_attach(S32K1XX_IRQ_DMACH0,  s32k1xx_edma_interrupt, &g_edma.dmach[0]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH1,  s32k1xx_edma_interrupt, &g_edma.dmach[1]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH2,  s32k1xx_edma_interrupt, &g_edma.dmach[2]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH3,  s32k1xx_edma_interrupt, &g_edma.dmach[3]);
+  irq_attach(S32K1XX_IRQ_DMACH0,  s32k1xx_edma_interrupt, &g_edma.dmach[0]);
+  irq_attach(S32K1XX_IRQ_DMACH1,  s32k1xx_edma_interrupt, &g_edma.dmach[1]);
+  irq_attach(S32K1XX_IRQ_DMACH2,  s32k1xx_edma_interrupt, &g_edma.dmach[2]);
+  irq_attach(S32K1XX_IRQ_DMACH3,  s32k1xx_edma_interrupt, &g_edma.dmach[3]);
 #if S32K1XX_EDMA_NCHANNELS > 4
-  (void)irq_attach(S32K1XX_IRQ_DMACH4,  s32k1xx_edma_interrupt, &g_edma.dmach[4]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH5,  s32k1xx_edma_interrupt, &g_edma.dmach[5]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH6,  s32k1xx_edma_interrupt, &g_edma.dmach[6]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH7,  s32k1xx_edma_interrupt, &g_edma.dmach[7]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH8,  s32k1xx_edma_interrupt, &g_edma.dmach[8]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH9,  s32k1xx_edma_interrupt, &g_edma.dmach[9]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH10, s32k1xx_edma_interrupt, &g_edma.dmach[10]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH11, s32k1xx_edma_interrupt, &g_edma.dmach[11]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH12, s32k1xx_edma_interrupt, &g_edma.dmach[12]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH13, s32k1xx_edma_interrupt, &g_edma.dmach[13]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH14, s32k1xx_edma_interrupt, &g_edma.dmach[14]);
-  (void)irq_attach(S32K1XX_IRQ_DMACH15, s32k1xx_edma_interrupt, &g_edma.dmach[15]);
+  irq_attach(S32K1XX_IRQ_DMACH4,  s32k1xx_edma_interrupt, &g_edma.dmach[4]);
+  irq_attach(S32K1XX_IRQ_DMACH5,  s32k1xx_edma_interrupt, &g_edma.dmach[5]);
+  irq_attach(S32K1XX_IRQ_DMACH6,  s32k1xx_edma_interrupt, &g_edma.dmach[6]);
+  irq_attach(S32K1XX_IRQ_DMACH7,  s32k1xx_edma_interrupt, &g_edma.dmach[7]);
+  irq_attach(S32K1XX_IRQ_DMACH8,  s32k1xx_edma_interrupt, &g_edma.dmach[8]);
+  irq_attach(S32K1XX_IRQ_DMACH9,  s32k1xx_edma_interrupt, &g_edma.dmach[9]);
+  irq_attach(S32K1XX_IRQ_DMACH10, s32k1xx_edma_interrupt, &g_edma.dmach[10]);
+  irq_attach(S32K1XX_IRQ_DMACH11, s32k1xx_edma_interrupt, &g_edma.dmach[11]);
+  irq_attach(S32K1XX_IRQ_DMACH12, s32k1xx_edma_interrupt, &g_edma.dmach[12]);
+  irq_attach(S32K1XX_IRQ_DMACH13, s32k1xx_edma_interrupt, &g_edma.dmach[13]);
+  irq_attach(S32K1XX_IRQ_DMACH14, s32k1xx_edma_interrupt, &g_edma.dmach[14]);
+  irq_attach(S32K1XX_IRQ_DMACH15, s32k1xx_edma_interrupt, &g_edma.dmach[15]);
 #endif
   /* Attach the DMA error interrupt vector */
 
-  (void)irq_attach(S32K1XX_IRQ_DMACH_ERR, s32k1xx_error_interrupt, NULL);
+  irq_attach(S32K1XX_IRQ_DMACH_ERR, s32k1xx_error_interrupt, NULL);
 
   /* Disable and clear all error interrupts */
 

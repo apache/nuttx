@@ -717,8 +717,8 @@ static inline int usbmsc_cmdmodeselect6(FAR struct usbmsc_dev_s *priv)
   FAR struct scsicmd_modeselect6_s *modeselect = (FAR struct scsicmd_modeselect6_s *)priv->cdb;
 
   priv->u.alloclen = modeselect->plen;
-  (void)usbmsc_setupcmd(priv, SCSICMD_MODESELECT6_SIZEOF,
-                        USBMSC_FLAGS_DIRHOST2DEVICE);
+  usbmsc_setupcmd(priv, SCSICMD_MODESELECT6_SIZEOF,
+                  USBMSC_FLAGS_DIRHOST2DEVICE);
 
   /* Not supported */
 
@@ -1256,8 +1256,8 @@ static inline int usbmsc_cmdmodeselect10(FAR struct usbmsc_dev_s *priv)
   FAR struct scsicmd_modeselect10_s *modeselect = (FAR struct scsicmd_modeselect10_s *)priv->cdb;
 
   priv->u.alloclen = usbmsc_getbe16(modeselect->parmlen);
-  (void)usbmsc_setupcmd(priv, SCSICMD_MODESELECT10_SIZEOF,
-                        USBMSC_FLAGS_DIRHOST2DEVICE);
+  usbmsc_setupcmd(priv, SCSICMD_MODESELECT10_SIZEOF,
+                  USBMSC_FLAGS_DIRHOST2DEVICE);
 
   /* Not supported */
 
@@ -2466,13 +2466,13 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
                */
 
               nxsig_usleep (100000);
-              (void)EP_STALL(priv->epbulkin);
+              EP_STALL(priv->epbulkin);
 
               /* now wait for stall to go away .... */
 
               nxsig_usleep (100000);
 #else
-              (void)EP_STALL(priv->epbulkin);
+              EP_STALL(priv->epbulkin);
 #endif
             }
         }
@@ -2612,7 +2612,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SNDSTATUSSUBMIT), (uint16_t)-ret);
       flags = enter_critical_section();
-      (void)sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
+      sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
       leave_critical_section(flags);
     }
 

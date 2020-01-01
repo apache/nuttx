@@ -90,6 +90,6 @@ void nx_disconnect(NXHANDLE handle)
     {
       snprintf(climqname, sizeof(climqname),
                NX_CLIENT_MQNAMEFMT, conn->cid);
-      (void)mq_unlink(climqname);
+      mq_unlink(climqname);
     }
 }

@@ -401,7 +401,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
             {
               if (inode->u.i_bops && inode->u.i_bops->close)
                 {
-                  (void)inode->u.i_bops->close(inode);
+                  inode->u.i_bops->close(inode);
                 }
             }
         }
@@ -439,7 +439,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
         {
           if (inode->u.i_bops && inode->u.i_bops->close)
             {
-              (void)inode->u.i_bops->close(inode);
+              inode->u.i_bops->close(inode);
             }
         }
     }
@@ -1900,7 +1900,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
    */
 
   savepos = sf->filepos;
-  (void)smartfs_seek_internal(fs, sf, 0, SEEK_END);
+  smartfs_seek_internal(fs, sf, 0, SEEK_END);
 
   while (remaining > 0)
     {
@@ -2077,7 +2077,7 @@ errout_with_buffer:
 #endif
   /* Restore the original file position */
 
-  (void)smartfs_seek_internal(fs, sf, savepos, SEEK_SET);
+  smartfs_seek_internal(fs, sf, savepos, SEEK_SET);
   return ret;
 }
 

@@ -122,8 +122,8 @@ static inline void mpl115a_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, MPL115A_SPI_MAXFREQUENCY);
 }
 
 /****************************************************************************
@@ -140,7 +140,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   mpl115a_configspi(priv->spi);
 
   /* Select the MPL115A */
@@ -149,7 +149,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Send register to read and get the next byte */
 
-  (void)SPI_SEND(priv->spi, regaddr);
+  SPI_SEND(priv->spi, regaddr);
   SPI_RECVBLOCK(priv->spi, &regval, 1);
 
   /* Deselect the MPL115A */
@@ -158,7 +158,7 @@ static uint8_t mpl115a_getreg8(FAR struct mpl115a_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_MPL115A_REGDEBUG
   _err("%02x->%02x\n", regaddr, regval);

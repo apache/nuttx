@@ -152,5 +152,5 @@ void cxd56_sysctlinitialize(void)
 
   cxd56_iccregisterhandler(CXD56_PROTO_SYSCTL, sysctl_rxhandler, NULL);
 
-  (void)register_driver("/dev/sysctl", &g_sysctlfops, 0666, NULL);
+  register_driver("/dev/sysctl", &g_sysctlfops, 0666, NULL);
 }

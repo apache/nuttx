@@ -110,7 +110,7 @@ uint8_t spirit_pktcommon_get_controllen(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKTCTRL4 register value */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -180,7 +180,7 @@ uint8_t spirit_pktcommon_get_preamblen(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKTCTRL2 register value */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL2_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL2_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -250,7 +250,7 @@ uint8_t spirit_pktcommon_get_synclen(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKTCTRL2 register value */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL2_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL2_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -375,7 +375,7 @@ enum spirit_functional_state_e
 
   /* Read the PCKT_FLT_OPTIONS register value */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
 
   /* Check the CRC filtering bit */
 
@@ -453,7 +453,7 @@ enum pkt_crcmode_e
 
   /* Read the PCKTCTRL1 register */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -657,7 +657,7 @@ uint8_t spirit_pktcommon_get_syncword(FAR struct spirit_library_s *spirit,
 
   /* Read the selected register value */
 
-  (void)spirit_reg_read(spirit, regaddr, &regval, 1);
+  spirit_reg_read(spirit, regaddr, &regval, 1);
 
   /* Returns the read value */
 
@@ -733,7 +733,7 @@ uint32_t spirit_pktcommon_get_syncwords(FAR struct spirit_library_s *spirit,
 
   /* Read the SYNCx registers value */
 
-  (void)spirit_reg_read(spirit, SYNC4_BASE, regval, 4);
+  spirit_reg_read(spirit, SYNC4_BASE, regval, 4);
 
   /* Rebuild the SYNC words */
 
@@ -770,7 +770,7 @@ uint8_t spirit_pktcommon_get_varlen(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKTCTRL3 register value */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -820,7 +820,7 @@ uint8_t spirit_pktcommon_get_txdestaddr(FAR struct spirit_library_s *spirit)
 
   /* Read value from the PCKT_FLT_GOALS_SOURCE_ADDR register */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_SOURCE_ADDR_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_SOURCE_ADDR_BASE, &regval, 1);
 
   /* Return value */
 
@@ -873,7 +873,7 @@ uint8_t spirit_pktcommon_get_nodeaddress(FAR struct spirit_library_s *spirit)
 
   /* Read value from the PCKT_FLT_GOALS_TX_ADDR register */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_TX_ADDR_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_TX_ADDR_BASE, &regval, 1);
 
   /* Return value */
 
@@ -925,7 +925,7 @@ uint8_t spirit_pktcommon_get_bcastaddr(FAR struct spirit_library_s *spirit)
 
   /* Read value from the PCKT_FLT_GOALS_BROADCAST register */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_BROADCAST_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_BROADCAST_BASE, &regval, 1);
 
   /* Return value */
 
@@ -977,7 +977,7 @@ uint8_t spirit_pktcommon_get_mcastaddr(FAR struct spirit_library_s *spirit)
 
   /* Read value from the PCKT_FLT_GOALS_MULTICAST register */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_MULTICAST_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_MULTICAST_BASE, &regval, 1);
 
   /* Return value */
 
@@ -1040,7 +1040,7 @@ uint32_t spirit_pktcommon_get_ctrlmask(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKT_FLT_GOALS_CONTROLx_MASK registers */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_CONTROL0_MASK_BASE, regval, 4);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_CONTROL0_MASK_BASE, regval, 4);
 
   /* Rebuild the control mask value on a 32-bit integer variable */
 
@@ -1110,7 +1110,7 @@ uint32_t spirit_pktcommon_get_ctrlref(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKT_FLT_GOALS_CONTROLx_FIELD registers */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_CONTROL0_FIELD_BASE, regval, 4);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_CONTROL0_FIELD_BASE, regval, 4);
 
   /* Rebuild the control mask value on a 32-bit integer variable */
 
@@ -1178,7 +1178,7 @@ uint32_t spirit_pktcommon_get_txctrl(FAR struct spirit_library_s *spirit)
 
   /* Read the TX_CTRL_FIELDx registers */
 
-  (void)spirit_reg_read(spirit, TX_CTRL_FIELD3_BASE, regval, 4);
+  spirit_reg_read(spirit, TX_CTRL_FIELD3_BASE, regval, 4);
 
   /* Rebuild value: build a 32-bit value from the read bytes */
 
@@ -1363,7 +1363,7 @@ enum spirit_functional_state_e
 
   /* Read the register value */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
 
   /* Gets the enable/disable bit in form of enum spirit_functional_state_e type */
 
@@ -1398,7 +1398,7 @@ enum spirit_functional_state_e
 
   /* Read the register value */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
 
   /* Get the enable/disable bit in form of enum spirit_functional_state_e type */
 
@@ -1433,7 +1433,7 @@ enum spirit_functional_state_e
 
   /* Read the register value */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
 
   /* Get the enable/disable bit in form of enum spirit_functional_state_e type */
 
@@ -1467,7 +1467,7 @@ uint8_t spirit_pktcommon_get_rxdestaddr(FAR struct spirit_library_s *spirit)
 
   /* Read the RX_ADDR_FIELD0 register value */
 
-  (void)spirit_reg_read(spirit, RX_ADDR_FIELD0_BASE, &regval, 1);
+  spirit_reg_read(spirit, RX_ADDR_FIELD0_BASE, &regval, 1);
 
   /* Return value */
 
@@ -1496,7 +1496,7 @@ uint32_t spirit_pktcommon_get_rxctrl(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKT_FLT_GOALS_CONTROLx_MASK registers */
 
-  (void)spirit_reg_read(spirit, RX_CTRL_FIELD0_BASE, regval, 4);
+  spirit_reg_read(spirit, RX_CTRL_FIELD0_BASE, regval, 4);
 
   /* Rebuild the control mask value on a 32-bit integer variable */
 
@@ -1805,7 +1805,7 @@ uint8_t spirit_pktcommon_get_maxretx(FAR struct spirit_library_s *spirit)
 
   /* Read the PROTOCOL0 register value */
 
-  (void)spirit_reg_read(spirit, PROTOCOL0_BASE, &regval, 1);
+  spirit_reg_read(spirit, PROTOCOL0_BASE, &regval, 1);
 
   /* Build the value to be written */
 
@@ -1833,7 +1833,7 @@ enum spirit_functional_state_e
 
   /* Read the PROTOCOL0 register value */
 
-  (void)spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
+  spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
 
   /* Build the value to be written */
 
@@ -1860,7 +1860,7 @@ uint8_t spirit_pktcommon_get_rxsrcaddr(FAR struct spirit_library_s *spirit)
 
   /* Read the RX_ADDR_FIELD1 register value */
 
-  (void)spirit_reg_read(spirit, RX_ADDR_FIELD1_BASE, &regval, 1);
+  spirit_reg_read(spirit, RX_ADDR_FIELD1_BASE, &regval, 1);
 
   /* Returns value */
 
@@ -1887,7 +1887,7 @@ uint8_t spirit_pktcommon_get_rxseqno(FAR struct spirit_library_s *spirit)
 
   /* Read the RX_PCKT_INFO register value */
 
-  (void)spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
+  spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
 
   /* Obtains and returns the sequence number */
 
@@ -1914,7 +1914,7 @@ uint8_t spirit_pktcommon_get_rxnak(FAR struct spirit_library_s *spirit)
 
   /* Read the RX_PCKT_INFO register value */
 
-  (void)spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
+  spirit_reg_read(spirit, RX_PCKT_INFO_BASE, &regval, 1);
 
   /* Obtains and returns the RX nack bit */
 
@@ -1941,7 +1941,7 @@ uint8_t spirit_pktcommon_get_txseqno(FAR struct spirit_library_s *spirit)
 
   /* Read the TX_PCKT_INFO register value */
 
-  (void)spirit_reg_read(spirit, TX_PCKT_INFO_BASE, &regval, 1);
+  spirit_reg_read(spirit, TX_PCKT_INFO_BASE, &regval, 1);
 
   /* Obtains and returns the TX sequence number */
 
@@ -1968,7 +1968,7 @@ uint8_t spirit_pktcommon_get_nretx(FAR struct spirit_library_s *spirit)
 
   /* Read the TX_PCKT_INFO register value */
 
-  (void)spirit_reg_read(spirit, TX_PCKT_INFO_BASE, &regval, 1);
+  spirit_reg_read(spirit, TX_PCKT_INFO_BASE, &regval, 1);
 
   /* Obtains and returns the number of retransmission done */
 
@@ -2052,7 +2052,7 @@ enum spirit_functional_state_e
 
   /* Read the register value */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_OPTIONS_BASE, &regval, 1);
 
   /* Gets the enable/disable bit in form of enum spirit_functional_state_e type */
 

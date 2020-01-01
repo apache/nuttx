@@ -120,7 +120,7 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization here if so configured */
 
-  (void)pic32mx_bringup();
+  pic32mx_bringup();
 }
 #endif
 

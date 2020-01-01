@@ -1638,7 +1638,7 @@ static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
    */
 
   qh->fqp = qh->hw.overlay.nqp;
-  (void)imxrt_qh_dump(qh, NULL, NULL);
+  imxrt_qh_dump(qh, NULL, NULL);
 
   /* Add the new QH to the head of the asynchronous queue list.
    *

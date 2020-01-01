@@ -204,7 +204,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   return buflen;
 
 drop_with_chain:
-  (void)iob_free_chain(iob, IOBUSER_NET_SOCK_ICMPv6);
+  iob_free_chain(iob, IOBUSER_NET_SOCK_ICMPv6);
 
 drop:
   dev->d_len = 0;

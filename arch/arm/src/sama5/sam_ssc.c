@@ -1424,7 +1424,7 @@ static void ssc_rx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)ssc_rxdma_setup(priv);
+      ssc_rxdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1570,7 +1570,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->rx.dog);
+  wd_cancel(priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1836,7 +1836,7 @@ static void ssc_tx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)ssc_txdma_setup(priv);
+      ssc_txdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1970,7 +1970,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->tx.dog);
+  wd_cancel(priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -2877,7 +2877,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   /* Configure MCK/2 divider */
 
-  (void)ssc_mck2divider(priv);
+  ssc_mck2divider(priv);
 
   /* Enable peripheral clocking */
 

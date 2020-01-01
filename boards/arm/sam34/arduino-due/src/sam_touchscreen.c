@@ -364,7 +364,7 @@ int sam_tsc_setup(int minor)
 
   /* Configure and enable the XPT2046 interrupt pin as an input */
 
-  (void)sam_configgpio(GPIO_TSC_IRQ);
+  sam_configgpio(GPIO_TSC_IRQ);
 
   /* Configure the PIO interrupt */
 

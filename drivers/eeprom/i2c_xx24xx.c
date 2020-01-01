@@ -761,11 +761,11 @@ static int ee24xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
+  UNUSED(eedev);
 
   switch (cmd)
     {
       default:
-        (void)eedev;
         ret = -EINVAL;
     }
 

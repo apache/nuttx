@@ -1201,8 +1201,8 @@ static void tca64_irqworker(void *arg)
             {
               /* Yes.. perform the callback */
 
-              (void)priv->cb[i].cbfunc(&priv->dev, match,
-                                       priv->cb[i].cbarg);
+              priv->cb[i].cbfunc(&priv->dev, match,
+                                 priv->cb[i].cbarg);
             }
         }
     }
@@ -1266,7 +1266,7 @@ static void tca64_interrupt(FAR void *arg)
 #ifdef CONFIG_TCA64XX_INT_POLL
       /* Cancel the poll timer */
 
-      (void)wd_cancel(priv->wdog);
+      wd_cancel(priv->wdog);
 #endif
 
       /* Disable interrupts */

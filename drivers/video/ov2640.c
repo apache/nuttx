@@ -1120,6 +1120,6 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 
 errout:
   gerr("ERROR: Failed to initialize the OV2640: %d\n", ret);
-  (void)ov2640_reset(i2c);
+  ov2640_reset(i2c);
   return ret;
 }

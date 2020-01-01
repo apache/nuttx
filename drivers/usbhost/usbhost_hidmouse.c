@@ -570,7 +570,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
                                      FAR char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devno);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devno);
 }
 
 /****************************************************************************
@@ -604,7 +604,7 @@ static void usbhost_destroy(FAR void *arg)
 
   uinfo("Unregister driver\n");
   usbhost_mkdevname(priv, devname);
-  (void)unregister_driver(devname);
+  unregister_driver(devname);
 
   /* Release the device name used by this connection */
 
@@ -2063,7 +2063,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        * perhaps, destroy the class instance.  Then it will exit.
        */
 
-      (void)nxsig_kill(priv->pollpid, SIGALRM);
+      nxsig_kill(priv->pollpid, SIGALRM);
     }
   else
     {
@@ -2074,7 +2074,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        */
 
       DEBUGASSERT(priv->work.worker == NULL);
-      (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
+      work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
     }
 
   return OK;
@@ -2239,7 +2239,7 @@ static int usbhost_close(FAR struct file *filep)
                * signal that we use does not matter in this case.
                */
 
-              (void)nxsig_kill(priv->pollpid, SIGALRM);
+              nxsig_kill(priv->pollpid, SIGALRM);
             }
         }
     }

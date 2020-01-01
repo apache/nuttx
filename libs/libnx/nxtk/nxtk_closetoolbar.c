@@ -98,7 +98,7 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd)
 
       /* Then re-draw the frame */
 
-      (void)nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
+      nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
     }
   else
 #endif

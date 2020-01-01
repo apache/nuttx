@@ -476,7 +476,7 @@ get_card_size:
     {
       /* cache on */
 
-      (void)lc823450_sdc_cachectl(dev->channel, 1);
+      lc823450_sdc_cachectl(dev->channel, 1);
     }
 
   finfo("ch=%d size=%lld \n", dev->channel, (uint64_t)blocksize * (uint64_t)nblocks);

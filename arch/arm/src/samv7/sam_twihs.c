@@ -477,8 +477,8 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * TWIHS transfer stalls.
    */
 
-  (void)wd_start(priv->timeout, (timeout * size), twi_timeout, 1,
-                 (uint32_t)priv);
+  wd_start(priv->timeout, (timeout * size), twi_timeout, 1,
+           (uint32_t)priv);
 
   /* Wait for either the TWIHS transfer or the timeout to complete */
 
@@ -1245,7 +1245,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   /* Reset the TWIHS */
 
   twi_putrel(priv, SAM_TWIHS_CR_OFFSET, TWIHS_CR_SWRST);
-  (void)twi_getrel(priv, SAM_TWIHS_RHR_OFFSET);
+  twi_getrel(priv, SAM_TWIHS_RHR_OFFSET);
 
   /* TWIHS Slave Mode Disabled, TWIHS Master Mode Disabled. */
 
@@ -1425,8 +1425,8 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
       /* Initialize semaphores */
 
-      (void)nxsem_init(&priv->exclsem, 0, 1);
-      (void)nxsem_init(&priv->waitsem, 0, 0);
+      nxsem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->waitsem, 0, 0);
 
       /* The waitsem semaphore is used for signaling and, hence, should not
        * have priority inheritance enabled.
@@ -1496,7 +1496,7 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 
       /* Detach Interrupt Handler */
 
-      (void)irq_detach(priv->attr->irq);
+      irq_detach(priv->attr->irq);
     }
 
   leave_critical_section(flags);

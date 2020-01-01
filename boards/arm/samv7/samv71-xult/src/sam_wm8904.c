@@ -165,7 +165,7 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
   else
     {
       audinfo("Detaching %p\n", g_wm8904info.handler);
-      (void)wm8904_enable(lower, false);
+      wm8904_enable(lower, false);
       g_wm8904info.handler = NULL;
       g_wm8904info.arg = NULL;
     }
@@ -267,7 +267,7 @@ int sam_wm8904_initialize(int minor)
     {
       /* Configure the WM8904 interrupt pin */
 
-      (void)sam_configgpio(GPIO_INT_WM8904);
+      sam_configgpio(GPIO_INT_WM8904);
 
       /* Get an instance of the I2C interface for the WM8904 chip select */
 
@@ -299,11 +299,11 @@ int sam_wm8904_initialize(int minor)
        * enabled in sam_boot.c if needed.
        */
 
-      (void)sam_pck_configure(PCK2, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
+      sam_pck_configure(PCK2, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
 #else
       /* Drive the DAC with the main clock (12 MHz) */
 
-      (void)sam_pck_configure(PCK2, PCKSRC_MAINCK, BOARD_MAINCK_FREQUENCY);
+      sam_pck_configure(PCK2, PCKSRC_MAINCK, BOARD_MAINCK_FREQUENCY);
 #endif
 
       /* Enable the DAC master clock */

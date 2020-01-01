@@ -828,7 +828,7 @@ static inline void rtc_enable_alarm(void)
        * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
        */
 
-      (void)stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
+      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
       g_alarm_enabled = true;
     }
 }
@@ -1386,7 +1386,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
    * seconds)
    */
 
-  (void)gmtime_r(&tp->tv_sec, &newtime);
+  gmtime_r(&tp->tv_sec, &newtime);
   return stm32_rtc_setdatetime(&newtime);
 }
 

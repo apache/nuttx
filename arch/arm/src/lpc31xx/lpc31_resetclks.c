@@ -137,7 +137,7 @@ void lpc31_resetclks(void)
        * upon if the clock is needed by the board logic or not
        */
 
-      (void)lpc31_defclk((enum lpc31_clockid_e)i);
+      lpc31_defclk((enum lpc31_clockid_e)i);
     }
 
   /* Disable all fractional dividers */

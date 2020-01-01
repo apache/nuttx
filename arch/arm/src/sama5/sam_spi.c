@@ -558,7 +558,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
 
   while ((spi_getreg(spi, SAM_SPI_SR_OFFSET) & SPI_INT_RDRF) != 0)
     {
-       (void)spi_getreg(spi, SAM_SPI_RDR_OFFSET);
+       spi_getreg(spi, SAM_SPI_RDR_OFFSET);
     }
 }
 
@@ -762,7 +762,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(spics->dmadog);
+  wd_cancel(spics->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1516,7 +1516,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(spics->dmadog);
+      wd_cancel(spics->dmadog);
 
       /* Check if we were awakened by an error of some kind. */
 
@@ -1783,8 +1783,8 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
       /* Flush any pending transfers */
 
-      (void)spi_getreg(spi, SAM_SPI_SR_OFFSET);
-      (void)spi_getreg(spi, SAM_SPI_RDR_OFFSET);
+      spi_getreg(spi, SAM_SPI_SR_OFFSET);
+      spi_getreg(spi, SAM_SPI_RDR_OFFSET);
 
       /* Initialize the SPI semaphore that enforces mutually exclusive
        * access to the SPI registers.

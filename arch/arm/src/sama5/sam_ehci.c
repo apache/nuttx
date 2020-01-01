@@ -1454,7 +1454,7 @@ static void sam_qh_enqueue(struct sam_qh_s *qhead, struct sam_qh_s *qh)
    */
 
   qh->fqp = qh->hw.overlay.nqp;
-  (void)sam_qh_dump(qh, NULL, NULL);
+  sam_qh_dump(qh, NULL, NULL);
 
   /* Add the new QH to the head of the asynchronous queue list.
    *

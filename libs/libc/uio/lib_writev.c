@@ -132,7 +132,7 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
 
                   /* Restore the file position */
 
-                  (void)lseek(fildes, pos, SEEK_SET);
+                  lseek(fildes, pos, SEEK_SET);
 
                   /* Restore the errno value */
 

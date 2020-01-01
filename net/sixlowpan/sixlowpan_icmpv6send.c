@@ -145,7 +145,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
               buf    = (FAR uint8_t *)ipv6 + hdrlen;
               buflen = dev->d_len - hdrlen;
 
-              (void)sixlowpan_queue_frames(
+              sixlowpan_queue_frames(
                       (FAR struct radio_driver_s *)fwddev,
                       &ipv6icmpv6->ipv6, buf, buflen, &destmac);
             }

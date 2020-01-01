@@ -1249,7 +1249,7 @@ FAR struct spi_dev_s *cxd56_spibus_initialize(int port)
 
   for (i = 0; i < CXD56_SPI_FIFOSZ; i++)
     {
-      (void)spi_getreg(priv, CXD56_SPI_DR_OFFSET);
+      spi_getreg(priv, CXD56_SPI_DR_OFFSET);
     }
 
   /* Enable clock gating (clock disable) */
@@ -1312,7 +1312,7 @@ void spi_flush(FAR struct spi_dev_s *dev)
 
   do
     {
-      (void)spi_getreg(priv, CXD56_SPI_DR_OFFSET);
+      spi_getreg(priv, CXD56_SPI_DR_OFFSET);
     }
   while (spi_getreg(priv, CXD56_SPI_SR_OFFSET) & SPI_SR_RNE);
 
@@ -1462,7 +1462,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data)
       spierr("dma error\n");
     }
 
-  (void)nxsem_post(&priv->dmasem);
+  nxsem_post(&priv->dmasem);
 }
 
 /****************************************************************************
@@ -1484,7 +1484,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data)
       spierr("dma error\n");
     }
 
-  (void)nxsem_post(&priv->dmasem);
+  nxsem_post(&priv->dmasem);
 }
 
 /****************************************************************************

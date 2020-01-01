@@ -287,7 +287,7 @@ int net_breaklock(FAR unsigned int *count)
       g_holder = NO_HOLDER;
       g_count  = 0;
 
-      (void)nxsem_post(&g_netlock);
+      nxsem_post(&g_netlock);
       ret      = OK;
     }
 

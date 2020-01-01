@@ -909,7 +909,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
 {
   /* Save the result and cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
   priv->result = result;
 
   /* Wake up the waiting thread */

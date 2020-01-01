@@ -128,7 +128,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
            * failures are reported by fdopen().
            */
 
-          (void)close(fd);
+          close(fd);
         }
     }
 

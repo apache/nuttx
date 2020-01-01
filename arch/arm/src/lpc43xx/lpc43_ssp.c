@@ -827,7 +827,7 @@ FAR struct spi_dev_s *lpc43_sspbus_initialize(int port)
   ssp_putreg(priv, LPC43_SSP_CR1_OFFSET, regval | SSP_CR1_SSE);
   for (i = 0; i < LPC43_SSP_FIFOSZ; i++)
     {
-      (void)ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
+      ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
     }
 
   return &priv->spidev;
@@ -869,7 +869,7 @@ void ssp_flush(FAR struct spi_dev_s *dev)
 
   do
     {
-      (void)ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
+      ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
     }
   while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE);
 }

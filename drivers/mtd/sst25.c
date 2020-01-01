@@ -277,7 +277,7 @@ static void sst25_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -287,8 +287,8 @@ static void sst25_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_SST25_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, CONFIG_SST25_SPIFREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, CONFIG_SST25_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -297,7 +297,7 @@ static void sst25_lock(FAR struct spi_dev_s *dev)
 
 static inline void sst25_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -319,7 +319,7 @@ static inline int sst25_readid(struct sst25_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
-  (void)SPI_SEND(priv->dev, SST25_JEDEC_ID);
+  SPI_SEND(priv->dev, SST25_JEDEC_ID);
   manufacturer = SPI_SEND(priv->dev, SST25_DUMMY);
   memory       = SPI_SEND(priv->dev, SST25_DUMMY);
   capacity     = SPI_SEND(priv->dev, SST25_DUMMY);
@@ -407,7 +407,7 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->dev, SST25_RDSR);
+      SPI_SEND(priv->dev, SST25_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the status */
 
@@ -448,7 +448,7 @@ static inline void sst25_cmd(struct sst25_dev_s *priv, uint8_t cmd)
 
   /* Send command */
 
-  (void)SPI_SEND(priv->dev, cmd);
+  SPI_SEND(priv->dev, cmd);
 
   /* Deselect the FLASH */
 
@@ -491,7 +491,7 @@ static void sst25_sectorerase(struct sst25_dev_s *priv, off_t sector)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)sst25_waitwritecomplete(priv);
+  sst25_waitwritecomplete(priv);
 
   /* Send write enable instruction */
 
@@ -503,15 +503,15 @@ static void sst25_sectorerase(struct sst25_dev_s *priv, off_t sector)
 
   /* Send the "Sector Erase (SE)" instruction */
 
-  (void)SPI_SEND(priv->dev, SST25_SE);
+  SPI_SEND(priv->dev, SST25_SE);
 
   /* Send the sector address high byte first. Only the most significant bits (those
    * corresponding to the sector) have any meaning.
    */
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+  SPI_SEND(priv->dev, (address >> 16) & 0xff);
+  SPI_SEND(priv->dev, (address >> 8) & 0xff);
+  SPI_SEND(priv->dev, address & 0xff);
 
   /* Deselect the FLASH */
 
@@ -528,7 +528,7 @@ static inline int sst25_chiperase(struct sst25_dev_s *priv)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)sst25_waitwritecomplete(priv);
+  sst25_waitwritecomplete(priv);
 
   /* Send write enable instruction */
 
@@ -566,21 +566,21 @@ static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
   /* Send "Read from Memory " instruction */
 
 #ifdef CONFIG_SST25_SLOWREAD
-  (void)SPI_SEND(priv->dev, SST25_READ);
+  SPI_SEND(priv->dev, SST25_READ);
 #else
-  (void)SPI_SEND(priv->dev, SST25_FAST_READ);
+  SPI_SEND(priv->dev, SST25_FAST_READ);
 #endif
 
   /* Send the address high byte first. */
 
-  (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, address & 0xff);
+  SPI_SEND(priv->dev, (address >> 16) & 0xff);
+  SPI_SEND(priv->dev, (address >> 8) & 0xff);
+  SPI_SEND(priv->dev, address & 0xff);
 
   /* Send a dummy byte */
 
 #ifndef CONFIG_SST25_SLOWREAD
-  (void)SPI_SEND(priv->dev, SST25_DUMMY);
+  SPI_SEND(priv->dev, SST25_DUMMY);
 #endif
 
   /* Then read all of the requested bytes */
@@ -628,17 +628,17 @@ static void sst25_bytewrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
           /* Send "Byte Program (BP)" command */
 
-          (void)SPI_SEND(priv->dev, SST25_BP);
+          SPI_SEND(priv->dev, SST25_BP);
 
           /* Send the byte address high byte first. */
 
-          (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-          (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-          (void)SPI_SEND(priv->dev, address & 0xff);
+          SPI_SEND(priv->dev, (address >> 16) & 0xff);
+          SPI_SEND(priv->dev, (address >> 8) & 0xff);
+          SPI_SEND(priv->dev, address & 0xff);
 
           /* Then write the single byte */
 
-          (void)SPI_SEND(priv->dev, *buffer);
+          SPI_SEND(priv->dev, *buffer);
 
           /* Deselect the FLASH and setup for the next pass through the loop */
 
@@ -709,13 +709,13 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
       /* Send "Auto Address Increment (AAI)" command */
 
-      (void)SPI_SEND(priv->dev, SST25_AAI);
+      SPI_SEND(priv->dev, SST25_AAI);
 
       /* Send the word address high byte first. */
 
-      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, address & 0xff);
+      SPI_SEND(priv->dev, (address >> 16) & 0xff);
+      SPI_SEND(priv->dev, (address >> 8) & 0xff);
+      SPI_SEND(priv->dev, address & 0xff);
 
       /* Then write one 16-bit word */
 
@@ -754,7 +754,7 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
           /* Send "Auto Address Increment (AAI)" command with no address */
 
-          (void)SPI_SEND(priv->dev, SST25_AAI);
+          SPI_SEND(priv->dev, SST25_AAI);
 
           /* Then write one 16-bit word */
 

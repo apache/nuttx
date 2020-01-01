@@ -308,7 +308,7 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
   if (0 == strcmp(cmd, "cur_freq"))
     {
       tmp = atoi(line + (n + 1));
-      (void)lc823450_dvfs_set_freq(tmp);
+      lc823450_dvfs_set_freq(tmp);
     }
   else if (0 == strcmp(cmd, "enable"))
     {

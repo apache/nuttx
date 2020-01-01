@@ -142,7 +142,7 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
 
   if (attr)
     {
-      (void)spawn_execattrs(pid, attr);
+      spawn_execattrs(pid, attr);
     }
 
   /* Re-enable pre-emption and return */

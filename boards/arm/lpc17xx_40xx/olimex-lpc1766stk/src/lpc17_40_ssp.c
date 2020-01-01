@@ -144,7 +144,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
     {
       /* Attach then enable the new interrupt handler */
 
-      (void)irq_attach(irq, irqhandler, NULL);
+      irq_attach(irq, irqhandler, NULL);
       up_enable_irq(irq);
     }
   else
@@ -152,7 +152,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
       /* Disable then detach the old interrupt handler */
 
       up_disable_irq(irq);
-      (void)irq_detach(irq);
+      irq_detach(irq);
     }
 
   leave_critical_section(flags);

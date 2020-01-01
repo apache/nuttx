@@ -135,7 +135,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  (void)nxtask_argsetup(ttcb, name, argv);
+  nxtask_argsetup(ttcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 

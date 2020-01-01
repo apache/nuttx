@@ -1716,7 +1716,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       dev->erasesize = geo.erasesize;
       dev->nblocks = geo.neraseblocks * geo.erasesize / geo.blocksize;
 
-      (void)register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
+      register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
     }
 
 errout:

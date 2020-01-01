@@ -128,8 +128,8 @@ static inline void max7219_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX7219_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_MAX7219_FREQUENCY);
 }
 
 /****************************************************************************
@@ -145,7 +145,7 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 {
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
 
   /* Configure the SPI */
 
@@ -157,7 +157,7 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 
   /* Send 16 bits (2 bytes) */
 
-  (void)SPI_SNDBLOCK(priv->spi, &value, 2);
+  SPI_SNDBLOCK(priv->spi, &value, 2);
 
   /* De-select */
 
@@ -165,7 +165,7 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /****************************************************************************

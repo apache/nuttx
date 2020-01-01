@@ -94,7 +94,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&notify->nt_sem, 0, 0);
+  nxsem_init(&notify->nt_sem, 0, 0);
   nxsem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
@@ -150,7 +150,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)nxsem_destroy(&notify->nt_sem);
+  nxsem_destroy(&notify->nt_sem);
   return ret;
 }
 
@@ -201,7 +201,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
    * head of the list).
    */
 
-  (void)arp_wait_cancel(notify);
+  arp_wait_cancel(notify);
 
   /* Re-enable interrupts and return the result of the wait */
 

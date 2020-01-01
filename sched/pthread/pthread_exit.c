@@ -89,7 +89,7 @@ void pthread_exit(FAR void *exit_value)
    * are performing the JOIN handshake.
    */
 
-  (void)nxsig_procmask(SIG_SETMASK, &set, NULL);
+  nxsig_procmask(SIG_SETMASK, &set, NULL);
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* Mark the pthread as non-cancelable to avoid additional calls to

@@ -340,7 +340,7 @@ static void spi_txuint8(struct imx_spidev_s *priv)
 
 static void spi_rxnull(struct imx_spidev_s *priv)
 {
-  (void)spi_getreg(priv, CSPI_RXD_OFFSET);
+  spi_getreg(priv, CSPI_RXD_OFFSET);
 }
 
 static void spi_rxuint16(struct imx_spidev_s *priv)
@@ -906,7 +906,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint16_t response = 0;
 
-  (void)spi_transfer(priv, &wd, &response, 1);
+  spi_transfer(priv, &wd, &response, 1);
   return response;
 }
 
@@ -935,7 +935,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, txbuffer, rxbuffer, nwords);
+  spi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
 
@@ -962,7 +962,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, buffer, NULL, nwords);
+  spi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
 
@@ -989,7 +989,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, NULL, buffer, nwords);
+  spi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
 

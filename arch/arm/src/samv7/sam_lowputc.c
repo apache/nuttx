@@ -293,49 +293,49 @@ void sam_lowsetup(void)
   /* Configure UART pins for all selected UART/USARTs */
 
 #ifdef CONFIG_SAMV7_UART0
-  (void)sam_configgpio(GPIO_UART0_RXD);
-  (void)sam_configgpio(GPIO_UART0_TXD);
+  sam_configgpio(GPIO_UART0_RXD);
+  sam_configgpio(GPIO_UART0_TXD);
 #endif
 
 #ifdef CONFIG_SAMV7_UART1
-  (void)sam_configgpio(GPIO_UART1_RXD);
-  (void)sam_configgpio(GPIO_UART1_TXD);
+  sam_configgpio(GPIO_UART1_RXD);
+  sam_configgpio(GPIO_UART1_TXD);
 #endif
 
 #ifdef CONFIG_SAMV7_UART2
-  (void)sam_configgpio(GPIO_UART2_RXD);
-  (void)sam_configgpio(GPIO_UART2_TXD);
+  sam_configgpio(GPIO_UART2_RXD);
+  sam_configgpio(GPIO_UART2_TXD);
 #endif
 
 #ifdef CONFIG_SAMV7_UART3
-  (void)sam_configgpio(GPIO_UART3_RXD);
-  (void)sam_configgpio(GPIO_UART3_TXD);
+  sam_configgpio(GPIO_UART3_RXD);
+  sam_configgpio(GPIO_UART3_TXD);
 #endif
 
 #ifdef CONFIG_SAMV7_UART4
-  (void)sam_configgpio(GPIO_UART4_RXD);
-  (void)sam_configgpio(GPIO_UART4_TXD);
+  sam_configgpio(GPIO_UART4_RXD);
+  sam_configgpio(GPIO_UART4_TXD);
 #endif
 
 #ifdef CONFIG_SAMV7_USART0
-  (void)sam_configgpio(GPIO_USART0_RXD);
-  (void)sam_configgpio(GPIO_USART0_TXD);
+  sam_configgpio(GPIO_USART0_RXD);
+  sam_configgpio(GPIO_USART0_TXD);
 #ifdef CONFIG_USART0_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART0_CTS);
+  sam_configgpio(GPIO_USART0_CTS);
 #endif
 #ifdef CONFIG_USART0_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART0_RTS);
+  sam_configgpio(GPIO_USART0_RTS);
 #endif
 #endif
 
 #ifdef CONFIG_SAMV7_USART1
-  (void)sam_configgpio(GPIO_USART1_RXD);
-  (void)sam_configgpio(GPIO_USART1_TXD);
+  sam_configgpio(GPIO_USART1_RXD);
+  sam_configgpio(GPIO_USART1_TXD);
 #  ifdef CONFIG_USART1_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART1_CTS);
+  sam_configgpio(GPIO_USART1_CTS);
 #  endif
 #  ifdef CONFIG_USART1_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART1_RTS);
+  sam_configgpio(GPIO_USART1_RTS);
 #  endif
 
   /* To use the USART1 as an USART, the SYSIO Pin4 must be bound to PB4
@@ -354,13 +354,13 @@ void sam_lowsetup(void)
 #endif
 
 #ifdef CONFIG_SAMV7_USART2
-  (void)sam_configgpio(GPIO_USART2_RXD);
-  (void)sam_configgpio(GPIO_USART2_TXD);
+  sam_configgpio(GPIO_USART2_RXD);
+  sam_configgpio(GPIO_USART2_TXD);
 #ifdef CONFIG_USART2_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART2_CTS);
+  sam_configgpio(GPIO_USART2_CTS);
 #endif
 #ifdef CONFIG_USART2_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART2_RTS);
+  sam_configgpio(GPIO_USART2_RTS);
 #endif
 #endif
 

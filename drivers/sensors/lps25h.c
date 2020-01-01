@@ -531,7 +531,7 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
           return ret;
         }
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
       abstime.tv_sec += (LPS25H_RETRY_TIMEOUT_MSECS / 1000);
       abstime.tv_nsec += (LPS25H_RETRY_TIMEOUT_MSECS % 1000) * 1000 * 1000;
       while (abstime.tv_nsec >= (1000 * 1000 * 1000))

@@ -87,7 +87,7 @@ static inline int nxspawn_close(FAR struct spawn_close_file_action_s *action)
 
   sinfo("Closing fd=%d\n", action->fd);
 
-  (void)close(action->fd);
+  close(action->fd);
   return OK;
 }
 
@@ -283,7 +283,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
       param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
 #endif
-      (void)nxsched_setscheduler(pid, attr->policy, &param);
+      nxsched_setscheduler(pid, attr->policy, &param);
     }
 
   return OK;
@@ -317,7 +317,7 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
 
   if (attr != NULL && (attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
     {
-      (void)nxsig_procmask(SIG_SETMASK, &attr->sigmask, NULL);
+      nxsig_procmask(SIG_SETMASK, &attr->sigmask, NULL);
     }
 
   /* Were we also requested to perform file actions? */

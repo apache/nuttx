@@ -794,14 +794,14 @@ void up_serialinit(void)
   /* Register the console */
 
 #ifdef CONSOLE_DEV
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all UARTs */
 
-  (void)uart_register("/dev/ttyLE0", &TTYLE0_DEV);
+  uart_register("/dev/ttyLE0", &TTYLE0_DEV);
 #ifdef TTYLE1_DEV
-  (void)uart_register("/dev/ttyLE1", &TTYLE1_DEV);
+  uart_register("/dev/ttyLE1", &TTYLE1_DEV);
 #endif
 }
 

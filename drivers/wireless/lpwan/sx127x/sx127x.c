@@ -1109,7 +1109,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               = (FAR struct sx127x_chanscan_ioc_s *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
-          (void)sx127x_channel_scan(dev, ptr);
+          sx127x_channel_scan(dev, ptr);
           break;
         }
 
@@ -1238,7 +1238,7 @@ static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      (void)nxsem_wait(&dev->rx_buffer_sem);
+      nxsem_wait(&dev->rx_buffer_sem);
       if (dev->rx_fifo_len > 0)
         {
           /* Data available for input */

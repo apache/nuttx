@@ -472,7 +472,7 @@ static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   /* Remove unused-variable warning */
 
-  (void)chan;
+  UNUSED(chan);
 
   /* Ensure the PWM channel has been stopped */
 
@@ -710,7 +710,7 @@ static int tiva_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
 
   /* Remove unused-variable warning */
 
-  (void)chan;
+  UNUSED(chan);
 
   /* There are no platform-specific ioctl commands */
 

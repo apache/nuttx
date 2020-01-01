@@ -560,17 +560,17 @@ static int scd30_configure(FAR struct scd30_dev_s *priv, bool start)
   /* Set measurement interval. */
 
   scd30_set_command_param(&param, priv->interval);
-  (void)scd30_write_cmd(priv, SCD30_CMD_SET_INTERVAL, &param, 1);
+  scd30_write_cmd(priv, SCD30_CMD_SET_INTERVAL, &param, 1);
 
   /* Set altitude compensation. */
 
   scd30_set_command_param(&param, priv->altitude_comp);
-  (void)scd30_write_cmd(priv, SCD30_CMD_SET_ALT_COMPENSATION, &param, 1);
+  scd30_write_cmd(priv, SCD30_CMD_SET_ALT_COMPENSATION, &param, 1);
 
   /* Set temperature offset. */
 
   scd30_set_command_param(&param, priv->temperature_offset);
-  (void)scd30_write_cmd(priv, SCD30_CMD_SET_TEMP_OFFSET, &param, 1);
+  scd30_write_cmd(priv, SCD30_CMD_SET_TEMP_OFFSET, &param, 1);
 
   if (!start)
     {

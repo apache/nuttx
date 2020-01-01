@@ -181,8 +181,8 @@ void up_irqinitialize(void)
    * an NMI.
    */
 
-  (void)irq_attach(TMS570_REQ_ESMHIGH, tms570_esm_interrupt, NULL);
-  (void)irq_attach(TMS570_REQ_ESMLO, tms570_esm_interrupt, NULL);
+  irq_attach(TMS570_REQ_ESMHIGH, tms570_esm_interrupt, NULL);
+  irq_attach(TMS570_REQ_ESMLO, tms570_esm_interrupt, NULL);
   up_enable_irq(TMS570_REQ_ESMHIGH);
   up_enable_irq(TMS570_REQ_ESMLO);
 

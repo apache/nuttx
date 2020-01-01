@@ -1299,7 +1299,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_RESOLUTION
   /* Configure ADC resolution */
 
-  (void)adc_resolution_set(dev, priv->resolution);
+  adc_resolution_set(dev, priv->resolution);
 #endif
 
 #ifdef ADC_HAVE_EXTCFG

@@ -143,7 +143,7 @@ void files_initlist(FAR struct filelist *list)
 
   /* Initialize the list access mutex */
 
-  (void)nxsem_init(&list->fl_sem, 0, 1);
+  nxsem_init(&list->fl_sem, 0, 1);
 }
 
 /****************************************************************************
@@ -167,12 +167,12 @@ void files_releaselist(FAR struct filelist *list)
 
   for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
     {
-      (void)_files_close(&list->fl_files[i]);
+      _files_close(&list->fl_files[i]);
     }
 
   /* Destroy the semaphore */
 
-  (void)nxsem_destroy(&list->fl_sem);
+  nxsem_destroy(&list->fl_sem);
 }
 
 /****************************************************************************

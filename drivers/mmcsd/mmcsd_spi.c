@@ -358,7 +358,7 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 {
   /* Get exclusive access to the SPI bus (if necessary) */
 
-  (void)SPI_LOCK(slot->spi, true);
+  SPI_LOCK(slot->spi, true);
 
   /* Set the frequency, bit width and mode, as some other driver could have
    * changed those since the last time that we had the SPI bus.
@@ -366,8 +366,8 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 
   SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
   SPI_SETBITS(slot->spi, 8);
-  (void)SPI_HWFEATURES(slot->spi, 0);
-  (void)SPI_SETFREQUENCY(slot->spi, slot->spispeed);
+  SPI_HWFEATURES(slot->spi, 0);
+  SPI_SETFREQUENCY(slot->spi, slot->spispeed);
 
   /* Get exclusive access to the MMC/SD device (possibly unnecessary if
    * SPI_LOCK is also implemented as a semaphore).
@@ -392,11 +392,11 @@ static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
    * and release the MISO line.
    */
 
-  (void)SPI_SEND(slot->spi, 0xff);
+  SPI_SEND(slot->spi, 0xff);
 
   /* Relinquish exclusive access to the SPI bus */
 
-  (void)SPI_LOCK(slot->spi, false);
+  SPI_LOCK(slot->spi, false);
 }
 
 /****************************************************************************
@@ -998,7 +998,7 @@ static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot,
 
   /* Transmit the block to the MMC/SD card */
 
-  (void)SPI_SNDBLOCK(spi, buffer, nbytes);
+  SPI_SNDBLOCK(spi, buffer, nbytes);
 
   /* Add the bogus CRC.  By default, the SPI interface is initialized in
    * non-protected mode.  However, we still have to send bogus CRC values
@@ -1429,7 +1429,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   /* Wait until the card is no longer busy */
 
-  (void)mmcsd_waitready(slot);
+  mmcsd_waitready(slot);
   SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
   SPI_SEND(spi, 0xff);
   mmcsd_semgive(slot);
@@ -1582,7 +1582,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   /* Clock Freq. Identification Mode < 400kHz */
 
   slot->spispeed = MMCSD_IDMODE_CLOCK;
-  (void)SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
+  SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
 
   /* Set the maximum access time out */
 
@@ -1986,7 +1986,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
    * removal of cards.
    */
 
-  (void)SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, (FAR void *)slot);
+  SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, (FAR void *)slot);
   return OK;
 }
 

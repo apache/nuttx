@@ -530,7 +530,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1480,7 +1480,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                    I2C_CMD_CLEARPC | I2C_CMD_CLEARTX);
   if (efm32_i2c_getreg(priv, EFM32_I2C_IF_OFFSET) & I2C_IF_RXDATAV)
     {
-      (void)efm32_i2c_getreg(priv, EFM32_I2C_RXDATA_OFFSET);
+      efm32_i2c_getreg(priv, EFM32_I2C_RXDATA_OFFSET);
     }
 
   /* Clear all pending interrupts prior to starting transfer. */

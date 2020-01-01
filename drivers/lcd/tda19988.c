@@ -769,8 +769,8 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
 done:
   if (priv->version == HDMI_CTRL_REV_TDA19988)
     {
-      (void)tda19988_hdmi_modifyreg(priv, HDMI_HDCPOTP_TX4_REG,
-                                    0, HDMI_HDCPOTP_TX4_PDRAM);
+      tda19988_hdmi_modifyreg(priv, HDMI_HDCPOTP_TX4_REG,
+                              0, HDMI_HDCPOTP_TX4_PDRAM);
     }
 
   return ret;
@@ -1610,8 +1610,8 @@ static void tda19988_shutdown(FAR struct tda1988_dev_s *priv)
       DEBUGASSERT(priv->lower->attach != NULL &&
                   priv->lower->enable != NULL);
 
-      (void)priv->lower->attach(priv->lower, NULL, NULL);
-      (void)priv->lower->enable(priv->lower, false);
+      priv->lower->attach(priv->lower, NULL, NULL);
+      priv->lower->enable(priv->lower, false);
     }
 
   /* Release resources */

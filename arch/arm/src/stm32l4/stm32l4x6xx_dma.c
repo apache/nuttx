@@ -224,7 +224,7 @@ static void stm32l4_dmatake(FAR struct stm32l4_dma_s *dmach)
 
 static inline void stm32l4_dmagive(FAR struct stm32l4_dma_s *dmach)
 {
-  (void)nxsem_post(&dmach->sem);
+  nxsem_post(&dmach->sem);
 }
 
 /************************************************************************************
@@ -338,7 +338,7 @@ void weak_function up_dma_initialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
+      irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
 
       /* Disable the DMA channel */
 

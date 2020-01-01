@@ -222,7 +222,7 @@ int pipecommon_open(FAR struct file *filep)
       dev->d_buffer = (FAR uint8_t *)kmm_malloc(dev->d_bufsize);
       if (!dev->d_buffer)
         {
-          (void)nxsem_post(&dev->d_bfsem);
+          nxsem_post(&dev->d_bfsem);
           return -ENOMEM;
         }
     }
@@ -259,7 +259,7 @@ int pipecommon_open(FAR struct file *filep)
    */
 
   sched_lock();
-  (void)nxsem_post(&dev->d_bfsem);
+  nxsem_post(&dev->d_bfsem);
 
   if ((filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
       dev->d_nwriters < 1 &&                     /* No writers on the pipe */
@@ -285,7 +285,7 @@ int pipecommon_open(FAR struct file *filep)
 
           /* Immediately close the pipe that we just opened */
 
-          (void)pipecommon_close(filep);
+          pipecommon_close(filep);
         }
     }
 

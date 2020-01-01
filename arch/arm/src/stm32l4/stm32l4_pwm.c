@@ -1735,7 +1735,7 @@ static int stm32l4pwm_interrupt(struct stm32l4_pwmtimer_s *priv)
 
       /* Disable first interrtups, stop and reset the timer */
 
-      (void)stm32l4pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
+      stm32l4pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
 
       /* Then perform the callback into the upper half driver */
 

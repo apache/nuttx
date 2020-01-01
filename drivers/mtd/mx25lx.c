@@ -306,7 +306,7 @@ static void mx25l_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -316,8 +316,8 @@ static void mx25l_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_MX25L_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, CONFIG_MX25L_SPIFREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, CONFIG_MX25L_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -326,7 +326,7 @@ static void mx25l_lock(FAR struct spi_dev_s *dev)
 
 static inline void mx25l_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -348,7 +348,7 @@ static inline int mx25l_readid(FAR struct mx25l_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
-  (void)SPI_SEND(priv->dev, MX25L_RDID);
+  SPI_SEND(priv->dev, MX25L_RDID);
   manufacturer = SPI_SEND(priv->dev, MX25L_DUMMY);
   memory       = SPI_SEND(priv->dev, MX25L_DUMMY);
   capacity     = SPI_SEND(priv->dev, MX25L_DUMMY);
@@ -420,7 +420,7 @@ static void mx25l_waitwritecomplete(FAR struct mx25l_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->dev, MX25L_RDSR);
+      SPI_SEND(priv->dev, MX25L_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the status */
 
@@ -459,7 +459,7 @@ static void mx25l_writeenable(FAR struct mx25l_dev_s *priv)
 
   /* Send "Write Enable (WREN)" command */
 
-  (void)SPI_SEND(priv->dev, MX25L_WREN);
+  SPI_SEND(priv->dev, MX25L_WREN);
 
   /* Deselect the FLASH */
 
@@ -480,7 +480,7 @@ static void mx25l_writedisable(FAR struct mx25l_dev_s *priv)
 
   /* Send "Write Disable (WRDI)" command */
 
-  (void)SPI_SEND(priv->dev, MX25L_WRDI);
+  SPI_SEND(priv->dev, MX25L_WRDI);
 
   /* Deselect the FLASH */
 
@@ -517,27 +517,27 @@ static void mx25l_sectorerase(FAR struct mx25l_dev_s *priv, off_t sector)
 
   if (priv->addressbytes == MX25L_ADDRESSBYTES_4)
     {
-      (void)SPI_SEND(priv->dev, MX25L_SE4B);
+      SPI_SEND(priv->dev, MX25L_SE4B);
 
       /* Send the sector offset high byte first. */
 
-      (void)SPI_SEND(priv->dev, (offset >> 24) & 0xff);
-      (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, offset & 0xff);
+      SPI_SEND(priv->dev, (offset >> 24) & 0xff);
+      SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+      SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+      SPI_SEND(priv->dev, offset & 0xff);
     }
   else
     {
-      (void)SPI_SEND(priv->dev, MX25L_SE);
+      SPI_SEND(priv->dev, MX25L_SE);
 
       /* Send the sector offset high byte first.  For all of the supported
        * parts, the sector number is completely contained in the first byte
        * and the values used in the following two bytes don't really matter.
        */
 
-      (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, offset & 0xff);
+      SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+      SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+      SPI_SEND(priv->dev, offset & 0xff);
     }
 
   /* Deselect the FLASH */
@@ -567,7 +567,7 @@ static inline int mx25l_chiperase(FAR struct mx25l_dev_s *priv)
 
   /* Send the "Chip Erase (CE)" instruction */
 
-  (void)SPI_SEND(priv->dev, MX25L_CE);
+  SPI_SEND(priv->dev, MX25L_CE);
 
   /* Deselect the FLASH */
 
@@ -606,31 +606,31 @@ static void mx25l_byteread(FAR struct mx25l_dev_s *priv, FAR uint8_t *buffer,
     {
       /* Send "Read from Memory - 4 byte mode" instruction */
 
-      (void)SPI_SEND(priv->dev, MX25L_FAST_READ4B);
+      SPI_SEND(priv->dev, MX25L_FAST_READ4B);
 
       /* Send the address high byte first. */
 
-      (void)SPI_SEND(priv->dev, (address >> 24) & 0xff);
-      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, address & 0xff);
+      SPI_SEND(priv->dev, (address >> 24) & 0xff);
+      SPI_SEND(priv->dev, (address >> 16) & 0xff);
+      SPI_SEND(priv->dev, (address >> 8) & 0xff);
+      SPI_SEND(priv->dev, address & 0xff);
     }
   else
     {
       /* Send "Read from Memory " instruction */
 
-      (void)SPI_SEND(priv->dev, MX25L_FAST_READ);
+      SPI_SEND(priv->dev, MX25L_FAST_READ);
 
       /* Send the address high byte first. */
 
-      (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-      (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-      (void)SPI_SEND(priv->dev, address & 0xff);
+      SPI_SEND(priv->dev, (address >> 16) & 0xff);
+      SPI_SEND(priv->dev, (address >> 8) & 0xff);
+      SPI_SEND(priv->dev, address & 0xff);
     }
 
   /* Send a dummy byte */
 
-  (void)SPI_SEND(priv->dev, MX25L_DUMMY);
+  SPI_SEND(priv->dev, MX25L_DUMMY);
 
   /* Then read all of the requested bytes */
 
@@ -669,10 +669,10 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
 
           /* Send the address high byte first. */
 
-          (void)SPI_SEND(priv->dev, (address >> 24) & 0xff);
-          (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-          (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-          (void)SPI_SEND(priv->dev, address & 0xff);
+          SPI_SEND(priv->dev, (address >> 24) & 0xff);
+          SPI_SEND(priv->dev, (address >> 16) & 0xff);
+          SPI_SEND(priv->dev, (address >> 8) & 0xff);
+          SPI_SEND(priv->dev, address & 0xff);
         }
       else
         {
@@ -682,9 +682,9 @@ static inline void mx25l_pagewrite(FAR struct mx25l_dev_s *priv,
 
           /* Send the address high byte first. */
 
-          (void)SPI_SEND(priv->dev, (address >> 16) & 0xff);
-          (void)SPI_SEND(priv->dev, (address >> 8) & 0xff);
-          (void)SPI_SEND(priv->dev, address & 0xff);
+          SPI_SEND(priv->dev, (address >> 16) & 0xff);
+          SPI_SEND(priv->dev, (address >> 8) & 0xff);
+          SPI_SEND(priv->dev, address & 0xff);
         }
 
       /* Then send the page of data */

@@ -135,6 +135,6 @@ void stm32l4_rcc_enablelse(void)
 
     /* Disable backup domain access if it was disabled on entry */
 
-    (void)stm32l4_pwr_enablebkp(writable);
+    stm32l4_pwr_enablebkp(writable);
   }
 }

@@ -1008,7 +1008,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
           /* Disable and clear all channel interrupts */
 
           sam_chan_putreg(chan, SAM_TC_IDR_OFFSET, TC_INT_ALL);
-          (void)sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+          sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
         }
 
       /* Set the maximum TC peripheral clock frequency */
@@ -1029,7 +1029,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       /* Attach the timer interrupt handler and enable the timer interrupts */
 
-      (void)irq_attach(tc->pid, handler, NULL);
+      irq_attach(tc->pid, handler, NULL);
       up_enable_irq(tc->pid);
 
       /* Now the channel is initialized */
@@ -1112,7 +1112,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
       /* Clear and pending status */
 
-      (void)sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+      sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
 
       /* And set the requested mode */
 
@@ -1183,7 +1183,7 @@ void sam_tc_start(TC_HANDLE handle)
 
   /* Read the SR to clear any pending interrupts on this channel */
 
-  (void)sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+  sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
 
   /* Then enable the timer (by setting the CLKEN bit).  Setting SWTRIG
    * will also reset the timer counter and starting the timer.

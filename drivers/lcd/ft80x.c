@@ -209,7 +209,7 @@ static int ft80x_fade(FAR struct ft80x_dev_s *priv,
     {
       /* Wait for FADE_STEP_MSEC msec (or whatever we get) */
 
-      (void)nxsig_usleep(FADE_STEP_MSEC * 1000);
+      nxsig_usleep(FADE_STEP_MSEC * 1000);
 
       /* Get the elapsed time */
 

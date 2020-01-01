@@ -80,7 +80,7 @@
 
 void board_userled_initialize(void)
 {
-  (void)sam_configport(PORT_STATUS_LED);
+  sam_configport(PORT_STATUS_LED);
 }
 
 /****************************************************************************

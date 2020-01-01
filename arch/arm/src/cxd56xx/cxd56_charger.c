@@ -680,8 +680,7 @@ int cxd56_charger_initialize(FAR const char *devpath)
 
 int cxd56_charger_uninitialize(FAR const char *devpath)
 {
-  (void) unregister_driver(devpath);
-
+  unregister_driver(devpath);
   return OK;
 }
 

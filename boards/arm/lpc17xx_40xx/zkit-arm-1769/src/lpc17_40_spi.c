@@ -92,8 +92,8 @@ void weak_function zkit_spidev_initialize(void)
 
   /* Configure card detect and chip select for the SD slot. */
 
-  (void)lpc17_40_configgpio(ZKITARM_SD_CS);
-  (void)lpc17_40_configgpio(ZKITARM_SD_CD);
+  lpc17_40_configgpio(ZKITARM_SD_CS);
+  lpc17_40_configgpio(ZKITARM_SD_CD);
 
   spi_dumpgpio("zkit_spidev_initialize() Exit");
 }
@@ -136,7 +136,7 @@ void  lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
     {
       /* Assert/de-assert the CS pin to the card */
 
-      (void)lpc17_40_gpiowrite(ZKITARM_SD_CS, !selected);
+      lpc17_40_gpiowrite(ZKITARM_SD_CS, !selected);
     }
 
   spi_dumpgpio("lpc17_40_spiselect() Exit");

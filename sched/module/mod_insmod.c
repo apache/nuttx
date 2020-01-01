@@ -270,7 +270,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
 errout_with_load:
   modlib_unload(&loadinfo);
-  (void)modlib_undepend(modp);
+  modlib_undepend(modp);
 errout_with_registry_entry:
   kmm_free(modp);
 errout_with_loadinfo:

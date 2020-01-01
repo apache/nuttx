@@ -212,6 +212,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)ez80_bringup();
+  ez80_bringup();
 }
 #endif

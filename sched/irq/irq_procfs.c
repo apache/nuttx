@@ -380,7 +380,7 @@ static ssize_t irq_read(FAR struct file *filep, FAR char *buffer,
    * each.
    */
 
-  (void)irq_foreach(irq_callback, (FAR void *)irqfile);
+  irq_foreach(irq_callback, (FAR void *)irqfile);
 
   /* Update the file position */
 

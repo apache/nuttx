@@ -382,7 +382,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   spiinfo("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
-      (void)spi_send(dev, (uint16_t)*ptr++);
+      spi_send(dev, (uint16_t)*ptr++);
     }
 }
 

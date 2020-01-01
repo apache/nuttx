@@ -109,9 +109,9 @@ int work_lock(void)
 void work_unlock(void)
 {
 #ifdef CONFIG_BUILD_PROTECTED
-  (void)sem_post(&g_usrsem);
+  sem_post(&g_usrsem);
 #else
-  (void)pthread_mutex_unlock(&g_usrmutex);
+  pthread_mutex_unlock(&g_usrmutex);
 #endif
 }
 

@@ -639,7 +639,7 @@ int sim_tsc_initialize(int minor)
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &up_fops, 0666, priv);
@@ -696,7 +696,7 @@ void sim_tsc_uninitialize(void)
 
   /* Un-register the device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
   iinfo("Un-registering %s\n", devname);
 
   ret = unregister_driver(devname);

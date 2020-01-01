@@ -1575,7 +1575,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
    * driver as soon as it starts.
    */
 
-  (void)spi_setfrequency((struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Set MSB first data order and the configured pad mux setting.
    * SPI mode 0 is assumed initially (CPOL=0 and CPHA=0).

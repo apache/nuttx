@@ -262,7 +262,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * Add the task to the ready-to-run (but not running) task list
        */
 
-      (void)sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
+      sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
 
       btcb->task_state = TSTATE_TASK_READYTORUN;
       doswitch         = false;
@@ -401,7 +401,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                   tasklist         = (FAR dq_queue_t *)&g_readytorun;
                 }
 
-              (void)sched_addprioritized(next, tasklist);
+              sched_addprioritized(next, tasklist);
             }
 
           doswitch = true;

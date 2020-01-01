@@ -417,7 +417,7 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
       seconds = ts.tv_sec + (alarminfo->reltime + 1);
 
-      (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+      gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
 
       /* The set the alarm using this absolute time */
 

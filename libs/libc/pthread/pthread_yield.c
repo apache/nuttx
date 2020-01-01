@@ -63,5 +63,5 @@
 
 void pthread_yield(void)
 {
-  (void)sched_yield();
+  sched_yield();
 }

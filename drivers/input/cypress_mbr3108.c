@@ -898,7 +898,7 @@ static int mbr3108_open(FAR struct file *filep)
         {
           /* No such device. Power off the switch. */
 
-          (void)priv->board->set_power(priv->board, false);
+          priv->board->set_power(priv->board, false);
           goto out_sem;
         }
 
@@ -911,7 +911,7 @@ static int mbr3108_open(FAR struct file *filep)
             {
               /* Configuration failed. Power off the switch. */
 
-              (void)priv->board->set_power(priv->board, false);
+              priv->board->set_power(priv->board, false);
               goto out_sem;
             }
         }
@@ -954,11 +954,11 @@ static int mbr3108_close(FAR struct file *filep)
 
       /* Set chip in low-power mode. */
 
-      (void)mbr3108_enter_low_power_mode(priv);
+      mbr3108_enter_low_power_mode(priv);
 
       /* Last user, do power off. */
 
-      (void)priv->board->set_power(priv->board, false);
+      priv->board->set_power(priv->board, false);
 
       priv->debug_conf.debug_mode = false;
       priv->cref = use_count;

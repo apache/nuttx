@@ -80,8 +80,8 @@ void weak_function stm32_spidev_initialize(void)
   stm32_configgpio(GPIO_CS_MAX7456);
 #endif
 #if defined(CONFIG_MMCSD_SPI)
-  (void)stm32_configgpio(GPIO_MMCSD_NCD);  /* SD_DET */
-  (void)stm32_configgpio(GPIO_MMCSD_NSS);  /* CS */
+  stm32_configgpio(GPIO_MMCSD_NCD);  /* SD_DET */
+  stm32_configgpio(GPIO_MMCSD_NSS);  /* CS */
 #endif
 }
 

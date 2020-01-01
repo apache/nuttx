@@ -184,13 +184,13 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   iinfo("enable:%d\n", enable);
   if (enable)
     {
-      (void)stm32_gpiosetevent(GPIO_TP_INT, true, true, false,
-                               priv->handler, NULL);
+      stm32_gpiosetevent(GPIO_TP_INT, true, true, false,
+                         priv->handler, NULL);
     }
   else
     {
-      (void)stm32_gpiosetevent(GPIO_TP_INT, false, false, false,
-                               NULL, NULL);
+      stm32_gpiosetevent(GPIO_TP_INT, false, false, false,
+                         NULL, NULL);
     }
 }
 
@@ -256,7 +256,7 @@ int stm32_tsc_setup(int minor)
 
   /* Configure and enable the ADS7843E interrupt pin as an input. */
 
-  (void)stm32_configgpio(GPIO_TP_INT);
+  stm32_configgpio(GPIO_TP_INT);
 
   /* Get an instance of the SPI interface */
 

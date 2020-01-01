@@ -57,8 +57,8 @@ void board_userled_initialize(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
-  (void)xmc4_gpio_config(GPIO_LED1);
-  (void)xmc4_gpio_config(GPIO_LED2);
+  xmc4_gpio_config(GPIO_LED1);
+  xmc4_gpio_config(GPIO_LED2);
 }
 
 /****************************************************************************

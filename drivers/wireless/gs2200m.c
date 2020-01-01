@@ -746,7 +746,7 @@ static ssize_t gs2200m_write(FAR struct file *filep, FAR const char *buffer,
 
 static int gs2200m_spi_init(FAR struct gs2200m_dev_s *dev)
 {
-  (void)SPI_LOCK(dev->spi, true);
+  SPI_LOCK(dev->spi, true);
 
   /* SPI settings (mode1/8bits/max freq) */
 
@@ -754,7 +754,7 @@ static int gs2200m_spi_init(FAR struct gs2200m_dev_s *dev)
   SPI_SETBITS(dev->spi, 8);
   SPI_SETFREQUENCY(dev->spi, SPI_MAXFREQ);
 
-  (void)SPI_LOCK(dev->spi, false);
+  SPI_LOCK(dev->spi, false);
   return 0;
 }
 
@@ -2471,11 +2471,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
       strncpy(addr[1], inet_ntoa(in[1]), sizeof(addr[1]));
       strncpy(addr[2], inet_ntoa(in[2]), sizeof(addr[2]));
 
-      (void)gs2200m_set_addresses(dev,
-                                  addr[0],
-                                  addr[1],
-                                  addr[2]
-                                  );
+      gs2200m_set_addresses(dev, addr[0], addr[1], addr[2]);
     }
 
   wlinfo("+++ end: \n");
@@ -2815,7 +2811,7 @@ static int gs2200m_irq(int irq, FAR void *context, FAR void *arg)
   DEBUGASSERT(arg != NULL);
   dev = (FAR struct gs2200m_dev_s *)arg;
 
-  (void)dev->lower->dready(&ec);
+  dev->lower->dready(&ec);
   ASSERT(0 < ec);
 
   wlinfo(">>>> \n");
@@ -2850,7 +2846,7 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
 
   while (dev->lower->dready(NULL))
     {
-      (void)gs2200m_recv_pkt(dev, NULL);
+      gs2200m_recv_pkt(dev, NULL);
       break;
     }
 

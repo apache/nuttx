@@ -118,7 +118,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
        * a watchdog timer interrupt handler.
        */
 
-      (void)nxsig_tcbdispatch(tcb, &info);
+      nxsig_tcbdispatch(tcb, &info);
     }
 
 #else /* HAVE_GROUP_MEMBERS */
@@ -133,9 +133,9 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
   /* Send the specified signal to the specified task. */
 
   value.sival_ptr = NULL;
-  (void)nxsig_queue((int)pid, (int)signo, value);
+  nxsig_queue((int)pid, (int)signo, value);
 #else
-  (void)nxsig_queue((int)pid, (int)signo, NULL);
+  nxsig_queue((int)pid, (int)signo, NULL);
 #endif
 
 #endif /* HAVE_GROUP_MEMBERS */
@@ -180,7 +180,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
   /* pthread_cond_timedwait() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Make sure that non-NULL references were provided. */
 
@@ -274,10 +274,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                     {
                       /* Start the watchdog */
 
-                      (void)wd_start(rtcb->waitdog, ticks,
-                                     (wdentry_t)pthread_condtimedout,
-                                     2, (uint32_t)mypid,
-                                     (uint32_t)SIGCONDTIMEDOUT);
+                      wd_start(rtcb->waitdog, ticks,
+                               (wdentry_t)pthread_condtimedout,
+                               2, (uint32_t)mypid,
+                               (uint32_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore interrupts
                        * until we return from the wait.  This is necessary to

@@ -640,7 +640,7 @@ static void skel_irqworker(void *arg)
             {
               /* Yes.. perform the callback */
 
-              (void)priv->cb[i].cbfunc(&priv->dev, match);
+              priv->cb[i].cbfunc(&priv->dev, match);
             }
         }
     }

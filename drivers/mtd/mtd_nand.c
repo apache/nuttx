@@ -934,7 +934,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
       /* Disable any internal, embedded ECC function */
 
-      (void)onfi_embeddedecc(&onfi, cmdaddr, addraddr, dataaddr, false);
+      onfi_embeddedecc(&onfi, cmdaddr, addraddr, dataaddr, false);
     }
 
   /* Allocate an NAND MTD device structure */
@@ -958,7 +958,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
   /* Scan the device for bad blocks */
 
-  (void)nand_devscan(nand);
+  nand_devscan(nand);
 
   /* Return the implementation-specific state structure as the MTD device */
 

@@ -521,7 +521,7 @@ static inline int s32k1xx_lpi2c_sem_waitdone(FAR struct s32k1xx_lpi2c_priv_s *pr
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1393,8 +1393,8 @@ static int s32k1xx_lpi2c_init(FAR struct s32k1xx_lpi2c_priv_s *priv)
 
   /* Configure pins */
 
-  (void)s32k1xx_pinconfig(priv->config->scl_pin);
-  (void)s32k1xx_pinconfig(priv->config->sda_pin);
+  s32k1xx_pinconfig(priv->config->scl_pin);
+  s32k1xx_pinconfig(priv->config->sda_pin);
 
   /* Reset LPI2C before configuring it */
 

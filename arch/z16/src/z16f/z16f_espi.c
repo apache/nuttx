@@ -340,7 +340,7 @@ static void spi_flush(FAR struct z16f_spi_s *priv)
 
   while ((spi_getreg8(priv, Z16F_ESPI_STAT) & Z16F_ESPI_STAT_RDRF) != 0)
     {
-      (void)spi_getreg8(priv, Z16F_ESPI_DATA);
+      spi_getreg8(priv, Z16F_ESPI_DATA);
     }
 }
 
@@ -834,7 +834,7 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
        * the BRG for 400KHz operation.
        */
 
-      (void)spi_setfrequency(&priv->spi, 400000);
+      spi_setfrequency(&priv->spi, 400000);
       spi_setmode(&priv->spi, SPIDEV_MODE0);
       spi_setbits(&priv->spi, 8);
 

@@ -135,7 +135,7 @@ static void stm32_idlepm(void)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
+          pm_changestate(PM_IDLE_DOMAIN, oldstate);
 
           /* No state change... */
 
@@ -202,7 +202,7 @@ static void stm32_idlepm(void)
              * of standby is via the reset path.
              */
 
-            (void)stm32_pmstandby();
+            stm32_pmstandby();
           }
           break;
 

@@ -996,7 +996,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   priv->dev.ops = &g_i2sops;
 
-  (void)lc823450_i2s_configure();
+  lc823450_i2s_configure();
 
 #ifdef BEEP_TEST
   lc823450_i2s_beeptest();
@@ -1025,11 +1025,11 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   /* Backup the current affinity */
 
-  (void)nxsched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  nxsched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
 
   /* Set the new affinity which assigns to CPU0 */
 
-  (void)nxsched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
+  nxsched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
   nxsig_usleep(10 * 1000);
 #endif
 
@@ -1042,7 +1042,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 #ifdef CONFIG_SMP
   /* Restore the original affinity */
 
-  (void)nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
   nxsig_usleep(10 * 1000);
 #endif
 

@@ -376,7 +376,7 @@ SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status,
           ret = -100;
           break;
         }
-      (void)sched_yield();
+      sched_yield();
     }
 
   return ret;

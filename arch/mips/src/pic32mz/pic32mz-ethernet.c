@@ -1215,8 +1215,8 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
-                 pic32mz_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
+           pic32mz_txtimeout_expiry, 1, (uint32_t)priv);
 
   return OK;
 }
@@ -1350,7 +1350,7 @@ static void pic32mz_poll(struct pic32mz_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_poll(&priv->pd_dev, pic32mz_txpoll);
+          devif_poll(&priv->pd_dev, pic32mz_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1396,7 +1396,7 @@ static void pic32mz_timerpoll(struct pic32mz_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_timer(&priv->pd_dev, PIC32MZ_WDDELAY, pic32mz_txpoll);
+          devif_timer(&priv->pd_dev, PIC32MZ_WDDELAY, pic32mz_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -2095,7 +2095,7 @@ static void pic32mz_txtimeout_work(void *arg)
        * it back up.
        */
 
-      (void)pic32mz_ifup(&priv->pd_dev);
+      pic32mz_ifup(&priv->pd_dev);
 
       /* Then poll the network for new XMIT data (We are guaranteed to have
        * a free buffer here).
@@ -2184,8 +2184,8 @@ static void pic32mz_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry,
-                 1, priv);
+  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry,
+           1, priv);
   net_unlock();
 }
 
@@ -2508,9 +2508,9 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 
 #if defined(CONFIG_PIC32MZ_ETH_PRIORITY) && defined(CONFIG_ARCH_IRQPRIO)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
-  (void)up_prioritize_irq(priv->pd_irq, CONFIG_PIC32MZ_ETH_PRIORITY);
+  up_prioritize_irq(priv->pd_irq, CONFIG_PIC32MZ_ETH_PRIORITY);
 #else
-  (void)up_prioritize_irq(PIC32MZ_IRQ_ETH, CONFIG_PIC32MZ_ETH_PRIORITY);
+  up_prioritize_irq(PIC32MZ_IRQ_ETH, CONFIG_PIC32MZ_ETH_PRIORITY);
 #endif
 #endif
 
@@ -2524,8 +2524,8 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry, 1,
-                (uint32_t)priv);
+  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry, 1,
+           (uint32_t)priv);
 
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
@@ -3597,7 +3597,7 @@ static inline int pic32mz_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->pd_dev, NET_LL_ETHERNET);
+  netdev_register(&priv->pd_dev, NET_LL_ETHERNET);
   return OK;
 }
 
@@ -3615,7 +3615,7 @@ static inline int pic32mz_ethinitialize(int intf)
 #if CONFIG_PIC32MZ_NINTERFACES == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)pic32mz_ethinitialize(0);
+  pic32mz_ethinitialize(0);
 }
 #endif
 #endif /* CHIP_NETHERNET > 0 */

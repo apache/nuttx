@@ -170,7 +170,7 @@ void netdriver_loop(void)
   /* Check for new frames.  If so, then poll the network for new XMIT data */
 
   net_lock();
-  (void)devif_poll(&g_sim_dev, sim_txpoll);
+  devif_poll(&g_sim_dev, sim_txpoll);
   net_unlock();
 
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
@@ -355,13 +355,13 @@ int netdriver_init(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_sim_dev, NET_LL_ETHERNET);
+  netdev_register(&g_sim_dev, NET_LL_ETHERNET);
   return OK;
 }
 
 int netdriver_setmacaddr(unsigned char *macaddr)
 {
-  (void)memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
+  memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
   return 0;
 }
 

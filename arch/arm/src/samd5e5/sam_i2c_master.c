@@ -1410,8 +1410,8 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
   priv->dev.ops = &g_i2cops;
   priv->flags = 0;
 
-  (void)nxsem_init(&priv->exclsem, 0, 1);
-  (void)nxsem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Perform repeatable I2C hardware initialization */
 
@@ -1445,7 +1445,7 @@ int sam_i2c_uninitialize(FAR struct i2c_master_s *dev)
 
   /* Detach Interrupt Handler */
 
-  (void)irq_detach(priv->attr->irq);
+  irq_detach(priv->attr->irq);
   return OK;
 }
 

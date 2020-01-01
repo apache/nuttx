@@ -307,7 +307,7 @@ static void w25_lock(FAR struct spi_dev_s *spi)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -317,8 +317,8 @@ static void w25_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_W25_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_W25_SPIFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_W25_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -327,7 +327,7 @@ static void w25_lock(FAR struct spi_dev_s *spi)
 
 static inline void w25_unlock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /************************************************************************************
@@ -348,7 +348,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)w25_waitwritecomplete(priv);
+  w25_waitwritecomplete(priv);
 
   /* Select this FLASH part. */
 
@@ -356,7 +356,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
-  (void)SPI_SEND(priv->spi, W25_JEDEC_ID);
+  SPI_SEND(priv->spi, W25_JEDEC_ID);
   manufacturer = SPI_SEND(priv->spi, W25_DUMMY);
   memory       = SPI_SEND(priv->spi, W25_DUMMY);
   capacity     = SPI_SEND(priv->spi, W25_DUMMY);
@@ -458,7 +458,7 @@ static void w25_unprotect(FAR struct w25_dev_s *priv)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)w25_waitwritecomplete(priv);
+  w25_waitwritecomplete(priv);
 
   /* Send "Write enable (WREN)" */
 
@@ -506,7 +506,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->spi, W25_RDSR);
+      SPI_SEND(priv->spi, W25_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the status */
 
@@ -547,7 +547,7 @@ static inline void w25_wren(struct w25_dev_s *priv)
 
   /* Send "Write Enable (WREN)" command */
 
-  (void)SPI_SEND(priv->spi, W25_WREN);
+  SPI_SEND(priv->spi, W25_WREN);
 
   /* Deselect the FLASH */
 
@@ -566,7 +566,7 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
 
   /* Send "Write Disable (WRDI)" command */
 
-  (void)SPI_SEND(priv->spi, W25_WRDI);
+  SPI_SEND(priv->spi, W25_WRDI);
 
   /* Deselect the FLASH */
 
@@ -643,7 +643,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)w25_waitwritecomplete(priv);
+  w25_waitwritecomplete(priv);
 
   /* Send write enable instruction */
 
@@ -655,16 +655,16 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
   /* Send the "Sector Erase (SE)" instruction */
 
-  (void)SPI_SEND(priv->spi, W25_SE);
+  SPI_SEND(priv->spi, W25_SE);
   priv->prev_instr = W25_SE;
 
   /* Send the sector address high byte first. Only the most significant bits (those
    * corresponding to the sector) have any meaning.
    */
 
-  (void)SPI_SEND(priv->spi, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->spi, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->spi, address & 0xff);
+  SPI_SEND(priv->spi, (address >> 16) & 0xff);
+  SPI_SEND(priv->spi, (address >> 8) & 0xff);
+  SPI_SEND(priv->spi, address & 0xff);
 
   /* Deselect the FLASH */
 
@@ -681,7 +681,7 @@ static inline int w25_chiperase(struct w25_dev_s *priv)
 
   /* Wait for any preceding write or erase operation to complete. */
 
-  (void)w25_waitwritecomplete(priv);
+  w25_waitwritecomplete(priv);
 
   /* Send write enable instruction */
 
@@ -693,7 +693,7 @@ static inline int w25_chiperase(struct w25_dev_s *priv)
 
   /* Send the "Chip Erase (CE)" instruction */
 
-  (void)SPI_SEND(priv->spi, W25_CE);
+  SPI_SEND(priv->spi, W25_CE);
   priv->prev_instr = W25_CE;
 
   /* Deselect the FLASH */
@@ -730,23 +730,23 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
   /* Send "Read from Memory " instruction */
 
 #ifdef CONFIG_W25_SLOWREAD
-  (void)SPI_SEND(priv->spi, W25_RDDATA);
+  SPI_SEND(priv->spi, W25_RDDATA);
   priv->prev_instr = W25_RDDATA;
 #else
-  (void)SPI_SEND(priv->spi, W25_FRD);
+  SPI_SEND(priv->spi, W25_FRD);
   priv->prev_instr = W25_FRD;
 #endif
 
   /* Send the address high byte first. */
 
-  (void)SPI_SEND(priv->spi, (address >> 16) & 0xff);
-  (void)SPI_SEND(priv->spi, (address >> 8) & 0xff);
-  (void)SPI_SEND(priv->spi, address & 0xff);
+  SPI_SEND(priv->spi, (address >> 16) & 0xff);
+  SPI_SEND(priv->spi, (address >> 8) & 0xff);
+  SPI_SEND(priv->spi, address & 0xff);
 
   /* Send a dummy byte */
 
 #ifndef CONFIG_W25_SLOWREAD
-  (void)SPI_SEND(priv->spi, W25_DUMMY);
+  SPI_SEND(priv->spi, W25_DUMMY);
 #endif
 
   /* Then read all of the requested bytes */
@@ -794,9 +794,9 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 
       /* Send the address high byte first. */
 
-      (void)SPI_SEND(priv->spi, (address >> 16) & 0xff);
-      (void)SPI_SEND(priv->spi, (address >> 8) & 0xff);
-      (void)SPI_SEND(priv->spi, address & 0xff);
+      SPI_SEND(priv->spi, (address >> 16) & 0xff);
+      SPI_SEND(priv->spi, (address >> 8) & 0xff);
+      SPI_SEND(priv->spi, address & 0xff);
 
       /* Then send the page of data */
 
@@ -846,14 +846,14 @@ static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buff
 
   /* Send "Page Program (PP)" command */
 
-  (void)SPI_SEND(priv->spi, W25_PP);
+  SPI_SEND(priv->spi, W25_PP);
   priv->prev_instr = W25_PP;
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->spi, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->spi, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->spi, offset & 0xff);
+  SPI_SEND(priv->spi, (offset >> 16) & 0xff);
+  SPI_SEND(priv->spi, (offset >> 8) & 0xff);
+  SPI_SEND(priv->spi, offset & 0xff);
 
   /* Then write the specified number of bytes */
 

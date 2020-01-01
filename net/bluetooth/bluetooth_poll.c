@@ -100,7 +100,7 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
 
       /* Perform the application callback */
 
-      (void)bluetooth_callback(radio, conn, BLUETOOTH_POLL);
+      bluetooth_callback(radio, conn, BLUETOOTH_POLL);
     }
 }
 

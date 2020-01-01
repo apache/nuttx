@@ -896,8 +896,8 @@ static void lpc17_40_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes
   /* Done */
 
   lpc17_40_putreg(0, LPC17_40_USBDEV_CTRL);
-  (void)lpc17_40_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
-  (void)lpc17_40_usbcmd(CMD_USBDEV_EPVALIDATEBUFFER, 0);
+  lpc17_40_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
+  lpc17_40_usbcmd(CMD_USBDEV_EPVALIDATEBUFFER, 0);
 }
 
 /****************************************************************************
@@ -969,7 +969,7 @@ static int lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
   /* Done */
 
   lpc17_40_putreg(0, LPC17_40_USBDEV_CTRL);
-  (void)lpc17_40_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
+  lpc17_40_usbcmd(CMD_USBDEV_EPSELECT | epphy, 0);
   result = lpc17_40_usbcmd(CMD_USBDEV_EPCLRBUFFER, 0);
 
   /* The packet overrun bit in the clear buffer response is applicable only
@@ -1719,7 +1719,7 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
                  (privep = lpc17_40_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
-            (void)lpc17_40_epstall(&privep->ep, true);
+            lpc17_40_epstall(&privep->ep, true);
             lpc17_40_epwrite(LPC17_40_EP0_IN, NULL, 0);
             priv->ep0state = LPC17_40_EP0STATUSIN;
           }
@@ -2268,7 +2268,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                       /* Clear the endpoint interrupt */
 
                       usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0IN), priv->ep0state);
-                      (void)lpc17_40_epclrinterrupt(LPC17_40_CTRLEP_IN);
+                      lpc17_40_epclrinterrupt(LPC17_40_CTRLEP_IN);
                       lpc17_40_ep0dataininterrupt(priv);
                     }
                   pending >>= 2;
@@ -2283,7 +2283,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                         {
                           /* Yes.. clear the endpoint interrupt */
 
-                          (void)lpc17_40_epclrinterrupt(epphy);
+                          lpc17_40_epclrinterrupt(epphy);
 
                           /* Get the endpoint sructure corresponding to the physical
                            * endpoint number.
@@ -2926,7 +2926,7 @@ static int lpc17_40_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   if (resume)
     {
-      (void)lpc17_40_wrrequest(privep);
+      lpc17_40_wrrequest(privep);
     }
   leave_critical_section(flags);
   return OK;

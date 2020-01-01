@@ -318,9 +318,9 @@ static int route_ipv4_entry(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
   /* Generate routing table entry on one line */
 
-  (void)inet_ntop(AF_INET, &route->target,  target,  INET_ADDRSTRLEN);
-  (void)inet_ntop(AF_INET, &route->netmask, netmask, INET_ADDRSTRLEN);
-  (void)inet_ntop(AF_INET, &route->router,  router,  INET_ADDRSTRLEN);
+  inet_ntop(AF_INET, &route->target,  target,  INET_ADDRSTRLEN);
+  inet_ntop(AF_INET, &route->netmask, netmask, INET_ADDRSTRLEN);
+  inet_ntop(AF_INET, &route->router,  router,  INET_ADDRSTRLEN);
 
   info->index++;
   route_sprintf(info, "%4u. %-16s%-16s%-16s\n",
@@ -355,7 +355,7 @@ static int route_ipv6_entry(FAR struct net_route_ipv6_s *route, FAR void *arg)
   /* Generate routing table entry on three lines */
 
   info->index++;
-  (void)inet_ntop(AF_INET6, route->target,  addr, INET6_ADDRSTRLEN);
+  inet_ntop(AF_INET6, route->target,  addr, INET6_ADDRSTRLEN);
 
   route_sprintf(info, "%4u. TARGET  %s\n", info->index, addr);
   if (info->totalsize >= info->buflen)
@@ -363,14 +363,14 @@ static int route_ipv6_entry(FAR struct net_route_ipv6_s *route, FAR void *arg)
       return 1;
     }
 
-  (void)inet_ntop(AF_INET6, route->netmask, addr, INET6_ADDRSTRLEN);
+  inet_ntop(AF_INET6, route->netmask, addr, INET6_ADDRSTRLEN);
   route_sprintf(info, "      NETMASK %s\n", addr);
   if (info->totalsize >= info->buflen)
     {
       return 1;
     }
 
-  (void)inet_ntop(AF_INET6, route->router,  addr, INET6_ADDRSTRLEN);
+  inet_ntop(AF_INET6, route->router,  addr, INET6_ADDRSTRLEN);
   route_sprintf(info, "      ROUTER  %s\n", addr);
   return (info->totalsize >= info->buflen) ? 1 : 0;
 }
@@ -405,7 +405,7 @@ static ssize_t route_ipv4_table(FAR struct route_file_s *procfile,
 
   /* Generate each entry in the routing table */
 
-  (void)net_foreachroute_ipv4(route_ipv4_entry, &info);
+  net_foreachroute_ipv4(route_ipv4_entry, &info);
   return info.totalsize;
 }
 #endif
@@ -430,7 +430,7 @@ static ssize_t route_ipv6_table(FAR struct route_file_s *procfile,
 
   /* Generate each entry in the routing table */
 
-  (void)net_foreachroute_ipv6(route_ipv6_entry, &info);
+  net_foreachroute_ipv6(route_ipv6_entry, &info);
   return info.totalsize;
 }
 #endif

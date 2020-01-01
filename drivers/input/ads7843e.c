@@ -179,7 +179,7 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
    * SPI bus
    */
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   /* We have the lock.  Now make sure that the SPI bus is configured for the
    * ADS7843 (it might have gotten configured for a different device while
@@ -189,8 +189,8 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN(0), false);
 }
 
@@ -215,7 +215,7 @@ static void ads7843e_unlock(FAR struct spi_dev_s *spi)
 {
   /* Relinquish the SPI bus. */
 
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /****************************************************************************
@@ -264,7 +264,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
   /* Send the command */
 
-  (void)SPI_SEND(priv->spi, cmd);
+  SPI_SEND(priv->spi, cmd);
 
   /* Wait a tiny amount to make sure that the acquisition time is complete */
 
@@ -504,7 +504,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
 static void ads7843e_wdog(int argc, uint32_t arg1, ...)
 {
   FAR struct ads7843e_dev_s *priv = (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
-  (void)ads7843e_schedule(priv);
+  ads7843e_schedule(priv);
 }
 
 /****************************************************************************
@@ -588,8 +588,8 @@ static void ads7843e_worker(FAR void *arg)
        * later.
        */
 
-       (void)wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
-                      (uint32_t)priv);
+       wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
+                (uint32_t)priv);
        goto ignored;
     }
   else
@@ -671,7 +671,7 @@ ignored:
 
   /* Re-enable the PENIRQ interrupt at the ADS7843E */
 
-  (void)ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
+  ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
 
   /* Re-enable the PENIRQ interrupt at the MCU's interrupt controller */
 
@@ -1190,7 +1190,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &ads7843e_fops, 0666, priv);

@@ -648,7 +648,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      (void)cc1101_takesem(&dev->sem_rx_buffer);
+      cc1101_takesem(&dev->sem_rx_buffer);
       if (dev->fifo_len > 0)
         {
           dev->pfd->revents |= POLLIN; /* Data available for input */
@@ -676,11 +676,11 @@ errout:
 
 void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 {
-  (void)SPI_LOCK(dev->spi, true);
+  SPI_LOCK(dev->spi, true);
   SPI_SELECT(dev->spi, dev->dev_id, true);
   SPI_SETMODE(dev->spi, SPIDEV_MODE0); /* CPOL=0, CPHA=0 */
   SPI_SETBITS(dev->spi, 8);
-  (void)SPI_HWFEATURES(dev->spi, 0);
+  SPI_HWFEATURES(dev->spi, 0);
 
   if (dev->ops.wait)
     {
@@ -702,7 +702,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 {
   SPI_SELECT(dev->spi, dev->dev_id, false);
-  (void)SPI_LOCK(dev->spi, false);
+  SPI_LOCK(dev->spi, false);
 }
 
 /****************************************************************************
@@ -887,7 +887,7 @@ void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 
       for (i = 0, j = 0; i < readsize; i++, j += 3)
         {
-          (void)sprintf(&outbuf[j], " %02x", regbuf[i]);
+          sprintf(&outbuf[j], " %02x", regbuf[i]);
         }
 
       /* Dump the formatted data to the syslog output */

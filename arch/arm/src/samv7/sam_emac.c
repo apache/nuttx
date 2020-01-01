@@ -1460,8 +1460,8 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
-                 (uint32_t)priv);
+  wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
+           (uint32_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
    * available.
@@ -1607,7 +1607,7 @@ static void sam_dopoll(struct sam_emac_s *priv, int qid)
     {
       /* If we have the descriptor, then poll the network for new XMIT data. */
 
-      (void)devif_poll(dev, sam_txpoll);
+      devif_poll(dev, sam_txpoll);
     }
 }
 
@@ -2636,12 +2636,12 @@ static void sam_poll_work(FAR void *arg)
     {
       /* Update TCP timing states and poll the network for new XMIT data. */
 
-      (void)devif_timer(dev, SAM_WDDELAY, sam_txpoll);
+      devif_timer(dev, SAM_WDDELAY, sam_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -2759,7 +2759,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
 
   /* Enable the EMAC interrupt */
 
@@ -4741,7 +4741,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)sam_addmac(dev, mac);
+  sam_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -4749,7 +4749,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
    * packets.
    */
 
-  (void)sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -4758,7 +4758,7 @@ static void sam_ipv6multicast(struct sam_emac_s *priv)
    * packets.
    */
 
-  (void)sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
@@ -4901,9 +4901,9 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   /* Clear any pending interrupts */
 
-  (void)sam_getreg(priv, SAM_EMAC_ISR_OFFSET);
-  (void)sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(1));
-  (void)sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(2));
+  sam_getreg(priv, SAM_EMAC_ISR_OFFSET);
+  sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(1));
+  sam_getreg(priv, SAM_EMAC_ISRPQ_ISRPQ_OFFSET(2));
 
   /* Enable/disable the copy of data into the buffers, ignore broadcasts.
    * Don't copy FCS.

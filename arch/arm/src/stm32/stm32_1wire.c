@@ -814,7 +814,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
+          nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
 
         case ONEWIRETASK_WRITE:
@@ -837,7 +837,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
+          nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
 
         case ONEWIRETASK_READ:
@@ -860,7 +860,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
           clock_gettime(CLOCK_REALTIME, &abstime);
           abstime.tv_sec += BUS_TIMEOUT;
-          (void)nxsem_timedwait(&priv->sem_isr, &abstime);
+          nxsem_timedwait(&priv->sem_isr, &abstime);
           break;
         }
 
@@ -1001,7 +1001,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
        * good byte will be lost.
        */
 
-      (void)stm32_1wire_recv(priv);
+      stm32_1wire_recv(priv);
 #endif
 
       if (priv->msgs != NULL)

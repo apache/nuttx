@@ -186,7 +186,7 @@ void itm_syslog_initialize(void)
 
   /* Setup the SYSLOG channel */
 
-  (void)syslog_channel(&g_itm_channel);
+  syslog_channel(&g_itm_channel);
 }
 
 #endif /* CONFIG_ARMV7M_ITMSYSLOG */

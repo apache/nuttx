@@ -210,15 +210,15 @@ static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable)
       /* Configure the interrupt using the SAVED handler */
 
       stm32_configgpio(GPIO_XEN1210_INT);
-      (void)stm32_gpiosetevent(GPIO_XEN1210_INT, false, true,
-                               true, xen1210_interrupt, NULL);
+      stm32_gpiosetevent(GPIO_XEN1210_INT, false, true,
+                         true, xen1210_interrupt, NULL);
     }
   else
     {
       /* Configure the interrupt with a NULL handler to disable it */
 
-      (void)stm32_gpiosetevent(GPIO_XEN1210_INT, false, false, false,
-                               NULL, NULL);
+      stm32_gpiosetevent(GPIO_XEN1210_INT, false, false, false,
+                         NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -315,11 +315,11 @@ int xen1210_archinitialize(int minor)
        * We are using PWM on TIM1 CH1 to do it!
        */
 
-      (void)xen1210_pwm_setup();
+      xen1210_pwm_setup();
 
       /* Configure the XEN1210 interrupt pin as an input */
 
-      (void)stm32_configgpio(GPIO_XEN1210_INT);
+      stm32_configgpio(GPIO_XEN1210_INT);
 
       /* Get an instance of the I2C interface */
 

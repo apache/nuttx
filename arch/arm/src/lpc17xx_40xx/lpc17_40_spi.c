@@ -395,7 +395,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   /* Read the SPI Status Register again to clear the status bit */
 
-  (void)getreg32(LPC17_40_SPI_SR);
+  getreg32(LPC17_40_SPI_SR);
   return (uint16_t)getreg32(LPC17_40_SPI_DR);
 }
 
@@ -440,7 +440,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 
       /* Read the SPI Status Register again to clear the status bit */
 
-      (void)getreg32(LPC17_40_SPI_SR);
+      getreg32(LPC17_40_SPI_SR);
       nwords--;
     }
 }
@@ -486,7 +486,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
       /* Read the SPI Status Register again to clear the status bit */
 
-      (void)getreg32(LPC17_40_SPI_SR);
+      getreg32(LPC17_40_SPI_SR);
 
       /* Read the received data from the SPI Data Register */
 

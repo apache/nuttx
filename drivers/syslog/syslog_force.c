@@ -77,7 +77,7 @@ int syslog_force(int ch)
    * buffer through the emergency channel
    */
 
-  (void)syslog_flush_intbuffer(g_syslog_channel, true);
+  syslog_flush_intbuffer(g_syslog_channel, true);
 #endif
 
   /* Then send the character to the emergency channel */

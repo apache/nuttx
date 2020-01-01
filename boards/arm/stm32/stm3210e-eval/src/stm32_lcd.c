@@ -1223,7 +1223,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
             }
           else
             {
-              (void)stm3210e_poweroff();
+              stm3210e_poweroff();
             }
         }
         break;

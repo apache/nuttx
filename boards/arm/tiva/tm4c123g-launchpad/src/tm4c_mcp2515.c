@@ -162,7 +162,7 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
 
   /* Configure the interrupt for falling edge */
 
-  (void)tiva_configgpio(GPIO_MCP2515_IRQ);
+  tiva_configgpio(GPIO_MCP2515_IRQ);
 
   leave_critical_section(flags);
 
@@ -202,7 +202,7 @@ int tiva_mcp2515initialize(FAR const char *devpath)
 
       /* Configure the MCP2515 interrupt pin as an input */
 
-      (void)tiva_configgpio(GPIO_MCP2515_IRQ);
+      tiva_configgpio(GPIO_MCP2515_IRQ);
 
       spi = tiva_ssibus_initialize(MCP2515_SPI_PORTNO);
 

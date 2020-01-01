@@ -372,7 +372,7 @@ static int twi_wait(struct twi_dev_s *priv)
 {
   /* Start a timeout to avoid hangs */
 
-  (void)wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (uint32_t)priv);
 
   /* Wait for either the TWI transfer or the timeout to complete */
 
@@ -817,7 +817,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
   /* Reset the TWI */
 
   twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_SWRST);
-  (void)twi_getrel(priv, SAM_TWI_RHR_OFFSET);
+  twi_getrel(priv, SAM_TWI_RHR_OFFSET);
 
   /* TWI Slave Mode Disabled, TWI Master Mode Disabled. */
 

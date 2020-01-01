@@ -108,7 +108,7 @@ int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
 
   /* Get the current time */
 
-  (void)clock_gettime(CLOCK_REALTIME, &abstime);
+  clock_gettime(CLOCK_REALTIME, &abstime);
 
   timeout_sec      = timeout_ms / 1000;
   abstime.tv_sec  += timeout_sec;

@@ -296,7 +296,7 @@ static inline int lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1108,7 +1108,7 @@ FAR struct i2c_master_s *lc823450_i2cbus_initialize(int port)
 #ifndef CONFIG_I2C_POLLED
       nxsem_init(&priv->sem_isr, 0, 0);
 #endif
-      (void)lc823450_i2c_init(priv, port);
+      lc823450_i2c_init(priv, port);
     }
 
   leave_critical_section(flags);

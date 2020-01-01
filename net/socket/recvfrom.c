@@ -220,7 +220,7 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* recvfrom() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Get the underlying socket structure */
 

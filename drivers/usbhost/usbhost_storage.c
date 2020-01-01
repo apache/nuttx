@@ -476,7 +476,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->sdchar);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->sdchar);
 }
 
 /****************************************************************************
@@ -917,7 +917,7 @@ static void usbhost_destroy(FAR void *arg)
   /* Unregister the block driver */
 
   usbhost_mkdevname(priv, devname);
-  (void)unregister_blockdriver(devname);
+  unregister_blockdriver(devname);
 
   /* Release the device name used by this connection */
 
@@ -1173,7 +1173,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   if (ret < 0)
     {
       uerr("ERROR: Failed to allocate Bulk IN endpoint\n");
-      (void)DRVR_EPFREE(hport->drvr, priv->bulkout);
+      DRVR_EPFREE(hport->drvr, priv->bulkout);
       return ret;
     }
 
@@ -1836,7 +1836,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 
           uinfo("Queuing destruction: worker %p->%p\n", priv->work.worker, usbhost_destroy);
           DEBUGASSERT(priv->work.worker == NULL);
-          (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
+          work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
        }
       else
         {

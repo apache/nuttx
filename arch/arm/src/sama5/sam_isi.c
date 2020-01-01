@@ -124,23 +124,23 @@ int sam_isi_initialize(void)
   /* Configure PIO pins for the ISI (outputs) */
   /* Data pins */
 
-  (void)sam_configpio(PIO_ISI_D0);
-  (void)sam_configpio(PIO_ISI_D1);
-  (void)sam_configpio(PIO_ISI_D2);
-  (void)sam_configpio(PIO_ISI_D3);
-  (void)sam_configpio(PIO_ISI_D4);
-  (void)sam_configpio(PIO_ISI_D5);
-  (void)sam_configpio(PIO_ISI_D6);
-  (void)sam_configpio(PIO_ISI_D7);
-  (void)sam_configpio(PIO_ISI_D8);
-  (void)sam_configpio(PIO_ISI_D9);
-  (void)sam_configpio(PIO_ISI_D10);
-  (void)sam_configpio(PIO_ISI_D11);
+  sam_configpio(PIO_ISI_D0);
+  sam_configpio(PIO_ISI_D1);
+  sam_configpio(PIO_ISI_D2);
+  sam_configpio(PIO_ISI_D3);
+  sam_configpio(PIO_ISI_D4);
+  sam_configpio(PIO_ISI_D5);
+  sam_configpio(PIO_ISI_D6);
+  sam_configpio(PIO_ISI_D7);
+  sam_configpio(PIO_ISI_D8);
+  sam_configpio(PIO_ISI_D9);
+  sam_configpio(PIO_ISI_D10);
+  sam_configpio(PIO_ISI_D11);
 
   /* Horizontal and vertical sync pins (inputs) */
 
-  (void)sam_configpio(PIO_ISI_HSYNC);
-  (void)sam_configpio(PIO_ISI_VSYNC);
+  sam_configpio(PIO_ISI_HSYNC);
+  sam_configpio(PIO_ISI_VSYNC);
 
   /* Pixel clock input (ISI_PCK, not to be confused with the processor clock
    * (PCK) or the programmable clock (PCK).
@@ -151,7 +151,7 @@ int sam_isi_initialize(void)
    * Image Sensor Controller."
    */
 
-  (void)sam_configpio(PIO_ISI_PCK);
+  sam_configpio(PIO_ISI_PCK);
 
   /* Configure ISI_MCK programmable clock output.
    *

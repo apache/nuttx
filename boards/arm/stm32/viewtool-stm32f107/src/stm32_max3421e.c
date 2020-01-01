@@ -205,8 +205,8 @@ static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
        * event is also generated (but not used).
        */
 
-      (void)stm32_gpiosetevent(GPIO_MAX3421E_INT, false, true, true,
-                               priv->handler, priv->arg);
+      stm32_gpiosetevent(GPIO_MAX3421E_INT, false, true, true,
+                         priv->handler, priv->arg);
     }
   else
     {
@@ -216,8 +216,8 @@ static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
        * the EXTI is de-configured will not pend but will be lost.
        */
 
-     (void)stm32_gpiosetevent(GPIO_MAX3421E_INT, false, false, false,
-                              NULL, NULL);
+     stm32_gpiosetevent(GPIO_MAX3421E_INT, false, false, false,
+                        NULL, NULL);
     }
 
   leave_critical_section(flags);
@@ -295,14 +295,14 @@ int stm32_max3421e_setup(void)
    * provided.
    */
 
-  (void)stm32_configgpio(GPIO_MAX3421E_INT);
+  stm32_configgpio(GPIO_MAX3421E_INT);
 
 #ifdef CONFIG_VIEWTOOL_MAX3421E_RST
-  (void)stm32_configgpio(GPIO_MAX3421E_RST);
+  stm32_configgpio(GPIO_MAX3421E_RST);
 #endif
 
 #ifdef CONFIG_VIEWTOOL_MAX3421E_PWR
-  (void)stm32_configgpio(GPIO_MAX3421E_PWR);
+  stm32_configgpio(GPIO_MAX3421E_PWR);
 #endif
 
   /* Get an instance of the SPI interface for the touchscreen chip select */

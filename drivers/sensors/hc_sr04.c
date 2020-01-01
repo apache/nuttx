@@ -181,7 +181,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   /* Setup and send a pulse to start measuring */
 
-  (void)hcsr04_start_measuring(priv);
+  hcsr04_start_measuring(priv);
 
   /* Wait the convertion to finish */
 

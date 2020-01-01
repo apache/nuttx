@@ -144,14 +144,14 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                   /* Remove the container from the list of pending transfers */
 
                   pid = aioc->aioc_pid;
-                  (void)aioc_decant(aioc);
+                  aioc_decant(aioc);
 
                   aiocbp->aio_result = -ECANCELED;
                   ret = AIO_CANCELED;
 
                   /* Signal the client */
 
-                  (void)aio_signal(pid, aiocbp);
+                  aio_signal(pid, aiocbp);
                 }
               else
                 {
@@ -211,7 +211,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
                   /* Signal the client */
 
-                  (void)aio_signal(pid, aiocbp);
+                  aio_signal(pid, aiocbp);
                 }
               else
                 {

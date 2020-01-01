@@ -480,14 +480,14 @@ static void slip_txtask(int argc, FAR char *argv[])
             {
               /* Yes, perform the timer poll */
 
-              (void)devif_timer(&priv->dev, hsec * TICK_PER_HSEC, slip_txpoll);
+              devif_timer(&priv->dev, hsec * TICK_PER_HSEC, slip_txpoll);
               start_ticks += hsec * TICK_PER_HSEC;
             }
           else
             {
               /* No, perform the normal TX poll */
 
-              (void)devif_poll(&priv->dev, slip_txpoll);
+              devif_poll(&priv->dev, slip_txpoll);
             }
 
           net_unlock();
@@ -859,7 +859,7 @@ static int slip_txavail(FAR struct net_driver_s *dev)
       /* Wake up the TX polling thread */
 
       priv->txnodelay = true;
-      (void)nxsig_kill(priv->txpid, SIGALRM);
+      nxsig_kill(priv->txpid, SIGALRM);
     }
 
   return OK;
@@ -1024,7 +1024,7 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_SLIP);
+  netdev_register(&priv->dev, NET_LL_SLIP);
 
   /* When the RX and TX tasks were created, the TTY file descriptor was
    * dup'ed for each task.  This task no longer needs the file descriptor

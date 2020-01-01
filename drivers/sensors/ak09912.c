@@ -718,7 +718,7 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Register the character driver */
 
-  (void) snprintf(path, sizeof(path), "%s%d", devpath, 0);
+  snprintf(path, sizeof(path), "%s%d", devpath, 0);
   ret = register_driver(path, &g_ak09912fops, 0666, priv);
   if (ret < 0)
     {

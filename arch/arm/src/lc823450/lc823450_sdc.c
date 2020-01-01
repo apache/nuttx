@@ -175,12 +175,12 @@ static void lc823450_sdc_access_led(uint32_t ch, unsigned long sector)
     {
       if (sector >= CONFIG_MTD_CP_STARTBLOCK)
         {
-          (void)led_start_accled(false);
+          led_start_accled(false);
         }
     }
   else
     {
-      (void)led_start_accled(false);
+      led_start_accled(false);
     }
 }
 #else
@@ -643,7 +643,7 @@ int lc823450_sdc_locked(void)
 
   for (i = 0; i < 2; i++)
     {
-      (void)nxsem_getvalue(&_sdc_sem[i], &val);
+      nxsem_getvalue(&_sdc_sem[i], &val);
       if (1 != val)
         {
           ret = 1;

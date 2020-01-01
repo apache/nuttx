@@ -1635,7 +1635,7 @@ static void lpc31_qh_enqueue(struct lpc31_qh_s *qhead, struct lpc31_qh_s *qh)
    */
 
   qh->fqp = qh->hw.overlay.nqp;
-  (void)lpc31_qh_dump(qh, NULL, NULL);
+  lpc31_qh_dump(qh, NULL, NULL);
 
   /* Add the new QH to the head of the asynchronous queue list.
    *

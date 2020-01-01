@@ -655,7 +655,7 @@ static void lpc54_spi_rxdiscard(FAR struct lpc54_spidev_s *priv)
 {
   while (lpc54_spi_rxavailable(priv))
     {
-      (void)lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
+      lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
     }
 }
 
@@ -1069,7 +1069,7 @@ static void lpc54_spi_sndblock8(FAR struct lpc54_spidev_s *priv,
        * Tx FIFO.
        */
 
-      (void)lpc54_spi_txtransfer8(priv, &txtransfer);
+      lpc54_spi_txtransfer8(priv, &txtransfer);
     }
 }
 

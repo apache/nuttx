@@ -454,11 +454,11 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
       memset(&sa, 0, sizeof(sa));
       sa.sa_handler = info->action;
       sa.sa_flags   = SA_SIGINFO;
-      (void)nxsig_action(info->signo, &sa, NULL, true);
+      nxsig_action(info->signo, &sa, NULL, true);
 
       /* Indicate that the default signal handler has been attached */
 
-      (void)sigaddset(&group->tg_sigdefault, (int)info->signo);
+      sigaddset(&group->tg_sigdefault, (int)info->signo);
     }
 }
 
@@ -581,7 +581,7 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
           /* sigaddset() is not atomic (but neither is sigaction()) */
 
           flags = spin_lock_irqsave();
-          (void)sigaddset(&group->tg_sigdefault, signo);
+          sigaddset(&group->tg_sigdefault, signo);
           spin_unlock_irqrestore(flags);
         }
     }
@@ -593,7 +593,7 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
        */
 
       flags = spin_lock_irqsave();
-      (void)sigdelset(&group->tg_sigdefault, signo);
+      sigdelset(&group->tg_sigdefault, signo);
       spin_unlock_irqrestore(flags);
     }
 
@@ -626,7 +626,7 @@ int nxsig_default_initialize(FAR struct tcb_s *tcb)
 
   /* Initialize the set of default signal handlers */
 
-  (void)sigemptyset(&group->tg_sigdefault);
+  sigemptyset(&group->tg_sigdefault);
 
   /* Setup the default action for each signal in g_defactions[] */
 

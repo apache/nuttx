@@ -67,9 +67,9 @@
 static inline void board_config_usart1(void)
 {
 #if defined(CONFIG_USART1_RS485)
-  (void)sam_configgpio(GPIO_RS485_ENABLE);
+  sam_configgpio(GPIO_RS485_ENABLE);
 #else /* if defined(CONFIG_USART1_SERIALDRIVER) */
-  (void)sam_configgpio(GPIO_RS232_ENABLE);
+  sam_configgpio(GPIO_RS232_ENABLE);
 #endif
 }
 #else
@@ -149,7 +149,7 @@ void board_late_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  (void)board_app_initialize(0);
+  board_app_initialize(0);
 #endif
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

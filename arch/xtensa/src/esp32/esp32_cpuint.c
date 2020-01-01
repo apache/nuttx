@@ -406,9 +406,9 @@ void up_disable_irq(int cpuint)
 
 #ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  (void)xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+  xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
 #else
-  (void)xtensa_disable_cpuint(&g_intenable[0], (1ul << cpuint));
+  xtensa_disable_cpuint(&g_intenable[0], (1ul << cpuint));
 #endif
 }
 
@@ -430,9 +430,9 @@ void up_enable_irq(int cpuint)
 
 #ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  (void)xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+  xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
 #else
-  (void)xtensa_enable_cpuint(&g_intenable[0], (1ul << cpuint));
+  xtensa_enable_cpuint(&g_intenable[0], (1ul << cpuint));
 #endif
 }
 

@@ -563,7 +563,7 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
   spiinfo("   PIR:%08x  LPTR:%08x\n",
           getreg32(priv->base + STM32L4_QUADSPI_PIR_OFFSET),    /* Polling Interval Register */
           getreg32(priv->base + STM32L4_QUADSPI_LPTR_OFFSET));  /* Low-Power Timeout Register */
-  (void)regval;
+  UNUSED(regval);
 #endif
 }
 #endif
@@ -1325,7 +1325,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1465,7 +1465,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(priv->dmadog);
+      wd_cancel(priv->dmadog);
 
       /* Check if we were awakened by an error of some kind */
 
@@ -2023,7 +2023,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  (void)nxsem_wait(&priv->op_sem);
+  nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* Convey the result */
@@ -2181,7 +2181,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  (void)nxsem_wait(&priv->op_sem);
+  nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* convey the result */

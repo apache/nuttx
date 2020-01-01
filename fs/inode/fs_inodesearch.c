@@ -553,8 +553,8 @@ int inode_search(FAR struct inode_search_s *desc)
 
           if (desc->relpath != NULL && *desc->relpath != '\0')
             {
-              (void)asprintf(&buffer, "%s/%s",
-                             desc->linktgt, desc->relpath);
+              asprintf(&buffer, "%s/%s",
+                       desc->linktgt, desc->relpath);
             }
           else
             {

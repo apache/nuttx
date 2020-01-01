@@ -248,7 +248,7 @@ void board_button_initialize(void)
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      (void)board_button_irq(i, button_handler);
+      board_button_irq(i, button_handler);
 #endif
 #endif
     }

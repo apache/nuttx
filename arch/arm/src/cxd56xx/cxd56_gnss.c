@@ -2124,9 +2124,9 @@ static void cxd56_gnss_common_signalhandler(uint32_t data, FAR void *userdata)
 #ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_ptr = &sig->info;
-          (void)sigqueue(sig->pid, sig->info.signo, value);
+          sigqueue(sig->pid, sig->info.signo, value);
 #else
-          (void)sigqueue(sig->pid, sig->info.signo, &sig->info);
+          sigqueue(sig->pid, sig->info.signo, &sig->info);
 #endif
           issetmask = 1;
         }

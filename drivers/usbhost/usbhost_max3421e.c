@@ -707,10 +707,10 @@ static void max3421e_lock(FAR struct max3421e_usbhost_s *priv)
   DEBUGASSERT(lower != NULL && lower->spi != NULL && !priv->locked);
   spi = lower->spi;
 
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
   SPI_SETMODE(spi, lower->mode);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, lower->frequency);
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
@@ -733,7 +733,7 @@ static void max3421e_unlock(FAR struct max3421e_usbhost_s *priv)
   FAR const struct max3421e_lowerhalf_s *lower = priv->lower;
 
   DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
-  (void)SPI_LOCK(lower->spi, false);
+  SPI_LOCK(lower->spi, false);
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
   /* Mark the SPI bus as unlocked (for debug only) */
@@ -874,7 +874,7 @@ static uint32_t max3421e_getreg(FAR struct max3421e_usbhost_s *priv,
   /* Send the read command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_READ);
-  (void)SPI_SEND(spi, cmd);
+  SPI_SEND(spi, cmd);
 
   /* Read the value of the register */
 
@@ -927,11 +927,11 @@ static void max3421e_putreg(FAR struct max3421e_usbhost_s *priv,
   /* Send the write command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_WRITE);
-  (void)SPI_SEND(spi, cmd);
+  SPI_SEND(spi, cmd);
 
   /* Send the new value for the register */
 
-  (void)SPI_SEND(spi, value);
+  SPI_SEND(spi, value);
 
   /* De-select the MAX4321E */
 
@@ -990,7 +990,7 @@ static void max3421e_recvblock(FAR struct max3421e_usbhost_s *priv,
   /* Send the read command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_READ);
-  (void)SPI_SEND(spi, cmd);
+  SPI_SEND(spi, cmd);
 
   /* Read the block of values from the register(s) */
 
@@ -1042,7 +1042,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
   /* Send the wrte command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_WRITE);
-  (void)SPI_SEND(spi, cmd);
+  SPI_SEND(spi, cmd);
 
   /* Send the new value for the register */
 
@@ -3207,7 +3207,7 @@ static int max3421e_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* And defer interrupt processing to the high priority work queue thread */
 
-  (void)work_queue(LPWORK, &priv->irqwork, max3421e_irqwork, priv, 0);
+  work_queue(LPWORK, &priv->irqwork, max3421e_irqwork, priv, 0);
   return OK;
 }
 

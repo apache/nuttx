@@ -274,7 +274,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
    * register
    */
 
-  (void)getreg32(SAM_TRNG_ISR);
+  getreg32(SAM_TRNG_ISR);
 
   /* Enable TRNG interrupts */
 

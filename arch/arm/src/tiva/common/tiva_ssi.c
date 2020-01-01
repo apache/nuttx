@@ -570,7 +570,7 @@ static void ssi_rxnull(struct tiva_ssidev_s *priv)
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   spiinfo("RX: discard %04x\n", regval);
 #else
-  (void)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
+  ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
 #endif
 }
 
@@ -1025,7 +1025,7 @@ static int ssi_interrupt(int irq, void *context, FAR void *arg)
 
   /* Handle outgoing Tx FIFO transfers */
 
-  (void)ssi_performtx(priv);
+  ssi_performtx(priv);
 
   /* Handle incoming Rx FIFO transfers */
 
@@ -1369,7 +1369,7 @@ static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint16_t response = 0;
 
-  (void)ssi_transfer(priv, &wd, &response, 1);
+  ssi_transfer(priv, &wd, &response, 1);
   return response;
 }
 
@@ -1398,7 +1398,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, txbuffer, rxbuffer, nwords);
+  ssi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
 
@@ -1426,7 +1426,7 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, buffer, NULL, nwords);
+  ssi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
 
@@ -1454,7 +1454,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                           size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, NULL, buffer, nwords);
+  ssi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
 

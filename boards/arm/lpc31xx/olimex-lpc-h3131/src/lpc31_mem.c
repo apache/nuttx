@@ -257,7 +257,7 @@ static inline void lpc31_sdraminitialize(void)
    * 16bit mode
    */
 
-  (void)getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));
+  getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));
 
   /* Select normal operating mode */
 
