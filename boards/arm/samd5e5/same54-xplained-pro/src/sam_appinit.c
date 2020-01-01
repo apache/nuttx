@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ethernet.c
+ * boards/arm/samd5e5/same54-xplained-pro/src/sam_appinit.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,60 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include "sam_ethernet.h"
+#include <nuttx/board.h>
 
-#ifdef CONFIG_NET
+#include "same54-xplained-pro.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_gmac_initialize
- *
- * Description:
- *   Initialize the GMAC driver
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_GMAC
-static inline void up_gmac_initialize(void)
-{
-  int ret;
-
-  /* Initialize the GMAC driver */
-
-  ret = sam_gmac_initialize();
-  if (ret < 0)
-    {
-      nerr("ERROR: sam_gmac_initialize failed: %d\n", ret);
-    }
-}
-#else
-#  define up_gmac_initialize()
+#ifndef OK
+#  define OK 0
 #endif
 
 /****************************************************************************
@@ -100,26 +56,39 @@ static inline void up_gmac_initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Name: board_app_initialize
  *
  * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
  * Input Parameters:
- *   None.
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   None.
- *
- * Assumptions:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+int board_app_initialize(uintptr_t arg)
 {
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-  up_gmac_initialize();
+  return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return sam_bringup();
+#endif
 }
-
-#endif /* CONFIG_NET */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ethernet.c
+ * arch/arm/src/samd5e5/sam_ethernet.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_GMAC
+#ifdef CONFIG_SAMD5E5_GMAC
 static inline void up_gmac_initialize(void)
 {
   int ret;

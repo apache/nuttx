@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ethernet.c
+ * boards/arm/samd5e5/same54-xplained-pro/src/sam_bringup.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,87 +39,53 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
-#include "sam_ethernet.h"
+#include <errno.h>
 
-#ifdef CONFIG_NET
+#include "same54-xplained-pro.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_gmac_initialize
- *
- * Description:
- *   Initialize the GMAC driver
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_GMAC
-static inline void up_gmac_initialize(void)
-{
-  int ret;
-
-  /* Initialize the GMAC driver */
-
-  ret = sam_gmac_initialize();
-  if (ret < 0)
-    {
-      nerr("ERROR: sam_gmac_initialize failed: %d\n", ret);
-    }
-}
-#else
-#  define up_gmac_initialize()
-#endif
+#define PROCFS_MOUNTPOINT "/proc"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Name: sam_bringup
  *
  * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   None.
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- * Returned Value:
- *   None.
- *
- * Assumptions:
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+int sam_bringup(void)
 {
+  int ret = OK;
 
-  up_gmac_initialize();
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslot(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
 }
-
-#endif /* CONFIG_NET */

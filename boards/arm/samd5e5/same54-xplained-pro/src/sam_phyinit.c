@@ -1,8 +1,9 @@
-/************************************************************************************
- * arch/arm/src/samd5e5/hardware/sam_memorymap.h
+/****************************************************************************
+ * boards/arm/samd5e5/same54-xplained-pro/src/sam_phyinit.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Darcy Gong <darcy.gong@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,21 +32,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
-#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(CONFIG_ARCH_CHIP_SAME5X)
-#  include "hardware/samd5e5_pinmap.h"
-#else
-#  error "Unsupported SAMD5/E5 family"
+#include "sam_port.h"
+#include "sam_ethernet.h"
+
+#include "same54-xplained-pro.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#if defined(CONFIG_ETH0_PHY_KSZ8081) && defined(CONFIG_SAMD5E5_GMAC_PHYINIT)
+int sam_phy_boardinitialize(int intf)
+{
+  /* Configure the KSZ8081 PHY reset pin and take it out of reset */
+
+  sam_portconfig(PORT_PHY_RESET);
+  return 0;
+}
 #endif
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H */

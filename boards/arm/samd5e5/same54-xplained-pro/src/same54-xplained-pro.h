@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ethernet.c
+ * boards/arm/samd5e5/same54-xplained-pro/src/same54-xplained-pro.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,93 +33,95 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H
+#define __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include "sam_ethernet.h"
-
-#ifdef CONFIG_NET
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* Configuration ************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* Metro-M4 GPIOs ***********************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_gmac_initialize
+/* LEDs
  *
- * Description:
- *   Initialize the GMAC driver
+ *   The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
  *
- * Input Parameters:
- *   None.
+ *   1. LED0 near the edge of the board
  *
- * Returned Value:
- *   None.
  *
+ *   ----------------- -----------
+ *   SAMD5E5           FUNCTION
+ *   ----------------- -----------
+ *   PC18              GPIO output
+ * 
+ */
+
+#define PORT_LED0 (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                   PORTC | PORT_PIN18)
+/* Ethernet *****************************************************************/
+
+/* PHY pins:
+ *
+ *   -------- ----------------- -----------
+ *   PHY      SAMD5E5           FUNCTION
+ *   -------- ----------------- -----------
+ *   Reset    PD12              GPIO output
+ *   IRQ      PC21              GPIO input
+ */
+#define PORT_PHY_RESET  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                         PORTD | PORT_PIN12)
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_GMAC
-static inline void up_gmac_initialize(void)
-{
-  int ret;
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
 
-  /* Initialize the GMAC driver */
-
-  ret = sam_gmac_initialize();
-  if (ret < 0)
-    {
-      nerr("ERROR: sam_gmac_initialize failed: %d\n", ret);
-    }
-}
-#else
-#  define up_gmac_initialize()
-#endif
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Name: sam_bringup
  *
  * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   None.
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- * Returned Value:
- *   None.
- *
- * Assumptions:
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
-{
+int sam_bringup(void);
 
-  up_gmac_initialize();
-}
+/****************************************************************************
+ * Name: sam_led_pminitialize
+ *
+ * Description:
+ *   Register LED power management features.
+ *
+ ****************************************************************************/
 
-#endif /* CONFIG_NET */
+#ifdef CONFIG_PM
+void sam_led_pminitialize(void);
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_SAMD5E5_SAME54_XPLAINED_PRO_SRC_SAME54_XPLAINED_PRO_H */

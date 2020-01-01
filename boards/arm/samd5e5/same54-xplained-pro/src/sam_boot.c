@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_ethernet.c
+ * boards/arm/samd5e5/same54-xplained-pro/src/sam_boot.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,86 +40,55 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
-#include "sam_ethernet.h"
 
-#ifdef CONFIG_NET
+#include <nuttx/board.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "same54-xplained-pro.h"
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_gmac_initialize
- *
- * Description:
- *   Initialize the GMAC driver
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_GMAC
-static inline void up_gmac_initialize(void)
-{
-  int ret;
-
-  /* Initialize the GMAC driver */
-
-  ret = sam_gmac_initialize();
-  if (ret < 0)
-    {
-      nerr("ERROR: sam_gmac_initialize failed: %d\n", ret);
-    }
-}
-#else
-#  define up_gmac_initialize()
-#endif
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Name: sam_board_initialize
  *
  * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
+ *   All SAMD5/E5 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void sam_board_initialize(void)
 {
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
 
-  up_gmac_initialize();
+  board_autoled_initialize();
+#endif
 }
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  (void)sam_bringup();
+}
+#endif
