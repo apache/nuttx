@@ -160,7 +160,7 @@ void stm32_fmc_sdram_set_refresh_rate(int count)
 
 void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
 {
-  uint32_t val
+  uint32_t val;
   uint32_t sdtr;
 
   DEBUGASSERT((bank == 1) || (bank == 2));
@@ -183,7 +183,7 @@ void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
 
 void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
 {
-  uint32_t val
+  uint32_t val;
   uint32_t sdcr;
 
   DEBUGASSERT((bank == 1) || (bank == 2));
