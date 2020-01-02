@@ -141,6 +141,10 @@ ifeq ($(CONFIG_STM32H7_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
+ifeq ($(CONFIG_STM32H7_FMC),y)
+CHIP_CSRCS += stm32_fmc.c
+endifo
+
 ifeq ($(filter y,$(CONFIG_STM32H7_IWDG) $(CONFIG_STM32H7_RTC_LSICLOCK)),y)
 CHIP_CSRCS += stm32_lsi.c
 endif

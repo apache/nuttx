@@ -41,6 +41,7 @@ config STM32H7_STM32H7X3XX
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 	select STM32H7_HAVE_ETHERNET
+	select STM32H7_HAVE_FMC
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5
 	select STM32H7_HAVE_SPI6
@@ -147,6 +148,10 @@ menu "STM32H7 Peripheral Selection"
 config STM32H7_HAVE_ETHERNET
 	bool
 	default n
+
+config STM32H7_HAVE_FMC
+    bool
+    default n
 
 config STM32H7_HAVE_SPI4
 	bool
@@ -273,6 +278,11 @@ config STM32H7_ETHMAC
 	depends on STM32H7_HAVE_ETHERNET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+
+config STM32H7_FMC
+    bool "FMC"
+    default n
+    depends on STM32H7_HAVE_FMC
 
 config STM32H7_OTGFS
 	bool "OTG FS"
@@ -1142,6 +1152,14 @@ config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 		3 = High drive capability
 
 endif # STM32H7_RTC_LSECLOCK
+
+config STM32H7_EXTERNAL_RAM
+    bool "External RAM on FMC"
+    default n
+    depends on STM32H7_FMC
+    select ARCH_HAVE_HEAP2
+    ---help---
+        In addition to internal SDRAM, external RAM may be available through the FMC.
 
 endmenu # RTC Configuration
 
