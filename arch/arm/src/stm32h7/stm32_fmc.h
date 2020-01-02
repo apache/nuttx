@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32H7_STM32_FMC_H
-#define __ARCH_ARM_STC_STM32H7_STM32_FMC_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_FMC_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_FMC_H
 
 /************************************************************************************
  * Included Files
