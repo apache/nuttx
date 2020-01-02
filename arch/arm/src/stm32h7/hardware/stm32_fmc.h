@@ -144,7 +144,7 @@
 #define STM32_FMC_PATT3          (STM32_FMC_BASE+STM32_FMC_PATT3_OFFSET )
 #define STM32_FMC_PATT4          (STM32_FMC_BASE+STM32_FMC_PATT4_OFFSET )
 
-#define STM32_PIO4                (STM32_FMC_BASE+STM32_FMC_PIO4_OFFSET )
+#define STM32_PIO4               (STM32_FMC_BASE+STM32_FMC_PIO4_OFFSET )
 
 #define STM32_FMC_ECCR(n)        (STM32_FMC_BASE+STM32_FMC_ECCR_OFFSET(n))
 #define STM32_FMC_ECCR2          (STM32_FMC_BASE+STM32_FMC_ECCR2_OFFSET )
@@ -186,9 +186,9 @@
 #define FMC_BCR_ASYNCWAIT        (1 << 15)  /* Wait signal during asynchronous transfers */
 #define FMC_BCR_CBURSTRW         (1 << 19)  /* Write burst enable */
 #define FMC_BCR_BMAP_SHIFT       (24)
-#  define FMC_BCR_BMAP_0               (0 << FMC_BCR_BMAP_SHIFT)
-#  define FMC_BCR_BMAP_1               (1 << FMC_BCR_BMAP_SHIFT)
-#  define FMC_BCR_BMAP_2               (2 << FMC_BCR_BMAP_SHIFT)
+#  define FMC_BCR_BMAP_0         (0 << FMC_BCR_BMAP_SHIFT)
+#  define FMC_BCR_BMAP_1         (1 << FMC_BCR_BMAP_SHIFT)
+#  define FMC_BCR_BMAP_2         (2 << FMC_BCR_BMAP_SHIFT)
 
 #define FMC_BCR_FMCEN            (1 << 31)  /* Write burst enable */
 
