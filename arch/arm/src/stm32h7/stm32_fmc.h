@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_STM32_FMC_H
-#define __ARCH_ARM_STC_STM32_STM32_FMC_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_FMC_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_FMC_H
 
 /****************************************************************************
  * Included Files
@@ -78,7 +78,7 @@ void stm32_fmc_sdram_wait(void);
  *
  ****************************************************************************/
 
-void stm32_fmc_enable(void);
+void stm32_fmc_enable_clk(void);
 
 /****************************************************************************
  * Name: stm32_fmc_disable
@@ -109,6 +109,16 @@ void stm32_fmc_sdram_write_protect(int bank, bool state);
  ****************************************************************************/
 
 void stm32_fmc_sdram_set_refresh_rate(int count);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_enable
+ *
+ * Description:
+ *   Enable FMC SDRAM. Do this after issue refresh rate.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_enable(void);
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_set_timing
@@ -146,4 +156,4 @@ void stm32_fmc_sdram_command(uint32_t cmd);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32_STM32_FMC_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_FMC_H */

@@ -166,13 +166,14 @@
 #  define STM32H7_NETHERNET                0   /* No 100/100 Ethernet MAC */
 #endif
 
-#if defined(CONFIG_STM32F7_HAVE_FMC)
-#  define STM32F7_NFMC                     1   /* Have FMC memory controller */
+#if defined(CONFIG_STM32H7_HAVE_FMC)
+#  define STM32H7_NFMC                     1   /* Have FMC memory controller */
 #else
-#  define STM32F7_NFMC                     0   /* No FMC memory controller */
+#  define STM32H7_NFMC                     0   /* No FMC memory controller */
 #endif
 
 /* NVIC priority levels **************************************************************/
+
 /* 16 Programmable interrupt levels */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits set in minimum priority */

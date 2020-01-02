@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_fmc.h
+ * arch/arm/src/stm32h7/stm32_fmc.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -33,42 +33,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_STM32_FMC_H
-#define __ARCH_ARM_STC_STM32_STM32_FMC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "chip.h"
-#include "hardware/stm32_fmc.h"
+#include "stm32.h"
+
+#if defined(CONFIG_STM32H7_FMC)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_wait
- *
- * Description:
- *   Wait for the SDRAM controller to be ready.
- *
- ****************************************************************************/
-
-void stm32_fmc_sdram_wait(void);
 
 /****************************************************************************
  * Name: stm32_fmc_enable
@@ -78,7 +55,10 @@ void stm32_fmc_sdram_wait(void);
  *
  ****************************************************************************/
 
-void stm32_fmc_enable(void);
+void stm32_fmc_enable_clk(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, 0, RCC_AHB3ENR_FMCEN);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_disable
@@ -88,7 +68,10 @@ void stm32_fmc_enable(void);
  *
  ****************************************************************************/
 
-void stm32_fmc_disable(void);
+void stm32_fmc_disable(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, RCC_AHB3ENR_FMCEN, 0);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_write_protect
@@ -98,7 +81,26 @@ void stm32_fmc_disable(void);
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_write_protect(int bank, bool state);
+void stm32_fmc_sdram_write_protect(int bank, bool state)
+{
+  uint32_t val;
+  uint32_t sdcr;
+
+  DEBUGASSERT(bank == 1 || bank == 2);
+  sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
+
+  val = getreg32(sdcr);
+  if (state)
+    {
+      val |= FMC_SDRAM_CR_WRITE_PROTECT;       /* wp == 1 */
+    }
+  else
+    {
+      val &= ~FMC_SDRAM_CR_WRITE_PROTECT;      /* wp == 0 */
+    }
+
+  putreg32(val, sdcr);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_set_refresh_rate
@@ -108,7 +110,13 @@ void stm32_fmc_sdram_write_protect(int bank, bool state);
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_set_refresh_rate(int count);
+void stm32_fmc_sdram_set_refresh_rate(int count)
+{
+  uint32_t val;
+
+  DEBUGASSERT(count <= 0x1fff && count >= 0x29);
+  putreg32(count << 1, STM32_FMC_SDRTR);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_set_timing
@@ -118,7 +126,35 @@ void stm32_fmc_sdram_set_refresh_rate(int count);
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
+void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
+{
+  uint32_t val;
+  uint32_t sdtr;
+
+  DEBUGASSERT((bank == 1) || (bank == 2));
+  DEBUGASSERT((timing & FMC_SDRAM_TR_RESERVED) == 0);
+
+  sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
+  val  = getreg32(sdtr);
+  val &= FMC_SDRAM_TR_RESERVED;     /* preserve reserved bits */
+  val |= timing;
+  putreg32(val, sdtr);
+}
+
+/****************************************************************************
+ * Name: stm32_fmc_enable
+ *
+ * Description:
+ *   Enable FMC SDRAM. Do this after issue refresh rate.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_enable(void)
+{
+  uint32_t val;
+  val = FMC_BCR_FMCEN | getreg32(STM32_FMC_BCR1);
+  putreg32(val, STM32_FMC_BCR1);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_set_control
@@ -128,7 +164,20 @@ void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
+void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
+{
+  uint32_t val;
+  uint32_t sdcr;
+
+  DEBUGASSERT((bank == 1) || (bank == 2));
+  DEBUGASSERT((ctrl & FMC_SDRAM_CR_RESERVED) == 0);
+
+  sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
+  val  = getreg32(sdcr);
+  val &= FMC_SDRAM_CR_RESERVED;     /* preserve reserved bits */
+  val |= ctrl;
+  putreg32(val, sdcr);
+}
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_command
@@ -138,12 +187,10 @@ void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_command(uint32_t cmd);
-
-#undef EXTERN
-#if defined(__cplusplus)
+void stm32_fmc_sdram_command(uint32_t cmd)
+{
+  DEBUGASSERT((cmd & FMC_SDRAM_CMD_RESERVED) == 0);
+  putreg32(cmd, STM32_FMC_SDCMR);
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32_STM32_FMC_H */
+#endif /* CONFIG_STM32H7_FMC */
