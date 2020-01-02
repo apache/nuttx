@@ -176,8 +176,8 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
 
       /* Free both the IOB and the container */
 
-      iob_free(container->ic_iob);
-      ieee802154_container_free(container, IOBUSER_NET_SOCK_IEEE802154);
+      iob_free(container->ic_iob, IOBUSER_NET_SOCK_IEEE802154);
+      ieee802154_container_free(container);
     }
   else
     {
