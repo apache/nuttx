@@ -156,4 +156,4 @@ void stm32_fmc_sdram_command(uint32_t cmd);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32H7_STM32_FMC_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_FMC_H */
