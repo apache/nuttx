@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_fmc.c
  *
- *   Copyright (C) 20019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
