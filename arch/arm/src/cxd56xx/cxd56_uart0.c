@@ -128,11 +128,7 @@ static sem_t g_lock;
 
 static int uart0_semtake(sem_t *id)
 {
-  while (sem_wait(id) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 /****************************************************************************
@@ -141,7 +137,7 @@ static int uart0_semtake(sem_t *id)
 
 static void uart0_semgive(sem_t *id)
 {
-  sem_post(id);
+  nxsem_post(id);
 }
 
 /****************************************************************************
@@ -301,7 +297,7 @@ int cxd56_uart0initialize(FAR const char *devname)
 {
   int ret;
 
-  sem_init(&g_lock, 0, 1);
+  nxsem_init(&g_lock, 0, 1);
 
   ret = register_driver(devname, &g_uart0fops, 0666, NULL);
   if (ret != 0)
@@ -319,7 +315,7 @@ int cxd56_uart0initialize(FAR const char *devname)
 void cxd56_uart0uninitialize(FAR const char *devname)
 {
   unregister_driver(devname);
-  sem_destroy(&g_lock);
+  nxsem_destroy(&g_lock);
 }
 
 #endif /* CONFIG_CXD56_UART0 */

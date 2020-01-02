@@ -299,12 +299,7 @@ static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
           ierr("ERROR: nxsem_wait failed: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
     }
@@ -354,10 +349,7 @@ static int stmpe811_open(FAR struct file *filep)
   ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was cancelled by an signal */
-
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -414,10 +406,7 @@ static int stmpe811_close(FAR struct file *filep)
   ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -477,10 +466,7 @@ static ssize_t stmpe811_read(FAR struct file *filep, FAR char *buffer, size_t le
   ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -592,10 +578,7 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = nxsem_wait(&priv->exclsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -659,7 +642,6 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -898,7 +880,6 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -973,7 +954,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   /* Cancel the missing pen up timer */
 
-  (void)wd_cancel(priv->wdog);
+  wd_cancel(priv->wdog);
 
   /* Check for pen up or down from the TSC_STA ibit n the STMPE811_TSC_CTRL register. */
 
@@ -1113,8 +1094,8 @@ ignored:
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
-      (void)wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
-                     1, (uint32_t)((uintptr_t)priv));
+      wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
+               1, (uint32_t)((uintptr_t)priv));
     }
 
   /*  Reset and clear all data in the FIFO */

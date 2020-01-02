@@ -1636,7 +1636,7 @@ static void stm32_ltdc_irqconfig(void)
 
   /* Attach LTDC interrupt vector */
 
-  (void)irq_attach(g_interrupt.irq, stm32_ltdcirq, NULL);
+  irq_attach(g_interrupt.irq, stm32_ltdcirq, NULL);
 
   /* Enable the IRQ at the NVIC */
 

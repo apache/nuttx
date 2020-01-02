@@ -1304,7 +1304,7 @@ static inline void dm320_ep0setup(struct dm320_usbdev_s *priv)
 
             /* Restart the write queue */
 
-            (void)dm320_wrrequest(privep);
+            dm320_wrrequest(privep);
           }
         else
           {
@@ -1581,7 +1581,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context, FAR void *arg)
             if ((csr0 & USB_PERCSR0_RXPKTRDY) != 0)
               {
                 usbtrace(TRACE_INTENTRY(DM320_TRACEINTID_RXPKTRDY), csr0);
-                (void)dm320_getreg8(DM320_USB_COUNT0);
+                dm320_getreg8(DM320_USB_COUNT0);
                 dm320_ep0setup(priv);
               }
             else if ((csr0 & USB_PERCSR0_SENTST) != 0)
@@ -1643,7 +1643,7 @@ static int dm320_ctlrinterrupt(int irq, FAR void *context, FAR void *arg)
 
             if (!dm320_rqempty(privep))
               {
-                (void)dm320_wrrequest(privep);
+                dm320_wrrequest(privep);
               }
           }
           break;

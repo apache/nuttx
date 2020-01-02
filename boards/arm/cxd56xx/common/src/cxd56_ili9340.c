@@ -205,7 +205,7 @@ static int cxd56_ili93404ws_sendcmd(FAR struct ili9340_lcd_s *lcd,
    */
 
   cxd56_gpio_write(DISPLAY_DC, false); /* Indicate CMD */
-  (void) SPI_SEND(priv->spi, cmd);
+  SPI_SEND(priv->spi, cmd);
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
 
   return OK;
@@ -232,7 +232,7 @@ static int cxd56_ili93404ws_sendparam(FAR struct ili9340_lcd_s *lcd,
   FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
-  (void) SPI_SEND(priv->spi, param);
+  SPI_SEND(priv->spi, param);
 
   return OK;
 }
@@ -261,7 +261,7 @@ static int cxd56_ili93404ws_sendgram(FAR struct ili9340_lcd_s *lcd,
   lcdinfo("lcd:%p, wd=%p, nwords=%d\n", lcd, wd, nwords);
 
   SPI_SETBITS(priv->spi, 16);
-  (void) SPI_SNDBLOCK(priv->spi, wd, nwords);
+  SPI_SNDBLOCK(priv->spi, wd, nwords);
 
   return OK;
 }
@@ -359,8 +359,8 @@ int board_lcd_initialize(void)
 
       SPI_SETMODE(priv->spi, SPIDEV_MODE3);
       SPI_SETBITS(priv->spi, 8);
-      (void)SPI_HWFEATURES(priv->spi, 0);
-      (void)SPI_SETFREQUENCY(priv->spi, ILI9340_SPI_MAXFREQUENCY);
+      SPI_HWFEATURES(priv->spi, 0);
+      SPI_SETFREQUENCY(priv->spi, ILI9340_SPI_MAXFREQUENCY);
 
       /* Initialize ILI9340 driver with necessary methods */
 

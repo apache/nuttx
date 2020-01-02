@@ -71,8 +71,8 @@
 void weak_function stm32_spidev_initialize(void)
 {
 #if defined(CONFIG_LCD_SSD1351)
-  (void)stm32_configgpio(GPIO_OLED_CS); /* OLED chip select */
-  (void)stm32_configgpio(GPIO_OLED_DC); /* OLED Command/Data */
+  stm32_configgpio(GPIO_OLED_CS); /* OLED chip select */
+  stm32_configgpio(GPIO_OLED_DC); /* OLED Command/Data */
 #endif
 }
 
@@ -178,7 +178,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_LCD_SSD1351
   if (devid == SPIDEV_DISPLAY(0))
     {
-      (void)stm32_gpiowrite(GPIO_OLED_DC, !cmd);
+      stm32_gpiowrite(GPIO_OLED_DC, !cmd);
       return OK;
     }
 #endif

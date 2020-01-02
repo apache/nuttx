@@ -81,14 +81,14 @@ int pause(void)
 
   /* pause() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Set up for the sleep.  Using the empty set means that we are not
    * waiting for any particular signal.  However, any unmasked signal
    * can still awaken sigtimedwait().
    */
 
-  (void)sigemptyset(&set);
+  sigemptyset(&set);
 
   /* sigtwaitinfo() cannot succeed.  It should always return error EINTR
    * meaning that some unblocked signal was caught.

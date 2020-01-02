@@ -140,10 +140,10 @@ static const struct file_operations g_ads1242_fops =
 
 static void ads1242_lock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
   SPI_SETMODE(spi, ADS1242_SPI_MODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, ADS1242_SPI_FREQUENCY);
 }
 
@@ -157,7 +157,7 @@ static void ads1242_lock(FAR struct spi_dev_s *spi)
 
 static void ads1242_unlock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /****************************************************************************

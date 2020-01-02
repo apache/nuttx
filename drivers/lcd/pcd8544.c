@@ -392,8 +392,8 @@ static void pcd8544_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_PCD8544_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_PCD8544_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_PCD8544_FREQUENCY);
 }
 
 /**************************************************************************************
@@ -551,8 +551,8 @@ static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Set the starting position for the run */
 
-  (void)SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+page);           /* Set the page start */
-  (void)SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + (col & 0x7f)); /* Set the low column */
+  SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+page);           /* Set the page start */
+  SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + (col & 0x7f)); /* Set the low column */
 
   /* Select data transfer */
 
@@ -560,7 +560,7 @@ static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Then transfer all of the data */
 
-  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
+  SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
 
   /* Unlock and de-select the device */
 
@@ -775,7 +775,7 @@ static int pcd8544_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display off (power-down) */
 
-      (void)SPI_SEND(priv->spi, (PCD8544_FUNC_SET | PCD8544_POWER_DOWN));
+      SPI_SEND(priv->spi, (PCD8544_FUNC_SET | PCD8544_POWER_DOWN));
 
       priv->powered = PCD8544_POWER_OFF;
     }
@@ -783,7 +783,7 @@ static int pcd8544_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Leave the power-down */
 
-      (void)SPI_SEND(priv->spi, PCD8544_FUNC_SET);
+      SPI_SEND(priv->spi, PCD8544_FUNC_SET);
 
       priv->powered = PCD8544_POWER_ON;
     }
@@ -848,15 +848,15 @@ static int pcd8544_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Select the extended instruction set ( H = 1 ) */
 
-  (void)SPI_SEND(priv->spi, (PCD8544_FUNC_SET | PCD8544_MODEH));
+  SPI_SEND(priv->spi, (PCD8544_FUNC_SET | PCD8544_MODEH));
 
   /* Set the contrast */
 
-  (void)SPI_SEND(priv->spi, (PCD8544_WRITE_VOP | contrast) );
+  SPI_SEND(priv->spi, (PCD8544_WRITE_VOP | contrast) );
 
   /* Return to normal mode */
 
-  (void)SPI_SEND(priv->spi, PCD8544_FUNC_SET);
+  SPI_SEND(priv->spi, PCD8544_FUNC_SET);
 
   /* Select data transfer */
 
@@ -901,8 +901,8 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      (void)SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+i);      /* Set the page start */
-      (void)SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + page); /* Set the column */
+      SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+i);      /* Set the page start */
+      SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + page); /* Set the column */
 
 
       /* Select data transfer */
@@ -911,7 +911,7 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
 
        /* Then transfer all 84 columns of data */
 
-       (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * PCD8544_XRES], PCD8544_XRES);
+       SPI_SNDBLOCK(priv->spi, &priv->fb[page * PCD8544_XRES], PCD8544_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -967,23 +967,23 @@ FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int
 
   /* Leave the power-down and select extended instruction set mode H = 1 */
 
-  (void)SPI_SEND(spi, (PCD8544_FUNC_SET | PCD8544_MODEH));
+  SPI_SEND(spi, (PCD8544_FUNC_SET | PCD8544_MODEH));
 
   /* Set LCD Bias to n = 3 */
 
-  (void)SPI_SEND(spi, (PCD8544_BIAS_SYSTEM | PCD8544_BIAS_BS2));
+  SPI_SEND(spi, (PCD8544_BIAS_SYSTEM | PCD8544_BIAS_BS2));
 
   /* Select the normal instruction set mode H = 0 */
 
-  (void)SPI_SEND(spi, PCD8544_FUNC_SET);
+  SPI_SEND(spi, PCD8544_FUNC_SET);
 
   /* Clear the screen */
 
-  (void)SPI_SEND(spi, (PCD8544_DISP_CTRL | PCD8544_DISP_BLANK));
+  SPI_SEND(spi, (PCD8544_DISP_CTRL | PCD8544_DISP_BLANK));
 
   /* Set the Display Control to Normal Mode D = 1 and E = 0 */
 
-  (void)SPI_SEND(spi, (PCD8544_DISP_CTRL | PCD8544_DISP_NORMAL));
+  SPI_SEND(spi, (PCD8544_DISP_CTRL | PCD8544_DISP_NORMAL));
 
   /* Select data transfer */
 

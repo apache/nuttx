@@ -71,7 +71,7 @@
 
 void board_button_initialize(void)
 {
-  (void)sam_configport(PORT_SW0);
+  sam_configport(PORT_SW0);
 }
 
 /****************************************************************************
@@ -126,7 +126,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
       /* Configure the interrupt */
 
       sam_portirq(IRQ_SW0);
-      (void)irq_attach(IRQ_SW0, irqhandler, arg);
+      irq_attach(IRQ_SW0, irqhandler, arg);
       sam_portirqenable(IRQ_SW0);
 
       leave_critical_section(flags);

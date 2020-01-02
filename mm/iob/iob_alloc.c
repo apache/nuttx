@@ -146,26 +146,8 @@ static FAR struct iob_s *iob_allocwait(bool throttled,
        * list.
        */
 
-      ret = nxsem_wait(sem);
-      if (ret < 0)
-        {
-          /* EINTR is not an error!  EINTR simply means that we were
-           * awakened by a signal and we should try again.
-           *
-           * REVISIT:  Many end-user interfaces are required to return with
-           * an error if EINTR is set.  Most uses of this function are in
-           * internal, non-user logic.  But are there cases where the error
-           * should be returned.
-           */
-
-          if (ret == -EINTR)
-            {
-              /* Force a success indication so that we will continue looping. */
-
-              ret = OK;
-            }
-        }
-      else
+      ret = nxsem_wait_uninterruptible(sem);
+      if (ret >= 0)
         {
           /* When we wake up from wait successfully, an I/O buffer was
            * freed and we hold a count for one IOB.

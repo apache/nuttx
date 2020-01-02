@@ -103,7 +103,7 @@ static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
 
   /* IRQ on rising edge */
 
-  (void)stm32_gpiosetevent(GPIO_SX127X_DIO0, true, false, false, isr, arg);
+  stm32_gpiosetevent(GPIO_SX127X_DIO0, true, false, false, isr, arg);
   return OK;
 }
 

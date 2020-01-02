@@ -334,7 +334,7 @@ int up_rtc_initialize(void)
   /* Attach the ALARM interrupt handler */
 
   up_disable_irq(MAX326_IRQ_RTC);
-  (void)irq_attach(MAX326_IRQ_RTC, max326_rtc_interrupt, NULL);
+  irq_attach(MAX326_IRQ_RTC, max326_rtc_interrupt, NULL);
 #endif
 
   /* Enable the RTC */

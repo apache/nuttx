@@ -87,7 +87,7 @@
 
 void board_autoled_initialize(void)
 {
-  (void)sam_configgpio(GPIO_LED0);
+  sam_configgpio(GPIO_LED0);
 }
 
 /****************************************************************************

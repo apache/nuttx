@@ -1139,9 +1139,9 @@ static int up_attach(struct uart_dev_s *dev)
       return OK;
     }
 
-  (void)irq_detach(priv->recvirq);
-  (void)irq_detach(priv->xmitirq);
-  (void)irq_detach(priv->eriirq);
+  irq_detach(priv->recvirq);
+  irq_detach(priv->xmitirq);
+  irq_detach(priv->eriirq);
   return ret;
 }
 
@@ -1169,8 +1169,8 @@ static void up_detach(struct uart_dev_s *dev)
 
   up_disable_irq(priv->recvirq);
   up_disable_irq(priv->xmitirq);
-  (void)irq_detach(priv->recvirq);
-  (void)irq_detach(priv->xmitirq);
+  irq_detach(priv->recvirq);
+  irq_detach(priv->xmitirq);
 }
 
 static int up_eriinterrupt(int irq, void *context, void *arg)
@@ -1598,47 +1598,47 @@ void up_serialinit(void)
 #endif
 
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+  uart_register("/dev/ttyS3", &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+  uart_register("/dev/ttyS4", &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
-  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+  uart_register("/dev/ttyS5", &TTYS5_DEV);
 #endif
 #ifdef TTYS6_DEV
-  (void)uart_register("/dev/ttyS6", &TTYS6_DEV);
+  uart_register("/dev/ttyS6", &TTYS6_DEV);
 #endif
 #ifdef TTYS7_DEV
-  (void)uart_register("/dev/ttyS7", &TTYS7_DEV);
+  uart_register("/dev/ttyS7", &TTYS7_DEV);
 #endif
 #ifdef TTYS8_DEV
-  (void)uart_register("/dev/ttyS8", &TTYS8_DEV);
+  uart_register("/dev/ttyS8", &TTYS8_DEV);
 #endif
 #ifdef TTYS9_DEV
-  (void)uart_register("/dev/ttyS9", &TTYS9_DEV);
+  uart_register("/dev/ttyS9", &TTYS9_DEV);
 #endif
 #ifdef TTYS10_DEV
-  (void)uart_register("/dev/ttyS10", &TTYS10_DEV);
+  uart_register("/dev/ttyS10", &TTYS10_DEV);
 #endif
 #ifdef TTYS11_DEV
-  (void)uart_register("/dev/ttyS11", &TTYS11_DEV);
+  uart_register("/dev/ttyS11", &TTYS11_DEV);
 #endif
 #ifdef TTYS12_DEV
-  (void)uart_register("/dev/ttyS12", &TTYS12_DEV);
+  uart_register("/dev/ttyS12", &TTYS12_DEV);
 #endif
 
   /* Register the console */
 
 #ifdef HAVE_CONSOLE
   up_setup(&CONSOLE_DEV);
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 }
 

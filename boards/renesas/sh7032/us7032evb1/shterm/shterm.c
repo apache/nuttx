@@ -108,10 +108,10 @@ static void putconsole(char ch)
 {
   if (g_logstream)
     {
-      (void)putc(ch, g_logstream);
+      putc(ch, g_logstream);
     }
 
-  (void)putchar(ch);
+  putchar(ch);
 }
 
 /****************************************************************************
@@ -122,10 +122,10 @@ static void flushconsole(void)
 {
   if (g_logstream)
     {
-      (void)fflush(g_logstream);
+      fflush(g_logstream);
     }
 
-  (void)fflush(stdout);
+  fflush(stdout);
 }
 
 /****************************************************************************
@@ -139,10 +139,10 @@ static void printconsole(const char *fmt, ...)
   va_start(ap, fmt);
   if (g_logstream)
     {
-      (void)vfprintf(g_logstream, fmt, ap);
+      vfprintf(g_logstream, fmt, ap);
     }
 
-  (void)vprintf(fmt, ap);
+  vprintf(fmt, ap);
   va_end(ap);
 }
 
@@ -165,7 +165,7 @@ static void sendfile(int fdtarg, char *filename, int verify)
   if (fdin < 0)
     {
       fprintf(stderr, "ERROR: Failed to open '%s' for reading\n", filename);
-      (void)writebyte(fdin, '>');
+      writebyte(fdin, '>');
       return;
     }
 
@@ -293,13 +293,13 @@ static void receivefile(int fdtarg, char *filename)
   if (fdout < 0)
     {
       fprintf(stderr, "ERROR: Failed to open '%s' for writing\n", filename);
-      (void)writebyte(fdtarg, '>');
+      writebyte(fdtarg, '>');
       return;
     }
 
   printconsole("Receiving file '%s':\n", filename);
   flushconsole();
-  (void)writebyte(fdtarg, '+');
+  writebyte(fdtarg, '+');
 
   /* Synchronize */
 
@@ -437,7 +437,7 @@ static void close_tty(void)
 
   if (g_fdnb >= 0)
     {
-      (void)close(g_fdnb);
+      close(g_fdnb);
     }
 
   if (g_fd >= 0)
@@ -449,12 +449,12 @@ static void close_tty(void)
                        g_ttydev, strerror(errno));
         }
 
-      (void)close(g_fd);
+      close(g_fd);
     }
 
   if (g_logstream)
     {
-      (void)fclose(g_logstream);
+      fclose(g_logstream);
     }
 }
 
@@ -687,8 +687,8 @@ int main(int argc, char **argv, char **envp)
   tty.c_cflag &= ~(CSIZE | PARENB);
   tty.c_cflag |= CS8;
 
-  (void)cfsetispeed(&tty, speed);
-  (void)cfsetospeed(&tty, speed);
+  cfsetispeed(&tty, speed);
+  cfsetospeed(&tty, speed);
 
   ret = tcsetattr(g_fd, TCSANOW, &tty);
   if (ret < 0)

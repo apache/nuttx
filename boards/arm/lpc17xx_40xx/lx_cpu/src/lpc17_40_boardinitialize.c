@@ -122,6 +122,6 @@ void board_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)lx_cpu_bringup();
+  lx_cpu_bringup();
 }
 #endif

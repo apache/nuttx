@@ -151,7 +151,7 @@ int sd_main(int argc, char *argv)
 
   /* Interrupts must be disabled through the following. */
 
-  (void)up_irq_save();
+  up_irq_save();
 
   /* Then jump into SRAM via the reset vector at 0x040000 */
 

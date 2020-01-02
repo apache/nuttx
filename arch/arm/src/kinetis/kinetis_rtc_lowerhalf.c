@@ -431,7 +431,7 @@ static int kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
       /* And convert the time back to Julian/broken out format */
 
-      (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+      gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
 
       /* The set the alarm using this absolute time */
 
@@ -532,11 +532,11 @@ static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
       ret = kinetis_rtc_rdalarm(&ts);
 
 #ifdef CONFIG_LIBC_LOCALTIME
-      (void)localtime_r((FAR const time_t *)&ts.tv_sec,
-                        (FAR struct tm *)alarminfo->time);
+      localtime_r((FAR const time_t *)&ts.tv_sec,
+                  (FAR struct tm *)alarminfo->time);
 #else
-      (void)gmtime_r((FAR const time_t *)&ts.tv_sec,
-                     (FAR struct tm *)alarminfo->time);
+      gmtime_r((FAR const time_t *)&ts.tv_sec,
+               (FAR struct tm *)alarminfo->time);
 #endif
       sched_unlock();
     }

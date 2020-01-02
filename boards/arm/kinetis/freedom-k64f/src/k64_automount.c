@@ -209,7 +209,7 @@ static void k64_enable(FAR const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = k64_cardinserted();
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
 
       state->pending = false;
@@ -317,7 +317,7 @@ void k64_automount_event(bool inserted)
         {
           /* No.. forward the event to the handler */
 
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
     }
 }

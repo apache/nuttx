@@ -1171,7 +1171,6 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode         *inode;
   FAR struct apds9960_dev_s *priv;
-  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1189,17 +1188,7 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 
   /* Wait for data available */
 
-  do
-    {
-      ret = nxsem_wait(&priv->sample_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->sample_sem);
 
   buffer[0] = (char) priv->gesture_motion;
   buflen    = 1;

@@ -75,7 +75,7 @@ double trunc(double x)
   /* Force Evaluation */
 
   __x = (x + 0x1p120f);
-  (void)__x;
+  UNUSED(__x);
 
   u.i &= ~m;
   return u.f;

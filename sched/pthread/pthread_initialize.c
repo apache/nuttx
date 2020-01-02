@@ -102,55 +102,30 @@ int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout,
 {
   int ret;
 
-  /* Verify input parameters */
-
-  DEBUGASSERT(sem != NULL);
-  if (sem != NULL)
+  if (intr)
     {
-      do
+      if (abs_timeout == NULL)
         {
-          /* Take the semaphore (perhaps waiting) */
-
-          if (abs_timeout == NULL)
-            {
-              ret = nxsem_wait(sem);
-            }
-          else
-            {
-              ret = nxsem_timedwait(sem, abs_timeout);
-            }
-
-          if (ret < 0)
-            {
-              /* The only cases that an error should occur here is if the wait
-               * was awakened by a signal or if the thread was canceled during
-               * the wait.
-               */
-
-              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED ||
-                          ret == -ETIMEDOUT);
-
-              /* When the error occurs in this case, should we errout?  Or
-               * should we just continue waiting until we have the
-               * semaphore?
-               */
-
-              if (intr)
-                {
-                  return -ret;
-                }
-            }
+          ret = nxsem_wait(sem);
         }
-      while (ret == -EINTR);
-
-      /* We have the semaphore (or some awful, unexpected error has
-       * occurred).
-       */
-
-      return OK;
+      else
+        {
+          ret = nxsem_timedwait(sem, abs_timeout);
+        }
+    }
+  else
+    {
+      if (abs_timeout == NULL)
+        {
+          ret = nxsem_wait_uninterruptible(sem);
+        }
+      else
+        {
+          ret = nxsem_timedwait_uninterruptible(sem, abs_timeout);
+        }
     }
 
-  return EINVAL;
+  return -ret;
 }
 
 #ifdef CONFIG_PTHREAD_MUTEX_UNSAFE

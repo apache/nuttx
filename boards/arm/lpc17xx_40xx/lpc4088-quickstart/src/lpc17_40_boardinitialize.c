@@ -128,6 +128,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)lpc4088_quickstart_bringup();
+  lpc4088_quickstart_bringup();
 }
 #endif

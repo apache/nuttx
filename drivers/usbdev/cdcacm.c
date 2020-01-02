@@ -431,7 +431,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
         {
           /* Remove the empty container from the request list */
 
-          (void)sq_remfirst(&priv->txfree);
+          sq_remfirst(&priv->txfree);
           priv->nwrq--;
 
           /* Then submit the request to the endpoint */
@@ -595,7 +595,7 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 
  if (nexthead == recv->tail)
    {
-     (void)cdcuart_rxflowcontrol(&priv->serdev, recv->size - 1, true);
+     cdcuart_rxflowcontrol(&priv->serdev, recv->size - 1, true);
    }
 #endif
 
@@ -728,7 +728,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
            * pending RX list and returned to the DCD.
            */
 
-          (void)sq_remfirst(&priv->rxpending);
+          sq_remfirst(&priv->rxpending);
           ret = cdcacm_requeue_rdrequest(priv, rdcontainer);
         }
     }
@@ -747,8 +747,8 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   if (!sq_empty(&priv->rxpending))
     {
-      (void)wd_start(priv->rxfailsafe, CDCACM_RXDELAY, cdcacm_rxtimeout,
-                     1, priv);
+      wd_start(priv->rxfailsafe, CDCACM_RXDELAY, cdcacm_rxtimeout,
+               1, priv);
     }
 
   leave_critical_section(flags);
@@ -772,7 +772,7 @@ static void cdcacm_rxtimeout(int argc, wdparm_t arg1, ...)
   FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)arg1;
 
   DEBUGASSERT(priv != NULL);
-  (void)cdcacm_release_rxpending(priv);
+  cdcacm_release_rxpending(priv);
 }
 
 /****************************************************************************
@@ -1207,7 +1207,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
          * list
          */
 
-        (void)cdcacm_release_rxpending(priv);
+        cdcacm_release_rxpending(priv);
       }
       break;
 
@@ -2421,7 +2421,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                  * disabled)
                  */
 
-                (void)cdcacm_release_rxpending(priv);
+                cdcacm_release_rxpending(priv);
 
               }
 
@@ -2621,7 +2621,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
        * with enable == false , anyway the pend-list should be flushed
        */
 
-      (void)cdcacm_release_rxpending(priv);
+      cdcacm_release_rxpending(priv);
     }
 
   /* RX "interrupts" are disabled.  Nothing special needs to be done on a
@@ -2707,7 +2707,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
                * set?
                */
 
-              (void)cdcacm_serialstate(priv);
+              cdcacm_serialstate(priv);
             }
 
           /* Flow control is active */
@@ -2738,7 +2738,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
                *  still clear?
                */
 
-              (void)cdcacm_serialstate(priv);
+              cdcacm_serialstate(priv);
             }
 
           /* During the time that flow control ws disabled, incoming packets
@@ -2749,7 +2749,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
            * upper == false.
            */
 
-          (void)cdcacm_release_rxpending(priv);
+          cdcacm_release_rxpending(priv);
         }
     }
   else
@@ -2767,7 +2767,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
            * not set?
            */
 
-          (void)cdcacm_serialstate(priv);
+          cdcacm_serialstate(priv);
 
           /* Flow control is not active */
 

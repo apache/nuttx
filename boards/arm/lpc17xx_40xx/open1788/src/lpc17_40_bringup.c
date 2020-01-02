@@ -198,7 +198,7 @@ static int nsh_waiter(int argc, char *argv[])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)CONN_ENUMERATE(g_usbconn, hport);
+          CONN_ENUMERATE(g_usbconn, hport);
         }
     }
 
@@ -256,7 +256,7 @@ static int nsh_sdinitialize(void)
    * inserted or deleted.
    */
 
-  (void)irq_attach(LPC17_40_IRQ_P0p13, nsh_cdinterrupt, NULL);
+  irq_attach(LPC17_40_IRQ_P0p13, nsh_cdinterrupt, NULL);
   up_enable_irq(LPC17_40_IRQ_P0p13);
 
 #endif

@@ -118,7 +118,7 @@ void stm32_spidev_initialize(void)
   /* Configure the SPI-based MFRC522 chip select GPIO */
 
 #  ifdef CONFIG_CL_MFRC522
-  (void)stm32_configgpio(GPIO_MFRC522_CS);
+  stm32_configgpio(GPIO_MFRC522_CS);
 #  endif
 
 #endif  /* CONFIG_STM32F0L0G0_SPI2 */

@@ -88,7 +88,7 @@ FAR char *tempnam(FAR const char *dir, FAR const char *pfx)
   FAR char *path;
   int ret;
 
-  (void)asprintf(&path, "%s/%s-XXXXXX.tmp", dir, pfx);
+  asprintf(&path, "%s/%s-XXXXXX.tmp", dir, pfx);
   if (path)
     {
       ret = mktemp(path);

@@ -111,7 +111,7 @@ enum spirit_directrx_e
 
   /* Reads the register value and mask the RX_Mode field */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
 
   /* Rebuild and return value */
 
@@ -182,7 +182,7 @@ enum spirit_directtx_e
 
   /* Reads the register value and mask the RX_Mode field */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL1_BASE, &regval, 1);
 
   /* Returns value */
 

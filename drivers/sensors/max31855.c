@@ -125,10 +125,10 @@ static const struct file_operations g_max31855fops =
 
 static void max31855_lock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, 400000);
 }
 
@@ -142,7 +142,7 @@ static void max31855_lock(FAR struct spi_dev_s *spi)
 
 static void max31855_unlock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 /****************************************************************************

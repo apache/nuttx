@@ -107,7 +107,7 @@ int syslog_putc(int ch)
        * buffer.
        */
 
-      (void)syslog_flush_intbuffer(g_syslog_channel, false);
+      syslog_flush_intbuffer(g_syslog_channel, false);
 #endif
 
       return g_syslog_channel->sc_putc(ch);

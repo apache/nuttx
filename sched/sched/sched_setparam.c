@@ -150,8 +150,8 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
 
       /* Convert timespec values to system clock ticks */
 
-      (void)clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
-      (void)clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+      clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
+      clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
 
       /* Avoid zero/negative times */
 

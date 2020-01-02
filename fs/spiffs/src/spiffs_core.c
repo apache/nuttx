@@ -755,7 +755,7 @@ int spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
       finfo("erase %08lx:%d\n",
             (unsigned long)addr, SPIFFS_GEO_EBLOCK_SIZE(fs));
 
-      (void)spiffs_mtd_erase(fs, addr, SPIFFS_GEO_EBLOCK_SIZE(fs));
+      spiffs_mtd_erase(fs, addr, SPIFFS_GEO_EBLOCK_SIZE(fs));
 
       addr += SPIFFS_GEO_EBLOCK_SIZE(fs);
       size -= SPIFFS_GEO_EBLOCK_SIZE(fs);

@@ -572,7 +572,7 @@ enum spirit_functional_state_e
 
   /* Reads the PCKTCTRL4 register value */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL4_BASE, &regval, 1);
 
   /* Returns the address field value */
 
@@ -665,7 +665,7 @@ uint16_t spirit_pktbase_get_payloadlen(FAR struct spirit_library_s *spirit)
 
   /* Reads the packet length registers */
 
-  (void)spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
+  spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
 
   /* Returns the packet length */
 
@@ -702,7 +702,7 @@ uint16_t spirit_pktbasic_get_rxpktlen(FAR struct spirit_library_s *spirit)
 
   /* Reads the RX_PCKT_LENx registers value */
 
-  (void)spirit_reg_read(spirit, RX_PCKT_LEN1_BASE, regval, 2);
+  spirit_reg_read(spirit, RX_PCKT_LEN1_BASE, regval, 2);
 
   /* Rebuild and return the length field */
 

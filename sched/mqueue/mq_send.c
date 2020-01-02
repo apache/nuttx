@@ -214,7 +214,7 @@ int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, unsigned int prio)
 
   /* mq_send() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nxmq_send() do all of the work */
 

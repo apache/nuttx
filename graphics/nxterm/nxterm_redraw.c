@@ -94,17 +94,6 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
   do
     {
       ret = nxterm_semwait(priv);
-
-      /* Check for errors */
-
-      if (ret < 0)
-        {
-          /* The only expected error is if the wait failed because of it
-           * was interrupted by a signal.
-           */
-
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
     }
   while (ret < 0);
 
@@ -125,5 +114,5 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
       nxterm_fillchar(priv, rect, &priv->bm[i]);
     }
 
-  (void)nxterm_sempost(priv);
+  nxterm_sempost(priv);
 }

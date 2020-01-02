@@ -98,7 +98,7 @@ void igmp_devinit(struct net_driver_s *dev)
 
   /* Add the all systems address to the group */
 
-  (void)igmp_grpalloc(dev, &g_ipv4_allsystems);
+  igmp_grpalloc(dev, &g_ipv4_allsystems);
 
   /* Allow the IGMP messages at the MAC level */
 

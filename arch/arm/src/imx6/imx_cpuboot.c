@@ -298,7 +298,7 @@ void arm_cpu_boot(int cpu)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
-  (void)up_irq_enable();
+  up_irq_enable();
 #endif
 
   /* The next thing that we expect to happen is for logic running on CPU0

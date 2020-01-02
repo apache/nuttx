@@ -1096,7 +1096,7 @@ static void khci_rqrestart(int argc, uint32_t arg1, ...)
 #ifndef CONFIG_USBDEV_NOWRITEAHEAD
               privreq->inflight[1] = 0;
 #endif
-              (void)khci_wrrequest(priv, privep);
+              khci_wrrequest(priv, privep);
             }
         }
     }
@@ -1114,8 +1114,8 @@ static void khci_delayedrestart(struct khci_usbdev_s *priv, uint8_t epno)
 
   /* And start (or re-start) the watchdog timer */
 
-  (void)wd_start(priv->wdog, RESTART_DELAY, khci_rqrestart, 1,
-                 (uint32_t)priv);
+  wd_start(priv->wdog, RESTART_DELAY, khci_rqrestart, 1,
+           (uint32_t)priv);
 }
 
 /****************************************************************************
@@ -1366,7 +1366,7 @@ static int khci_wrrequest(struct khci_usbdev_s *priv, struct khci_ep_s *privep)
        * queued
        */
 
-      (void)khci_wrstart(priv, privep);
+      khci_wrstart(priv, privep);
     }
 #else
   UNUSED(ret);
@@ -1840,7 +1840,7 @@ static void khci_eptransfer(struct khci_usbdev_s *priv, uint8_t epno,
         {
           /* If that succeeds, then try to set up another OUT transfer. */
 
-          (void)khci_rdrequest(priv, privep);
+          khci_rdrequest(priv, privep);
         }
 #else
       UNUSED(ret);
@@ -1860,7 +1860,7 @@ static void khci_eptransfer(struct khci_usbdev_s *priv, uint8_t epno,
 
       /* Handle additional queued write requests */
 
-      (void)khci_wrrequest(priv, privep);
+      khci_wrrequest(priv, privep);
     }
 }
 
@@ -2718,7 +2718,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
       /* Stall EP0 */
 
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_EP0SETUPSTALLED), priv->ctrlstate);
-      (void)khci_epstall(&priv->eplist[EP0].ep, false);
+      khci_epstall(&priv->eplist[EP0].ep, false);
     }
 }
 
@@ -3519,7 +3519,7 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (!privep->stalled)
         {
-          (void)khci_wrrequest(priv, privep);
+          khci_wrrequest(priv, privep);
         }
     }
 
@@ -3538,7 +3538,7 @@ static int khci_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (!privep->stalled)
         {
-          (void)khci_rdrequest(priv, privep);
+          khci_rdrequest(priv, privep);
         }
     }
 
@@ -3876,7 +3876,7 @@ static void khci_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
 
   /* Disable the endpoint */
 
-  (void)khci_epdisable(ep);
+  khci_epdisable(ep);
 
   /* Mark the endpoint as available */
 

@@ -139,11 +139,7 @@ static struct pm_cpu_wakelock_s g_wlock = {
 
 static int farapi_semtake(sem_t *id)
 {
-  while (sem_wait(id) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 #ifdef CONFIG_CXD56_FARAPI_DEBUG
@@ -188,7 +184,7 @@ static int cxd56_farapidonehandler(int cpuid, int protoid,
       /* Send event flag response */
 
       cxd56_sendmsg(cpuid, CXD56_PROTO_FLG, 5, pdata & 0xff00, 0);
-      sem_post(&g_farwait);
+      nxsem_post(&g_farwait);
     }
 
   return OK;
@@ -258,7 +254,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   dump_farapi_message(&msg);
 
 err:
-  sem_post(&g_farlock);
+  nxsem_post(&g_farlock);
 }
 
 void cxd56_farapiinitialize(void)
@@ -274,8 +270,8 @@ void cxd56_farapiinitialize(void)
 #  endif
     }
 #endif
-  sem_init(&g_farlock, 0, 1);
-  sem_init(&g_farwait, 0, 0);
+  nxsem_init(&g_farlock, 0, 1);
+  nxsem_init(&g_farwait, 0, 0);
 
   cxd56_iccinit(CXD56_PROTO_MBX);
   cxd56_iccinit(CXD56_PROTO_FLG);

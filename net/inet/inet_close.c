@@ -328,7 +328,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
       /* Wait for the disconnect event */
 
-      (void)net_lockedwait(&state.cl_sem);
+      net_lockedwait(&state.cl_sem);
 
       /* We are now disconnected */
 

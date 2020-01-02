@@ -618,12 +618,12 @@ static void bcmf_poll_work(FAR void *arg)
 
   priv->bc_dev.d_buf = priv->cur_tx_frame->data;
   priv->bc_dev.d_len = 0;
-  (void)devif_timer(&priv->bc_dev, BCMF_WDDELAY, bcmf_txpoll);
+  devif_timer(&priv->bc_dev, BCMF_WDDELAY, bcmf_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
+  ,        (wdparm_t)priv);
 exit_unlock:
   net_unlock();
 }
@@ -698,8 +698,8 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
+           (wdparm_t)priv);
 
   /* Enable the hardware interrupt */
 
@@ -793,7 +793,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
       priv->bc_dev.d_buf = priv->cur_tx_frame->data;
       priv->bc_dev.d_len = 0;
-      (void)devif_poll(&priv->bc_dev, bcmf_txpoll);
+      devif_poll(&priv->bc_dev, bcmf_txpoll);
     }
 
 exit_unlock:
@@ -946,7 +946,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)bcmf_addmac(dev, mac);
+  bcmf_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -954,7 +954,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
    * packets.
    */
 
-  (void)bcmf_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  bcmf_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -963,7 +963,7 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
    * packets.
    */
 
-  (void)bcmf_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  bcmf_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
 #endif /* CONFIG_NET_ICMPv6 */
@@ -1159,7 +1159,7 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->bc_dev, NET_LL_IEEE80211);
+  netdev_register(&priv->bc_dev, NET_LL_IEEE80211);
   return OK;
 }
 

@@ -188,7 +188,7 @@ int builtin_initialize(void)
 
 void builtin_uninitialize(void)
 {
-  (void)unregister_binfmt(&g_builtin_binfmt);
+  unregister_binfmt(&g_builtin_binfmt);
 }
 
 #endif /* HAVE_BUILTIN_CONTEXT */

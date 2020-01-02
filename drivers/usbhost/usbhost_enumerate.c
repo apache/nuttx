@@ -408,7 +408,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
    * a device to support multiple, different classes.
    */
 
-  (void)usbhost_devdesc((struct usb_devdesc_s *)buffer, &id);
+  usbhost_devdesc((struct usb_devdesc_s *)buffer, &id);
 
   /* Assign a function address to the device connected to this port */
 

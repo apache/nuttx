@@ -323,5 +323,5 @@ static ssize_t lwlconsole_write(struct file *filep, const char *buffer,
 void lwlconsole_init(void)
 {
   g_d.upword = 0;
-  (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  register_driver("/dev/console", &g_consoleops, 0666, NULL);
 }

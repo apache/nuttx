@@ -118,7 +118,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
         {
           /* Yes... duplicate it for the child */
 
-          (void)file_dup2(&parent[i], &child[i]);
+          file_dup2(&parent[i], &child[i]);
         }
     }
 }
@@ -174,7 +174,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
         {
           /* Yes... duplicate it for the child */
 
-          (void)net_clone(&parent[i], &child[i]);
+          net_clone(&parent[i], &child[i]);
         }
     }
 }

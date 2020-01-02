@@ -114,12 +114,12 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          (void)ramroute_ipv4_remafter((FAR struct net_route_ipv4_entry_s *)match->prev,
-                                       &g_ipv4_routes);
+          ramroute_ipv4_remafter((FAR struct net_route_ipv4_entry_s *)match->prev,
+                                 &g_ipv4_routes);
         }
       else
         {
-          (void)ramroute_ipv4_remfirst(&g_ipv4_routes);
+          ramroute_ipv4_remfirst(&g_ipv4_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */
@@ -167,12 +167,12 @@ static int net_match_ipv6(FAR struct net_route_ipv6_s *route, FAR void *arg)
 
       if (match->prev)
         {
-          (void)ramroute_ipv6_remafter((FAR struct net_route_ipv6_entry_s *)match->prev,
-                                        &g_ipv6_routes);
+          ramroute_ipv6_remafter((FAR struct net_route_ipv6_entry_s *)match->prev,
+                                 &g_ipv6_routes);
         }
       else
         {
-          (void)ramroute_ipv6_remfirst(&g_ipv6_routes);
+          ramroute_ipv6_remfirst(&g_ipv6_routes);
         }
 
       /* And free the routing table entry by adding it to the free list */

@@ -287,7 +287,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)stm32_oneshot_cancel(oneshot, NULL);
+      stm32_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */

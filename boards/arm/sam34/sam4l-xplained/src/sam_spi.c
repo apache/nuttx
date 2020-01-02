@@ -243,7 +243,7 @@ int sam_spic0mddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        * Low:  the inputs are transferred to the command registers.
        */
 
-      (void)sam_gpiowrite(GPIO_OLED_DATA, !cmd);
+      sam_gpiowrite(GPIO_OLED_DATA, !cmd);
     }
 #endif
       return OK;

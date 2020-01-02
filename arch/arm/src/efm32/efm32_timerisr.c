@@ -125,7 +125,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(EFM32_IRQ_SYSTICK, (xcpt_t)efm32_timerisr, NULL);
+  irq_attach(EFM32_IRQ_SYSTICK, (xcpt_t)efm32_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

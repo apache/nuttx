@@ -681,7 +681,7 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   /* Attach our EWI interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(SAM_IRQ_WDT, sam34_interrupt, NULL);
+  irq_attach(SAM_IRQ_WDT, sam34_interrupt, NULL);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the
@@ -699,7 +699,7 @@ void sam_wdtinitialize(FAR const char *devpath)
    * (default /dev/watchdog0).
    */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
 }
 #endif /* CONFIG_WDT_DISABLE_ON_RESET */

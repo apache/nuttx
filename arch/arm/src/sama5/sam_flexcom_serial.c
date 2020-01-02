@@ -1211,25 +1211,25 @@ void flexus_serialinit(void)
   /* Register the console */
 
 #ifdef SAMA5_HAVE_FLEXCOM_CONSOLE
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all UARTs/USARTs */
 
 #ifdef TTYFC0_DEV
-  (void)uart_register("/dev/ttyFC0", &TTYFC0_DEV);
+  uart_register("/dev/ttyFC0", &TTYFC0_DEV);
 #endif
 #ifdef TTYFC1_DEV
-  (void)uart_register("/dev/ttyFC1", &TTYFC1_DEV);
+  uart_register("/dev/ttyFC1", &TTYFC1_DEV);
 #endif
 #ifdef TTYFC2_DEV
-  (void)uart_register("/dev/ttyFC2", &TTYFC2_DEV);
+  uart_register("/dev/ttyFC2", &TTYFC2_DEV);
 #endif
 #ifdef TTYFC3_DEV
-  (void)uart_register("/dev/ttyFC3", &TTYFC3_DEV);
+  uart_register("/dev/ttyFC3", &TTYFC3_DEV);
 #endif
 #ifdef TTYFC4_DEV
-  (void)uart_register("/dev/ttyFC4", &TTYFC4_DEV);
+  uart_register("/dev/ttyFC4", &TTYFC4_DEV);
 #endif
 }
 

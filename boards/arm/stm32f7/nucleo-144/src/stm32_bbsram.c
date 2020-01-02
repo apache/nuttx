@@ -304,7 +304,7 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
     {
       ret = file_ioctl(&filestruct, STM32F7_BBSRAM_GETDESC_IOCTL,
                        (unsigned long)((uintptr_t)desc));
-      (void)file_close(&filestruct);
+      file_close(&filestruct);
 
       if (ret < 0)
         {
@@ -399,7 +399,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   FAR struct tcb_s *rtcb;
   int rv;
 
-  (void)enter_critical_section();
+  enter_critical_section();
 
   rtcb = (FAR struct tcb_s *)tcb;
 

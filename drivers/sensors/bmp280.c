@@ -483,7 +483,7 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
 
   /* Update temperature fine value first. */
 
-  (void) bmp280_compensate_temp(priv, temp);
+  bmp280_compensate_temp(priv, temp);
 
   var1 = (priv->tempfine >> 1) - 64000;
   var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t)c->p6);

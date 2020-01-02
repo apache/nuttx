@@ -108,7 +108,7 @@ int nxtask_exit(void)
    * with state == TSTATE_TASK_RUNNING
    */
 
-  (void)sched_removereadytorun(dtcb);
+  sched_removereadytorun(dtcb);
 
   /* Get the new task at the head of the ready to run list */
 
@@ -176,7 +176,7 @@ int nxtask_exit(void)
 
   if (g_pendingtasks.head != NULL)
     {
-      (void)sched_mergepending();
+      sched_mergepending();
     }
 
   return ret;

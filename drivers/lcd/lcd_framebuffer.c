@@ -589,7 +589,7 @@ int up_fbinitialize(int display)
 
   /* Turn the LCD on at 75% power */
 
-  (void)priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+  priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
   return OK;
 
 errout_with_lcd:

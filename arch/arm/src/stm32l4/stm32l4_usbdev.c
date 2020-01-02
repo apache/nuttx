@@ -1600,7 +1600,7 @@ static void stm32l4_epdone(struct stm32l4_usbdev_s *priv, uint8_t epno)
         {
           /* Read host data into the current read request */
 
-          (void)stm32l4_rdrequest(priv, privep);
+          stm32l4_rdrequest(priv, privep);
 
           /* "After the received data is processed, the application software
            *  should set the STAT_RX bits to '11' (Valid) in the USB_EPnR,
@@ -1651,11 +1651,11 @@ static void stm32l4_epdone(struct stm32l4_usbdev_s *priv, uint8_t epno)
       priv->txstatus = USB_EPR_STATTX_NAK;
       if (epno == EP0)
         {
-          (void)stm32l4_wrrequest_ep0(priv, privep);
+          stm32l4_wrrequest_ep0(priv, privep);
         }
       else
         {
-          (void)stm32l4_wrrequest(priv, privep);
+          stm32l4_wrrequest(priv, privep);
         }
 
       /* Set the new TX status */
@@ -1913,7 +1913,7 @@ static void stm32l4_ep0setup(struct stm32l4_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 0;
-                (void)stm32l4_epstall(&privep->ep, true);
+                stm32l4_epstall(&privep->ep, true);
               }
             else
               {
@@ -1961,7 +1961,7 @@ static void stm32l4_ep0setup(struct stm32l4_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 1;
-                (void)stm32l4_epstall(&privep->ep, false);
+                stm32l4_epstall(&privep->ep, false);
               }
             else
               {
@@ -3170,11 +3170,11 @@ static int stm32l4_epstall(struct usbdev_ep_s *ep, bool resume)
               priv->txstatus = USB_EPR_STATTX_NAK;
               if (epno == EP0)
                 {
-                  (void)stm32l4_wrrequest_ep0(priv, privep);
+                  stm32l4_wrrequest_ep0(priv, privep);
                 }
               else
                 {
-                  (void)stm32l4_wrrequest(priv, privep);
+                  stm32l4_wrrequest(priv, privep);
                 }
 
               /* Set the new TX status */

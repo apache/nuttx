@@ -912,7 +912,7 @@ static void sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
 
   /* Clear any pending interrupts then enable the DMA interrupt */
 
-  (void)sam_getreg(SAM_UDPHS_DMASTATUS(epno));
+  sam_getreg(SAM_UDPHS_DMASTATUS(epno));
   regval  = sam_getreg(SAM_UDPHS_IEN);
   regval |= UDPHS_INT_DMA(epno);
   sam_putreg(regval, SAM_UDPHS_IEN);
@@ -1808,7 +1808,7 @@ static void sam_ep0_dispatch(struct sam_usbdev_s *priv)
           /* Stall on failure */
 
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_DISPATCHSTALL), 0);
-          (void)sam_ep_stall(&priv->eplist[EP0].ep, false);
+          sam_ep_stall(&priv->eplist[EP0].ep, false);
         }
     }
 }
@@ -2298,7 +2298,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPSTALLED),
                    priv->ctrl.req);
 
-          (void)sam_ep_stall(&priv->eplist[EP0].ep, false);
+          sam_ep_stall(&priv->eplist[EP0].ep, false);
         }
         break;
 
@@ -2397,7 +2397,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           DEBUGASSERT(USB_ISEPIN(privep->ep.eplog));
           privep->epstate = UDPHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+          sam_req_write(priv, privep);
         }
       else if (privep->epstate == UDPHS_EPSTATE_RECEIVING)
         {
@@ -2423,7 +2423,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
            */
 
           privep->epstate = UDPHS_EPSTATE_IDLE;
-          (void)sam_req_read(priv, privep, xfrsize);
+          sam_req_read(priv, privep, xfrsize);
         }
       else
         {
@@ -2476,7 +2476,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
        */
 
       privep->epstate = UDPHS_EPSTATE_IDLE;
-      (void)sam_req_read(priv, privep, xfrsize);
+      sam_req_read(priv, privep, xfrsize);
     }
   else
     {
@@ -2541,7 +2541,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
            */
 
           privep->epstate = UDPHS_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+          sam_req_write(priv, privep);
         }
 
       /* Setting of the device address is a special case.  The address was
@@ -2635,7 +2635,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
               /* STALL and discard received data. */
 
-              (void)sam_ep_stall(&privep->ep, false);
+              sam_ep_stall(&privep->ep, false);
               sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
             }
         }
@@ -3737,13 +3737,13 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
             {
               /* IN endpoint (or EP0).  Restart any queued write requests */
 
-              (void)sam_req_write(priv, privep);
+              sam_req_write(priv, privep);
             }
           else
             {
               /* OUT endpoint.  Restart any queued read requests. */
 
-              (void)sam_req_read(priv, privep, 0);
+              sam_req_read(priv, privep, 0);
             }
         }
     }

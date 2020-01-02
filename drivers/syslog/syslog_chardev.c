@@ -112,7 +112,7 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
 
 void syslog_register(void)
 {
-  (void)register_driver("/dev/syslog", &syslog_fops, 0222, NULL);
+  register_driver("/dev/syslog", &syslog_fops, 0222, NULL);
 }
 
 #endif /* CONFIG_SYSLOG_CHARDEV */

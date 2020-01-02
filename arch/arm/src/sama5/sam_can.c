@@ -558,19 +558,7 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg)
 
 static void can_semtake(FAR struct sam_can_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************

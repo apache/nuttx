@@ -135,9 +135,7 @@ FAR struct mtd_dev_s *mtd_temp;
   char blockdev[18];
   char chardev[12];
 #endif
-  int ret;
-
-  (void)ret;
+  int ret = OK;
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
@@ -315,7 +313,7 @@ FAR struct mtd_dev_s *mtd_temp;
     }
 #endif
 
-  return OK;
+  return ret;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
 

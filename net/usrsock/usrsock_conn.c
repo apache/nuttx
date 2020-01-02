@@ -85,23 +85,12 @@ static dq_queue_t g_active_usrsock_connections;
 
 static void _usrsock_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  while ((ret = net_lockedwait(sem)) < 0)
-    {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-    }
+  net_lockedwait_uninterruptible(sem);
 }
 
 static void _usrsock_semgive(FAR sem_t *sem)
 {
-  (void)nxsem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -257,7 +246,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 {
   int ret = -EBUSY;
 
-  (void)nxsem_init(&pstate->recvsem, 0, 0);
+  nxsem_init(&pstate->recvsem, 0, 0);
   nxsem_setprotocol(&pstate->recvsem, SEM_PRIO_NONE);
 
   pstate->conn   = conn;

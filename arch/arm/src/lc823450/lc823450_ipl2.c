@@ -284,7 +284,7 @@ static void load_kernel(const char *name, const char *devname)
 
   tmp = (void *)0x02040000;
 
-  (void)blk_read(tmp, 512 * 1024, devname, 0);
+  blk_read(tmp, 512 * 1024, devname, 0);
 
   /* disable all IRQ */
 
@@ -655,11 +655,11 @@ void check_lastkmsg(void)
 
   /* log rotate */
 
-  (void)unlink(LASTMSG_LOGPATH ".4");
-  (void)rename(LASTMSG_LOGPATH ".3", LASTMSG_LOGPATH ".4");
-  (void)rename(LASTMSG_LOGPATH ".2", LASTMSG_LOGPATH ".3");
-  (void)rename(LASTMSG_LOGPATH ".1", LASTMSG_LOGPATH ".2");
-  (void)rename(LASTMSG_LOGPATH ".0", LASTMSG_LOGPATH ".1");
+  unlink(LASTMSG_LOGPATH ".4");
+  rename(LASTMSG_LOGPATH ".3", LASTMSG_LOGPATH ".4");
+  rename(LASTMSG_LOGPATH ".2", LASTMSG_LOGPATH ".3");
+  rename(LASTMSG_LOGPATH ".1", LASTMSG_LOGPATH ".2");
+  rename(LASTMSG_LOGPATH ".0", LASTMSG_LOGPATH ".1");
 
   fp = fopen(LASTMSG_LOGPATH ".0", "w");
 

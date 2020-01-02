@@ -138,21 +138,7 @@ extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
 
 static void _sdc_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -189,12 +175,12 @@ static void lc823450_sdc_access_led(uint32_t ch, unsigned long sector)
     {
       if (sector >= CONFIG_MTD_CP_STARTBLOCK)
         {
-          (void)led_start_accled(false);
+          led_start_accled(false);
         }
     }
   else
     {
-      (void)led_start_accled(false);
+      led_start_accled(false);
     }
 }
 #else
@@ -657,7 +643,7 @@ int lc823450_sdc_locked(void)
 
   for (i = 0; i < 2; i++)
     {
-      (void)nxsem_getvalue(&_sdc_sem[i], &val);
+      nxsem_getvalue(&_sdc_sem[i], &val);
       if (1 != val)
         {
           ret = 1;

@@ -171,7 +171,7 @@ errout_with_halfduplex:
 
   /* Release our reference to the half duplex FIFO */
 
-  (void)local_release_halfduplex(conn);
+  local_release_halfduplex(conn);
   return nsent;
 }
 

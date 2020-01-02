@@ -567,12 +567,12 @@ void timer_unregister(FAR void *handle)
   /* Disable the timer */
 
   DEBUGASSERT(lower->ops->stop); /* Required */
-  (void)lower->ops->stop(lower);
+  lower->ops->stop(lower);
   nxsig_cancel_notification(&upper->work);
 
   /* Unregister the timer device */
 
-  (void)unregister_driver(upper->path);
+  unregister_driver(upper->path);
 
   /* Then free all of the driver resources */
 

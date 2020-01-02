@@ -388,8 +388,8 @@ static int usart0_attach(struct uart_dev_s *dev)
    *      written.
    */
 
-  (void)irq_attach(ATMEGA_IRQ_U0RX, usart0_rxinterrupt, NULL);
-  (void)irq_attach(ATMEGA_IRQ_U0DRE, usart0_txinterrupt, NULL);
+  irq_attach(ATMEGA_IRQ_U0RX, usart0_rxinterrupt, NULL);
+  irq_attach(ATMEGA_IRQ_U0DRE, usart0_txinterrupt, NULL);
 //(void)irq_attach(ATMEGA_IRQ_U0TX, usart0_txinterrupt, NULL);
   return OK;
 }
@@ -410,8 +410,8 @@ static int usart1_attach(struct uart_dev_s *dev)
    *      written.
    */
 
-  (void)irq_attach(ATMEGA_IRQ_U1RX, usart1_rxinterrupt, NULL);
-  (void)irq_attach(ATMEGA_IRQ_U1DRE, usart1_txinterrupt, NULL);
+  irq_attach(ATMEGA_IRQ_U1RX, usart1_rxinterrupt, NULL);
+  irq_attach(ATMEGA_IRQ_U1DRE, usart1_txinterrupt, NULL);
 //(void)irq_attach(ATMEGA_IRQ_U1TX, usart1_txinterrupt, NULL);
   return OK;
 }
@@ -436,8 +436,8 @@ static void usart0_detach(struct uart_dev_s *dev)
 
   /* Detach the USART0 IRQs */
 
-  (void)irq_detach(ATMEGA_IRQ_U0RX);
-  (void)irq_detach(ATMEGA_IRQ_U0DRE);
+  irq_detach(ATMEGA_IRQ_U0RX);
+  irq_detach(ATMEGA_IRQ_U0DRE);
 //  (void)irq_detach(ATMEGA_IRQ_U0TX);
 }
 #endif
@@ -451,8 +451,8 @@ static void usart1_detach(struct uart_dev_s *dev)
 
   /* Detach the USART1 IRQs */
 
-  (void)irq_detach(ATMEGA_IRQ_U1RX);
-  (void)irq_detach(ATMEGA_IRQ_U1DRE);
+  irq_detach(ATMEGA_IRQ_U1RX);
+  irq_detach(ATMEGA_IRQ_U1DRE);
 //(void)irq_detach(ATMEGA_IRQ_U1TX);
 }
 #endif
@@ -935,14 +935,14 @@ void up_serialinit(void)
   /* Register the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all USARTs */
 
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  uart_register("/dev/ttyS0", &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 }
 

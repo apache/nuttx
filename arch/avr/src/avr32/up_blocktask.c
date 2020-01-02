@@ -159,7 +159,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
            * thread at the head of the ready-to-run list.
            */
 
-          (void)group_addrenv(nexttcb);
+          group_addrenv(nexttcb);
 #endif
           /* Reset scheduler parameters */
 

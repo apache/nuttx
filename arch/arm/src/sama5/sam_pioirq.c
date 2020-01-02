@@ -267,12 +267,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOA interrupts */
 
-  (void)getreg32(SAM_PIOA_ISR);
+  getreg32(SAM_PIOA_ISR);
   putreg32(0xffffffff, SAM_PIOA_IDR);
 
   /* Attach and enable the PIOA IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOA, sam_pioainterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOA, sam_pioainterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOA);
 #endif
 
@@ -285,12 +285,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOB interrupts */
 
-  (void)getreg32(SAM_PIOB_ISR);
+  getreg32(SAM_PIOB_ISR);
   putreg32(0xffffffff, SAM_PIOB_IDR);
 
   /* Attach and enable the PIOB IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOB, sam_piobinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOB, sam_piobinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOB);
 #endif
 
@@ -303,12 +303,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOC interrupts */
 
-  (void)getreg32(SAM_PIOC_ISR);
+  getreg32(SAM_PIOC_ISR);
   putreg32(0xffffffff, SAM_PIOC_IDR);
 
   /* Attach and enable the PIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOC, sam_piocinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOC, sam_piocinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOC);
 #endif
 
@@ -321,12 +321,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOD interrupts */
 
-  (void)getreg32(SAM_PIOD_ISR);
+  getreg32(SAM_PIOD_ISR);
   putreg32(0xffffffff, SAM_PIOD_IDR);
 
   /* Attach and enable the PIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOD, sam_piodinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOD, sam_piodinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOD);
 #endif
 
@@ -339,12 +339,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOE interrupts */
 
-  (void)getreg32(SAM_PIOE_ISR);
+  getreg32(SAM_PIOE_ISR);
   putreg32(0xffffffff, SAM_PIOE_IDR);
 
   /* Attach and enable the PIOE IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOE, sam_pioeinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOE, sam_pioeinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOE);
 #endif
 
@@ -357,12 +357,12 @@ void sam_pioirqinitialize(void)
 
   /* Clear and disable all PIOF interrupts */
 
-  (void)getreg32(SAM_PIOF_ISR);
+  getreg32(SAM_PIOF_ISR);
   putreg32(0xffffffff, SAM_PIOF_IDR);
 
   /* Attach and enable the PIOF IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOF, sam_piofinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOF, sam_piofinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOF);
 #endif
 }

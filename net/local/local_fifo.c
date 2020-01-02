@@ -82,13 +82,13 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
 {
   if (conn->lc_instance_id < 0)
     {
-      (void)snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX,
-                     conn->lc_path);
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX,
+               conn->lc_path);
     }
   else
     {
-      (void)snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX "%x",
-                     conn->lc_path, conn->lc_instance_id);
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX "%x",
+               conn->lc_path, conn->lc_instance_id);
     }
 
   path[LOCAL_FULLPATH_LEN - 1] = '\0';
@@ -109,13 +109,13 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
 {
   if (conn->lc_instance_id < 0)
     {
-      (void)snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX,
-                     conn->lc_path);
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX,
+               conn->lc_path);
     }
   else
     {
-      (void)snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX "%x",
-                     conn->lc_path, conn->lc_instance_id);
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX "%x",
+               conn->lc_path, conn->lc_instance_id);
     }
 
   path[LOCAL_FULLPATH_LEN - 1] = '\0';
@@ -133,8 +133,8 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
 #ifdef CONFIG_NET_LOCAL_DGRAM
 static inline void local_hd_name(FAR const char *inpath, FAR char *outpath)
 {
-  (void)snprintf(outpath, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_HD_SUFFIX,
-                 inpath);
+  snprintf(outpath, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_HD_SUFFIX,
+          inpath);
   outpath[LOCAL_FULLPATH_LEN - 1] = '\0';
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */

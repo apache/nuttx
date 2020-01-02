@@ -451,9 +451,9 @@ static void rit_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_P14201_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_P14201_FREQUENCY
-  (void)SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
+  SPI_SETFREQUENCY(spi, CONFIG_P14201_FREQUENCY);
 #endif
 }
 
@@ -512,7 +512,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
 
   /* Clear/set the D/Cn bit to enable command or data mode */
 
-  (void)SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), cmd);
+  SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), cmd);
 
   /* Loop until the entire command/data block is transferred */
 
@@ -521,7 +521,7 @@ static void rit_sndbytes(FAR struct rit_dev_s *priv, FAR const uint8_t *buffer,
       /* Write the next byte to the controller */
 
       tmp = *buffer++;
-      (void)SPI_SEND(spi, tmp);
+      SPI_SEND(spi, tmp);
    }
 }
 

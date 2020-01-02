@@ -91,6 +91,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)mcb1700_bringup();
+  mcb1700_bringup();
 }
 #endif

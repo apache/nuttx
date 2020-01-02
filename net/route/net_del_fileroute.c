@@ -325,10 +325,10 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
   ret = file_truncate(&fshandle, filesize);
 
 errout_with_fshandle:
-  (void)net_closeroute_ipv4(&fshandle);
+  net_closeroute_ipv4(&fshandle);
 
 errout_with_lock:
-  (void)net_unlockroute_ipv4();
+  net_unlockroute_ipv4();
   return ret;
 }
 #endif
@@ -474,10 +474,10 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
   ret = file_truncate(&fshandle, filesize);
 
 errout_with_fshandle:
-  (void)net_closeroute_ipv6(&fshandle);
+  net_closeroute_ipv6(&fshandle);
 
 errout_with_lock:
-  (void)net_unlockroute_ipv6();
+  net_unlockroute_ipv6();
   return ret;
 }
 #endif

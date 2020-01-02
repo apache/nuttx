@@ -635,17 +635,7 @@ static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* How many samples were requested to get? */
 
@@ -701,17 +691,7 @@ static int t67xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   switch (cmd)
     {

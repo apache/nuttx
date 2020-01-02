@@ -259,7 +259,7 @@ void am335x_gpio_irqinitialize(void)
 
   /* Attach and enable the GPIO0 IRQ */
 
-  (void)irq_attach(AM335X_IRQ_GPIO0A, am335x_gpio0_interrupt, NULL);
+  irq_attach(AM335X_IRQ_GPIO0A, am335x_gpio0_interrupt, NULL);
   up_enable_irq(AM335X_IRQ_GPIO0A);
 #endif
 
@@ -284,7 +284,7 @@ void am335x_gpio_irqinitialize(void)
 
   /* Attach and enable the GPIO1 IRQ */
 
-  (void)irq_attach(AM335X_IRQ_GPIO1A, am335x_gpio1_interrupt, NULL);
+  irq_attach(AM335X_IRQ_GPIO1A, am335x_gpio1_interrupt, NULL);
   up_enable_irq(AM335X_IRQ_GPIO1A);
 #endif
 
@@ -309,7 +309,7 @@ void am335x_gpio_irqinitialize(void)
 
   /* Attach and enable the GPIO2 IRQ */
 
-  (void)irq_attach(AM335X_IRQ_GPIO2A, am335x_gpio2_interrupt, NULL);
+  irq_attach(AM335X_IRQ_GPIO2A, am335x_gpio2_interrupt, NULL);
   up_enable_irq(AM335X_IRQ_GPIO2A);
 #endif
 
@@ -334,7 +334,7 @@ void am335x_gpio_irqinitialize(void)
 
   /* Attach and enable the GPIO3 IRQ */
 
-  (void)irq_attach(AM335X_IRQ_GPIO3A, am335x_gpio3_interrupt, NULL);
+  irq_attach(AM335X_IRQ_GPIO3A, am335x_gpio3_interrupt, NULL);
   up_enable_irq(AM335X_IRQ_GPIO3A);
 #endif
 }

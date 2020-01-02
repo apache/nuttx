@@ -100,8 +100,8 @@ int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 
   /* Convert that to a struct timespec and return it */
 
-  (void)clock_ticks2time(ticks, &value->it_value);
-  (void)clock_ticks2time(timer->pt_last, &value->it_interval);
+  clock_ticks2time(ticks, &value->it_value);
+  clock_ticks2time(timer->pt_last, &value->it_interval);
   return OK;
 }
 

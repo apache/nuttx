@@ -261,7 +261,7 @@ void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
    * unlocked.
    */
 
-  (void)QSPI_LOCK(qspi, true);
+  QSPI_LOCK(qspi, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits
    * and setmode methods to make sure that the SPI is properly configured for
@@ -271,13 +271,13 @@ void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
 
   QSPI_SETMODE(qspi, CONFIG_MX25RXX_QSPIMODE);
   QSPI_SETBITS(qspi, 8);
-  (void)QSPI_SETFREQUENCY(qspi,
+  QSPI_SETFREQUENCY(qspi,
      read ? CONFIG_MX25RXX_QSPI_READ_FREQUENCY : CONFIG_MX25RXX_QSPI_FREQUENCY);
 }
 
 void mx25rxx_unlock(FAR struct qspi_dev_s *qspi)
 {
-  (void)QSPI_LOCK(qspi, false);
+  QSPI_LOCK(qspi, false);
 }
 
 int mx25rxx_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,

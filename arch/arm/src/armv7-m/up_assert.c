@@ -369,7 +369,7 @@ static void up_dumpstate(void)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 }
 #else
@@ -385,19 +385,19 @@ static void _up_assert(int errorcode)
 {
   /* Flush any buffered SYSLOG data */
 
-  (void)syslog_flush();
+  syslog_flush();
 
   /* Are we in an interrupt handler or the idle task? */
 
   if (CURRENT_REGS || (running_task())->flink == NULL)
     {
-      (void)up_irq_save();
+      up_irq_save();
       for (; ; )
         {
 #ifdef CONFIG_SMP
           /* Try (again) to stop activity on other CPUs */
 
-          (void)spin_trylock(&g_cpu_irqlock);
+          spin_trylock(&g_cpu_irqlock);
 #endif
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
@@ -438,7 +438,7 @@ void up_assert(const uint8_t *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (prior to the assertion) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_SMP
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -462,7 +462,7 @@ void up_assert(const uint8_t *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (from the above) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), running_task(), filename, lineno);

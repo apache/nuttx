@@ -1973,8 +1973,8 @@ void weak_function up_dma_initialize(void)
 
       /* Attach standard DMA interrupt vectors */
 
-      (void)irq_attach(dmachan->irq, g_dma_ops[controller].dma_interrupt,
-                       dmachan);
+      irq_attach(dmachan->irq, g_dma_ops[controller].dma_interrupt,
+                 dmachan);
 
       /* Disable the DMA stream */
 

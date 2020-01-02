@@ -313,7 +313,7 @@ int main(int argc, char **argv)
 
               /* Write the modified line to the output */
 
-              (void)fputs(g_line0, outstream);
+              fputs(g_line0, outstream);
             }
           else
             {
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 
                   /* Write the modified line to the output */
 
-                  (void)fputs(g_line0, outstream);
+                  fputs(g_line0, outstream);
 
                   /* Closing comment must be followed by a blank line */
 
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
                 {
                   /* Write the modified line to the output */
 
-                  (void)fputs(g_line0, outstream);
+                  fputs(g_line0, outstream);
                 }
             }
         }
@@ -380,7 +380,7 @@ int main(int argc, char **argv)
 
           /* Write the closing line to the output */
 
-          (void)fputs(g_iobuffer, outstream);
+          fputs(g_iobuffer, outstream);
 
           /* Closing comment must be followed by a blank line */
 
@@ -393,13 +393,13 @@ int main(int argc, char **argv)
 
           /* Write the noncomment line to the output */
 
-          (void)fputs(g_line0, outstream);
+          fputs(g_line0, outstream);
         }
       else
         {
           /* Write the noncomment line to the output */
 
-          (void)fputs(g_line0, outstream);
+          fputs(g_line0, outstream);
         }
 
       wascomment = iscomment;

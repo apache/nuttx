@@ -215,7 +215,7 @@ enum spirit_pqi_threshold_e
 
   /* Reads the QI register value */
 
-  (void)spirit_reg_read(spirit, QI_BASE, &regval, 1);
+  spirit_reg_read(spirit, QI_BASE, &regval, 1);
 
   /* Rebuild and return the PQI threshold value */
 
@@ -291,7 +291,7 @@ enum spirit_sqi_threshold_e
 
   /* Read the QI register value */
 
-  (void)spirit_reg_read(spirit, QI_BASE, &regval, 1);
+  spirit_reg_read(spirit, QI_BASE, &regval, 1);
 
   /* Return the SQI threshold value */
 
@@ -318,7 +318,7 @@ uint8_t spirit_qi_get_pqi(FAR struct spirit_library_s *spirit)
 
   /* Reads the LINK_QUALIF2 register value */
 
-  (void)spirit_reg_read(spirit, LINK_QUALIF2_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINK_QUALIF2_BASE, &regval, 1);
 
   /* Returns the PQI value */
 
@@ -345,7 +345,7 @@ uint8_t spirit_qi_get_sqi(FAR struct spirit_library_s *spirit)
 
   /* Reads the register LINK_QUALIF1 value */
 
-  (void)spirit_reg_read(spirit, LINK_QUALIF1_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINK_QUALIF1_BASE, &regval, 1);
 
   /* Rebuild and return the SQI value */
 
@@ -372,7 +372,7 @@ uint8_t spirit_qi_get_lqi(FAR struct spirit_library_s *spirit)
 
   /* Reads the LINK_QUALIF0 register value */
 
-  (void)spirit_reg_read(spirit, LINK_QUALIF0_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINK_QUALIF0_BASE, &regval, 1);
 
   /* Rebuild and return the LQI value */
 
@@ -399,7 +399,7 @@ enum spirit_flag_status_e spirit_qi_get_cs(FAR struct spirit_library_s *spirit)
 
   /* Reads the LINK_QUALIF1 register value */
 
-  (void)spirit_reg_read(spirit, LINK_QUALIF1_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINK_QUALIF1_BASE, &regval, 1);
 
   /* Rebuild and returns the CS status value */
 
@@ -435,7 +435,7 @@ uint8_t spirit_qi_get_rssi(FAR struct spirit_library_s *spirit)
 
   /* Reads the RSSI_LEVEL register value */
 
-  (void)spirit_reg_read(spirit, RSSI_LEVEL_BASE, &regval, 1);
+  spirit_reg_read(spirit, RSSI_LEVEL_BASE, &regval, 1);
 
   /* Returns the RSSI value */
 
@@ -486,7 +486,7 @@ uint8_t spirit_qi_get_rssithreshold(FAR struct spirit_library_s *spirit)
 
   /* Reads the RSSI_TH register value */
 
-  (void)spirit_reg_read(spirit, RSSI_TH_BASE, &regval, 1);
+  spirit_reg_read(spirit, RSSI_TH_BASE, &regval, 1);
 
   /* Returns RSSI threshold */
 
@@ -618,7 +618,7 @@ enum spirit_rssi_filtergain_e
 
   /* Reads the RSSI_FLT register */
 
-  (void)spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
+  spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
 
   /* Rebuild and returns the filter gain value */
 
@@ -695,7 +695,7 @@ enum spirit_csmode_e spirit_qi_get_csmode(FAR struct spirit_library_s *spirit)
 
   /* Reads the RSSI_FLT register */
 
-  (void)spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
+  spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
 
   /* Rebuild and returns the CS mode value */
 

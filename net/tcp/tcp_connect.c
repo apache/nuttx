@@ -106,8 +106,8 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
-  (void)nxsem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
+  nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
+  nxsem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;
   pstate->tc_psock  = psock;
@@ -345,7 +345,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 
           /* Uninitialize the state structure */
 
-          (void)nxsem_destroy(&state.tc_sem);
+          nxsem_destroy(&state.tc_sem);
 
           /* If net_lockedwait failed, negated errno was returned. */
 

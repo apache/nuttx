@@ -970,7 +970,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Detach the interrupt handler */
 
-  (void)irq_detach(priv->config->irq);
+  irq_detach(priv->config->irq);
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.

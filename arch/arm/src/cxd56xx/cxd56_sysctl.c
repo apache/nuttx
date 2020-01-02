@@ -86,15 +86,12 @@ static int sysctl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static void sysctl_semtake(sem_t *semid)
 {
-  while (sem_wait(semid) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(semid);
 }
 
 static void sysctl_semgive(sem_t *semid)
 {
-  sem_post(semid);
+  nxsem_post(semid);
 }
 
 static int sysctl_rxhandler(int cpuid, int protoid,
@@ -150,10 +147,10 @@ void cxd56_sysctlinitialize(void)
 {
   cxd56_iccinit(CXD56_PROTO_SYSCTL);
 
-  sem_init(&g_exc, 0, 1);
-  sem_init(&g_sync, 0, 0);
+  nxsem_init(&g_exc, 0, 1);
+  nxsem_init(&g_sync, 0, 0);
 
   cxd56_iccregisterhandler(CXD56_PROTO_SYSCTL, sysctl_rxhandler, NULL);
 
-  (void)register_driver("/dev/sysctl", &g_sysctlfops, 0666, NULL);
+  register_driver("/dev/sysctl", &g_sysctlfops, 0666, NULL);
 }

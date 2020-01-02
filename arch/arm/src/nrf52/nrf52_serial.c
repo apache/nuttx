@@ -662,10 +662,10 @@ void up_serialinit(void)
 #ifdef HAVE_UART_CONSOLE
   /* Register the serial console */
 
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  uart_register("/dev/ttyS0", &TTYS0_DEV);
   minor = 1;
 
   /* Register all remaining UARTs */
@@ -691,7 +691,7 @@ void up_serialinit(void)
       /* Register USARTs as devices in increasing order */
 
       devname[9] = '0' + minor++;
-      (void)uart_register(devname, g_uart_devs[i]);
+      uart_register(devname, g_uart_devs[i]);
     }
 }
 

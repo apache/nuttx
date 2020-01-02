@@ -77,7 +77,7 @@ long double truncl(long double x)
       /* Force Eval */
 
       __x = (x + 0x1p120f);
-      (void)__x;
+      UNUSED(__x);
       return x*0;
     }
 

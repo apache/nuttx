@@ -177,15 +177,7 @@ static struct pm_cpu_wakelock_s g_wlock =
 
 static int cxd56_pm_semtake(FAR sem_t *id)
 {
-  while (sem_wait(id) != 0)
-    {
-      if (errno != EINTR)
-        {
-          pmerr("ERR:sem_wait\n");
-          return errno;
-        }
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 static int cxd56_pm_needcallback(uint32_t target,
@@ -315,7 +307,7 @@ static void cxd56_pm_clkchange(struct cxd56_pm_message_s *message)
 
   cxd56_pmsendmsg(mid, ret);
 
-  sem_post(&g_regcblock);
+  nxsem_post(&g_regcblock);
 }
 
 static void cxd56_pm_checkfreqlock(void)
@@ -463,7 +455,7 @@ FAR void *cxd56_pm_register_callback(uint32_t target,
   entry = (struct pm_cbentry_s *)kmm_malloc(sizeof(struct pm_cbentry_s));
   if (entry == NULL)
     {
-      sem_post(&g_regcblock);
+      nxsem_post(&g_regcblock);
       return NULL;
     }
 
@@ -471,7 +463,7 @@ FAR void *cxd56_pm_register_callback(uint32_t target,
   entry->callback = callback;
 
   dq_addlast((FAR dq_entry_t *)entry, &g_cbqueue);
-  sem_post(&g_regcblock);
+  nxsem_post(&g_regcblock);
 
   return (void *)entry;
 }
@@ -483,7 +475,7 @@ void cxd56_pm_unregister_callback(FAR void *handle)
   dq_rem((FAR dq_entry_t *)handle, &g_cbqueue);
   kmm_free(handle);
 
-  sem_post(&g_regcblock);
+  nxsem_post(&g_regcblock);
 }
 
 static int cxd56_pmmsghandler(int cpuid, int protoid, uint32_t pdata,
@@ -517,7 +509,7 @@ static int cxd56_pmmsghandler(int cpuid, int protoid, uint32_t pdata,
     }
   else if (msgid == MSGID_FREQLOCK)
     {
-      sem_post(&g_freqlockwait);
+      nxsem_post(&g_freqlockwait);
     }
   else
     {
@@ -573,7 +565,7 @@ void up_pm_acquire_freqlock(struct pm_cpu_freqlock_s *lock)
 
   lock->count++;
 
-  sem_post(&g_freqlock);
+  nxsem_post(&g_freqlock);
 
   up_pm_release_wakelock(&g_wlock);
 }
@@ -614,7 +606,7 @@ void up_pm_release_freqlock(struct pm_cpu_freqlock_s *lock)
         }
     }
 
-  sem_post(&g_freqlock);
+  nxsem_post(&g_freqlock);
 
   up_pm_release_wakelock(&g_wlock);
 }
@@ -651,7 +643,7 @@ int up_pm_get_freqlock_count(struct pm_cpu_freqlock_s *lock)
         }
     }
 
-  sem_post(&g_freqlock);
+  nxsem_post(&g_freqlock);
   return count;
 }
 
@@ -795,22 +787,22 @@ int cxd56_pm_initialize(void)
   sq_init(&g_freqlockqueue);
   sq_init(&g_wakelockqueue);
 
-  ret = sem_init(&g_regcblock, 0, 1);
+  ret = nxsem_init(&g_regcblock, 0, 1);
   if (ret < 0)
     {
-      return -EPERM;
+      return ret;
     }
 
-  ret = sem_init(&g_freqlock, 0, 1);
+  ret = nxsem_init(&g_freqlock, 0, 1);
   if (ret < 0)
     {
-      return -EPERM;
+      return ret;
     }
 
-  ret = sem_init(&g_freqlockwait, 0, 0);
+  ret = nxsem_init(&g_freqlockwait, 0, 0);
   if (ret < 0)
     {
-      return -EPERM;
+      return ret;
     }
 
   attr.mq_maxmsg  = 8;

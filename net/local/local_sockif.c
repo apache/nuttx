@@ -409,7 +409,7 @@ static int local_getsockname(FAR struct socket *psock,
 
           /* Copy the path into the user address structure */
 
-          (void)strncpy(unaddr->sun_path, conn->lc_path, namelen);
+          strncpy(unaddr->sun_path, conn->lc_path, namelen);
           unaddr->sun_path[pathlen - 1] = '\0';
 
           *addrlen = sizeof(sa_family_t) + namelen;

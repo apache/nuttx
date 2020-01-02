@@ -360,19 +360,7 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 
 static void spi_semtake(struct sam_spidev_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->spisem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->spisem);
 }
 
 /****************************************************************************
@@ -1191,8 +1179,8 @@ struct spi_sctrlr_s *sam_spi_slave_initialize(int port)
 
       /* Flush any pending interrupts/transfers */
 
-      (void)spi_getreg(priv, SAM_SPI_SR_OFFSET);
-      (void)spi_getreg(priv, SAM_SPI_RDR_OFFSET);
+      spi_getreg(priv, SAM_SPI_SR_OFFSET);
+      spi_getreg(priv, SAM_SPI_RDR_OFFSET);
 
       /* Initialize the SPI semaphore that enforces mutually exclusive
        * access to the SPI registers.

@@ -359,7 +359,7 @@ int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        * Low:  the inputs are transferred to the command registers.
        */
 
-      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
+      sam_portwrite(PORT_OLED_DATA, !cmd);
     }
 #endif
 
@@ -380,7 +380,7 @@ int sam_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        * Low:  the inputs are transferred to the command registers.
        */
 
-      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
+      sam_portwrite(PORT_OLED_DATA, !cmd);
     }
 #endif
 

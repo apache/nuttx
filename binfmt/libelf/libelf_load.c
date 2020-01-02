@@ -368,7 +368,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
 errout_with_addrenv:
 #ifdef CONFIG_ARCH_ADDRENV
-  (void)elf_addrenv_restore(loadinfo);
+  elf_addrenv_restore(loadinfo);
 #endif
 
 errout_with_buffers:

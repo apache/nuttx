@@ -262,7 +262,7 @@ char *up_deviceimage(void)
           case Z_STREAM_ERROR:
               serr("ERROR: inflate FAILED: ret=%d msg=\"%s\"\n",
                     ret, strm.msg ? strm.msg : "No message");
-              (void)inflateEnd(&strm);
+              inflateEnd(&strm);
               kmm_free(pbuffer);
               return NULL;
         }
@@ -310,7 +310,7 @@ char *up_deviceimage(void)
     }
   while (strm.avail_out == 0 && ret != Z_STREAM_END);
 
-  (void)inflateEnd(&strm);
+  inflateEnd(&strm);
   return pbuffer;
 }
 

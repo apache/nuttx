@@ -160,7 +160,7 @@ static void get_base62(FAR uint8_t *ptr)
 
   memcpy(ptr, g_base62, MAX_XS);
   incr_base62();
-  (void)_SEM_POST(&g_b62sem);
+  _SEM_POST(&g_b62sem);
 }
 
 /****************************************************************************

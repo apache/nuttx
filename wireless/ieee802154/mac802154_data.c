@@ -73,7 +73,7 @@
 
 int mac802154_req_data(MACHANDLE mac,
                        FAR const struct ieee802154_frame_meta_s *meta,
-                       FAR struct iob_s *frame)
+                       FAR struct iob_s *frame, bool allowinterrupt)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -156,7 +156,7 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* From this point on, we need exclusive access to the privmac struct */
 
-  ret = mac802154_lock(priv, true);
+  ret = mac802154_lock(priv, allowinterrupt);
   if (ret < 0)
     {
       /* Should only fail if interrupted by a signal */

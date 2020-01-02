@@ -189,7 +189,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           /* Disable the interrupt and detach the handler */
 
           up_disable_irq(ZKITARM_KEY5_IRQ);
-          (void)irq_detach(ZKITARM_KEY5_IRQ);
+          irq_detach(ZKITARM_KEY5_IRQ);
 
           /* Configure KEY5 as a non-interrupting input */
 

@@ -486,26 +486,12 @@ static struct sam_dmac_s g_dmac1 =
 
 static void sam_takechsem(struct sam_dmac_s *dmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&dmac->chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dmac->chsem);
 }
 
 static inline void sam_givechsem(struct sam_dmac_s *dmac)
 {
-  (void)nxsem_post(&dmac->chsem);
+  nxsem_post(&dmac->chsem);
 }
 
 /****************************************************************************
@@ -518,26 +504,12 @@ static inline void sam_givechsem(struct sam_dmac_s *dmac)
 
 static void sam_takedsem(struct sam_dmac_s *dmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&dmac->dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dmac->dsem);
 }
 
 static inline void sam_givedsem(struct sam_dmac_s *dmac)
 {
-  (void)nxsem_post(&dmac->dsem);
+  nxsem_post(&dmac->dsem);
 }
 
 /****************************************************************************
@@ -1627,7 +1599,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
    * the interrupt status register.
    */
 
-  (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
+  sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
   /* Write the starting source address in the SADDR register */
 
@@ -1701,7 +1673,7 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
    * the status register
    */
 
-  (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
+  sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
   /* Set up the initial CTRLA register */
 
@@ -1918,7 +1890,7 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC0, sam_dmac_interrupt, &g_dmac0);
+  irq_attach(SAM_IRQ_DMAC0, sam_dmac_interrupt, &g_dmac0);
 
   /* Initialize the controller */
 
@@ -1938,7 +1910,7 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC1, sam_dmac_interrupt, &g_dmac1);
+  irq_attach(SAM_IRQ_DMAC1, sam_dmac_interrupt, &g_dmac1);
 
   /* Initialize the controller */
 
@@ -2015,7 +1987,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
            * channel
            */
 
-          (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
+          sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
           /* Disable the channel by writing one to the write-only channel
            * disable register

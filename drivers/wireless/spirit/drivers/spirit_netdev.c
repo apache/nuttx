@@ -486,21 +486,7 @@ static struct spirit_pktstack_address_s g_addrinit =
 
 static void spirit_rxlock(FAR struct spirit_driver_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->rxsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->rxsem);
 }
 
 /****************************************************************************
@@ -538,21 +524,7 @@ static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv)
 
 static void spirit_txlock(FAR struct spirit_driver_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->txsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->txsem);
 }
 
 /****************************************************************************
@@ -937,18 +909,18 @@ static void spirit_transmit_work(FAR void *arg)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->txtimeout, SPIRIT_TXTIMEOUT,
-                     spirit_txtimeout_expiry, 1, (wdparm_t)priv);
+      wd_start(priv->txtimeout, SPIRIT_TXTIMEOUT,
+               spirit_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 
   spirit_txunlock(priv);
   return;
 
 errout_with_rxtimeout:
-  (void)spirit_timer_set_rxtimeout_counter(spirit, 0);
+  spirit_timer_set_rxtimeout_counter(spirit, 0);
 
 errout_with_csma:
-  (void)spirit_csma_enable(spirit, S_DISABLE);
+  spirit_csma_enable(spirit, S_DISABLE);
 
 errout_with_lock:
   spirit_txunlock(priv);
@@ -1812,18 +1784,18 @@ static void spirit_txpoll_work(FAR void *arg)
       /* Perform the periodic poll */
 
       priv->needpoll = false;
-      (void)devif_timer(&priv->radio.r_dev, SPIRIT_WDDELAY, spirit_txpoll_callback);
+      devif_timer(&priv->radio.r_dev, SPIRIT_WDDELAY, spirit_txpoll_callback);
 
       /* Setup the watchdog poll timer again */
 
-      (void)wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
-                     (wdparm_t)priv);
+      wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
+               (wdparm_t)priv);
     }
   else
     {
       /* Perform a normal, asynchronous poll for new TX data */
 
-      (void)devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
+      devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
     }
 
   net_unlock();
@@ -1954,8 +1926,8 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      (void)wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
-                     (wdparm_t)priv);
+      wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
+               (wdparm_t)priv);
 
       /* Enables the interrupts from the SPIRIT1 */
 
@@ -1971,7 +1943,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
 error_with_ifalmostup:
   priv->ifup = true;
-  (void)spirit_ifdown(dev);
+  spirit_ifdown(dev);
   return ret;
 }
 
@@ -2890,7 +2862,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   return OK;
 
 errout_with_attach:
-  (void)lower->attach(lower, NULL, NULL);
+  lower->attach(lower, NULL, NULL);
 
 errout_with_alloc:
   kmm_free(priv);

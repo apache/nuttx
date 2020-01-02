@@ -646,21 +646,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 
 static inline void tiva_i2c_sem_wait(struct tiva_i2c_priv_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /************************************************************************************
@@ -725,7 +711,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -754,12 +740,11 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
       /* Wait until either the transfer is complete or the timeout expires */
 
-      ret = nxsem_timedwait(&priv->waitsem, &abstime);
-      if (ret < 0 && ret != -EINTR)
+      ret = nxsem_timedwait_uninterruptible(&priv->waitsem, &abstime);
+      if (ret < 0)
         {
           /* Break out of the loop on irrecoverable errors.  This would
            * include timeouts and mystery errors reported by nxsem_timedwait.
-           * NOTE that we try again if we are awakened by a signal (EINTR).
            */
 
           tiva_i2c_traceevent(priv, I2CEVENT_TIMEOUT,
@@ -1190,7 +1175,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
        * harmless (other than the slight performance hit).
        */
 
-      (void)tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
+      tiva_i2c_getreg(priv, TIVA_I2CM_MIS_OFFSET);
 #endif
 
       /* We need look at the Master Control/Status register to determine the cause
@@ -1505,7 +1490,7 @@ static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv, uint32_t frequency)
    */
 
 #ifndef CONFIG_I2C_POLLED
-  (void)irq_attach(config->irq, tiva_i2c_interrupt, priv);
+  irq_attach(config->irq, tiva_i2c_interrupt, priv);
   up_enable_irq(config->irq);
 #endif
 

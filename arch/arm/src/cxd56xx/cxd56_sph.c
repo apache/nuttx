@@ -167,16 +167,12 @@ static int sph_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int sph_semtake(sem_t *id)
 {
-  while (sem_wait(id) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 static void sph_semgive(sem_t *id)
 {
-  sem_post(id);
+  nxsem_post(id);
 }
 
 static int sph_lock(FAR struct sph_dev_s *priv)
@@ -263,7 +259,7 @@ static inline int cxd56_sphdevinit(FAR const char *devname, int num)
       return ERROR;
     }
 
-  sem_init(&priv->wait, 0, 0);
+  nxsem_init(&priv->wait, 0, 0);
   priv->id = num;
 
   irq_attach(CXD56_IRQ_SPH0 + num, cxd56_sphirqhandler, NULL);

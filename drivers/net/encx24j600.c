@@ -407,8 +407,8 @@ static void enc_lock(FAR struct enc_driver_s *priv)
 
   SPI_SETMODE(priv->spi, CONFIG_ENCX24J600_SPIMODE);
   SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_ENCX24J600_FREQUENCY);
+  SPI_HWFEATURES(priv->spi, 0);
+  SPI_SETFREQUENCY(priv->spi, CONFIG_ENCX24J600_FREQUENCY);
 }
 
 /****************************************************************************
@@ -460,9 +460,9 @@ static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg)
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), true);
 
-  (void)SPI_SEND(priv->spi, cmd);          /* Clock out the command */
-  (void)SPI_SEND(priv->spi, arg & 0xff);   /* Clock out the low byte */
-  (void)SPI_SEND(priv->spi, arg >> 8);     /* Clock out the high byte */
+  SPI_SEND(priv->spi, cmd);          /* Clock out the command */
+  SPI_SEND(priv->spi, arg & 0xff);   /* Clock out the low byte */
+  SPI_SEND(priv->spi, arg >> 8);     /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -496,7 +496,7 @@ static inline void enc_setethrst(FAR struct enc_driver_s *priv)
 
   /* Send the system reset command. */
 
-  (void)SPI_SEND(priv->spi, ENC_SETETHRST);
+  SPI_SEND(priv->spi, ENC_SETETHRST);
 
   up_udelay(25);
 
@@ -697,9 +697,9 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
    * 8 to clock out the cmd + 16 to clock out the data.
    */
 
-  (void)SPI_SEND(priv->spi, ENC_BFS | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
-  (void)SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
+  SPI_SEND(priv->spi, ENC_BFS | GETADDR(ctrlreg)); /* Clock out the command */
+  SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
+  SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -742,9 +742,9 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
    * 8 to clock out the cmd + 16 to clock out the data.
    */
 
-  (void)SPI_SEND(priv->spi, ENC_BFC | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
-  (void)SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
+  SPI_SEND(priv->spi, ENC_BFC | GETADDR(ctrlreg)); /* Clock out the command */
+  SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
+  SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -854,7 +854,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Send the read buffer memory command (ignoring the response) */
 
-  (void)SPI_SEND(priv->spi, ENC_RRXDATA);
+  SPI_SEND(priv->spi, ENC_RRXDATA);
 
   /* Then read the buffer data */
 
@@ -1063,8 +1063,8 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    * the timer is started?
    */
 
-  (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
+           (wdparm_t)priv);
 
   /* free the descriptor */
 
@@ -1484,7 +1484,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-       (void)pkt_input(&priv->dev);
+       pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1500,7 +1500,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
            */
 
           arp_ipin(&priv->dev);
-          (void)ipv4_input(&priv->dev);
+          ipv4_input(&priv->dev);
 
           /* Free the packet */
 
@@ -1543,7 +1543,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           /* Give the IPv6 packet to the network layer */
 
-          (void)ipv6_input(&priv->dev);
+          ipv6_input(&priv->dev);
 
           /* Free the packet */
 
@@ -2064,11 +2064,11 @@ static void enc_toworker(FAR void *arg)
   DEBUGASSERT(ret == OK);
   ret = enc_ifup(&priv->dev);
   DEBUGASSERT(ret == OK);
-  (void)ret;
+  UNUSED(ret);
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, enc_txpoll);
+  devif_poll(&priv->dev, enc_txpoll);
 
   /* Release the network */
 
@@ -2112,7 +2112,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    */
 
   ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
-  (void)ret;
+  UNUSED(ret);
   DEBUGASSERT(ret == OK);
 }
 
@@ -2157,7 +2157,7 @@ static void enc_pollworker(FAR void *arg)
        * is a transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, ENC_WDDELAY, enc_txpoll);
+      devif_timer(&priv->dev, ENC_WDDELAY, enc_txpoll);
     }
 
   /* Release lock on the SPI bus and the network */
@@ -2167,7 +2167,7 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (wdparm_t)arg);
+  wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -2269,8 +2269,8 @@ static int enc_ifup(struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                     (wdparm_t)priv);
+      wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+               (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
        * controller
@@ -2385,7 +2385,7 @@ static int enc_txavail(struct net_driver_s *dev)
         {
           /* The interface is up and TX is idle; poll the network for new XMIT data */
 
-          (void)devif_poll(&priv->dev, enc_txpoll);
+          devif_poll(&priv->dev, enc_txpoll);
         }
     }
 

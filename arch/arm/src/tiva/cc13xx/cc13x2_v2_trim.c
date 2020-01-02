@@ -131,7 +131,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* Dummy read to ensure that the write has propagated */
 
-  (void)getreg16(TIVA_DDI0_OSC_CTL0);
+  getreg16(TIVA_DDI0_OSC_CTL0);
 
   /* read the MODE_CONF register in CCFG */
 

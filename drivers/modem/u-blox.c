@@ -324,9 +324,9 @@ void ubxmdm_unregister(FAR void *handle)
   m_info("Unregistering: %s\n", upper->path);
 
   DEBUGASSERT(lower->ops->poweroff);
-  (void) lower->ops->poweroff(lower);
+  lower->ops->poweroff(lower);
 
-  (void) unregister_driver(upper->path);
+  unregister_driver(upper->path);
 
   kmm_free(upper->path);
   kmm_free(upper);

@@ -92,7 +92,7 @@ int stm32_lm75initialize(FAR const char *devpath)
   ret = lm75_register(devpath, i2c, 0x48);
   if (ret < 0)
     {
-      (void)stm32_i2cbus_uninitialize(i2c);
+      stm32_i2cbus_uninitialize(i2c);
     }
 
   return ret;
@@ -115,7 +115,7 @@ int stm32_lm75initialize(FAR const char *devpath)
 
 int stm32_lm75attach(xcpt_t irqhandler, void *arg)
 {
-  (void)stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler, arg);
+  stm32_gpiosetevent(GPIO_LM75_OSINT, true, true, true, irqhandler, arg);
   return OK;
 }
 

@@ -150,8 +150,8 @@ static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
   priv->isr     = isr;
   priv->arg     = arg;
 
-  (void)stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
-                           isr, arg);
+  stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
+                     isr, arg);
 
   leave_critical_section(flags);
 
@@ -187,8 +187,8 @@ static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
 
   iinfo("%d\n", enable);
 
-  (void)stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
-                           enable ? priv->isr : NULL, priv->arg);
+  stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
+                     enable ? priv->isr : NULL, priv->arg);
 }
 
 /* Acknowledge/clear any pending GPIO interrupt */
@@ -202,7 +202,7 @@ static void hcsr04_irq_clear(FAR const struct hcsr04_config_s *state)
 
 static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state, bool on)
 {
-  (void)stm32_gpiowrite(GPIO_HCSR04_TRIG, on);
+  stm32_gpiowrite(GPIO_HCSR04_TRIG, on);
 }
 
 /* Return the current Free Running clock tick */

@@ -256,7 +256,7 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
 errout_with_load:
   modlib_unload(&loadinfo);
-  (void)modlib_undepend(modp);
+  modlib_undepend(modp);
 errout_with_registry_entry:
   lib_free(modp);
 errout_with_loadinfo:

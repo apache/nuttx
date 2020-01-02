@@ -881,7 +881,7 @@ static uint8_t get_and_clear_uart_status(struct up_dev_s *priv)
        * discarding the data.
        */
 
-      (void)up_serialin(priv, KINETIS_UART_D_OFFSET);
+      up_serialin(priv, KINETIS_UART_D_OFFSET);
     }
 
   return regval;
@@ -2032,7 +2032,7 @@ unsigned int kinetis_uart_serialinit(unsigned int first)
   /* Register the console */
 
 #ifdef HAVE_UART_CONSOLE
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 
 #  ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
@@ -2044,26 +2044,26 @@ unsigned int kinetis_uart_serialinit(unsigned int first)
   /* Register all UARTs */
 
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS0_DEV);
+  uart_register(devname, &TTYS0_DEV);
 #ifdef TTYS1_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS1_DEV);
+  uart_register(devname, &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS2_DEV);
+  uart_register(devname, &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS3_DEV);
+  uart_register(devname, &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS4_DEV);
+  uart_register(devname, &TTYS4_DEV);
 #endif
 #ifdef TTYS5_DEV
   devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
-  (void)uart_register(devname, &TTYS5_DEV);
+  uart_register(devname, &TTYS5_DEV);
 #endif
   return first;
 }

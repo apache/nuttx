@@ -98,7 +98,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 
       if (stream)
         {
-          (void)fclose(stream);
+          fclose(stream);
         }
 
       /* And attempt to reopen the file at the provided path */

@@ -127,21 +127,7 @@ static struct ptmx_dev_s g_ptmx;
 
 static void ptmx_semtake(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_ptmx.px_exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_ptmx.px_exclsem);
 }
 
 #define ptmx_semgive() nxsem_post(&g_ptmx.px_exclsem)

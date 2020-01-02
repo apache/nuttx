@@ -128,8 +128,8 @@ static void pga11x_configure(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_PGA11X_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_PGA11X_SPIFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_PGA11X_SPIFREQUENCY);
 }
 
 /****************************************************************************

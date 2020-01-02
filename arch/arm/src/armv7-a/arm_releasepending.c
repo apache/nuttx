@@ -150,7 +150,7 @@ void up_release_pending(void)
            * thread at the head of the ready-to-run list.
            */
 
-          (void)group_addrenv(rtcb);
+          group_addrenv(rtcb);
 #endif
           /* Update scheduler parameters */
 

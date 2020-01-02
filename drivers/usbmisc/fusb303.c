@@ -667,7 +667,7 @@ static int fusb303_open(FAR struct file *filep)
     {
       fusb303_info("device id: 0x%02X type: 0x%02X\n", dev_id, dev_type);
 
-      (void)fusb303_clear_interrupts(priv);
+      fusb303_clear_interrupts(priv);
       priv->config->irq_enable(priv->config, true);
     }
 
@@ -743,7 +743,7 @@ static ssize_t fusb303_read(FAR struct file *filep, FAR char *buffer,
   fusb303_dumpregs("fusb303_read", priv);
 #endif
 
-  (void)fusb303_clear_interrupts(priv);
+  fusb303_clear_interrupts(priv);
 
   nxsem_post(&priv->devsem);
   return sizeof(struct fusb303_result_s);

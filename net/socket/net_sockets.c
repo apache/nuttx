@@ -57,20 +57,7 @@
 
 static void _net_semtake(FAR struct socketlist *list)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  while ((ret = net_lockedwait(&list->sl_sem)) < 0)
-    {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-    }
-
-  UNUSED(ret);
+  net_lockedwait_uninterruptible(&list->sl_sem);
 }
 
 #define _net_semgive(list) nxsem_post(&list->sl_sem)
@@ -97,7 +84,7 @@ void net_initlist(FAR struct socketlist *list)
 {
   /* Initialize the list access mutex */
 
-  (void)nxsem_init(&list->sl_sem, 0, 1);
+  nxsem_init(&list->sl_sem, 0, 1);
 }
 
 /****************************************************************************
@@ -127,13 +114,13 @@ void net_releaselist(FAR struct socketlist *list)
       FAR struct socket *psock = &list->sl_sockets[ndx];
       if (psock->s_crefs > 0)
         {
-          (void)psock_close(psock);
+          psock_close(psock);
         }
     }
 
   /* Destroy the semaphore */
 
-  (void)nxsem_destroy(&list->sl_sem);
+  nxsem_destroy(&list->sl_sem);
 }
 
 /****************************************************************************

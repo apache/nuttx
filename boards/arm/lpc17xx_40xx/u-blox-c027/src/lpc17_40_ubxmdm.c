@@ -306,5 +306,5 @@ void lpc17_40_ubxmdm_init(bool usb_used)
 
   lpc17_40_poweroff((FAR struct ubxmdm_lower*) priv);
 
-  (void) ubxmdm_register("/dev/ubxmdm", (FAR struct ubxmdm_lower*) priv);
+  ubxmdm_register("/dev/ubxmdm", (FAR struct ubxmdm_lower*) priv);
 }

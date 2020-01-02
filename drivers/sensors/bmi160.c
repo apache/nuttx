@@ -294,8 +294,8 @@ static inline void bmi160_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, BMI160_SPI_MAXFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, BMI160_SPI_MAXFREQUENCY);
 }
 #endif
 
@@ -336,7 +336,7 @@ static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
 #else /* CONFIG_SENSORS_BMI160_SPI */
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   bmi160_configspi(priv->spi);
 
   /* Select the BMI160 */
@@ -345,7 +345,7 @@ static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
 
   /* Send register to read and get the next byte */
 
-  (void)SPI_SEND(priv->spi, regaddr | 0x80);
+  SPI_SEND(priv->spi, regaddr | 0x80);
   SPI_RECVBLOCK(priv->spi, &regval, 1);
 
   /* Deselect the BMI160 */
@@ -354,7 +354,7 @@ static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 #endif
 
   return regval;
@@ -394,7 +394,7 @@ static void bmi160_putreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 #else /* CONFIG_SENSORS_BMI160_SPI */
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   bmi160_configspi(priv->spi);
 
   /* Select the BMI160 */
@@ -403,8 +403,8 @@ static void bmi160_putreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 
   /* Send register address and set the value */
 
-  (void)SPI_SEND(priv->spi, regaddr);
-  (void)SPI_SEND(priv->spi, regval);
+  SPI_SEND(priv->spi, regaddr);
+  SPI_SEND(priv->spi, regval);
 
   /* Deselect the BMI160 */
 
@@ -412,7 +412,7 @@ static void bmi160_putreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 
 #endif
 }
@@ -455,7 +455,7 @@ static uint16_t bmi160_getreg16(FAR struct bmi160_dev_s *priv,
 #else /* CONFIG_SENSORS_BMI160_SPI */
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   bmi160_configspi(priv->spi);
 
   /* Select the BMI160 */
@@ -464,7 +464,7 @@ static uint16_t bmi160_getreg16(FAR struct bmi160_dev_s *priv,
 
   /* Send register to read and get the next 2 bytes */
 
-  (void)SPI_SEND(priv->spi, regaddr | 0x80);
+  SPI_SEND(priv->spi, regaddr | 0x80);
   SPI_RECVBLOCK(priv->spi, &regval, 2);
 
   /* Deselect the BMI160 */
@@ -473,7 +473,7 @@ static uint16_t bmi160_getreg16(FAR struct bmi160_dev_s *priv,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 #endif
 
   return regval;
@@ -515,7 +515,7 @@ static void bmi160_getregs(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 #else /* CONFIG_SENSORS_BMI160_SPI */
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   bmi160_configspi(priv->spi);
 
   /* Select the BMI160 */
@@ -524,7 +524,7 @@ static void bmi160_getregs(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 
   /* Send register to read and get the next 2 bytes */
 
-  (void)SPI_SEND(priv->spi, regaddr | 0x80);
+  SPI_SEND(priv->spi, regaddr | 0x80);
   SPI_RECVBLOCK(priv->spi, regval, len);
 
   /* Deselect the BMI160 */
@@ -533,7 +533,7 @@ static void bmi160_getregs(FAR struct bmi160_dev_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 
 #endif
 }

@@ -162,7 +162,7 @@ int sam_hsmci_initialize(int minor)
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect, NULL);
+      irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect, NULL);
 
       /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

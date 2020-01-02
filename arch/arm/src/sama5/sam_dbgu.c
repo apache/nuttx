@@ -608,12 +608,12 @@ void sam_dbgu_register(void)
   /* Register the console */
 
 #ifdef CONFIG_SAMA5_DBGU_CONSOLE
-  (void)uart_register("/dev/console", &g_dbgu_port);
+  uart_register("/dev/console", &g_dbgu_port);
 #endif
 
   /* Register the DBGU serial device */
 
-  (void)uart_register("/dev/ttyDBGU", &g_dbgu_port);
+  uart_register("/dev/ttyDBGU", &g_dbgu_port);
 }
 
 #endif /* USE_SERIALDRIVER */
@@ -632,8 +632,8 @@ void sam_dbgu_initialize(void)
 {
   /* Initialize DBGU pins */
 
-  (void)sam_configpio(PIO_DBGU_DRXD);
-  (void)sam_configpio(PIO_DBGU_DTXD);
+  sam_configpio(PIO_DBGU_DRXD);
+  sam_configpio(PIO_DBGU_DTXD);
 
 #if defined(USE_SERIALDRIVER)
   /* Initialize the DBGU device driver */

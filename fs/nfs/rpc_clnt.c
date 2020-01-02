@@ -584,7 +584,7 @@ void rpcclnt_disconnect(struct rpcclnt *rpc)
 {
   if (rpc->rc_so != NULL)
     {
-      (void)psock_close(rpc->rc_so);
+      psock_close(rpc->rc_so);
     }
 }
 

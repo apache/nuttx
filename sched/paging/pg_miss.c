@@ -166,7 +166,7 @@ void pg_miss(void)
 
       pginfo("New worker priority. %d->%d\n",
              wtcb->sched_priority, ftcb->sched_priority);
-      (void)nxsched_setpriority(wtcb, ftcb->sched_priority);
+      nxsched_setpriority(wtcb, ftcb->sched_priority);
     }
 
   /* Signal the page fill worker thread.
@@ -177,7 +177,7 @@ void pg_miss(void)
   if (!g_pftcb)
     {
       pginfo("Signaling worker. PID: %d\n", g_pgworker);
-      (void)nxsig_kill(g_pgworker, SIGWORK);
+      nxsig_kill(g_pgworker, SIGWORK);
     }
 }
 

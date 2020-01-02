@@ -176,7 +176,7 @@ void up_idle(void)
    * correct rate.
    */
 
-  (void)up_hostusleep(1000000 / CLK_TCK);
+  up_hostusleep(1000000 / CLK_TCK);
 
   /* Handle X11-related events */
 

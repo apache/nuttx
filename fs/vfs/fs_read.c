@@ -199,7 +199,7 @@ ssize_t read(int fd, FAR void *buf, size_t nbytes)
 
   /* read() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nx_read() do the real work */
 

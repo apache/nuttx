@@ -127,7 +127,7 @@ void up_initialize(void)
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  (void)z80_mmu_initialize();
+  z80_mmu_initialize();
 #endif
 
 #ifdef CONFIG_MM_IOB
@@ -188,7 +188,7 @@ void up_initialize(void)
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Register the master pseudo-terminal multiplexor device */
 
-  (void)ptmx_register();
+  ptmx_register();
 #endif
 
   /* Early initialization of the system logging device.  Some SYSLOG channel
@@ -217,19 +217,19 @@ void up_initialize(void)
 #ifdef CONFIG_NETDEV_LOOPBACK
   /* Initialize the local loopback device */
 
-  (void)localhost_initialize();
+  localhost_initialize();
 #endif
 
 #ifdef CONFIG_NET_TUN
   /* Initialize the TUN device */
 
-  (void)tun_initialize();
+  tun_initialize();
 #endif
 
 #ifdef CONFIG_NETDEV_TELNET
   /* Initialize the Telnet session factory */
 
-  (void)telnet_initialize();
+  telnet_initialize();
 #endif
 
   board_autoled_on(LED_IRQSENABLED);

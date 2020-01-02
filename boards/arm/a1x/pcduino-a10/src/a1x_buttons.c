@@ -122,7 +122,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
       /* Configure the interrupt */
 
       a1x_pioirq(xxx);
-      (void)irq_attach(xxx, irqhandler, arg);
+      irq_attach(xxx, irqhandler, arg);
       a1x_pioirqenable(xxx);
       leave_critical_section(flags);
 

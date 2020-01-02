@@ -175,7 +175,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Initialize the SPIFI block device */
 
-  (void)nsh_spifi_initialize();
+  nsh_spifi_initialize();
 
 #ifdef HAVE_MMCSD
   /* Get an instance of the SDIO interface */

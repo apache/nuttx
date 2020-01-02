@@ -159,15 +159,12 @@ static struct iccdev_s *g_cpumsg[NCPUS];
 
 static void icc_semtake(sem_t *semid)
 {
-  while (sem_wait(semid) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(semid);
 }
 
 static void icc_semgive(sem_t *semid)
 {
-  sem_post(semid);
+  nxsem_post(semid);
 }
 
 static FAR struct iccdev_s *icc_getprotocol(int protoid)
@@ -254,9 +251,9 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
 #  ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
       value.sival_ptr = priv->sigdata;
-      (void)sigqueue(priv->pid, priv->signo, value);
+      sigqueue(priv->pid, priv->signo, value);
 #  else
-      (void)sigqueue(priv->pid, priv->signo, priv->sigdata);
+      sigqueue(priv->pid, priv->signo, priv->sigdata);
 #  endif
     }
 #endif
@@ -362,7 +359,7 @@ static FAR struct iccdev_s *icc_devnew(void)
 
   priv->rxtimeout = wd_create();
 
-  sem_init(&priv->rxwait, 0, 0);
+  nxsem_init(&priv->rxwait, 0, 0);
 
   /* Initialize receive queue and free list */
 

@@ -176,7 +176,7 @@ static int up_getgrp(unsigned int irq)
 
 static int avr32_xcptn(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _alert("PANIC!!! Exception IRQ: %d\n", irq);
   PANIC();
   return 0;

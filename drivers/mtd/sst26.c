@@ -291,7 +291,7 @@ static void sst26_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, then we also need to call the setfrequency, setbits,
    * and setmode methods to make sure that the SPI is properly configured for the
@@ -301,8 +301,8 @@ static void sst26_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_SST26_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, CONFIG_SST26_SPIFREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, CONFIG_SST26_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -311,7 +311,7 @@ static void sst26_lock(FAR struct spi_dev_s *dev)
 
 static inline void sst26_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -333,7 +333,7 @@ static inline int sst26_readid(struct sst26_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
-  (void)SPI_SEND(priv->dev, SST26_RDID);
+  SPI_SEND(priv->dev, SST26_RDID);
   manufacturer = SPI_SEND(priv->dev, SST26_DUMMY);
   memory       = SPI_SEND(priv->dev, SST26_DUMMY);
   capacity     = SPI_SEND(priv->dev, SST26_DUMMY);
@@ -405,7 +405,7 @@ static void sst26_waitwritecomplete(struct sst26_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->dev, SST26_RDSR);
+      SPI_SEND(priv->dev, SST26_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the status */
 
@@ -446,7 +446,7 @@ static void sst26_globalunlock(struct sst26_dev_s *priv)
 
   /* Send "Global Unlock (ULBPR)" command */
 
-  (void)SPI_SEND(priv->dev, SST26_ULBPR);
+  SPI_SEND(priv->dev, SST26_ULBPR);
 
   /* Deselect the FLASH */
 
@@ -467,7 +467,7 @@ static void sst26_writeenable(struct sst26_dev_s *priv)
 
   /* Send "Write Enable (WREN)" command */
 
-  (void)SPI_SEND(priv->dev, SST26_WREN);
+  SPI_SEND(priv->dev, SST26_WREN);
 
   /* Deselect the FLASH */
 
@@ -488,7 +488,7 @@ static void sst26_writedisable(struct sst26_dev_s *priv)
 
   /* Send "Write Disable (WRDI)" command */
 
-  (void)SPI_SEND(priv->dev, SST26_WRDI);
+  SPI_SEND(priv->dev, SST26_WRDI);
 
   /* Deselect the FLASH */
 
@@ -521,16 +521,16 @@ static void sst26_sectorerase(struct sst26_dev_s *priv, off_t sector, uint8_t ty
    * that was passed in as the erase type.
    */
 
-  (void)SPI_SEND(priv->dev, type);
+  SPI_SEND(priv->dev, type);
 
   /* Send the sector offset high byte first.  For all of the supported
    * parts, the sector number is completely contained in the first byte
    * and the values used in the following two bytes don't really matter.
    */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Deselect the FLASH */
 
@@ -559,7 +559,7 @@ static inline int sst26_chiperase(struct sst26_dev_s *priv)
 
   /* Send the "Chip Erase (CE)" instruction */
 
-  (void)SPI_SEND(priv->dev, SST26_CE);
+  SPI_SEND(priv->dev, SST26_CE);
 
   /* Deselect the FLASH */
 
@@ -592,13 +592,13 @@ static inline void sst26_pagewrite(struct sst26_dev_s *priv,
 
   /* Send "Page Program (PP)" command */
 
-  (void)SPI_SEND(priv->dev, SST26_PP);
+  SPI_SEND(priv->dev, SST26_PP);
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then write the specified number of bytes */
 
@@ -634,13 +634,13 @@ static inline void sst26_bytewrite(struct sst26_dev_s *priv,
 
   /* Send "Page Program (PP)" command */
 
-  (void)SPI_SEND(priv->dev, SST26_PP);
+  SPI_SEND(priv->dev, SST26_PP);
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then write the specified number of bytes */
 
@@ -757,17 +757,17 @@ static ssize_t sst26_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
   /* Send "Read from Memory " instruction */
 
-  (void)SPI_SEND(priv->dev, SST26_FAST_READ);
+  SPI_SEND(priv->dev, SST26_FAST_READ);
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Dummy read */
 
-  (void)SPI_SEND(priv->dev, SST26_DUMMY);
+  SPI_SEND(priv->dev, SST26_DUMMY);
 
   /* Then read all of the requested bytes */
 

@@ -151,24 +151,13 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
 
 void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 {
-  int ret;
-
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   DEBUGASSERT(conn->crefs == 0);
 
   /* Take the semaphore (perhaps waiting) */
 
-  while ((ret = net_lockedwait(&g_free_sem)) < 0)
-    {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-    }
-
-  UNUSED(ret);
+  net_lockedwait_uninterruptible(&g_free_sem);
 
   /* Remove the connection from the active list */
 

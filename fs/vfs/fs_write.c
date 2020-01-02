@@ -232,7 +232,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes)
 
   /* write() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nx_write() do all of the work */
 

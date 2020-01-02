@@ -98,6 +98,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)stm32l4_bringup();
+  stm32l4_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

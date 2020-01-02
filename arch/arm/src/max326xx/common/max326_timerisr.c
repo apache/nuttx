@@ -133,7 +133,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(MAX326_IRQ_SYSTICK, (xcpt_t)max326_timerisr, NULL);
+  irq_attach(MAX326_IRQ_SYSTICK, (xcpt_t)max326_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

@@ -238,7 +238,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Destroy the wait semaphore */
 
-  (void)nxsem_destroy(&group->sem);
+  nxsem_destroy(&group->sem);
 
   /* Destroy the wdog */
 

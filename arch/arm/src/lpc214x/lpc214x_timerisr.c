@@ -157,7 +157,7 @@ void arm_timer_initialize(void)
   up_attach_vector(LPC214X_IRQ_SYSTIMER, LPC214X_SYSTIMER_VEC,
                    (vic_vector_t)lpc214x_timerisr);
 #else
-  (void)irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr, NULL);
+  irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr, NULL);
 #endif
 
   /* And enable the timer interrupt */

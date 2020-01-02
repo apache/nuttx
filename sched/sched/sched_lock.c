@@ -178,7 +178,7 @@ int sched_lock(void)
    */
 
   DEBUGASSERT((uint16_t)g_global_lockcount < INT16_MAX); /* Not atomic! */
-  (void)up_fetchadd16(&g_global_lockcount, 1);
+  up_fetchadd16(&g_global_lockcount, 1);
 #endif
 
   /* This operation is safe if CONFIG_ARCH_HAVE_FETCHADD is defined.  NOTE
@@ -199,7 +199,7 @@ int sched_lock(void)
       up_irq_restore(flags);
 #elif defined(CONFIG_ARCH_HAVE_FETCHADD)
       DEBUGASSERT(g_global_lockcount > 0);
-      (void)up_fetchsub16(&g_global_lockcount, 1);
+      up_fetchsub16(&g_global_lockcount, 1);
 #endif
     }
   else
@@ -247,7 +247,7 @@ int sched_lock(void)
       up_irq_restore(flags);
 #elif defined(CONFIG_ARCH_HAVE_FETCHADD)
       DEBUGASSERT(g_global_lockcount > 0);
-      (void)up_fetchsub16(&g_global_lockcount, 1);
+      up_fetchsub16(&g_global_lockcount, 1);
 #endif
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \

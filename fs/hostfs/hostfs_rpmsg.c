@@ -333,18 +333,10 @@ static int hostfs_rpmsg_send_recv(uint32_t command, bool copy,
       goto fail;
     }
 
-  while (1)
+  ret = nxsem_wait_uninterruptible(&cookie.sem);
+  if (ret == 0)
     {
-      ret = nxsem_wait(&cookie.sem);
-      if (ret != -EINTR)
-        {
-          if (ret == 0)
-            {
-              ret = cookie.result;
-            }
-
-          break;
-        }
+      ret = cookie.result;
     }
 
 fail:

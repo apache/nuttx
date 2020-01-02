@@ -374,11 +374,7 @@ static const struct coeff_addr_s g_caddrs[3][2] =
 
 static int seq_semtake(sem_t *id)
 {
-  while (sem_wait(id) != 0)
-    {
-      ASSERT(errno == EINTR);
-    }
-  return OK;
+  return nxsem_wait_uninterruptible(id);
 }
 
 /****************************************************************************
@@ -387,7 +383,7 @@ static int seq_semtake(sem_t *id)
 
 static void seq_semgive(sem_t *id)
 {
-  sem_post(id);
+  nxsem_post(id);
 }
 
 /****************************************************************************
@@ -1514,9 +1510,9 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv, uint32_t intr)
 
 #  ifdef CONFIG_CAN_PASS_STRUCTS
           value.sival_ptr = notify->ts;
-          (void)sigqueue(notify->pid, notify->signo, value);
+          sigqueue(notify->pid, notify->signo, value);
 #  else
-          (void)sigqueue(notify->pid, notify->signo, (FAR void *)notify->ts);
+          sigqueue(notify->pid, notify->signo, (FAR void *)notify->ts);
 #  endif
 #endif
         }
@@ -1606,9 +1602,9 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
 #  ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
           value.sival_ptr = notify->arg;
-          (void)sigqueue(notify->pid, notify->signo, value);
+          sigqueue(notify->pid, notify->signo, value);
 #  else
-          (void)sigqueue(notify->pid, notify->signo, (FAR void *)notify->arg);
+          sigqueue(notify->pid, notify->signo, (FAR void *)notify->arg);
 #  endif
           detected = 0;
         }
@@ -1999,7 +1995,7 @@ static int seq_fifoinit(FAR struct seq_s *seq, int fifoid, uint16_t fsize)
 
   /* Initialize DMA done wait semaphore */
 
-  sem_init(&fifo->dmawait, 0, 0);
+  nxsem_init(&fifo->dmawait, 0, 0);
   fifo->dmaresult = -1;
 #endif
 
@@ -2085,7 +2081,7 @@ static void seq_fifofree(FAR struct scufifo_s *fifo)
   scufifo_memfree(fifo->start);
 
 #ifdef CONFIG_CXD56_UDMAC
-  sem_destroy(&fifo->dmawait);
+  nxsem_destroy(&fifo->dmawait);
 #endif
 
   kmm_free(fifo);
@@ -3422,12 +3418,12 @@ void scu_initialize(void)
 
   memset(priv, 0, sizeof(struct cxd56_scudev_s));
 
-  sem_init(&priv->syncwait, 0, 0);
-  sem_init(&priv->syncexc, 0, 1);
+  nxsem_init(&priv->syncwait, 0, 0);
+  nxsem_init(&priv->syncexc, 0, 1);
 
   for (i = 0; i < 3; i++)
     {
-      sem_init(&priv->oneshotwait[i], 0, 0);
+      nxsem_init(&priv->oneshotwait[i], 0, 0);
     }
 
   scufifo_initialize();
@@ -3489,11 +3485,11 @@ void scu_uninitialize(void)
 
   cxd56_scuseq_clock_disable();
 
-  sem_destroy(&priv->syncwait);
-  sem_destroy(&priv->syncexc);
+  nxsem_destroy(&priv->syncwait);
+  nxsem_destroy(&priv->syncexc);
 
   for (i = 0; i < 3; i++)
     {
-      sem_destroy(&priv->oneshotwait[i]);
+      nxsem_destroy(&priv->oneshotwait[i]);
     }
 }

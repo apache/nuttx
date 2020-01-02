@@ -130,8 +130,6 @@ static void stm32aes_setkey(FAR const void *key, size_t key_len)
 {
   FAR uint32_t *in = (FAR uint32_t *)key;
 
-  (void)key_len;
-
   putreg32(__builtin_bswap32(*in), STM32_AES_KEYR3);
   in++;
   putreg32(__builtin_bswap32(*in), STM32_AES_KEYR2);

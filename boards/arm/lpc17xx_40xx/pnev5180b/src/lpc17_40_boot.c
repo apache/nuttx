@@ -91,6 +91,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)pnev5180b_bringup();
+  pnev5180b_bringup();
 }
 #endif

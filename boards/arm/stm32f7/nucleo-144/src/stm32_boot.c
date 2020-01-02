@@ -103,7 +103,7 @@ void board_late_initialize(void)
    * but the initialization function must run in kernel space.
    */
 
-  (void)board_app_initialize(0);
+  board_app_initialize(0);
 #endif
 }
 #endif

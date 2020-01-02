@@ -98,7 +98,7 @@ void sam_boardinitialize(void)
 
   /* Enable PCK6 */
 
-  (void)sam_pck_enable(PCK6, true);
+  sam_pck_enable(PCK6, true);
 #endif
 
 #ifdef CONFIG_SAMV7_SDRAMC
@@ -154,6 +154,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)sam_bringup();
+  sam_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

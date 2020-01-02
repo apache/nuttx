@@ -111,7 +111,7 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
    */
 
   lib_nulloutstream(&nulloutstream);
-  (void)lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
+  lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.

@@ -176,7 +176,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
         {
           pginfo("New worker priority. %d->%d\n",
                  wtcb->sched_priority, priority);
-          (void)nxsched_setpriority(wtcb, priority);
+          nxsched_setpriority(wtcb, priority);
         }
 
       /* Save the page fill result (don't permit the value -EBUSY) */
@@ -192,7 +192,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   /* Signal the page fill worker thread (in any event) */
 
   pginfo("Signaling worker. PID: %d\n", g_pgworker);
-  (void)nxsig_kill(g_pgworker, SIGWORK);
+  nxsig_kill(g_pgworker, SIGWORK);
 }
 #endif
 
@@ -287,7 +287,7 @@ static inline bool pg_dequeue(void)
 
                   pginfo("New worker priority. %d->%d\n",
                          wtcb->sched_priority, priority);
-                  (void)nxsched_setpriority(wtcb, priority);
+                  nxsched_setpriority(wtcb, priority);
                 }
 
               /* Return with g_pftcb holding the pointer to
@@ -451,7 +451,7 @@ static inline void pg_alldone(void)
   g_pftcb = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
-  (void)nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
+  nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
 
 /****************************************************************************
@@ -529,7 +529,7 @@ int pg_worker(int argc, char *argv[])
    */
 
   pginfo("Started\n");
-  (void)up_irq_save();
+  up_irq_save();
   for (; ; )
     {
       /* Wait awhile.  We will wait here until either the configurable timeout
@@ -625,7 +625,7 @@ int pg_worker(int argc, char *argv[])
            */
 
           pginfo("Calling pg_startfill\n");
-          (void)pg_startfill();
+          pg_startfill();
         }
 #else
       /* Are there tasks blocked and waiting for a fill?  Loop until all

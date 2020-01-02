@@ -242,10 +242,10 @@ void srand(unsigned int seed)
   g_randint1 = seed;
 #if (CONFIG_LIB_RAND_ORDER > 1)
   g_randint2 = seed;
-  (void)fgenerate1();
+  fgenerate1();
 #if (CONFIG_LIB_RAND_ORDER > 2)
   g_randint3 = seed;
-  (void)fgenerate2();
+  fgenerate2();
 #endif
 #endif
 }

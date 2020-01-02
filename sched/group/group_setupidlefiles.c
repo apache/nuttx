@@ -102,8 +102,8 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
     {
       /* Successfully opened /dev/console as stdin (fd == 0) */
 
-      (void)fs_dupfd2(0, 1);
-      (void)fs_dupfd2(0, 2);
+      fs_dupfd2(0, 1);
+      fs_dupfd2(0, 2);
     }
   else
     {
@@ -114,7 +114,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
       if (fd > 0)
         {
           sinfo("Open /dev/console fd: %d\n", fd);
-          (void)close(fd);
+          close(fd);
         }
       else
         {

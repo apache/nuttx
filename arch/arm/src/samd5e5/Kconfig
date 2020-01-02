@@ -361,6 +361,13 @@ config SAMD5E5_DMAC
 	default n
 	select ARCH_DMA
 
+config SAMD5E5_GMAC
+	bool "Ethernet"
+	default n
+	depends on SAMD5E5_HAVE_ETHERNET
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
 config SAMD5E5_EVSYS
 	bool "Event System"
 	default n
@@ -710,3 +717,111 @@ config SAMD5E5_USB_REGDEBUG
 		CONFIG_DEBUG_USB_INFO.
 
 endmenu # USB options
+
+
+if SAMD5E5_GMAC
+
+menu "GMAC device driver options"
+
+config SAMD5E5_GMAC_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		GMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMD5E5_GMAC_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		GMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMD5E5_GMAC_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMD5E5_GMAC_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMD5E5_GMAC_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMD5E5_GMAC_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMD5E5_GMAC_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMD5E5 GMAC driver will call this function
+		one time before it first uses the PHY.
+
+config SAMD5E5_GMAC_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+if !SAMD5E5_GMAC_AUTONEG
+
+config SAMD5E5_GMAC_ETHFD
+	bool "Full duplex"
+	default n
+	---help---
+		If SAMD5E5_GMAC_AUTONEG is not defined, then this may be defined to
+		select full duplex mode. Default: half-duplex
+
+choice
+	prompt "GMAC Speed"
+	default SAMD5E5_GMAC_ETH100MBPS
+	---help---
+		If autonegotiation is not used, then you must select the fixed speed
+		of the PHY
+
+config SAMD5E5_GMAC_ETH10MBPS
+	bool "10 Mbps"
+	---help---
+		If SAMD5E5_GMAC_AUTONEG is not defined, then this may be defined to select 10 MBps
+		speed.  Default: 100 Mbps
+
+config SAMD5E5_GMAC_ETH100MBPS
+	bool "100 Mbps"
+	---help---
+		If SAMD5E5_GMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 100 Mbps
+
+endchoice # GMAC speed
+endif # !SAMD5E5_GMAC_AUTONEG
+
+config SAMD5E5_GMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET_INFO.
+
+config SAMD5E5_GMAC_USE_MII
+	bool "Use MII interface for Ethernet"
+	default n
+	---help---
+		If selected, use MII interface to Ethernet PHY.  Otherwise, RMII will be used.
+
+endmenu # GMAC device driver options
+endif # SAMD5E5_GMAC
+

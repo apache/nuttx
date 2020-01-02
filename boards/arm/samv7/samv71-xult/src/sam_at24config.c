@@ -85,7 +85,7 @@ int sam_at24config(void)
   if (!at24)
     {
       ferr("ERROR: Failed to initialize the AT24 driver\n");
-      (void)sam_i2cbus_uninitialize(i2c);
+      sam_i2cbus_uninitialize(i2c);
       return -ENODEV;
     }
 
@@ -103,7 +103,7 @@ int sam_at24config(void)
   if (ret < 0)
     {
       ferr("ERROR: Failed to bind AT24 driver to the MTD config device\n");
-      (void)sam_i2cbus_uninitialize(i2c);
+      sam_i2cbus_uninitialize(i2c);
     }
 
   return ret;

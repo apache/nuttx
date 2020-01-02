@@ -96,6 +96,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)s32k118_bringup();
+  s32k118_bringup();
 }
 #endif

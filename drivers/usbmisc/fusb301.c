@@ -496,7 +496,7 @@ static int fusb301_open(FAR struct file *filep)
     {
       fusb301_info("device id: 0x%02X\n", ret);
 
-      (void)fusb301_clear_interrupts(priv);
+      fusb301_clear_interrupts(priv);
       priv->config->irq_enable(priv->config, true);
     }
 
@@ -554,7 +554,7 @@ static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buf
   priv->int_pending = false;
   leave_critical_section(flags);
 
-  (void)fusb301_clear_interrupts(priv);
+  fusb301_clear_interrupts(priv);
 
   ptr->status = fusb301_getreg(priv, FUSB301_STATUS_REG);
   ptr->dev_type = fusb301_getreg(priv, FUSB301_TYPE_REG);

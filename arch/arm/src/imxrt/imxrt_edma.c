@@ -185,26 +185,12 @@ static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
 
 static void imxrt_takechsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.chsem);
 }
 
 static inline void imxrt_givechsem(void)
 {
-  (void)nxsem_post(&g_edma.chsem);
+  nxsem_post(&g_edma.chsem);
 }
 
 /****************************************************************************
@@ -218,26 +204,12 @@ static inline void imxrt_givechsem(void)
 #if CONFIG_IMXRT_EDMA_NTCD > 0
 static void imxrt_takedsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_edma.dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_edma.dsem);
 }
 
 static inline void imxrt_givedsem(void)
 {
-  (void)nxsem_post(&g_edma.dsem);
+  nxsem_post(&g_edma.dsem);
 }
 #endif
 
@@ -296,7 +268,7 @@ static void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
 
   flags = spin_lock_irqsave();
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  (void)imxrt_givedsem();
+  imxrt_givedsem();
   spin_unlock_irqrestore(flags);
 }
 #endif
@@ -811,26 +783,26 @@ void weak_function up_dma_initialize(void)
    * NOTE that there are only 16 vectors for 32 DMA channels.
    */
 
-  (void)irq_attach(IMXRT_IRQ_EDMA0_16,  imxrt_edma_interrupt, &g_edma.dmach[0]);
-  (void)irq_attach(IMXRT_IRQ_EDMA1_17,  imxrt_edma_interrupt, &g_edma.dmach[1]);
-  (void)irq_attach(IMXRT_IRQ_EDMA2_18,  imxrt_edma_interrupt, &g_edma.dmach[2]);
-  (void)irq_attach(IMXRT_IRQ_EDMA3_19,  imxrt_edma_interrupt, &g_edma.dmach[3]);
-  (void)irq_attach(IMXRT_IRQ_EDMA4_20,  imxrt_edma_interrupt, &g_edma.dmach[4]);
-  (void)irq_attach(IMXRT_IRQ_EDMA5_21,  imxrt_edma_interrupt, &g_edma.dmach[5]);
-  (void)irq_attach(IMXRT_IRQ_EDMA6_22,  imxrt_edma_interrupt, &g_edma.dmach[6]);
-  (void)irq_attach(IMXRT_IRQ_EDMA7_23,  imxrt_edma_interrupt, &g_edma.dmach[7]);
-  (void)irq_attach(IMXRT_IRQ_EDMA8_24,  imxrt_edma_interrupt, &g_edma.dmach[8]);
-  (void)irq_attach(IMXRT_IRQ_EDMA9_25,  imxrt_edma_interrupt, &g_edma.dmach[9]);
-  (void)irq_attach(IMXRT_IRQ_EDMA10_26, imxrt_edma_interrupt, &g_edma.dmach[10]);
-  (void)irq_attach(IMXRT_IRQ_EDMA11_27, imxrt_edma_interrupt, &g_edma.dmach[11]);
-  (void)irq_attach(IMXRT_IRQ_EDMA12_28, imxrt_edma_interrupt, &g_edma.dmach[12]);
-  (void)irq_attach(IMXRT_IRQ_EDMA13_29, imxrt_edma_interrupt, &g_edma.dmach[13]);
-  (void)irq_attach(IMXRT_IRQ_EDMA14_30, imxrt_edma_interrupt, &g_edma.dmach[14]);
-  (void)irq_attach(IMXRT_IRQ_EDMA15_31, imxrt_edma_interrupt, &g_edma.dmach[15]);
+  irq_attach(IMXRT_IRQ_EDMA0_16,  imxrt_edma_interrupt, &g_edma.dmach[0]);
+  irq_attach(IMXRT_IRQ_EDMA1_17,  imxrt_edma_interrupt, &g_edma.dmach[1]);
+  irq_attach(IMXRT_IRQ_EDMA2_18,  imxrt_edma_interrupt, &g_edma.dmach[2]);
+  irq_attach(IMXRT_IRQ_EDMA3_19,  imxrt_edma_interrupt, &g_edma.dmach[3]);
+  irq_attach(IMXRT_IRQ_EDMA4_20,  imxrt_edma_interrupt, &g_edma.dmach[4]);
+  irq_attach(IMXRT_IRQ_EDMA5_21,  imxrt_edma_interrupt, &g_edma.dmach[5]);
+  irq_attach(IMXRT_IRQ_EDMA6_22,  imxrt_edma_interrupt, &g_edma.dmach[6]);
+  irq_attach(IMXRT_IRQ_EDMA7_23,  imxrt_edma_interrupt, &g_edma.dmach[7]);
+  irq_attach(IMXRT_IRQ_EDMA8_24,  imxrt_edma_interrupt, &g_edma.dmach[8]);
+  irq_attach(IMXRT_IRQ_EDMA9_25,  imxrt_edma_interrupt, &g_edma.dmach[9]);
+  irq_attach(IMXRT_IRQ_EDMA10_26, imxrt_edma_interrupt, &g_edma.dmach[10]);
+  irq_attach(IMXRT_IRQ_EDMA11_27, imxrt_edma_interrupt, &g_edma.dmach[11]);
+  irq_attach(IMXRT_IRQ_EDMA12_28, imxrt_edma_interrupt, &g_edma.dmach[12]);
+  irq_attach(IMXRT_IRQ_EDMA13_29, imxrt_edma_interrupt, &g_edma.dmach[13]);
+  irq_attach(IMXRT_IRQ_EDMA14_30, imxrt_edma_interrupt, &g_edma.dmach[14]);
+  irq_attach(IMXRT_IRQ_EDMA15_31, imxrt_edma_interrupt, &g_edma.dmach[15]);
 
   /* Attach the DMA error interrupt vector */
 
-  (void)irq_attach(IMXRT_IRQ_EDMA_ERROR, imxrt_error_interrupt, NULL);
+  irq_attach(IMXRT_IRQ_EDMA_ERROR, imxrt_error_interrupt, NULL);
 
   /* Disable and clear all error interrupts */
 

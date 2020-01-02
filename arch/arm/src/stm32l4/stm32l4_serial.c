@@ -1137,7 +1137,7 @@ static void stm32l4serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
           if (priv->iflow)
             {
-              (void)stm32l4serial_dmaiflowrestart(priv);
+              stm32l4serial_dmaiflowrestart(priv);
             }
           else
 #endif
@@ -2503,7 +2503,7 @@ static void stm32l4serial_dmarxint(FAR struct uart_dev_s *dev, bool enable)
     {
       /* Re-enable RX DMA. */
 
-      (void)stm32l4serial_dmaiflowrestart(priv);
+      stm32l4serial_dmaiflowrestart(priv);
     }
 #endif
 }
@@ -2657,7 +2657,7 @@ static void stm32l4serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
         {
           /* Re-enable RX DMA. */
 
-          (void)stm32l4serial_dmaiflowrestart(priv);
+          stm32l4serial_dmaiflowrestart(priv);
         }
 #endif
     }
@@ -2924,14 +2924,14 @@ void up_serialinit(void)
   /* Register the console */
 
 #if CONSOLE_UART > 0
-  (void)uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
+  uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
 #ifndef CONFIG_STM32L4_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
 
-  (void)uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_UART - 1]->dev);
+  uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_UART - 1]->dev);
   minor = 1;
 #endif
 
@@ -2967,7 +2967,7 @@ void up_serialinit(void)
       /* Register USARTs as devices in increasing order */
 
       devname[9] = '0' + minor++;
-      (void)uart_register(devname, &g_uart_devs[i]->dev);
+      uart_register(devname, &g_uart_devs[i]->dev);
     }
 #endif /* HAVE UART */
 }

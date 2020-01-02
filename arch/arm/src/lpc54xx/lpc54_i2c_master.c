@@ -421,7 +421,7 @@ static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv)
 
   if (msg->frequency > 0)
     {
-      (void)lpc54_i2c_setfrequency(priv, msg->frequency);
+      lpc54_i2c_setfrequency(priv, msg->frequency);
     }
 
   /* Clear error status bits */
@@ -766,8 +766,8 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Set up the transfer timeout */
 
-  (void)wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
-                 lpc54_i2c_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
+           lpc54_i2c_timeout, 1, (uint32_t)priv);
 
   /* Initiate the transfer */
 
@@ -780,7 +780,7 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifndef CONFIG_I2C_POLLED
        nxsem_wait(&priv->waitsem);
 #else
-       (void)lpc54_i2c_statemachine(priv);
+       lpc54_i2c_statemachine(priv);
 #endif
     }
   while (priv->state != I2CSTATE_IDLE);

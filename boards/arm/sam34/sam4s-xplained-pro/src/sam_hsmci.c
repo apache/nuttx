@@ -170,7 +170,7 @@ int sam_hsmci_initialize(void)
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int, NULL);
+      irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int, NULL);
       g_hsmci.inserted = sam_cardinserted(0);
 #else
       g_hsmci.inserted = true; /* An assumption? */

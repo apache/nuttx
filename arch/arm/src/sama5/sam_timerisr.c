@@ -136,7 +136,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_PIT, (xcpt_t)sam_timerisr, NULL);
+  irq_attach(SAM_IRQ_PIT, (xcpt_t)sam_timerisr, NULL);
 
   /* Set the PIT overflow value (PIV), enable the PIT, and enable
    * interrupts from the PIT.

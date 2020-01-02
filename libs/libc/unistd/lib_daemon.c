@@ -135,15 +135,15 @@ int daemon(int nochdir, int noclose)
 #if CONFIG_NFILE_STREAMS > 0
       /* Make sure the stdin, stdout, and stderr are closed */
 
-      (void)fclose(stdin);
-      (void)fclose(stdout);
-      (void)fclose(stderr);
+      fclose(stdin);
+      fclose(stdout);
+      fclose(stderr);
 #endif
       /* Dup the fd to create standard fd 0-2 */
 
-      (void)dup2(fd, 0);
-      (void)dup2(fd, 1);
-      (void)dup2(fd, 2);
+      dup2(fd, 0);
+      dup2(fd, 1);
+      dup2(fd, 2);
 
       /* fdopen to get the stdin, stdout and stderr streams. The
        * following logic depends on the fact that the library layer
@@ -155,9 +155,9 @@ int daemon(int nochdir, int noclose)
        * fd = 2 is stderr (write-only, append)
        */
 
-      (void)fdopen(0, "r");
-      (void)fdopen(1, "a");
-      (void)fdopen(2, "a");
+      fdopen(0, "r");
+      fdopen(1, "a");
+      fdopen(2, "a");
 
       /* We can close the original file descriptor now (unless it was
        * one of* 0-2)
@@ -165,7 +165,7 @@ int daemon(int nochdir, int noclose)
 
       if (fd > 2)
        {
-         (void)close(fd);
+         close(fd);
        }
     }
 

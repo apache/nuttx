@@ -196,15 +196,15 @@ static void stm32l4_enable_irq(FAR const struct spirit_lower_s *lower,
     {
       /* Enable interrupts on falling edge (active low) */
 
-      (void)stm32l4_gpiosetevent(priv->intcfg, false, true, false,
-                                 priv->handler, priv->arg);
+      stm32l4_gpiosetevent(priv->intcfg, false, true, false,
+                           priv->handler, priv->arg);
     }
   else
     {
       /* Disable interrupts */
 
-      (void)stm32l4_gpiosetevent(priv->intcfg, false, false, false,
-                                 NULL, NULL);
+      stm32l4_gpiosetevent(priv->intcfg, false, false, false,
+                           NULL, NULL);
     }
 }
 

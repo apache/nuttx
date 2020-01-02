@@ -105,6 +105,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)cc1312_bringup();
+  cc1312_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

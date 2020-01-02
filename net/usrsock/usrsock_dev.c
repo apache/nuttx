@@ -293,26 +293,12 @@ static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
 
 static void usrsockdev_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 static void usrsockdev_semgive(FAR sem_t *sem)
 {
-  (void)nxsem_post(sem);
+  nxsem_post(sem);
 }
 
 /****************************************************************************
@@ -570,7 +556,7 @@ static ssize_t usrsockdev_handle_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
     }
 
   return sizeof(*hdr);
@@ -640,7 +626,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
 
       ret = sizeof(*datahdr);
       goto unlock_out;
@@ -914,7 +900,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
           /* Done with data response. */
 
-          (void)usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+          usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
         }
     }
 
@@ -1210,10 +1196,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  while ((ret = net_lockedwait(&dev->req.sem)) < 0)
-    {
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-    }
+  net_lockedwait_uninterruptible(&dev->req.sem);
 
   if (usrsockdev_is_opened(dev))
     {
@@ -1229,10 +1212,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
       /* Wait ack for request. */
 
-      while ((ret = net_lockedwait(&dev->req.acksem)) < 0)
-        {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
+      net_lockedwait_uninterruptible(&dev->req.acksem);
     }
   else
     {
@@ -1269,8 +1249,8 @@ void usrsockdev_register(void)
   nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
   nxsem_setprotocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
 
-  (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
-                        &g_usrsockdev);
+  register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
+                  &g_usrsockdev);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

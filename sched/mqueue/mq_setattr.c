@@ -84,7 +84,7 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
 
       if (oldstat)
         {
-          (void)mq_getattr(mqdes, oldstat);
+          mq_getattr(mqdes, oldstat);
         }
 
       /* Set the new value of the O_NONBLOCK flag. */

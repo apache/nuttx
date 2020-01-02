@@ -183,5 +183,5 @@ void nxterm_showcursor(FAR struct nxterm_state_s *priv)
 
 void nxterm_hidecursor(FAR struct nxterm_state_s *priv)
 {
-  (void)nxterm_hidechar(priv, &priv->cursor);
+  nxterm_hidechar(priv, &priv->cursor);
 }

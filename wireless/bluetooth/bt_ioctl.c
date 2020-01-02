@@ -157,7 +157,6 @@ static void btnet_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
   uint8_t nexttail;
   uint8_t head;
   uint8_t tail;
-  int ret;
 
   if (!g_scanstate.bs_scanning)
     {
@@ -173,14 +172,7 @@ static void btnet_scan_callback(FAR const bt_addr_le_t *addr, int8_t rssi,
 
   /* Get exclusive access to the scan data */
 
-  while ((ret = nxsem_wait(&g_scanstate.bs_exclsem)) < 0)
-    {
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-      if (ret != -EINTR)
-        {
-          return;
-        }
-    }
+  nxsem_wait_uninterruptible(&g_scanstate.bs_exclsem);
 
   /* Add the scan data to the cache */
 
@@ -260,7 +252,6 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
       ret = nxsem_wait(&g_scanstate.bs_exclsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           return ret;
         }
     }

@@ -219,26 +219,12 @@ static inline void dmachan_putreg(struct stm32l4_dma_s *dmach, uint32_t offset, 
 
 static void stm32l4_dmatake(FAR struct stm32l4_dma_s *dmach)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&dmach->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&dmach->sem);
 }
 
 static inline void stm32l4_dmagive(FAR struct stm32l4_dma_s *dmach)
 {
-  (void)nxsem_post(&dmach->sem);
+  nxsem_post(&dmach->sem);
 }
 
 /************************************************************************************
@@ -352,7 +338,7 @@ void weak_function up_dma_initialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      (void)irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
+      irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
 
       /* Disable the DMA channel */
 

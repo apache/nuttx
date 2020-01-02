@@ -142,7 +142,7 @@ int task_restart(pid_t pid)
   /* Kill any children of this thread */
 
 #ifdef HAVE_GROUP_MEMBERS
-  (void)group_killchildren(tcb);
+  group_killchildren(tcb);
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB
@@ -217,7 +217,7 @@ int task_restart(pid_t pid)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
     {
-      (void)nxtask_terminate(pid, true);
+      nxtask_terminate(pid, true);
       errcode = -ret;
       goto errout_with_lock;
     }

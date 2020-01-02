@@ -169,9 +169,9 @@ void avr_timer_initialize(void)
   /* Attach the timer interrupt vector */
 
 #if defined(ATMEGA_IRQ_T1COMPA)
-  (void)irq_attach(ATMEGA_IRQ_T1COMPA, (xcpt_t)atmega_timerisr, NULL);
+  irq_attach(ATMEGA_IRQ_T1COMPA, (xcpt_t)atmega_timerisr, NULL);
 #elif defined(ATMEGA_IRQ_TIM1_COMPA)
-  (void)irq_attach(ATMEGA_IRQ_TIM1_COMPA, (xcpt_t)atmega_timerisr, NULL);
+  irq_attach(ATMEGA_IRQ_TIM1_COMPA, (xcpt_t)atmega_timerisr, NULL);
 #else
 # error "Unable to find IRQ for timer"
 #endif

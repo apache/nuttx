@@ -1236,7 +1236,7 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          (void)devif_poll(dev, rx65n_txpoll);
+          devif_poll(dev, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2088,8 +2088,8 @@ static void rx65n_txtimeout_work(FAR void *arg)
   (priv->dev.d_statistics.tx_timeouts)++;
 #endif
 
-  (void)rx65n_ifdown(&priv->dev);
-  (void)rx65n_ifup(&priv->dev);
+  rx65n_ifdown(&priv->dev);
+  rx65n_ifup(&priv->dev);
 
   /* Then poll for new XMIT data */
 
@@ -2188,7 +2188,7 @@ static void rx65n_poll_work(FAR void *arg)
           /* Update TCP timing states and poll the network for new XMIT data.
            */
 
-          (void)devif_timer(dev, CLK_TCK, rx65n_txpoll);
+          devif_timer(dev, CLK_TCK, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -4394,7 +4394,7 @@ int rx65n_ethinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 }
 

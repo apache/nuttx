@@ -187,7 +187,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
       return 0;
     }
 
@@ -200,7 +200,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
       return 0;
     }
 
@@ -219,7 +219,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
           nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n",
                ret);
-          (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+          iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
           return 0;
         }
     }
@@ -230,7 +230,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
       return 0;
     }
 

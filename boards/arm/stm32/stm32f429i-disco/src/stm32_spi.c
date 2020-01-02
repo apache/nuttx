@@ -79,13 +79,13 @@ FAR struct spi_dev_s *g_spidev5 = NULL;
 void weak_function stm32_spidev_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI5
-  (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
-  (void)stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
-  (void)stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
-  (void)stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
+  stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
+  stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
+  stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
+  stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
 #endif
 #if defined(CONFIG_STM32_SPI4) && defined(CONFIG_MTD_SST25XX)
-  (void)stm32_configgpio(GPIO_CS_SST25);   /* SST25 FLASH chip select */
+  stm32_configgpio(GPIO_CS_SST25);   /* SST25 FLASH chip select */
 #endif
 }
 
@@ -253,7 +253,7 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      (void)stm32_gpiowrite(GPIO_LCD_DC, !cmd);
+      stm32_gpiowrite(GPIO_LCD_DC, !cmd);
 
       return OK;
     }

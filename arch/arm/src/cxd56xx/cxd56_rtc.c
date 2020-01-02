@@ -160,7 +160,7 @@ static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
 {
   FAR struct tm tm;
 
-  (void)gmtime_r(&tp->tv_sec, &tm);
+  gmtime_r(&tp->tv_sec, &tm);
 
   rtcinfo("%s:\n", msg);
   rtcinfo("RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);

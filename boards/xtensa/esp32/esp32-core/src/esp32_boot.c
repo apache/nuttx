@@ -91,6 +91,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)esp32_bringup();
+  esp32_bringup();
 }
 #endif

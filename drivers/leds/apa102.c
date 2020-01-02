@@ -117,8 +117,8 @@ static inline void apa102_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, APA102_SPI_MAXFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, APA102_SPI_MAXFREQUENCY);
 }
 
 /****************************************************************************
@@ -134,21 +134,21 @@ static inline void apa102_write32(FAR struct apa102_dev_s *priv,
 {
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
 
   apa102_configspi(priv->spi);
 
   /* Note: APA102 doesn't use chip select */
   /* Send 32 bits (4 bytes) */
 
-  (void)SPI_SEND(priv->spi, (value & 0xff));
-  (void)SPI_SEND(priv->spi, ((value & 0xff00) >> 8));
-  (void)SPI_SEND(priv->spi, ((value & 0xff0000) >> 16));
-  (void)SPI_SEND(priv->spi, ((value & 0xff000000) >> 24));
+  SPI_SEND(priv->spi, (value & 0xff));
+  SPI_SEND(priv->spi, ((value & 0xff00) >> 8));
+  SPI_SEND(priv->spi, ((value & 0xff0000) >> 16));
+  SPI_SEND(priv->spi, ((value & 0xff000000) >> 24));
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /****************************************************************************

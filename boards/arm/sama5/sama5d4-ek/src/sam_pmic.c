@@ -94,15 +94,15 @@ void sam_pmic_initialize(void)
 
       buffer[0] = 0x0b;
       buffer[1] = 0xee;
-      (void)i2c_write(i2c, &config, buffer, 2);
+      i2c_write(i2c, &config, buffer, 2);
 
       buffer[0] = 0x02;
       buffer[1] = 0x0f;
-      (void)i2c_write(i2c, &config, buffer, 2);
+      i2c_write(i2c, &config, buffer, 2);
 
       buffer[0] = 0x03;
       buffer[1] = 0x0f;
-      (void)i2c_write(i2c, &config, buffer, 2);
+      i2c_write(i2c, &config, buffer, 2);
     }
 }
 

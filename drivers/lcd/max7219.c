@@ -367,8 +367,8 @@ static void max7219_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MAX7219_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_MAX7219_FREQUENCY);
 }
 
 /****************************************************************************
@@ -516,7 +516,7 @@ static int max7219_putrun(fb_coord_t row, fb_coord_t col,
 
       /* Then transfer all 8 columns of data */
 
-      (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+      SPI_SNDBLOCK(priv->spi, &data, 2);
     }
 
   /* Unlock */
@@ -706,7 +706,7 @@ static int max7219_setpower(struct lcd_dev_s *dev, int power)
 
       /* Turn the display off (power-down) */
 
-      (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+      SPI_SNDBLOCK(priv->spi, &data, 2);
 
       priv->powered = MAX7219_POWER_OFF;
     }
@@ -716,7 +716,7 @@ static int max7219_setpower(struct lcd_dev_s *dev, int power)
 
       /* Leave the power-down */
 
-      (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+      SPI_SNDBLOCK(priv->spi, &data, 2);
 
       priv->powered = MAX7219_POWER_ON;
     }
@@ -778,7 +778,7 @@ static int max7219_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+  SPI_SNDBLOCK(priv->spi, &data, 2);
 
   /* Let go of the SPI lock and de-select the device */
 
@@ -819,7 +819,7 @@ static inline void up_clear(FAR struct max7219_dev_s  *priv)
 
       /* Then transfer all 8 columns of data */
 
-      (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+      SPI_SNDBLOCK(priv->spi, &data, 2);
 
       /* Unlock and de-select the device */
 
@@ -870,7 +870,7 @@ FAR struct lcd_dev_s *max7219_initialize(FAR struct spi_dev_s *spi,
 
   data = (MAX7219_SHUTDOWN) | (MAX7219_POWER_ON << 8);
 
-  (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+  SPI_SNDBLOCK(priv->spi, &data, 2);
 
   max7219_deselect(spi);
 
@@ -880,7 +880,7 @@ FAR struct lcd_dev_s *max7219_initialize(FAR struct spi_dev_s *spi,
 
   data = (MAX7219_DECODE_MODE) | (DISABLE_DECODE << 8);
 
-  (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+  SPI_SNDBLOCK(priv->spi, &data, 2);
 
   max7219_deselect(spi);
 
@@ -890,7 +890,7 @@ FAR struct lcd_dev_s *max7219_initialize(FAR struct spi_dev_s *spi,
 
   data = (MAX7219_SCAN_LIMIT) | (DEFAULT_SCAN_LIMIT << 8);
 
-  (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+  SPI_SNDBLOCK(priv->spi, &data, 2);
 
   max7219_deselect(spi);
 
@@ -900,7 +900,7 @@ FAR struct lcd_dev_s *max7219_initialize(FAR struct spi_dev_s *spi,
 
   data = (MAX7219_INTENSITY) | (DISPLAY_INTENSITY(CONFIG_LCD_MAXCONTRAST) << 8);
 
-  (void)SPI_SNDBLOCK(priv->spi, &data, 2);
+  SPI_SNDBLOCK(priv->spi, &data, 2);
 
   /* Let go of the SPI lock and de-select the device */
 

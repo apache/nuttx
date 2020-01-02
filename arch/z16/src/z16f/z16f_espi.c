@@ -340,7 +340,7 @@ static void spi_flush(FAR struct z16f_spi_s *priv)
 
   while ((spi_getreg8(priv, Z16F_ESPI_STAT) & Z16F_ESPI_STAT_RDRF) != 0)
     {
-      (void)spi_getreg8(priv, Z16F_ESPI_DATA);
+      spi_getreg8(priv, Z16F_ESPI_DATA);
     }
 }
 
@@ -373,24 +373,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -847,7 +834,7 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
        * the BRG for 400KHz operation.
        */
 
-      (void)spi_setfrequency(&priv->spi, 400000);
+      spi_setfrequency(&priv->spi, 400000);
       spi_setmode(&priv->spi, SPIDEV_MODE0);
       spi_setbits(&priv->spi, 8);
 

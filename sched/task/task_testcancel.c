@@ -62,6 +62,6 @@
 
 void task_testcancel(void)
 {
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
   leave_cancellation_point();
 }

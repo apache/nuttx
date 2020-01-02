@@ -124,8 +124,8 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
       while (semcount < 0)
         {
-          (void)sem_post(&barrier->sem);
-          (void)sem_getvalue(&barrier->sem, &semcount);
+          sem_post(&barrier->sem);
+          sem_getvalue(&barrier->sem, &semcount);
         }
 
       /* Then return PTHREAD_BARRIER_SERIAL_THREAD to the final thread */

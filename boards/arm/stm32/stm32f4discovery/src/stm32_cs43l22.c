@@ -163,7 +163,7 @@ static int cs43l22_attach(FAR const struct cs43l22_lower_s *lower,
   else
     {
       audinfo("Detaching %p\n", g_cs43l22info.handler);
-      (void)cs43l22_enable(lower, false);
+      cs43l22_enable(lower, false);
       g_cs43l22info.handler = NULL;
       g_cs43l22info.arg = NULL;
     }

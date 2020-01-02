@@ -846,7 +846,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
-          (void)va_arg(ap, double_t);
+          va_arg(ap, double_t);
           pnt  = "*float*";
           size = sizeof("*float*") - 1;
           goto str_lpad;

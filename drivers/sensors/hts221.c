@@ -904,21 +904,10 @@ static int hts221_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hts221_dev_s *priv = inode->i_private;
-  int ret;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   priv->config->set_power(priv->config, true);
   priv->config->irq_enable(priv->config, true);
@@ -936,17 +925,7 @@ static int hts221_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   priv->config->irq_enable(priv->config, false);
   ret = hts221_power_on_off(priv, false);
@@ -968,17 +947,7 @@ static ssize_t hts221_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   ret = hts221_read_convert_data(priv, &data);
   if (ret < 0)
@@ -1016,17 +985,7 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   switch (cmd)
     {
@@ -1117,7 +1076,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct inode *inode;
   FAR struct hts221_dev_s *priv;
   irqstate_t flags;
-  int ret;
+  int ret = OK;
   int i;
 
   DEBUGASSERT(filep && fds);
@@ -1128,17 +1087,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   if (setup)
     {

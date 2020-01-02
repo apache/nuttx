@@ -144,7 +144,7 @@ void up_unblock_task(struct tcb_s *tcb)
            * head of the ready-to-run list.
            */
 
-          (void)group_addrenv(nexttcb);
+          group_addrenv(nexttcb);
 #endif
           /* Update scheduler parameters */
 

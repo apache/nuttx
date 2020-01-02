@@ -170,10 +170,10 @@ static int usbmonitor_daemon(int argc, char **argv)
     {
       nxsig_sleep(CONFIG_USBMONITOR_INTERVAL);
 #ifdef CONFIG_USBDEV_TRACE
-      (void)usbtrace_enumerate(usbmonitor_tracecallback, NULL);
+      usbtrace_enumerate(usbmonitor_tracecallback, NULL);
 #endif
 #ifdef CONFIG_USBHOST_TRACE
-      (void)usbhost_trdump();
+      usbhost_trdump();
 #endif
     }
 

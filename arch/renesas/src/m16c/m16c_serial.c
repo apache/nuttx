@@ -720,7 +720,7 @@ static int up_attach(struct uart_dev_s *dev)
         {
           /* Detach the ERI interrupt on failure */
 
-          (void)irq_detach(priv->rcvirq);
+          irq_detach(priv->rcvirq);
         }
     }
 
@@ -747,8 +747,8 @@ static void up_detach(struct uart_dev_s *dev)
 
   /* Detach the UART interrupts */
 
-  (void)irq_detach(priv->rcvirq);
-  (void)irq_detach(priv->xmtirq);
+  irq_detach(priv->rcvirq);
+  irq_detach(priv->xmtirq);
 }
 
 /****************************************************************************
@@ -1076,17 +1076,17 @@ void up_consoleinit(void)
   /* Register the console */
 
 #ifdef HAVE_SERIALCONSOLE
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
   /* Register all UARTs */
 
 #ifdef TTYS0_DEV
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  uart_register("/dev/ttyS0", &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  uart_register("/dev/ttyS1", &TTYS1_DEV);
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 #endif
 #endif

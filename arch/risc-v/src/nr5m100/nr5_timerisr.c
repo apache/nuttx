@@ -147,7 +147,7 @@ void riscv_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(NR5_IRQ_SYSTICK, nr5m100_timerisr, NULL);
+  irq_attach(NR5_IRQ_SYSTICK, nr5m100_timerisr, NULL);
 
   /* Configure and enable SysTick to interrupt at the requested rate */
 

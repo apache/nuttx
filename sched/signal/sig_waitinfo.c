@@ -71,7 +71,7 @@ int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *info)
 
   /* sigwaitinfo() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Just a wrapper around nxsig_timedwait() */
 

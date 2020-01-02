@@ -271,7 +271,7 @@ static int sixlowpan_ieee802154_metadata(FAR struct radio_driver_s *radio,
    * PAN IDs are the same.
    */
 
-  (void)sixlowpan_src_panid(radio, pktmeta.dpanid);
+  sixlowpan_src_panid(radio, pktmeta.dpanid);
 
   /* Based on the collected attributes and addresses, construct the MAC meta
    * data structure that we need to interface with the IEEE802.15.4 MAC (we

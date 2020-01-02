@@ -106,6 +106,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)tm4c_bringup();
+  tm4c_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

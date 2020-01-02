@@ -90,12 +90,12 @@ static inline int bcmp(FAR const void *b1, FAR const void *b2, size_t len)
 
 static inline void bcopy(FAR const void *b1, FAR void *b2, size_t len)
 {
-  (void)memmove(b2, b1, len);
+  memmove(b2, b1, len);
 }
 
 static inline void bzero(FAR void *s, size_t len)
 {
-  (void)memset(s, 0, len);
+  memset(s, 0, len);
 }
 
 static inline FAR char *index(FAR const char *s, int c)

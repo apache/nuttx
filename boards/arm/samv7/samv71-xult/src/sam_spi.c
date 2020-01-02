@@ -72,18 +72,18 @@ void sam_spidev_initialize(void)
 #ifdef CONFIG_SAMV7_SPI0_MASTER
   /* Make sure that the EDBG DIGI_SPI CS is high so that it does not interfere */
 
-  (void)sam_configgpio(CLICK_EDBG_CS);
+  sam_configgpio(CLICK_EDBG_CS);
 
 #ifdef CONFIG_SAMV71XULT_MB1_SPI
   /* Enable chip select for mikroBUS1 */
 
-  (void)sam_configgpio(CLICK_MB1_CS);
+  sam_configgpio(CLICK_MB1_CS);
 #endif
 
 #ifdef CONFIG_SAMV71XULT_MB2_SPI
   /* Enable chip select for mikroBUS2 */
 
-  (void)sam_configgpio(CLICK_MB2_CS);
+  sam_configgpio(CLICK_MB2_CS);
 
 #endif
 #endif /* CONFIG_SAMV7_SPI0_MASTER */

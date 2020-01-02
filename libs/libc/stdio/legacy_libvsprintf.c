@@ -1220,7 +1220,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
              {
                /* Should return an error on a failure to flush */
 
-               (void)obj->flush(obj);
+               obj->flush(obj);
              }
 
            /* Process the next character in the format */

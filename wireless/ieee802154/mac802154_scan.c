@@ -102,7 +102,6 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
   ret = mac802154_takesem(&priv->opsem, true);
   if (ret < 0)
     {
-      ret = -EINTR;
       goto errout;
     }
 
@@ -114,7 +113,6 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
   if (ret < 0)
     {
       mac802154_givesem(&priv->opsem);
-      ret = -EINTR;
       goto errout;
     }
 

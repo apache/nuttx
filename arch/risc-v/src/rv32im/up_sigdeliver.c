@@ -113,7 +113,7 @@ void up_sigdeliver(void)
 
   sinfo("Resuming EPC: %08x INT_CTX: %08x\n", regs[REG_EPC], regs[REG_INT_CTX]);
 
-  (void)up_irq_save();
+  up_irq_save();
   rtcb->pterrno        = saved_errno;
 
   /* Modify the saved return state with the actual saved values in the

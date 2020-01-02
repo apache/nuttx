@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/fs/fs.h>
 
@@ -247,7 +248,7 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
               ret = file_poll(&conn->lc_outfile, &shadowfds[1], true);
               if (ret < 0)
                 {
-                  (void)file_poll(&conn->lc_infile, &shadowfds[0], false);
+                  file_poll(&conn->lc_infile, &shadowfds[0], false);
                 }
             }
 

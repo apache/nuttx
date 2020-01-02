@@ -369,26 +369,12 @@ static struct sam_xdmac_s g_xdmac;
 
 static void sam_takechsem(struct sam_xdmac_s *xdmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&xdmac->chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&xdmac->chsem);
 }
 
 static inline void sam_givechsem(struct sam_xdmac_s *xdmac)
 {
-  (void)nxsem_post(&xdmac->chsem);
+  nxsem_post(&xdmac->chsem);
 }
 
 /****************************************************************************
@@ -401,26 +387,12 @@ static inline void sam_givechsem(struct sam_xdmac_s *xdmac)
 
 static void sam_takedsem(struct sam_xdmac_s *xdmac)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&xdmac->dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&xdmac->dsem);
 }
 
 static inline void sam_givedsem(struct sam_xdmac_s *xdmac)
 {
-  (void)nxsem_post(&xdmac->dsem);
+  nxsem_post(&xdmac->dsem);
 }
 
 /****************************************************************************
@@ -1257,7 +1229,7 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
    *    reading the XDMAC Channel Interrupt Status Register (CIS).
    */
 
-  (void)sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
+  sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
 
   /* 3. Write the starting source address in the Channel Source Address (CSA)
    *    Register.
@@ -1359,7 +1331,7 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
    *    reading the XDMAC Channel Interrupt Status Register (CIS).
    */
 
-  (void)sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
+  sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
 
   /* 3. Build a linked list of transfer descriptors in memory. The
    *    descriptor view is programmable on a per descriptor basis. The
@@ -1630,7 +1602,7 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_XDMAC, sam_xdmac_interrupt, NULL);
+  irq_attach(SAM_IRQ_XDMAC, sam_xdmac_interrupt, NULL);
 
   /* Initialize the controller */
 
@@ -1682,7 +1654,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
            * Channel Interrupt Status (CIS) Register
            */
 
-          (void)sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
+          sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
 
           /* Disable the channel by writing one to the write-only Global
            * Channel Disable (GD) Register

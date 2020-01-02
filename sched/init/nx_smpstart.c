@@ -107,7 +107,7 @@ void nx_idle_trampoline(void)
 
   /* Then transfer control to the IDLE task */
 
-  (void)nx_idle_task(0, NULL);
+  nx_idle_task(0, NULL);
 
   /* The IDLE task should never return */
 

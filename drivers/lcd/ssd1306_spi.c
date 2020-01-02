@@ -70,8 +70,8 @@ void ssd1306_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_SSD1306_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_SSD1306_FREQUENCY);
 }
 
 /****************************************************************************
@@ -90,7 +90,7 @@ int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 
   /* Send byte value to display */
 
-  (void)SPI_SEND(priv->spi, regval);
+  SPI_SEND(priv->spi, regval);
   return OK;
 }
 
@@ -106,7 +106,7 @@ int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 {
   /* Send byte value to display */
 
-  (void)SPI_SNDBLOCK(priv->spi, data, len);
+  SPI_SNDBLOCK(priv->spi, data, len);
   return OK;
 }
 
@@ -126,7 +126,7 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
     {
       /* If SPI bus is shared then lock and configure it */
 
-      (void)SPI_LOCK(priv->spi, true);
+      SPI_LOCK(priv->spi, true);
       ssd1306_configspi(priv->spi);
     }
 
@@ -140,7 +140,7 @@ void ssd1306_select(FAR struct ssd1306_dev_s *priv, bool cs)
     {
       /* Unlock bus */
 
-      (void)SPI_LOCK(priv->spi, false);
+      SPI_LOCK(priv->spi, false);
     }
 }
 

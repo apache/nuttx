@@ -830,23 +830,15 @@ static inline bool spi_9to16bitmode(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 {
-  int ret;
-
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
    * must not really have completed???
    */
 
   do
     {
-      ret = nxsem_wait(&priv->rxsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&priv->rxsem);
     }
-  while (ret == -EINTR || priv->rxresult == 0);
+  while (priv->rxresult == 0);
 }
 #endif
 
@@ -861,23 +853,7 @@ static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
-   * must not really have completed???
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->txsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR || priv->txresult == 0);
+  nxsem_wait_uninterruptible(&priv->txsem);
 }
 #endif
 
@@ -892,7 +868,7 @@ static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->rxsem);
+  nxsem_post(&priv->rxsem);
 }
 #endif
 
@@ -907,7 +883,7 @@ static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static inline void spi_dmatxwakeup(FAR struct stm32_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->txsem);
+  nxsem_post(&priv->txsem);
 }
 #endif
 
@@ -1133,24 +1109,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
