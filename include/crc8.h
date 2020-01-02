@@ -88,6 +88,17 @@ uint8_t crc8(FAR const uint8_t *src, size_t len);
 
 uint8_t crc8ccitt(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc8part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer using the polynomial
+ *   x^8+x^2+x^1+1 (aka "0x07" poly).
+ *
+ ****************************************************************************/
+
+uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

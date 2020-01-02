@@ -91,6 +91,29 @@ static const uint8_t crc8_tab[256] =
  * Name: crc8ccitt
  *
  * Description:
+ *   Continue CRC calculation on a part of the buffer.
+ *
+ ***************************************************************************/
+
+uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val)
+{
+
+  uint8_t *pos = (uint8_t *) src;
+  uint8_t *end = pos + len;
+
+  while (pos < end)
+    {
+      crc8val = crc8_tab[crc8val ^ *pos];
+      pos++;
+    }
+
+  return crc8val;
+}
+
+/***************************************************************************
+ * Name: crc8ccitt
+ *
+ * Description:
  *   Return a 8-bit CRC of the contents of the 'src' buffer, length 'len
  *   using a CRC with the polynomial x^8+x^2+x^1+1 ("0x07" polynomial).
  *
@@ -98,16 +121,5 @@ static const uint8_t crc8_tab[256] =
 
 uint8_t crc8ccitt(FAR const uint8_t *src, size_t len)
 {
-  uint8_t val = 0;
-
-  uint8_t *pos = (uint8_t *) src;
-  uint8_t *end = pos + len;
-
-  while (pos < end)
-    {
-      val = crc8_tab[val ^ *pos];
-      pos++;
-    }
-
-  return val;
+    return crc8ccittpart(src, len, 0);
 }
