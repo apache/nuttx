@@ -166,7 +166,7 @@
 #  define STM32H7_NETHERNET                0   /* No 100/100 Ethernet MAC */
 #endif
 
-#if defined(CONFIG_STM32F7_HAVE_FMC)
+#if defined(CONFIG_STM32H7_HAVE_FMC)
 #  define STM32H7_NFMC                     1   /* Have FMC memory controller */
 #else
 #  define STM32H7_NFMC                     0   /* No FMC memory controller */
