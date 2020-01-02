@@ -106,7 +106,8 @@ void stm32_fmc_disable(void)
 
 void stm32_fmc_sdram_write_protect(int bank, bool state)
 {
-  uint32_t val, sdcr;
+  uint32_t val;
+  uint32_t sdcr;
 
   DEBUGASSERT(bank == 1 || bank == 2);
   sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
@@ -158,7 +159,8 @@ void stm32_fmc_sdram_set_refresh_rate(int count)
 
 void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
 {
-  uint32_t val, sdtr;
+  uint32_t val
+  uint32_t sdtr;
 
   DEBUGASSERT((bank == 1) || (bank == 2));
   DEBUGASSERT((timing & FMC_SDTR_RESERVED) == 0);
@@ -180,7 +182,8 @@ void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
 
 void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
 {
-  uint32_t val, sdcr;
+  uint32_t val
+  uint32_t sdcr;
 
   DEBUGASSERT((bank == 1) || (bank == 2));
   DEBUGASSERT((ctrl & FMC_SDCR_RESERVED) == 0);
