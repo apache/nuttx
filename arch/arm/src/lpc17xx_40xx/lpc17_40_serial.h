@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_serial.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,5 +129,7 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+void up_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_SERIAL_H */
