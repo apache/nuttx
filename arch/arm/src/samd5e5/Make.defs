@@ -154,6 +154,7 @@ endif
 
 ifeq ($(CONFIG_SAMD5E5_GMAC),y)
 CHIP_CSRCS += sam_gmac.c
+CHIP_CSRCS += sam_ethernet.c
 endif
 
 ifeq ($(CONFIG_SAMD5E5_USB),y)

@@ -1,9 +1,8 @@
-/************************************************************************************
- * arch/arm/src/samd5e5/hardware/sam_memorymap.h
+/****************************************************************************
+ * boards/arm/samd5e5/same54-xplained-pro/scripts/nvm.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
+ *   Author: Gregory Nutt 9
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -31,21 +30,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
-#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdio.h>
+#include <stdint.h>
 
-#if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(CONFIG_ARCH_CHIP_SAME5X)
-#  include "hardware/samd5e5_pinmap.h"
-#else
-#  error "Unsupported SAMD5/E5 family"
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H */
+static const uint8_t nvm[20] =
+{
+  0x14,                                           /* Count 20 bytes */
+  0x80, 0x40, 0x00,                               /* 24-address : 804000 */
+  0x39, 0x92, 0x9a, 0xfe, 0x80, 0xff, 0xec, 0xae, /* 16-bytes of NVM data */
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+};
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int main(int argc, char **argv)
+{
+  unsigned int csum;
+  int i;
+
+  printf("S2");
+
+  for (i = 0, csum = 0; i < 20; i++)
+    {
+      csum += nvm[i];
+      printf("%02X", (unsigned int)nvm[i]);
+    }
+
+  printf("%02X\r\n", ~csum & 0xff);
+  printf("S9030000FC\r\n");
+  return 0;
+}

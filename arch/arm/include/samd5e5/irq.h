@@ -76,7 +76,7 @@
 
 #define SAM_IRQ_EXTINT        (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(ARCH_CHIP_SAME5X)
+#if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(CONFIG_ARCH_CHIP_SAME5X)
 #  include <arch/samd5e5/samd5e5_irq.h>
 #else
 #  error "Unsupported SAMD5/E5 family"
