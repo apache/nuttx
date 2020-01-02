@@ -13,7 +13,8 @@ config SAME54_XPLAINED_PRO_RUNFROMFLASH
 	bool "Run from FLASH"
 	select BOOT_RUNFROMFLASH
 	---help---
-		This is the normal configuration for building METRO M4 code.
+		This is the normal configuration for building SAM E54 Xplained
+		Pro code.
 
 config SAME54_XPLAINED_PRO_RUNFROMSRAM
 	bool "Run from SRAM"
