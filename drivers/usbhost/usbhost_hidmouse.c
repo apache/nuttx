@@ -446,21 +446,7 @@ static struct usbhost_state_s *g_priv;    /* Data passed to thread */
 
 static void usbhost_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -584,7 +570,7 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
                                      FAR char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devno);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devno);
 }
 
 /****************************************************************************
@@ -618,7 +604,7 @@ static void usbhost_destroy(FAR void *arg)
 
   uinfo("Unregister driver\n");
   usbhost_mkdevname(priv, devname);
-  (void)unregister_driver(devname);
+  unregister_driver(devname);
 
   /* Release the device name used by this connection */
 
@@ -1373,7 +1359,6 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
            */
 
           ierr("ERROR: nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           goto errout;
         }
 
@@ -2078,7 +2063,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        * perhaps, destroy the class instance.  Then it will exit.
        */
 
-      (void)nxsig_kill(priv->pollpid, SIGALRM);
+      nxsig_kill(priv->pollpid, SIGALRM);
     }
   else
     {
@@ -2089,7 +2074,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
        */
 
       DEBUGASSERT(priv->work.worker == NULL);
-      (void)work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
+      work_queue(HPWORK, &priv->work, usbhost_destroy, priv, 0);
     }
 
   return OK;
@@ -2254,7 +2239,7 @@ static int usbhost_close(FAR struct file *filep)
                * signal that we use does not matter in this case.
                */
 
-              (void)nxsig_kill(priv->pollpid, SIGALRM);
+              nxsig_kill(priv->pollpid, SIGALRM);
             }
         }
     }

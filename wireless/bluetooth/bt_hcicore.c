@@ -439,7 +439,7 @@ static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 
       while (count--)
         {
-          sem_post(&g_btdev.le_pkts_sem);
+          nxsem_post(&g_btdev.le_pkts_sem);
         }
     }
 }
@@ -978,13 +978,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
       /* Wait until ncmd > 0 */
 
-      do
-        {
-          ret = nxsem_wait(&g_btdev.ncmd_sem);
-        }
-      while (ret == -EINTR);
-
-      DEBUGASSERT(ret >= 0);
+      nxsem_wait_uninterruptible(&g_btdev.ncmd_sem);
 
       /* Get next command - wait if necessary */
 
@@ -1765,13 +1759,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
            * released while we are waiting.
            */
 
-          do
-            {
-              /* The timed wait could also be awakened by a signal */
-
-              ret = nxsem_timedwait(&sync_sem, &abstime);
-            }
-          while (ret == -EINTR);
+          nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
         }
 
       sched_unlock();

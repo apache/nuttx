@@ -150,21 +150,7 @@ static const struct ioexpander_ops_s g_pca9555_ops =
 
 static void pca9555_lock(FAR struct pca9555_dev_s *pca)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&pca->exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&pca->exclsem);
 }
 
 #define pca9555_unlock(p) nxsem_post(&(p)->exclsem)
@@ -847,8 +833,8 @@ static void pca9555_irqworker(void *arg)
                 {
                   /* Yes.. perform the callback */
 
-                  (void)pca->cb[i].cbfunc(&pca->dev, match,
-                                          pca->cb[i].cbarg);
+                  pca->cb[i].cbfunc(&pca->dev, match,
+                                    pca->cb[i].cbarg);
                 }
             }
         }

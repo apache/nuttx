@@ -55,7 +55,7 @@ long double floorl(long double x)
    * -2.0 -2.0  -2.0
    */
 
-  (void)modfl(x, &modx);
+  modfl(x, &modx);
   if (x < 0.0 && x < modx)
     {
       modx -= 1.0;

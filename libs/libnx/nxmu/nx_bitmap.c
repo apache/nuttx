@@ -123,7 +123,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
    * priority inheritance enabled.
    */
 
-  (void)_SEM_SETPROTOCOL(&sem_done, SEM_PRIO_NONE);
+  _SEM_SETPROTOCOL(&sem_done, SEM_PRIO_NONE);
 
   /* Forward the fill command to the server */
 
@@ -138,7 +138,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 
   /* Destroy the semaphore and return. */
 
-  (void)_SEM_DESTROY(&sem_done);
+  _SEM_DESTROY(&sem_done);
 
   return ret;
 }

@@ -957,7 +957,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(spics->dmadog);
+  wd_cancel(spics->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1067,26 +1067,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          /* Take the semaphore (perhaps waiting) */
-
-          ret = nxsem_wait(&spi->spisem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&spi->spisem);
     }
   else
     {
-      (void)nxsem_post(&spi->spisem);
-      ret = OK;
+      ret = nxsem_post(&spi->spisem);
     }
 
   return ret;
@@ -1680,17 +1665,15 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Wait for the DMA complete */
 
-      ret = nxsem_wait(&spics->dmawait);
+      ret = nxsem_wait_uninterruptible(&spics->dmawait);
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(spics->dmadog);
+      wd_cancel(spics->dmadog);
 
-      /* Check if we were awakened by an error of some kind.  EINTR is not a
-       * failure.  It simply means that the wait was awakened by a signal.
-       */
+      /* Check if we were awakened by an error of some kind. */
 
-      if (ret < 0 && ret != -EINTR)
+      if (ret < 0)
         {
           DEBUGPANIC();
           return;
@@ -1952,9 +1935,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI0_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI0_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI0_SCLK);
+          xmc4_gpio_config(GPIO_SPI0_MISO);
+          xmc4_gpio_config(GPIO_SPI0_MOSI);
+          xmc4_gpio_config(GPIO_SPI0_SCLK);
         }
       else
 #endif
@@ -1965,9 +1948,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI1_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI1_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI1_SCLK);
+          xmc4_gpio_config(GPIO_SPI1_MISO);
+          xmc4_gpio_config(GPIO_SPI1_MOSI);
+          xmc4_gpio_config(GPIO_SPI1_SCLK);
         }
       else
 #endif
@@ -1978,9 +1961,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI2_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI2_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI2_SCLK);
+          xmc4_gpio_config(GPIO_SPI2_MISO);
+          xmc4_gpio_config(GPIO_SPI2_MOSI);
+          xmc4_gpio_config(GPIO_SPI2_SCLK);
         }
       else
 #endif
@@ -1991,9 +1974,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI3_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI3_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI3_SCLK);
+          xmc4_gpio_config(GPIO_SPI3_MISO);
+          xmc4_gpio_config(GPIO_SPI3_MOSI);
+          xmc4_gpio_config(GPIO_SPI3_SCLK);
         }
       else
 #endif
@@ -2004,9 +1987,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI4_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI4_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI4_SCLK);
+          xmc4_gpio_config(GPIO_SPI4_MISO);
+          xmc4_gpio_config(GPIO_SPI4_MOSI);
+          xmc4_gpio_config(GPIO_SPI4_SCLK);
         }
       else
 #endif
@@ -2017,9 +2000,9 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
            * select pins must be selected by board-specific logic.
            */
 
-          (void)xmc4_gpio_config(GPIO_SPI5_MISO);
-          (void)xmc4_gpio_config(GPIO_SPI5_MOSI);
-          (void)xmc4_gpio_config(GPIO_SPI5_SCLK);
+          xmc4_gpio_config(GPIO_SPI5_MISO);
+          xmc4_gpio_config(GPIO_SPI5_MOSI);
+          xmc4_gpio_config(GPIO_SPI5_SCLK);
         }
       else
 #endif

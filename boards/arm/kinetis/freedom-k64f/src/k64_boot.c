@@ -112,7 +112,7 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)k64_bringup();
+  k64_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
 

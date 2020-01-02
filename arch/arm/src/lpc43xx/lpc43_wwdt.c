@@ -644,7 +644,7 @@ void lpc43_wwdtinitialize(FAR const char *devpath)
 
   /* Attach our watchdog interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(LPC43M4_IRQ_WWDT, lpc43_interrupt, NULL);
+  irq_attach(LPC43M4_IRQ_WWDT, lpc43_interrupt, NULL);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the
@@ -656,7 +656,7 @@ void lpc43_wwdtinitialize(FAR const char *devpath)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_LPC43_WWDT */

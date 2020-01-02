@@ -137,7 +137,7 @@ FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
 
           /* And turn the OLED on */
 
-          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
+          dev->setpower(dev, CONFIG_LCD_MAXPOWER);
 
 #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
 

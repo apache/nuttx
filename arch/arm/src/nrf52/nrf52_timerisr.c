@@ -135,7 +135,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(NRF52_IRQ_SYSTICK, (xcpt_t)nrf52_timerisr, NULL);
+  irq_attach(NRF52_IRQ_SYSTICK, (xcpt_t)nrf52_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

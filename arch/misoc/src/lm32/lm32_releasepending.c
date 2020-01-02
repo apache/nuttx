@@ -129,7 +129,7 @@ void up_release_pending(void)
            * thread at the head of the ready-to-run list.
            */
 
-          (void)group_addrenv(nexttcb);
+          group_addrenv(nexttcb);
 #endif
           /* Update scheduler parameters */
 

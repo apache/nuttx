@@ -2261,7 +2261,7 @@ static int fat_putsfdirentry(struct fat_mountpt_s *fs,
 
   /* Directory name info */
 
-  (void)fat_putsfname(fs, dirinfo);
+  fat_putsfname(fs, dirinfo);
 
   /* Set the attribute attribute, write time, creation time */
 

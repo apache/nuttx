@@ -309,7 +309,7 @@ int pic32mz_oneshot_start(struct pic32mz_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)pic32mz_oneshot_cancel(oneshot, NULL);
+      pic32mz_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */

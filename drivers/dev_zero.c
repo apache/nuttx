@@ -136,5 +136,5 @@ static int devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devzero_register(void)
 {
-  (void)register_driver("/dev/zero", &devzero_fops, 0666, NULL);
+  register_driver("/dev/zero", &devzero_fops, 0666, NULL);
 }

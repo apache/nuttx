@@ -707,7 +707,7 @@ uint16_t spirit_pktstack_get_payloadlen(FAR struct spirit_library_s *spirit)
 
   /* Read the PCKTLEN1 registers value */
 
-  (void)spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
+  spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
 
   /* Rebuild and return the payload length value */
 
@@ -823,7 +823,7 @@ uint8_t spirit_pktstack_get_rxsource_addrmask(FAR struct spirit_library_s *spiri
 
   /* Write value to the PCKT_FLT_GOALS_SOURCE_MASK register */
 
-  (void)spirit_reg_read(spirit, PCKT_FLT_GOALS_SOURCE_MASK_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKT_FLT_GOALS_SOURCE_MASK_BASE, &regval, 1);
 
   /* Return the read value */
 
@@ -851,7 +851,7 @@ uint16_t spirit_pktstack_get_rxpktlen(FAR struct spirit_library_s *spirit)
 
   /* Read the RX_PCKT_LENx registers value */
 
-  (void)spirit_reg_read(spirit, RX_PCKT_LEN1_BASE, regval, 2);
+  spirit_reg_read(spirit, RX_PCKT_LEN1_BASE, regval, 2);
 
   /* Rebuild and return the the length field */
 

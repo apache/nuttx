@@ -86,7 +86,7 @@ static inline void s32k1xx_wdog_disable(void)
    * completed.
    */
 
-  (void)getreg32(S32K1XX_WDOG_CNT);
+  getreg32(S32K1XX_WDOG_CNT);
 
   /* Initial write of WDOG configuration register:  Enables support for
    * 32-bit refresh/unlock command write words, clock select from LPO,

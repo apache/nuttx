@@ -215,14 +215,14 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
       /* Configure the interrupt using the SAVED handler */
 
       kl_configgpio(GPIO_ADXL345_INT1);
-      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, adxl345_interrupt, NULL);
+      kl_gpioirqattach(GPIO_ADXL345_INT1, adxl345_interrupt, NULL);
       kl_gpioirqenable(GPIO_ADXL345_INT1);
     }
   else
     {
       /* Configure the interrupt with a NULL handler to disable it */
 
-      (void)kl_gpioirqattach(GPIO_ADXL345_INT1, NULL, NULL);
+      kl_gpioirqattach(GPIO_ADXL345_INT1, NULL, NULL);
       kl_gpioirqdisable(GPIO_ADXL345_INT1);
     }
 
@@ -272,7 +272,7 @@ int adxl345_archinitialize(int minor)
 
       /* Configure the ADXL345 interrupt pin as an input */
 
-      (void)kl_configgpio(GPIO_ADXL345_INT1);
+      kl_configgpio(GPIO_ADXL345_INT1);
 
       /* Get an instance of the I2C interface */
 

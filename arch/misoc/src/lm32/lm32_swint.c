@@ -320,7 +320,7 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
        * thread at the head of the ready-to-run list.
        */
 
-      (void)group_addrenv(NULL);
+      group_addrenv(NULL);
 #endif
     }
 #endif

@@ -120,7 +120,7 @@ static int ehci_waiter(int argc, char *argv[])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)CONN_ENUMERATE(g_ehciconn, hport);
+          CONN_ENUMERATE(g_ehciconn, hport);
         }
     }
 

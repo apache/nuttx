@@ -350,21 +350,7 @@ static inline void kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv)
 
 static inline void kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->mutex);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->mutex);
 }
 
 /****************************************************************************
@@ -390,7 +376,7 @@ static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv)
 
 static inline void kinetis_i2c_wait(struct kinetis_i2cdev_s *priv)
 {
-  (void)nxsem_wait(&priv->wait);
+  nxsem_wait(&priv->wait);
 }
 
 /****************************************************************************
@@ -1207,8 +1193,8 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
 
       /* Wait for transfer complete */
 
-      (void)wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
-                     (uint32_t)priv);
+      wd_start(priv->timeout, I2C_TIMEOUT, kinetis_i2c_timeout, 1,
+               (uint32_t)priv);
       kinetis_i2c_wait(priv);
 
       wd_cancel(priv->timeout);

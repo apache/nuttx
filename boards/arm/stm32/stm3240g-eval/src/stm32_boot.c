@@ -123,6 +123,6 @@ void board_late_initialize(void)
    * the start-up thread.
    */
 
-  (void)stm32_bringup();
+  stm32_bringup();
 }
 #endif

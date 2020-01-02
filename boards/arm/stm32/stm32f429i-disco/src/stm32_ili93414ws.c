@@ -312,7 +312,7 @@ static void stm32_ili93414ws_spirecvmode(void)
    * broken transfer.
    */
 
-  (void)getreg16(ILI93414WS_SPI_DR);
+  getreg16(ILI93414WS_SPI_DR);
 }
 
 /****************************************************************************
@@ -692,7 +692,7 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
 
       /* Dummy read to discard the first 8 bit. */
 
-      (void)stm32_ili93414ws_recvword();
+      stm32_ili93414ws_recvword();
 
       while (nwords--)
         {
@@ -864,7 +864,7 @@ static inline void stm32_ili93414ws_cmddata(
 static inline void stm32_ili93414ws_cmddata(
                       FAR struct ili9341_lcd_s *lcd, bool cmd)
 {
-  (void)stm32_gpiowrite(GPIO_LCD_DC, !cmd);
+  stm32_gpiowrite(GPIO_LCD_DC, !cmd);
 }
 #endif
 
@@ -926,7 +926,7 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
 {
   /* We own the spi bus, so just select the chip */
 
-  (void)stm32_gpiowrite(GPIO_CS_LCD, false);
+  stm32_gpiowrite(GPIO_CS_LCD, false);
 
   /* Disable spi */
 
@@ -980,7 +980,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
 #else
 static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
 {
-  (void)stm32_gpiowrite(GPIO_CS_LCD, true);
+  stm32_gpiowrite(GPIO_CS_LCD, true);
 }
 #endif
 
@@ -1200,11 +1200,11 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
 
   /* Configure gpios */
 
-  (void)stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
-  (void)stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
-  (void)stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
-  (void)stm32_configgpio(GPIO_SPI5_SCK);   /* SPI clock */
-  (void)stm32_configgpio(GPIO_SPI5_MOSI);  /* SPI MOSI */
+  stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
+  stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
+  stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
+  stm32_configgpio(GPIO_SPI5_SCK);   /* SPI clock */
+  stm32_configgpio(GPIO_SPI5_MOSI);  /* SPI MOSI */
 
   /* Initialize structure */
 

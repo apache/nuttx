@@ -418,11 +418,11 @@ int syslog_dev_uninitialize(void)
   /* Attempt to flush any buffered data */
 
   sched_lock();
-  (void)syslog_dev_flush();
+  syslog_dev_flush();
 
   /* Close the detached file instance */
 
-  (void)file_close(&g_syslog_dev.sl_file);
+  file_close(&g_syslog_dev.sl_file);
 
   /* Free the device path */
 
@@ -646,7 +646,7 @@ int syslog_dev_putc(int ch)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (nbytes > 0)
         {
-          (void)syslog_dev_flush();
+          syslog_dev_flush();
         }
 #endif
     }
@@ -694,7 +694,7 @@ int syslog_dev_flush(void)
    * mountpoint does not support the sync() method.
    */
 
-  (void)file_fsync(&g_syslog_dev.sl_file);
+  file_fsync(&g_syslog_dev.sl_file);
 #endif
 
   return OK;

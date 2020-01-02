@@ -221,7 +221,7 @@ static void rtc_wprunlock(void)
 {
   /* Enable write access to the backup domain. */
 
-  (void)stm32l4_pwr_enablebkp(true);
+  stm32l4_pwr_enablebkp(true);
 
   /* The following steps are required to unlock the write protection on all the
    * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
@@ -258,7 +258,7 @@ static inline void rtc_wprlock(void)
 
   /* Disable write access to the backup domain. */
 
-  (void)stm32l4_pwr_enablebkp(false);
+  stm32l4_pwr_enablebkp(false);
 }
 
 /****************************************************************************
@@ -485,7 +485,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
    * backup data registers and backup SRAM).
    */
 
-  (void)stm32l4_pwr_enablebkp(true);
+  stm32l4_pwr_enablebkp(true);
 
   /* Check for EXTI from Alarm A or B and handle according */
 
@@ -551,7 +551,7 @@ static int stm32l4_rtc_alarm_handler(int irq, FAR void *context, FAR void *rtc_h
    * data registers and backup SRAM).
    */
 
-  (void)stm32l4_pwr_enablebkp(false);
+  stm32l4_pwr_enablebkp(false);
 
   return ret;
 }
@@ -757,7 +757,7 @@ static inline void rtc_enable_alarm(void)
        * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
        */
 
-      (void)stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler, NULL);
+      stm32l4_exti_alarm(true, false, true, stm32l4_rtc_alarm_handler, NULL);
       g_alarm_enabled = true;
     }
 }
@@ -871,7 +871,7 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32l4_pwr_enablebkp(true);
+      stm32l4_pwr_enablebkp(true);
 
 #if defined(CONFIG_STM32L4_RTC_HSECLOCK)
       modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
@@ -903,7 +903,7 @@ int up_rtc_initialize(void)
            * data registers and backup SRAM).
            */
 
-          (void)stm32l4_pwr_enablebkp(false);
+          stm32l4_pwr_enablebkp(false);
 
           rtc_dumpregs("After Failed Initialization");
 
@@ -968,7 +968,7 @@ int up_rtc_initialize(void)
            * data registers and backup SRAM).
            */
 
-          (void)stm32l4_pwr_enablebkp(false);
+          stm32l4_pwr_enablebkp(false);
         }
     }
   else
@@ -977,7 +977,7 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32l4_pwr_enablebkp(true);
+      stm32l4_pwr_enablebkp(true);
 
       /* Write protection for RTC registers does not need to be disabled. */
 
@@ -987,7 +987,7 @@ int up_rtc_initialize(void)
        * data registers and backup SRAM).
        */
 
-      (void)stm32l4_pwr_enablebkp(false);
+      stm32l4_pwr_enablebkp(false);
     }
 
   g_rtc_enabled = true;
@@ -1318,7 +1318,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
    * seconds)
    */
 
-  (void)gmtime_r(&tp->tv_sec, &newtime);
+  gmtime_r(&tp->tv_sec, &newtime);
   return stm32l4_rtc_setdatetime(&newtime);
 }
 
@@ -1582,13 +1582,13 @@ static int stm32l4_rtc_wakeup_handler(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t regval = 0;
 
-  (void)stm32l4_pwr_enablebkp(true);
+  stm32l4_pwr_enablebkp(true);
 
   regval = getreg32(STM32L4_RTC_ISR);
   regval &= ~RTC_ISR_WUTF;
   putreg32(regval, STM32L4_RTC_ISR);
 
-  (void)stm32l4_pwr_enablebkp(false);
+  stm32l4_pwr_enablebkp(false);
 
   if (g_wakeupcb != NULL)
     {
@@ -1612,7 +1612,7 @@ static inline void rtc_enable_wakeup(void)
 {
   if (!g_wakeup_enabled)
     {
-      (void)stm32l4_exti_wakeup(true, false, true, stm32l4_rtc_wakeup_handler, NULL);
+      stm32l4_exti_wakeup(true, false, true, stm32l4_rtc_wakeup_handler, NULL);
       g_wakeup_enabled = true;
     }
 }

@@ -369,7 +369,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      (void)iob_free_chain(iob, IOBUSER_NET_SOCK_ICMP);
+      iob_free_chain(iob, IOBUSER_NET_SOCK_ICMP);
     }
 
   return ret;

@@ -108,20 +108,7 @@ static uint16_t g_last_udp_port;
 
 static inline void _udp_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  while ((ret = net_lockedwait(sem)) < 0)
-    {
-      /* The only case that an error should occur here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-    }
-
-  UNUSED(ret);
+  net_lockedwait_uninterruptible(sem);
 }
 
 #define _udp_semgive(sem) nxsem_post(sem)

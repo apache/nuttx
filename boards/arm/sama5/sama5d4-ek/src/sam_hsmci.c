@@ -339,7 +339,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Configure card detect interrupts */
 
   sam_pioirq(state->cdcfg);
-  (void)irq_attach(state->irq, state->handler, NULL);
+  irq_attach(state->irq, state->handler, NULL);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

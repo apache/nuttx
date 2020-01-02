@@ -99,7 +99,7 @@ int bchdev_unregister(FAR const char *chardev)
 
   ret = file_ioctl(&filestruct, DIOC_GETPRIV,
                    (unsigned long)((uintptr_t)&bch));
-  (void)file_close(&filestruct);
+  file_close(&filestruct);
 
   if (ret < 0)
     {

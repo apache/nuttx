@@ -548,7 +548,7 @@ void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
        * of course, the device that received the packet.
        */
 
-      (void)netdev_foreach(ipv4_forward_callback, dev);
+      netdev_foreach(ipv4_forward_callback, dev);
     }
 }
 #endif

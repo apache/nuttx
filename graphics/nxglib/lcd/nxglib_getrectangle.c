@@ -79,7 +79,7 @@ void NXGL_FUNCNAME(nxgl_getrectangle, NXGLIB_SUFFIX)
 
   for (srcrow = rect->pt1.y; srcrow <= rect->pt2.y; srcrow++)
     {
-      (void)pinfo->getrun(srcrow, rect->pt1.x, dline, ncols);
+      pinfo->getrun(srcrow, rect->pt1.x, dline, ncols);
       dline += deststride;
     }
 }

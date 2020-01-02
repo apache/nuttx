@@ -56,7 +56,7 @@ static void wrlock_cleanup(FAR void *arg)
   FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
 
   rw_lock->num_writers--;
-  (void)pthread_mutex_unlock(&rw_lock->lock);
+  pthread_mutex_unlock(&rw_lock->lock);
 }
 #endif
 
@@ -151,7 +151,7 @@ int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *rw_lock,
     {
       /* In case of error, notify any blocked readers. */
 
-      (void) pthread_cond_broadcast(&rw_lock->cv);
+      pthread_cond_broadcast(&rw_lock->cv);
     }
 
   rw_lock->num_writers--;

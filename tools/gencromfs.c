@@ -490,7 +490,7 @@ static void unlink_tmpfiles(void)
   for (i = 0; i < g_ntmps; i++)
     {
       snprintf(tmpname, TMP_NAMLEN, TMP_NAME, i);
-      (void)unlink(tmpname);
+      unlink(tmpname);
     }
 }
 #endif
@@ -513,7 +513,7 @@ static void append_tmpfile(FILE *dest, FILE *src)
       nread = fread(iobuffer, 1, 1024, src);
       if (nread > 0)
         {
-          (void)fwrite(iobuffer, 1, nread, dest);
+          fwrite(iobuffer, 1, nread, dest);
         }
     }
   while (nread > 0);
@@ -974,7 +974,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
     {
       /* Then recurse to generate all of the nodes for the subtree */
 
-      (void)traverse_directory(path, process_direntry, NULL);
+      traverse_directory(path, process_direntry, NULL);
     }
 
   /* When traverse_directory() returns, all of the nodes in the sub-tree under
@@ -1326,7 +1326,7 @@ int main(int argc, char **argv, char **envp)
        * each directory entry encountered.
        */
 
-      (void)traverse_directory(g_dirname, process_direntry, NULL);
+      traverse_directory(g_dirname, process_direntry, NULL);
     }
 
   /* Now append the volume header to output file */

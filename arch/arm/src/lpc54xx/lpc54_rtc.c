@@ -322,7 +322,7 @@ int lpc54_rtc_rdalarm(FAR struct tm *time)
   uint32_t match;
 
   match = getreg32(LPC54_RTC_MATCH);
-  (void)gmtime_r((time_t *)&match, time);
+  gmtime_r((time_t *)&match, time);
   return OK;
 }
 #endif

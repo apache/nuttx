@@ -87,6 +87,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)or1k_bringup();
+  or1k_bringup();
 }
 #endif

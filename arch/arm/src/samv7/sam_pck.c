@@ -156,7 +156,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK0:
       putreg32(PMC_PCK0, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK0
-      (void)cam_configgpio(GPIO_PMC_PCK0);
+      cam_configgpio(GPIO_PMC_PCK0);
 #endif
       putreg32(regval, SAM_PMC_PCK0);
       break;
@@ -164,7 +164,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK1:
       putreg32(PMC_PCK1, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK1
-      (void)cam_configgpio(GPIO_PMC_PCK1);
+      cam_configgpio(GPIO_PMC_PCK1);
 #endif
       putreg32(regval, SAM_PMC_PCK1);
       break;
@@ -172,7 +172,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK2:
       putreg32(PMC_PCK2, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK2
-      (void)cam_configgpio(GPIO_PMC_PCK2);
+      cam_configgpio(GPIO_PMC_PCK2);
 #endif
       putreg32(regval, SAM_PMC_PCK2);
       break;
@@ -180,7 +180,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK3:
       putreg32(PMC_PCK3, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK3
-      (void)cam_configgpio(GPIO_PMC_PCK3);
+      cam_configgpio(GPIO_PMC_PCK3);
 #endif
       putreg32(regval, SAM_PMC_PCK3);
       break;
@@ -188,7 +188,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK4:
       putreg32(PMC_PCK4, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK4
-      (void)cam_configgpio(GPIO_PMC_PCK4);
+      cam_configgpio(GPIO_PMC_PCK4);
 #endif
       putreg32(regval, SAM_PMC_PCK4);
       break;
@@ -196,7 +196,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK5:
       putreg32(PMC_PCK5, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK5
-      (void)cam_configgpio(GPIO_PMC_PCK5);
+      cam_configgpio(GPIO_PMC_PCK5);
 #endif
       putreg32(regval, SAM_PMC_PCK5);
       break;
@@ -204,7 +204,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
     case PCK6:
       putreg32(PMC_PCK6, SAM_PMC_SCDR);
 #ifdef GPIO_PMC_PCK6
-      (void)cam_configgpio(GPIO_PMC_PCK6);
+      cam_configgpio(GPIO_PMC_PCK6);
 #endif
       putreg32(regval, SAM_PMC_PCK6);
       break;

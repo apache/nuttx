@@ -230,14 +230,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART1_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART1_TX);
+  imxrt_config_gpio(GPIO_LPUART1_RX);
+  imxrt_config_gpio(GPIO_LPUART1_TX);
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART1_CTS);
+  imxrt_config_gpio(GPIO_LPUART1_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART1_RTS);
+  imxrt_config_gpio(GPIO_LPUART1_RTS);
 #endif
 #endif
 
@@ -247,14 +247,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART2_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART2_TX);
+  imxrt_config_gpio(GPIO_LPUART2_RX);
+  imxrt_config_gpio(GPIO_LPUART2_TX);
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART2_CTS);
+  imxrt_config_gpio(GPIO_LPUART2_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART2_RTS);
+  imxrt_config_gpio(GPIO_LPUART2_RTS);
 #endif
 #endif
 
@@ -264,14 +264,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART3_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART3_TX);
+  imxrt_config_gpio(GPIO_LPUART3_RX);
+  imxrt_config_gpio(GPIO_LPUART3_TX);
 #ifdef CONFIG_LPUART3_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART3_CTS);
+  imxrt_config_gpio(GPIO_LPUART3_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART3_RTS);
+  imxrt_config_gpio(GPIO_LPUART3_RTS);
 #endif
 #endif
 
@@ -281,14 +281,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART4_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART4_TX);
+  imxrt_config_gpio(GPIO_LPUART4_RX);
+  imxrt_config_gpio(GPIO_LPUART4_TX);
 #ifdef CONFIG_LPUART4_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART4_CTS);
+  imxrt_config_gpio(GPIO_LPUART4_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART4_RTS);
+  imxrt_config_gpio(GPIO_LPUART4_RTS);
 #endif
 #endif
 
@@ -298,14 +298,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART5_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART5_TX);
+  imxrt_config_gpio(GPIO_LPUART5_RX);
+  imxrt_config_gpio(GPIO_LPUART5_TX);
 #ifdef CONFIG_LPUART5_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART5_CTS);
+  imxrt_config_gpio(GPIO_LPUART5_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART5_RTS);
+  imxrt_config_gpio(GPIO_LPUART5_RTS);
 #endif
 #endif
 
@@ -315,14 +315,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART6_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART6_TX);
+  imxrt_config_gpio(GPIO_LPUART6_RX);
+  imxrt_config_gpio(GPIO_LPUART6_TX);
 #ifdef CONFIG_LPUART6_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART6_CTS);
+  imxrt_config_gpio(GPIO_LPUART6_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART6_RTS);
+  imxrt_config_gpio(GPIO_LPUART6_RTS);
 #endif
 #endif
 
@@ -332,14 +332,14 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART7_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART7_TX);
+  imxrt_config_gpio(GPIO_LPUART7_RX);
+  imxrt_config_gpio(GPIO_LPUART7_TX);
 #ifdef CONFIG_LPUART7_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART7_CTS);
+  imxrt_config_gpio(GPIO_LPUART7_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART7_RTS);
+  imxrt_config_gpio(GPIO_LPUART7_RTS);
 #endif
 #endif
 
@@ -349,21 +349,21 @@ void imxrt_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imxrt_config_gpio(GPIO_LPUART8_RX);
-  (void)imxrt_config_gpio(GPIO_LPUART8_TX);
+  imxrt_config_gpio(GPIO_LPUART8_RX);
+  imxrt_config_gpio(GPIO_LPUART8_TX);
 #ifdef CONFIG_LPUART8_OFLOWCONTROL
-  (void)imxrt_config_gpio(GPIO_LPUART8_CTS);
+  imxrt_config_gpio(GPIO_LPUART8_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
-  (void)imxrt_config_gpio(GPIO_LPUART8_RTS);
+  imxrt_config_gpio(GPIO_LPUART8_RTS);
 #endif
 #endif
 
 #ifdef HAVE_LPUART_CONSOLE
   /* Configure the serial console for initial, non-interrupt driver mode */
 
-  (void)imxrt_lpuart_configure(IMXRT_CONSOLE_BASE, &g_console_config);
+  imxrt_lpuart_configure(IMXRT_CONSOLE_BASE, &g_console_config);
 #endif
 #endif /* HAVE_LPUART_DEVICE */
 #endif /* CONFIG_SUPPRESS_LPUART_CONFIG */

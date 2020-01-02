@@ -186,8 +186,8 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  (void)sam_tc_attach(freerun->tch, sam_freerun_handler, freerun,
-                      TC_INT_COVFS);
+  sam_tc_attach(freerun->tch, sam_freerun_handler, freerun,
+                TC_INT_COVFS);
 
   /* Start the counter */
 

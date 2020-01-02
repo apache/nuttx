@@ -165,7 +165,7 @@ void dns_save_answer(FAR const char *hostname,
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
   /* Get the current time, using CLOCK_MONOTONIC if possible */
 
-  (void)clock_gettime(DNS_CLOCK, &now);
+  clock_gettime(DNS_CLOCK, &now);
   entry->ctime = (time_t)now.tv_sec;
 #endif
 

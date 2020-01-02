@@ -1086,7 +1086,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
             {
               if (INODE_IS_BLOCK(inode) && inode->u.i_bops->close != NULL)
                 {
-                  (void)inode->u.i_bops->close(inode);
+                  inode->u.i_bops->close(inode);
                 }
 
               /* We hold a reference to the block driver but should

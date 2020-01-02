@@ -183,7 +183,7 @@ int board_app_initialize(uintptr_t arg)
 
   /* Register an interrupt handler for the card detect pin */
 
-  (void)stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
+  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt, NULL);
 
   /* Mount the SDIO-based MMC/SD block driver */
 

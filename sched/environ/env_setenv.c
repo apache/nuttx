@@ -143,7 +143,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
        * the environment buffer; this will happen below.
        */
 
-      (void)env_removevar(group, pvar);
+      env_removevar(group, pvar);
     }
 
   /* Get the size of the new name=value string.  The +2 is for the '=' and for

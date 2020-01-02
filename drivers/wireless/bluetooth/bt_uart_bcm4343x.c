@@ -168,33 +168,29 @@ static int uartwriteconf(FAR const struct btuart_lowerhalf_s *lower,
   din = kmm_malloc(maxl);
   while (gotlen < maxl)
     {
-      do
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret < 0)
         {
-          ret = clock_gettime(CLOCK_REALTIME, &abstime);
-          if (ret < 0)
-            {
-              goto exit_uartwriteconf;
-            }
-
-          /* Add the offset to the time in the future */
-
-          abstime.tv_nsec += NSEC_PER_SEC / 10;
-          if (abstime.tv_nsec >= NSEC_PER_SEC)
-            {
-              abstime.tv_nsec -= NSEC_PER_SEC;
-              abstime.tv_sec++;
-            }
-
-          ret = nxsem_timedwait(rxsem, &abstime);
-          if (ret == -ETIMEDOUT)
-            {
-              /* We didn't receive enough message, so fall out */
-
-              wlerr("Response timed out\n");
-              goto exit_uartwriteconf;
-            }
+          goto exit_uartwriteconf;
         }
-      while (ret == -EINTR);
+
+      /* Add the offset to the time in the future */
+
+      abstime.tv_nsec += NSEC_PER_SEC / 10;
+      if (abstime.tv_nsec >= NSEC_PER_SEC)
+        {
+          abstime.tv_nsec -= NSEC_PER_SEC;
+          abstime.tv_sec++;
+        }
+
+      ret = nxsem_timedwait_uninterruptible(rxsem, &abstime);
+      if (ret == -ETIMEDOUT)
+        {
+          /* We didn't receive enough message, so fall out */
+
+          wlerr("Response timed out\n");
+          goto exit_uartwriteconf;
+        }
 
       ret = lower->read(lower, &din[gotlen], maxl - gotlen);
       if (ret < 0)

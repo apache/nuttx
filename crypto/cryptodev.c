@@ -173,5 +173,5 @@ static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 void devcrypto_register(void)
 {
-  (void)register_driver("/dev/crypto", &g_cryptodevops, 0666, NULL);
+  register_driver("/dev/crypto", &g_cryptodevops, 0666, NULL);
 }

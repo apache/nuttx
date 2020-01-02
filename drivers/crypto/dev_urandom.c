@@ -344,7 +344,7 @@ void devurandom_register(void)
   g_prng.state.z = g_prng.state.x << 25;
 #endif
 
-  (void)register_driver("/dev/urandom", &g_urand_fops, 0666, NULL);
+  register_driver("/dev/urandom", &g_urand_fops, 0666, NULL);
 }
 
 #endif /* CONFIG_DEV_URANDOM && CONFIG_DEV_URANDOM_ARCH */

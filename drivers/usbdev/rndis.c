@@ -1119,8 +1119,8 @@ static void rndis_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer, 1,
-                 (wdparm_t)arg);
+  wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer, 1,
+           (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -1135,8 +1135,8 @@ static int rndis_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
 
-  (void)wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer,
+           1, (wdparm_t)priv);
   return OK;
 }
 

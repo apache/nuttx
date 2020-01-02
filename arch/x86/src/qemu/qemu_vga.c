@@ -515,5 +515,5 @@ void qemu_vga(void)
     }
 
   memset(g_pscreen, g_bg_color, VGA_XRES * VGA_YRES);
-  (void)register_driver("/dev/lcd", &g_vgaops, 0666, NULL);
+  register_driver("/dev/lcd", &g_vgaops, 0666, NULL);
 }

@@ -280,7 +280,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
+  nxsem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
   nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries = 0;                       /* No retries yet */
@@ -342,7 +342,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
       do
         {
-          (void)net_lockedwait(&state.snd_sem);
+          net_lockedwait(&state.snd_sem);
         }
       while (!state.snd_sent);
 

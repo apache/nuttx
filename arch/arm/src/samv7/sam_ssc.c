@@ -862,19 +862,7 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
 
 static void ssc_exclsem_take(struct sam_ssc_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -893,19 +881,7 @@ static void ssc_exclsem_take(struct sam_ssc_s *priv)
 
 static void ssc_bufsem_take(struct sam_ssc_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -1423,7 +1399,7 @@ static void ssc_rx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)ssc_rxdma_setup(priv);
+      ssc_rxdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1569,7 +1545,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->rx.dog);
+  wd_cancel(priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1839,7 +1815,7 @@ static void ssc_tx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)ssc_txdma_setup(priv);
+      ssc_txdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1973,7 +1949,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->tx.dog);
+  wd_cancel(priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -2880,7 +2856,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   /* Configure MCK/2 divider */
 
-  (void)ssc_mck2divider(priv);
+  ssc_mck2divider(priv);
 
   /* Enable peripheral clocking */
 

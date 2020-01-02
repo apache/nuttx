@@ -234,7 +234,7 @@ static void lo_poll_work(FAR void *arg)
 
   net_lock();
   priv->lo_txdone = false;
-  (void)devif_timer(&priv->lo_dev, LO_WDDELAY, lo_txpoll);
+  devif_timer(&priv->lo_dev, LO_WDDELAY, lo_txpoll);
 
   /* Was something received and looped back? */
 
@@ -243,12 +243,12 @@ static void lo_poll_work(FAR void *arg)
       /* Yes, poll again for more TX data */
 
       priv->lo_txdone = false;
-      (void)devif_poll(&priv->lo_dev, lo_txpoll);
+      devif_poll(&priv->lo_dev, lo_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
+  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -315,8 +315,8 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
+           1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;
@@ -383,7 +383,7 @@ static void lo_txavail_work(FAR void *arg)
           /* If so, then poll the network for new XMIT data */
 
           priv->lo_txdone = false;
-          (void)devif_poll(&priv->lo_dev, lo_txpoll);
+          devif_poll(&priv->lo_dev, lo_txpoll);
         }
       while (priv->lo_txdone);
     }
@@ -530,7 +530,7 @@ int localhost_initialize(void)
    * performed.
    */
 
-  (void)netdev_register(&priv->lo_dev, NET_LL_LOOPBACK);
+  netdev_register(&priv->lo_dev, NET_LL_LOOPBACK);
 
   /* Set the local loopback IP address */
 

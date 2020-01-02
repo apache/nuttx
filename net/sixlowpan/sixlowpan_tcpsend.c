@@ -685,7 +685,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           /* Initialize the send state structure */
 
           nxsem_init(&sinfo.s_waitsem, 0, 0);
-          (void)nxsem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
+          nxsem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
           sinfo.s_sock      = psock;
           sinfo.s_result    = -EBUSY;
@@ -983,7 +983,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
               buf    = (FAR uint8_t *)ipv6 + hdrlen;
               buflen = dev->d_len - hdrlen;
 
-              (void)sixlowpan_queue_frames(
+              sixlowpan_queue_frames(
                       (FAR struct radio_driver_s *)fwddev,
                       &ipv6hdr->ipv6, buf, buflen, &destmac);
             }

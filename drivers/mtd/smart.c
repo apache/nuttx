@@ -5520,7 +5520,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, FAR const char *partn
     }
 
 #ifdef CONFIG_SMART_DEV_LOOP
-  (void)register_driver("/dev/smart", &g_fops, 0666, NULL);
+  register_driver("/dev/smart", &g_fops, 0666, NULL);
 #endif
 
   return OK;

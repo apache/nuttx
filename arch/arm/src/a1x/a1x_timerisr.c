@@ -138,7 +138,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(A1X_IRQ_TIMER0, (xcpt_t)a1x_timerisr, NULL);
+  irq_attach(A1X_IRQ_TIMER0, (xcpt_t)a1x_timerisr, NULL);
 
   /* Enable interrupts from the TIMER 0 port */
 

@@ -72,8 +72,8 @@
 
 void board_button_initialize(void)
 {
-  (void)tiva_configgpio(&g_gpio_sw1);
-  (void)tiva_configgpio(&g_gpio_sw2);
+  tiva_configgpio(&g_gpio_sw1);
+  tiva_configgpio(&g_gpio_sw2);
 }
 
 /****************************************************************************

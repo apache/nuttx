@@ -684,13 +684,13 @@ int sam_rswdt_initialize(void)
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
   /* Attach our RSWDT interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(SAM_IRQ_RSWDT, sam_interrupt, NULL);
+  irq_attach(SAM_IRQ_RSWDT, sam_interrupt, NULL);
 #endif
 
   /* Register the watchdog driver as /dev/rswdt */
 
-  (void)watchdog_register("/dev/rswdt",
-                         (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register("/dev/rswdt",
+                    (FAR struct watchdog_lowerhalf_s *)priv);
   return OK;
 }
 

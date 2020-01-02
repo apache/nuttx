@@ -80,22 +80,22 @@ void psignal(int signum, FAR const char *message)
 
   if (message != NULL)
     {
-      (void)fprintf(stderr, "%s: %s\n", message, strsignal(signum));
+      fprintf(stderr, "%s: %s\n", message, strsignal(signum));
     }
   else
     {
-      (void)fprintf(stderr, "%s\n", strsignal(signum));
+      fprintf(stderr, "%s\n", strsignal(signum));
     }
 #else
   /* No stderr!  Write to whatever alternative console is available */
 
   if (message != NULL)
     {
-      (void)printf("%s: %s\n", message, strsignal(signum));
+      printf("%s: %s\n", message, strsignal(signum));
     }
   else
     {
-      (void)printf("%s\n", strsignal(signum));
+      printf("%s\n", strsignal(signum));
     }
 #endif
 }

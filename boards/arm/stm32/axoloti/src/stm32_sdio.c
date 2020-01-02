@@ -125,8 +125,8 @@ int stm32_sdio_initialize(void)
 
   /* Register an interrupt handler for the card detect pin */
 
-  (void)stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
-                           stm32_ncd_interrupt, NULL);
+  stm32_gpiosetevent(GPIO_SDIO_NCD, true, true, true,
+                     stm32_ncd_interrupt, NULL);
 
 #endif
 

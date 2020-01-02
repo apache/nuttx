@@ -1371,19 +1371,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
 
 static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->locksem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->locksem);
 }
 
 /****************************************************************************
@@ -1440,7 +1428,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
           flags = enter_critical_section();
           txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
-          (void)nxsem_getvalue(&priv->txfsem, &sval);
+          nxsem_getvalue(&priv->txfsem, &sval);
           txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
 
           /* If the semaphore count and the TXFQS samples are in
@@ -1549,7 +1537,6 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
       ret = nxsem_wait(&priv->txfsem);
       leave_critical_section(flags);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret < 0);
 }
@@ -1586,7 +1573,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
    * many times.
    */
 
-  (void)nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_getvalue(&priv->txfsem, &sval);
   if (sval < priv->config->ntxfifoq)
     {
       nxsem_post(&priv->txfsem);
@@ -2975,7 +2962,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    * called from the tasking level.
    */
 
-  (void)can_txdone(dev);
+  can_txdone(dev);
   return OK;
 }
 
@@ -3020,7 +3007,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
    * the TX FIFO/queue.  Make sure that they are consistent.
    */
 
-  (void)nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_getvalue(&priv->txfsem, &sval);
   DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
               (sval <= priv->config->ntxfifoq));
 #endif
@@ -3087,7 +3074,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
    * elements, then there is no transfer in progress.
    */
 
-  (void)nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_getvalue(&priv->txfsem, &sval);
   DEBUGASSERT(sval > 0 && sval <= priv->config->ntxfifoq);
 
   empty = (sval ==  priv->config->ntxfifoq);
@@ -3552,7 +3539,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
            * data in mcan_send().
            */
 
-          (void)can_txready(dev);
+          can_txready(dev);
 #endif
         }
       else if ((pending & priv->txints) != 0)

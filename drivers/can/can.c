@@ -177,18 +177,7 @@ static const struct file_operations g_canops =
 
 static int can_takesem(FAR sem_t *sem)
 {
-  int ret;
-
-  /* Take a count from the semaphore, possibly waiting */
-
-  ret = nxsem_wait(sem);
-
-  /* The only case that an error should occur here is if the wait
-   * was awakened by a signal
-   */
-
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(sem);
 }
 
 /****************************************************************************
@@ -879,7 +868,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           if (inactive)
             {
-              (void)can_xmit(dev);
+              can_xmit(dev);
             }
 
           /* Wait for a message to be sent */
@@ -922,7 +911,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   if (inactive)
     {
-      (void)can_xmit(dev);
+      can_xmit(dev);
     }
 
   /* Return the number of bytes that were sent */
@@ -1494,7 +1483,7 @@ int can_txdone(FAR struct can_dev_s *dev)
 
       /* Send the next message in the FIFO */
 
-      (void)can_xmit(dev);
+      can_xmit(dev);
 
       /* Are there any threads waiting for space in the TX FIFO? */
 

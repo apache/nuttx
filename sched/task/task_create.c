@@ -144,7 +144,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Setup to pass parameters to the new task */
 
-  (void)nxtask_argsetup(tcb, name, argv);
+  nxtask_argsetup(tcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 

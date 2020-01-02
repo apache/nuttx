@@ -72,12 +72,12 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_STM32_SPI3) && defined(CONFIG_CLICKER2_STM32_MB1_SPI)
   /* Enable chip select for mikroBUS1 */
 
-  (void)stm32_configgpio(GPIO_MB1_CS);
+  stm32_configgpio(GPIO_MB1_CS);
 #endif
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_CLICKER2_STM32_MB2_SPI)
   /* Enable chip select for mikroBUS2 */
 
-  (void)stm32_configgpio(GPIO_MB2_CS);
+  stm32_configgpio(GPIO_MB2_CS);
 #endif
 }
 

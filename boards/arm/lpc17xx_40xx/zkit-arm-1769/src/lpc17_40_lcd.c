@@ -117,7 +117,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 
       /* And turn the OLCD on (CONFIG_LCD_MAXPOWER should be 1) */
 
-      (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
       return g_lcddev;
     }
 

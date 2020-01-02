@@ -70,14 +70,14 @@ static void ft80x_select(FAR struct ft80x_dev_s *priv)
 
   /* Lock the SPI bus */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
 
   /* Configure SPI for the FT80X */
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE0);
   SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, priv->frequency);
+  SPI_HWFEATURES(priv->spi, 0);
+  SPI_SETFREQUENCY(priv->spi, priv->frequency);
 
   /* Select SPI device */
 
@@ -100,7 +100,7 @@ static void ft80x_deselect(FAR struct ft80x_dev_s *priv)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /****************************************************************************

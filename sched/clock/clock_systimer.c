@@ -97,7 +97,7 @@ clock_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-  (void)clock_systimespec(&ts);
+  clock_systimespec(&ts);
 
   /* Convert to a 64-bit value in microseconds, then in clock tick units */
 
@@ -110,7 +110,7 @@ clock_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-  (void)clock_systimespec(&ts);
+  clock_systimespec(&ts);
 
   /* Convert to a 64- then a 32-bit value */
 

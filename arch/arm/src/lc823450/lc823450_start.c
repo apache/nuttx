@@ -394,7 +394,7 @@ void __start(void)
   showprogress('\r');
   showprogress('\n');
 
-  (void)get_cpu_ver();
+  get_cpu_ver();
 
   /* run as interrupt context, before scheduler running */
 

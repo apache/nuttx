@@ -98,7 +98,7 @@ int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
 
   nwritten = net_writeroute_ipv4(&fshandle, &route);
 
-  (void)net_closeroute_ipv4(&fshandle);
+  net_closeroute_ipv4(&fshandle);
   return nwritten >= 0 ? 0 : (int)nwritten;
 }
 #endif
@@ -132,7 +132,7 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
 
   nwritten = net_writeroute_ipv6(&fshandle, &route);
 
-  (void)net_closeroute_ipv6(&fshandle);
+  net_closeroute_ipv6(&fshandle);
   return nwritten >= 0 ? 0 : (int)nwritten;
 }
 #endif

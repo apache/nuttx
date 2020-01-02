@@ -109,9 +109,9 @@ void aio_initialize(void)
 
   /* Initialize counting semaphores */
 
-  (void)nxsem_init(&g_aioc_freesem, 0, CONFIG_FS_NAIOC);
-  (void)nxsem_setprotocol(&g_aioc_freesem, SEM_PRIO_NONE);
-  (void)nxsem_init(&g_aio_exclsem, 0, 1);
+  nxsem_init(&g_aioc_freesem, 0, CONFIG_FS_NAIOC);
+  nxsem_setprotocol(&g_aioc_freesem, SEM_PRIO_NONE);
+  nxsem_init(&g_aio_exclsem, 0, 1);
 
   g_aio_holder = INVALID_PROCESS_ID;
 
@@ -159,21 +159,7 @@ void aio_lock(void)
     }
   else
     {
-      int ret;
-
-      /* No.. take the semaphore */
-
-      do
-        {
-          ret = nxsem_wait(&g_aio_exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_aio_exclsem);
 
       /* And mark it as ours */
 
@@ -226,25 +212,12 @@ void aio_unlock(void)
 FAR struct aio_container_s *aioc_alloc(void)
 {
   FAR struct aio_container_s *aioc;
-  int ret;
 
   /* Take a count from semaphore, thus guaranteeing that we have an AIO
    * container set aside for us.
    */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_aioc_freesem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_aioc_freesem);
 
   /* Get our AIO container */
 

@@ -1589,12 +1589,12 @@ static int tzparse(FAR const char *name, FAR struct state_s *const sp,
     }
 
   cp = sp->chars;
-  (void)strncpy(cp, stdname, stdlen);
+  strncpy(cp, stdname, stdlen);
   cp += stdlen;
   *cp++ = '\0';
   if (dstlen != 0)
     {
-      (void)strncpy(cp, dstname, dstlen);
+      strncpy(cp, dstname, dstlen);
       *(cp + dstlen) = '\0';
     }
 
@@ -1605,7 +1605,7 @@ static void gmtload(FAR struct state_s *const sp)
 {
   if (tzload(GMT, sp, TRUE) != 0)
     {
-      (void)tzparse(GMT, sp, TRUE);
+      tzparse(GMT, sp, TRUE);
     }
 }
 
@@ -2476,7 +2476,7 @@ void tzset(void)
   g_lcl_isset = strlen(name) < sizeof g_lcl_tzname;
   if (g_lcl_isset)
     {
-      (void)strcpy(g_lcl_tzname, name);
+      strcpy(g_lcl_tzname, name);
     }
 
   if (lclptr == NULL)
@@ -2499,13 +2499,13 @@ void tzset(void)
       lclptr->ttis[0].tt_isdst = 0;
       lclptr->ttis[0].tt_gmtoff = 0;
       lclptr->ttis[0].tt_abbrind = 0;
-      (void)strcpy(lclptr->chars, GMT);
+      strcpy(lclptr->chars, GMT);
     }
   else if (tzload(name, lclptr, TRUE) != 0)
     {
       if (name[0] == ':' || tzparse(name, lclptr, FALSE) != 0)
         {
-          (void)gmtload(lclptr);
+          gmtload(lclptr);
         }
     }
 

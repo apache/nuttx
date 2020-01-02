@@ -107,7 +107,7 @@ FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno)
    * putting the OLED into reset state.
    */
 
-  (void)pic32mz_configgpio(GPIO_SSD1306_RST);
+  pic32mz_configgpio(GPIO_SSD1306_RST);
 
   /* Wait a bit then release the OLED from the reset state */
 
@@ -136,7 +136,7 @@ FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno)
 
           /* And turn the OLED on */
 
-          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
+          dev->setpower(dev, CONFIG_LCD_MAXPOWER);
 
 #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
           /* Initialize and register the simulated framebuffer driver */

@@ -419,8 +419,8 @@ static inline void ug2864ambag01_lock(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_UG2864AMBAG01_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_UG2864AMBAG01_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_UG2864AMBAG01_FREQUENCY);
 }
 
 /**************************************************************************************
@@ -644,7 +644,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
   /* Then transfer all of the data */
 
-  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
+  SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
 
   /* De-select and unlock the device */
 
@@ -898,14 +898,14 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display off */
 
-      (void)SPI_SEND(priv->spi, SH1101A_DISPOFF);
+      SPI_SEND(priv->spi, SH1101A_DISPOFF);
       priv->on = false;
     }
   else
     {
       /* Turn the display on */
 
-      (void)SPI_SEND(priv->spi, SH1101A_DISPON);
+      SPI_SEND(priv->spi, SH1101A_DISPON);
       priv->on = true;
     }
 
@@ -979,8 +979,8 @@ static int ug2864ambag01_setcontrast(struct lcd_dev_s *dev, unsigned int contras
 
   /* Set the contrast */
 
-  (void)SPI_SEND(priv->spi, SH1101A_CONTRAST_MODE);    /* Set contrast control register */
-  (void)SPI_SEND(priv->spi, SH1101A_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
+  SPI_SEND(priv->spi, SH1101A_CONTRAST_MODE);    /* Set contrast control register */
+  SPI_SEND(priv->spi, SH1101A_CONTRAST(scaled)); /* Data 1: Set 1 of 256 contrast steps */
   priv->contrast = contrast;
 
   /* De-select and unlock the device */
@@ -1137,8 +1137,8 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
       /* Transfer one page of the selected color */
 
-      (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * UG2864AMBAG01_XRES],
-                         UG2864AMBAG01_XRES);
+      SPI_SNDBLOCK(priv->spi, &priv->fb[page * UG2864AMBAG01_XRES],
+                   UG2864AMBAG01_XRES);
     }
 
   /* De-select and unlock the device */

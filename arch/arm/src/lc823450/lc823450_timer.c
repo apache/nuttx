@@ -500,7 +500,7 @@ void arm_timer_initialize(void)
   modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2C_CLKEN, 0);
   modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2_CLKEN, 0);
 
-  (void)irq_attach(LC823450_IRQ_MTIMER20, (xcpt_t)hrt_interrupt, NULL);
+  irq_attach(LC823450_IRQ_MTIMER20, (xcpt_t)hrt_interrupt, NULL);
   up_enable_irq(LC823450_IRQ_MTIMER20);
 
 #endif /* CONFIG_HRT_TIMER */
@@ -540,7 +540,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LC823450_IRQ_MTIMER30, (xcpt_t)up_proftimerisr, NULL);
+  irq_attach(LC823450_IRQ_MTIMER30, (xcpt_t)up_proftimerisr, NULL);
 
   /* And enable the system timer interrupt */
 
@@ -584,7 +584,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LC823450_IRQ_MTIMER00, (xcpt_t)up_timerisr, NULL);
+  irq_attach(LC823450_IRQ_MTIMER00, (xcpt_t)up_timerisr, NULL);
 
   /* And enable the system timer interrupt */
 
@@ -617,7 +617,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LC823450_IRQ_SYSTICK, (xcpt_t)up_timerisr, NULL);
+  irq_attach(LC823450_IRQ_SYSTICK, (xcpt_t)up_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -634,7 +634,7 @@ void arm_timer_initialize(void)
 #ifdef CONFIG_DVFS
   /* attach timer interrupt handler */
 
-  (void)irq_attach(LC823450_IRQ_MTIMER01, (xcpt_t)lc823450_dvfs_oneshot, NULL);
+  irq_attach(LC823450_IRQ_MTIMER01, (xcpt_t)lc823450_dvfs_oneshot, NULL);
 
   /* enable MTM0-ch1 */
 

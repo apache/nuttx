@@ -630,19 +630,7 @@ static void i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg)
 
 static void i2s_exclsem_take(struct stm32_i2s_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -661,19 +649,7 @@ static void i2s_exclsem_take(struct stm32_i2s_s *priv)
 
 static void i2s_bufsem_take(struct stm32_i2s_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -1176,7 +1152,7 @@ static void i2s_rx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)i2s_rxdma_setup(priv);
+      i2s_rxdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1318,7 +1294,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->rx.dog);
+  wd_cancel(priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1568,7 +1544,7 @@ static void i2s_tx_worker(void *arg)
        */
 
       flags = enter_critical_section();
-      (void)i2s_txdma_setup(priv);
+      i2s_txdma_setup(priv);
       leave_critical_section(flags);
     }
 
@@ -1698,7 +1674,7 @@ static void i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->tx.dog);
+  wd_cancel(priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 

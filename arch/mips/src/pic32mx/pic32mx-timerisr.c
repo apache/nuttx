@@ -178,12 +178,12 @@ void mips_timer_initialize(void)
 
   up_clrpend_irq(PIC32MX_IRQSRC_T1);
 #ifdef CONFIG_ARCH_IRQPRIO
-  (void)up_prioritize_irq(PIC32MX_IRQ_T1, CONFIG_PIC32MX_T1PRIO);
+  up_prioritize_irq(PIC32MX_IRQ_T1, CONFIG_PIC32MX_T1PRIO);
 #endif
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(PIC32MX_IRQ_T1, (xcpt_t)pc32mx_timerisr, NULL);
+  irq_attach(PIC32MX_IRQ_T1, (xcpt_t)pc32mx_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

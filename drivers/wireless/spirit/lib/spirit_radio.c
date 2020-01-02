@@ -729,7 +729,7 @@ enum xtal_flag_e spirit_radio_get_xtalflag(FAR struct spirit_library_s *spirit)
    * the value.
    */
 
-  (void)spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval, 1);
+  spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval, 1);
 
   return (enum xtal_flag_e)((regval & 0x40) >> 6);
 }
@@ -835,7 +835,7 @@ uint32_t spirit_radio_get_synthword(FAR struct spirit_library_s *spirit)
 
   /* Read the SYNTH registers, build the synth word and return it */
 
-  (void)spirit_reg_read(spirit, SYNT3_BASE, regvalues, 4);
+  spirit_reg_read(spirit, SYNT3_BASE, regvalues, 4);
   return ((((uint32_t)(regvalues[0] & 0x1f)) << 21) +
           (((uint32_t)(regvalues[1])) << 13) +
           (((uint32_t)(regvalues[2])) << 5) +
@@ -962,7 +962,7 @@ enum spirit_bandselect_e
 
   /* Read the SYNT0 register */
 
-  (void)spirit_reg_read(spirit, SYNT0_BASE, &regval, 1);
+  spirit_reg_read(spirit, SYNT0_BASE, &regval, 1);
 
   /* Mask the Band selected field */
 
@@ -1028,7 +1028,7 @@ uint8_t spirit_radio_get_channel(FAR struct spirit_library_s *spirit)
 
   /* Read the CHNUM register and return the value */
 
-  (void)spirit_reg_read(spirit, CHNUM_BASE, &regval, 1);
+  spirit_reg_read(spirit, CHNUM_BASE, &regval, 1);
   return regval;
 }
 
@@ -1087,7 +1087,7 @@ uint32_t spirit_radio_get_chspace(FAR struct spirit_library_s *spirit)
 
   /* Read the CHSPACE register, calculate the channel space and return it */
 
-  (void)spirit_reg_read(spirit, CHSPACE_BASE, &factor, 1);
+  spirit_reg_read(spirit, CHSPACE_BASE, &factor, 1);
 
   /* Compute the Hertz value and return it */
 
@@ -1224,7 +1224,7 @@ int32_t spirit_radio_get_foffset(FAR struct spirit_library_s *spirit)
 
   /* Read the FC_OFFSET registers */
 
-  (void)spirit_reg_read(spirit, FC_OFFSET1_BASE, tmp, 2);
+  spirit_reg_read(spirit, FC_OFFSET1_BASE, tmp, 2);
 
   /* Calculates the Offset Factor */
 
@@ -1808,7 +1808,7 @@ uint32_t spirit_radio_get_datarate(FAR struct spirit_library_s *spirit)
 
   /* Read the datarate registers for mantissa and exponent */
 
-  (void)spirit_reg_read(spirit, MOD1_BASE, regval, 2);
+  spirit_reg_read(spirit, MOD1_BASE, regval, 2);
 
   /* Calculates the datarate */
 
@@ -1898,7 +1898,7 @@ uint32_t spirit_radio_get_freqdev(FAR struct spirit_library_s *spirit)
 
   /* Read the frequency deviation register for mantissa and exponent */
 
-  (void)spirit_reg_read(spirit, FDEV0_BASE, &regval, 1);
+  spirit_reg_read(spirit, FDEV0_BASE, &regval, 1);
   fdevm = regval & 0x07;
   fdeve = (regval & 0xf0) >> 4;
 
@@ -1985,7 +1985,7 @@ uint32_t spirit_radio_get_chfilterbw(FAR struct spirit_library_s *spirit)
 
   /* Read the channel filter register for mantissa and exponent */
 
-  (void)spirit_reg_read(spirit, CHFLT_BASE, &regval, 1);
+  spirit_reg_read(spirit, CHFLT_BASE, &regval, 1);
   bwm = (regval & 0xf0) >> 4;
   bwe = regval & 0x0f;
 
@@ -2055,7 +2055,7 @@ enum modulation_select_e
 
   /* Read the modulation register MOD0 */
 
-  (void)spirit_reg_read(spirit, MOD0_BASE, &regval, 1);
+  spirit_reg_read(spirit, MOD0_BASE, &regval, 1);
 
   /* Return the modulation type */
 
@@ -2171,7 +2171,7 @@ enum spirit_ookpeakdelay_e
 
   /* Read the OOK peak decay register RSSI_FLT_BASE */
 
-  (void)spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
+  spirit_reg_read(spirit, RSSI_FLT_BASE, &regval, 1);
 
   /* Returns the OOK peak decay */
 
@@ -2524,7 +2524,7 @@ float spirit_radio_get_palevel_dbm(FAR struct spirit_library_s *spirit,
 
   /* Reads the PA_LEVEL[ndx] register */
 
-  (void)spirit_reg_read(spirit, regaddr, &value, 1);
+  spirit_reg_read(spirit, regaddr, &value, 1);
 
   return spirit_radio_convert_reg2power(spirit,
                                         spirit_radio_get_basefrequency(spirit),
@@ -2714,7 +2714,7 @@ uint8_t spirit_radio_get_palevel(FAR struct spirit_library_s *spirit,
 
   /* Reads the PA_LEVEL[ndx] register and return the value */
 
-  (void)spirit_reg_read(spirit, regaddr, &regval, 1);
+  spirit_reg_read(spirit, regaddr, &regval, 1);
   return regval;
 }
 
@@ -2791,7 +2791,7 @@ enum spirit_paload_capacitor_e
 
   /* Read the PA_POWER_0 register */
 
-  (void)spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+  spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
 
   /* Mask the CWC[1:0] field and return the value */
 
@@ -2862,7 +2862,7 @@ uint8_t spirit_radio_get_palevel_maxindex(FAR struct spirit_library_s *spirit)
 
   /* Read the PA_POWER_0 register */
 
-  (void)spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+  spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
 
   /* Mask the PA_LEVEL_MAX_INDEX[1:0] field and return the value */
 
@@ -2934,7 +2934,7 @@ uint8_t spirit_radio_get_pastep_width(FAR struct spirit_library_s *spirit)
 
   /* Read the PA_POWER_0 register */
 
-  (void)spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+  spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
 
   /* Mask the PA_RAMP_STEP_WIDTH[1:0] field and return the value */
 
@@ -3013,7 +3013,7 @@ enum spirit_functional_state_e
 
   /* Read the PA_POWER_0 register and configure the PA_RAMP_ENABLE field */
 
-  (void)spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
+  spirit_reg_read(spirit, PA_POWER0_BASE, &regval, 1);
 
   /* Mask and return data */
 
@@ -3192,7 +3192,7 @@ enum spirit_afcmode_e
 
   /* Read the AFC_2 register */
 
-  (void)spirit_reg_read(spirit, AFC2_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC2_BASE, &regval, 1);
 
   /* Mask the AFC Mode field and returns the value */
 
@@ -3261,7 +3261,7 @@ uint8_t spirit_radio_get_afcpdleakage(FAR struct spirit_library_s *spirit)
 
   /* Read the AFC_2 register */
 
-  (void)spirit_reg_read(spirit, AFC2_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC2_BASE, &regval, 1);
 
   /* Mask the AFC PD leakage field and return the value */
 
@@ -3311,7 +3311,7 @@ uint8_t spirit_radio_get_afcfastperiod(FAR struct spirit_library_s *spirit)
 
   /* Read the AFC 1 register and return the value */
 
-  (void)spirit_reg_read(spirit, AFC1_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC1_BASE, &regval, 1);
 
   return regval;
 }
@@ -3381,7 +3381,7 @@ uint8_t spirit_radio_get_afcfastgain(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AFC0_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC0_BASE, &regval, 1);
 
   return ((regval & 0xf0) >> 4);
 }
@@ -3450,7 +3450,7 @@ uint8_t spirit_radio_get_afclowgain(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AFC0_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC0_BASE, &regval, 1);
 
   return (regval & 0x0f);
 }
@@ -3478,7 +3478,7 @@ int8_t spirit_radio_get_afccorrection(FAR struct spirit_library_s *spirit)
    * it.
    */
 
-  (void)spirit_reg_read(spirit, AFC_CORR_BASE, &regval, 1);
+  spirit_reg_read(spirit, AFC_CORR_BASE, &regval, 1);
 
   return (int8_t)regval;
 }
@@ -3643,7 +3643,7 @@ enum spirit_agcmode_e
 
   /* Read the AGCCTRL_0 register, mask the AGC Mode field and return the value */
 
-  (void)spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
 
   return (enum spirit_agcmode_e)(regval & 0x40);
 }
@@ -3867,7 +3867,7 @@ uint16_t spirit_radio_get_agcmeasure_us(FAR struct spirit_library_s *spirit)
 
   /* Read the AGCCTRL_2 register */
 
-  (void)spirit_reg_read(spirit, AGCCTRL2_BASE, &measure, 1);
+  spirit_reg_read(spirit, AGCCTRL2_BASE, &measure, 1);
 
   /* Mask the MEAS_TIME field */
 
@@ -3945,7 +3945,7 @@ uint8_t spirit_radio_get_agcmeasure(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AGCCTRL2_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL2_BASE, &regval, 1);
 
   return (regval & 0x0f);
 }
@@ -4016,7 +4016,7 @@ uint8_t spirit_radio_get_agcholdtime_us(FAR struct spirit_library_s *spirit)
 
   /* Read the AGCCTRL_0 register */
 
-  (void)spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
 
   /* Mask the HOLD_TIME field */
 
@@ -4094,7 +4094,7 @@ uint8_t spirit_radio_get_agcholdtime(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
 
   return (regval & 0x3f);
 }
@@ -4162,7 +4162,7 @@ uint8_t spirit_radio_get_agchighthres(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
 
   return ((regval & 0xf0) >> 4);
 }
@@ -4230,7 +4230,7 @@ uint8_t spirit_radio_get_agclowthres(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, AGCCTRL1_BASE, &regval, 1);
 
   return (regval & 0x0f);
 }
@@ -4304,7 +4304,7 @@ enum spirit_clkrecmode_e
    * the value.
    */
 
-  (void)spirit_reg_read(spirit, FDEV0_BASE, &regval, 1);
+  spirit_reg_read(spirit, FDEV0_BASE, &regval, 1);
 
   return (enum spirit_clkrecmode_e)(regval & 0x08);
 }
@@ -4373,7 +4373,7 @@ uint8_t spirit_radio_get_clkrecgain(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
+  spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
 
   return ((regval & 0xef) >> 5);
 }
@@ -4441,7 +4441,7 @@ uint8_t spirit_radio_get_clkrecigain(FAR struct spirit_library_s *spirit)
    * value.
    */
 
-  (void)spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
+  spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
 
   return (regval & 0x0f);
 }
@@ -4515,7 +4515,7 @@ enum spirit_pstfltlen_e
    * value.
    */
 
-  (void)spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
+  spirit_reg_read(spirit, CLOCKREC_BASE, &regval, 1);
 
   return (enum spirit_pstfltlen_e)(regval & 0x10);
 }
@@ -4681,7 +4681,7 @@ enum spirit_functional_state_e
 {
   uint8_t regval;
 
-  (void)spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
+  spirit_reg_read(spirit, SYNTH_CONFIG1_BASE, &regval, 1);
 
   if (((regval >> 7) & 0x1) != 0)
     {
@@ -4759,7 +4759,7 @@ enum spirit_functional_state_e
 {
   uint8_t regval;
 
-  (void)spirit_reg_read(spirit, XO_RCO_TEST_BASE, &regval, 1);
+  spirit_reg_read(spirit, XO_RCO_TEST_BASE, &regval, 1);
 
   if (((regval >> 3) & 0x1) != 0)
     {

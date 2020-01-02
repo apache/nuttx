@@ -183,11 +183,11 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
       /* All pending I/O has completed */
       /* Restore the signal handler */
 
-      (void)sigaction(SIGPOLL, &sighand->oact, NULL);
+      sigaction(SIGPOLL, &sighand->oact, NULL);
 
       /* Restore the sigprocmask */
 
-      (void)sigprocmask(SIG_SETMASK, &sighand->oprocmask, NULL);
+      sigprocmask(SIG_SETMASK, &sighand->oprocmask, NULL);
 
       /* Signal the client */
 
@@ -273,8 +273,8 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
   /* Make sure that SIGPOLL is not blocked */
 
-  (void)sigemptyset(&set);
-  (void)sigaddset(&set, SIGPOLL);
+  sigemptyset(&set);
+  sigaddset(&set, SIGPOLL);
   status = sigprocmask(SIG_UNBLOCK, &set, &sighand->oprocmask);
   if (status != OK)
     {
@@ -291,8 +291,8 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   act.sa_sigaction = lio_sighandler;
   act.sa_flags = SA_SIGINFO;
 
-  (void)sigfillset(&act.sa_mask);
-  (void)sigdelset(&act.sa_mask, SIGPOLL);
+  sigfillset(&act.sa_mask);
+  sigdelset(&act.sa_mask, SIGPOLL);
 
   status = sigaction(SIGPOLL, &act, &sighand->oact);
   if (status != OK)

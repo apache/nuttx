@@ -267,7 +267,7 @@ enum spirit_functional_state_e
 
   /* Reads the PROTOCOL1 register value */
 
-  (void)spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
 
   /* Return if set or reset */
 
@@ -352,7 +352,7 @@ enum spirit_functional_state_e
 
   /* Reads the PROTOCOL1 register value */
 
-  (void)spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
 
   /* Return if set or reset */
 
@@ -438,7 +438,7 @@ enum spirit_functional_state_e
 
   /* Reads the PROTOCOL1 register value */
 
-  (void)spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
+  spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
 
   /* Return if set or reset */
 
@@ -511,7 +511,7 @@ uint16_t spirit_csma_get_bucounterseed(FAR struct spirit_library_s *spirit)
 
   /* Reads the CSMA_CONFIGx registers value */
 
-  (void)spirit_reg_read(spirit, CSMA_CONFIG3_BASE, regval, 2);
+  spirit_reg_read(spirit, CSMA_CONFIG3_BASE, regval, 2);
 
   /* Build the counter seed and return it */
 
@@ -582,7 +582,7 @@ uint8_t spirit_csma_get_buprescaler(FAR struct spirit_library_s *spirit)
 
   /* Reads the CSMA_CONFIG1 register value */
 
-  (void)spirit_reg_read(spirit, CSMA_CONFIG1_BASE, &regval, 1);
+  spirit_reg_read(spirit, CSMA_CONFIG1_BASE, &regval, 1);
 
   /* Build and return the BU prescaler value */
 
@@ -654,7 +654,7 @@ enum spirit_cca_period_e
 
   /* Reads the CSMA_CONFIG1 register value */
 
-  (void)spirit_reg_read(spirit, CSMA_CONFIG1_BASE, &regval, 1);
+  spirit_reg_read(spirit, CSMA_CONFIG1_BASE, &regval, 1);
 
   /* Build and return the CCA period value */
 
@@ -726,7 +726,7 @@ uint8_t spirit_csma_get_ccalen(FAR struct spirit_library_s *spirit)
 
   /* Reads the CSMA_CONFIG0 register value */
 
-  (void)spirit_reg_read(spirit, CSMA_CONFIG0_BASE, &regval, 1);
+  spirit_reg_read(spirit, CSMA_CONFIG0_BASE, &regval, 1);
 
   /* Build and return the CCA length */
 
@@ -796,7 +796,7 @@ uint8_t spirit_csma_get_maxbackoff(FAR struct spirit_library_s *spirit)
 
   /* Reads the CSMA_CONFIG0 register value */
 
-  (void)spirit_reg_read(spirit, CSMA_CONFIG0_BASE, &regval, 1);
+  spirit_reg_read(spirit, CSMA_CONFIG0_BASE, &regval, 1);
 
   /* Build and return the max number of back-off */
 

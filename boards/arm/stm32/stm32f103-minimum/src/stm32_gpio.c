@@ -220,8 +220,8 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
 
   /* Make sure the interrupt is disabled */
 
-  (void)stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id], false,
-                           false, false, NULL, NULL);
+  stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id], false,
+                     false, false, NULL, NULL);
 
   gpioinfo("Attach %p\n", callback);
   stm32gpint->callback = callback;
@@ -240,17 +240,17 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 
           /* Configure the interrupt for rising edge */
 
-          (void)stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
-                                   true, false, false, stm32gpio_interrupt,
-                                   &g_gpint[stm32gpint->stm32gpio.id]);
+          stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
+                             true, false, false, stm32gpio_interrupt,
+                             &g_gpint[stm32gpint->stm32gpio.id]);
 
         }
     }
   else
     {
       gpioinfo("Disable the interrupt\n");
-      (void)stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
-                               false, false, false, NULL, NULL);
+      stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
+                         false, false, false, NULL, NULL);
     }
 
   return OK;
@@ -281,7 +281,7 @@ int stm32_gpio_initialize(void)
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
-      (void)gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, pincount);
 
       /* Configure the pin that will be used as input */
 
@@ -299,7 +299,7 @@ int stm32_gpio_initialize(void)
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
-      (void)gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, pincount);
 
       /* Configure the pin that will be used as output */
       stm32_gpiowrite(g_gpiooutputs[i], 0);
@@ -317,7 +317,7 @@ int stm32_gpio_initialize(void)
       g_gpint[i].stm32gpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].stm32gpio.gpio.gp_ops     = &gpint_ops;
       g_gpint[i].stm32gpio.id              = i;
-      (void)gpio_pin_register(&g_gpint[i].stm32gpio.gpio, pincount);
+      gpio_pin_register(&g_gpint[i].stm32gpio.gpio, pincount);
 
       /* Configure the pin that will be used as interrupt input */
 

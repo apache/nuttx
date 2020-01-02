@@ -601,7 +601,7 @@ static void cdcecm_txdone(FAR struct cdcecm_driver_s *priv)
 
   /* In any event, poll the network for new TX data */
 
-  (void)devif_poll(&priv->dev, cdcecm_txpoll);
+  devif_poll(&priv->dev, cdcecm_txpoll);
 }
 
 /****************************************************************************
@@ -699,12 +699,12 @@ static void cdcecm_poll_work(FAR void *arg)
    * become available.
    */
 
-  (void)devif_timer(&self->dev, CDCECM_WDDELAY, cdcecm_txpoll);
+  devif_timer(&self->dev, CDCECM_WDDELAY, cdcecm_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(self->txpoll, CDCECM_WDDELAY, cdcecm_poll_expiry, 1,
-                 (wdparm_t)self);
+  wd_start(self->txpoll, CDCECM_WDDELAY, cdcecm_poll_expiry, 1,
+           (wdparm_t)self);
 
   net_unlock();
 }
@@ -784,8 +784,8 @@ static int cdcecm_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, CDCECM_WDDELAY, cdcecm_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txpoll, CDCECM_WDDELAY, cdcecm_poll_expiry, 1,
+           (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;
@@ -867,7 +867,7 @@ static void cdcecm_txavail_work(FAR void *arg)
 
   if (self->bifup)
     {
-      (void)devif_poll(&self->dev, cdcecm_txpoll);
+      devif_poll(&self->dev, cdcecm_txpoll);
     }
 
   net_unlock();
@@ -1018,7 +1018,7 @@ static void cdcecm_ipv6multicast(FAR struct cdcecm_driver_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)cdcecm_addmac(dev, mac);
+  cdcecm_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -1026,7 +1026,7 @@ static void cdcecm_ipv6multicast(FAR struct cdcecm_driver_s *priv)
    * packets.
    */
 
-  (void)cdcecm_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  cdcecm_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 
@@ -1036,7 +1036,7 @@ static void cdcecm_ipv6multicast(FAR struct cdcecm_driver_s *priv)
    * packets.
    */
 
-  (void)cdcecm_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  cdcecm_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }

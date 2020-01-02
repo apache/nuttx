@@ -167,7 +167,7 @@ int syslog_file_channel(FAR const char *devpath)
        * since it was not uninitialized (was it?)
        */
 
-      (void)syslog_channel(saved_channel);
+      syslog_channel(saved_channel);
       goto errout_with_lock;
     }
 
@@ -178,8 +178,8 @@ int syslog_file_channel(FAR const char *devpath)
     {
       /* We should still be able to back-up and re-initialized everything */
 
-      (void)syslog_initialize(SYSLOG_INIT_EARLY);
-      (void)syslog_initialize(SYSLOG_INIT_LATE);
+      syslog_initialize(SYSLOG_INIT_EARLY);
+      syslog_initialize(SYSLOG_INIT_LATE);
       goto errout_with_lock;
     }
 

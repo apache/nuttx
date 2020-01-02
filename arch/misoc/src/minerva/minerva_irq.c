@@ -71,7 +71,7 @@ void minerva_irq_initialize(void)
 
   /* Attach the software interrupt */
 
-  (void)irq_attach(MINERVA_IRQ_SWINT, minerva_swint, NULL);
+  irq_attach(MINERVA_IRQ_SWINT, minerva_swint, NULL);
 
   /* Enable interrupts */
 

@@ -199,8 +199,8 @@ int nxsched_setscheduler(pid_t pid, int policy,
 
           /* Convert timespec values to system clock ticks */
 
-          (void)clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
-          (void)clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+          clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
+          clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
 
           /* Avoid zero/negative times */
 

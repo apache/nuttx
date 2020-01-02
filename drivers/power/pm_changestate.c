@@ -243,7 +243,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
        */
 
       newstate =  g_pmglobals.domain[domain].state;
-      (void)pm_prepall(domain, newstate);
+      pm_prepall(domain, newstate);
     }
 
   /* All drivers have agreed to the state change (or, one or more have

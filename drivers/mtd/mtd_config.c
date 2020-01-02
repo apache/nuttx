@@ -1022,7 +1022,6 @@ static int  mtdconfig_open(FAR struct file *filep)
   if (ret < 0)
     {
       ferr("ERROR: nxsem_wait failed: %d\n", ret);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       goto errout;
     }
 
@@ -1717,7 +1716,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       dev->erasesize = geo.erasesize;
       dev->nblocks = geo.neraseblocks * geo.erasesize / geo.blocksize;
 
-      (void)register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
+      register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
     }
 
 errout:

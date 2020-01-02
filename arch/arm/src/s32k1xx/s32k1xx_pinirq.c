@@ -153,7 +153,7 @@ static int s32k1xx_portinterrupt(int irq, FAR void *context,
 
               /* There is a registered interrupt handler... invoke it */
 
-              (void)handler(irq, context, arg);
+              handler(irq, context, arg);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -228,27 +228,27 @@ static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 void s32k1xx_pinirq_initialize(void)
 {
 #ifdef CONFIG_S32K1XX_PORTAINTS
-  (void)irq_attach(S32K1XX_IRQ_PORTA, s32k1xx_portainterrupt, NULL);
+  irq_attach(S32K1XX_IRQ_PORTA, s32k1xx_portainterrupt, NULL);
   putreg32(0xffffffff, S32K1XX_PORTA_ISFR);
   up_enable_irq(S32K1XX_IRQ_PORTA);
 #endif
 #ifdef CONFIG_S32K1XX_PORTBINTS
-  (void)irq_attach(S32K1XX_IRQ_PORTB, s32k1xx_portbinterrupt, NULL);
+  irq_attach(S32K1XX_IRQ_PORTB, s32k1xx_portbinterrupt, NULL);
   putreg32(0xffffffff, S32K1XX_PORTB_ISFR);
   up_enable_irq(S32K1XX_IRQ_PORTB);
 #endif
 #ifdef CONFIG_S32K1XX_PORTCINTS
-  (void)irq_attach(S32K1XX_IRQ_PORTC, s32k1xx_portcinterrupt, NULL);
+  irq_attach(S32K1XX_IRQ_PORTC, s32k1xx_portcinterrupt, NULL);
   putreg32(0xffffffff, S32K1XX_PORTC_ISFR);
   up_enable_irq(S32K1XX_IRQ_PORTC);
 #endif
 #ifdef CONFIG_S32K1XX_PORTDINTS
-  (void)irq_attach(S32K1XX_IRQ_PORTD, s32k1xx_portdinterrupt, NULL);
+  irq_attach(S32K1XX_IRQ_PORTD, s32k1xx_portdinterrupt, NULL);
   putreg32(0xffffffff, S32K1XX_PORTD_ISFR);
   up_enable_irq(S32K1XX_IRQ_PORTD);
 #endif
 #ifdef CONFIG_S32K1XX_PORTEINTS
-  (void)irq_attach(S32K1XX_IRQ_PORTE, s32k1xx_porteinterrupt, NULL);
+  irq_attach(S32K1XX_IRQ_PORTE, s32k1xx_porteinterrupt, NULL);
   putreg32(0xffffffff, S32K1XX_PORTE_ISFR);
   up_enable_irq(S32K1XX_IRQ_PORTE);
 #endif

@@ -119,7 +119,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   FAR struct tcb_s *rtcb;
   fullcontext_t *pdump;
 
-  (void)enter_critical_section();
+  enter_critical_section();
 
   rtcb = (FAR struct tcb_s *)tcb;
 #ifdef CONFIG_CXD56_BACKUPLOG

@@ -757,7 +757,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 
   priv->ops = &g_tmrops;
 
-  (void)irq_attach(irq, lpc43_interrupt, NULL);
+  irq_attach(irq, lpc43_interrupt, NULL);
 
   /* Enable NVIC interrupt. */
 
@@ -765,7 +765,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 
   /* Register the timer driver as /dev/timerX */
 
-  (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
+  timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER && CONFIG_LPC43_TMRx */

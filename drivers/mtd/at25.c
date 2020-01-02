@@ -191,7 +191,7 @@ static void at25_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -201,8 +201,8 @@ static void at25_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_AT25_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, CONFIG_AT25_SPIFREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, CONFIG_AT25_SPIFREQUENCY);
 }
 
 /************************************************************************************
@@ -211,7 +211,7 @@ static void at25_lock(FAR struct spi_dev_s *dev)
 
 static inline void at25_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -232,7 +232,7 @@ static inline int at25_readid(struct at25_dev_s *priv)
 
   /* Send the "Read ID (RDID)" command and read the first three ID bytes */
 
-  (void)SPI_SEND(priv->dev, AT25_RDID);
+  SPI_SEND(priv->dev, AT25_RDID);
   manufacturer = SPI_SEND(priv->dev, AT25_DUMMY);
   memory       = SPI_SEND(priv->dev, AT25_DUMMY);
 
@@ -284,7 +284,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->dev, AT25_RDSR);
+      SPI_SEND(priv->dev, AT25_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the status */
 
@@ -323,7 +323,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 static void at25_writeenable(struct at25_dev_s *priv)
 {
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
-  (void)SPI_SEND(priv->dev, AT25_WREN);
+  SPI_SEND(priv->dev, AT25_WREN);
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Enabled\n");
 }
@@ -356,16 +356,16 @@ static inline void at25_sectorerase(struct at25_dev_s *priv, off_t sector)
 
   /* Send the "Sector Erase (SE)" instruction */
 
-  (void)SPI_SEND(priv->dev, AT25_SE);
+  SPI_SEND(priv->dev, AT25_SE);
 
   /* Send the sector offset high byte first.  For all of the supported
    * parts, the sector number is completely contained in the first byte
    * and the values used in the following two bytes don't really matter.
    */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Deselect the FLASH */
 
@@ -399,7 +399,7 @@ static inline int at25_bulkerase(struct at25_dev_s *priv)
 
   /* Send the "Bulk Erase (BE)" instruction */
 
-  (void)SPI_SEND(priv->dev, AT25_BE);
+  SPI_SEND(priv->dev, AT25_BE);
 
   /* Deselect the FLASH */
 
@@ -437,13 +437,13 @@ static inline void at25_pagewrite(struct at25_dev_s *priv, FAR const uint8_t *bu
 
   /* Send "Page Program (PP)" command */
 
-  (void)SPI_SEND(priv->dev, AT25_PP);
+  SPI_SEND(priv->dev, AT25_PP);
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then write the specified number of bytes */
 
@@ -563,13 +563,13 @@ static ssize_t at25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   /* Send "Read from Memory " instruction */
 
-  (void)SPI_SEND(priv->dev, AT25_READ);
+  SPI_SEND(priv->dev, AT25_READ);
 
   /* Send the page offset high byte first. */
 
-  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
-  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
-  (void)SPI_SEND(priv->dev, offset & 0xff);
+  SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  SPI_SEND(priv->dev, offset & 0xff);
 
   /* Then read all of the requested bytes */
 
@@ -708,8 +708,8 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
 
           at25_writeenable(priv);
           SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
-          (void)SPI_SEND(priv->dev, AT25_WRSR);
-          (void)SPI_SEND(priv->dev, AT25_SR_UNPROT);
+          SPI_SEND(priv->dev, AT25_WRSR);
+          SPI_SEND(priv->dev, AT25_SR_UNPROT);
           SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
         }
     }

@@ -247,7 +247,7 @@ int sam_tsc_setup(int minor)
 
   /* Configure the maXTouch CHG interrupt pin */
 
-  (void)sam_configpio(PIO_CHG_MXT);
+  sam_configpio(PIO_CHG_MXT);
 
   /* Get an instance of the I2C interface for the touchscreen chip select */
 
@@ -261,7 +261,7 @@ int sam_tsc_setup(int minor)
   /* Configure maXTouch CHG interrupts */
 
   sam_pioirq(PIO_CHG_MXT);
-  (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
+  irq_attach(IRQ_CHG_MXT, mxt_interrupt, NULL);
 
   /* Initialize and register the I2C touchscreen device */
 

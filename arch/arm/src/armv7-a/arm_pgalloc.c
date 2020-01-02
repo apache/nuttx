@@ -163,7 +163,7 @@ static int get_pgtable(FAR group_addrenv_t *addrenv, uintptr_t vaddr)
 
           /* And instantiate the modified environment */
 
-          (void)up_addrenv_select(addrenv, NULL);
+          up_addrenv_select(addrenv, NULL);
         }
     }
 

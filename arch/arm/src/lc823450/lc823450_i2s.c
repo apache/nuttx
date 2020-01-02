@@ -322,21 +322,7 @@ static void _setup_audio_pll(uint32_t freq)
 
 static void _i2s_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -1010,7 +996,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   priv->dev.ops = &g_i2sops;
 
-  (void)lc823450_i2s_configure();
+  lc823450_i2s_configure();
 
 #ifdef BEEP_TEST
   lc823450_i2s_beeptest();
@@ -1039,11 +1025,11 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 
   /* Backup the current affinity */
 
-  (void)nxsched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  nxsched_getaffinity(getpid(), sizeof(cpuset0), &cpuset0);
 
   /* Set the new affinity which assigns to CPU0 */
 
-  (void)nxsched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
+  nxsched_setaffinity(getpid(), sizeof(cpuset1), &cpuset1);
   nxsig_usleep(10 * 1000);
 #endif
 
@@ -1056,7 +1042,7 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 #ifdef CONFIG_SMP
   /* Restore the original affinity */
 
-  (void)nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
+  nxsched_setaffinity(getpid(), sizeof(cpuset0), &cpuset0);
   nxsig_usleep(10 * 1000);
 #endif
 

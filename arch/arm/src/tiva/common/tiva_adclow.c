@@ -944,33 +944,9 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
 void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
-  int ret;
-#ifdef CONFIG_DEBUG_ANALOG
-  uint16_t loop_count = 0;
-#endif
 
   ainfo("Locking...\n");
-
-  do
-    {
-      ret = nxsem_wait(&s->exclsem);
-
-      /* This should only fail if the wait was canceled by an signal (and the
-       * worker thread will receive a lot of signals).
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-
-#ifdef CONFIG_DEBUG_ANALOG
-      if (loop_count % 1000)
-        {
-          ainfo("loop=%d\n");
-        }
-
-      ++loop_count;
-#endif
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&s->exclsem);
 }
 
 /****************************************************************************

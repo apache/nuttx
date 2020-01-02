@@ -309,7 +309,7 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
        * the ready-to-run list.
        */
 
-      (void)group_addrenv(NULL);
+      group_addrenv(NULL);
 #endif
     }
 #endif

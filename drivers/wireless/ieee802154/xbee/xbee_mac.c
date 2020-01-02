@@ -124,7 +124,7 @@ static void xbee_assoctimer(int argc, uint32_t arg, ...)
    */
 
   ret = work_queue(HPWORK, &priv->assocwork, xbee_assocworker, (FAR void *)priv, 0);
-  (void)ret;
+  UNUSED(ret);
   DEBUGASSERT(ret == OK);
 }
 
@@ -154,8 +154,8 @@ static void xbee_assocworker(FAR void *arg)
     {
       xbee_send_atquery(priv, "AI");
 
-      (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
-                     1, (wdparm_t)arg);
+      wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
+               1, (wdparm_t)arg);
     }
 }
 
@@ -380,8 +380,8 @@ int xbee_req_data(XBEEHANDLE xbee,
     {
       /* Setup a timeout in case the XBee never responds with a tx status */
 
-      (void)wd_start(priv->reqdata_wd, XBEE_RESPONSE_TIMEOUT, xbee_reqdata_timeout,
-                     1, (wdparm_t)priv);
+      wd_start(priv->reqdata_wd, XBEE_RESPONSE_TIMEOUT, xbee_reqdata_timeout,
+               1, (wdparm_t)priv);
 
       /* Send the frame */
 

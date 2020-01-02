@@ -94,7 +94,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
    * test and set is atomic.
    */
 
-  (void)pthread_mutex_lock(&g_tsmutex);
+  pthread_mutex_lock(&g_tsmutex);
 #endif
 
   /* In the non-SMP case, the simulation is implemented with a single thread
@@ -105,7 +105,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
   *lock = SP_LOCKED;
 
 #ifdef CONFIG_SMP
-  (void)pthread_mutex_unlock(&g_tsmutex);
+  pthread_mutex_unlock(&g_tsmutex);
 #endif
   return ret;
 }

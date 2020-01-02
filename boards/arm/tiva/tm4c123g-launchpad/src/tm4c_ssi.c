@@ -80,7 +80,7 @@
 void weak_function tm4c_ssidev_initialize(void)
 {
   #ifdef CONFIG_CAN_MCP2515
-  (void)tiva_configgpio(GPIO_MCP2515_CS);    /* mcp2515 chip select */
+  tiva_configgpio(GPIO_MCP2515_CS);    /* mcp2515 chip select */
   #endif
 }
 

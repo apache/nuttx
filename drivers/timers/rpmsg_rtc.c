@@ -265,17 +265,10 @@ static int rpmsg_rtc_send_recv(FAR struct rpmsg_rtc_lowerhalf_s *lower,
       goto fail;
     }
 
-  while (1)
+  ret = nxsem_wait_uninterruptible(&cookie.sem);
+  if (ret == 0)
     {
-      ret = nxsem_wait(&cookie.sem);
-      if (ret != -EINTR)
-        {
-          if (ret == 0)
-            {
-              ret = msg->result;
-            }
-          break;
-        }
+      ret = msg->result;
     }
 
 fail:

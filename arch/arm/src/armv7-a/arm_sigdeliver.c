@@ -152,9 +152,9 @@ void up_sigdeliver(void)
    */
 
 #ifdef CONFIG_SMP
-  (void)enter_critical_section();
+  enter_critical_section();
 #else
-  (void)up_irq_save();
+  up_irq_save();
 #endif
 
   /* Restore the saved errno value */
@@ -187,7 +187,7 @@ void up_sigdeliver(void)
   DEBUGASSERT(rtcb->irqcount == 1);
   while (rtcb->irqcount < saved_irqcount)
     {
-      (void)enter_critical_section();
+      enter_critical_section();
     }
 #endif
 

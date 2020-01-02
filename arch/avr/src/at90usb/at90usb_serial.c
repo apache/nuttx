@@ -245,8 +245,8 @@ static int usart1_attach(struct uart_dev_s *dev)
    *      written.
    */
 
-  (void)irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt, NULL);
-  (void)irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt, NULL);
+  irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt, NULL);
+  irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt, NULL);
 //(void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt, NULL);
   return OK;
 }
@@ -269,8 +269,8 @@ static void usart1_detach(struct uart_dev_s *dev)
 
   /* Detach USART1 interrupts */
 
-  (void)irq_detach(AT90USB_IRQ_U1RX);
-  (void)irq_detach(AT90USB_IRQ_U1DRE);
+  irq_detach(AT90USB_IRQ_U1RX);
+  irq_detach(AT90USB_IRQ_U1DRE);
 //(void)irq_detach(AT90USB_IRQ_U1TX);
 }
 
@@ -552,12 +552,12 @@ void up_serialinit(void)
   /* Register the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
-  (void)uart_register("/dev/console", &g_usart1port);
+  uart_register("/dev/console", &g_usart1port);
 #endif
 
   /* Register all USARTs */
 
-  (void)uart_register("/dev/ttyS0", &g_usart1port);
+  uart_register("/dev/ttyS0", &g_usart1port);
 }
 
 /****************************************************************************

@@ -895,7 +895,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
   /* Stop all timers, reset scheduling */
 
-  (void)sched_sporadic_reset(tcb);
+  sched_sporadic_reset(tcb);
 
   /* The free the container holder the sporadic scheduling parameters */
 

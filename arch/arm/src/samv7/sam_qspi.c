@@ -631,7 +631,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -782,7 +782,7 @@ static int qspi_memory_enable(struct sam_qspidev_s *priv,
   /* Write the instruction frame value */
 
   qspi_putreg(priv, regval, SAM_QSPI_IFR_OFFSET);
-  (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+  qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
   return OK;
 }
 
@@ -892,17 +892,15 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
       /* Wait for the DMA complete */
 
-      ret = nxsem_wait(&priv->dmawait);
+      ret = nxsem_wait_uninterruptible(&priv->dmawait);
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(priv->dmadog);
+      wd_cancel(priv->dmadog);
 
-      /* Check if we were awakened by an error of some kind.  EINTR is not a
-       * failure.  That simply means that the wait was awakened by a signal.
-       */
+      /* Check if we were awakened by an error of some kind. */
 
-      if (ret < 0 && ret != -EINTR)
+      if (ret < 0)
         {
           DEBUGPANIC();
           return ret;
@@ -1060,24 +1058,11 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -1452,7 +1437,7 @@ static int qspi_command(struct qspi_dev_s *dev,
            * accesses.
            */
 
-          (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+          qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data to write to QSPI_RAM */
 
@@ -1476,7 +1461,7 @@ static int qspi_command(struct qspi_dev_s *dev,
            * accesses.
            */
 
-          (void)qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
+          qspi_getreg(priv, SAM_QSPI_IFR_OFFSET);
 
           /* Copy the data from QSPI memory into the user buffer */
 
@@ -1697,8 +1682,8 @@ static int qspi_hw_initialize(struct sam_qspidev_s *priv)
 
   /* Flush any pending transfers */
 
-  (void)qspi_getreg(priv, SAM_QSPI_SR_OFFSET);
-  (void)qspi_getreg(priv, SAM_QSPI_RDR_OFFSET);
+  qspi_getreg(priv, SAM_QSPI_SR_OFFSET);
+  qspi_getreg(priv, SAM_QSPI_RDR_OFFSET);
 
   qspi_dumpregs(priv, "After initialization");
   return OK;

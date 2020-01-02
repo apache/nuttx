@@ -112,7 +112,7 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
 
       /* Then re-draw the frame */
 
-      (void)nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
+      nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
     }
   else
 #endif

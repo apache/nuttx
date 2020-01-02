@@ -701,21 +701,7 @@ static void lpc54_putreg(uint32_t val, uint32_t addr)
 
 static void lpc54_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -2175,7 +2161,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  (void)nxsig_usleep(100*1000);
+  nxsig_usleep(100*1000);
 
   /* Put RH port 1 in reset (the LPC546x supports only a single downstream port) */
 
@@ -2188,7 +2174,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
   /* Release RH port 1 from reset and wait a bit */
 
   lpc54_putreg(OHCI_RHPORTST_PRSC, LPC54_OHCI_RHPORTST1);
-  (void)nxsig_usleep(200*1000);
+  nxsig_usleep(200*1000);
   return OK;
 }
 

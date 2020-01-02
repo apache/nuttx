@@ -107,7 +107,7 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < NR_IRQS; irq++)
     {
-      (void)up_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
+      up_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
     }
 
   /* Set the BEV bit in the STATUS register */

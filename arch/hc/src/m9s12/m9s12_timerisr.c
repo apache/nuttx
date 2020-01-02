@@ -171,7 +171,7 @@ void hc_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(HCS12_IRQ_VRTI, (xcpt_t)m9s12_timerisr, NULL);
+  irq_attach(HCS12_IRQ_VRTI, (xcpt_t)m9s12_timerisr, NULL);
 
   /* Enable RTI interrupt by setting the RTIE bit */
 

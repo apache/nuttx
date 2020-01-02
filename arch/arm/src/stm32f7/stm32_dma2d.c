@@ -1131,7 +1131,7 @@ int stm32_dma2dinitialize(void)
 
       /* Attach DMA2D interrupt vector */
 
-      (void)irq_attach(g_interrupt.irq, stm32_dma2dirq, NULL);
+      irq_attach(g_interrupt.irq, stm32_dma2dirq, NULL);
 
       /* Enable the IRQ at the NVIC */
 

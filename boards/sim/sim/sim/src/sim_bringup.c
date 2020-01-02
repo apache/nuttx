@@ -116,13 +116,13 @@ int sim_bringup(void)
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
-  (void)sim_zoneinfo(3);
+  sim_zoneinfo(3);
 #endif
 
 #ifdef CONFIG_EXAMPLES_GPIO
   /* Initialize simulated GPIO drivers */
 
-  (void)sim_gpio_initialize();
+  sim_gpio_initialize();
 #endif
 
 #ifdef CONFIG_RAMMTD

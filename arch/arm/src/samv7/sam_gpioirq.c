@@ -250,12 +250,12 @@ void sam_gpioirqinitialize(void)
 
   /* Clear and disable all GPIOA interrupts */
 
-  (void)getreg32(SAM_PIOA_ISR);
+  getreg32(SAM_PIOA_ISR);
   putreg32(0xffffffff, SAM_PIOA_IDR);
 
   /* Attach and enable the GPIOA IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOA, sam_gpioainterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOA, sam_gpioainterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOA);
 #endif
 
@@ -268,12 +268,12 @@ void sam_gpioirqinitialize(void)
 
   /* Clear and disable all GPIOB interrupts */
 
-  (void)getreg32(SAM_PIOB_ISR);
+  getreg32(SAM_PIOB_ISR);
   putreg32(0xffffffff, SAM_PIOB_IDR);
 
   /* Attach and enable the GPIOB IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOB, sam_gpiobinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOB, sam_gpiobinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOB);
 #endif
 
@@ -286,12 +286,12 @@ void sam_gpioirqinitialize(void)
 
   /* Clear and disable all GPIOC interrupts */
 
-  (void)getreg32(SAM_PIOC_ISR);
+  getreg32(SAM_PIOC_ISR);
   putreg32(0xffffffff, SAM_PIOC_IDR);
 
   /* Attach and enable the GPIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOC, sam_gpiocinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOC, sam_gpiocinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOC);
 #endif
 
@@ -304,12 +304,12 @@ void sam_gpioirqinitialize(void)
 
   /* Clear and disable all GPIOD interrupts */
 
-  (void)getreg32(SAM_PIOD_ISR);
+  getreg32(SAM_PIOD_ISR);
   putreg32(0xffffffff, SAM_PIOD_IDR);
 
   /* Attach and enable the GPIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOD, sam_gpiodinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOD, sam_gpiodinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOD);
 #endif
 
@@ -322,12 +322,12 @@ void sam_gpioirqinitialize(void)
 
   /* Clear and disable all GPIOE interrupts */
 
-  (void)getreg32(SAM_PIOE_ISR);
+  getreg32(SAM_PIOE_ISR);
   putreg32(0xffffffff, SAM_PIOE_IDR);
 
   /* Attach and enable the GPIOE IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOE, sam_gpioeinterrupt, NULL);
+  irq_attach(SAM_IRQ_PIOE, sam_gpioeinterrupt, NULL);
   up_enable_irq(SAM_IRQ_PIOE);
 #endif
 }

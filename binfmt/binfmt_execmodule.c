@@ -296,7 +296,7 @@ errout_with_tcbinit:
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  (void)up_addrenv_restore(&oldenv);
+  up_addrenv_restore(&oldenv);
 
 errout_with_tcb:
 #endif

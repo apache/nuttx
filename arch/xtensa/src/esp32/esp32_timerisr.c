@@ -192,7 +192,7 @@ void xtensa_timer_initialize(void)
 
   /* Attach the timer interrupt */
 
-  (void)irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr, NULL);
+  irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32_timerisr, NULL);
 
   /* Enable the timer 0 CPU interrupt. */
 

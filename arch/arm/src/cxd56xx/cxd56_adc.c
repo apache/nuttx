@@ -585,7 +585,7 @@ static int adc_stop(adc_ch_t ch, FAR struct seq_s *seq)
       return OK;
     }
 
-  (void) seq_ioctl(seq, 0, SCUIOC_STOP, 0);
+  seq_ioctl(seq, 0, SCUIOC_STOP, 0);
 
   if (ch <= CH3)
     {
@@ -1006,11 +1006,7 @@ void cxd56_adc_getinterval(int adctype, uint32_t *interval, uint16_t *adjust)
 
 int cxd56_adcinitialize(void)
 {
-  int ret;
-
-  /* Avoid warnings when no ADC options enabled */
-
-  (void) ret;
+  int ret = OK;
 
 #if defined (CONFIG_CXD56_LPADC0) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc0", &g_adcops, 0666, &g_lpadc0priv);
@@ -1061,5 +1057,5 @@ int cxd56_adcinitialize(void)
     }
 #endif
 
-  return OK;
+  return ret;
 }

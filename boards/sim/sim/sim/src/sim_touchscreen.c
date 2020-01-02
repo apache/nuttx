@@ -135,7 +135,7 @@ static FAR void *sim_listener(FAR void *arg)
       if (!g_simtc.connected)
         {
           g_simtc.connected = true;
-          sem_post(&g_simtc.eventsem);
+          nxsem_post(&g_simtc.eventsem);
           ginfo("Connected\n");
         }
     }
@@ -213,10 +213,10 @@ int sim_tsc_setup(int minor)
        * but it makes this example flow more smoothly.
        */
 
-      (void)pthread_attr_init(&attr);
+      pthread_attr_init(&attr);
       param.sched_priority = CONFIG_SIM_LISTENERPRIO;
-      (void)pthread_attr_setschedparam(&attr, &param);
-      (void)pthread_attr_setstacksize(&attr, CONFIG_SIM_LISTENER_STACKSIZE);
+      pthread_attr_setschedparam(&attr, &param);
+      pthread_attr_setstacksize(&attr, CONFIG_SIM_LISTENER_STACKSIZE);
 
       ret = pthread_create(&thread, &attr, sim_listener, NULL);
       if (ret != 0)
@@ -233,7 +233,7 @@ int sim_tsc_setup(int minor)
            * are connected.
            */
 
-           (void)sem_wait(&g_simtc.eventsem);
+           nxsem_wait(&g_simtc.eventsem);
         }
     }
   else

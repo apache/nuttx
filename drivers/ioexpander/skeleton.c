@@ -168,21 +168,7 @@ static const struct ioexpander_ops_s g_skel_ops =
 
 static void skel_lock(FAR struct skel_dev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 #define skel_unlock(p) nxsem_post(&(p)->exclsem)
@@ -654,7 +640,7 @@ static void skel_irqworker(void *arg)
             {
               /* Yes.. perform the callback */
 
-              (void)priv->cb[i].cbfunc(&priv->dev, match);
+              priv->cb[i].cbfunc(&priv->dev, match);
             }
         }
     }

@@ -103,7 +103,7 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
        * the ready-to-run list.
        */
 
-      (void)group_addrenv(NULL);
+      group_addrenv(NULL);
 #  endif
     }
 #endif

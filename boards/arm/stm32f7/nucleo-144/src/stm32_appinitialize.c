@@ -141,7 +141,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_STM32F7_BBSRAM
   /* Initialize battery-backed RAM */
 
-  (void)stm32_bbsram_int();
+  stm32_bbsram_int();
 #endif
 
 #if defined(CONFIG_FAT_DMAMEMORY)

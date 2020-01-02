@@ -390,17 +390,11 @@ void lpc43_dmaconfigure(uint8_t dmarequest, uint8_t dmasrc)
 DMA_HANDLE lpc43_dmachannel(void)
 {
   struct lpc43_dmach_s *dmach = NULL;
-  int ret;
   int i;
 
   /* Get exclusive access to the GPDMA state structure */
 
-  do
-    {
-      ret = nxsem_wait(&g_gpdma.exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret < 0);
+  nxsem_wait_uninterruptible(&g_gpdma.exclsem);
 
   /* Find an available DMA channel */
 

@@ -112,6 +112,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization here if so configured */
 
-  (void)lpc17_40_bringup();
+  lpc17_40_bringup();
 }
 #endif

@@ -404,6 +404,44 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
 int net_lockedwait(sem_t *sem);
 
 /****************************************************************************
+ * Name: net_timedwait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of net_timedwait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Input Parameters:
+ *   sem     - A reference to the semaphore to be taken.
+ *   abstime - The absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int net_timedwait_uninterruptible(sem_t *sem,
+                                  FAR const struct timespec *abstime);
+
+/****************************************************************************
+ * Name: net_lockedwait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of net_lockedwait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Input Parameters:
+ *   sem - A reference to the semaphore to be taken.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int net_lockedwait_uninterruptible(sem_t *sem);
+
+/****************************************************************************
  * Name: net_ioballoc
  *
  * Description:

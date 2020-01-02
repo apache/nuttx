@@ -123,7 +123,7 @@ void x86_timer_initialize(void)
 
   /* Attach to the timer interrupt handler */
 
-  (void)irq_attach(IRQ0, (xcpt_t)qemu_timerisr, NULL);
+  irq_attach(IRQ0, (xcpt_t)qemu_timerisr, NULL);
 
   /* Send the command byte to configure counter 0 */
 

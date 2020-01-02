@@ -201,7 +201,7 @@ int imxrt_gpio_initialize(void)
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
 
-      (void)gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, pincount);
 
       /* Configure the pin that will be used as input */
 
@@ -220,7 +220,7 @@ int imxrt_gpio_initialize(void)
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
 
-      (void)gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, pincount);
 
       /* Configure the pin that will be used as output */
 

@@ -100,7 +100,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
       if (remainder != 0)
         {
           NXGL_FUNCNAME(nxgl_copyrun, NXGLIB_SUFFIX)(sline, pinfo->buffer, remainder, ncols);
-          (void)pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
+          pinfo->putrun(row, dest->pt1.x, pinfo->buffer, ncols);
         }
       else
 #endif
@@ -109,7 +109,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
            * the image memory.
            */
 
-          (void)pinfo->putrun(row, dest->pt1.x, sline, ncols);
+          pinfo->putrun(row, dest->pt1.x, sline, ncols);
         }
 
       /* Then adjust the source pointer to refer to the next line in the source

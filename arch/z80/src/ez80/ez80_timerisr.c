@@ -67,11 +67,11 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
   /* Read the appropriate timer0 register to clear the interrupt */
 
 #ifdef _EZ80F91
-  (void)inp(EZ80_TMR0_IIR);
+  inp(EZ80_TMR0_IIR);
 #else
   /* _EZ80190, _EZ80L92, _EZ80F92, _EZ80F93 */
 
-  (void)inp(EZ80_TMR0_CTL);
+  inp(EZ80_TMR0_CTL);
 #endif
 
   /* Process timer interrupt */
@@ -138,9 +138,9 @@ void z80_timer_initialize(void)
   /* Clear any pending timer interrupts */
 
 #if defined(_EZ80F91)
-  (void)inp(EZ80_TMR0_IIR);
+  inp(EZ80_TMR0_IIR);
 #elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
-  (void)inp(EZ80_TMR0_CTL);
+  inp(EZ80_TMR0_CTL);
 #endif
 
   /* Configure and enable the timer */

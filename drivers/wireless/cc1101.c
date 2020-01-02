@@ -329,18 +329,7 @@ static const struct file_operations g_cc1101ops =
 
 static int cc1101_takesem(FAR sem_t *sem)
 {
-  int ret;
-
-  /* Take a count from the semaphore, possibly waiting */
-
-  ret = nxsem_wait(sem);
-
-  /* The only case that an error should occur here is if the wait
-   * was awakened by a signal
-   */
-
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(sem);
 }
 
 /****************************************************************************
@@ -376,9 +365,6 @@ static int cc1101_file_open(FAR struct file *filep)
   ret = cc1101_takesem(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -427,9 +413,6 @@ static int cc1101_file_close(FAR struct file *filep)
   ret = cc1101_takesem(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -472,9 +455,6 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
   ret = cc1101_takesem(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -500,9 +480,6 @@ static void fifo_put(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
   ret = cc1101_takesem(&dev->sem_rx_buffer);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return;
     }
 
@@ -539,9 +516,6 @@ static uint8_t fifo_get(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
   ret = cc1101_takesem(&dev->sem_rx_buffer);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -591,9 +565,6 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
   ret = cc1101_takesem(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -609,9 +580,6 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
 
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -648,9 +616,6 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = cc1101_takesem(&dev->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
       return ret;
     }
 
@@ -683,7 +648,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      (void)cc1101_takesem(&dev->sem_rx_buffer);
+      cc1101_takesem(&dev->sem_rx_buffer);
       if (dev->fifo_len > 0)
         {
           dev->pfd->revents |= POLLIN; /* Data available for input */
@@ -711,11 +676,11 @@ errout:
 
 void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 {
-  (void)SPI_LOCK(dev->spi, true);
+  SPI_LOCK(dev->spi, true);
   SPI_SELECT(dev->spi, dev->dev_id, true);
   SPI_SETMODE(dev->spi, SPIDEV_MODE0); /* CPOL=0, CPHA=0 */
   SPI_SETBITS(dev->spi, 8);
-  (void)SPI_HWFEATURES(dev->spi, 0);
+  SPI_HWFEATURES(dev->spi, 0);
 
   if (dev->ops.wait)
     {
@@ -737,7 +702,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
 void cc1101_access_end(FAR struct cc1101_dev_s *dev)
 {
   SPI_SELECT(dev->spi, dev->dev_id, false);
-  (void)SPI_LOCK(dev->spi, false);
+  SPI_LOCK(dev->spi, false);
 }
 
 /****************************************************************************
@@ -922,7 +887,7 @@ void cc1101_dumpregs(struct cc1101_dev_s *dev, uint8_t addr, uint8_t length)
 
       for (i = 0, j = 0; i < readsize; i++, j += 3)
         {
-          (void)sprintf(&outbuf[j], " %02x", regbuf[i]);
+          sprintf(&outbuf[j], " %02x", regbuf[i]);
         }
 
       /* Dump the formatted data to the syslog output */

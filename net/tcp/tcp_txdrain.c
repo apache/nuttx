@@ -159,11 +159,7 @@ int tcp_txdrain(FAR struct socket *psock,
            * wait for it to drain or be be disconnected.
            */
 
-          do
-            {
-              ret = net_timedwait(&waitsem, abstime);
-            }
-          while (ret == -EINTR);
+          ret = net_timedwait_uninterruptible(&waitsem, abstime);
 
           /* Tear down the disconnect notifier */
 

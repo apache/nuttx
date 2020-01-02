@@ -76,21 +76,21 @@ void weak_function stm32_spidev_initialize(void)
 #ifdef CONFIG_STM32_SPI3
 
 #ifdef CONFIG_MTD_M25P
-  (void)stm32_configgpio(GPIO_CS_FLASH);    /* FLASH chip select */
+  stm32_configgpio(GPIO_CS_FLASH);    /* FLASH chip select */
 #endif
 
 #if defined(CONFIG_MMCSD)
-  (void)stm32_configgpio(GPIO_CS_MMCSD);    /* MMC/SD chip select */
-  (void)stm32_configgpio(GPIO_SD_CD);       /* MMC/SD card detect */
+  stm32_configgpio(GPIO_CS_MMCSD);    /* MMC/SD chip select */
+  stm32_configgpio(GPIO_SD_CD);       /* MMC/SD card detect */
 #endif
 
 #ifdef CONFIG_AUDIO_VS1053
-  (void)stm32_configgpio(GPIO_CS_MP3_DATA); /* MP3 codec chip select for DATA */
-  (void)stm32_configgpio(GPIO_CS_MP3_CMD);  /* MP3 codec chip select for CMD */
+  stm32_configgpio(GPIO_CS_MP3_DATA); /* MP3 codec chip select for DATA */
+  stm32_configgpio(GPIO_CS_MP3_CMD);  /* MP3 codec chip select for CMD */
 #endif
 
   /* Configure the EXP I/O cs for SPI3 */
-  (void)stm32_configgpio(GPIO_CS_EXP_SPI3); /* Expander chip select */
+  stm32_configgpio(GPIO_CS_EXP_SPI3); /* Expander chip select */
 
 #endif
 }

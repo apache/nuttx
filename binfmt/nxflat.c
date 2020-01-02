@@ -315,7 +315,7 @@ int nxflat_initialize(void)
 
 void nxflat_uninitialize(void)
 {
-  (void)unregister_binfmt(&g_nxflatbinfmt);
+  unregister_binfmt(&g_nxflatbinfmt);
 }
 
 #endif /* CONFIG_NXFLAT */

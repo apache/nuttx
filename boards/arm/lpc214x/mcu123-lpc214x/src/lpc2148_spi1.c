@@ -180,24 +180,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&g_exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&g_exclsem);
     }
   else
     {
-      (void)nxsem_post(&g_exclsem);
-      ret = OK;
+      ret = nxsem_post(&g_exclsem);
     }
 
   return ret;
@@ -257,7 +244,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
 
       do
         {
-          (void)getreg16(LPC214X_SPI1_DR);
+          getreg16(LPC214X_SPI1_DR);
         }
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE);
     }
@@ -450,7 +437,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
         {
           /* Yes.. Read and discard */
 
-          (void)getreg16(LPC214X_SPI1_DR);
+          getreg16(LPC214X_SPI1_DR);
         }
 
       /* There is a race condition where TFE may go true just before
@@ -611,7 +598,7 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
 
   for (i = 0; i < 8; i++)
     {
-      (void)getreg16(LPC214X_SPI1_DR);
+      getreg16(LPC214X_SPI1_DR);
     }
 
   return &g_spidev;

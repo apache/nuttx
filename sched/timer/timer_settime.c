@@ -114,8 +114,8 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
   if (timer->pt_delay)
     {
       timer->pt_last = timer->pt_delay;
-      (void)wd_start(timer->pt_wdog, timer->pt_delay,
-                     (wdentry_t)timer_timeout, 1, itimer);
+      wd_start(timer->pt_wdog, timer->pt_delay,
+               (wdentry_t)timer_timeout, 1, itimer);
     }
 }
 
@@ -298,7 +298,7 @@ int timer_settime(timer_t timerid, int flags,
    * is called).
    */
 
-  (void)wd_cancel(timer->pt_wdog);
+  wd_cancel(timer->pt_wdog);
 
   /* Cancel any pending notification */
 
@@ -315,7 +315,7 @@ int timer_settime(timer_t timerid, int flags,
 
   if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
     {
-      (void)clock_time2ticks(&value->it_interval, &delay);
+      clock_time2ticks(&value->it_interval, &delay);
 
       /* REVISIT: Should pt_delay be sclock_t? */
 
@@ -341,7 +341,7 @@ int timer_settime(timer_t timerid, int flags,
        * returns an error if clockid != CLOCK_REALTIME.
        */
 
-      (void)clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
+      clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
     }
   else
     {
@@ -350,7 +350,7 @@ int timer_settime(timer_t timerid, int flags,
        * returns success.
        */
 
-      (void)clock_time2ticks(&value->it_value, &delay);
+      clock_time2ticks(&value->it_value, &delay);
     }
 
   /* If the time is in the past or now, then set up the next interval

@@ -89,8 +89,8 @@ void weak_function lpcxpresso_sspdev_initialize(void)
    */
 
 #ifdef CONFIG_LPC17_40_SSP1
-  (void)lpc17_40_configgpio(LPCXPRESSO_SD_CS);
-  (void)lpc17_40_configgpio(LPCXPRESSO_SD_CD);
+  lpc17_40_configgpio(LPCXPRESSO_SD_CS);
+  lpc17_40_configgpio(LPCXPRESSO_SD_CD);
 
   /* Configure chip select for the OLED.
    * For the SPI interface, insert jumpers in J42, J43, J45 pin1-2
@@ -98,7 +98,7 @@ void weak_function lpcxpresso_sspdev_initialize(void)
    */
 
 #ifdef CONFIG_NX_LCDDRIVER
-  (void)lpc17_40_configgpio(LPCXPRESSO_OLED_CS);
+  lpc17_40_configgpio(LPCXPRESSO_OLED_CS);
 #endif
 #endif
 
@@ -164,14 +164,14 @@ void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
     {
       /* Assert/de-assert the CS pin to the card */
 
-      (void)lpc17_40_gpiowrite(LPCXPRESSO_SD_CS, !selected);
+      lpc17_40_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
 #ifdef CONFIG_NX_LCDDRIVER
   else if (devid == SPIDEV_DISPLAY(0))
     {
       /* Assert the CS pin to the OLED display */
 
-      (void)lpc17_40_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
+      lpc17_40_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
     }
 #endif
   ssp_dumpgpio("lpc17_40_ssp1select() Exit");

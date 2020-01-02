@@ -222,21 +222,7 @@ static const struct file_operations g_pty_fops =
 
 static void pty_semtake(FAR struct pty_devpair_s *devpair)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&devpair->pp_exclsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&devpair->pp_exclsem);
 }
 
 /****************************************************************************
@@ -261,21 +247,21 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 #else
   snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
 #endif
-  (void)unregister_driver(devname);
+  unregister_driver(devname);
 
   /* Un-register the master device (/dev/ptyN may have already been
    * unlinked).
    */
 
   snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
-  (void)unregister_driver(devname);
+  unregister_driver(devname);
 
   /* Close the contained file structures */
 
-  (void)file_close(&devpair->pp_master.pd_src);
-  (void)file_close(&devpair->pp_master.pd_sink);
-  (void)file_close(&devpair->pp_slave.pd_src);
-  (void)file_close(&devpair->pp_slave.pd_sink);
+  file_close(&devpair->pp_master.pd_src);
+  file_close(&devpair->pp_master.pd_sink);
+  file_close(&devpair->pp_slave.pd_src);
+  file_close(&devpair->pp_slave.pd_sink);
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Free this minor number so that it can be reused */
@@ -324,7 +310,7 @@ static int pty_open(FAR struct file *filep)
         {
           /* Wait until unlocked.  We will also most certainly suspend here. */
 
-          (void)nxsem_wait(&devpair->pp_slavesem);
+          nxsem_wait(&devpair->pp_slavesem);
 
           /* Get exclusive access to the device structure.  This might also
            * cause suspension.
@@ -1204,7 +1190,7 @@ errout_with_slave:
 #else
   snprintf(devname, 16, "/dev/pts/%d", minor);
 #endif
-  (void)unregister_driver(devname);
+  unregister_driver(devname);
 
 errout_with_pipeb:
   if (pipe_b[0] >= 0)
@@ -1213,7 +1199,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close(&devpair->pp_master.pd_src);
+      file_close(&devpair->pp_master.pd_src);
     }
 
   if (pipe_b[1] >= 0)
@@ -1222,7 +1208,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close(&devpair->pp_slave.pd_sink);
+      file_close(&devpair->pp_slave.pd_sink);
     }
 
 errout_with_pipea:
@@ -1232,7 +1218,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close(&devpair->pp_slave.pd_src);
+      file_close(&devpair->pp_slave.pd_src);
     }
 
   if (pipe_a[1] >= 0)
@@ -1241,7 +1227,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close(&devpair->pp_master.pd_sink);
+      file_close(&devpair->pp_master.pd_sink);
     }
 
 errout_with_devpair:

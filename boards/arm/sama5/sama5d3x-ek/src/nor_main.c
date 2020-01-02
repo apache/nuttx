@@ -141,7 +141,7 @@ int nor_main(int argc, char *argv)
    * will hang when the interrupts are disabled!
    */
 
-  (void)up_irq_save();
+  up_irq_save();
 
   /* Disable MATRIX write protection */
 

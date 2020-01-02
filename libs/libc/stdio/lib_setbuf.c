@@ -79,7 +79,7 @@ void setbuf(FAR FILE *stream, FAR char *buf)
   DEBUGASSERT(stream != NULL);
 
   mode = (buf != NULL) ? _IOFBF : _IONBF;
-  (void)setvbuf(stream, buf, mode, BUFSIZ);
+  setvbuf(stream, buf, mode, BUFSIZ);
 
 #else
   DEBUGASSERT(stream != NULL);

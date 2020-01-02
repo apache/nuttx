@@ -594,7 +594,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
    * backup data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   isr  = getreg32(STM32_RTC_ISR);
 
@@ -656,7 +656,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
    * data registers and backup SRAM).
    */
 
-  (void)stm32_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   return ret;
 }
@@ -1424,7 +1424,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
    * seconds)
    */
 
-  (void)gmtime_r(&tp->tv_sec, &newtime);
+  gmtime_r(&tp->tv_sec, &newtime);
   return stm32_rtc_setdatetime(&newtime);
 }
 
@@ -1469,7 +1469,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   if (!once)
     {
       once = true;
-      (void)stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
+      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
     }
 
   /* REVISIT:  Should test that the time is in the future */
@@ -1735,8 +1735,8 @@ static inline void rtc_enable_wakeup(void)
 {
   if (!g_wakeup_enabled)
     {
-      (void)stm32_exti_wakeup(true, false, true, stm32_rtc_wakeup_handler,
-                              NULL);
+      stm32_exti_wakeup(true, false, true, stm32_rtc_wakeup_handler,
+                        NULL);
       g_wakeup_enabled = true;
     }
 }

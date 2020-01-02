@@ -120,7 +120,7 @@ static void print_formalparm(FILE *stream, const char *argtype, int parmno)
       (part2 = check_array(argtype)) != NULL)
     {
       len = part2 - argtype;
-      (void)fwrite(argtype, 1, len, stream);
+      fwrite(argtype, 1, len, stream);
       fprintf(stream, "parm%d%s", parmno, part2);
     }
   else

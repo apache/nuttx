@@ -150,24 +150,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -395,7 +382,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   spiinfo("nwords: %d\n", nwords);
   while (nwords-- > 0)
     {
-      (void)spi_send(dev, (uint16_t)*ptr++);
+      spi_send(dev, (uint16_t)*ptr++);
     }
 }
 

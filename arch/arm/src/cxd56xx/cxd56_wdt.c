@@ -673,12 +673,12 @@ int cxd56_wdt_initialize(void)
 #ifdef CONFIG_CXD56_WDT_INTERRUPT
   /* Attach our WDT interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(CXD56_IRQ_WDT_INT, cxd56_wdtinterrupt, priv);
+  irq_attach(CXD56_IRQ_WDT_INT, cxd56_wdtinterrupt, priv);
 #endif
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(DEVPATH, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(DEVPATH, (FAR struct watchdog_lowerhalf_s *)priv);
 
   /* Register pm event callback */
 

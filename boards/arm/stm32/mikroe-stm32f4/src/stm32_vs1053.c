@@ -138,13 +138,13 @@ static void up_enable(FAR const struct vs1053_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, true, false, false,
-                           priv->handler, priv->arg);
+  stm32_gpiosetevent(GPIO_VS1053_DREQ, true, false, false,
+                     priv->handler, priv->arg);
 }
 
 static void up_disable(FAR const struct vs1053_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, false, false, NULL, NULL);
+  stm32_gpiosetevent(GPIO_VS1053_DREQ, false, false, false, NULL, NULL);
 }
 
 static void up_reset(FAR const struct vs1053_lower_s *lower, bool state)
@@ -186,7 +186,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
 
   /* Initialize the VS1053 DREQ GPIO line */
 
-  (void)stm32_configgpio(GPIO_VS1053_DREQ);
+  stm32_configgpio(GPIO_VS1053_DREQ);
 
   /* Bind the SPI port to the VS1053 driver */
 

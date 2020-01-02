@@ -251,7 +251,7 @@ uint8_t spirit_pktmbus_get_preamble(FAR struct spirit_library_s *spirit)
 
   /* Modifies the MBUS_PRMBL register value */
 
-  (void)spirit_reg_read(spirit, MBUS_PRMBL_BASE, &regval, 1);
+  spirit_reg_read(spirit, MBUS_PRMBL_BASE, &regval, 1);
 
   /* Return value */
 
@@ -301,7 +301,7 @@ uint8_t spirit_pktmbus_get_postamble(FAR struct spirit_library_s *spirit)
 
   /* Reads the MBUS_PSTMBL register */
 
-  (void)spirit_reg_read(spirit, MBUS_PSTMBL_BASE, &regval, 1);
+  spirit_reg_read(spirit, MBUS_PSTMBL_BASE, &regval, 1);
 
   /* Returns value */
 
@@ -352,7 +352,7 @@ enum spirit_mbus_submode_e
 
   /* Reads the MBUS_CTRL register value */
 
-  (void)spirit_reg_read(spirit, MBUS_CTRL_BASE, &regval, 1);
+  spirit_reg_read(spirit, MBUS_CTRL_BASE, &regval, 1);
 
   /* Returns value */
 
@@ -412,7 +412,7 @@ uint16_t spirit_pktmbus_get_payloadlen(FAR struct spirit_library_s *spirit)
 
   /* Reads the packet length registers */
 
-  (void)spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
+  spirit_reg_read(spirit, PCKTLEN1_BASE, regval, 2);
 
   /* Returns the packet length */
 

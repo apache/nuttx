@@ -562,7 +562,7 @@ void nxsched_timer_expiration(void)
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
 
-  (void)up_timer_gettime(&g_sched_time);
+  up_timer_gettime(&g_sched_time);
 #endif
 
   /* Process the timer ticks and set up the next interval (or not) */
@@ -610,7 +610,7 @@ unsigned int sched_timer_cancel(void)
   ts.tv_sec  = g_stop_time.tv_sec;
   ts.tv_nsec = g_stop_time.tv_nsec;
 
-  (void)up_alarm_cancel(&g_stop_time);
+  up_alarm_cancel(&g_stop_time);
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
@@ -654,7 +654,7 @@ unsigned int sched_timer_cancel(void)
 
   /* Get the time remaining on the interval timer and cancel the timer. */
 
-  (void)up_timer_cancel(&ts);
+  up_timer_cancel(&ts);
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
@@ -716,7 +716,7 @@ void sched_timer_resume(void)
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
 
-  (void)up_timer_gettime(&g_sched_time);
+  up_timer_gettime(&g_sched_time);
 #endif
 
   /* Reassess the next deadline (by simply processing a zero ticks expired)

@@ -213,7 +213,7 @@ static uint8_t as726x_read8(FAR struct as726x_dev_s *priv, uint8_t regaddr)
        * Read the byte but do nothing with it.
        */
 
-      (void)read_register(priv, AS72XX_SLAVE_READ_REG);
+      read_register(priv, AS72XX_SLAVE_READ_REG);
     }
 
   /* Wait for WRITE flag to clear */

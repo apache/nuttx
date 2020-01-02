@@ -367,9 +367,9 @@ static void st7567_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ST7567_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
+  SPI_HWFEATURES(spi, 0);
 #ifdef CONFIG_ST7567_FREQUENCY
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ST7567_FREQUENCY);
+  SPI_SETFREQUENCY(spi, CONFIG_ST7567_FREQUENCY);
 #endif
 }
 
@@ -528,9 +528,9 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Set the starting position for the run */
 
-  (void)SPI_SEND(priv->spi, ST7567_SETPAGESTART+page);         /* Set the page start */
-  (void)SPI_SEND(priv->spi, ST7567_SETCOLL + (col & 0x0f));    /* Set the low column */
-  (void)SPI_SEND(priv->spi, ST7567_SETCOLH + (col >> 4));      /* Set the high column */
+  SPI_SEND(priv->spi, ST7567_SETPAGESTART+page);         /* Set the page start */
+  SPI_SEND(priv->spi, ST7567_SETCOLL + (col & 0x0f));    /* Set the low column */
+  SPI_SEND(priv->spi, ST7567_SETCOLH + (col >> 4));      /* Set the high column */
 
   /* Select data transfer */
 
@@ -538,7 +538,7 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
 
   /* Then transfer all of the data */
 
-  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
+  SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
 
   /* Unlock and de-select the device */
 
@@ -748,15 +748,15 @@ static int st7567_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display off */
 
-      (void)SPI_SEND(priv->spi, ST7567_DISPOFF);       /* Display off */
+      SPI_SEND(priv->spi, ST7567_DISPOFF);       /* Display off */
       priv->powered = ST7567_POWER_OFF;
     }
   else
     {
-      (void)SPI_SEND(priv->spi, ST7567_DISPON);        /* Display on, normal mode */
+      SPI_SEND(priv->spi, ST7567_DISPON);        /* Display on, normal mode */
       power = ST7567_POWER_ON;
 
-      (void)SPI_SEND(priv->spi, ST7567_DISPRAM);       /* Resume to RAM content display */
+      SPI_SEND(priv->spi, ST7567_DISPRAM);       /* Resume to RAM content display */
       priv->powered = power;
     }
 
@@ -810,8 +810,8 @@ static int st7567_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  (void)SPI_SEND(priv->spi, ST7567_SETEV);         /* Set contrast control register */
-  (void)SPI_SEND(priv->spi, contrast);             /* Data 1: Set 1 of 256 contrast steps */
+  SPI_SEND(priv->spi, ST7567_SETEV);         /* Set contrast control register */
+  SPI_SEND(priv->spi, contrast);             /* Data 1: Set 1 of 256 contrast steps */
   priv->contrast = contrast;
 
   /* Unlock and de-select the device */
@@ -852,9 +852,9 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      (void)SPI_SEND(priv->spi, ST7567_SETPAGESTART+i);
-      (void)SPI_SEND(priv->spi, ST7567_SETCOLL);
-      (void)SPI_SEND(priv->spi, ST7567_SETCOLH);
+      SPI_SEND(priv->spi, ST7567_SETPAGESTART+i);
+      SPI_SEND(priv->spi, ST7567_SETCOLL);
+      SPI_SEND(priv->spi, ST7567_SETCOLH);
 
       /* Select data transfer */
 
@@ -862,7 +862,7 @@ static inline void up_clear(FAR struct st7567_dev_s  *priv)
 
        /* Then transfer all 96 columns of data */
 
-       (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * ST7567_XRES], ST7567_XRES);
+       SPI_SNDBLOCK(priv->spi, &priv->fb[page * ST7567_XRES], ST7567_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -922,21 +922,21 @@ FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi, unsigned int 
 
   /* Set the starting position for the run */
 
-  (void)SPI_SEND(spi, ST7567_EXIT_SOFTRST);
-  (void)SPI_SEND(spi, ST7567_BIAS_1_7);
-  (void)SPI_SEND(spi, ST7567_DISPON);
-  (void)SPI_SEND(spi, SSD1305_MAPCOL0);
-  (void)SPI_SEND(spi, ST7567_SETCOMREVERSE);
-  (void)SPI_SEND(spi, ST7567_REG_RES_RR1);
-  (void)SPI_SEND(spi, ST7567_SETEV);
-  (void)SPI_SEND(spi, 0x32);
-  (void)SPI_SEND(spi, ST7567_POWERCTRL);
-  (void)SPI_SEND(spi, ST7567_SETSTARTLINE);
-  (void)SPI_SEND(spi, ST7567_SETPAGESTART);
-  (void)SPI_SEND(spi, ST7567_SETCOLH);
-  (void)SPI_SEND(spi, ST7567_SETCOLL);
-  (void)SPI_SEND(spi, ST7567_DISPON);
-  (void)SPI_SEND(spi, ST7567_DISPRAM);
+  SPI_SEND(spi, ST7567_EXIT_SOFTRST);
+  SPI_SEND(spi, ST7567_BIAS_1_7);
+  SPI_SEND(spi, ST7567_DISPON);
+  SPI_SEND(spi, SSD1305_MAPCOL0);
+  SPI_SEND(spi, ST7567_SETCOMREVERSE);
+  SPI_SEND(spi, ST7567_REG_RES_RR1);
+  SPI_SEND(spi, ST7567_SETEV);
+  SPI_SEND(spi, 0x32);
+  SPI_SEND(spi, ST7567_POWERCTRL);
+  SPI_SEND(spi, ST7567_SETSTARTLINE);
+  SPI_SEND(spi, ST7567_SETPAGESTART);
+  SPI_SEND(spi, ST7567_SETCOLH);
+  SPI_SEND(spi, ST7567_SETCOLL);
+  SPI_SEND(spi, ST7567_DISPON);
+  SPI_SEND(spi, ST7567_DISPRAM);
 
   /* Let go of the SPI lock and de-select the device */
 

@@ -233,7 +233,7 @@ static void set_ethaddr(struct in_addr addr)
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
 
-                 (void)netdriver_setmacaddr(adapters->PhysicalAddress);
+                 netdriver_setmacaddr(adapters->PhysicalAddress);
               break;
             }
         }

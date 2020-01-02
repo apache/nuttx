@@ -289,7 +289,7 @@ int ieee802154_input(FAR struct radio_driver_s *radio,
        * was not consumed.
        */
 
-      (void)ieee802154_callback(radio, conn, IEEE802154_NEWDATA);
+      ieee802154_callback(radio, conn, IEEE802154_NEWDATA);
     }
   else
     {

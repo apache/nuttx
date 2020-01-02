@@ -150,7 +150,7 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
 
               /* There is a registered interrupt handler... invoke it */
 
-              (void)handler(irq, context, arg);
+              handler(irq, context, arg);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -225,27 +225,27 @@ static int kinetis_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 void kinetis_pinirqinitialize(void)
 {
 #ifdef CONFIG_KINETIS_PORTAINTS
-  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt, NULL);
+  irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTA_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTA);
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
-  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt, NULL);
+  irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTB_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTB);
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
-  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt, NULL);
+  irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTC_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTC);
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
-  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt, NULL);
+  irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTD_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTD);
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
-  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt, NULL);
+  irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt, NULL);
   putreg32(0xffffffff, KINETIS_PORTE_ISFR);
   up_enable_irq(KINETIS_IRQ_PORTE);
 #endif

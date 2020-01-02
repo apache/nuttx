@@ -197,7 +197,7 @@ static inline void nx_workqueues(void)
    * halves.
    */
 
-  (void)work_hpstart();
+  work_hpstart();
 
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -206,7 +206,7 @@ static inline void nx_workqueues(void)
    * tasks
    */
 
-  (void)work_lpstart();
+  work_lpstart();
 
 #endif /* CONFIG_SCHED_LPWORK */
 
@@ -433,11 +433,11 @@ int nx_bringup(void)
    */
 
 #ifdef CONFIG_PATH_INITIAL
-  (void)setenv("PATH", CONFIG_PATH_INITIAL, 1);
+  setenv("PATH", CONFIG_PATH_INITIAL, 1);
 #endif
 
 #ifdef CONFIG_LDPATH_INITIAL
-  (void)setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
+  setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
 #endif
 #endif
 
@@ -465,7 +465,7 @@ int nx_bringup(void)
      defined(CONFIG_LDPATH_INITIAL))
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
-  (void)clearenv();
+  clearenv();
 #endif
 
   return OK;

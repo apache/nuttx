@@ -655,7 +655,7 @@ static void lpc54_spi_rxdiscard(FAR struct lpc54_spidev_s *priv)
 {
   while (lpc54_spi_rxavailable(priv))
     {
-      (void)lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
+      lpc54_spi_getreg(priv, LPC54_SPI_FIFORD_OFFSET);
     }
 }
 
@@ -1069,7 +1069,7 @@ static void lpc54_spi_sndblock8(FAR struct lpc54_spidev_s *priv,
        * Tx FIFO.
        */
 
-      (void)lpc54_spi_txtransfer8(priv, &txtransfer);
+      lpc54_spi_txtransfer8(priv, &txtransfer);
     }
 }
 
@@ -1266,24 +1266,11 @@ static int lpc54_spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;

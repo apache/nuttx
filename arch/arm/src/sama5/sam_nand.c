@@ -313,14 +313,7 @@ struct sam_nand_s g_nand;
 #if NAND_NBANKS > 1
 void nand_lock(void)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(&g_nand.exclsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_nand.exclsem);
 }
 #endif
 
@@ -681,15 +674,13 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 {
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
-  int ret;
 
   /* Wait for the CMDDONE interrupt to occur */
 
   flags = enter_critical_section();
   do
     {
-      ret = nxsem_wait(&g_nand.waitsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_nand.waitsem);
     }
   while (!g_nand.cmddone);
 
@@ -703,7 +694,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.cmddone);
 #endif
@@ -746,7 +737,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear CMDDONE status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.cmddone = false;
 #endif
 }
@@ -769,15 +760,13 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 {
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
-  int ret;
 
   /* Wait for the XFRDONE interrupt to occur */
 
   flags = enter_critical_section();
   do
     {
-      ret = nxsem_wait(&g_nand.waitsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_nand.waitsem);
     }
   while (!g_nand.xfrdone);
 
@@ -791,7 +780,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.xfrdone);
 #endif
@@ -834,7 +823,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear XFRDONE status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.xfrdone = false;
 #endif
 }
@@ -857,15 +846,13 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 {
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
-  int ret;
 
   /* Wait for the RBEDGE0 interrupt to occur */
 
   flags = enter_critical_section();
   do
     {
-      ret = nxsem_wait(&g_nand.waitsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_nand.waitsem);
     }
   while (!g_nand.rbedge);
 
@@ -879,7 +866,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 
   do
     {
-      (void)nand_nfc_poll();
+      nand_nfc_poll();
     }
   while (!g_nand.rbedge);
 #endif
@@ -922,7 +909,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 #else
   /* Just sample and clear any pending NFC status, then clear RBEDGE0 status */
 
-  (void)nand_nfc_poll();
+  nand_nfc_poll();
   g_nand.rbedge = false;
 #endif
 }
@@ -1213,12 +1200,9 @@ static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
 #ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_wait_dma(struct sam_nandcs_s *priv)
 {
-  int ret;
-
   while (!priv->dmadone)
     {
-      ret = nxsem_wait(&priv->waitsem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&priv->waitsem);
     }
 
   finfo("Awakened: result=%d\n", priv->result);

@@ -119,7 +119,7 @@ static int nx_server(int argc, char *argv[])
 
   /* Turn the LCD on at 75% power */
 
-  (void)dev->setpower(dev, ((3 * CONFIG_LCD_MAXPOWER + 3) / 4));
+  dev->setpower(dev, ((3 * CONFIG_LCD_MAXPOWER + 3) / 4));
 
 #else /* CONFIG_NX_LCDDRIVER */
   /* Initialize the frame buffer device. */

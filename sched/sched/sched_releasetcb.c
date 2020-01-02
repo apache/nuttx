@@ -184,7 +184,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
       /* Release the kernel stack */
 
-      (void)up_addrenv_kstackfree(tcb);
+      up_addrenv_kstackfree(tcb);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

@@ -429,7 +429,7 @@ int sam_ajoy_initialization(void)
        */
 
       sam_pioirq(g_joypio[i]);
-      (void)irq_attach(g_joyirq[i], ajoy_interrupt, NULL);
+      irq_attach(g_joyirq[i], ajoy_interrupt, NULL);
       sam_pioirqdisable(g_joyirq[i]);
     }
 

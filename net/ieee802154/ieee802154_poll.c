@@ -100,7 +100,7 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
 
       /* Perform the application callback */
 
-      (void)ieee802154_callback(radio, conn, IEEE802154_POLL);
+      ieee802154_callback(radio, conn, IEEE802154_POLL);
     }
 }
 

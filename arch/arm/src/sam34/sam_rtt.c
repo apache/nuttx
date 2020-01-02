@@ -650,7 +650,7 @@ void sam_rttinitialize(FAR const char *devpath)
 
   priv->ops = &g_tcops;
 
-  (void)irq_attach(SAM_IRQ_RTT, sam34_interrupt, priv);
+  irq_attach(SAM_IRQ_RTT, sam34_interrupt, priv);
 
   /* Enable NVIC interrupt. */
 
@@ -658,7 +658,7 @@ void sam_rttinitialize(FAR const char *devpath)
 
   /* Register the timer driver as /dev/timerX */
 
-  (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
+  timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER && CONFIG_SAM34_TCx */

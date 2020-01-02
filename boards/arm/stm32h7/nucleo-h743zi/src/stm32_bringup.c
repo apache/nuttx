@@ -156,7 +156,7 @@ int stm32_bringup(void)
    * mounted.
    */
 
-  (void)ccm_procfs_register();
+  ccm_procfs_register();
 #endif  /* CONFIG_STM32_CCM_PROCFS */
 
   /* Mount the procfs file system */

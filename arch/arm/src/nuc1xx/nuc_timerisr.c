@@ -226,7 +226,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(NUC_IRQ_SYSTICK, (xcpt_t)nuc_timerisr, NULL);
+  irq_attach(NUC_IRQ_SYSTICK, (xcpt_t)nuc_timerisr, NULL);
 
   /* Enable SysTick interrupts.  We need to select the core clock here if
    * we are not using one of the alternative clock sources above.

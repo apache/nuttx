@@ -200,7 +200,7 @@ static void max326_int_enable(FAR struct max326_wdt_lowerhalf_s *priv)
     {
       /* Yes.. attach handler and enable the interrupt */
 
-      (void)irq_attach(MAX326_IRQ_WDT0, priv->handler, priv);
+      irq_attach(MAX326_IRQ_WDT0, priv->handler, priv);
       up_enable_irq(MAX326_IRQ_WDT0);
 
       /* Select the interrupt behavior (de-selecting the reset behavior) */

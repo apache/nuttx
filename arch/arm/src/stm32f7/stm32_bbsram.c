@@ -221,19 +221,7 @@ static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
 
 static void stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal.
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -337,7 +325,7 @@ static int stm32_bbsram_open(FAR struct file *filep)
 static int stm32_bbsram_internal_close(FAR struct bbsramfh_s *bbf)
 {
   bbf->dirty = 0;
-  (void)clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
+  clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
   bbf->crc = stm32_bbsram_crc(bbf);
 
   BBSRAM_DUMP(bbf, "close done");

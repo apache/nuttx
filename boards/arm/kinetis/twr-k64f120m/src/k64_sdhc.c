@@ -167,7 +167,7 @@ int k64_sdhc_initialize(void)
 
   /* Attached the card detect interrupt (but don't enable it yet) */
 
-  (void)kinetis_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt, NULL);
+  kinetis_pinirqattach(GPIO_SD_CARDDETECT, k64_cdinterrupt, NULL);
 
   /* Configure the write protect GPIO -- None */
 

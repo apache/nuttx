@@ -134,7 +134,7 @@ int up_hardfault(int irq, FAR void *context, FAR void *arg)
           getprimask(), getipsr());
 #endif
 
-  (void)up_irq_save();
+  up_irq_save();
   hfalert("PANIC!!! Hard fault\n");
   PANIC();
   return OK; /* Won't get here */

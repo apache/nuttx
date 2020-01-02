@@ -251,7 +251,7 @@ static void blake2s_compress(FAR blake2s_state *S,
 #else
   /* Larger, slightly faster. */
 
-  (void)(round = 0);
+  UNUSED(round);
   ROUND(0);
   ROUND(1);
   ROUND(2);

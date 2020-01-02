@@ -119,7 +119,7 @@ void minerva_sigdeliver(void)
   sinfo("Resuming EPC: %08x INT_CTX: %08x\n", regs[REG_CSR_MEPC],
         regs[REG_CSR_MSTATUS]);
 
-  (void)up_irq_save();
+  up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Then restore the correct state for this thread of execution. */

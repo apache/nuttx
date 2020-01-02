@@ -114,7 +114,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
    * putting the OLED into reset state.
    */
 
-  (void)stm32_configgpio(GPIO_OLED_RESET);
+  stm32_configgpio(GPIO_OLED_RESET);
 
   /* Wait a bit then release the OLED from the reset state */
 
@@ -143,7 +143,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
           /* And turn the OLED on */
 
-          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
+          dev->setpower(dev, CONFIG_LCD_MAXPOWER);
           return dev;
         }
     }

@@ -648,7 +648,7 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch)
 {
   DEBUGASSERT(arg != NULL);
-  (void)nx_kbdin((NXHANDLE)arg, nch, ch);
+  nx_kbdin((NXHANDLE)arg, nch, ch);
 }
 
 #endif /* CONFIG_NX_KBD */

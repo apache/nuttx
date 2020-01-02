@@ -74,19 +74,7 @@ void gran_enter_critical(FAR struct gran_s *priv)
 #ifdef CONFIG_GRAN_INTR
   priv->irqstate = enter_critical_section();
 #else
-  int ret;
-
-  /* Continue waiting if we are awakened by a signal */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 #endif
 }
 

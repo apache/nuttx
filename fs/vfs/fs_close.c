@@ -86,7 +86,7 @@ int close(int fd)
 
   /* close() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Did we get a valid file descriptor? */
 

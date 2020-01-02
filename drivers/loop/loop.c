@@ -173,7 +173,7 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 void loop_register(void)
 {
-  (void)register_driver("/dev/loop", &g_loop_fops, 0666, NULL);
+  register_driver("/dev/loop", &g_loop_fops, 0666, NULL);
 }
 
 #endif /* CONFIG_DEV_LOOP */

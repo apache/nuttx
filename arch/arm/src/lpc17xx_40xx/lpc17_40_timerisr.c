@@ -135,7 +135,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(LPC17_40_IRQ_SYSTICK, (xcpt_t)lpc17_40_timerisr, NULL);
+  irq_attach(LPC17_40_IRQ_SYSTICK, (xcpt_t)lpc17_40_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

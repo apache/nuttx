@@ -823,7 +823,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           ret = sendto_next_transfer(psock, conn);
           if (ret < 0)
             {
-              (void)sq_remlast(&conn->write_q);
+              sq_remlast(&conn->write_q);
               goto errout_with_wrb;
             }
         }

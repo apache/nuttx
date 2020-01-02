@@ -119,5 +119,5 @@ static ssize_t syslog_console_write(FAR struct file *filep,
 
 void syslog_console_init(void)
 {
-  (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  register_driver("/dev/console", &g_consoleops, 0666, NULL);
 }

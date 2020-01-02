@@ -82,7 +82,7 @@ static void exited_child(FAR struct tcb_s *rtcb, FAR struct child_status_s *chil
 
   /* Discard the child entry */
 
-  (void)group_removechild(rtcb->group, child->ch_pid);
+  group_removechild(rtcb->group, child->ch_pid);
   group_freechild(child);
 }
 #endif
@@ -195,12 +195,12 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
   /* waitid() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Create a signal set that contains only SIGCHLD */
 
-  (void)sigemptyset(&set);
-  (void)sigaddset(&set, SIGCHLD);
+  sigemptyset(&set);
+  sigaddset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 

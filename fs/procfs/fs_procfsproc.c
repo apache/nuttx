@@ -745,7 +745,7 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
    * after the procfs entry was opened.
    */
 
-  (void)clock_cpuload(procfile->pid, &cpuload);
+  clock_cpuload(procfile->pid, &cpuload);
 
   /* On the simulator, you may hit cpuload.total == 0, but probably never on
    * real hardware.
@@ -1255,7 +1255,7 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
 
   /* Generate output for each environment variable */
 
-  (void)env_foreach(group, proc_groupenv_callback, &info);
+  env_foreach(group, proc_groupenv_callback, &info);
   return info.totalsize;
 }
 #endif

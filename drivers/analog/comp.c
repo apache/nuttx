@@ -143,21 +143,7 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
 
 static void comp_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -420,10 +406,10 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
   /* Initialize semaphores */
 
   nxsem_init(&dev->ad_sem, 0, 1);
-  (void)nxsem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->ad_sem, SEM_PRIO_NONE);
 
   nxsem_init(&dev->ad_readsem, 0, 0);
-  (void)nxsem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&dev->ad_readsem, SEM_PRIO_NONE);
 
   /* Bind the upper-half callbacks to the lower half COMP driver */
 

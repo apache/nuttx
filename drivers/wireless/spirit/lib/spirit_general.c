@@ -177,7 +177,7 @@ enum battery_level_e
 
   /* Reads the ANA_FUNC_CONF1_BASE register value */
 
-  (void)spirit_reg_read(spirit, ANA_FUNC_CONF1_BASE, &regval, 1);
+  spirit_reg_read(spirit, ANA_FUNC_CONF1_BASE, &regval, 1);
 
   /* Mask the battery level field and returns the settled battery level */
 
@@ -352,7 +352,7 @@ enum mode_extref_e
 
   /* Reads the ANA_FUNC_CONF0_BASE register value and return the result */
 
-  (void)spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval, 1);
+  spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval, 1);
 
   /* Mask the EXT_REF field field and returns the settled reference signal */
 
@@ -455,7 +455,7 @@ enum gm_conf_e spirit_general_get_xogm(FAR struct spirit_library_s *spirit)
 
   /* Reads the ANA_FUNC_CONF1_BASE register value */
 
-  (void)spirit_reg_read(spirit, ANA_FUNC_CONF1_BASE, &regval, 1);
+  spirit_reg_read(spirit, ANA_FUNC_CONF1_BASE, &regval, 1);
 
   /* Mask the GM_CONF field field and returns the settled transconductance of
    * the XO at startup.
@@ -485,7 +485,7 @@ enum packet_type_e
 
   /* Reads the PROTOCOL1 register */
 
-  (void)spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
+  spirit_reg_read(spirit, PCKTCTRL3_BASE, &regval, 1);
 
   /* cast and return value */
 
@@ -512,7 +512,7 @@ uint16_t spirit_general_get_partnumber(FAR struct spirit_library_s *spirit)
 
   /* Reads the register value containing the device part number */
 
-  (void)spirit_reg_read(spirit, DEVICE_INFO1_PARTNUM, regval, 2);
+  spirit_reg_read(spirit, DEVICE_INFO1_PARTNUM, regval, 2);
 
   return (((uint16_t)regval[0] << 8) | (uint16_t)regval[1]);
 }
@@ -535,6 +535,6 @@ uint8_t spirit_general_get_version(FAR struct spirit_library_s *spirit)
 {
   uint8_t ver;
 
-  (void)spirit_reg_read(spirit, DEVICE_INFO0_VERSION, &ver, 1);
+  spirit_reg_read(spirit, DEVICE_INFO0_VERSION, &ver, 1);
   return ver;
 }

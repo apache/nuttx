@@ -184,7 +184,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(CXD56_IRQ_SYSTICK, (xcpt_t)cxd56_timerisr, NULL);
+  irq_attach(CXD56_IRQ_SYSTICK, (xcpt_t)cxd56_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

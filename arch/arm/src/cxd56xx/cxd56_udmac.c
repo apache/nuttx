@@ -252,8 +252,8 @@ void cxd56_udmainitialize(void)
 
   /* Initialize the channel list  */
 
-  sem_init(&g_dmac.exclsem, 0, 1);
-  sem_init(&g_dmac.chansem, 0, CXD56_DMA_NCHANNELS);
+  nxsem_init(&g_dmac.exclsem, 0, 1);
+  nxsem_init(&g_dmac.chansem, 0, CXD56_DMA_NCHANNELS);
 
   for (i = 0; i < CXD56_DMA_NCHANNELS; i++)
     {
@@ -311,21 +311,11 @@ DMA_HANDLE cxd56_udmachannel(void)
    * reserved for us.
    */
 
-  while (sem_wait(&g_dmac.chansem) < 0)
-    {
-      /* sem_wait should fail only if it is awakened by a a signal */
-
-      DEBUGASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(&g_dmac.chansem);
 
   /* Get exclusive access to the DMA channel list */
 
-  while (sem_wait(&g_dmac.exclsem) < 0)
-    {
-      /* sem_wait should fail only if it is awakened by a a signal */
-
-      DEBUGASSERT(errno == EINTR);
-    }
+  nxsem_wait_uninterruptible(&g_dmac.exclsem);
 
   /* Search for an available DMA channel */
 
@@ -346,11 +336,11 @@ DMA_HANDLE cxd56_udmachannel(void)
         }
     }
 
-  sem_post(&g_dmac.exclsem);
+  nxsem_post(&g_dmac.exclsem);
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(CXD56_IRQ_DMA_A_0 + ch, cxd56_dmac_interrupt, NULL);
+  irq_attach(CXD56_IRQ_DMA_A_0 + ch, cxd56_dmac_interrupt, NULL);
 
   /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
 
@@ -405,7 +395,7 @@ void cxd56_udmafree(DMA_HANDLE handle)
    * thread that may be waiting for a channel.
    */
 
-  sem_post(&g_dmac.chansem);
+  nxsem_post(&g_dmac.chansem);
 }
 
 /****************************************************************************
