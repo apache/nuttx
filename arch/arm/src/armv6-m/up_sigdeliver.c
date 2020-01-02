@@ -111,7 +111,7 @@ void up_sigdeliver(void)
    */
 
   sinfo("Resuming\n");
-  (void)up_irq_save();
+  up_irq_save();
   rtcb->pterrno = saved_errno;
 
   /* Modify the saved return state with the actual saved values in the

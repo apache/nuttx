@@ -277,7 +277,7 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
    * bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency,
    * setbits, and setmode methods to make sure that the SPI is properly
@@ -287,8 +287,8 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_EE25XX_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, CONFIG_EE25XX_FREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, CONFIG_EE25XX_FREQUENCY);
 }
 
 /****************************************************************************
@@ -297,7 +297,7 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
 
 static inline void ee25xx_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /****************************************************************************
@@ -361,7 +361,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
       /* Send "Read Status Register (RDSR)" command */
 
-      (void)SPI_SEND(priv->spi, EE25XX_CMD_RDSR);
+      SPI_SEND(priv->spi, EE25XX_CMD_RDSR);
 
       /* Send a dummy byte to generate the clock needed to shift out the
        * status
@@ -439,21 +439,7 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
 
 static void ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&eedev->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&eedev->sem);
 }
 
 /****************************************************************************
@@ -760,11 +746,11 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
+  UNUSED(eedev);
 
   switch (cmd)
     {
       default:
-        (void)eedev;
         ret = -EINVAL;
     }
 

@@ -93,8 +93,8 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
     {
       /* Yes.. Let sys_call4() do all of the work to get us into user space */
 
-      (void)sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
-                      (uintptr_t)info, (uintptr_t)ucontext);
+      sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
+                (uintptr_t)info, (uintptr_t)ucontext);
     }
   else
     {

@@ -222,7 +222,7 @@ static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback)
   if (priv->handle != NULL)
     {
       gpioinfo("pin%u: Detaching handle %p\n", priv->pin, priv->handle);
-      (void)IOEP_DETACH(priv->ioe, priv->handle);
+      IOEP_DETACH(priv->ioe, priv->handle);
       priv->handle = NULL;
     }
 

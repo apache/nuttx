@@ -569,7 +569,7 @@ void cxd56_timer_initialize(FAR const char *devpath, int timer)
 
   priv->ops = &g_tmrops;
 
-  (void)irq_attach(irq, cxd56_timer_interrupt, priv);
+  irq_attach(irq, cxd56_timer_interrupt, priv);
 
   /* Enable NVIC interrupt. */
 
@@ -577,7 +577,7 @@ void cxd56_timer_initialize(FAR const char *devpath, int timer)
 
   /* Register the timer driver as /dev/timerX */
 
-  (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
+  timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER */

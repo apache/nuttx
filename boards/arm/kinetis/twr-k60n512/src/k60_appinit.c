@@ -228,7 +228,7 @@ int board_app_initialize(uintptr_t arg)
   /* Attached the card detect interrupt (but don't enable it yet) */
 
   kinetis_pinconfig(GPIO_SD_CARDDETECT);
-  (void)kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt, NULL);
+  kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt, NULL);
 
   /* Configure the write protect GPIO */
 

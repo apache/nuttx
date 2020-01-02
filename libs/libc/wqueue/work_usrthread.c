@@ -177,7 +177,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
         {
           /* Remove the ready-to-execute work from the list */
 
-          (void)dq_rem((struct dq_entry_s *)work, &wqueue->q);
+          dq_rem((struct dq_entry_s *)work, &wqueue->q);
 
           /* Extract the work description from the entry (in case the work
            * instance by the re-used after it has been de-queued).
@@ -269,7 +269,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
    * signals directed to the worker thread to pend.
    */
 
-  (void)sigprocmask(SIG_BLOCK, &sigset, &oldset);
+  sigprocmask(SIG_BLOCK, &sigset, &oldset);
   work_unlock();
 
   if (next == WORK_DELAY_MAX)
@@ -295,7 +295,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
       sigtimedwait(&sigset, NULL, &rqtp);
     }
 
-  (void)sigprocmask(SIG_SETMASK, &oldset, NULL);
+  sigprocmask(SIG_SETMASK, &oldset, NULL);
 }
 
 /****************************************************************************
@@ -368,7 +368,7 @@ int work_usrstart(void)
   {
     /* Set up the work queue lock */
 
-    (void)nxsem_init(&g_usrsem, 0, 1);
+    nxsem_init(&g_usrsem, 0, 1);
 
     /* Start a user-mode worker thread for use by applications. */
 
@@ -397,12 +397,12 @@ int work_usrstart(void)
 
     /* Set up the work queue lock */
 
-    (void)pthread_mutex_init(&g_usrmutex, NULL);
+    pthread_mutex_init(&g_usrmutex, NULL);
 
     /* Start a user-mode worker thread for use by applications. */
 
-    (void)pthread_attr_init(&attr);
-    (void)pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
+    pthread_attr_init(&attr);
+    pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
 
 #ifdef CONFIG_SCHED_SPORADIC
     /* Get the current sporadic scheduling parameters.  Those will not be
@@ -418,7 +418,7 @@ int work_usrstart(void)
 #endif
 
     param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
-    (void)pthread_attr_setschedparam(&attr, &param);
+    pthread_attr_setschedparam(&attr, &param);
 
     ret = pthread_create(&usrwork, &attr, work_usrthread, NULL);
     if (ret != 0)
@@ -430,7 +430,7 @@ int work_usrstart(void)
      * requested.
      */
 
-    (void)pthread_detach(usrwork);
+    pthread_detach(usrwork);
 
     g_usrwork.pid = (pid_t)usrwork;
     return g_usrwork.pid;

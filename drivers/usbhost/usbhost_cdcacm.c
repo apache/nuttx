@@ -474,21 +474,7 @@ static uint32_t g_devinuse;
 
 static void usbhost_takesem(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -655,7 +641,7 @@ static void usbhost_devno_free(FAR struct usbhost_cdcacm_s *priv)
 static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
                                      FAR char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
 }
 
 /****************************************************************************
@@ -878,9 +864,9 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
 
       if (work_available(&priv->ntwork))
         {
-          (void)work_queue(HPWORK, &priv->ntwork,
-                           (worker_t)usbhost_notification_work,
-                           priv, delay);
+          work_queue(HPWORK, &priv->ntwork,
+                     (worker_t)usbhost_notification_work,
+                     priv, delay);
         }
     }
 }
@@ -1602,7 +1588,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
   if (ret < 0)
     {
       uerr("ERROR: Failed to allocate Bulk IN endpoint\n");
-      (void)DRVR_EPFREE(hport->drvr, priv->bulkout);
+      DRVR_EPFREE(hport->drvr, priv->bulkout);
       return ret;
     }
 
@@ -1824,27 +1810,27 @@ static void usbhost_free_buffers(FAR struct usbhost_cdcacm_s *priv)
 
   if (priv->ctrlreq)
     {
-      (void)DRVR_FREE(hport->drvr, priv->ctrlreq);
+      DRVR_FREE(hport->drvr, priv->ctrlreq);
     }
 
   if (priv->linecode)
     {
-      (void)DRVR_IOFREE(hport->drvr, priv->linecode);
+      DRVR_IOFREE(hport->drvr, priv->linecode);
     }
 
   if (priv->notification)
     {
-      (void)DRVR_IOFREE(hport->drvr, priv->notification);
+      DRVR_IOFREE(hport->drvr, priv->notification);
     }
 
   if (priv->inbuf)
     {
-      (void)DRVR_IOFREE(hport->drvr, priv->inbuf);
+      DRVR_IOFREE(hport->drvr, priv->inbuf);
     }
 
   if (priv->outbuf)
     {
-      (void)DRVR_IOFREE(hport->drvr, priv->outbuf);
+      DRVR_IOFREE(hport->drvr, priv->outbuf);
     }
 
   priv->pktsize      = 0;
@@ -2196,7 +2182,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
                 priv->ntwork.worker, usbhost_destroy);
 
           DEBUGASSERT(work_available(&priv->ntwork));
-          (void)work_queue(HPWORK, &priv->ntwork, usbhost_destroy, priv, 0);
+          work_queue(HPWORK, &priv->ntwork, usbhost_destroy, priv, 0);
         }
       else
         {
@@ -2584,7 +2570,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
     {
       /* Cancel any pending, delayed RX data reception work */
 
-      (void)work_cancel(LPWORK, &priv->rxwork);
+      work_cancel(LPWORK, &priv->rxwork);
 
       /* Restart immediate RX data reception work (unless RX flow control
        * is in effect.
@@ -2604,7 +2590,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
     {
       /* Cancel any pending RX data reception work */
 
-      (void)work_cancel(LPWORK, &priv->rxwork);
+      work_cancel(LPWORK, &priv->rxwork);
     }
 
   /* Save the new RX enable state */
@@ -2683,11 +2669,11 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
        * RTS.
        */
 
-       priv->rts = false;
+      priv->rts = false;
 
-       /* Cancel any pending RX data reception work */
+      /* Cancel any pending RX data reception work */
 
-      (void)work_cancel(LPWORK, &priv->rxwork)
+      work_cancel(LPWORK, &priv->rxwork);
       return true;
     }
   else if (!priv->rts && !upper)
@@ -2738,7 +2724,7 @@ static void usbhost_txint(FAR struct uart_dev_s *uartdev, bool enable)
     {
       /* Cancel any pending, delayed TX data transmission work */
 
-      (void)work_cancel(LPWORK, &priv->txwork);
+      work_cancel(LPWORK, &priv->txwork);
 
       /* Restart immediate TX data transmission work */
 
@@ -2751,7 +2737,7 @@ static void usbhost_txint(FAR struct uart_dev_s *uartdev, bool enable)
     {
       /* Cancel any pending TX data transmission work */
 
-      (void)work_cancel(LPWORK, &priv->txwork);
+      work_cancel(LPWORK, &priv->txwork);
     }
 
   /* Save the new RX enable state */

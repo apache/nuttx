@@ -88,7 +88,7 @@ int lc823450_bringup(void)
 #ifdef CONFIG_FS_PROCFS
 
 #ifdef CONFIG_DVFS
-  (void)dvfs_procfs_register();
+  dvfs_procfs_register();
 #endif
 
   /* Mount the procfs file system */

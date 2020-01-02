@@ -679,7 +679,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
   /* When the microcontroller enters debug mode (Cortex-M4F core halted),
    * the IWDG counter either continues to work normally or stops, depending

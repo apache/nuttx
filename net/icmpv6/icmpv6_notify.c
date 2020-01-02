@@ -107,7 +107,7 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&notify->nt_sem, 0, 0);
+  nxsem_init(&notify->nt_sem, 0, 0);
   nxsem_setprotocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
@@ -164,7 +164,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)nxsem_destroy(&notify->nt_sem);
+  nxsem_destroy(&notify->nt_sem);
   return ret;
 }
 
@@ -208,14 +208,14 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
    * the wrong error code.
    */
 
-  (void)net_timedwait(&notify->nt_sem, &abstime);
+  net_timedwait(&notify->nt_sem, &abstime);
   ret = notify->nt_result;
 
   /* Remove our wait structure from the list (we may no longer be at the
    * head of the list).
    */
 
-  (void)icmpv6_wait_cancel(notify);
+  icmpv6_wait_cancel(notify);
 
   /* Re-enable interrupts and return the result of the wait */
 

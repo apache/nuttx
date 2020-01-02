@@ -660,11 +660,11 @@ int fb_register(int display, int plane)
 
   if (nplanes < 2)
     {
-      (void)snprintf(devname, 16, "/dev/fb%d", display);
+      snprintf(devname, 16, "/dev/fb%d", display);
     }
   else
     {
-      (void)snprintf(devname, 16, "/dev/fb%d.%d", display, plane);
+      snprintf(devname, 16, "/dev/fb%d.%d", display, plane);
     }
 
   ret = register_driver(devname, &fb_fops, 0666, (FAR void *)fb);

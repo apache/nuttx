@@ -126,11 +126,7 @@ int udp_txdrain(FAR struct socket *psock,
 
       /* There is pending write data.. wait for it to drain. */
 
-      do
-        {
-          ret = net_timedwait(&waitsem, abstime);
-        }
-      while (ret == -EINTR);
+      ret = net_timedwait_uninterruptible(&waitsem, abstime);
 
       /* Tear down the notifier (in case we timed out or were canceled) */
 

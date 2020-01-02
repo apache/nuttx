@@ -303,7 +303,7 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t buflen)
 void devrandom_register(void)
 {
   stm32_rng_initialize();
-  (void)register_driver("/dev/random", &g_rngops, 0444, NULL);
+  register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -327,7 +327,7 @@ void devurandom_register(void)
 #ifndef CONFIG_DEV_RANDOM
   stm32_rng_initialize();
 #endif
-  (void)register_driver("/dev/urandom", &g_rngops, 0444, NULL);
+  register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 

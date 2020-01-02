@@ -140,8 +140,8 @@ static void gs2200m_irq_enable(void)
 
       /* NOTE: stm32 does not support level-triggered irq */
 
-      (void)stm32_gpiosetevent(GPIO_GS2200M_INT, true, false,
-                               true, g_irq_handler, g_irq_arg);
+      stm32_gpiosetevent(GPIO_GS2200M_INT, true, false,
+                         true, g_irq_handler, g_irq_arg);
     }
 
   spin_unlock_irqrestore(flags);
@@ -169,8 +169,8 @@ static void gs2200m_irq_disable(void)
 
   if (0 == _enable_count)
     {
-      (void)stm32_gpiosetevent(GPIO_GS2200M_INT, false, false,
-                               false, NULL, NULL);
+      stm32_gpiosetevent(GPIO_GS2200M_INT, false, false,
+                         false, NULL, NULL);
     }
 
   spin_unlock_irqrestore(flags);

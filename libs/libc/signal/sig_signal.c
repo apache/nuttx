@@ -82,7 +82,7 @@ _sa_handler_t signal(int signo, _sa_handler_t func)
 
   act.sa_handler = func;
   act.sa_flags   = 0;
-  (void)sigemptyset(&act.sa_mask);
+  sigemptyset(&act.sa_mask);
 
   /* Check for SIG_IGN and SIG_DFL (and someday SIG_HOLD)
    *

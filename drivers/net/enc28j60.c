@@ -382,8 +382,8 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ENC28J60_SPIMODE);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_ENC28J60_FREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_ENC28J60_FREQUENCY);
 }
 
 /****************************************************************************
@@ -416,8 +416,8 @@ static void enc_lock(FAR struct enc_driver_s *priv)
 
   SPI_SETMODE(priv->spi, CONFIG_ENC28J60_SPIMODE);
   SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_ENC28J60_FREQUENCY);
+  SPI_HWFEATURES(priv->spi, 0);
+  SPI_SETFREQUENCY(priv->spi, CONFIG_ENC28J60_FREQUENCY);
 }
 
 /****************************************************************************
@@ -475,7 +475,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
    * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
    */
 
-  (void)SPI_SEND(priv->spi, cmd);  /* Clock out the command */
+  SPI_SEND(priv->spi, cmd);  /* Clock out the command */
   rddata = SPI_SEND(priv->spi, 0); /* Clock in the data */
 
   /* De-select ENC28J60 chip */
@@ -518,8 +518,8 @@ static void enc_wrgreg2(FAR struct enc_driver_s *priv, uint8_t cmd,
    * 8 to clock out the cmd + 8 to clock out the data.
    */
 
-  (void)SPI_SEND(priv->spi, cmd);    /* Clock out the command */
-  (void)SPI_SEND(priv->spi, wrdata); /* Clock out the data */
+  SPI_SEND(priv->spi, cmd);    /* Clock out the command */
+  SPI_SEND(priv->spi, wrdata); /* Clock out the data */
 
   /* De-select ENC28J60 chip. */
 
@@ -560,7 +560,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
 
   /* Send the system reset command. */
 
-  (void)SPI_SEND(priv->spi, ENC_SRC);
+  SPI_SEND(priv->spi, ENC_SRC);
 
   /* Check CLKRDY bit to see when the reset is complete.  There is an errata
    * that says the CLKRDY may be invalid.  We'll wait a couple of msec to
@@ -662,14 +662,14 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
    * 16-clocks:  8 to clock out the cmd and  8 to clock in the data.
    */
 
-  (void)SPI_SEND(priv->spi, ENC_RCR | GETADDR(ctrlreg)); /* Clock out the command */
+  SPI_SEND(priv->spi, ENC_RCR | GETADDR(ctrlreg)); /* Clock out the command */
   if (ISPHYMAC(ctrlreg))
     {
       /* The PHY/MAC sequence requires 24-clocks:  8 to clock out the cmd,
        * 8 dummy bits, and 8 to clock in the PHY/MAC data.
        */
 
-      (void)SPI_SEND(priv->spi, 0); /* Clock in the dummy byte */
+      SPI_SEND(priv->spi, 0); /* Clock in the dummy byte */
     }
 
   rddata = SPI_SEND(priv->spi, 0);  /* Clock in the data */
@@ -718,8 +718,8 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
    * 8 to clock out the cmd + 8 to clock out the data.
    */
 
-  (void)SPI_SEND(priv->spi, ENC_WCR | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(priv->spi, wrdata);                     /* Clock out the data */
+  SPI_SEND(priv->spi, ENC_WCR | GETADDR(ctrlreg)); /* Clock out the command */
+  SPI_SEND(priv->spi, wrdata);                     /* Clock out the data */
 
   /* De-select ENC28J60 chip. */
 
@@ -870,7 +870,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
 
   /* Send the read buffer memory command (ignoring the response) */
 
-  (void)SPI_SEND(priv->spi, ENC_RBM);
+  SPI_SEND(priv->spi, ENC_RBM);
 
   /* Then read the buffer data */
 
@@ -919,7 +919,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    *  followed by the 5-bit constant, 1Ah."
    */
 
-  (void)SPI_SEND(priv->spi, ENC_WBM);
+  SPI_SEND(priv->spi, ENC_WBM);
 
   /* "...the ENC28J60 requires a single per packet control byte to
    * precede the packet for transmission."
@@ -937,8 +937,8 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    *   because POVERRIDE is zero).
    */
 
-  (void)SPI_SEND(priv->spi,
-                 (PKTCTRL_PCRCEN | PKTCTRL_PPADEN | PKTCTRL_PHUGEEN));
+  SPI_SEND(priv->spi,
+           (PKTCTRL_PCRCEN | PKTCTRL_PPADEN | PKTCTRL_PHUGEEN));
 
   /* Then send the buffer
    *
@@ -1158,8 +1158,8 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    * the timer is started?
    */
 
-  (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
+           (wdparm_t)priv);
   return OK;
 }
 
@@ -1299,7 +1299,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, enc_txpoll);
+  devif_poll(&priv->dev, enc_txpoll);
 }
 
 /****************************************************************************
@@ -1916,7 +1916,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, enc_txpoll);
+  devif_poll(&priv->dev, enc_txpoll);
 
   /* Release lock on the network */
 
@@ -2005,7 +2005,7 @@ static void enc_pollworker(FAR void *arg)
        * is a transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, ENC_WDDELAY, enc_txpoll);
+      devif_timer(&priv->dev, ENC_WDDELAY, enc_txpoll);
     }
 
   /* Release lock on the SPI bus and the network */
@@ -2015,8 +2015,8 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                 (wdparm_t)arg);
+  wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+           (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -2115,8 +2115,8 @@ static int enc_ifup(struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      (void)wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
-                     (wdparm_t)priv);
+      wd_start(priv->txpoll, ENC_WDDELAY, enc_polltimer, 1,
+               (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
        * controller
@@ -2229,7 +2229,7 @@ static int enc_txavail(struct net_driver_s *dev)
         {
           /* The interface is up and TX is idle; poll the network for new XMIT data */
 
-          (void)devif_poll(&priv->dev, enc_txpoll);
+          devif_poll(&priv->dev, enc_txpoll);
         }
     }
 

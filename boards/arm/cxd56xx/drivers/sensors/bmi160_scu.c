@@ -636,7 +636,7 @@ static int bmi160_close_gyro(FAR struct file *filep)
     }
   else
     {
-      (void) seq_ioctl(priv->seq, priv->fifoid, SCUIOC_FREEFIFO, 0);
+      seq_ioctl(priv->seq, priv->fifoid, SCUIOC_FREEFIFO, 0);
     }
 
   return OK;
@@ -664,7 +664,7 @@ static int bmi160_close_accel(FAR struct file *filep)
     }
   else
     {
-      (void) seq_ioctl(priv->seq, priv->fifoid, SCUIOC_FREEFIFO, 0);
+      seq_ioctl(priv->seq, priv->fifoid, SCUIOC_FREEFIFO, 0);
     }
 
   return OK;
@@ -814,7 +814,7 @@ static int bmi160_devregister(FAR const char *devpath, FAR struct spi_dev_s *dev
   priv->fifoid = minor;
 
 #endif
-  (void) snprintf(path, sizeof(path), "%s%d", devpath, minor);
+  snprintf(path, sizeof(path), "%s%d", devpath, minor);
   ret = register_driver(path, fops, 0666, priv);
   if (ret < 0)
     {
@@ -994,8 +994,8 @@ int bmi160_init(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, SPIDEV_MODE3);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, BMI160_SPI_MAXFREQUENCY);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, BMI160_SPI_MAXFREQUENCY);
 
   /* BMI160 detects communication bus is SPI by rising edge of CS. */
 

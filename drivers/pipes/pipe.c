@@ -130,7 +130,7 @@ static inline void pipe_free(int pipeno)
   if (ret == OK)
     {
       g_pipeset &= ~(1 << pipeno);
-      (void)nxsem_post(&g_pipesem);
+      nxsem_post(&g_pipesem);
     }
 }
 
@@ -208,7 +208,7 @@ int pipe2(int fd[2], size_t bufsize)
   pipeno = pipe_allocate();
   if (pipeno < 0)
     {
-      (void)nxsem_post(&g_pipesem);
+      nxsem_post(&g_pipesem);
       errcode = -pipeno;
       goto errout;
     }
@@ -226,7 +226,7 @@ int pipe2(int fd[2], size_t bufsize)
       dev = pipecommon_allocdev(bufsize);
       if (!dev)
         {
-          (void)nxsem_post(&g_pipesem);
+          nxsem_post(&g_pipesem);
           errcode = ENOMEM;
           goto errout_with_pipe;
         }
@@ -238,7 +238,7 @@ int pipe2(int fd[2], size_t bufsize)
       ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
       if (ret != 0)
         {
-          (void)nxsem_post(&g_pipesem);
+          nxsem_post(&g_pipesem);
           errcode = -ret;
           goto errout_with_dev;
         }
@@ -248,7 +248,7 @@ int pipe2(int fd[2], size_t bufsize)
        g_pipecreated |= (1 << pipeno);
     }
 
-  (void)nxsem_post(&g_pipesem);
+  nxsem_post(&g_pipesem);
 
   /* Get a write file descriptor */
 

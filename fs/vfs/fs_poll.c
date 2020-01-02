@@ -72,18 +72,7 @@
 
 static int poll_semtake(FAR sem_t *sem)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  ret = nxsem_wait(sem);
-
-  /* The only case that an error should occur here is if the wait were
-   * awakened by a signal.
-   */
-
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(sem);
 }
 
 /****************************************************************************
@@ -204,16 +193,16 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
               switch (fds[j].events & POLLMASK)
                 {
                 case POLLFD:
-                  (void)poll_fdsetup(fds[j].fd, &fds[j], false);
+                  poll_fdsetup(fds[j].fd, &fds[j], false);
                   break;
 
                 case POLLFILE:
-                  (void)file_poll(fds[j].ptr, &fds[j], false);
+                  file_poll(fds[j].ptr, &fds[j], false);
                   break;
 
 #ifdef CONFIG_NET
                 case POLLSOCK:
-                  (void)psock_poll(fds[j].ptr, &fds[j], false);
+                  psock_poll(fds[j].ptr, &fds[j], false);
                   break;
 #endif
 
@@ -452,7 +441,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   /* poll() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

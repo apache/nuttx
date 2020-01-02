@@ -72,7 +72,7 @@
 
 void board_button_initialize(void)
 {
-  (void)sam_configgpio(GPIO_SW0);
+  sam_configgpio(GPIO_SW0);
 }
 
 /****************************************************************************
@@ -130,14 +130,14 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
           /* Configure the interrupt */
 
           sam_gpioirq(GPIO_SW0);
-          (void)irq_attach(IRQ_SW0, irqhandler, arg);
+          irq_attach(IRQ_SW0, irqhandler, arg);
           sam_gpioirqenable(IRQ_SW0);
         }
       else
         {
           /* Detach and disable the interrupt */
 
-          (void)irq_detach(IRQ_SW0);
+          irq_detach(IRQ_SW0);
           sam_gpioirqdisable(IRQ_SW0);
         }
 

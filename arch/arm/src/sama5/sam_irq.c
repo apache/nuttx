@@ -562,7 +562,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  (void)up_irq_enable();
+  up_irq_enable();
 #endif
 }
 

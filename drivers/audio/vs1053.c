@@ -259,7 +259,7 @@ static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -269,8 +269,8 @@ static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
 
   SPI_SETMODE(dev, CONFIG_VS1053_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_HWFEATURES(dev, 0);
-  (void)SPI_SETFREQUENCY(dev, freq_mhz);
+  SPI_HWFEATURES(dev, 0);
+  SPI_SETFREQUENCY(dev, freq_mhz);
 }
 
 /************************************************************************************
@@ -279,7 +279,7 @@ static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
 
 static inline void vs1053_spi_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************
@@ -1009,7 +1009,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               /* After at least 2052 bytes, we send an SM_CANCEL */
 
               dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
-              (void)SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
+              SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
               reg = vs1053_readreg(dev, VS1053_SCI_MODE);
               vs1053_writereg(dev, VS1053_SCI_MODE, reg | VS1053_SM_CANCEL);
               dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
@@ -1032,7 +1032,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
               if (!(vs1053_readreg(dev, VS1053_SCI_STATUS) & VS1053_SM_CANCEL))
                 {
-                  (void)SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
+                  SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
                   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
 
                   audinfo("HDAT1: 0x%0X   HDAT0: 0x%0X\n",
@@ -1092,9 +1092,9 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               /* Read the VS1053 MODE register */
 
               dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
-              (void)SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
+              SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
               reg = vs1053_readreg(dev, VS1053_SCI_MODE);
-              (void)SPI_SETFREQUENCY(dev->spi, VS1053_DATA_FREQ);
+              SPI_SETFREQUENCY(dev->spi, VS1053_DATA_FREQ);
               dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
 
               /* Check the SM_CANCEL bit */
@@ -1120,10 +1120,10 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                   /* This is the final buffer.  Get the VS1053 endfillchar */
 
                   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
-                  (void)SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
+                  SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
                   vs1053_writereg(dev, VS1053_SCI_WRAMADDR, VS1053_END_FILL_BYTE);
                   dev->endfillchar = vs1053_readreg(dev, VS1053_SCI_WRAM) >> 8;
-                  (void)SPI_SETFREQUENCY(dev->spi, VS1053_DATA_FREQ);
+                  SPI_SETFREQUENCY(dev->spi, VS1053_DATA_FREQ);
                   dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
 
                   /* Mark the device as endmode */
@@ -1223,8 +1223,8 @@ static int vs1053_dreq_isr(int irq, FAR void *context, FAR void *arg)
   if (dev->running)
     {
       msg.msgId = AUDIO_MSG_DATA_REQUEST;
-      (void)nxmq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
-                      CONFIG_VS1053_MSG_PRIO);
+      nxmq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
+                CONFIG_VS1053_MSG_PRIO);
     }
   else
     {
@@ -1472,8 +1472,8 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   pthread_attr_init(&tattr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  (void)pthread_attr_setschedparam(&tattr, &sparam);
-  (void)pthread_attr_setstacksize(&tattr, CONFIG_VS1053_WORKER_STACKSIZE);
+  pthread_attr_setschedparam(&tattr, &sparam);
+  pthread_attr_setstacksize(&tattr, CONFIG_VS1053_WORKER_STACKSIZE);
 
   audinfo("Starting workerthread\n");
   ret = pthread_create(&dev->threadid, &tattr, vs1053_workerthread,
@@ -1514,8 +1514,8 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  (void)nxmq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                  CONFIG_VS1053_MSG_PRIO);
+  nxmq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+            CONFIG_VS1053_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -1628,8 +1628,8 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
         {
           term_msg.msgId = AUDIO_MSG_ENQUEUE;
           term_msg.u.data = 0;
-          (void)nxmq_send(dev->mq, (FAR const char *)&term_msg,
-                          sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
+          nxmq_send(dev->mq, (FAR const char *)&term_msg,
+                    sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
         }
     }
 

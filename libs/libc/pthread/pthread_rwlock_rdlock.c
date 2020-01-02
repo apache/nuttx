@@ -55,7 +55,7 @@ static void rdlock_cleanup(FAR void *arg)
 {
   FAR pthread_rwlock_t *rw_lock = (FAR pthread_rwlock_t *)arg;
 
-  (void)pthread_mutex_unlock(&rw_lock->lock);
+  pthread_mutex_unlock(&rw_lock->lock);
 }
 #endif
 

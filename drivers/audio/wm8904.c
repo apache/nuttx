@@ -416,14 +416,7 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
 static void wm8904_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /************************************************************************************
@@ -1579,8 +1572,8 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
   pthread_attr_init(&tattr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  (void)pthread_attr_setschedparam(&tattr, &sparam);
-  (void)pthread_attr_setstacksize(&tattr, CONFIG_WM8904_WORKER_STACKSIZE);
+  pthread_attr_setschedparam(&tattr, &sparam);
+  pthread_attr_setstacksize(&tattr, CONFIG_WM8904_WORKER_STACKSIZE);
 
   audinfo("Starting worker thread\n");
   ret = pthread_create(&priv->threadid, &tattr, wm8904_workerthread,
@@ -1621,8 +1614,8 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  (void)nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                  CONFIG_WM8904_MSG_PRIO);
+  nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+            CONFIG_WM8904_MSG_PRIO);
 
   /* Join the worker thread */
 

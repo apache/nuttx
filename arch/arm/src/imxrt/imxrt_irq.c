@@ -208,7 +208,7 @@ static void imxrt_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG_FEATURES
 static int imxrt_nmi(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -216,7 +216,7 @@ static int imxrt_nmi(int irq, FAR void *context, FAR void *arg)
 
 static int imxrt_busfault(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
@@ -224,7 +224,7 @@ static int imxrt_busfault(int irq, FAR void *context, FAR void *arg)
 
 static int imxrt_usagefault(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
@@ -232,7 +232,7 @@ static int imxrt_usagefault(int irq, FAR void *context, FAR void *arg)
 
 static int imxrt_pendsv(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -240,7 +240,7 @@ static int imxrt_pendsv(int irq, FAR void *context, FAR void *arg)
 
 static int imxrt_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
@@ -248,7 +248,7 @@ static int imxrt_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 
 static int imxrt_reserved(int irq, FAR void *context, FAR void *arg)
 {
-  (void)up_irq_save();
+  up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

@@ -179,18 +179,7 @@ static const struct file_operations mac802154dev_fops =
 
 static inline int mac802154dev_takesem(sem_t *sem)
 {
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  ret = nxsem_wait(sem);
-
-  /* The only case that an error should occur here is if the wait were
-   * awakened by a signal.
-   */
-
-  DEBUGASSERT(ret == OK || ret == -EINTR);
-  return ret;
+  return nxsem_wait(sem);
 }
 
 /****************************************************************************
@@ -440,7 +429,6 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
       ret = nxsem_wait(&dev->readsem);
       if (ret < 0)
         {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
           dev->readpending = false;
           return ret;
         }
@@ -568,7 +556,7 @@ static ssize_t mac802154dev_write(FAR struct file *filep,
 
   /* Pass the request to the MAC layer */
 
-  ret = mac802154_req_data(dev->md_mac, &tx->meta, iob);
+  ret = mac802154_req_data(dev->md_mac, &tx->meta, iob, true);
   if (ret < 0)
     {
       iob_free(iob, IOBUSER_WIRELESS_MAC802154_CHARDEV);
@@ -681,7 +669,6 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               ret = nxsem_wait(&dev->geteventsem);
               if (ret < 0)
                 {
-                  DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
                   dev->geteventpending = false;
                   return ret;
                 }

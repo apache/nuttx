@@ -179,7 +179,7 @@ void mips_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(PIC32MZ_IRQ_T1, (xcpt_t)pc32mz_timerisr, NULL);
+  irq_attach(PIC32MZ_IRQ_T1, (xcpt_t)pc32mz_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

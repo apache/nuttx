@@ -353,7 +353,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Release our reference to the half duplex FIFO */
 
-  (void)local_release_halfduplex(conn);
+  local_release_halfduplex(conn);
 
   /* Return the address family */
 
@@ -379,7 +379,7 @@ errout_with_halfduplex:
 
   /* Release our reference to the half duplex FIFO */
 
-  (void)local_release_halfduplex(conn);
+  local_release_halfduplex(conn);
   return ret;
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */

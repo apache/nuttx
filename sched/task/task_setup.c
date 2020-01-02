@@ -101,7 +101,7 @@ static int nxtask_assignpid(FAR struct tcb_s *tcb)
    * for the following operation.
    */
 
-  (void)sched_lock();
+  sched_lock();
 
   /* We'll try every allowable pid */
 
@@ -136,7 +136,7 @@ static int nxtask_assignpid(FAR struct tcb_s *tcb)
 #endif
           tcb->pid = next_pid;
 
-          (void)sched_unlock();
+          sched_unlock();
           return OK;
         }
     }
@@ -145,7 +145,7 @@ static int nxtask_assignpid(FAR struct tcb_s *tcb)
    * We cannot allow another task to be started.
    */
 
-  (void)sched_unlock();
+  sched_unlock();
   return ERROR;
 }
 
@@ -410,7 +410,7 @@ static int nxthread_schedsetup(FAR struct tcb_s *tcb, int priority,
        * inherit the signal mask of the parent thread.
        */
 
-      (void)nxsig_procmask(SIG_SETMASK, NULL, &tcb->sigprocmask);
+      nxsig_procmask(SIG_SETMASK, NULL, &tcb->sigprocmask);
 
       /* Initialize the task state.  It does not get a valid state
        * until it is activated.

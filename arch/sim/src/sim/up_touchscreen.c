@@ -303,11 +303,6 @@ static int up_waitsample(FAR struct up_dev_s *priv,
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
-          DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
           goto errout;
         }
     }
@@ -395,9 +390,6 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -493,9 +485,6 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -536,9 +525,6 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
       return ret;
     }
 
@@ -653,7 +639,7 @@ int sim_tsc_initialize(int minor)
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &up_fops, 0666, priv);
@@ -699,17 +685,7 @@ void sim_tsc_uninitialize(void)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->devsem);
 
   /* Stop the event loop (Hmm.. the caller must be sure that there are no
    * open references to the touchscreen driver.  This might better be
@@ -720,7 +696,7 @@ void sim_tsc_uninitialize(void)
 
   /* Un-register the device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
   iinfo("Un-registering %s\n", devname);
 
   ret = unregister_driver(devname);

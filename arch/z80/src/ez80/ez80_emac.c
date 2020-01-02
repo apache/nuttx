@@ -1100,8 +1100,8 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
-                 ez80emac_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
+           ez80emac_txtimeout_expiry, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -1679,7 +1679,7 @@ static void ez80emac_rxinterrupt_work(FAR void *arg)
 
   /* Process any RX packets pending the RX buffer */
 
-  (void)ez80emac_receive(priv);
+  ez80emac_receive(priv);
   net_unlock();
 
   /* Re-enable Ethernet Rx interrupts */
@@ -1884,7 +1884,7 @@ static void ez80emac_txtimeout_work(FAR void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, ez80emac_txpoll);
+  devif_poll(&priv->dev, ez80emac_txpoll);
   net_unlock();
 }
 
@@ -1947,11 +1947,11 @@ static void ez80emac_poll_work(FAR void *arg)
   /* Poll the network for new XMIT data */
 
   net_lock();
-  (void)devif_timer(&priv->dev, EMAC_WDDELAY, ez80emac_txpoll);
+  devif_timer(&priv->dev, EMAC_WDDELAY, ez80emac_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -1993,8 +1993,8 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
-                     1, arg);
+      wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+               1, arg);
     }
 }
 
@@ -2081,8 +2081,8 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-     (void)wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
-                    1, (uint32_t)priv);
+      wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
+               1, (uint32_t)priv);
 
       /* Enable the Ethernet interrupts */
 
@@ -2175,7 +2175,7 @@ static void ez80emac_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->dev, ez80emac_txpoll);
+      devif_poll(&priv->dev, ez80emac_txpoll);
     }
 
   net_unlock();
@@ -2575,7 +2575,7 @@ int up_netinitialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
   return OK;
 
 errout:

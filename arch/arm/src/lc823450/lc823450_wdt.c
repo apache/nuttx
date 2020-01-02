@@ -546,7 +546,7 @@ int lc823450_wdt_initialize(void)
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
   /* Attach our WDT interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(LC823450_IRQ_WDT0, lc823450_wdt_interrupt, NULL);
+  irq_attach(LC823450_IRQ_WDT0, lc823450_wdt_interrupt, NULL);
 #else
   if (getreg32(WDT_WT0RSTS) & (1 << WDT_WT0RSTS_RSTS))
     {
@@ -556,8 +556,8 @@ int lc823450_wdt_initialize(void)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register("/dev/watchdog0",
-                         (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register("/dev/watchdog0",
+                    (FAR struct watchdog_lowerhalf_s *)priv);
   return OK;
 }
 

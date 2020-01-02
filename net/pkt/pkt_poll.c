@@ -90,7 +90,7 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 
       /* Perform the application callback */
 
-      (void)pkt_callback(dev, conn, PKT_POLL);
+      pkt_callback(dev, conn, PKT_POLL);
 
       /* Check if the application has data to send */
 

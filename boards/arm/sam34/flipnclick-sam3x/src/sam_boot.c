@@ -88,6 +88,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)sam_bringup();
+  sam_bringup();
 }
 #endif

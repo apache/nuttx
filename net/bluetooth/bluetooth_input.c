@@ -279,7 +279,7 @@ int bluetooth_input(FAR struct radio_driver_s *radio,
        * was not consumed.
        */
 
-      (void)bluetooth_callback(radio, conn, BLUETOOTH_NEWDATA);
+      bluetooth_callback(radio, conn, BLUETOOTH_NEWDATA);
     }
   else
     {

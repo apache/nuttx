@@ -252,7 +252,7 @@ int usbtrace_enumerate(trace_callback_t callback, void *arg)
 
   /* Restore tracing state */
 
-  (void)usbtrace_enable(idset);
+  usbtrace_enable(idset);
   return ret;
 }
 #endif /* CONFIG_USBDEV_TRACE */

@@ -233,13 +233,13 @@ static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
    * NOTE: Not necessary.  The RST# input is pulled high on the BEE.
    */
 
-  (void)sam_configgpio(priv->rstcfg);
+  sam_configgpio(priv->rstcfg);
   sam_gpiowrite(priv->rstcfg, true);
 #endif
 
   /* Configure the interrupt pin */
 
-  (void)sam_configgpio(priv->intcfg);
+  sam_configgpio(priv->intcfg);
   sam_gpioirq(priv->intcfg);
 
   /* Initialize the SPI bus and get an instance of the SPI interface */

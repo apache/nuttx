@@ -283,23 +283,11 @@ static const struct block_operations g_bops =
 
 static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 {
-  int ret;
-
   /* Take the semaphore, giving exclusive access to the driver (perhaps
    * waiting)
    */
 
-  do
-    {
-      ret = nxsem_wait(&priv->sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->sem);
 
   /* Lock the bus if mutually exclusive access to the SDIO bus is required
    * on this platform.
@@ -510,9 +498,9 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
   SDIO_BLOCKSETUP(priv->dev, 8, 1);
   SDIO_RECVSETUP(priv->dev, (FAR uint8_t *)scr, 8);
 
-  (void)SDIO_WAITENABLE(priv->dev,
-                        SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT |
-                        SDIOWAIT_ERROR);
+  SDIO_WAITENABLE(priv->dev,
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT |
+                  SDIOWAIT_ERROR);
 
   /* Send CMD55 APP_CMD with argument as card's RCA */
 
@@ -2505,7 +2493,7 @@ static void mmcsd_mediachange(FAR void *arg)
        * NOTE that mmcsd_probe() will always re-enable callbacks appropriately.
        */
 
-      (void)mmcsd_probe(priv);
+      mmcsd_probe(priv);
     }
   else
     {
@@ -2514,7 +2502,7 @@ static void mmcsd_mediachange(FAR void *arg)
        * re-enable callbacks so we will need to do that here.
        */
 
-      (void)mmcsd_removed(priv);
+      mmcsd_removed(priv);
 
       /* Enable logic to detect if a card is re-inserted */
 
@@ -2702,7 +2690,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
    * the card default value (0x0404) will be used.
    */
 
-  (void)mmcsd_sendcmd4(priv);
+  mmcsd_sendcmd4(priv);
 
   /* Send CMD7 with the argument == RCA in order to select the card
    * and send it in data-trasfer mode. Since we are supporting
@@ -2976,7 +2964,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
    * the card default value (0x0404) will be used.
    */
 
-  (void)mmcsd_sendcmd4(priv);
+  mmcsd_sendcmd4(priv);
 
   /* Select high speed SD clocking (which may depend on the DSR setting) */
 
@@ -3514,7 +3502,7 @@ static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
 
   /* Disable clocking to the card */
 
-  (void)SDIO_CLOCK(priv->dev, CLOCK_SDIO_DISABLED);
+  SDIO_CLOCK(priv->dev, CLOCK_SDIO_DISABLED);
   return OK;
 }
 

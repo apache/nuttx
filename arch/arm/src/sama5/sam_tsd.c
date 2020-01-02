@@ -383,7 +383,6 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
            */
 
           ierr("ERROR: nxsem_wait: %d\n", ret);
-          DEBUGASSERT(ret == -EINTR || ret  == -ECANCELED);
           goto errout;
         }
     }
@@ -587,8 +586,8 @@ static void sam_tsd_bottomhalf(void *arg)
        * this case; we rely on the timer expiry to get us going again.
        */
 
-      (void)wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
-                     (uint32_t)priv);
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
+               (uint32_t)priv);
       ier = 0;
       goto ignored;
     }
@@ -666,8 +665,8 @@ static void sam_tsd_bottomhalf(void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      (void)wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
-                     (uint32_t)priv);
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
+               (uint32_t)priv);
 
       /* Check the thresholds.  Bail if (1) this is not the first
        * measurement and (2) there is no significant difference from
@@ -812,7 +811,7 @@ static void sam_tsd_expiry(int argc, uint32_t arg1, ...)
 
   /* Schedule touchscreen work */
 
-  (void)sam_tsd_schedule(priv);
+  sam_tsd_schedule(priv);
 }
 
 /****************************************************************************
@@ -1668,7 +1667,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Register the device as an input device */
 
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &g_tsdops, 0666, priv);

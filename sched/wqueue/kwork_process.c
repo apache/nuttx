@@ -142,7 +142,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
         {
           /* Remove the ready-to-execute work from the list */
 
-          (void)dq_rem((struct dq_entry_s *)work, &wqueue->q);
+          dq_rem((struct dq_entry_s *)work, &wqueue->q);
 
           /* Extract the work description from the entry (in case the work
            * instance by the re-used after it has been de-queued).

@@ -130,7 +130,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 
-          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
+          dev->setpower(dev, CONFIG_LCD_MAXPOWER);
           return dev;
         }
     }

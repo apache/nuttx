@@ -205,7 +205,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
       if (buflen == 0)
         {
           file_seek(&priv->mtdfile, seekpos, SEEK_SET);
-          (void)file_write(&priv->mtdfile, buf, sizeof(buf));
+          file_write(&priv->mtdfile, buf, sizeof(buf));
           seekpos += sizeof(buf);
         }
     }
@@ -215,7 +215,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
   if (buflen != 0)
     {
       file_seek(&priv->mtdfile, seekpos, SEEK_SET);
-      (void)file_write(&priv->mtdfile, buf, sizeof(buf));
+      file_write(&priv->mtdfile, buf, sizeof(buf));
     }
 
   return len;
@@ -231,7 +231,7 @@ static ssize_t filemtd_read(FAR struct file_dev_s *priv,
 {
   /* Set the starting location in the file */
 
-  (void)file_seek(&priv->mtdfile, priv->offset + offsetbytes, SEEK_SET);
+  file_seek(&priv->mtdfile, priv->offset + offsetbytes, SEEK_SET);
 
   return file_read(&priv->mtdfile, buffer, nbytes);
 }
@@ -282,7 +282,7 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   memset(buffer, CONFIG_FILEMTD_ERASESTATE, sizeof(buffer));
   while (nbytes)
     {
-      (void)file_write(&priv->mtdfile, buffer, sizeof(buffer));
+      file_write(&priv->mtdfile, buffer, sizeof(buffer));
       nbytes -= sizeof(buffer);
     }
 
@@ -325,7 +325,7 @@ static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Then read the data from the file */
 
-  (void)filemtd_read(priv, buf, offset, nbytes);
+  filemtd_read(priv, buf, offset, nbytes);
   return nblocks;
 }
 
@@ -387,7 +387,7 @@ static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
      return 0;
    }
 
-  (void)filemtd_read(priv, buf, offset, nbytes);
+  filemtd_read(priv, buf, offset, nbytes);
   return nbytes;
 }
 

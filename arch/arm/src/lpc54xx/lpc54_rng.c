@@ -159,7 +159,7 @@ static ssize_t lpc54_read(struct file *filep, char *buffer, size_t buflen)
 void devrandom_register(void)
 {
   nxsem_init(&g_rngdev.rd_devsem, 0, 1);
-  (void)register_driver("/dev/random", &g_rngops, 0444, NULL);
+  register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -183,7 +183,7 @@ void devurandom_register(void)
 #ifndef CONFIG_DEV_RANDOM
   nxsem_init(&g_rngdev.rd_devsem, 0, 1);
 #endif
-  (void)register_driver("/dev/urandom", &g_rngops, 0444, NULL);
+  register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 

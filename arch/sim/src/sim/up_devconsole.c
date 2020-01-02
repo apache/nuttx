@@ -163,7 +163,7 @@ static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void up_devconsole(void)
 {
-  (void)register_driver("/dev/console", &devconsole_fops, 0666, NULL);
+  register_driver("/dev/console", &devconsole_fops, 0666, NULL);
 }
 
 /****************************************************************************

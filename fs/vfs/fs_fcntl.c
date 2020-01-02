@@ -285,7 +285,7 @@ int fcntl(int fd, int cmd, ...)
 
   /* fcntl() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Setup to access the variable argument list */
 

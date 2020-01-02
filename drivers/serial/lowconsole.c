@@ -130,5 +130,5 @@ static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t b
 
 void lowconsole_init(void)
 {
-  (void)register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  register_driver("/dev/console", &g_consoleops, 0666, NULL);
 }

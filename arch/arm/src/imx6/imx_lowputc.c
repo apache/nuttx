@@ -188,13 +188,13 @@ void imx_lowsetup(void)
    * control is enabled.  REVISIT: DTR, DCD, RI, and DSR -- not configured.
    */
 
-  (void)imx_config_gpio(GPIO_UART1_RX_DATA);
-  (void)imx_config_gpio(GPIO_UART1_TX_DATA);
+  imx_config_gpio(GPIO_UART1_RX_DATA);
+  imx_config_gpio(GPIO_UART1_TX_DATA);
 #ifdef CONFIG_UART1_OFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART1_CTS);
+  imx_config_gpio(GPIO_UART1_CTS);
 #endif
 #ifdef CONFIG_UART1_IFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART1_RTS);
+  imx_config_gpio(GPIO_UART1_RTS);
 #endif
 #endif
 
@@ -210,13 +210,13 @@ void imx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imx_config_gpio(GPIO_UART2_RX_DATA);
-  (void)imx_config_gpio(GPIO_UART2_TX_DATA);
+  imx_config_gpio(GPIO_UART2_RX_DATA);
+  imx_config_gpio(GPIO_UART2_TX_DATA);
 #ifdef CONFIG_UART1_OFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART2_CTS);
+  imx_config_gpio(GPIO_UART2_CTS);
 #endif
 #ifdef CONFIG_UART1_IFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART2_RTS);
+  imx_config_gpio(GPIO_UART2_RTS);
 #endif
 #endif
 
@@ -232,13 +232,13 @@ void imx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imx_config_gpio(GPIO_UART3_RX_DATA);
-  (void)imx_config_gpio(GPIO_UART3_TX_DATA);
+  imx_config_gpio(GPIO_UART3_RX_DATA);
+  imx_config_gpio(GPIO_UART3_TX_DATA);
 #ifdef CONFIG_UART1_OFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART3_CTS);
+  imx_config_gpio(GPIO_UART3_CTS);
 #endif
 #ifdef CONFIG_UART1_IFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART3_RTS);
+  imx_config_gpio(GPIO_UART3_RTS);
 #endif
 #endif
 
@@ -254,13 +254,13 @@ void imx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imx_config_gpio(GPIO_UART4_RX_DATA);
-  (void)imx_config_gpio(GPIO_UART4_TX_DATA);
+  imx_config_gpio(GPIO_UART4_RX_DATA);
+  imx_config_gpio(GPIO_UART4_TX_DATA);
 #ifdef CONFIG_UART1_OFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART4_CTS);
+  imx_config_gpio(GPIO_UART4_CTS);
 #endif
 #ifdef CONFIG_UART1_IFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART4_RTS);
+  imx_config_gpio(GPIO_UART4_RTS);
 #endif
 #endif
 
@@ -276,20 +276,20 @@ void imx_lowsetup(void)
    * control is enabled.
    */
 
-  (void)imx_config_gpio(GPIO_UART5_RX_DATA);
-  (void)imx_config_gpio(GPIO_UART5_TX_DATA);
+  imx_config_gpio(GPIO_UART5_RX_DATA);
+  imx_config_gpio(GPIO_UART5_TX_DATA);
 #ifdef CONFIG_UART1_OFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART5_CTS);
+  imx_config_gpio(GPIO_UART5_CTS);
 #endif
 #ifdef CONFIG_UART1_IFLOWCONTROL
-  (void)imx_config_gpio(GPIO_UART5_RTS);
+  imx_config_gpio(GPIO_UART5_RTS);
 #endif
 #endif
 
 #ifdef IMX_HAVE_UART_CONSOLE
   /* Configure the serial console for initial, non-interrupt driver mode */
 
-  (void)imx_uart_configure(IMX_CONSOLE_VBASE, &g_console_config);
+  imx_uart_configure(IMX_CONSOLE_VBASE, &g_console_config);
 #endif
 #endif /* IMX_HAVE_UART */
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */

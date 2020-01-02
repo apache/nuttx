@@ -686,21 +686,7 @@ static inline void sdmmc_modifyreg32(struct stm32_dev_s *priv, int offset,
 
 static void stm32_takesem(struct stm32_dev_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->waitsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -796,16 +782,16 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
       /* Arm the SDMMC_D Ready and install Isr */
 
-      (void)stm32_gpiosetevent(pinset, true, false, false,
-                               stm32_sdmmc_rdyinterrupt, priv);
+      stm32_gpiosetevent(pinset, true, false, false,
+                         stm32_sdmmc_rdyinterrupt, priv);
     }
 
   /* Disarm SDMMC_D ready */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      (void)stm32_gpiosetevent(priv->d0_gpio, false, false, false,
-                               NULL, NULL);
+      stm32_gpiosetevent(priv->d0_gpio, false, false, false,
+                         NULL, NULL);
       stm32_configgpio(priv->d0_gpio);
     }
 #endif
@@ -1337,7 +1323,7 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1450,8 +1436,8 @@ static void stm32_sdmmc_fifo_monitor(FAR void *arg)
   if (sdmmc_getreg32(priv, STM32_SDMMC_DCOUNT_OFFSET) != 0 &&
       sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) == STM32_SDMMC_STA_DPSMACT)
     {
-      (void)work_queue(HPWORK, &priv->cbfifo,
-                       (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
+      work_queue(HPWORK, &priv->cbfifo,
+                 (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
     }
 }
 #endif
@@ -1535,8 +1521,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               stm32_recvfifo(priv);
 #if !defined(CONFIG_STM32H7_SDMMC_IDMA)
-              (void)work_queue(HPWORK, &priv->cbfifo,
-                               (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
+              work_queue(HPWORK, &priv->cbfifo,
+                         (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
 #endif
             }
 
@@ -2307,7 +2293,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  (void)wd_cancel(priv->waitwdog);
+  wd_cancel(priv->waitwdog);
 
   /* Mark no transfer in progress */
 
@@ -3225,8 +3211,8 @@ static void stm32_callback(void *arg)
           /* Yes.. queue it */
 
           mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
-                           priv->cbarg, 0);
+          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {

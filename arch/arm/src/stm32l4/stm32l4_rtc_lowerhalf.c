@@ -447,7 +447,7 @@ static int stm32l4_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
           /* And convert the time back to broken out format */
 
-          (void)gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+          gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
 
           /* The set the alarm using this absolute time */
 

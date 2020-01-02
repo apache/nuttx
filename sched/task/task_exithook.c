@@ -363,7 +363,7 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
 
       /* Send the signal to one thread in the group */
 
-      (void)group_signal(pgrp, &info);
+      group_signal(pgrp, &info);
     }
 }
 
@@ -418,7 +418,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
        * can provide the correct si_code value with the signal.
        */
 
-      (void)nxsig_tcbdispatch(ptcb, &info);
+      nxsig_tcbdispatch(ptcb, &info);
     }
 }
 
@@ -572,9 +572,9 @@ static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
     {
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
-      (void)lib_flushall(tcb->group->tg_streamlist);
+      lib_flushall(tcb->group->tg_streamlist);
 #else
-      (void)lib_flushall(&tcb->group->tg_streamlist);
+      lib_flushall(&tcb->group->tg_streamlist);
 #endif
     }
 }

@@ -93,14 +93,14 @@ void rom_setup_stepvaddrtrimto(uint32_t tocode)
 
            /* Wait for VDDR_LOSS_EN setting to propagate */
 
-          (void)getreg32(TIVA_AON_RTC_SYNC);
+          getreg32(TIVA_AON_RTC_SYNC);
         }
 
       while (target_trim != current_trim)
         {
           /* Wait for next edge on SCLK_LF (positive or negative) */
 
-          (void)getreg32(TIVA_AON_RTC_SYNCLF);
+          getreg32(TIVA_AON_RTC_SYNCLF);
 
           if (target_trim > current_trim)
             {
@@ -121,23 +121,23 @@ void rom_setup_stepvaddrtrimto(uint32_t tocode)
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
-      (void)getreg32(TIVA_AON_RTC_SYNCLF);
+      getreg32(TIVA_AON_RTC_SYNCLF);
 
       if ((pmctl_regsetctrl & AON_PMCTL_RESETCTL_VDDR_LOSS_EN) != 0)
         {
           /* Wait for next edge on SCLK_LF (positive or negative) */
 
-          (void)getreg32(TIVA_AON_RTC_SYNCLF);
+          getreg32(TIVA_AON_RTC_SYNCLF);
 
           /* Wait for next edge on SCLK_LF (positive or negative) */
 
-          (void)getreg32(TIVA_AON_RTC_SYNCLF);
+          getreg32(TIVA_AON_RTC_SYNCLF);
 
           putreg32(pmctl_regsetctrl, TIVA_AON_PMCTL_RESETCTL);
 
            /* And finally wait for VDDR_LOSS_EN setting to propagate */
 
-          (void)getreg32(TIVA_AON_RTC_SYNC);
+          getreg32(TIVA_AON_RTC_SYNC);
         }
     }
 }

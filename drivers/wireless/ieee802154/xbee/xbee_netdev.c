@@ -611,12 +611,12 @@ static void xbeenet_txpoll_work(FAR void *arg)
 
   /* Then perform the poll */
 
-  (void)devif_timer(&priv->xd_dev.r_dev, TXPOLL_WDDELAY, xbeenet_txpoll_callback);
+  devif_timer(&priv->xd_dev.r_dev, TXPOLL_WDDELAY, xbeenet_txpoll_callback);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry, 1,
+           (wdparm_t)priv);
   net_unlock();
 }
 
@@ -766,8 +766,8 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
 #endif
       /* Set and activate a timer process */
 
-      (void)wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry,
-                     1, (wdparm_t)priv);
+      wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry,
+               1, (wdparm_t)priv);
 
       /* The interface is now up */
 
@@ -862,7 +862,7 @@ static void xbeenet_txavail_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->xd_dev.r_dev, xbeenet_txpoll_callback);
+      devif_poll(&priv->xd_dev.r_dev, xbeenet_txpoll_callback);
     }
 
   net_unlock();
@@ -1078,7 +1078,6 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                       ret = nxsem_wait(&priv->xd_eventsem);
                       if (ret < 0)
                         {
-                          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
                           priv->xd_eventpending = false;
                           return ret;
                         }
@@ -1287,10 +1286,10 @@ static int xbeenet_properties(FAR struct radio_driver_s *netdev,
    */
 
 #ifdef CONFIG_NET_6LOWPAN_EXTENDEDADDR
-  (void)xbeenet_coord_eaddr(netdev, properties->sp_hubnode.nv_addr);
+  xbeenet_coord_eaddr(netdev, properties->sp_hubnode.nv_addr);
   properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_EADDRSIZE;
 #else
-  (void)xbeenet_coord_saddr(netdev, properties->sp_hubnode.nv_addr);
+  xbeenet_coord_saddr(netdev, properties->sp_hubnode.nv_addr);
   properties->sp_hubnode.nv_addrlen = NET_6LOWPAN_SADDRSIZE;
 #endif
 #endif
@@ -1428,7 +1427,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->xd_dev.r_dev, NET_LL_IEEE802154);
+  netdev_register(&priv->xd_dev.r_dev, NET_LL_IEEE802154);
   return OK;
 }
 

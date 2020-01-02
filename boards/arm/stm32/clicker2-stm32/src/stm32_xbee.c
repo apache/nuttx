@@ -252,13 +252,13 @@ static void stm32_enable_attn(FAR const struct xbee_lower_s *lower,
 
   if (state)
     {
-      (void)stm32_gpiosetevent(priv->attncfg, false, true, true,
-                               priv->handler, priv->arg);
+      stm32_gpiosetevent(priv->attncfg, false, true, true,
+                         priv->handler, priv->arg);
     }
   else
     {
-      (void)stm32_gpiosetevent(priv->attncfg, false, false, false,
-                               NULL, NULL);
+      stm32_gpiosetevent(priv->attncfg, false, false, false,
+                         NULL, NULL);
     }
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_lowputc.c
  *
- *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -154,9 +154,6 @@
  * And for the LPC178x/40xx, the PCLK is determined by the global divisor setting in
  * the PLKSEL register.
  *
- * Ignoring the fractional divider for now. (If you want to extend this driver
- * to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- * the same peripheral and that logic could easily leveraged here).
  */
 
 #ifdef LPC178x_40xx
@@ -165,6 +162,10 @@
 # define CONSOLE_NUMERATOR BOARD_PCLK_FREQUENCY
 
 #else
+#  ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+#    define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
+#    define CONSOLE_NUMERATOR (LPC17_40_CCLK)
+#  else
   /* Calculate and optimal PCLKSEL0/1 divisor.
    * First, check divisor == 1.  This works if the upper limit is met:
    *
@@ -181,9 +182,9 @@
    *   BAUD <= CCLK / 16 / MinDL
    */
 
-#  if CONSOLE_BAUD < (LPC17_40_CCLK / 16 / UART_MINDL)
-#    define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
-#    define CONSOLE_NUMERATOR (LPC17_40_CCLK)
+#    if CONSOLE_BAUD < (LPC17_40_CCLK / 16 / UART_MINDL)
+#      define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
+#      define CONSOLE_NUMERATOR (LPC17_40_CCLK)
 
   /* Check divisor == 2.  This works if:
    *
@@ -196,9 +197,9 @@
    *   BAUD <= CCLK / 8 / MinDL
    */
 
-#  elif CONSOLE_BAUD < (LPC17_40_CCLK / 8 / UART_MINDL)
-#    define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
-#    define CONSOLE_NUMERATOR (LPC17_40_CCLK / 2)
+#    elif CONSOLE_BAUD < (LPC17_40_CCLK / 8 / UART_MINDL)
+#      define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
+#      define CONSOLE_NUMERATOR (LPC17_40_CCLK / 2)
 
   /* Check divisor == 4.  This works if:
    *
@@ -211,9 +212,9 @@
    *   BAUD <= CCLK / 4 / MinDL
    */
 
-#  elif CONSOLE_BAUD < (LPC17_40_CCLK / 4 / UART_MINDL)
-#   define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
-#    define CONSOLE_NUMERATOR (LPC17_40_CCLK / 4)
+#    elif CONSOLE_BAUD < (LPC17_40_CCLK / 4 / UART_MINDL)
+#     define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
+#      define CONSOLE_NUMERATOR (LPC17_40_CCLK / 4)
 
   /* Check divisor == 8.  This works if:
    *
@@ -226,9 +227,10 @@
    *   BAUD <= CCLK / 2 / MinDL
   */
 
-#  else /* if CONSOLE_BAUD < (LPC17_40_CCLK / 2 / UART_MINDL) */
-#    define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
-#    define CONSOLE_NUMERATOR (LPC17_40_CCLK /  8)
+#    else /* if CONSOLE_BAUD < (LPC17_40_CCLK / 2 / UART_MINDL) */
+#      define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
+#      define CONSOLE_NUMERATOR (LPC17_40_CCLK /  8)
+#    endif
 #  endif
 #endif /* LPC178x_40xx */
 
@@ -273,11 +275,11 @@ void up_lowputc(char ch)
 #if defined HAVE_UART && defined HAVE_CONSOLE
   /* Wait for the transmitter to be available */
 
-  while ((getreg32(CONSOLE_BASE+LPC17_40_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
+  while ((getreg32(CONSOLE_BASE + LPC17_40_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
 
   /* Send the character */
 
-  putreg32((uint32_t)ch, CONSOLE_BASE+LPC17_40_UART_THR_OFFSET);
+  putreg32((uint32_t)ch, CONSOLE_BASE + LPC17_40_UART_THR_OFFSET);
 #endif
 }
 
@@ -396,6 +398,7 @@ void lpc17_40_lowsetup(void)
   putreg32(UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8,
            CONSOLE_BASE + LPC17_40_UART_FCR_OFFSET);
 
+#ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
   /* Disable FDR (fractional divider),
    * ignored by baudrate calculation => has to be disabled
    */
@@ -403,15 +406,20 @@ void lpc17_40_lowsetup(void)
   putreg32((1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT),
            CONSOLE_BASE + LPC17_40_UART_FDR_OFFSET);
 
+#endif
   /* Set up the LCR and set DLAB=1 */
 
   putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB,
            CONSOLE_BASE + LPC17_40_UART_LCR_OFFSET);
 
+#ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+  up_setbaud(CONSOLE_BASE, CONSOLE_NUMERATOR, CONSOLE_BAUD);
+#else
   /* Set the BAUD divisor */
 
   putreg32(CONSOLE_DL >> 8, CONSOLE_BASE + LPC17_40_UART_DLM_OFFSET);
   putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE + LPC17_40_UART_DLL_OFFSET);
+#endif
 
   /* Clear DLAB */
 

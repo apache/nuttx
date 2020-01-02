@@ -452,7 +452,7 @@ static int vnc_start_server(int display)
 
   /* Format the kernel thread arguments (ASCII.. yech) */
 
-  (void)itoa(display, str, 10);
+  itoa(display, str, 10);
   argv[0] = str;
   argv[1] = NULL;
 
@@ -486,8 +486,6 @@ static int vnc_start_server(int display)
 
 static inline int vnc_wait_start(int display)
 {
-  int ret = OK;
-
   /* Check if there has been a session allocated yet.  This is one of the
    * first things that the VNC server will do with the kernel thread is
    * started.  But we might be here before the thread has gotten that far.
@@ -506,20 +504,10 @@ static inline int vnc_wait_start(int display)
        * conditions here, but I think none that are fatal.
        */
 
-      do
-        {
-          ret = nxsem_wait(&g_fbstartup[display].fbinit);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_fbstartup[display].fbinit);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -564,20 +552,11 @@ static inline int vnc_wait_connect(int display)
        * conditions here, but I think none that are fatal.
        */
 
-      do
+      ret = nxsem_wait_uninterruptible(&g_fbstartup[display].fbconnect);
+      if (ret < 0)
         {
-          ret = nxsem_wait(&g_fbstartup[display].fbconnect);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          if (ret < 0 && ret != -EINTR)
-            {
-              return ret;
-            }
+          return ret;
         }
-      while (ret == -EINTR);
 
       /* We were awakened.  A result of -EBUSY means that the negotiation
        * is not complete.  Why would we be awakened in that case?  Some

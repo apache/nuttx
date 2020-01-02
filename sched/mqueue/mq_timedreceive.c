@@ -240,8 +240,8 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       /* Start the watchdog */
 
-      (void)wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_rcvtimeout,
-                     1, getpid());
+      wd_start(rtcb->waitdog, ticks, (wdentry_t)nxmq_rcvtimeout,
+               1, getpid());
     }
 
   /* Get the message from the message queue */
@@ -334,7 +334,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* mq_timedreceive() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Let nxmq_timedreceive do all of the work */
 

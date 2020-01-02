@@ -125,13 +125,13 @@ int wd_cancel(WDOG_ID wdog)
         {
           /* Remove the watchdog from mid- or end-of-queue */
 
-          (void)sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
+          sq_remafter((FAR sq_entry_t *)prev, &g_wdactivelist);
         }
       else
         {
           /* Remove the watchdog at the head of the queue */
 
-          (void)sq_remfirst(&g_wdactivelist);
+          sq_remfirst(&g_wdactivelist);
 
           /* Reassess the interval timer that will generate the next
            * interval event.

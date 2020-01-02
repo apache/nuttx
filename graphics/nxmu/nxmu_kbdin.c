@@ -90,7 +90,7 @@ void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch)
           outmsg->ch[i] = ch[i];
         }
 
-      (void)nxmu_sendclientwindow(nxmu->be.topwnd, outmsg, size);
+      nxmu_sendclientwindow(nxmu->be.topwnd, outmsg, size);
       kmm_free(outmsg);
     }
 }

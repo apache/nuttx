@@ -104,8 +104,8 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
   oledcs_dumpgpio("board_graphics_setup: After OLED CS setup");
   oleddc_dumpgpio("board_graphics_setup: On entry");
 
-  (void)lpc17_40_configgpio(LPCXPRESSO_OLED_POWER); /* OLED 11V power */
-  (void)lpc17_40_configgpio(LPCXPRESSO_OLED_DC);    /* OLED Command/Data */
+  lpc17_40_configgpio(LPCXPRESSO_OLED_POWER); /* OLED 11V power */
+  lpc17_40_configgpio(LPCXPRESSO_OLED_DC);    /* OLED Command/Data */
 
   oleddc_dumpgpio("board_graphics_setup: After OLED Power/DC setup");
 
@@ -131,7 +131,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
           /* And turn the OLED on (dim) */
 
-          (void)dev->setpower(dev, UG_POWER_DIM);
+          dev->setpower(dev, UG_POWER_DIM);
           return dev;
         }
     }
@@ -167,7 +167,7 @@ int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
     {
       /* Set GPIO to 1 for data, 0 for command */
 
-      (void)lpc17_40_gpiowrite(LPCXPRESSO_OLED_DC, !cmd);
+      lpc17_40_gpiowrite(LPCXPRESSO_OLED_DC, !cmd);
       return OK;
     }
   return -ENODEV;
@@ -197,6 +197,6 @@ int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 void ug_power(unsigned int devno, bool on)
 {
   ginfo("power %s\n", on ? "ON" : "OFF");
-  (void)lpc17_40_gpiowrite(LPCXPRESSO_OLED_POWER, on);
+  lpc17_40_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

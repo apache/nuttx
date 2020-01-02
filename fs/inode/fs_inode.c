@@ -99,7 +99,7 @@ void inode_initialize(void)
    * inode tree).
    */
 
-  (void)nxsem_init(&g_inode_sem.sem, 0, 1);
+  nxsem_init(&g_inode_sem.sem, 0, 1);
   g_inode_sem.holder = NO_HOLDER;
   g_inode_sem.count  = 0;
 
@@ -140,19 +140,7 @@ void inode_semtake(void)
 
   else
     {
-      int ret;
-
-      do
-        {
-          ret = nxsem_wait(&g_inode_sem.sem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      nxsem_wait_uninterruptible(&g_inode_sem.sem);
 
       /* No we hold the semaphore */
 

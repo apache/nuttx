@@ -98,7 +98,7 @@ void stm32l4_spiinitialize(void)
   /* Setup CS, EN & IRQ line IOs */
 
 #ifdef CONFIG_MTD_AT45DB
-  (void)stm32l4_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
+  stm32l4_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
 #endif
 #endif
 

@@ -457,19 +457,7 @@ static void sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg)
 
 static void sai_exclsem_take(struct stm32l4_sai_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal).
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -730,7 +718,7 @@ static void sai_worker(void *arg)
 
       flags = enter_critical_section();
 #ifdef CONFIG_STM32L4_SAI_DMA
-      (void)sai_dma_setup(priv);
+      sai_dma_setup(priv);
 #endif
       leave_critical_section(flags);
     }
@@ -849,7 +837,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dog);
+  wd_cancel(priv->dog);
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
@@ -1157,19 +1145,7 @@ errout_with_exclsem:
 
 static void sai_bufsem_take(struct stm32l4_sai_s *priv)
 {
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal).
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->bufsem);
 }
 
 /****************************************************************************

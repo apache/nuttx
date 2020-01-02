@@ -109,7 +109,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t tocode)
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
-      (void)getreg32(TIVA_AON_RTC_SYNCLF);
+      getreg32(TIVA_AON_RTC_SYNCLF);
 
       if (tocode > current_trim)
         {
@@ -162,7 +162,7 @@ static void step_vbg(int32_t target_signed)
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
-      (void)getreg32(TIVA_AON_RTC_SYNCLF);
+      getreg32(TIVA_AON_RTC_SYNCLF);
 
       if (target_signed != current_signed)
         {
@@ -251,7 +251,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* Dummy read to ensure that the write has propagated */
 
-  (void)getreg16(TIVA_DDI0_OSC_CTL0);
+  getreg16(TIVA_DDI0_OSC_CTL0);
 
   /* read the MODE_CONF register in CCFG */
 
@@ -333,7 +333,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* Wait for xxx_LOSS_EN setting to propagate */
 
-  (void)getreg32(TIVA_AON_RTC_SYNC);
+  getreg32(TIVA_AON_RTC_SYNC);
 
   /* The VDDS_BOD trim and the VDDR trim is already stepped up to max/HH if
    * "CC1352 boost mode" is requested. See function
@@ -402,17 +402,17 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * Wait for first edge on SCLK_LF (positive or negative)
    */
 
-  (void)getreg32(TIVA_AON_RTC_SYNCLF);
+  getreg32(TIVA_AON_RTC_SYNCLF);
 
   /* Wait for second edge on SCLK_LF (positive or negative) */
 
-  (void)getreg32(TIVA_AON_RTC_SYNCLF);
+  getreg32(TIVA_AON_RTC_SYNCLF);
 
   putreg32(org_resetctl, TIVA_AON_PMCTL_RESETCTL) ;
 
   /* Wait for xxx_LOSS_EN setting to propagate */
 
-  (void)getreg32(TIVA_AON_RTC_SYNC);
+  getreg32(TIVA_AON_RTC_SYNC);
 
   /* Propagate the LPM_BIAS trim */
 

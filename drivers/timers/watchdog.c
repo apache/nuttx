@@ -687,11 +687,11 @@ void watchdog_unregister(FAR void *handle)
   /* Disable the watchdog timer */
 
   DEBUGASSERT(lower->ops->stop); /* Required */
-  (void)lower->ops->stop(lower);
+  lower->ops->stop(lower);
 
   /* Unregister the watchdog timer device */
 
-  (void)unregister_driver(upper->path);
+  unregister_driver(upper->path);
 
   /* Then free all of the driver resources */
 

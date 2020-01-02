@@ -340,7 +340,7 @@ static void spi_txuint8(struct imx_spidev_s *priv)
 
 static void spi_rxnull(struct imx_spidev_s *priv)
 {
-  (void)spi_getreg(priv, CSPI_RXD_OFFSET);
+  spi_getreg(priv, CSPI_RXD_OFFSET);
 }
 
 static void spi_rxuint16(struct imx_spidev_s *priv)
@@ -504,7 +504,6 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 #ifndef CONFIG_SPI_POLLWAIT
   irqstate_t flags;
   uint32_t regval;
-  int ret;
 #endif
   int ntxd;
 
@@ -558,13 +557,9 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
    * with the transfer, so it should be safe with no timeout.
    */
 
-  do
-    {
-      /* Wait to be signaled from the interrupt handler */
+  /* Wait to be signaled from the interrupt handler */
 
-      ret = nxsem_wait(&priv->waitsem);
-    }
-  while (ret < 0 && ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->waitsem);
 
 #else
   /* Perform the transfer using polling logic.  This will totally
@@ -713,19 +708,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      do
-        {
-          /* Take the semaphore (perhaps waiting) */
-
-          ret = nxsem_wait(&priv->exclsem);
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -919,7 +906,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint16_t response = 0;
 
-  (void)spi_transfer(priv, &wd, &response, 1);
+  spi_transfer(priv, &wd, &response, 1);
   return response;
 }
 
@@ -948,7 +935,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, txbuffer, rxbuffer, nwords);
+  spi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
 
@@ -975,7 +962,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, buffer, NULL, nwords);
+  spi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
 
@@ -1002,7 +989,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  (void)spi_transfer(priv, NULL, buffer, nwords);
+  spi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
 

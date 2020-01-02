@@ -149,7 +149,7 @@ static void lpc54_ft5x06_enable(FAR const struct ft5x06_config_s *config,
 #ifndef CONFIG_FT5X06_POLLMODE
 static void lpc54_ft5x06_clear(FAR const struct ft5x06_config_s *config)
 {
-  (void)lpc54_gpio_ackedge(g_ft5x06_irq);
+  lpc54_gpio_ackedge(g_ft5x06_irq);
 }
 #endif
 

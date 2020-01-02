@@ -150,23 +150,10 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
 {
   FAR struct pktradio_metadata_s *metadata;
   uint8_t pool;
-  int ret;
 
   /* Get exclusive access to the free list */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_metadata_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_metadata_sem);
 
   /* Try the free list first */
 
@@ -226,23 +213,9 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
 
 void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
 {
-  int ret;
-
   /* Get exclusive access to the free list */
 
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_metadata_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_metadata_sem);
 
   /* If this is a pre-allocated meta-data structure, then just put it back
    * in the free list.

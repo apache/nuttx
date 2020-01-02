@@ -210,11 +210,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
     {
       /* Wait for completion of request. */
 
-      while ((ret = net_lockedwait(&state.reqstate.recvsem)) < 0)
-        {
-          DEBUGASSERT(ret == -EINTR);
-        }
-
+      net_lockedwait_uninterruptible(&state.reqstate.recvsem);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= arglen);

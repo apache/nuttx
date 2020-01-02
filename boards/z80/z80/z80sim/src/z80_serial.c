@@ -319,8 +319,8 @@ static bool up_txempty(FAR struct uart_dev_s *dev)
 
 void z80_serial_initialize(void)
 {
-  (void)uart_register("/dev/console", &g_uartport);
-  (void)uart_register("/dev/ttyS0", &g_uartport);
+  uart_register("/dev/console", &g_uartport);
+  uart_register("/dev/ttyS0", &g_uartport);
 }
 
 #endif /* USE_SERIALDRIVER */

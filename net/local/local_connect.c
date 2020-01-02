@@ -91,21 +91,7 @@ static int32_t local_generate_instance_id(void)
 
 static inline void _local_semtake(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = net_lockedwait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  net_lockedwait_uninterruptible(sem);
 }
 
 #define _local_semgive(sem) nxsem_post(sem)
@@ -233,11 +219,11 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   return OK;
 
 errout_with_outfd:
-  (void)file_close(&client->lc_outfile);
+  file_close(&client->lc_outfile);
   client->lc_outfile.f_inode = NULL;
 
 errout_with_fifos:
-  (void)local_release_fifos(client);
+  local_release_fifos(client);
   client->lc_state = LOCAL_STATE_BOUND;
   return ret;
 }

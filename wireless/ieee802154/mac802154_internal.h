@@ -540,27 +540,14 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
 
 static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
 {
-  int ret;
-  do
+  if (allowinterrupt)
     {
-      /* Take a count from the semaphore, possibly waiting */
-
-      ret = nxsem_wait(sem);
-      if (ret < 0)
-        {
-          /* EINTR and ECANCELED are the only errors that we expect */
-
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-
-          if (allowinterrupt)
-            {
-              return ret;
-            }
-        }
+      return nxsem_wait(sem);
     }
-  while (ret == -EINTR);
-
-  return ret;
+  else
+    {
+      return nxsem_wait_uninterruptible(sem);
+    }
 }
 
 #ifdef CONFIG_MAC802154_LOCK_VERBOSE

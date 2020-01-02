@@ -115,7 +115,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
               /* Free this entry and set the next I/O buffer as the head */
 
               iobinfo("iob=%p: Freeing\n", iob);
-              (void)iob_free(iob, producerid);
+              iob_free(iob, producerid);
               iob = next;
             }
           else

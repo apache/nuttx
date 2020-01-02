@@ -115,7 +115,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 
       subdirname = basename((FAR char *)oldpath);
 
-      (void)asprintf(&subdir, "/%s", subdirname);
+      asprintf(&subdir, "/%s", subdirname);
       if (subdir == NULL)
         {
           ret = -ENOMEM;
@@ -179,7 +179,7 @@ next_subdir:
           tmp        = subdir;
           subdir     = NULL;
 
-          (void)asprintf(&subdir, "%s/%s", newpath, subdirname);
+          asprintf(&subdir, "%s/%s", newpath, subdirname);
 
           if (tmp != NULL)
             {
@@ -213,7 +213,7 @@ next_subdir:
            * won't really be removed until we call inode_release();
            */
 
-          (void)inode_remove(newpath);
+          inode_remove(newpath);
         }
 
       inode_release(newinode);
@@ -274,7 +274,7 @@ next_subdir:
     {
       /* Remove the new node we just recreated */
 
-      (void)inode_remove(newpath);
+      inode_remove(newpath);
       goto errout_with_sem;
     }
 
@@ -415,8 +415,8 @@ next_subdir:
                       FAR char *tmp = subdir;
 
                       subdir = NULL;
-                      (void)asprintf(&subdir, "%s/%s", newrelpath,
-                                     subdirname);
+                      asprintf(&subdir, "%s/%s", newrelpath,
+                               subdirname);
 
                       if (tmp != NULL)
                         {
@@ -450,7 +450,7 @@ next_subdir:
                    * should check that.
                    */
 
-                   (void)oldinode->u.i_mops->unlink(oldinode, newrelpath);
+                   oldinode->u.i_mops->unlink(oldinode, newrelpath);
                 }
             }
         }

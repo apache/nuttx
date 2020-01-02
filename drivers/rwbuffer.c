@@ -93,21 +93,7 @@
 
 static void rwb_semtake(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -226,7 +212,7 @@ static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
    */
 
   int ticks = MSEC2TICK(CONFIG_DRVR_WRDELAY);
-  (void)work_queue(LPWORK, &rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
+  work_queue(LPWORK, &rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
 #endif
 }
 #endif
@@ -239,7 +225,7 @@ static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
 static inline void rwb_wrcanceltimeout(struct rwbuffer_s *rwb)
 {
 #if CONFIG_DRVR_WRDELAY != 0
-  (void)work_cancel(LPWORK, &rwb->work);
+  work_cancel(LPWORK, &rwb->work);
 #endif
 }
 #endif

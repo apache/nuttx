@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_serial.c
  *
- *   Copyright (C) 2010-2013, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -547,20 +547,156 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
   up_serialout(priv, LPC17_40_UART_LCR_OFFSET, lcr);
 }
 
+#ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+/****************************************************************************
+ * Name: lpc17_40_setbaud
+ *
+ * Description:
+ *   Configure the UART divisors to accomplish the desired BAUD given the
+ *   UART base frequency.
+ *
+ *   This computationally intensive algorithm is based on the same logic
+ *   used in the NXP sample code.
+ *
+ ****************************************************************************/
+
+void up_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
+{
+  uint32_t lcr;      /* Line control register value */
+  uint32_t dl;       /* Best DLM/DLL full value */
+  uint32_t mul;      /* Best FDR MULVALL value */
+  uint32_t divadd;   /* Best FDR DIVADDVAL value */
+  uint32_t best;     /* Error value associated with best {dl, mul, divadd} */
+  uint32_t cdl;      /* Candidate DLM/DLL full value */
+  uint32_t cmul;     /* Candidate FDR MULVALL value */
+  uint32_t cdivadd;  /* Candidate FDR DIVADDVAL value */
+  uint32_t errval;   /* Error value associated with the candidate */
+
+  /* The UART buad is given by:
+   *
+   * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
+   * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16
+   *       =  Fbase * mul / ((mul + divadd) * Fbaud * 16)
+   *       = ((Fbase * mul) >> 4) / ((mul + divadd) * Fbaud)
+   *
+   * Where the  value of MULVAL and DIVADDVAL comply with:
+   *
+   *  0 < mul < 16
+   *  0 <= divadd < mul
+   */
+
+  best   = UINT32_MAX;
+  divadd = 0;
+  mul    = 0;
+  dl     = 0;
+
+  /* Try each multiplier value in the valid range */
+
+  for (cmul = 1 ; cmul < 16; cmul++)
+    {
+      /* Try each divider value in the valid range */
+
+      for (cdivadd = 0 ; cdivadd < cmul ; cdivadd++)
+        {
+          /* Candidate:
+           *   dl         = ((Fbase * mul) >> 4) / ((mul + cdivadd) * Fbaud)
+           *   (dl << 32) = (Fbase << 28) * cmul / ((mul + cdivadd) * Fbaud)
+           */
+
+          uint64_t dl64 = ((uint64_t)basefreq << 28) * cmul /
+                          ((cmul + cdivadd) * baud);
+
+          /* The lower 32-bits of this value is the error */
+
+          errval = (uint32_t)(dl64 & 0x00000000ffffffffull);
+
+          /* The upper 32-bits is the candidate DL value */
+
+          cdl = (uint32_t)(dl64 >> 32);
+
+          /* Round up */
+
+          if (errval > (1 << 31))
+            {
+              errval = -errval;
+              cdl++;
+            }
+
+          /* Check if the resulting candidate DL value is within range */
+
+          if (cdl < 1 || cdl > 65536)
+            {
+              /* No... try a different divadd value */
+
+              continue;
+            }
+
+          /* Is this the best combination that we have seen so far? */
+
+          if (errval < best)
+            {
+              /* Yes.. then the candidate is out best guess so far */
+
+              best   = errval;
+              dl     = cdl;
+              divadd = cdivadd;
+              mul    = cmul;
+
+              /* If the new best guess is exact (within our precision), then
+               * we are finished.
+               */
+
+              if (best == 0)
+                {
+                  break;
+                }
+            }
+        }
+    }
+
+  DEBUGASSERT(dl > 0);
+
+  /* Enter DLAB=1 */
+
+  lcr = getreg32(uartbase + LPC17_40_UART_LCR_OFFSET);
+  putreg32(lcr | UART_LCR_DLAB, uartbase + LPC17_40_UART_LCR_OFFSET);
+
+  /* Save the divider values */
+
+  putreg32(dl >> 8, uartbase + LPC17_40_UART_DLM_OFFSET);
+  putreg32(dl & 0xff, uartbase + LPC17_40_UART_DLL_OFFSET);
+
+  /* Clear DLAB */
+
+  putreg32(lcr & ~UART_LCR_DLAB, uartbase + LPC17_40_UART_LCR_OFFSET);
+
+  /* Then save the fractional divider values */
+
+  putreg32((mul << UART_FDR_MULVAL_SHIFT) | (divadd << UART_FDR_DIVADDVAL_SHIFT),
+           uartbase + LPC17_40_UART_FDR_OFFSET);
+}
+#  ifdef LPC176x
+static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
+{
+  /* If we're using the fractional divider, assume that the full PCLK speed
+   * will be acceptable.
+   */
+
+  return SYSCON_PCLKSEL_CCLK;
+}
+#  endif
+#else
 /************************************************************************************
  * Name: lpc17_40_uartcclkdiv
  *
  * Description:
- *   Select a CCLK divider to produce the UART PCLK.  The stratey is to select the
+ *   Select a CCLK divider to produce the UART PCLK.  The strategy is to select the
  *   smallest divisor that results in an solution within range of the 16-bit
  *   DLM and DLL divisor:
  *
  *     PCLK = CCLK / divisor
  *     BAUD = PCLK / (16 * DL)
  *
- *   Ignoring the fractional divider for now. (If you want to extend this driver
- *   to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- *   the same peripheral and that logic could easily leveraged here).
  *
  *   For the LPC176x the PCLK is determined by the UART-specific divisor in
  *   PCLKSEL0 or PCLKSEL1:
@@ -576,7 +712,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
  *
  ************************************************************************************/
 
-#ifdef LPC176x
+#  ifdef LPC176x
 static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
 {
   /* Ignoring the fractional divider, the BAUD is given by:
@@ -662,8 +798,8 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
       return SYSCON_PCLKSEL_CCLK8;
     }
 }
-#endif /* LPC176x */
-
+#  endif /* LPC176x */
+#endif /* CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER */
 /************************************************************************************
  * Name: lpc17_40_uart0config, uart1config, uart2config, and uart3config
  *
@@ -734,7 +870,21 @@ static inline void lpc17_40_uart1config(void)
   putreg32(regval, LPC17_40_SYSCON_PCLKSEL0);
 #endif
 
-  /* Step 3: Configure I/O pins */
+  /* Step 3: Configure RS-485 control register */
+
+#ifdef CONFIG_LPC17_40_UART1_RS485
+  regval  = getreg32(LPC17_40_UART1_RS485CTRL);
+  regval |= UART_RS485CTRL_DCTRL;
+#if (CONFIG_LPC17_40_RS485_DIR_POLARITY == 1)
+  regval |= UART_RS485CTRL_OINV;
+#endif
+#ifdef CONFIG_LPC17_40_UART1_RS485_DIR_DTR
+  regval |= UART_RS485CTRL_SEL;
+#endif
+  putreg32(regval, LPC17_40_UART1_RS485CTRL);
+#endif
+
+  /* Step 4: Configure I/O pins */
 
   lpc17_40_configgpio(GPIO_UART1_TXD);
   lpc17_40_configgpio(GPIO_UART1_RXD);
@@ -748,6 +898,11 @@ static inline void lpc17_40_uart1config(void)
   lpc17_40_configgpio(GPIO_UART1_RI);
 #endif
 #endif
+
+#ifdef CONFIG_LPC17_40_UART1_RS485
+  lpc17_40_configgpio(GPIO_UART1_RS485_DIR);
+#endif
+
   leave_critical_section(flags);
 };
 #endif
@@ -821,13 +976,10 @@ static inline void lpc17_40_uart3config(void)
  *     BAUD = PCLK / (16 * DL), or
  *     DL   = PCLK / BAUD / 16
  *
- *   Ignoring the fractional divider for now. (If you want to extend this driver
- *   to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
- *   the same peripheral and that logic could easily leveraged here).
- *
  ************************************************************************************/
 
-#ifdef LPC176x
+#ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+#  ifdef LPC176x
 static inline uint32_t lpc17_40_uartdl(uint32_t baud, uint8_t divcode)
 {
   uint32_t num;
@@ -859,6 +1011,7 @@ static inline uint32_t lpc17_40_uartdl(uint32_t baud)
 {
   return (uint32_t)BOARD_PCLK_FREQUENCY / (baud << 4);
 }
+#  endif
 #endif
 
 /****************************************************************************
@@ -878,16 +1031,20 @@ static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#  ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
   uint16_t dl;
+#  endif
   uint32_t lcr;
 
   /* Clear fifos */
 
-  up_serialout(priv, LPC17_40_UART_FCR_OFFSET, (UART_FCR_RXRST | UART_FCR_TXRST));
+  up_serialout(priv, LPC17_40_UART_FCR_OFFSET,
+               (UART_FCR_RXRST | UART_FCR_TXRST));
 
   /* Set trigger */
 
-  up_serialout(priv, LPC17_40_UART_FCR_OFFSET, (UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8));
+  up_serialout(priv, LPC17_40_UART_FCR_OFFSET,
+               (UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8));
 
   /* Set up the IER */
 
@@ -920,12 +1077,14 @@ static int up_setup(struct uart_dev_s *dev)
       lcr |= (UART_LCR_PE | UART_LCR_PS_EVEN);
     }
 
+#ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
   /* Disable FDR (fractional divider),
    * ignored by baudrate calculation => has to be disabled
    */
 
   up_serialout(priv, LPC17_40_UART_FDR_OFFSET,
               (1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT));
+#endif
 
   /* Enter DLAB=1 */
 
@@ -933,13 +1092,17 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set the BAUD divisor */
 
-#ifdef LPC176x
-  dl = lpc17_40_uartdl(priv->baud, priv->cclkdiv);
+#ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+  up_setbaud(priv->uartbase, LPC17_40_CCLK / priv->cclkdiv, priv->baud);
 #else
+#  ifdef LPC176x
+  dl = lpc17_40_uartdl(priv->baud, priv->cclkdiv);
+#  else
   dl = lpc17_40_uartdl(priv->baud);
-#endif
+#  endif
   up_serialout(priv, LPC17_40_UART_DLM_OFFSET, dl >> 8);
   up_serialout(priv, LPC17_40_UART_DLL_OFFSET, dl & 0xff);
+#endif
 
   /* Clear DLAB */
 
@@ -1135,7 +1298,8 @@ static int up_interrupt(int irq, void *context, void *arg)
             }
         }
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1212,8 +1376,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TCSETS:
       {
         struct termios *termiosp = (struct termios *)arg;
+#  ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
         uint32_t           lcr;  /* Holds current values of line control register */
         uint16_t           dl;   /* Divisor latch */
+#  endif
 
         if (!termiosp)
           {
@@ -1234,10 +1400,14 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          * and reset the divider in the CLKSEL0/1 register.
          */
 
-#if 0 /* ifdef LPC176x */
+#  ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
+        up_setbaud(priv->uartbase, LPC17_40_CCLK / priv->cclkdiv, priv->baud);
+#  else
+#    if 0 /* ifdef LPC176x */
         priv->cclkdiv = lpc17_40_uartcclkdiv(priv->baud);
-#endif
+#    endif
         /* DLAB open latch */
+
         /* REVISIT:  Shouldn't we just call up_setup() to do all of the following? */
 
         lcr = getreg32(priv->uartbase + LPC17_40_UART_LCR_OFFSET);
@@ -1245,17 +1415,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Set the BAUD divisor */
 
-#ifdef LPC176x
+#    ifdef LPC176x
         dl = lpc17_40_uartdl(priv->baud, priv->cclkdiv);
-#else
+#    else
         dl = lpc17_40_uartdl(priv->baud);
-#endif
+#    endif
         up_serialout(priv, LPC17_40_UART_DLM_OFFSET, dl >> 8);
         up_serialout(priv, LPC17_40_UART_DLL_OFFSET, dl & 0xff);
 
         /* Clear DLAB */
 
         up_serialout(priv, LPC17_40_UART_LCR_OFFSET, lcr);
+#  endif
       }
       break;
 #endif
@@ -1422,6 +1593,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
   /* Configure all UARTs (except the CONSOLE UART) and disable interrupts */
@@ -1475,6 +1647,8 @@ void up_earlyserialinit(void)
 #endif
 }
 
+#endif
+
 /****************************************************************************
  * Name: up_serialinit
  *
@@ -1487,19 +1661,19 @@ void up_earlyserialinit(void)
 void up_serialinit(void)
 {
 #ifdef CONSOLE_DEV
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 #ifdef TTYS0_DEV
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  uart_register("/dev/ttyS0", &TTYS0_DEV);
 #endif
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+  uart_register("/dev/ttyS3", &TTYS3_DEV);
 #endif
 }
 

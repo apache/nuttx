@@ -111,7 +111,7 @@ static void xtensa_assert(int errorcode)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
 #ifdef CONFIG_BOARD_CRASHDUMP
@@ -122,7 +122,7 @@ static void xtensa_assert(int errorcode)
 
   /* Flush any buffered SYSLOG data (from the above) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
   /* Are we in an interrupt handler or the idle task? */
 
@@ -130,7 +130,7 @@ static void xtensa_assert(int errorcode)
     {
        /* Blink the LEDs forever */
 
-       (void)up_irq_save();
+       up_irq_save();
         for (; ; )
           {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
@@ -173,7 +173,7 @@ void up_assert(const uint8_t *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
@@ -220,7 +220,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
   /* Flush any buffered SYSLOG data (from prior to the panic) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Unhandled Exception %d task: %s\n", xptcode, rtcb->name);
@@ -324,7 +324,7 @@ void xtensa_user(int exccause, uint32_t *regs)
 
   /* Flush any buffered SYSLOG data (from prior to the error) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("User Exception: EXCCAUSE=%04x task: %s\n", exccause, rtcb->name);

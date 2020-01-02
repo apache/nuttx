@@ -237,7 +237,7 @@ enum spirit_outputlevel_e
 
   /* Reads the SPIRIT_GPIOx register */
 
-  (void)spirit_reg_read(spirit, gpio, &regval, 1);
+  spirit_reg_read(spirit, gpio, &regval, 1);
 
   /* Mask the GPIO_SELECT field and returns the value according */
 
@@ -415,7 +415,7 @@ enum spirit_clockoutput_xoprescaler_e
 
   /* Reads the MCU_CLK_CONFIG register */
 
-  (void)spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
+  spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
 
   /* Mask the XO_RATIO field and return the value */
 
@@ -488,7 +488,7 @@ enum spirit_clockoutput_rcoprescaler_e
 
   /* Reads the MCU_CLK_CONFIG register */
 
-  (void)spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
+  spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
 
   /* Mask the RCO_RATIO field and returns the value */
 
@@ -564,7 +564,7 @@ enum spirit_extra_clockcycles_e
 
   /* Reads the MCU_CLK_CONFIG register */
 
-  (void)spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
+  spirit_reg_read(spirit, MCU_CK_CONF_BASE, &regval, 1);
 
   /* Mask the CLOCK_TAIL field and returns the value */
 

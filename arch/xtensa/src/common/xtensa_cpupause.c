@@ -190,7 +190,7 @@ int up_cpu_paused(int cpu)
 
 void xtensa_pause_handler(void)
 {
-  (void)up_cpu_paused(up_cpu_index());
+  up_cpu_paused(up_cpu_index());
 }
 
 /****************************************************************************

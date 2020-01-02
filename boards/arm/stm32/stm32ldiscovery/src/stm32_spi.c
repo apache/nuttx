@@ -70,9 +70,9 @@
 void weak_function stm32_spidev_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
-  (void)stm32_configgpio(GPIO_MEMS_CS);    /* MEMS chip select */
-  (void)stm32_configgpio(GPIO_MEMS_INT1);  /* MEMS interrupts */
-  (void)stm32_configgpio(GPIO_MEMS_INT2);
+  stm32_configgpio(GPIO_MEMS_CS);    /* MEMS chip select */
+  stm32_configgpio(GPIO_MEMS_INT1);  /* MEMS interrupts */
+  stm32_configgpio(GPIO_MEMS_INT2);
 #endif
 }
 

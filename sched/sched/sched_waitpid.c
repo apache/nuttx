@@ -191,7 +191,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* waitpid() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Disable pre-emption so that nothing changes in the following tests */
 
@@ -322,12 +322,12 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* waitpid() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Create a signal set that contains only SIGCHLD */
 
-  (void)sigemptyset(&set);
-  (void)sigaddset(&set, SIGCHLD);
+  sigemptyset(&set);
+  sigaddset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 
@@ -445,7 +445,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
               /* Discard the child entry and break out of the loop */
 
-              (void)group_removechild(rtcb->group, child->ch_pid);
+              group_removechild(rtcb->group, child->ch_pid);
               group_freechild(child);
               break;
             }
@@ -470,7 +470,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
               /* Discard the child entry and break out of the loop */
 
-              (void)group_removechild(rtcb->group, pid);
+              group_removechild(rtcb->group, pid);
               group_freechild(child);
               break;
             }
@@ -551,7 +551,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
               if (child != NULL)
                 {
-                  (void)group_removechild(rtcb->group, child->ch_pid);
+                  group_removechild(rtcb->group, child->ch_pid);
                   group_freechild(child);
                 }
             }

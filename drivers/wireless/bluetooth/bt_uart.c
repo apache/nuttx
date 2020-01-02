@@ -372,7 +372,7 @@ int btuart_open(FAR const struct bt_driver_s *dev)
 
   /* Drain any cached Rx data */
 
-  (void)lower->rxdrain(lower);
+  lower->rxdrain(lower);
 
   /* Attach the Rx event handler */
 

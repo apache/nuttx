@@ -561,9 +561,9 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
 
   /* Set the starting position for the run */
 
-  (void)st7565_send_one_data(priv, ST7565_SETPAGESTART + page);
-  (void)st7565_send_one_data(priv, ST7565_SETCOLL + (col & 0x0f));
-  (void)st7565_send_one_data(priv, ST7565_SETCOLH + (col >> 4));
+  st7565_send_one_data(priv, ST7565_SETPAGESTART + page);
+  st7565_send_one_data(priv, ST7565_SETCOLL + (col & 0x0f));
+  st7565_send_one_data(priv, ST7565_SETCOLH + (col >> 4));
 
   /* Select data transfer */
 
@@ -571,7 +571,7 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
 
   /* Then transfer all of the data */
 
-  (void)st7565_send_data_buf(priv, fbptr, pixlen);
+  st7565_send_data_buf(priv, fbptr, pixlen);
 
   /* Unlock and de-select the device */
 
@@ -787,24 +787,24 @@ static int st7565_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display off */
 
-      (void)st7565_send_one_data(priv, ST7565_DISPOFF);
-      (void)st7565_backlight(priv, 0);
+      st7565_send_one_data(priv, ST7565_DISPOFF);
+      st7565_backlight(priv, 0);
       priv->power_level = 0;
     }
   else
     {
-      (void)st7565_send_one_data(priv, ST7565_DISPON);
-      (void)st7565_send_one_data(priv, ST7565_DISPRAM);
+      st7565_send_one_data(priv, ST7565_DISPON);
+      st7565_send_one_data(priv, ST7565_DISPRAM);
 
       /* Don't use value 1 of backlight to allow low power mode */
 
       if (power == 1)
         {
-          (void)st7565_backlight(priv, 0);
+          st7565_backlight(priv, 0);
         }
       else
         {
-          (void)st7565_backlight(priv, power);
+          st7565_backlight(priv, power);
         }
 
       priv->power_level = 1;
@@ -861,8 +861,8 @@ static int st7565_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
-  (void)st7565_send_one_data(priv, ST7565_SETEVREG(contrast));
+  st7565_send_one_data(priv, ST7565_SETEVMODE);
+  st7565_send_one_data(priv, ST7565_SETEVREG(contrast));
   priv->contrast = contrast;
 
   /* Deselect command transfer */
@@ -906,9 +906,9 @@ static inline void up_clear(FAR struct st7565_dev_s *priv)
 
       /* Set the starting position for the run */
 
-      (void)st7565_send_one_data(priv, ST7565_SETPAGESTART + i);
-      (void)st7565_send_one_data(priv, ST7565_SETCOLL);
-      (void)st7565_send_one_data(priv, ST7565_SETCOLH);
+      st7565_send_one_data(priv, ST7565_SETPAGESTART + i);
+      st7565_send_one_data(priv, ST7565_SETCOLL);
+      st7565_send_one_data(priv, ST7565_SETCOLH);
 
       /* Select data transfer */
 
@@ -916,8 +916,8 @@ static inline void up_clear(FAR struct st7565_dev_s *priv)
 
       /* Then transfer all 96 columns of data */
 
-      (void)st7565_send_data_buf(priv, &priv->fb[page * ST7565_XRES],
-                                 ST7565_XRES);
+      st7565_send_data_buf(priv, &priv->fb[page * ST7565_XRES],
+                           ST7565_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -997,87 +997,87 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   /* Reset by command in case of st7565_reset not implemeted */
 
-  (void)st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
+  st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
 
   /* Follow NHD-C12864KGZ DISPLAY INITIALIZATION...  */
 
 #if defined(CONFIG_NHD_C12864KGZ)
 
-  (void)st7565_send_one_data(priv, ST7565_BIAS_1_9);
+  st7565_send_one_data(priv, ST7565_BIAS_1_9);
 
-  (void)st7565_send_one_data(priv, ST7565_REG_RES_5_5);
-  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
-  (void)st7565_send_one_data(priv, ST7565_SETEVREG(15));
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
-  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+  st7565_send_one_data(priv, ST7565_REG_RES_5_5);
+  st7565_send_one_data(priv, ST7565_SETEVMODE);
+  st7565_send_one_data(priv, ST7565_SETEVREG(15));
+  st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
+  st7565_send_one_data(priv, ST7565_SETSTARTLINE);
 
 #elif defined(CONFIG_ERC_12864_3)
 
-  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
-  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
-  (void)st7565_send_one_data(priv, ST7565_BIAS_1_9);
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
-  (void)st7565_send_one_data(priv, ST7565_REG_RES_5_5);
-  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
-  (void)st7565_send_one_data(priv, ST7565_SETEVREG(0x24));
-  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+  st7565_send_one_data(priv, ST7565_ADCNORMAL);
+  st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  st7565_send_one_data(priv, ST7565_BIAS_1_9);
+  st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
+  st7565_send_one_data(priv, ST7565_REG_RES_5_5);
+  st7565_send_one_data(priv, ST7565_SETEVMODE);
+  st7565_send_one_data(priv, ST7565_SETEVREG(0x24));
+  st7565_send_one_data(priv, ST7565_SETSTARTLINE);
 
 #elif defined(CONFIG_AQM_1248A)
 
-  (void)st7565_send_one_data(priv, ST7565_DISPOFF);
-  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
-  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
-  (void)st7565_send_one_data(priv, ST7565_BIAS_1_7);
+  st7565_send_one_data(priv, ST7565_DISPOFF);
+  st7565_send_one_data(priv, ST7565_ADCNORMAL);
+  st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  st7565_send_one_data(priv, ST7565_BIAS_1_7);
 
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_B);
+  st7565_send_one_data(priv, ST7565_POWERCTRL_B);
   up_mdelay(2);
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_BR);
+  st7565_send_one_data(priv, ST7565_POWERCTRL_BR);
   up_mdelay(2);
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
+  st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
 
-  (void)st7565_send_one_data(priv, ST7565_REG_RES_4_5);
-  (void)st7565_send_one_data(priv, ST7565_SETEVMODE);
-  (void)st7565_send_one_data(priv, ST7565_SETEVREG(0x1c));
-  (void)st7565_send_one_data(priv, ST7565_DISPRAM);
-  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
-  (void)st7565_send_one_data(priv, ST7565_DISPNORMAL);
-  (void)st7565_send_one_data(priv, ST7565_DISPON);
+  st7565_send_one_data(priv, ST7565_REG_RES_4_5);
+  st7565_send_one_data(priv, ST7565_SETEVMODE);
+  st7565_send_one_data(priv, ST7565_SETEVREG(0x1c));
+  st7565_send_one_data(priv, ST7565_DISPRAM);
+  st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+  st7565_send_one_data(priv, ST7565_DISPNORMAL);
+  st7565_send_one_data(priv, ST7565_DISPON);
 
 #else
 #  error "No initialization sequence selected"
 #endif
 
 #if 0
-  (void)st7565_send_one_data(priv, ST7565_DISPON);
-  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
-  (void)st7565_send_one_data(priv, ST7565_REG_RES_RR1);
-  (void)st7565_send_one_data(priv, ST7565_SETEV);
-  (void)st7565_send_one_data(priv, 0x32);
-  (void)st7565_send_one_data(priv, ST7565_POWERCTRL);
-  (void)st7565_send_one_data(priv, ST7565_SETSTARTLINE);
-  (void)st7565_send_one_data(priv, ST7565_SETPAGESTART);
-  (void)st7565_send_one_data(priv, ST7565_SETCOLH);
-  (void)st7565_send_one_data(priv, ST7565_SETCOLL);
-  (void)st7565_send_one_data(priv, ST7565_DISPON);
-  (void)st7565_send_one_data(priv, ST7565_DISPRAM);
+  st7565_send_one_data(priv, ST7565_DISPON);
+  st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  st7565_send_one_data(priv, ST7565_REG_RES_RR1);
+  st7565_send_one_data(priv, ST7565_SETEV);
+  st7565_send_one_data(priv, 0x32);
+  st7565_send_one_data(priv, ST7565_POWERCTRL);
+  st7565_send_one_data(priv, ST7565_SETSTARTLINE);
+  st7565_send_one_data(priv, ST7565_SETPAGESTART);
+  st7565_send_one_data(priv, ST7565_SETCOLH);
+  st7565_send_one_data(priv, ST7565_SETCOLL);
+  st7565_send_one_data(priv, ST7565_DISPON);
+  st7565_send_one_data(priv, ST7565_DISPRAM);
 #endif
 
 #ifdef CONFIG_ST7565_MIRROR_X
-  (void)st7565_send_one_data(priv, ST7565_ADCINVERSE);
+  st7565_send_one_data(priv, ST7565_ADCINVERSE);
 #else
-  (void)st7565_send_one_data(priv, ST7565_ADCNORMAL);
+  st7565_send_one_data(priv, ST7565_ADCNORMAL);
 #endif
 
 #ifdef CONFIG_ST7565_MIRROR_Y
-  (void)st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
+  st7565_send_one_data(priv, ST7565_SETCOMREVERSE);
 #else
-  (void)st7565_send_one_data(priv, ST7565_SETCOMNORMAL);
+  st7565_send_one_data(priv, ST7565_SETCOMNORMAL);
 #endif
 
 #ifdef CONFIG_ST7565_INVERSE_VIDEO
-  (void)st7565_send_one_data(priv, ST7565_DISPINVERSE);
+  st7565_send_one_data(priv, ST7565_DISPINVERSE);
 #else
-  (void)st7565_send_one_data(priv, ST7565_DISPNORMAL);
+  st7565_send_one_data(priv, ST7565_DISPNORMAL);
 #endif
 
   /* Let go of the SPI lock and de-select the device */

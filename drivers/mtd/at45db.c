@@ -282,7 +282,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
    * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -292,8 +292,8 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 
   SPI_SETMODE(priv->spi, SPIDEV_MODE0);
   SPI_SETBITS(priv->spi, 8);
-  (void)SPI_HWFEATURES(priv->spi, 0);
-  (void)SPI_SETFREQUENCY(priv->spi, CONFIG_AT45DB_FREQUENCY);
+  SPI_HWFEATURES(priv->spi, 0);
+  SPI_SETFREQUENCY(priv->spi, CONFIG_AT45DB_FREQUENCY);
 }
 
 /************************************************************************************
@@ -302,7 +302,7 @@ static void at45db_lock(FAR struct at45db_dev_s *priv)
 
 static inline void at45db_unlock(FAR struct at45db_dev_s *priv)
 {
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /************************************************************************************
@@ -353,7 +353,7 @@ static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
    * ID bytes from the FLASH.
    */
 
-  (void)SPI_SEND(priv->spi, AT45DB_RDDEVID);
+  SPI_SEND(priv->spi, AT45DB_RDDEVID);
   SPI_RECVBLOCK(priv->spi, devid, 3);
 
   /* Deselect the FLASH */

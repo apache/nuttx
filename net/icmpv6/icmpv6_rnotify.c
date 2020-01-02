@@ -189,7 +189,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
    * priority inheritance enabled.
    */
 
-  (void)nxsem_init(&notify->rn_sem, 0, 0);
+  nxsem_init(&notify->rn_sem, 0, 0);
   nxsem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
@@ -248,7 +248,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
     }
 
   leave_critical_section(flags);
-  (void)nxsem_destroy(&notify->rn_sem);
+  nxsem_destroy(&notify->rn_sem);
   return ret;
 }
 
@@ -294,14 +294,14 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
    * the wrong error code.
    */
 
-  (void)net_timedwait(&notify->rn_sem, &abstime);
+  net_timedwait(&notify->rn_sem, &abstime);
   ret = notify->rn_result;
 
   /* Remove our wait structure from the list (we may no longer be at the
    * head of the list).
    */
 
-  (void)icmpv6_rwait_cancel(notify);
+  icmpv6_rwait_cancel(notify);
 
   /* Re-enable interrupts and return the result of the wait */
 

@@ -275,26 +275,12 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 
 static void sam_takechsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_chsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_chsem);
 }
 
 static inline void sam_givechsem(void)
 {
-  (void)nxsem_post(&g_chsem);
+  nxsem_post(&g_chsem);
 }
 
 /****************************************************************************
@@ -307,26 +293,12 @@ static inline void sam_givechsem(void)
 
 static void sam_takedsem(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_dsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_dsem);
 }
 
 static inline void sam_givedsem(void)
 {
-  (void)nxsem_post(&g_dsem);
+  nxsem_post(&g_dsem);
 }
 
 /****************************************************************************
@@ -1134,7 +1106,7 @@ static inline int sam_single(struct sam_dma_s *dmach)
    * EBCISR register could cause a loss of interrupts!
    */
 
-  (void)getreg32(SAM_DMAC_EBCISR);
+  getreg32(SAM_DMAC_EBCISR);
 
   /* Write the starting source address in the SADDR register */
 
@@ -1208,7 +1180,7 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
    * EBCISR register could cause a loss of interrupts!
    */
 
-  (void)getreg32(SAM_DMAC_EBCISR);
+  getreg32(SAM_DMAC_EBCISR);
 
   /* Set up the initial CTRLA register */
 
@@ -1381,7 +1353,7 @@ void weak_function up_dma_initialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt, NULL);
+  irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt, NULL);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
@@ -1450,7 +1422,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
            * reading the EBCISR register could cause a loss of interrupts!
            */
 
-          (void)getreg32(SAM_DMAC_EBCISR);
+          getreg32(SAM_DMAC_EBCISR);
 
           /* Disable the channel by writing one to the write-only channel
            * disable register

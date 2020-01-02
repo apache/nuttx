@@ -102,26 +102,12 @@ static const size_t page_sizes[STM32_FLASH_NPAGES] = STM32_FLASH_SIZES;
 
 static void sem_lock(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = sem_wait(&g_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&g_sem);
 }
 
 static inline void sem_unlock(void)
 {
-  sem_post(&g_sem);
+  nxsem_post(&g_sem);
 }
 
 static void flash_unlock(void)

@@ -173,7 +173,7 @@ int stm32_rgbled_setup(void)
 
       /* Initialize led off */
 
-      (void)nx_write(fd, "#000000", 8);
+      nx_write(fd, "#000000", 8);
       close(fd);
 
       /* Now we are initialized */

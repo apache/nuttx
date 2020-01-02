@@ -476,7 +476,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_class_s *hubclass,
   if (ret < 0)
     {
       uerr("ERROR: Failed to allocate Interrupt IN endpoint: %d\n", ret);
-      (void)DRVR_EPFREE(hport->drvr, priv->intin);
+      DRVR_EPFREE(hport->drvr, priv->intin);
       return ret;
     }
 
@@ -831,7 +831,7 @@ static void usbhost_hub_event(FAR void *arg)
                   usbhost_putle16(ctrlreq->index, port);
                   usbhost_putle16(ctrlreq->len, 0);
 
-                  (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
+                  DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
                 }
 
               debouncetime += 25;
@@ -896,7 +896,7 @@ static void usbhost_hub_event(FAR void *arg)
                       usbhost_putle16(ctrlreq->index, port);
                       usbhost_putle16(ctrlreq->len, 0);
 
-                      (void)DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
+                      DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
                     }
 
                   connport = &priv->hport[port];
@@ -1052,7 +1052,7 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   /* Disable power to all downstream ports */
 
-  (void)usbhost_hubpwr(priv, hport, false);
+  usbhost_hubpwr(priv, hport, false);
 
   /* Free the allocated control request */
 
@@ -1219,8 +1219,8 @@ static void usbhost_callback(FAR void *arg, ssize_t nbytes)
 
   if (work_available(&priv->work) && !priv->disconnected)
     {
-      (void)work_queue(LPWORK, &priv->work, (worker_t)usbhost_hub_event,
-                       hubclass, delay);
+      work_queue(LPWORK, &priv->work, (worker_t)usbhost_hub_event,
+                 hubclass, delay);
     }
 }
 
@@ -1420,7 +1420,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *hubclass,
   if (ret < 0)
     {
       uerr("ERROR: DRVR_ASYNCH failed: %d\n", ret);
-      (void)usbhost_hubpwr(priv, hport, false);
+      usbhost_hubpwr(priv, hport, false);
     }
 
   return ret;
@@ -1472,7 +1472,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
    * hub interrupt pipe events.  That work may be lost by this action.
    */
 
-  (void)work_cancel(LPWORK, &priv->work);
+  work_cancel(LPWORK, &priv->work);
 
   /* Schedule the disconnection work */
 

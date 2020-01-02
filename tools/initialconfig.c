@@ -647,8 +647,8 @@ static int enum_boards(const char *dirpath, struct dirent *entry, void *arg)
             {
               /* Enumerate the board configurations */
 
-              (void)foreach_dirent(boardpath, enum_board_configurations,
-                                   entry->d_name);
+              foreach_dirent(boardpath, enum_board_configurations,
+                             entry->d_name);
             }
         }
     }

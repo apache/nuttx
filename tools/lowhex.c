@@ -148,7 +148,7 @@ int main(int argc, char **argv)
             }
         }
 
-      (void)fputs(g_line, outstream);
+      fputs(g_line, outstream);
     }
 
   ret = 0;

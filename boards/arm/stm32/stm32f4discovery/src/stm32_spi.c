@@ -70,28 +70,28 @@
 void weak_function stm32_spidev_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
-  (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
+  stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
 #endif
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX31855)
-  (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
+  stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
 #if defined(CONFIG_LCD_MAX7219) || defined(CONFIG_LEDS_MAX7219)
-  (void)stm32_configgpio(GPIO_MAX7219_CS);  /* MAX7219 chip select */
+  stm32_configgpio(GPIO_MAX7219_CS);  /* MAX7219 chip select */
 #endif
 #if defined(CONFIG_LCD_ST7567)
-  (void)stm32_configgpio(STM32_LCD_CS);     /* ST7567 chip select */
+  stm32_configgpio(STM32_LCD_CS);     /* ST7567 chip select */
 #endif
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX6675)
-  (void)stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
+  stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
 #endif
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01) || \
     defined(CONFIG_LCD_SSD1351)
-  (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
+  stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
 # if defined(CONFIG_LCD_UG2864AMBAG01)
-  (void)stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
+  stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
 # endif
 # if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
-  (void)stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
+  stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
 # endif
 #endif
 }
@@ -251,7 +251,7 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      (void)stm32_gpiowrite(STM32_LCD_RS, !cmd);
+      stm32_gpiowrite(STM32_LCD_RS, !cmd);
 
       return OK;
     }
@@ -269,10 +269,10 @@ int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        */
 
 # if defined(CONFIG_LCD_UG2864AMBAG01)
-      (void)stm32_gpiowrite(GPIO_OLED_A0, !cmd);
+      stm32_gpiowrite(GPIO_OLED_A0, !cmd);
 # endif
 # if defined(CONFIG_LCD_UG2864HSWEG01) || defined(CONFIG_LCD_SSD1351)
-      (void)stm32_gpiowrite(GPIO_OLED_DC, !cmd);
+      stm32_gpiowrite(GPIO_OLED_DC, !cmd);
 # endif
       return OK;
     }

@@ -2145,21 +2145,8 @@ struct adc_dev_s *sam_adc_initialize(void)
 
 void sam_adc_lock(FAR struct sam_adc_s *priv)
 {
-  int ret;
-
   ainfo("Locking\n");
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-
-      /* This should only fail if the wait was canceled by an signal
-       * (and the worker thread will receive a lot of signals).
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************

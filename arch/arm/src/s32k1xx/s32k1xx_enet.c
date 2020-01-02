@@ -562,8 +562,8 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT, s32k1xx_txtimeout_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT, s32k1xx_txtimeout_expiry, 1,
+           (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -963,7 +963,7 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
    * new XMIT data
    */
 
-  (void)devif_poll(&priv->dev, s32k1xx_txpoll);
+  devif_poll(&priv->dev, s32k1xx_txpoll);
 }
 
 /****************************************************************************
@@ -1033,8 +1033,8 @@ static void s32k1xx_enet_interrupt_work(FAR void *arg)
       galrstore = getreg32(S32K1XX_ENET_GALR);
 #endif
 
-      (void)s32k1xx_ifdown(&priv->dev);
-      (void)s32k1xx_ifup_action(&priv->dev, false);
+      s32k1xx_ifdown(&priv->dev);
+      s32k1xx_ifup_action(&priv->dev, false);
 
 #ifdef CONFIG_NET_MCASTGROUP
       /* Now write the multicast table back */
@@ -1045,7 +1045,7 @@ static void s32k1xx_enet_interrupt_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->dev, s32k1xx_txpoll);
+      devif_poll(&priv->dev, s32k1xx_txpoll);
     }
   else
     {
@@ -1151,12 +1151,12 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
    * aggressive hardware reset.
    */
 
-  (void)s32k1xx_ifdown(&priv->dev);
-  (void)s32k1xx_ifup_action(&priv->dev, false);
+  s32k1xx_ifdown(&priv->dev);
+  s32k1xx_ifup_action(&priv->dev, false);
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, s32k1xx_txpoll);
+  devif_poll(&priv->dev, s32k1xx_txpoll);
   net_unlock();
 }
 
@@ -1230,13 +1230,13 @@ static void s32k1xx_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, S32K1XX_WDDELAY, s32k1xx_txpoll);
+      devif_timer(&priv->dev, S32K1XX_WDDELAY, s32k1xx_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */
 
-  (void)wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry,
+           1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1367,8 +1367,8 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry, 1,
+           (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1505,7 +1505,7 @@ static void s32k1xx_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          (void)devif_poll(&priv->dev, s32k1xx_txpoll);
+          devif_poll(&priv->dev, s32k1xx_txpoll);
         }
     }
 
@@ -2579,11 +2579,11 @@ int s32k1xx_netinitialize(int intf)
    * the device and/or calling s32k1xx_ifdown().
    */
 
-  (void)s32k1xx_ifdown(&priv->dev);
+  s32k1xx_ifdown(&priv->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
 
   UNUSED(ret);
   return OK;
@@ -2603,7 +2603,7 @@ int s32k1xx_netinitialize(int intf)
 #if CONFIG_S32K1XX_ENET_NETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)s32k1xx_netinitialize(0);
+  s32k1xx_netinitialize(0);
 }
 #endif
 

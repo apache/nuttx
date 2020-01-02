@@ -215,9 +215,9 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 
 errout:
 #ifdef CONFIG_ARCH_ADDRENV
-  (void)nxflat_addrenv_restore(loadinfo);
+  nxflat_addrenv_restore(loadinfo);
 #endif
-  (void)nxflat_unload(loadinfo);
+  nxflat_unload(loadinfo);
   return ret;
 }
 

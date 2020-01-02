@@ -98,6 +98,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)lpc54_bringup();
+  lpc54_bringup();
 }
 #endif

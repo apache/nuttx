@@ -464,21 +464,7 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
 
 static void i2c_takesem(sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /*******************************************************************************
@@ -1386,8 +1372,8 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
   priv->dev.ops = &g_i2cops;
   priv->flags = 0;
 
-  (void)nxsem_init(&priv->exclsem, 0, 1);
-  (void)nxsem_init(&priv->waitsem, 0, 0);
+  nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Perform repeatable I2C hardware initialization */
 
@@ -1421,7 +1407,7 @@ int sam_i2c_uninitialize(FAR struct i2c_master_s *dev)
 
   /* Detach Interrupt Handler */
 
-  (void)irq_detach(priv->attr->irq);
+  irq_detach(priv->attr->irq);
   return OK;
 }
 

@@ -130,9 +130,7 @@ int board_app_initialize(uintptr_t arg)
   int index;
   char buf[9];
 #endif
-  int ret;
-
-  (void)ret;
+  int ret = OK;
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
@@ -377,8 +375,7 @@ int board_app_initialize(uintptr_t arg)
 
 #endif
 
-  UNUSED(ret);
-  return OK;
+  return ret;
 }
 
 #ifdef CONFIG_BOARDCTL_IOCTL

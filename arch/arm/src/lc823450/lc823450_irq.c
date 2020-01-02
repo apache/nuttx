@@ -199,7 +199,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
 #ifdef CONFIG_DEBUG
 static int lc823450_nmi(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! NMI received\n");
   PANIC();
   return 0;
@@ -207,7 +207,7 @@ static int lc823450_nmi(int irq, FAR void *context, FAR void *arg)
 
 static int lc823450_busfault(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
@@ -215,7 +215,7 @@ static int lc823450_busfault(int irq, FAR void *context, FAR void *arg)
 
 static int lc823450_usagefault(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
@@ -223,7 +223,7 @@ static int lc823450_usagefault(int irq, FAR void *context, FAR void *arg)
 
 static int lc823450_pendsv(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! PendSV received\n");
   PANIC();
   return 0;
@@ -231,7 +231,7 @@ static int lc823450_pendsv(int irq, FAR void *context, FAR void *arg)
 
 static int lc823450_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! Debug Monitor receieved\n");
   PANIC();
   return 0;
@@ -239,7 +239,7 @@ static int lc823450_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 
 static int lc823450_reserved(int irq, FAR void *context, FAR void *arg)
 {
-  (void)enter_critical_section();
+  enter_critical_section();
   irqinfo("PANIC!!! Reserved interrupt\n");
   PANIC();
   return 0;

@@ -59,7 +59,7 @@ int sighold(int signo)
 
   /* Create a set of signals with only the signal to be blocked */
 
-  (void)sigemptyset(&set);
+  sigemptyset(&set);
   ret = sigaddset(&set, signo);
   if (ret == OK)
     {

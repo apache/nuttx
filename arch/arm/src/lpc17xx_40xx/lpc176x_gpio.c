@@ -448,7 +448,7 @@ static inline int lpc17_40_configinterrupt(lpc17_40_pinset_t cfgset, unsigned in
    * starting point and consistent behavior during the re-configuration.
    */
 
-  (void)lpc17_40_configinput(cfgset, port, pin);
+  lpc17_40_configinput(cfgset, port, pin);
 
   /* Then just remember the rising/falling edge interrupt enabled */
 
@@ -477,7 +477,7 @@ static inline int lpc17_40_configoutput(lpc17_40_pinset_t cfgset, unsigned int p
    * starting point and consistent behavior during the re-configuration.
    */
 
-  (void)lpc17_40_configinput(DEFAULT_INPUT, port, pin);
+  lpc17_40_configinput(DEFAULT_INPUT, port, pin);
 
   /* Check for open drain output */
 
@@ -525,7 +525,7 @@ static int lpc17_40_configalternate(lpc17_40_pinset_t cfgset, unsigned int port,
    * starting point and consistent behavior during the re-configuration.
    */
 
-  (void)lpc17_40_configinput(DEFAULT_INPUT, port, pin);
+  lpc17_40_configinput(DEFAULT_INPUT, port, pin);
 
   /* Set up PINSEL registers */
   /* Configure as GPIO */

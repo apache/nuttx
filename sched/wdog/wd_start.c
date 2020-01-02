@@ -250,7 +250,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
    * remove it).
    */
 
-  (void)sched_timer_cancel();
+  sched_timer_cancel();
 #endif
 
   /* Do the easy case first -- when the watchdog timer queue is empty. */

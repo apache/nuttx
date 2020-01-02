@@ -162,7 +162,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   if (attr)
     {
-      (void)spawn_execattrs(pid, attr);
+      spawn_execattrs(pid, attr);
     }
 
   /* Re-enable pre-emption and return */

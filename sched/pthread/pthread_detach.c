@@ -87,7 +87,7 @@ int pthread_detach(pthread_t thread)
 
   /* Find the entry associated with this pthread. */
 
-  (void)pthread_sem_take(&group->tg_joinsem, NULL, false);
+  pthread_sem_take(&group->tg_joinsem, NULL, false);
   pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
@@ -119,7 +119,7 @@ int pthread_detach(pthread_t thread)
       ret = OK;
     }
 
-  (void)pthread_sem_give(&group->tg_joinsem);
+  pthread_sem_give(&group->tg_joinsem);
 
   sinfo("Returning %d\n", ret);
   return ret;

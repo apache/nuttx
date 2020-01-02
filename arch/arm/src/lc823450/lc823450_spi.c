@@ -153,24 +153,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-         ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait was
-           * awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -444,14 +431,14 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
     {
       for (i = 0; i < nwords; i++)
         {
-          (void)spi_send(dev, *buf16++);
+          spi_send(dev, *buf16++);
         }
     }
   else
     {
       for (i = 0; i < nwords; i++)
         {
-          (void)spi_send(dev, *buf++);
+          spi_send(dev, *buf++);
         }
     }
 #endif /* CONFIG_LC823450_SPI_DMA */

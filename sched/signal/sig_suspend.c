@@ -98,7 +98,7 @@ int sigsuspend(FAR const sigset_t *set)
 
   /* sigsuspend() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can

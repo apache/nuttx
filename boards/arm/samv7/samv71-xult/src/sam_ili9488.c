@@ -909,7 +909,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
 {
   /* Save the result and cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
   priv->result = result;
 
   /* Wake up the waiting thread */
@@ -994,11 +994,7 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
        * incremented and there will be no wait.
        */
 
-      ret = nxsem_wait(&priv->waitsem);
-
-      /* The only expected failure is EINTR */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      nxsem_wait_uninterruptible(&priv->waitsem);
     }
 
   /* Dump the collect DMA sample data */

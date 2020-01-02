@@ -989,8 +989,8 @@ static int c5471_transmit(struct c5471_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->c_txtimeout, C5471_TXTIMEOUT,
-                 c5471_txtimeout_expiry, 1, (wdparm_t)priv);
+  wd_start(priv->c_txtimeout, C5471_TXTIMEOUT,
+           c5471_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -1539,7 +1539,7 @@ static void c5471_txdone(struct c5471_driver_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->c_dev, c5471_txpoll);
+  devif_poll(&priv->c_dev, c5471_txpoll);
 }
 
 /****************************************************************************
@@ -1707,7 +1707,7 @@ static void c5471_txtimeout_work(FAR void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->c_dev, c5471_txpoll);
+  devif_poll(&priv->c_dev, c5471_txpoll);
   net_unlock();
 }
 
@@ -1778,13 +1778,13 @@ static void c5471_poll_work(FAR void *arg)
     {
       /* If so, update TCP timing states and poll the network for new XMIT data */
 
-      (void)devif_timer(&priv->c_dev, C5471_WDDELAY, c5471_txpoll);
+      devif_timer(&priv->c_dev, C5471_WDDELAY, c5471_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry, 1,
+           (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1870,8 +1870,8 @@ static int c5471_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry,
+           1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -1969,7 +1969,7 @@ static void c5471_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          (void)devif_poll(&priv->c_dev, c5471_txpoll);
+          devif_poll(&priv->c_dev, c5471_txpoll);
         }
     }
 
@@ -2458,7 +2458,7 @@ void up_netinitialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_c5471[0].c_dev, NET_LL_ETHERNET);
+  netdev_register(&g_c5471[0].c_dev, NET_LL_ETHERNET);
 }
 
 #endif /* CONFIG_NET */

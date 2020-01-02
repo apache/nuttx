@@ -181,7 +181,7 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
     {
       inode = bch->inode;
 
-      (void)bchlib_flushsector(bch);
+      bchlib_flushsector(bch);
       bch->sector = (size_t)-1;
 
       ret = inode->u.i_bops->read(inode, bch->buffer, sector, 1);

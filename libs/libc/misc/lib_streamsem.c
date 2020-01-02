@@ -73,5 +73,5 @@ void stream_semtake(FAR struct streamlist *list)
 
 void stream_semgive(FAR struct streamlist *list)
 {
-  (void)_SEM_POST(&list->sl_sem);
+  _SEM_POST(&list->sl_sem);
 }

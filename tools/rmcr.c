@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 
       g_line[len + 1] = '\n';
       g_line[len + 2] = '\0';
-      (void)fputs(g_line, outstream);
+      fputs(g_line, outstream);
     }
 
   ret = 0;

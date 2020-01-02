@@ -397,7 +397,7 @@ static void lo_loopback_work(FAR void *arg)
   /* Perform the loopback */
 
   net_lock();
-  (void)lo_loopback(&priv->lo_radio.r_dev);
+  lo_loopback(&priv->lo_radio.r_dev);
   net_unlock();
 }
 
@@ -434,11 +434,11 @@ static void lo_poll_work(FAR void *arg)
 
   /* And perform the poll */
 
-  (void)devif_timer(&priv->lo_radio.r_dev, LO_WDDELAY, lo_loopback);
+  devif_timer(&priv->lo_radio.r_dev, LO_WDDELAY, lo_loopback);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
+  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -522,8 +522,8 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry,
+           1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;
@@ -599,7 +599,7 @@ static void lo_txavail_work(FAR void *arg)
 
       /* Then perform the poll */
 
-      (void)devif_poll(&priv->lo_radio.r_dev, lo_loopback);
+      devif_poll(&priv->lo_radio.r_dev, lo_loopback);
     }
 
   net_unlock();
@@ -1061,7 +1061,7 @@ int pktradio_loopback(void)
    * performed.
    */
 
-  (void)netdev_register(&priv->lo_radio.r_dev, NET_LL_PKTRADIO);
+  netdev_register(&priv->lo_radio.r_dev, NET_LL_PKTRADIO);
 
   /* Put the network in the UP state */
 

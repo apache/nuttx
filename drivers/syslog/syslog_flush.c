@@ -86,7 +86,7 @@ int syslog_flush(void)
    * buffer.
    */
 
-  (void)syslog_flush_intbuffer(g_syslog_channel, true);
+  syslog_flush_intbuffer(g_syslog_channel, true);
 #endif
 
   /* Then flush all of the buffered output to the SYSLOG device */

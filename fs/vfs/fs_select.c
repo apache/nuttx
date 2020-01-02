@@ -103,7 +103,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* select() is cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* How many pollfd structures do we need to allocate? */
 

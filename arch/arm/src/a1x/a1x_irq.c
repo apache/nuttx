@@ -156,7 +156,7 @@ void up_irqinitialize(void)
     {
       putreg32(0x00000000, A1X_INTC_EN(i));   /* 0 disables corresponding interrupt */
       putreg32(0xffffffff, A1X_INTC_MASK(i)); /* 1 masks corresponding interrupt */
-      (void)getreg32(A1X_INTC_IRQ_PEND(i));   /* Reading status clears pending interrupts */
+      getreg32(A1X_INTC_IRQ_PEND(i));         /* Reading status clears pending interrupts */
     }
 
   /* Set the interrupt base address to zero.  We do not use the vectored
@@ -178,7 +178,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  (void)up_irq_enable();
+  up_irq_enable();
 #endif
 
   a1x_dumpintc("initial", 0);

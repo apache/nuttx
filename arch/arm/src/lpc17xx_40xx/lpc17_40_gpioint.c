@@ -468,7 +468,7 @@ void lpc17_40_gpioirqinitialize(void)
    * position in the NVIC with External Interrupt 3
    */
 
-  (void)irq_attach(LPC17_40_IRQ_EINT3, lpc17_40_gpiointerrupt, NULL);
+  irq_attach(LPC17_40_IRQ_EINT3, lpc17_40_gpiointerrupt, NULL);
   up_enable_irq(LPC17_40_IRQ_EINT3);
 
 #elif defined(LPC178x_40xx)
@@ -476,7 +476,7 @@ void lpc17_40_gpioirqinitialize(void)
    * GPIO2.
    */
 
-  (void)irq_attach(LPC17_40_IRQ_GPIO, lpc17_40_gpiointerrupt, NULL);
+  irq_attach(LPC17_40_IRQ_GPIO, lpc17_40_gpiointerrupt, NULL);
   up_enable_irq(LPC17_40_IRQ_GPIO);
 
 #endif

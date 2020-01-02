@@ -256,11 +256,11 @@ void arm_timer_initialize(void)
 
   /* Configure as a (rising) edge-triggered interrupt */
 
-  (void)arm_gic_irq_trigger(IMX_IRQ_GPT, true);
+  arm_gic_irq_trigger(IMX_IRQ_GPT, true);
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(IMX_IRQ_GPT, (xcpt_t)imx_timerisr, NULL);
+  irq_attach(IMX_IRQ_GPT, (xcpt_t)imx_timerisr, NULL);
 
   /* Enable all three GPT output compare interrupts */
 

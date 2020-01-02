@@ -131,7 +131,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
    * still awaken nxsig_timedwait().
    */
 
-  (void)sigemptyset(&set);
+  sigemptyset(&set);
 
   /* nxsig_nanosleep is a simple application of nxsig_timedwait. */
 
@@ -141,8 +141,6 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
    * either (1) EAGAIN meaning that the timeout occurred, or (2) EINTR
    * meaning that some other unblocked signal was caught.
    */
-
-  DEBUGASSERT(ret < 0 && (ret == -EAGAIN || ret == -EINTR));
 
   if (ret == -EAGAIN)
     {
@@ -171,7 +169,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
        * wait.
        */
 
-      (void)clock_time2ticks(rqtp, &ticks);
+      clock_time2ticks(rqtp, &ticks);
 
       /* Get the number of ticks that we actually waited */
 
@@ -191,7 +189,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
           remaining = (clock_t)ticks - elapsed;
         }
 
-      (void)clock_ticks2time((sclock_t)remaining, rmtp);
+      clock_ticks2time((sclock_t)remaining, rmtp);
     }
 
   leave_critical_section(flags);
@@ -279,7 +277,7 @@ int clock_nanosleep(clockid_t clockid, int flags,
 
   /* clock_nanosleep() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Check if absolute time is selected */
 

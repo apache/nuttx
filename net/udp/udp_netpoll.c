@@ -204,7 +204,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct udp_poll_s *info;
   FAR struct devif_callback_s *cb;
-  int ret;
+  int ret = OK;
 
   /* Sanity check */
 

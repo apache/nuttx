@@ -658,7 +658,7 @@ static int bmp280_close_press(FAR struct file *filep)
     }
   else
     {
-      (void) seq_ioctl(priv->seq, priv->id, SCUIOC_FREEFIFO, 0);
+      seq_ioctl(priv->seq, priv->id, SCUIOC_FREEFIFO, 0);
     }
 
   g_refcnt_press--;
@@ -695,7 +695,7 @@ static int bmp280_close_temp(FAR struct file *filep)
     }
   else
     {
-      (void) seq_ioctl(priv->seq, priv->id, SCUIOC_FREEFIFO, 0);
+      seq_ioctl(priv->seq, priv->id, SCUIOC_FREEFIFO, 0);
     }
 
   g_refcnt_temp--;
@@ -934,7 +934,7 @@ int bmp280press_register(FAR const char *devpath, int minor,
 
   /* Register the character driver */
 
-  (void) snprintf(path, sizeof(path), "%s%d", devpath, minor);
+  snprintf(path, sizeof(path), "%s%d", devpath, minor);
   ret = register_driver(path, &g_bmp280pressfops, 0666, priv);
   if (ret < 0)
     {
@@ -985,7 +985,7 @@ int bmp280temp_register(FAR const char *devpath, int minor,
 
   /* Register the character driver */
 
-  (void) snprintf(path, sizeof(path), "%s%d", devpath, minor);
+  snprintf(path, sizeof(path), "%s%d", devpath, minor);
   ret = register_driver(path, &g_bmp280tempfops, 0666, priv);
   if (ret < 0)
     {

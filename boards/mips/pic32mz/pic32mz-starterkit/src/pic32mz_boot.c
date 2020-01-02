@@ -108,6 +108,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)pic32mz_bringup();
+  pic32mz_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

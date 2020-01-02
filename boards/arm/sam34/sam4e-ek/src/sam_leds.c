@@ -178,9 +178,9 @@ static void sam_setleds(uint8_t state)
 
 void board_autoled_initialize(void)
 {
-  (void)sam_configgpio(GPIO_D3);
-  (void)sam_configgpio(GPIO_D2);
-  (void)sam_configgpio(GPIO_D4);
+  sam_configgpio(GPIO_D3);
+  sam_configgpio(GPIO_D2);
+  sam_configgpio(GPIO_D4);
 }
 
 /****************************************************************************

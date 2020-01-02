@@ -224,7 +224,7 @@ static void stm32_enable(FAR const struct automount_lower_s *lower, bool enable)
       if (state->handler)
         {
           bool inserted = stm32_cardinserted(config->mmcsd);
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
 
       state->pending = false;
@@ -383,7 +383,7 @@ void stm32_automount_event(int slotno, bool inserted)
         {
           /* No.. forward the event to the handler */
 
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
     }
 }

@@ -51,7 +51,7 @@ float floorf(float x)
    * -2.0 -2.0  -2.0
    */
 
-  (void)modff(x, &modx);
+  modff(x, &modx);
   if (x < 0.0F && x < modx)
     {
       modx -= 1.0F;

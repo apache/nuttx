@@ -232,7 +232,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid, NXGLIB_SUFFIX)
           /* Then draw the run from ix1 to ix2 at row */
 
           ncols = ix2 - ix1 + 1;
-          (void)pinfo->putrun(row, ix1, pinfo->buffer, ncols);
+          pinfo->putrun(row, ix1, pinfo->buffer, ncols);
         }
 
       /* Add the dx/dy value to get the run positions on the next row */

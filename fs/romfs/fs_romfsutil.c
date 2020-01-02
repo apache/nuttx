@@ -332,21 +332,7 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
 
 void romfs_semtake(struct romfs_mountpt_s *rm)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&rm->rm_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&rm->rm_sem);
 }
 
 /****************************************************************************

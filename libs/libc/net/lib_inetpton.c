@@ -104,7 +104,7 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
   char numstr[4];
   uint8_t *ip;
 
-  (void)memset(dest, 0, sizeof(struct in_addr));
+  memset(dest, 0, sizeof(struct in_addr));
 
   ip        = (uint8_t *)dest;
   srcoffset = 0;
@@ -217,7 +217,7 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
   uint8_t rip[sizeof(struct in6_addr)];
   bool rtime;
 
-  (void)memset(dest, 0, sizeof(struct in6_addr));
+  memset(dest, 0, sizeof(struct in6_addr));
 
   srcoffset = 0;
   numoffset = 0;

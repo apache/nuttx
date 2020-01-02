@@ -374,7 +374,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
                    * pending connections
                    */
 
-                  (void)sq_remafter(&prev->bc_node, &bls->bl_pending);
+                  sq_remafter(&prev->bc_node, &bls->bl_pending);
                 }
               else
                 {
@@ -382,7 +382,7 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
                    * pending connections
                    */
 
-                  (void)sq_remfirst(&bls->bl_pending);
+                  sq_remfirst(&bls->bl_pending);
                 }
 
               /* Put container in the free list */

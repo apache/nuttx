@@ -238,7 +238,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
           irq = g_buttonirq[i];
           if (irq > 0)
             {
-              (void)irq_attach(irq, djoy_interrupt, arg);
+              irq_attach(irq, djoy_interrupt, arg);
               up_enable_irq(irq);
             }
         }
@@ -272,7 +272,7 @@ static void djoy_disable(void)
       if (irq > 0)
         {
           up_disable_irq(irq);
-          (void)irq_detach(irq);
+          irq_detach(irq);
         }
     }
 

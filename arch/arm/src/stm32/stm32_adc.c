@@ -1854,28 +1854,15 @@ static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
 #ifdef HAVE_ADC_CMN_DATA
 static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock)
 {
-  int ret;
+  int ret = OK;
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->cmn->lock);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->cmn->lock);
     }
   else
     {
-      (void)nxsem_post(&priv->cmn->lock);
-      ret = OK;
+      nxsem_post(&priv->cmn->lock);
     }
 
   return ret;
@@ -2803,7 +2790,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_RESOLUTION
   /* Configure ADC resolution */
 
-  (void)adc_resolution_set(dev, priv->resolution);
+  adc_resolution_set(dev, priv->resolution);
 #endif
 
 #ifdef ADC_HAVE_EXTCFG

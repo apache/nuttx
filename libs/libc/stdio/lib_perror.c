@@ -72,9 +72,9 @@ void perror(FAR const char *s)
   /* If strerror() is not enabled, then just print the error number */
 
 #ifdef CONFIG_LIBC_STRERROR
-  (void)fprintf(PERROR_STREAM, "%s: %s\n", s, strerror(errno));
+  fprintf(PERROR_STREAM, "%s: %s\n", s, strerror(errno));
 #else
-  (void)fprintf(PERROR_STREAM, "%s: Error %d\n", s, errno);
+  fprintf(PERROR_STREAM, "%s: Error %d\n", s, errno);
 #endif
 }
 

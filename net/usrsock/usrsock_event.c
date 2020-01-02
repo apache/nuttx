@@ -127,7 +127,7 @@ int usrsock_event(FAR struct usrsock_conn_s *conn, uint16_t events)
 
   /* Send events to callbacks */
 
-  (void)devif_conn_event(NULL, conn, events, conn->list);
+  devif_conn_event(NULL, conn, events, conn->list);
   net_unlock();
 
   return OK;

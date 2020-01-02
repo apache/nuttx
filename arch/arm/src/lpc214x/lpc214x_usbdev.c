@@ -838,8 +838,8 @@ static void lpc214x_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes)
   /* Done */
 
   lpc214x_putreg(0, LPC214X_USBDEV_CTRL);
-  (void)lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
-  (void)lpc214x_usbcmd(CMD_USB_EP_VALIDATEBUFFER, 0);
+  lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
+  lpc214x_usbcmd(CMD_USB_EP_VALIDATEBUFFER, 0);
 }
 
 /****************************************************************************
@@ -911,7 +911,7 @@ static int lpc214x_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
   /* Done */
 
   lpc214x_putreg(0, LPC214X_USBDEV_CTRL);
-  (void)lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
+  lpc214x_usbcmd(CMD_USB_EP_SELECT | epphy, 0);
   result = lpc214x_usbcmd(CMD_USB_EP_CLRBUFFER, 0);
 
   /* The packet overrun bit in the clear buffer response is applicable only
@@ -1674,7 +1674,7 @@ static inline void lpc214x_ep0setup(struct lpc214x_usbdev_s *priv)
                  (privep = lpc214x_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
-            (void)lpc214x_epstall(&privep->ep, true);
+            lpc214x_epstall(&privep->ep, true);
             lpc214x_epwrite(LPC214X_EP0_IN, NULL, 0);
             priv->ep0state = LPC214X_EP0STATUSIN;
           }
@@ -2231,7 +2231,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                       /* Clear the endpoint interrupt */
 
                       usbtrace(TRACE_INTDECODE(LPC214X_TRACEINTID_EP0IN), priv->ep0state);
-                      (void)lpc214x_epclrinterrupt(LPC214X_CTRLEP_IN);
+                      lpc214x_epclrinterrupt(LPC214X_CTRLEP_IN);
                       lpc214x_ep0dataininterrupt(priv);
                     }
                   pending >>= 2;
@@ -2246,7 +2246,7 @@ static int lpc214x_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                         {
                           /* Yes.. clear the endpoint interrupt */
 
-                          (void)lpc214x_epclrinterrupt(epphy);
+                          lpc214x_epclrinterrupt(epphy);
 
                           /* Get the endpoint sructure corresponding to the physical
                            * endpoint number.
@@ -2884,7 +2884,7 @@ static int lpc214x_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   if (resume)
     {
-      (void)lpc214x_wrrequest(privep);
+      lpc214x_wrrequest(privep);
     }
   leave_critical_section(flags);
   return OK;

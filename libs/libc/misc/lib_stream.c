@@ -84,7 +84,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
 
   /* Initialize the list access mutex */
 
-  (void)nxsem_init(&list->sl_sem, 0, 1);
+  nxsem_init(&list->sl_sem, 0, 1);
 
   /* Initialize each FILE structure */
 
@@ -138,7 +138,7 @@ void lib_stream_release(FAR struct task_group_s *group)
 
   /* Destroy the semaphore and release the filelist */
 
-  (void)_SEM_DESTROY(&list->sl_sem);
+  _SEM_DESTROY(&list->sl_sem);
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   /* Release each stream in the list */
@@ -149,7 +149,7 @@ void lib_stream_release(FAR struct task_group_s *group)
 
       /* Destroy the semaphore that protects the IO buffer */
 
-      (void)_SEM_DESTROY(&stream->fs_sem);
+      _SEM_DESTROY(&stream->fs_sem);
 
       /* Release the IO buffer */
 

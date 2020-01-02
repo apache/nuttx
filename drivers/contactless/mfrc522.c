@@ -139,17 +139,17 @@ static const struct file_operations g_mfrc522fops =
 
 static void mfrc522_lock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, true);
+  SPI_LOCK(spi, true);
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
 }
 
 static void mfrc522_unlock(FAR struct spi_dev_s *spi)
 {
-  (void)SPI_LOCK(spi, false);
+  SPI_LOCK(spi, false);
 }
 
 static inline void mfrc522_configspi(FAR struct spi_dev_s *spi)
@@ -158,8 +158,8 @@ static inline void mfrc522_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, CONFIG_MFRC522_SPI_FREQ);
 }
 
 static inline void mfrc522_select(struct mfrc522_dev_s *dev)
@@ -1395,7 +1395,7 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
     {
       for (j = 0, k = 0; j < 8; j++, k += 3)
         {
-          (void)sprintf(&outbuf[k], " %02x", result[i + j]);
+          sprintf(&outbuf[k], " %02x", result[i + j]);
         }
 
       ctlsinfo("  %02x:%s\n", i, outbuf);
@@ -1526,7 +1526,7 @@ static ssize_t mfrc522_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = inode->i_private;
 
-  (void)dev;
+  UNUSED(dev);
 
   return -ENOSYS;
 }

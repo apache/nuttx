@@ -289,7 +289,7 @@ int stm32l4_oneshot_start(FAR struct stm32l4_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)stm32l4_oneshot_cancel(oneshot, NULL);
+      stm32l4_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */

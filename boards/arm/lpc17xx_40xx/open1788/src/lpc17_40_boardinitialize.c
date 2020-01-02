@@ -138,6 +138,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)open1788_bringup();
+  open1788_bringup();
 }
 #endif

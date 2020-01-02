@@ -132,6 +132,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)imx_bringup();
+  imx_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

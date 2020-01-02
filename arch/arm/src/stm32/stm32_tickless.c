@@ -914,7 +914,7 @@ int up_timer_start(FAR const struct timespec *ts)
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)up_timer_cancel(NULL);
+      up_timer_cancel(NULL);
     }
 
   /* Express the delay in microseconds */

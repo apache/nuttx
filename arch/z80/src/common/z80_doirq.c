@@ -99,7 +99,7 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
            * ready-to-run list.
            */
 
-          (void)group_addrenv(NULL);
+          group_addrenv(NULL);
         }
 
       regs = newregs;

@@ -184,7 +184,7 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
 
 void board_userled_initialize(void)
 {
-  (void)sam_portconfig(PORT_STATUS_LED);
+  sam_portconfig(PORT_STATUS_LED);
 }
 
 /****************************************************************************

@@ -268,7 +268,7 @@ static void lpc31_sdraminitialize(void)
    * 16bit mode
    */
 
-  (void)getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
+  getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
 
   putreg32((MPMC_DYNCONFIG0_MDSDRAM | MPMC_DYNCONFIG_HP16_32MX16),
            LPC31_MPMC_DYNCONFIG0);

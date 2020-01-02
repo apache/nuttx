@@ -89,7 +89,7 @@ FAR char *tmpnam(FAR char *s)
       s = path;
     }
 
-  (void)snprintf(s, L_tmpnam, "%s/XXXXXX.tmp", P_tmpdir);
+  snprintf(s, L_tmpnam, "%s/XXXXXX.tmp", P_tmpdir);
   ret = mktemp(s);
   return (ret == OK) ? s : NULL;
 }

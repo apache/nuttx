@@ -271,7 +271,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
       return 0;
     }
 
@@ -283,7 +283,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      (void)iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
       return 0;
     }
 

@@ -3793,7 +3793,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
 
       /* Disable first interrtups, stop and reset the timer */
 
-      (void)pwm_stop(dev);
+      pwm_stop(dev);
 
       /* Then perform the callback into the upper half driver */
 

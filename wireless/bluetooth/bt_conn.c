@@ -149,13 +149,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
 
       wlinfo("calling nxsem_wait\n");
 
-      do
-        {
-          ret = nxsem_wait(&g_btdev.le_pkts_sem);
-        }
-      while (ret == -EINTR);
-
-      DEBUGASSERT(ret == OK);
+      nxsem_wait_uninterruptible(&g_btdev.le_pkts_sem);
 
       /* Check for disconnection */
 
@@ -574,13 +568,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
            * zero when we complete this.
            */
 
-          do
-            {
-              ret = nxsem_wait(&g_conn_handoff.sync_sem);
-            }
-          while (ret == -EINTR);
-
-          DEBUGASSERT(ret == OK);
+          nxsem_wait_uninterruptible(&g_conn_handoff.sync_sem);
 
           /* Start the Tx connection kernel thread */
 
@@ -595,13 +583,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
            * sem_count at -1.  It will be zero again when we continue.
            */
 
-          do
-            {
-              ret = nxsem_wait(&g_conn_handoff.sync_sem);
-            }
-          while (ret == -EINTR);
-
-          DEBUGASSERT(ret == OK);
+          nxsem_wait_uninterruptible(&g_conn_handoff.sync_sem);
           nxsem_post(&g_conn_handoff.sync_sem);
         }
         break;

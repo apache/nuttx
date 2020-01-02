@@ -85,7 +85,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
   /* Establish the fixed SPI attributes for all transfers in the sequence */
 
-  (void)SPI_SETFREQUENCY(spi, seq->frequency);
+  SPI_SETFREQUENCY(spi, seq->frequency);
 
 #ifdef CONFIG_SPI_CS_DELAY_CONTROL
   ret = SPI_SETDELAY(spi, seq->a, seq->b, seq->c);

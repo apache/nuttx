@@ -827,24 +827,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->spilock);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->spilock);
     }
   else
     {
-      (void)nxsem_post(&priv->spilock);
-      ret = OK;
+      ret = nxsem_post(&priv->spilock);
     }
 
   return ret;
@@ -1173,7 +1160,6 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   uint32_t regval;
-  int ret;
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
@@ -1203,13 +1189,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
   spi_wait_synchronization(priv);
 
-  do
-    {
-      /* Wait for the DMA callback to notify us that the transfer is complete */
+  /* Wait for the DMA callback to notify us that the transfer is complete */
 
-      ret = nxsem_wait(&priv->dmasem);
-    }
-  while (ret < 0 && ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->dmasem);
 #else
   const uint16_t *ptx16;
   const uint8_t *ptx8;
@@ -1593,7 +1575,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
    * driver as soon as it starts.
    */
 
-  (void)spi_setfrequency((struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Set MSB first data order and the configured pad mux setting.
    * SPI mode 0 is assumed initially (CPOL=0 and CPHA=0).

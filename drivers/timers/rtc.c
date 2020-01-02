@@ -471,7 +471,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             if (ops->cancelalarm)
               {
-                (void)ops->cancelalarm(upper->lower, alarmid);
+                ops->cancelalarm(upper->lower, alarmid);
               }
 
             upperinfo->active = false;
@@ -542,7 +542,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             if (ops->cancelalarm)
               {
-                (void)ops->cancelalarm(upper->lower, alarmid);
+                ops->cancelalarm(upper->lower, alarmid);
               }
 
             upperinfo->active = false;
@@ -676,7 +676,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             if (ops->cancelperiodic)
               {
-                (void)ops->cancelperiodic(upper->lower, id);
+                ops->cancelperiodic(upper->lower, id);
               }
 
             upperinfo->active = false;

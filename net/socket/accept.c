@@ -245,7 +245,7 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   /* accept() is a cancellation point */
 
-  (void)enter_cancellation_point();
+  enter_cancellation_point();
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 

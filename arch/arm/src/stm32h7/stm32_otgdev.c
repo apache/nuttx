@@ -1519,7 +1519,7 @@ static void stm32_rxfifo_discard(FAR struct stm32_ep_s *privep, int len)
       for (i = 0; i < len; i += 4)
         {
           volatile uint32_t data = stm32_getreg(regaddr);
-          (void)data;
+          UNUSED(data);
         }
     }
 }
@@ -2287,7 +2287,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
               {
                 /* Actually, I think we could just stall here. */
 
-                (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+                stm32_req_dispatch(priv, &priv->ctrlreq);
               }
           }
         else
@@ -2333,7 +2333,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
               {
                 /* Actually, I think we could just stall here. */
 
-                (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+                stm32_req_dispatch(priv, &priv->ctrlreq);
               }
             else
               {
@@ -2397,7 +2397,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC), 0);
         if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
           {
-            (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+            stm32_req_dispatch(priv, &priv->ctrlreq);
           }
         else
           {
@@ -2422,7 +2422,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
             ctrlreq->index == 0 &&
             ctrlreq->len == 1)
           {
-            (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+            stm32_req_dispatch(priv, &priv->ctrlreq);
           }
         else
           {
@@ -2494,7 +2494,7 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
 
       {
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETIF), 0);
-        (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+        stm32_req_dispatch(priv, &priv->ctrlreq);
       }
       break;
 
@@ -2572,7 +2572,7 @@ static inline void stm32_ep0out_setup(struct stm32_usbdev_s *priv)
     {
       /* Dispatch any non-standard requests */
 
-      (void)stm32_req_dispatch(priv, &priv->ctrlreq);
+      stm32_req_dispatch(priv, &priv->ctrlreq);
     }
   else
     {
@@ -4019,10 +4019,10 @@ static void stm32_ep0_configure(FAR struct stm32_usbdev_s *priv)
 {
   /* Enable EP0 IN and OUT */
 
-  (void)stm32_epin_configure(&priv->epin[EP0], USB_EP_ATTR_XFER_CONTROL,
-                             CONFIG_USBDEV_EP0_MAXSIZE);
-  (void)stm32_epout_configure(&priv->epout[EP0], USB_EP_ATTR_XFER_CONTROL,
-                              CONFIG_USBDEV_EP0_MAXSIZE);
+  stm32_epin_configure(&priv->epin[EP0], USB_EP_ATTR_XFER_CONTROL,
+                       CONFIG_USBDEV_EP0_MAXSIZE);
+  stm32_epout_configure(&priv->epout[EP0], USB_EP_ATTR_XFER_CONTROL,
+                        CONFIG_USBDEV_EP0_MAXSIZE);
 }
 
 /****************************************************************************

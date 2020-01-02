@@ -190,7 +190,7 @@ void arm_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(STR71X_IRQ_SYSTIMER, (xcpt_t)str71x_timerisr, NULL);
+  irq_attach(STR71X_IRQ_SYSTIMER, (xcpt_t)str71x_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

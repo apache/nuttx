@@ -563,7 +563,7 @@ static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
   spiinfo("   PIR:%08x  LPTR:%08x\n",
           getreg32(priv->base + STM32L4_QUADSPI_PIR_OFFSET),    /* Polling Interval Register */
           getreg32(priv->base + STM32L4_QUADSPI_LPTR_OFFSET));  /* Low-Power Timeout Register */
-  (void)regval;
+  UNUSED(regval);
 #endif
 }
 #endif
@@ -1325,7 +1325,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1461,28 +1461,21 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
 
       /* Wait for the DMA complete */
 
-      ret = nxsem_wait(&priv->dmawait);
+      ret = nxsem_wait_uninterruptible(&priv->dmawait);
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(priv->dmadog);
+      wd_cancel(priv->dmadog);
 
       /* Check if we were awakened by an error of some kind */
 
       if (ret < 0)
         {
-          /* EINTR is not a failure.  That simply means that the wait
-           * was awakened by a signal.
-           */
-
-          if (ret != -EINTR)
-            {
-              DEBUGPANIC();
-              regval = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
-              regval &= ~QSPI_CR_DMAEN;
-              qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
-              return ret;
-            }
+          DEBUGPANIC();
+          regval = qspi_getreg(priv, STM32L4_QUADSPI_CR_OFFSET);
+          regval &= ~QSPI_CR_DMAEN;
+          qspi_putreg(priv, regval, STM32L4_QUADSPI_CR_OFFSET);
+          return ret;
         }
 
       /* Note that we might be awakened before the wait is over due to
@@ -1694,24 +1687,11 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-          /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -2043,7 +2023,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  (void)nxsem_wait(&priv->op_sem);
+  nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* Convey the result */
@@ -2201,7 +2181,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   /* Wait for the interrupt routine to finish it's magic */
 
-  (void)nxsem_wait(&priv->op_sem);
+  nxsem_wait(&priv->op_sem);
   MEMORY_SYNC();
 
   /* convey the result */

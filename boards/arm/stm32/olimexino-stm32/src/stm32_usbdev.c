@@ -77,7 +77,7 @@
 
 void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler)
 {
-  (void)stm32_gpiosetevent(GPIO_USB_VBUS, true, true, true, pwr_changed_handler, NULL);
+  stm32_gpiosetevent(GPIO_USB_VBUS, true, true, true, pwr_changed_handler, NULL);
 }
 
 /****************************************************************************

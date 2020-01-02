@@ -290,7 +290,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)sam_oneshot_cancel(oneshot, freerun, NULL);
+      sam_oneshot_cancel(oneshot, freerun, NULL);
     }
 
   /* Save the new handler and its argument */
@@ -317,8 +317,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  (void)sam_tc_attach(oneshot->tch, sam_oneshot_handler, oneshot,
-                      TC_INT_CPCS);
+  sam_tc_attach(oneshot->tch, sam_oneshot_handler, oneshot,
+                TC_INT_CPCS);
 
   /* Set RC so that an event will be triggered when TC_CV register counts
    * up to RC.

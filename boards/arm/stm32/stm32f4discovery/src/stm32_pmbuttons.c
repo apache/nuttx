@@ -130,7 +130,7 @@ void stm32_pm_buttons(void)
   board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-  (void)board_button_irq(0, button_handler, NULL);
+  board_button_irq(0, button_handler, NULL);
 #endif
 }
 

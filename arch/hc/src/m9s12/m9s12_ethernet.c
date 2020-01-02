@@ -183,7 +183,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT, emac_txtimeout, 1, (uint32_t)priv);
+  wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT, emac_txtimeout, 1, (uint32_t)priv);
   return OK;
 }
 
@@ -425,7 +425,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->d_dev, emac_txpoll);
+  devif_poll(&priv->d_dev, emac_txpoll);
 }
 
 /****************************************************************************
@@ -496,7 +496,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->d_dev, emac_txpoll);
+  devif_poll(&priv->d_dev, emac_txpoll);
 }
 
 /****************************************************************************
@@ -530,11 +530,11 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->d_dev, HCS12_WDDELAY, emac_txpoll);
+  devif_timer(&priv->d_dev, HCS12_WDDELAY, emac_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, arg);
+  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, arg);
 }
 
 /****************************************************************************
@@ -566,7 +566,7 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (uint32_t)priv);
+  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (uint32_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -656,7 +656,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->d_dev, emac_txpoll);
+      devif_poll(&priv->d_dev, emac_txpoll);
     }
 
   leave_critical_section(flags);
@@ -788,7 +788,7 @@ int emac_initialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->d_dev, NET_LL_ETHERNET);
+  netdev_register(&priv->d_dev, NET_LL_ETHERNET);
   return OK;
 }
 

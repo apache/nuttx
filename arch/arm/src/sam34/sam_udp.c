@@ -962,7 +962,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
             {
               /* Yes... stall the endpoint now */
 
-              (void)sam_ep_stall(privep);
+              sam_ep_stall(privep);
             }
 
           return -ENOENT;
@@ -1318,7 +1318,7 @@ static void sam_ep0_dispatch(struct sam_usbdev_s *priv)
           /* Stall on failure */
 
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_DISPATCHSTALL), 0);
-          (void)sam_ep_stall(&priv->eplist[EP0]);
+          sam_ep_stall(&priv->eplist[EP0]);
         }
     }
 }
@@ -1828,7 +1828,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPSTALLED),
                    priv->ctrl.req);
 
-          (void)sam_ep_stall(&priv->eplist[EP0]);
+          sam_ep_stall(&priv->eplist[EP0]);
         }
         break;
 
@@ -1875,7 +1875,7 @@ static void sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
        * transferred from the FIFO.
        */
 
-      (void)sam_req_read(priv, privep, pktsize, bank);
+      sam_req_read(priv, privep, pktsize, bank);
     }
 
   /* Did we just receive the data associated with an OUT SETUP command? */
@@ -1920,7 +1920,7 @@ static void sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
 
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPOUTSIZE), pktsize);
           sam_csr_clrbits(EP0, UDPEP_CSR_RXDATABK0);
-          (void)sam_ep_stall(privep);
+          sam_ep_stall(privep);
         }
     }
 
@@ -1995,7 +1995,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           /* Continue/resume processing the write requests */
 
           privep->epstate = UDP_EPSTATE_IDLE;
-          (void)sam_req_write(priv, privep);
+          sam_req_write(priv, privep);
         }
 
       /* Setting of the device address is a special case.  The address was
@@ -2706,7 +2706,7 @@ static int sam_ep_resume(struct sam_ep_s *privep)
         {
           /* IN endpoint (or EP0).  Restart any queued write requests */
 
-          (void)sam_req_write(priv, privep);
+          sam_req_write(priv, privep);
         }
     }
 

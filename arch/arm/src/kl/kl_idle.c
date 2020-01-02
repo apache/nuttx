@@ -112,7 +112,7 @@ static void up_idlepm(void)
         {
           /* The new state change failed, revert to the preceding state */
 
-          (void)pm_changestate(PM_IDLE_DOMAIN, oldstate);
+          pm_changestate(PM_IDLE_DOMAIN, oldstate);
         }
       else
         {
@@ -136,7 +136,7 @@ static void up_idlepm(void)
           break;
 
         case PM_SLEEP:
-          (void)kl_pmstandby();
+          kl_pmstandby();
           break;
 
         default:

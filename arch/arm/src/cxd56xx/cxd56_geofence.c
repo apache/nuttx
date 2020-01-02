@@ -445,7 +445,7 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
   int i;
   int ret;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return;
@@ -458,11 +458,11 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
         {
           fds->revents |= POLLIN;
           gnssinfo("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
+          nxsem_post(fds->sem);
         }
     }
 
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
 }
 
 /****************************************************************************
@@ -624,7 +624,7 @@ static int cxd56_geofence_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
   priv  = (FAR struct cxd56_geofence_dev_s *)inode->i_private;
 
-  ret = sem_wait(&priv->devsem);
+  ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
       return ret;
@@ -675,7 +675,7 @@ static int cxd56_geofence_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  sem_post(&priv->devsem);
+  nxsem_post(&priv->devsem);
   return ret;
 }
 #endif
@@ -708,7 +708,7 @@ static int cxd56_geofence_register(FAR const char *devpath)
     }
 
   memset(priv, 0, sizeof(struct cxd56_geofence_dev_s));
-  sem_init(&priv->devsem, 0, 1);
+  nxsem_init(&priv->devsem, 0, 1);
 
   ret = cxd56_geofence_initialize(priv);
   if (ret < 0)

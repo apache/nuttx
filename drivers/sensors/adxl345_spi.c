@@ -70,8 +70,8 @@ static inline void adxl345_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
-  (void)SPI_HWFEATURES(spi, 0);
-  (void)SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
+  SPI_HWFEATURES(spi, 0);
+  SPI_SETFREQUENCY(spi, ADXL345_SPI_MAXFREQUENCY);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
 
   /* Select the ADXL345 */
@@ -101,7 +101,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Send register to read and get the next byte */
 
-  (void)SPI_SEND(priv->spi, regaddr);
+  SPI_SEND(priv->spi, regaddr);
   SPI_RECVBLOCK(priv->spi, &regval, 1);
 
   /* Deselect the ADXL345 */
@@ -110,7 +110,7 @@ uint8_t adxl345_getreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   _err("%02x->%02x\n", regaddr, regval);
@@ -135,7 +135,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
 
   /* Select the ADXL345 */
@@ -144,8 +144,8 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* Send register address and set the value */
 
-  (void)SPI_SEND(priv->spi, regaddr);
-  (void)SPI_SEND(priv->spi, regval);
+  SPI_SEND(priv->spi, regaddr);
+  SPI_SEND(priv->spi, regval);
 
   /* Deselect the ADXL345 */
 
@@ -153,7 +153,7 @@ void adxl345_putreg8(FAR struct adxl345_dev_s *priv, uint8_t regaddr,
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /****************************************************************************
@@ -170,7 +170,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* If SPI bus is shared then lock and configure it */
 
-  (void)SPI_LOCK(priv->spi, true);
+  SPI_LOCK(priv->spi, true);
   adxl345_configspi(priv->spi);
 
   /* Select the ADXL345 */
@@ -179,7 +179,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Send register to read and get the next 2 bytes */
 
-  (void)SPI_SEND(priv->spi, regaddr);
+  SPI_SEND(priv->spi, regaddr);
   SPI_RECVBLOCK(priv->spi, &regval, 2);
 
   /* Deselect the ADXL345 */
@@ -188,7 +188,7 @@ uint16_t adxl345_getreg16(FAR struct adxl345_dev_s *priv, uint8_t regaddr)
 
   /* Unlock bus */
 
-  (void)SPI_LOCK(priv->spi, false);
+  SPI_LOCK(priv->spi, false);
 
 #ifdef CONFIG_ADXL345_REGDEBUG
   _err("%02x->%04x\n", regaddr, regval);

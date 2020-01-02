@@ -232,7 +232,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct tcp_poll_s *info;
   FAR struct devif_callback_s *cb;
-  int ret;
+  int ret = OK;
 
   /* Sanity check */
 

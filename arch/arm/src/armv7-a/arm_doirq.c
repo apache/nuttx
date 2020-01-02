@@ -118,7 +118,7 @@ static inline uint32_t *_arm_doirq(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      (void)group_addrenv(NULL);
+      group_addrenv(NULL);
 #endif
     }
 #endif

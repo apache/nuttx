@@ -138,13 +138,13 @@ int stm32_bringup(void)
 #ifdef CONFIG_DAC
   ainfo("Initializing DAC\n");
 
-  (void)stm32l4_dac_setup();
+  stm32l4_dac_setup();
 #endif
 
 #ifdef CONFIG_ADC
   ainfo("Initializing ADC\n");
 
-  (void)stm32l4_adc_setup();
+  stm32l4_adc_setup();
 #endif
 
   UNUSED(ret);

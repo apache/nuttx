@@ -111,7 +111,7 @@ static void rom_set_vddr_level(uint32_t ccfg_modeconf)
 
           currenttrim += deltatrim;
 
-          (void)getreg32(TIVA_AON_RTC_SYNC); /* Wait one SCLK_LF period */
+          getreg32(TIVA_AON_RTC_SYNC); /* Wait one SCLK_LF period */
 
           regval16 = (ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MASK << 8) |
                      ((currenttrim << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) &
@@ -124,18 +124,18 @@ static void rom_set_vddr_level(uint32_t ccfg_modeconf)
           putreg32(1, TIVA_AON_RTC_SYNC);
         }
 
-      (void)getreg32(TIVA_AON_RTC_SYNC);     /* Wait one SCLK_LF period */
+      getreg32(TIVA_AON_RTC_SYNC);     /* Wait one SCLK_LF period */
 
       /* Force SCLK_LF period wait on  next read */
 
       putreg32(1, TIVA_AON_RTC_SYNC);
 
-      (void)getreg32(TIVA_AON_RTC_SYNC);     /* Wait one more SCLK_LF period
+      getreg32(TIVA_AON_RTC_SYNC);     /* Wait one more SCLK_LF period
                                                  * before re-enabling VDDR BOD */
 
       modifyreg32(TIVA_AON_SYSCTL_RESETCTL, 0,
                  AON_SYSCTL_RESETCTL_VDDR_LOSS_EN);
-      (void)getreg32(TIVA_AON_RTC_SYNC);     /* And finally wait for
+      getreg32(TIVA_AON_RTC_SYNC);     /* And finally wait for
                                                  * VDDR_LOSS_EN setting to
                                                  * propagate */
     }

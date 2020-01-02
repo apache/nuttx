@@ -1,0 +1,50 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_SAME54_XPLAINED_PRO
+
+choice
+	prompt "Execution memory"
+	default SAME54_XPLAINED_PRO_RUNFROMFLASH
+
+config SAME54_XPLAINED_PRO_RUNFROMFLASH
+	bool "Run from FLASH"
+	select BOOT_RUNFROMFLASH
+	---help---
+		This is the normal configuration for building SAM E54 Xplained
+		Pro code.
+
+config SAME54_XPLAINED_PRO_RUNFROMSRAM
+	bool "Run from SRAM"
+	select BOOT_RUNFROMISRAM
+	---help---
+		During early bring-up, it is safer to execute entirely from
+		SRAM until you are confident in the initialization logic.
+		Then you can safely switch to FLASH.
+
+		REVISIT:  This auto-selects CONFIG_BOOT_RUNFROMISRAM but I have
+		found, with some difficulty, that that choice still defaults to
+		CONFIG_BOOT_RUNFROMFLASH, causing link-time failures when running
+		from SRAM.
+
+endchoice # Execution memory
+
+config SAME54_XPLAINED_PRO_32KHZXTAL
+	bool "32.768 KHz XTAL"
+	default n
+	---help---
+		According to the schematic, a 32.768 KHz crystal is installed  on
+		board.  However, I have been unable to use this crystal and thought
+		perhaps it is missing or defective on my board (there is a metal
+		package that could be a crystal on board, but I am not certain).
+		Another, more likely option is that there is a coding error on my
+		part that prevents the 32.768 KHz crystal from usable(?)
+
+		The configuration defaults to using the always-on OSCULP32 as the
+		slow clock source.  This option will select instead XOSC32 as the
+		slow clock source.
+
+
+endif # ARCH_BOARD_SAME54_XPLAINED_PRO

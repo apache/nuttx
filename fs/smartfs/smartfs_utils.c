@@ -75,21 +75,7 @@ static struct smartfs_mountpt_s *g_mounthead = NULL;
 
 void smartfs_semtake(struct smartfs_mountpt_s *fs)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(fs->fs_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(fs->fs_sem);
 }
 
 /****************************************************************************
@@ -415,7 +401,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
             {
               if (inode->u.i_bops && inode->u.i_bops->close)
                 {
-                  (void)inode->u.i_bops->close(inode);
+                  inode->u.i_bops->close(inode);
                 }
             }
         }
@@ -453,7 +439,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
         {
           if (inode->u.i_bops && inode->u.i_bops->close)
             {
-              (void)inode->u.i_bops->close(inode);
+              inode->u.i_bops->close(inode);
             }
         }
     }
@@ -1914,7 +1900,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
    */
 
   savepos = sf->filepos;
-  (void)smartfs_seek_internal(fs, sf, 0, SEEK_END);
+  smartfs_seek_internal(fs, sf, 0, SEEK_END);
 
   while (remaining > 0)
     {
@@ -2091,7 +2077,7 @@ errout_with_buffer:
 #endif
   /* Restore the original file position */
 
-  (void)smartfs_seek_internal(fs, sf, savepos, SEEK_SET);
+  smartfs_seek_internal(fs, sf, savepos, SEEK_SET);
   return ret;
 }
 

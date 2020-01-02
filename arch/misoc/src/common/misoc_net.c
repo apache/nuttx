@@ -269,8 +269,8 @@ static int misoc_net_transmit(FAR struct misoc_net_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->misoc_net_txtimeout, MISOC_NET_TXTIMEOUT,
-                 misoc_net_txtimeout_expiry, 1, (wdparm_t)priv);
+  wd_start(priv->misoc_net_txtimeout, MISOC_NET_TXTIMEOUT,
+           misoc_net_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -561,7 +561,7 @@ static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
 
   /* In any event, poll the network for new TX data */
 
-  (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+  devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
 }
 
 /****************************************************************************
@@ -694,7 +694,7 @@ static void misoc_net_txtimeout_work(FAR void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+  devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
   net_unlock();
 }
 
@@ -769,12 +769,12 @@ static void misoc_net_poll_work(FAR void *arg)
    * progress, we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->misoc_net_dev, MISOC_NET_WDDELAY, misoc_net_txpoll);
+  devif_timer(&priv->misoc_net_dev, MISOC_NET_WDDELAY, misoc_net_txpoll);
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
+           (wdparm_t)priv);
 
   net_unlock();
 }
@@ -855,8 +855,8 @@ static int misoc_net_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-                 misoc_net_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+           misoc_net_poll_expiry, 1, (wdparm_t)priv);
 
   priv->misoc_net_bifup = true;
   up_enable_irq(ETHMAC_INTERRUPT);
@@ -948,7 +948,7 @@ static void misoc_net_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          (void)devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+          devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
         }
     }
 
@@ -1104,7 +1104,7 @@ static void misoc_net_ipv6multicast(FAR struct misoc_net_driver_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)misoc_net_addmac(dev, mac);
+  misoc_net_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -1112,7 +1112,7 @@ static void misoc_net_ipv6multicast(FAR struct misoc_net_driver_s *priv)
    * packets.
    */
 
-  (void)misoc_net_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  misoc_net_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -1121,7 +1121,7 @@ static void misoc_net_ipv6multicast(FAR struct misoc_net_driver_s *priv)
    * packets.
    */
 
-  (void)misoc_net_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  misoc_net_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
@@ -1208,7 +1208,7 @@ int misoc_net_initialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->misoc_net_dev, NET_LL_ETHERNET);
+  netdev_register(&priv->misoc_net_dev, NET_LL_ETHERNET);
   return OK;
 }
 

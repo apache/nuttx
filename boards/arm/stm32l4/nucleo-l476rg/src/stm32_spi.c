@@ -96,7 +96,7 @@ void weak_function stm32l4_spiinitialize(void)
 #endif
 
 #ifdef CONFIG_LCD_PCD8544
-  (void)stm32l4_configgpio(STM32_LCD_CS);       /* PCD8544 chip select */
+  stm32l4_configgpio(STM32_LCD_CS);       /* PCD8544 chip select */
 #endif
 #endif
 
@@ -241,7 +241,7 @@ int stm32l4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      (void)stm32l4_gpiowrite(STM32_LCD_CD, !cmd);
+      stm32l4_gpiowrite(STM32_LCD_CD, !cmd);
 
       return OK;
     }

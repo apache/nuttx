@@ -504,13 +504,7 @@ static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable)
 #ifndef CONFIG_SSI_POLLWAIT
 static void ssi_semtake(sem_t *sem)
 {
-  int ret;
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(sem);
 }
 #endif
 
@@ -576,7 +570,7 @@ static void ssi_rxnull(struct tiva_ssidev_s *priv)
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   spiinfo("RX: discard %04x\n", regval);
 #else
-  (void)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
+  ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
 #endif
 }
 
@@ -1031,7 +1025,7 @@ static int ssi_interrupt(int irq, void *context, FAR void *arg)
 
   /* Handle outgoing Tx FIFO transfers */
 
-  (void)ssi_performtx(priv);
+  ssi_performtx(priv);
 
   /* Handle incoming Rx FIFO transfers */
 
@@ -1088,24 +1082,11 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxsem_wait_uninterruptible(&priv->exclsem);
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxsem_post(&priv->exclsem);
     }
 
   return ret;
@@ -1388,7 +1369,7 @@ static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint16_t response = 0;
 
-  (void)ssi_transfer(priv, &wd, &response, 1);
+  ssi_transfer(priv, &wd, &response, 1);
   return response;
 }
 
@@ -1417,7 +1398,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, txbuffer, rxbuffer, nwords);
+  ssi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
 
@@ -1445,7 +1426,7 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, buffer, NULL, nwords);
+  ssi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
 
@@ -1473,7 +1454,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                           size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  (void)ssi_transfer(priv, NULL, buffer, nwords);
+  ssi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
 

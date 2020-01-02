@@ -766,8 +766,8 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->dm_txtimeout, DM6X_TXTIMEOUT,
-                     dm9x_txtimeout_expiry, 1, (wdparm_t)priv);
+      wd_start(priv->dm_txtimeout, DM6X_TXTIMEOUT,
+               dm9x_txtimeout_expiry, 1, (wdparm_t)priv);
       return OK;
     }
 
@@ -883,8 +883,8 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
     {
       /* Store the value of memory data read address register */
 
-      (void)getreg(DM9X_MDRAH);
-      (void)getreg(DM9X_MDRAL);
+      getreg(DM9X_MDRAH);
+      getreg(DM9X_MDRAL);
 
       getreg(DM9X_MRCMDX);         /* Dummy read */
       rxbyte = (uint8_t)DM9X_DATA; /* Get the most up-to-date data */
@@ -1118,7 +1118,7 @@ static void dm9x_txdone(FAR struct dm9x_driver_s *priv)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
+  devif_poll(&priv->dm_dev, dm9x_txpoll);
 }
 
 /****************************************************************************
@@ -1334,7 +1334,7 @@ static void dm9x_txtimeout_work(FAR void *arg)
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
+  devif_poll(&priv->dm_dev, dm9x_txpoll);
   net_unlock();
 }
 
@@ -1416,13 +1416,13 @@ static void dm9x_poll_work(FAR void *arg)
     {
       /* If so, update TCP timing states and poll the network for new XMIT data */
 
-      (void)devif_timer(&priv->dm_dev, DM9X_WDDELAY, dm9x_txpoll);
+      devif_timer(&priv->dm_dev, DM9X_WDDELAY, dm9x_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
+           (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1556,8 +1556,8 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
+           (wdparm_t)priv);
 
   /* Enable the DM9X interrupt */
 
@@ -1649,7 +1649,7 @@ static void dm9x_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          (void)devif_poll(&priv->dm_dev, dm9x_txpoll);
+          devif_poll(&priv->dm_dev, dm9x_txpoll);
         }
     }
 
@@ -1992,7 +1992,7 @@ int dm9x_initialize(void)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&g_dm9x[0].dm_dev, NET_LL_ETHERNET);
+  netdev_register(&g_dm9x[0].dm_dev, NET_LL_ETHERNET);
   return OK;
 }
 

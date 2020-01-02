@@ -104,7 +104,7 @@ void board_late_initialize(void)
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform board-specific initialization */
 
-  (void)stm32_bringup();
+  stm32_bringup();
 #endif
 }
 #endif

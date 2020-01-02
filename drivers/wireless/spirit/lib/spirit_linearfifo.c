@@ -67,7 +67,7 @@ uint8_t spirit_fifo_get_rxcount(FAR struct spirit_library_s *spirit)
 
   /* Reads the register value */
 
-  (void)spirit_reg_read(spirit, LINEAR_FIFO_STATUS0_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINEAR_FIFO_STATUS0_BASE, &regval, 1);
 
   /* Build and return value */
 
@@ -94,7 +94,7 @@ uint8_t spirit_fifo_get_txcount(FAR struct spirit_library_s *spirit)
 
   /* Reads the number of elements in TX FIFO and return the value */
 
-  (void)spirit_reg_read(spirit, LINEAR_FIFO_STATUS1_BASE, &regval, 1);
+  spirit_reg_read(spirit, LINEAR_FIFO_STATUS1_BASE, &regval, 1);
 
   /* Build and return value */
 
@@ -164,7 +164,7 @@ uint8_t spirit_fifo_get_rxalmostfull(FAR struct spirit_library_s *spirit)
 
   /* Reads the almost full threshold for RX FIFO and return the value */
 
-  (void)spirit_reg_read(spirit, FIFO_CONFIG3_RXAFTHR_BASE, &regval, 1);
+  spirit_reg_read(spirit, FIFO_CONFIG3_RXAFTHR_BASE, &regval, 1);
 
   /* Build and return value */
 
@@ -226,7 +226,7 @@ uint8_t spirit_fifo_get_rxalmostempty(FAR struct spirit_library_s *spirit)
 
   /* Reads the almost empty threshold for RX FIFO and returns the value */
 
-  (void)spirit_reg_read(spirit, FIFO_CONFIG2_RXAETHR_BASE, &regval, 1);
+  spirit_reg_read(spirit, FIFO_CONFIG2_RXAETHR_BASE, &regval, 1);
 
   /* Build and return value */
 
@@ -306,7 +306,7 @@ uint8_t spirit_fifo_get_txalmostfull(FAR struct spirit_library_s *spirit)
 
   /* Reads the almost full threshold for Tx FIFO and returns the value */
 
-  (void)spirit_reg_read(spirit, FIFO_CONFIG1_TXAFTHR_BASE, &regval, 1);
+  spirit_reg_read(spirit, FIFO_CONFIG1_TXAFTHR_BASE, &regval, 1);
 
   /* Build and returns value */
 
@@ -378,7 +378,7 @@ uint8_t spirit_fifo_get_txalmostempty(FAR struct spirit_library_s *spirit)
 
   /* Reads the almost empty threshold for TX FIFO and returns the value */
 
-  (void)spirit_reg_read(spirit, FIFO_CONFIG0_TXAETHR_BASE, &regval, 1);
+  spirit_reg_read(spirit, FIFO_CONFIG0_TXAETHR_BASE, &regval, 1);
 
   /* Build and return value */
 

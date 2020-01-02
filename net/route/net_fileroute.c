@@ -269,7 +269,7 @@ int net_openroute_ipv4(int oflags, FAR struct file *filep)
         }
     }
 
-  (void)net_unlockroute_ipv4();
+  net_unlockroute_ipv4();
   return ret;
 }
 #endif
@@ -299,7 +299,7 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep)
         }
     }
 
-  (void)net_unlockroute_ipv6();
+  net_unlockroute_ipv6();
   return ret;
 }
 #endif
@@ -364,7 +364,7 @@ ssize_t net_readroute_ipv4(FAR struct file *filep,
     }
   while (ntotal < sizeof(struct net_route_ipv4_s));
 
-  (void)net_unlockroute_ipv4();
+  net_unlockroute_ipv4();
   return ntotal;
 }
 #endif
@@ -412,7 +412,7 @@ ssize_t net_readroute_ipv6(FAR struct file *filep,
     }
   while (ntotal < sizeof(struct net_route_ipv6_s));
 
-  (void)net_unlockroute_ipv6();
+  net_unlockroute_ipv6();
   return ntotal;
 }
 #endif
@@ -476,7 +476,7 @@ ssize_t net_writeroute_ipv4(FAR struct file *filep,
     }
   while (ntotal < sizeof(struct net_route_ipv4_s));
 
-  (void)net_unlockroute_ipv4();
+  net_unlockroute_ipv4();
   return ntotal;
 }
 #endif
@@ -524,7 +524,7 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
     }
   while (ntotal < sizeof(struct net_route_ipv6_s));
 
-  (void)net_unlockroute_ipv6();
+  net_unlockroute_ipv6();
   return ret;
 }
 #endif

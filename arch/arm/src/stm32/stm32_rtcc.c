@@ -1030,7 +1030,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Break out the time values (not that the time is set only to units of seconds) */
 
-  (void)gmtime_r(&tp->tv_sec, &newtime);
+  gmtime_r(&tp->tv_sec, &newtime);
   return stm32_rtc_setdatetime(&newtime);
 }
 

@@ -179,8 +179,8 @@ static sem_t g_ipv6_cachelock;
  *
  ****************************************************************************/
 
-#define net_lock_ipv4_cache() nxsem_wait(&g_ipv4_cachelock);
-#define net_lock_ipv6_cache() nxsem_wait(&g_ipv6_cachelock);
+#define net_lock_ipv4_cache() nxsem_wait_uninterruptible(&g_ipv4_cachelock)
+#define net_lock_ipv6_cache() nxsem_wait_uninterruptible(&g_ipv6_cachelock)
 
 /****************************************************************************
  * Name: net_unlock_ipv4_cache and net_unlock_ipv6_cache
@@ -786,16 +786,9 @@ int net_foreachcache_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 #ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
 void net_flushcache_ipv4(void)
 {
-  int ret;
-
   /* Get exclusive access to the cache */
 
-  do
-    {
-      ret = net_lock_ipv4_cache();
-    }
-  while (ret == -EINTR);
-  DEBUGASSERT(ret == OK);
+  net_lock_ipv4_cache();
 
   /* Reset the cache */
 
@@ -810,16 +803,9 @@ void net_flushcache_ipv4(void)
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
 void net_flushcache_ipv6(void)
 {
-  int ret;
-
   /* Get exclusive access to the cache */
 
-  do
-    {
-      ret = net_lock_ipv6_cache();
-    }
-  while (ret == -EINTR);
-  DEBUGASSERT(ret == OK);
+  net_lock_ipv6_cache();
 
   /* Reset the cache */
 

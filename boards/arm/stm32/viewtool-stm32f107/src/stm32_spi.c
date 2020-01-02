@@ -77,25 +77,25 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_INPUT_ADS7843E)
   /* Configure the XPT2046 SPI2 CS pin as an output */
 
-  (void)stm32_configgpio(GPIO_LCDTP_CS);
+  stm32_configgpio(GPIO_LCDTP_CS);
 #endif
 
 #if defined(CONFIG_STM32_SPI3) && defined(CONFIG_SENSORS_MPL115A)
   /* Configure the MPL115A SPI3 CS pin as an output */
 
-  (void)stm32_configgpio(GPIO_MPL115A_CS);
+  stm32_configgpio(GPIO_MPL115A_CS);
 #endif
 
 #if defined(CONFIG_VIEWTOOL_FT80X_SPI1) || defined(CONFIG_VIEWTOOL_FT80X_SPI2)
   /* Configure the FT80x CS pin as an input */
 
-  (void)stm32_configgpio(GPIO_FT80X_CS);
+  stm32_configgpio(GPIO_FT80X_CS);
 #endif
 
 #if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1) || defined(CONFIG_VIEWTOOL_MAX3421E_SPI2)
   /* Configure the MAX3421E CS pin as an input */
 
-  (void)stm32_configgpio(GPIO_MAX3421E_CS);
+  stm32_configgpio(GPIO_MAX3421E_CS);
 #endif
 }
 

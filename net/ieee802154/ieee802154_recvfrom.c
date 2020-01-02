@@ -382,8 +382,8 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
    * hence, should not have priority inheritance enabled.
    */
 
-  (void)nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
-  (void)nxsem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
+  nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
+  nxsem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
 
   /* Set up the callback in the connection */
 
@@ -400,7 +400,7 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
        * the task sleeps and automatically re-locked when the task restarts.
        */
 
-      (void)net_lockedwait(&state.ir_sem);
+      net_lockedwait(&state.ir_sem);
 
       /* Make sure that no further events are processed */
 

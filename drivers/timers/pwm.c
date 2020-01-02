@@ -361,8 +361,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
                * clear the waiting flag.
                */
 
-              int tmp = nxsem_wait(&upper->waitsem);
-              DEBUGASSERT(tmp == OK || tmp == -EINTR);
+              nxsem_wait_uninterruptible(&upper->waitsem);
             }
         }
       else

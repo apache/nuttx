@@ -117,8 +117,8 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
 
   DEBUGASSERT(GOOD_SIGNO(signo) && func != SIG_ERR);
 
-  (void)sigemptyset(&set);
-  (void)sigaddset(&set, signo);
+  sigemptyset(&set);
+  sigaddset(&set, signo);
 
   /* Check if we are being asked to block the signal */
 
@@ -146,7 +146,7 @@ _sa_handler_t sigset(int signo, _sa_handler_t func)
                * error.
                */
 
-              (void)signal(signo, disposition);
+              signal(signo, disposition);
               disposition = SIG_ERR;
             }
         }

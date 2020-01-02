@@ -122,7 +122,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
       /* Configure the interrupt */
 
       am335x_gpioirq(xxx);
-      (void)irq_attach(xxx, irqhandler, arg);
+      irq_attach(xxx, irqhandler, arg);
       am335x_gpioirq_enable(xxx);
       leave_critical_section(flags);
 

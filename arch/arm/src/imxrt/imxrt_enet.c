@@ -538,17 +538,17 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
   buf = (uint8_t *)imxrt_swap32((uint32_t)priv->dev.d_buf);
   if (priv->rxdesc[priv->rxtail].data == buf)
     {
-       struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
+      struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
 
-       /* Data was written into the RX buffer, so swap the TX and RX buffers */
+      /* Data was written into the RX buffer, so swap the TX and RX buffers */
 
-       DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
-       rxdesc->data = txdesc->data;
-       txdesc->data = buf;
+      DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
+      rxdesc->data = txdesc->data;
+      txdesc->data = buf;
     }
   else
     {
-       DEBUGASSERT(txdesc->data == buf);
+      DEBUGASSERT(txdesc->data == buf);
     }
 
   /* Make the following operations atomic */
@@ -563,8 +563,8 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, IMXRT_TXTIMEOUT, imxrt_txtimeout_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txtimeout, IMXRT_TXTIMEOUT, imxrt_txtimeout_expiry, 1,
+           (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -637,8 +637,8 @@ static int imxrt_txpoll(struct net_driver_s *dev)
           /* Send the packet */
 
           imxrt_transmit(priv);
-          priv->dev.d_buf =
-            (uint8_t *)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+          priv->dev.d_buf = (uint8_t *)
+            imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
           /* Check if there is room in the device to hold another packet. If
            * not, return a non-zero value to terminate the poll.
@@ -648,7 +648,7 @@ static int imxrt_txpoll(struct net_driver_s *dev)
             {
               return -EBUSY;
             }
-       }
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -685,7 +685,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
-   pkt_input(&priv->dev);
+  pkt_input(&priv->dev);
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -863,8 +863,8 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv)
            * queue is not full.
            */
 
-          priv->dev.d_buf =
-            (uint8_t *)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+          priv->dev.d_buf = (uint8_t *)
+            imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
           rxdesc->status1 |= RXDESC_E;
 
           /* Update the index to the next descriptor */
@@ -964,7 +964,7 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
    * new XMIT data
    */
 
-  (void)devif_poll(&priv->dev, imxrt_txpoll);
+  devif_poll(&priv->dev, imxrt_txpoll);
 }
 
 /****************************************************************************
@@ -1034,8 +1034,8 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
       galrstore = getreg32(IMXRT_ENET_GALR);
 #endif
 
-      (void)imxrt_ifdown(&priv->dev);
-      (void)imxrt_ifup_action(&priv->dev, false);
+      imxrt_ifdown(&priv->dev);
+      imxrt_ifup_action(&priv->dev, false);
 
 #ifdef CONFIG_NET_MCASTGROUP
       /* Now write the multicast table back */
@@ -1046,7 +1046,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      (void)devif_poll(&priv->dev, imxrt_txpoll);
+      devif_poll(&priv->dev, imxrt_txpoll);
     }
   else
     {
@@ -1152,12 +1152,12 @@ static void imxrt_txtimeout_work(FAR void *arg)
    * aggressive hardware reset.
    */
 
-  (void)imxrt_ifdown(&priv->dev);
-  (void)imxrt_ifup_action(&priv->dev, false);
+  imxrt_ifdown(&priv->dev);
+  imxrt_ifup_action(&priv->dev, false);
 
   /* Then poll the network for new XMIT data */
 
-  (void)devif_poll(&priv->dev, imxrt_txpoll);
+  devif_poll(&priv->dev, imxrt_txpoll);
   net_unlock();
 }
 
@@ -1231,13 +1231,13 @@ static void imxrt_poll_work(FAR void *arg)
        * transmit in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, IMXRT_WDDELAY, imxrt_txpoll);
+      devif_timer(&priv->dev, IMXRT_WDDELAY, imxrt_txpoll);
     }
 
   /* Setup the watchdog poll timer again in any case */
 
-  (void)wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry,
-                 1, (wdparm_t)priv);
+  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry,
+           1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1368,8 +1368,8 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry, 1,
+           (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 
@@ -1506,7 +1506,7 @@ static void imxrt_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          (void)devif_poll(&priv->dev, imxrt_txpoll);
+          devif_poll(&priv->dev, imxrt_txpoll);
         }
     }
 
@@ -1551,6 +1551,7 @@ static int imxrt_txavail(struct net_driver_s *dev)
 
   return OK;
 }
+
 /****************************************************************************
  * Function: imxrt_calcethcrc
  *
@@ -1598,7 +1599,7 @@ static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
     }
 
   return crc;
- }
+}
 #endif
 
 /****************************************************************************
@@ -1654,7 +1655,6 @@ static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  uint32_t crc;
   uint32_t hashindex;
   uint32_t temp;
   uint32_t registeraddress;
@@ -1702,7 +1702,6 @@ static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  uint32_t crc;
   uint32_t hashindex;
   uint32_t temp;
   uint32_t registeraddress;
@@ -2062,7 +2061,8 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
       if (retries >= 3)
         {
-          nerr("ERROR: Failed to read %s PHYID1 at address %d\n", BOARD_PHY_NAME, phyaddr);
+          nerr("ERROR: Failed to read %s PHYID1 at address %d\n",
+               BOARD_PHY_NAME, phyaddr);
           return -ENOENT;
         }
 
@@ -2145,16 +2145,15 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
                      (phydata | (1 << 4)));
 
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
+      /* Make sure that PHY comes up in correct mode when it's reset */
 
-        /* Make sure that PHY comes up in correct mode when it's reset */
+      imxrt_writemii(priv, phyaddr, MII_LAN8720_MODES,
+                     MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
+                     MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
 
-        imxrt_writemii(priv, phyaddr, MII_LAN8720_MODES,
-               MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
-               MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
+      /* ...and reset PHY */
 
-        /* ...and reset PHY */
-
-        imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+      imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
 #endif
 
       /* Start auto negotiation */
@@ -2228,17 +2227,17 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
     {
       if (renogphy == false)
         {
-           /* Give things one more chance with renegociation turned on */
+          /* Give things one more chance with renegotiation turned on */
 
           return imxrt_initphy(priv, true);
         }
       else
         {
-           /* That didn't end well, just give up */
+          /* That didn't end well, just give up */
 
-           nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
-                BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
-           return ret;
+          nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
+               BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+          return ret;
         }
     }
 
@@ -2568,11 +2567,11 @@ int imxrt_netinitialize(int intf)
    * the device and/or calling imxrt_ifdown().
    */
 
-  (void)imxrt_ifdown(&priv->dev);
+  imxrt_ifdown(&priv->dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
+  netdev_register(&priv->dev, NET_LL_ETHERNET);
 
   UNUSED(ret);
   return OK;
@@ -2592,7 +2591,7 @@ int imxrt_netinitialize(int intf)
 #if CONFIG_IMXRT_ENET_NETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
-  (void)imxrt_netinitialize(0);
+  imxrt_netinitialize(0);
 }
 #endif
 

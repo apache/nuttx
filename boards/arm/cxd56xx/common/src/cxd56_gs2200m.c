@@ -91,10 +91,10 @@ static volatile uint32_t _n_called;
 
 static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 {
-  (void)cxd56_gpioint_config(PIN_UART2_CTS,
-                             GPIOINT_LEVEL_HIGH,
-                             handler,
-                             arg);
+  cxd56_gpioint_config(PIN_UART2_CTS,
+                       GPIOINT_LEVEL_HIGH,
+                       handler,
+                       arg);
   return 0;
 }
 
@@ -231,8 +231,8 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
       /* Change UART2 to GPIO */
 
       CXD56_PIN_CONFIGS(PINCONFS_UART2_GPIO);
-      (void)cxd56_gpio_config(PIN_UART2_CTS, true);
-      (void)cxd56_gpio_config(PIN_UART2_RTS, false);
+      cxd56_gpio_config(PIN_UART2_CTS, true);
+      cxd56_gpio_config(PIN_UART2_RTS, false);
 
       /* Initialize spi deivce */
 

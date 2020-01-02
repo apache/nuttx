@@ -222,7 +222,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
           /* Initialize the semaphore the manages access to the buffer */
 
-          (void)nxsem_init(&stream->fs_sem, 0, 1);
+          nxsem_init(&stream->fs_sem, 0, 1);
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
           /* Allocate the IO buffer at the appropriate privilege level for

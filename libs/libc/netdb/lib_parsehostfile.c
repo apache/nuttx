@@ -351,7 +351,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
         {
           /* Conversion failed.  Entry is corrupted */
 
-          (void)lib_skipline(stream, &nread);
+          lib_skipline(stream, &nread);
           return -EAGAIN;
         }
 
@@ -372,7 +372,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
         {
           /* Conversion failed.  Entry is corrupted */
 
-          (void)lib_skipline(stream, &nread);
+          lib_skipline(stream, &nread);
           return -EAGAIN;
         }
 
@@ -476,7 +476,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
    * additional aliases.
    */
 
-  (void)lib_skipline(stream, &nread);
+  lib_skipline(stream, &nread);
   return nread;
 }
 

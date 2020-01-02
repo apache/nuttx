@@ -429,7 +429,7 @@ static void automount_worker(FAR void *arg)
     {
       /* We are unmounting */
 
-      (void)automount_unmount(priv);
+      automount_unmount(priv);
     }
 
   /* Re-enable interrupts */
@@ -476,7 +476,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
    * there is no work to be canceled.  No other errors are expected.
    */
 
-  (void)work_cancel(LPWORK, &priv->work);
+  work_cancel(LPWORK, &priv->work);
 
   /* Set the media insertion/removal state */
 
@@ -502,7 +502,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
     {
       /* Cancel any retry delays */
 
-      (void)wd_cancel(priv->wdog);
+      wd_cancel(priv->wdog);
     }
 
   return OK;
@@ -617,11 +617,11 @@ void automount_uninitialize(FAR void *handle)
   /* Disable and detach interrupts */
 
   AUTOMOUNT_DISABLE(lower);
-  (void)AUTOMOUNT_DETACH(lower);
+  AUTOMOUNT_DETACH(lower);
 
   /* Release resources */
 
-  (void)wd_delete(priv->wdog);
+  wd_delete(priv->wdog);
 
   /* And free the state structure */
 

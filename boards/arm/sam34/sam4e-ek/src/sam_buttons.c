@@ -85,14 +85,14 @@ static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
       /* Configure the interrupt */
 
       sam_gpioirq(pinset);
-      (void)irq_attach(irq, irqhandler, arg);
+      irq_attach(irq, irqhandler, arg);
       sam_gpioirqenable(irq);
     }
   else
     {
       /* Detach and disable the interrupt */
 
-      (void)irq_detach(irq);
+      irq_detach(irq);
       sam_gpioirqdisable(irq);
     }
 
@@ -118,10 +118,10 @@ static int board_button_irqx(gpio_pinset_t pinset, int irq, xcpt_t irqhandler,
 
 void board_button_initialize(void)
 {
-  (void)sam_configgpio(GPIO_SCROLLUP);
-  (void)sam_configgpio(GPIO_SCROLLDWN);
-  (void)sam_configgpio(GPIO_WAKU);
-  (void)sam_configgpio(GPIO_TAMP);
+  sam_configgpio(GPIO_SCROLLUP);
+  sam_configgpio(GPIO_SCROLLDWN);
+  sam_configgpio(GPIO_WAKU);
+  sam_configgpio(GPIO_TAMP);
 }
 
 /****************************************************************************

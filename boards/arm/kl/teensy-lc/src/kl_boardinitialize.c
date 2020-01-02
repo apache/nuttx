@@ -137,7 +137,7 @@ void board_late_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  (void)board_app_initialize(0);
+  board_app_initialize(0);
 #endif
 }
 #endif

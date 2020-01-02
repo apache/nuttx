@@ -93,7 +93,7 @@ void weak_function zkit_sspdev_initialize(void)
 
 #ifdef CONFIG_LPC17_40_SSP0
 #ifdef CONFIG_NX_LCDDRIVER
-  (void)lpc17_40_configgpio(ZKITARM_OLED_CS);
+  lpc17_40_configgpio(ZKITARM_OLED_CS);
 #endif
 #endif /* CONFIG_LPC17_40_SSP0 */
 
@@ -176,7 +176,7 @@ void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
     {
       /* Assert the CS pin to the OLED display */
 
-      (void)lpc17_40_gpiowrite(ZKITARM_OLED_CS, !selected);
+      lpc17_40_gpiowrite(ZKITARM_OLED_CS, !selected);
     }
 #endif
 

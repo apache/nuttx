@@ -1623,7 +1623,7 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
         {
           /* Read host data into the current read request */
 
-          (void)stm32_rdrequest(priv, privep);
+          stm32_rdrequest(priv, privep);
 
           /* "After the received data is processed, the application software
            *  should set the STAT_RX bits to '11' (Valid) in the USB_EPnR,
@@ -1673,11 +1673,11 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
       priv->txstatus = USB_EPR_STATTX_NAK;
       if (epno == EP0)
         {
-          (void)stm32_wrrequest_ep0(priv, privep);
+          stm32_wrrequest_ep0(priv, privep);
         }
       else
         {
-          (void)stm32_wrrequest(priv, privep);
+          stm32_wrrequest(priv, privep);
         }
 
       /* Set the new TX status */
@@ -1936,7 +1936,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 0;
-                (void)stm32_epstall(&privep->ep, true);
+                stm32_epstall(&privep->ep, true);
               }
             else
               {
@@ -1980,7 +1980,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 1;
-                (void)stm32_epstall(&privep->ep, false);
+                stm32_epstall(&privep->ep, false);
               }
             else
               {
@@ -3223,11 +3223,11 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
               priv->txstatus = USB_EPR_STATTX_NAK;
               if (epno == EP0)
                 {
-                  (void)stm32_wrrequest_ep0(priv, privep);
+                  stm32_wrrequest_ep0(priv, privep);
                 }
               else
                 {
-                  (void)stm32_wrrequest(priv, privep);
+                  stm32_wrrequest(priv, privep);
                 }
 
               /* Set the new TX status */
@@ -3718,8 +3718,8 @@ void up_usbinitialize(void)
   /* Configure USB GPIO alternate function pins */
 
 #ifdef CONFIG_STM32_STM32F30XX
-  (void)stm32_configgpio(GPIO_USB_DM);
-  (void)stm32_configgpio(GPIO_USB_DP);
+  stm32_configgpio(GPIO_USB_DM);
+  stm32_configgpio(GPIO_USB_DP);
 #endif
 
   /* Power up the USB controller, but leave it in the reset state */

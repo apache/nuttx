@@ -119,7 +119,7 @@ static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
 
   /* Setup interrupt for Falling Edge */
 
-  (void)stm32_gpiosetevent(GPIO_APDS9960_INT, false, true, true, isr, arg);
+  stm32_gpiosetevent(GPIO_APDS9960_INT, false, true, true, isr, arg);
 
   leave_critical_section(flags);
 

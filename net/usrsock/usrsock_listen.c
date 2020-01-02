@@ -229,8 +229,6 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
   ret = net_lockedwait(&state.recvsem);
   if (ret < 0)
     {
-      DEBUGASSERT(ret == -EINTR);
-
       /* Wait interrupted, exit early. */
 
       goto errout_teardown;
