@@ -416,8 +416,6 @@ static bool lsm6dsl_isbitset(int8_t b, int8_t m)
 
 static int lsm6dsl_sensor_start(FAR struct lsm6dsl_dev_s *priv)
 {
-  uint8_t value;
-
   /* Enable the accelerometer */
 
   /* Reset values */
@@ -519,13 +517,6 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
   int16_t OUTY_ST[samples];
   int16_t OUTZ_ST[samples];
 
-  int16_t AVR_OUTX_NOST[samples];
-  int16_t AVR_OUTY_NOST[samples];
-  int16_t AVR_OUTZ_NOST[samples];
-  int16_t AVR_OUTX_ST[samples];
-  int16_t AVR_OUTY_ST[samples];
-  int16_t AVR_OUTZ_ST[samples];
-
   int16_t avr_x   = 0;
   int16_t avr_y   = 0;
   int16_t avr_z   = 0;
@@ -546,11 +537,6 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
   int16_t max_xst = 0;
   int16_t max_yst = 0;
   int16_t max_zst = 0;
-
-  int16_t ltemp = 0;
-  int16_t htemp = 0;
-  int16_t tempi = 0;
-  int16_t temp  = 0;
 
   int16_t raw_x = 0;
   int16_t raw_y = 0;
@@ -626,14 +612,26 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 
   /* Read OUT registers Gyro is starting at 22h and Accelero at 28h */
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G + registershift, &lox);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G + registershift, &hix);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTX_L_G + registershift,
+                   (FAR uint8_t *)&lox);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTX_H_G + registershift,
+                   (FAR uint8_t *)&hix);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G + registershift, &loy);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G + registershift, &hiy);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTY_L_G + registershift,
+                   (FAR uint8_t *)&loy);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTY_H_G + registershift,
+                   (FAR uint8_t *)&hiy);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G + registershift, &loz);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G + registershift, &hiz);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTZ_L_G + registershift,
+                   (FAR uint8_t *)&loz);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTZ_H_G + registershift,
+                   (FAR uint8_t *)&hiz);
 
   /* check XLDA 5 times */
 
@@ -653,16 +651,28 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
        * http://ozzmaker.com/accelerometer-to-g/
        */
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G + registershift, &lox);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G + registershift, &hix);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTX_L_G + registershift,
+                       (FAR uint8_t *)&lox);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTX_H_G + registershift,
+                       (FAR uint8_t *)&hix);
       raw_x = (int16_t) (((uint16_t) hix << 8U) | (uint16_t) lox);
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G + registershift, &loy);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G + registershift, &hiy);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTY_L_G + registershift,
+                       (FAR uint8_t *)&loy);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTY_H_G + registershift,
+                       (FAR uint8_t *)&hiy);
       raw_y = (int16_t) (((uint16_t) hiy << 8U) | (uint16_t) loy);
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G + registershift, &loz);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G + registershift, &hiz);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTZ_L_G + registershift,
+                       (FAR uint8_t *)&loz);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTZ_H_G + registershift,
+                       (FAR uint8_t *)&hiz);
       raw_z = (int16_t) (((uint16_t) hiz << 8U) | (uint16_t) loz);
 
       /* Selftest only uses raw values */
@@ -704,14 +714,26 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 
   /* Now do all the ST values */
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G + registershift, &loxst);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G + registershift, &hixst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTX_L_G + registershift,
+                   (FAR uint8_t *)&loxst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTX_H_G + registershift,
+                   (FAR uint8_t *)&hixst);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G + registershift, &loyst);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G + registershift, &hiyst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTY_L_G + registershift,
+                   (FAR uint8_t *)&loyst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTY_H_G + registershift,
+                   (FAR uint8_t *)&hiyst);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G + registershift, &lozst);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G + registershift, &hizst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTZ_L_G + registershift,
+                   (FAR uint8_t *)&lozst);
+  lsm6dsl_readreg8(priv,
+                   LSM6DSL_OUTZ_H_G + registershift,
+                   (FAR uint8_t *)&hizst);
 
   for (i2 = 0; i2 < samples; i2++)
     {
@@ -727,16 +749,28 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 
       nxsig_usleep(100000);     /* 100ms */
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G + registershift, &loxst);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G + registershift, &hixst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTX_L_G + registershift,
+                       (FAR uint8_t *)&loxst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTX_H_G + registershift,
+                       (FAR uint8_t *)&hixst);
       raw_xst = (int16_t) (((uint16_t) hixst << 8U) | (uint16_t) loxst);
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G + registershift, &loyst);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G + registershift, &hiyst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTY_L_G + registershift,
+                       (FAR uint8_t *)&loyst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTY_H_G + registershift,
+                       (FAR uint8_t *)&hiyst);
       raw_yst = (int16_t) (((uint16_t) hiyst << 8U) | (uint16_t) loyst);
 
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G + registershift, &lozst);
-      lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G + registershift, &hizst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTZ_L_G + registershift,
+                       (FAR uint8_t *)&lozst);
+      lsm6dsl_readreg8(priv,
+                       LSM6DSL_OUTZ_H_G + registershift,
+                       (FAR uint8_t *)&hizst);
       raw_zst = (int16_t) (((uint16_t) hizst << 8U) | (uint16_t) lozst);
 
       /* Selftest only uses raw values */
@@ -897,10 +931,8 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
 static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
                                FAR struct lsm6dsl_sensor_data_s *sensor_data)
 {
-  int16_t lo    = 0;
   int16_t lox   = 0;
   int16_t loxg  = 0;
-  int16_t hi    = 0;
   int16_t hix   = 0;
   int16_t hixg  = 0;
   int16_t loy   = 0;
@@ -915,21 +947,11 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
   int16_t templ = 0;
   int16_t temph = 0;
 
-  uint8_t status1 = 0;
-  uint8_t status2 = 0;
-  uint8_t status3 = 0;
-  uint8_t status4 = 0;
-  uint8_t value   = 0;
-
   uint8_t tstamp0 = 0;
   uint8_t tstamp1 = 0;
   uint8_t tstamp2 = 0;
-  uint8_t tstamp3 = 0;
   uint32_t ts     = 0;
 
-  int16_t x_val = 0;
-  int16_t y_val = 0;
-  int16_t z_val = 0;
   int16_t tempi = 0;
   int16_t temp_val = 0;
 
@@ -943,25 +965,25 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
 
   /* Accelerometer */
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_XL, &lox);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_XL, &hix);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_XL, (FAR uint8_t *)&lox);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_XL, (FAR uint8_t *)&hix);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_XL, &loy);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_XL, &hiy);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_XL, (FAR uint8_t *)&loy);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_XL, (FAR uint8_t *)&hiy);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_XL, &loz);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_XL, &hiz);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_XL, (FAR uint8_t *)&loz);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_XL, (FAR uint8_t *)&hiz);
 
   /* Gyro */
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G, &loxg);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G, &hixg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_L_G, (FAR uint8_t *)&loxg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTX_H_G, (FAR uint8_t *)&hixg);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G, &loyg);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G, &hiyg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_L_G, (FAR uint8_t *)&loyg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTY_H_G, (FAR uint8_t *)&hiyg);
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G, &lozg);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G, &hizg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_L_G, (FAR uint8_t *)&lozg);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUTZ_H_G, (FAR uint8_t *)&hizg);
 
   /* Timestamp */
 
@@ -973,8 +995,8 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
 
   /* Temperature */
 
-  lsm6dsl_readreg8(priv, LSM6DSL_OUT_TEMP_L, &templ);
-  lsm6dsl_readreg8(priv, LSM6DSL_OUT_TEMP_H, &temph);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUT_TEMP_L, (FAR uint8_t *)&templ);
+  lsm6dsl_readreg8(priv, LSM6DSL_OUT_TEMP_H, (FAR uint8_t *)&temph);
 
   xf_val = (int16_t) ((hix << 8) | lox);
   yf_val = (int16_t) ((hiy << 8) | loy);
@@ -1211,7 +1233,8 @@ static int lsm6dsl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     case SNIOC_LSM6DSLSENSORREAD:
-      ret = priv->ops->sensor_read(priv, (FAR struct lsm6dsl_sensor_data_s *) arg);
+      ret = priv->ops->sensor_read(priv,
+                                   (FAR struct lsm6dsl_sensor_data_s *) arg);
       break;
 
     case SNIOC_START_SELFTEST:
