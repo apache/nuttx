@@ -81,7 +81,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -378,10 +380,6 @@ static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sampl
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
           ierr("ERROR: nxsem_wait: %d\n", ret);
           goto errout;
         }
@@ -752,6 +750,7 @@ static void sam_tsd_bottomhalf(void *arg)
   /* Exit, re-enabling touchscreen interrupts */
 
 ignored:
+
   /* Re-enable touchscreen interrupts as appropriate. */
 
   sam_adc_putreg(priv->adc, SAM_ADC_IER, ier);

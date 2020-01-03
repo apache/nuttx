@@ -1079,6 +1079,7 @@ static int stm32l4_chan_wait(FAR struct stm32l4_usbhost_s *priv,
                              FAR struct stm32l4_chan_s *chan)
 {
   irqstate_t flags;
+  int ret;
 
   /* Disable interrupts so that the following operations will be atomic.  On
    * the OTG FS global interrupt needs to be disabled.  However, here we disable
@@ -4235,6 +4236,7 @@ static int stm32l4_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Never called from an interrupt handler.
  *
  ****************************************************************************/
+
 #warning this function name is too generic
 static int stm32l4_alloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -4280,6 +4282,7 @@ static int stm32l4_alloc(FAR struct usbhost_driver_s *drvr,
  *   - Never called from an interrupt handler.
  *
  ****************************************************************************/
+
 #warning this function name is too generic
 static int stm32l4_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4316,6 +4319,7 @@ static int stm32l4_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   This function will *not* be called from an interrupt handler.
  *
  ************************************************************************************/
+
 #warning this function name is too generic
 static int stm32l4_ioalloc(FAR struct usbhost_driver_s *drvr,
                            FAR uint8_t **buffer, size_t buflen)
@@ -4360,6 +4364,7 @@ static int stm32l4_ioalloc(FAR struct usbhost_driver_s *drvr,
  *   This function will *not* be called from an interrupt handler.
  *
  ************************************************************************************/
+
 #warning this function name is too generic
 static int stm32l4_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4884,6 +4889,7 @@ static void stm32l4_disconnect(FAR struct usbhost_driver_s *drvr,
 /****************************************************************************
  * Initialization
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32l4_portreset
  *

@@ -140,6 +140,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* RCC reset ****************************************************************/
 
 #if defined(HAVE_IP_ADC_V1)
@@ -198,6 +199,7 @@
 #endif
 
 /* ADC Channels/DMA ********************************************************/
+
 /* The maximum number of channels that can be sampled.  If DMA support is
  * not enabled, then only a single channel can be sampled.  Otherwise,
  * data overruns would occur.
@@ -1169,7 +1171,7 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 
   /* Return register value */
 
-  return getreg32(base+offset);
+  return getreg32(base + offset);
 }
 #  endif
 #endif  /* HAVE_ADC_CMN_REGS */
@@ -1457,7 +1459,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler-1);
+  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler - 1);
   tim_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
@@ -1564,6 +1566,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
       case 4: /* TimerX TRGO event */
         {
           /* TODO: TRGO support not yet implemented */
+
           /* Set the event TRGO */
 
           ccenable = 0;
@@ -1645,7 +1648,8 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 #  if defined(HAVE_GTIM_CCXNP)
   else
     {
-      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP | GTIM_CCER_CC4NP);
+      ccer &= ~(GTIM_CCER_CC1NP | GTIM_CCER_CC2NP | GTIM_CCER_CC3NP |
+              GTIM_CCER_CC4NP);
     }
 #  endif
 
@@ -1775,7 +1779,6 @@ static void adc_reg_startconv(FAR struct stm32_dev_s *priv, bool enable)
 }
 #endif
 
-
 #ifdef ADC_HAVE_INJECTED
 
 /****************************************************************************
@@ -1854,7 +1857,7 @@ static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
 #ifdef HAVE_ADC_CMN_DATA
 static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock)
 {
-  int ret = OK;
+  int ret;
 
   if (lock)
     {
@@ -1862,7 +1865,7 @@ static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock)
     }
   else
     {
-      nxsem_post(&priv->cmn->lock);
+      ret = nxsem_post(&priv->cmn->lock);
     }
 
   return ret;
@@ -1902,6 +1905,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC1RST;
           break;
         }
+
 #endif
 #ifdef CONFIG_STM32_ADC2
       case 2:
@@ -1909,6 +1913,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC2RST;
           break;
         }
+
 #endif
 #ifdef CONFIG_STM32_ADC3
       case 3:
@@ -1916,6 +1921,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC3RST;
           break;
         }
+
 #endif
 #ifdef CONFIG_STM32_ADC4
       case 4:
@@ -1923,6 +1929,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC4RST;
           break;
         }
+
 #endif
       default:
         {
@@ -2003,6 +2010,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC12RST;
           break;
         }
+
 #endif
 #if defined(CONFIG_STM32_ADC3) || defined(CONFIG_STM32_ADC4)
       case 3:
@@ -2011,6 +2019,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
           adcbit = RCC_RSTR_ADC34RST;
           break;
         }
+
 #endif
       default:
         {
@@ -2664,29 +2673,29 @@ static void adc_dma_cfg(FAR struct stm32_dev_s *priv)
   uint32_t setbits = 0;
 
 #ifdef ADC_HAVE_DMACFG
-    /* Set DMA mode */
+  /* Set DMA mode */
 
-    if (priv->dmacfg == 0)
-      {
-        /* One Shot Mode */
+  if (priv->dmacfg == 0)
+    {
+      /* One Shot Mode */
 
-        clrbits |= ADC_CR2_DDS;
-      }
-    else
-      {
-        /* Circular Mode */
+      clrbits |= ADC_CR2_DDS;
+    }
+  else
+    {
+      /* Circular Mode */
 
-        setbits |= ADC_CR2_DDS;
-      }
+      setbits |= ADC_CR2_DDS;
+    }
 #endif
 
-    /* Enable DMA */
+  /* Enable DMA */
 
-    setbits |= ADC_CR2_DMA;
+  setbits |= ADC_CR2_DMA;
 
-    /* Modify CR2 configuration */
+  /* Modify CR2 configuration */
 
-    adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, clrbits, setbits);
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, clrbits, setbits);
 }
 #endif
 
@@ -4320,14 +4329,15 @@ static uint32_t adc_injget(FAR struct stm32_adc_dev_s *dev, uint8_t chan)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
   uint32_t regval = 0;
 
-  if (chan > priv->cj_channels-1)
+  if (chan > (priv->cj_channels - 1))
     {
       /* REVISIT: return valute with MSB set to indicate error ? */
 
       goto errout;
     }
 
-  regval = adc_getreg(priv, STM32_ADC_JDR1_OFFSET+4*(chan)) & ADC_JDR_JDATA_MASK;
+  regval = adc_getreg(priv, STM32_ADC_JDR1_OFFSET + 4 * (chan)) &
+           ADC_JDR_JDATA_MASK;
 
 errout:
   return regval;
@@ -4466,7 +4476,8 @@ void adc_sampletime_set(FAR struct stm32_adc_dev_s *dev,
   uint8_t i;
 
   /* Check if user wants to assign the same value for all channels
-   * or just wants to change sample time values for certain channels */
+   * or just wants to change sample time values for certain channels
+   */
 
   if (time_samples->all_same)
     {
@@ -4582,6 +4593,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 #  endif
           break;
         }
+
 #endif  /* CONFIG_STM32_ADC1 */
 #ifdef CONFIG_STM32_ADC2
       case 2:
@@ -4598,6 +4610,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 #  endif
           break;
         }
+
 #endif  /* CONFIG_STM32_ADC2 */
 #ifdef CONFIG_STM32_ADC3
       case 3:
@@ -4614,6 +4627,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 #  endif
           break;
         }
+
 #endif  /* CONFIG_STM32_ADC3 */
 #ifdef CONFIG_STM32_ADC4
       case 4:
@@ -4630,6 +4644,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 #  endif
           break;
         }
+
 #endif  /* CONFIG_STM32_ADC4 */
       default:
         {
