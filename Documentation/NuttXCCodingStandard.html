@@ -87,7 +87,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: July 6, 2019</p>
+      <p>Last Updated: January 2, 2020</p>
     </td>
   </tr>
 </table>
@@ -2182,9 +2182,8 @@ ptr = (FAR struct somestruct_s *)value;
   <b>Checking Return Values</b>.
   Callers of internal OS functions should always check return values for an error.
   At a minimum, a debug statement should indicate that an error has occurred.
-  The calling logic intentionally ignores the returned value, then the function return value should be explicitly cast to <code>(void)</code> to indicate that the return value is intentionally ignored.
-  An exception of for standard functions for which  people have historically ignored the returned values, such as <code>printf()</code> or <code>close</code>.
-  All calls to <code>malloc</code> or <code>realloc</code> must be checked for failures to allocate memory.
+  Ignored return values are always suspicious.
+  All calls to <code>malloc</code> or <code>realloc</code>, in particular, must be checked for failures to allocate memory to avoid use of NULL pointers.
 </p>
 
 <table width ="100%">
