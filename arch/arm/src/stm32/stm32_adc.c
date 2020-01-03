@@ -1854,7 +1854,7 @@ static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
 #ifdef HAVE_ADC_CMN_DATA
 static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock)
 {
-  int ret = OK;
+  int ret;
 
   if (lock)
     {
@@ -1862,7 +1862,7 @@ static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock)
     }
   else
     {
-      nxsem_post(&priv->cmn->lock);
+      ret = nxsem_post(&priv->cmn->lock);
     }
 
   return ret;

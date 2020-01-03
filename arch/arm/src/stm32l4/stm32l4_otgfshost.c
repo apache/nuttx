@@ -1079,6 +1079,7 @@ static int stm32l4_chan_wait(FAR struct stm32l4_usbhost_s *priv,
                              FAR struct stm32l4_chan_s *chan)
 {
   irqstate_t flags;
+  int ret;
 
   /* Disable interrupts so that the following operations will be atomic.  On
    * the OTG FS global interrupt needs to be disabled.  However, here we disable
