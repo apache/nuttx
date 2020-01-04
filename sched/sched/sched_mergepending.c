@@ -76,11 +76,10 @@
  *     a context switch is needed.
  *
  * Assumptions:
- * - The caller has established a critical section before
- *   calling this function (calling sched_lock() first is NOT
- *   a good idea -- use enter_critical_section()).
- * - The caller handles the condition that occurs if the
- *   the head of the sched_mergTSTATE_TASK_PENDINGs is changed.
+ * - The caller has established a critical section before calling this
+ *   function.
+ * - The caller handles the condition that occurs if the head of the
+ *   ready-to-run task list is changed.
  *
  ****************************************************************************/
 
@@ -181,11 +180,10 @@ bool sched_mergepending(void)
  *     a context switch is needed.
  *
  * Assumptions:
- * - The caller has established a critical section before
- *   calling this function (calling sched_lock() first is NOT
- *   a good idea -- use enter_critical_section()).
- * - The caller handles the condition that occurs if the
- *   the head of the sched_mergTSTATE_TASK_PENDINGs is changed.
+ * - The caller has established a critical section before calling this
+ *   function.
+ * - The caller handles the condition that occurs if the head of the
+ *   ready-to-run task list is changed.
  *
  ****************************************************************************/
 
@@ -261,7 +259,7 @@ bool sched_mergepending(void)
                                      (FAR dq_queue_t *)&g_pendingtasks,
                                      TSTATE_TASK_PENDING);
 
-              /* And return with the schedule locked and tasks in the
+              /* And return with the scheduler locked and tasks in the
                * pending task list.
                */
 
