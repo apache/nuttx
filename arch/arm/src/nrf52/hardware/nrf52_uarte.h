@@ -242,6 +242,7 @@
 #define UART_PSELRTS_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELRTS_PORT_MASK              (0x1 << UART_PSELRTS_PORT_SHIFT)
 #define UART_PSELRTS_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELRTS_RESET                  (0xffffffff)
 
 /* PSELTXD Register */
 
@@ -250,6 +251,7 @@
 #define UART_PSELTXD_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELTXD_PORT_MASK              (0x1 << UART_PSELTXD_PORT_SHIFT)
 #define UART_PSELTXD_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELTXD_RESET                  (0xffffffff)
 
 /* PSELCTS Register */
 
@@ -258,6 +260,7 @@
 #define UART_PSELCTS_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELCTS_PORT_MASK              (0x1 << UART_PSELCTS_PORT_SHIFT)
 #define UART_PSELCTS_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELCTS_RESET                  (0xffffffff)
 
 /* PSELRXD Register */
 
@@ -266,6 +269,7 @@
 #define UART_PSELRXD_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELRXD_PORT_MASK              (0x1 << UART_PSELRXD_PORT_SHIFT)
 #define UART_PSELRXD_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELRXD_RESET                  (0xffffffff)
 
 /* ENABLE Register */
 

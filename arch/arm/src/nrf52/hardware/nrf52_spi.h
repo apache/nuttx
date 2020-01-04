@@ -160,13 +160,13 @@
 
 /* STALLLSTAT Register */
 
-#define SPIM_STALLSTAT_TX           (1 << 0)  /* Bit 0: Stall status for EasyDMA RAM reads */
+#define SPIM_STALLSTAT_RX           (1 << 0)  /* Bit 0: Stall status for EasyDMA RAM reads */
 #define SPIM_STALLSTAT_TX           (1 << 1)  /* Bit 1: Stall status for EasyDMA RAM writes */
 
 /* ENABLE Register */
 
 #define SPIM_ENABLE_DIS             (0)        /* Disable SPIM */
-#define SPIM_ENABLE_EN              (0xf << 0) /* Enable SPIM */
+#define SPIM_ENABLE_EN              (0x7 << 0) /* Enable SPIM */
 
 /* PSELSCK Register */
 
@@ -175,6 +175,7 @@
 #define SPIM_PSELSCK_PORT_SHIFT     (5)       /* Bit 5: SCK port number */
 #define SPIM_PSELSCK_PORT_MASK      (0x1 << SPIM_PSELSCK_PORT_SHIFT)
 #define SPIM_PSELSCK_CONNECTED      (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELSCK_RESET          (0xffffffff)
 
 /* PSELMOSI Register */
 
@@ -183,6 +184,7 @@
 #define SPIM_PSELMOSI_PORT_SHIFT    (5)       /* Bit 5: MOSI port number */
 #define SPIM_PSELMOSI_PORT_MASK     (0x1 << SPIM_PSELMOSI_PORT_SHIFT)
 #define SPIM_PSELMOSI_CONNECTED     (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELMOSI_RESET         (0xffffffff)
 
 /* PSELMISO Register */
 
@@ -191,6 +193,7 @@
 #define SPIM_PSELMISO_PORT_SHIFT    (5)       /* Bit 5: MISO port number */
 #define SPIM_PSELMISO_PORT_MASK     (0x1 << SPIM_PSELMISO_PORT_SHIFT)
 #define SPIM_PSELMISO_CONNECTED     (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELMISO_RESET         (0xffffffff)
 
 /* PSELCSN Register */
 
@@ -199,6 +202,7 @@
 #define SPIM_PSELCSN_PORT_SHIFT     (5)       /* Bit 5: CSN port number */
 #define SPIM_PSELCSN_PORT_MASK      (0x1 << SPIM_PSELCSN_PORT_SHIFT)
 #define SPIM_PSELCSN_CONNECTED      (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELCSN_RESET          (0xffffffff)
 
 /* FREQUENCY Register */
 

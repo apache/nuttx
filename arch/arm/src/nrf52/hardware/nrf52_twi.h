@@ -145,7 +145,7 @@
 /* ENABLE Register */
 
 #define TWIM_ENABLE_DIS                     (0)        /* Disable TWIM */
-#define TWIM_ENABLE_EN                      (0xf << 0) /* Disable TWIM */
+#define TWIM_ENABLE_EN                      (0x6 << 0) /* Disable TWIM */
 
 /* PSELSCL Register */
 
@@ -154,6 +154,7 @@
 #define TWIM_PSELSCL_PORT_SHIFT             (5)        /* Bit 5: SCL port number */
 #define TWIM_PSELSCL_PORT_MASK              (0x1 << TWIM_PSELSCL_PORT_SHIFT)
 #define TWIM_PSELSCL_CONNECTED              (1 << 31)  /* Bit 31: Connection */
+#define TWIM_PSELSCL_RESET                  (0xffffffff)
 
 /* PSELSDA Register */
 
@@ -162,6 +163,7 @@
 #define TWIM_PSELSDA_PORT_SHIFT             (5)        /* Bit 5: SDA port number */
 #define TWIM_PSELSDA_PORT_MASK              (0x1 << TWIM_PSELSDA_PORT_SHIFT)
 #define TWIM_PSELSDA_CONNECTED              (1 << 31)  /* Bit 31: Connection */
+#define TWIM_PSELSDA_RESET                  (0xffffffff)
 
 /* FREQUENCY Register */
 
