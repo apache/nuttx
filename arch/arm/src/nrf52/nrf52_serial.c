@@ -319,13 +319,11 @@ static void nrf52_shutdown(struct uart_dev_s *dev)
 {
   struct nrf52_dev_s *priv = (struct nrf52_dev_s *)dev->priv;
 
-  /* TODO: release uart pins */
-
   /* Disable interrupts */
 
   /* Reset hardware and disable Rx and Tx */
 
-  nrf52_usart_disable(priv->uartbase);
+  nrf52_usart_disable(priv->uartbase, &priv->config);
 }
 
 /****************************************************************************

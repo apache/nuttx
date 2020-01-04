@@ -216,7 +216,7 @@ void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void nrf52_usart_disable(uintptr_t base)
+void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 {
   /* Disable interrupts */
 
@@ -228,6 +228,16 @@ void nrf52_usart_disable(uintptr_t base)
 
   putreg32(0xffffffff, base + NRF52_UART_PSELTXD_OFFSET);
   putreg32(0xffffffff, base + NRF52_UART_PSELRXD_OFFSET);
+
+  /* Unconfigure GPIO */
+
+  nrf52_gpio_unconfig(config->rxpin);
+  nrf52_gpio_unconfig(config->txpin);
+
+  /* Deatach TWI from GPIO */
+
+  putreg32(UART_PSELTXD_RESET, base + NRF52_UART_PSELTXD_OFFSET);
+  putreg32(UART_PSELRXD_RESET, base + NRF52_UART_PSELRXD_OFFSET);
 }
 #endif
 
