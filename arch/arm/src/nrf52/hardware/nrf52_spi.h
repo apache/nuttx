@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_spi.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ***************************************************************************/
 
-/* Register offsets for SPI master (SPIM) *******************************************************/
+/* Register offsets for SPI master (SPIM) **********************************/
 
 #define NRF52_SPIM_TASK_START_OFFSET      (0x0010) /* Start SPI transaction */
 #define NRF52_SPIM_TASK_STOP_OFFSET       (0x0014) /* Stop SPI transaction */
@@ -84,7 +84,7 @@
 #define NRF52_SPIM_DCXCNT_OFFSET          (0x0570) /* DCX configuration */
 #define NRF52_SPIM_ORC_OFFSET             (0x05c0) /* ORC */
 
-/* Register offsets for SPI slave (SPIS) *******************************************************/
+/* Register offsets for SPI slave (SPIS) ***********************************/
 
 #define NRF52_SPIS_SHORTS_OFFSET          (0x0200) /* Shortcuts between local events and tasks */
 #define NRF52_SPIS_INTENSET_OFFSET        (0x0304) /* Enable interrupt */
@@ -108,7 +108,7 @@
 #define NRF52_SPIS_DEF_OFFSET             (0x055c) /* Default character */
 #define NRF52_SPIS_ORC_OFFSET             (0x05c0) /* Over-read character */
 
-/* Register Bitfield Definitions for SPIM *******************************************************/
+/* Register Bitfield Definitions for SPIM **********************************/
 
 /* TASKS_START Register */
 
@@ -160,13 +160,13 @@
 
 /* STALLLSTAT Register */
 
-#define SPIM_STALLSTAT_TX           (1 << 0)  /* Bit 0: Stall status for EasyDMA RAM reads */
+#define SPIM_STALLSTAT_RX           (1 << 0)  /* Bit 0: Stall status for EasyDMA RAM reads */
 #define SPIM_STALLSTAT_TX           (1 << 1)  /* Bit 1: Stall status for EasyDMA RAM writes */
 
 /* ENABLE Register */
 
 #define SPIM_ENABLE_DIS             (0)        /* Disable SPIM */
-#define SPIM_ENABLE_EN              (0xf << 0) /* Enable SPIM */
+#define SPIM_ENABLE_EN              (0x7 << 0) /* Enable SPIM */
 
 /* PSELSCK Register */
 
@@ -175,6 +175,7 @@
 #define SPIM_PSELSCK_PORT_SHIFT     (5)       /* Bit 5: SCK port number */
 #define SPIM_PSELSCK_PORT_MASK      (0x1 << SPIM_PSELSCK_PORT_SHIFT)
 #define SPIM_PSELSCK_CONNECTED      (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELSCK_RESET          (0xffffffff)
 
 /* PSELMOSI Register */
 
@@ -183,6 +184,7 @@
 #define SPIM_PSELMOSI_PORT_SHIFT    (5)       /* Bit 5: MOSI port number */
 #define SPIM_PSELMOSI_PORT_MASK     (0x1 << SPIM_PSELMOSI_PORT_SHIFT)
 #define SPIM_PSELMOSI_CONNECTED     (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELMOSI_RESET         (0xffffffff)
 
 /* PSELMISO Register */
 
@@ -191,6 +193,7 @@
 #define SPIM_PSELMISO_PORT_SHIFT    (5)       /* Bit 5: MISO port number */
 #define SPIM_PSELMISO_PORT_MASK     (0x1 << SPIM_PSELMISO_PORT_SHIFT)
 #define SPIM_PSELMISO_CONNECTED     (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELMISO_RESET         (0xffffffff)
 
 /* PSELCSN Register */
 
@@ -199,6 +202,7 @@
 #define SPIM_PSELCSN_PORT_SHIFT     (5)       /* Bit 5: CSN port number */
 #define SPIM_PSELCSN_PORT_MASK      (0x1 << SPIM_PSELCSN_PORT_SHIFT)
 #define SPIM_PSELCSN_CONNECTED      (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSELCSN_RESET          (0xffffffff)
 
 /* FREQUENCY Register */
 
