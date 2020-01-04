@@ -226,6 +226,16 @@ void nrf52_gpio_irqinitialize(void);
 int nrf52_gpio_config(nrf52_pinset_t cfgset);
 
 /************************************************************************************
+ * Name: nrf52_gpio_unconfig
+ *
+ * Description:
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin.
+ *
+ ************************************************************************************/
+
+int nrf52_gpio_unconfig(nrf52_pinset_t cfgset);
+
+/************************************************************************************
  * Name: nrf52_gpio_interrupt
  *
  * Description:

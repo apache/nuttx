@@ -89,6 +89,8 @@
 
 /* Register bit definitions *********************************************************/
 
+#define NRF52_GPIO_CNF_DIR              (1 << 0) /* Bit 0: Pin direction */
+#define NRF52_GPIO_CNF_INPUT            (1 << 1) /* Bit 1: Input buffer disconnect */
 #define NRF52_GPIO_CNF_PULL_SHIFT       (2)
 #define NRF52_GPIO_CNF_PULL_MASK        (0x3 << NRF52_GPIO_CNF_PULL_SHIFT)
 #  define NRF52_GPIO_CNF_PULL_DISABLED  (0 << NRF52_GPIO_CNF_PULL_SHIFT)
