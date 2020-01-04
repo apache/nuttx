@@ -53,6 +53,7 @@
 #define NXSTYLE_VERSION "0.01"
 
 #define LINE_SIZE      512
+#define RANGE_NUMBER   4096
 
 #define FATAL(m, l, o) message(FATAL, (m), (l), (o))
 #define FATALFL(m,s)   message(FATAL, (m), -1, -1)
@@ -93,9 +94,12 @@ enum file_e
 
 static char *g_file_name       = "";
 static enum file_e g_file_type = UNKNOWN;
-static int  g_maxline          = 78;
-static int  g_status           = 0;
-static int  g_verbose          = 2;
+static int g_maxline           = 78;
+static int g_status            = 0;
+static int g_verbose           = 2;
+static int g_rangenumber       = 0;
+static int g_rangestart[RANGE_NUMBER];
+static int g_rangecount[RANGE_NUMBER];
 
 /****************************************************************************
  * Private Functions
@@ -109,7 +113,8 @@ static void show_usage(char *progname, int exitcode, char *what)
       fprintf(stderr, "%s\n", what);
     }
 
-  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <level>] <filename>\n", basename(progname));
+  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <level>] [-r <start,count>] <filename>\n",
+          basename(progname));
   fprintf(stderr, "        %s -h this help\n", basename(progname));
   fprintf(stderr, "        %s -v <level> where level is\n", basename(progname));
   fprintf(stderr, "                   0 - no output\n");
@@ -118,9 +123,29 @@ static void show_usage(char *progname, int exitcode, char *what)
   exit(exitcode);
 }
 
+static int skip(int lineno)
+{
+  int i;
+
+  for (i = 0; i < g_rangenumber; i++)
+    {
+      if (lineno >= g_rangestart[i] && lineno < g_rangestart[i] + g_rangecount[i])
+        {
+          return 0;
+        }
+    }
+
+  return g_rangenumber != 0;
+}
+
 static int message(enum class_e class, const char *text, int lineno, int ndx)
 {
   FILE *out = stdout;
+
+  if (skip(lineno))
+    {
+      return g_status;
+    }
 
   if (class > INFO)
     {
@@ -217,7 +242,7 @@ int main(int argc, char **argv, char **envp)
   int i;
   int c;
 
-  while ((c = getopt(argc, argv, ":hv:gm:")) != -1)
+  while ((c = getopt(argc, argv, ":hv:gm:r:")) != -1)
     {
       switch (c)
       {
@@ -236,6 +261,11 @@ int main(int argc, char **argv, char **envp)
             show_usage(argv[0], 1, "Bad value for <level>.");
           }
           break;
+
+      case 'r':
+        g_rangestart[g_rangenumber] = atoi(strtok(optarg, ","));
+        g_rangecount[g_rangenumber++] = atoi(strtok(NULL, ","));
+        break;
 
       case 'h':
         show_usage(argv[0], 0, NULL);

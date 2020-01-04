@@ -229,6 +229,36 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
 }
 
 /****************************************************************************
+ * Name: nrf52_gpio_unconfig
+ *
+ * Description:
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin.
+ *
+ ****************************************************************************/
+
+int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
+{
+  unsigned int pin;
+  unsigned int port;
+  uint32_t offset;
+
+  /* Get port and pin number */
+
+  port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+
+  /* Get address offset */
+
+  offset = nrf52_gpio_regget(port, NRF52_GPIO_PIN_CNF_OFFSET(pin));
+
+  /* Configure as input and disconnect input buffer */
+
+  putreg32(NRF52_GPIO_CNF_INPUT, offset);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: nrf52_gpio_write
  *
  * Description:
