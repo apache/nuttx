@@ -42,7 +42,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/clock.h>
 
 #include "neighbor/neighbor.h"
 

@@ -78,14 +78,11 @@
 
 struct sendto_s
 {
-#if defined(CONFIG_NET_SOCKOPTS) || defined(NEED_IPDOMAIN_SUPPORT)
+#ifdef NEED_IPDOMAIN_SUPPORT
   FAR struct socket *st_sock;         /* Points to the parent socket structure */
 #endif
   FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
   FAR struct net_driver_s *st_dev;    /* Driver that will perform the transmission */
-#ifdef CONFIG_NET_SOCKOPTS
-  clock_t st_time;                    /* Last send time for determining timeout */
-#endif
   sem_t st_sem;                       /* Semaphore signals sendto completion */
   uint16_t st_buflen;                 /* Length of send buffer (error if <0) */
   const char *st_buffer;              /* Pointer to send buffer */
@@ -95,46 +92,6 @@ struct sendto_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sendto_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   pstate - sendto state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int sendto_timeout(FAR struct sendto_s *pstate)
-{
-  FAR struct socket *psock;
-
-  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-   * If none... we well let the send wait forever.
-   */
-
-  psock = pstate->st_sock;
-  if (psock && psock->s_sndtimeo != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      return net_timeo(pstate->st_time, psock->s_sndtimeo);
-    }
-
-  /* No timeout */
-
-  return FALSE;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Name: sendto_ipselect
@@ -246,25 +203,10 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
       else if (dev->d_sndlen > 0 || (flags & UDP_NEWDATA) != 0)
         {
           /* Another thread has beat us sending data or the buffer is busy,
-           * Check for a timeout.  If not timed out, wait for the next
-           * polling cycle and check again.
+           * wait for the next polling cycle and check again.
            */
 
-#ifdef CONFIG_NET_SOCKOPTS
-          if (sendto_timeout(pstate))
-            {
-              /* Yes.. report the timeout */
-
-              nwarn("WARNING: SEND timeout\n");
-              pstate->st_sndlen = -ETIMEDOUT;
-            }
-          else
-#endif /* CONFIG_NET_SOCKOPTS */
-            {
-              /* No timeout.  Just wait for the next polling cycle */
-
-              return flags;
-            }
+          return flags;
         }
 
       /* It looks like we are good to send the data */
@@ -477,18 +419,12 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_buflen = len;
   state.st_buffer = buf;
 
-#if defined(CONFIG_NET_SOCKOPTS) || defined(NEED_IPDOMAIN_SUPPORT)
+#ifdef NEED_IPDOMAIN_SUPPORT
   /* Save the reference to the socket structure if it will be needed for
    * asynchronous processing.
    */
 
   state.st_sock = psock;
-#endif
-
-#ifdef CONFIG_NET_SOCKOPTS
-  /* Set the initial time for calculating timeouts */
-
-  state.st_time = clock_systimer();
 #endif
 
   /* Check if the socket is connected */
@@ -530,6 +466,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Set up the callback in the connection */
 
+  ret = -ENOMEM; /* Assume allocation failure */
   state.st_cb = udp_callback_alloc(state.st_dev, conn);
   if (state.st_cb)
     {
@@ -542,20 +479,22 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       netdev_txnotify_dev(state.st_dev);
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  net_lockedwait will also terminate if a signal
+       * occur. NOTES:  net_timedwait will also terminate if a signal
        * is received.
        */
 
-      net_lockedwait(&state.st_sem);
+      ret = net_timedwait(&state.st_sem, _SO_TIMEOUT(psock->s_sndtimeo));
+      if (ret >= 0)
+        {
+          /* The result of the sendto operation is the number of bytes transferred */
+
+          ret = state.st_sndlen;
+        }
 
       /* Make sure that no further events are processed */
 
       udp_callback_free(state.st_dev, conn, state.st_cb);
     }
-
-  /* The result of the sendto operation is the number of bytes transferred */
-
-  ret = state.st_sndlen;
 
 errout_with_lock:
 

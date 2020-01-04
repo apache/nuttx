@@ -44,9 +44,11 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <time.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
@@ -89,8 +91,8 @@ static int _net_takesem(void)
  * Name: _net_timedwait
  ****************************************************************************/
 
-static int _net_timedwait(sem_t *sem, bool interruptable,
-                          FAR const struct timespec *abstime)
+static int
+_net_timedwait(sem_t *sem, bool interruptable, unsigned int timeout)
 {
   unsigned int count;
   irqstate_t   flags;
@@ -108,17 +110,29 @@ static int _net_timedwait(sem_t *sem, bool interruptable,
 
   /* Now take the semaphore, waiting if so requested. */
 
-  if (abstime != NULL)
+  if (timeout != UINT_MAX)
     {
+      struct timespec abstime;
+
+      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
+
+      abstime.tv_sec  += timeout / MSEC_PER_SEC;
+      abstime.tv_nsec += timeout % MSEC_PER_SEC * NSEC_PER_MSEC;
+      if (abstime.tv_nsec >= NSEC_PER_SEC)
+        {
+          abstime.tv_sec++;
+          abstime.tv_nsec -= NSEC_PER_SEC;
+        }
+
       /* Wait until we get the lock or until the timeout expires */
 
       if (interruptable)
         {
-          ret = nxsem_timedwait(sem, abstime);
+          ret = nxsem_timedwait(sem, &abstime);
         }
       else
         {
-          ret = nxsem_timedwait_uninterruptible(sem, abstime);
+          ret = nxsem_timedwait_uninterruptible(sem, &abstime);
         }
     }
   else
@@ -340,7 +354,7 @@ int net_restorelock(unsigned int count)
  *
  * Input Parameters:
  *   sem     - A reference to the semaphore to be taken.
- *   abstime - The absolute time to wait until a timeout is declared.
+ *   timeout - The relative time to wait until a timeout is declared.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -348,9 +362,9 @@ int net_restorelock(unsigned int count)
  *
  ****************************************************************************/
 
-int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
+int net_timedwait(sem_t *sem, unsigned int timeout)
 {
-  return _net_timedwait(sem, true, abstime);
+  return _net_timedwait(sem, true, timeout);
 }
 
 /****************************************************************************
@@ -375,7 +389,7 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 
 int net_lockedwait(sem_t *sem)
 {
-  return net_timedwait(sem, NULL);
+  return net_timedwait(sem, UINT_MAX);
 }
 
 /****************************************************************************
@@ -387,7 +401,7 @@ int net_lockedwait(sem_t *sem)
  *
  * Input Parameters:
  *   sem     - A reference to the semaphore to be taken.
- *   abstime - The absolute time to wait until a timeout is declared.
+ *   timeout - The relative time to wait until a timeout is declared.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -395,10 +409,9 @@ int net_lockedwait(sem_t *sem)
  *
  ****************************************************************************/
 
-int net_timedwait_uninterruptible(sem_t *sem,
-                                  FAR const struct timespec *abstime)
+int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout)
 {
-  return _net_timedwait(sem, false, abstime);
+  return _net_timedwait(sem, false, timeout);
 }
 
 /****************************************************************************
@@ -419,7 +432,7 @@ int net_timedwait_uninterruptible(sem_t *sem,
 
 int net_lockedwait_uninterruptible(sem_t *sem)
 {
-  return net_timedwait_uninterruptible(sem, NULL);
+  return net_timedwait_uninterruptible(sem, UINT_MAX);
 }
 
 /****************************************************************************

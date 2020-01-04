@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>

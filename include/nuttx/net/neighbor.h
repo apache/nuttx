@@ -50,6 +50,7 @@
 #include <stdint.h>
 #include <net/ethernet.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 

@@ -267,7 +267,7 @@ struct iob_s;               /* Forward reference */
  *   buf     - Data to send
  *   len     - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
- *   timeout - Send timeout in deciseconds
+ *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
  *   Ok is returned on success; Othewise a negated errno value is returned.

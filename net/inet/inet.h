@@ -301,7 +301,7 @@ int inet_close(FAR struct socket *psock);
  *
  * Parameters:
  *   psock   - Pointer to the socket structure instance
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated error value is returned on
@@ -309,9 +309,7 @@ int inet_close(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-struct timespec;
-int inet_txdrain(FAR struct socket *psock,
-                 FAR const struct timespec *abstime);
+int inet_txdrain(FAR struct socket *psock, unsigned int timeout);
 
 #undef EXTERN
 #if defined(__cplusplus)

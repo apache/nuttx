@@ -370,7 +370,7 @@ void net_unlock(void);
  *
  * Input Parameters:
  *   sem     - A reference to the semaphore to be taken.
- *   abstime - The absolute time to wait until a timeout is declared.
+ *   timeout - The relative time to wait until a timeout is declared.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -378,8 +378,7 @@ void net_unlock(void);
  *
  ****************************************************************************/
 
-struct timespec;
-int net_timedwait(sem_t *sem, FAR const struct timespec *abstime);
+int net_timedwait(sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
  * Name: net_lockedwait
@@ -412,7 +411,7 @@ int net_lockedwait(sem_t *sem);
  *
  * Input Parameters:
  *   sem     - A reference to the semaphore to be taken.
- *   abstime - The absolute time to wait until a timeout is declared.
+ *   timeout - The relative time to wait until a timeout is declared.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -420,8 +419,7 @@ int net_lockedwait(sem_t *sem);
  *
  ****************************************************************************/
 
-int net_timedwait_uninterruptible(sem_t *sem,
-                                  FAR const struct timespec *abstime);
+int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
  * Name: net_lockedwait_uninterruptible

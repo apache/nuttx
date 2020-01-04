@@ -51,7 +51,6 @@
 #include <errno.h>
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************

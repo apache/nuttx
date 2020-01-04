@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <time.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
@@ -168,30 +167,13 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
  *
  ****************************************************************************/
 
-int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
+int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout)
 {
-  struct timespec abstime;
-  irqstate_t flags;
   int ret;
 
-  /* And wait for the ARP response (or a timeout).  Interrupts will be re-
-   * enabled while we wait.
-   */
+  /* And wait for the ARP response (or a timeout). */
 
-  flags = enter_critical_section();
-  DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-  abstime.tv_sec  += timeout->tv_sec;
-  abstime.tv_nsec += timeout->tv_nsec;
-  if (abstime.tv_nsec >= 1000000000)
-    {
-      abstime.tv_sec++;
-      abstime.tv_nsec -= 1000000000;
-    }
-
-  /* Wait to get either the correct response or a timeout. */
-
-  net_timedwait_uninterruptible(&notify->nt_sem, &abstime);
+  net_timedwait_uninterruptible(&notify->nt_sem, timeout);
 
   /* Then get the real result of the transfer */
 
@@ -202,10 +184,6 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
    */
 
   arp_wait_cancel(notify);
-
-  /* Re-enable interrupts and return the result of the wait */
-
-  leave_critical_section(flags);
   return ret;
 }
 

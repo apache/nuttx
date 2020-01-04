@@ -167,7 +167,6 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
   struct ipv6udp_hdr_s ipv6udp;
   struct netdev_varaddr_s destmac;
   uint16_t iplen;
-  uint16_t timeout;
   int ret;
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
@@ -306,15 +305,9 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
    * packet.
    */
 
-#ifdef CONFIG_NET_SOCKOPTS
-  timeout = psock->s_sndtimeo;
-#else
-  timeout = 0;
-#endif
-
   ret = sixlowpan_send(dev, &conn->list,
                        (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       buf, buflen, &destmac, timeout);
+                       buf, buflen, &destmac, _SO_TIMEOUT(psock->s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
