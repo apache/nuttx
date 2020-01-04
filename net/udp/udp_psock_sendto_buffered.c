@@ -61,7 +61,6 @@
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <nuttx/clock.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
@@ -109,10 +108,6 @@
 #ifdef NEED_IPDOMAIN_SUPPORT
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
-#endif
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int sendto_timeout(FAR struct socket *psock,
-                                 FAR struct udp_conn_s *conn);
 #endif
 static int sendto_next_transfer(FAR struct socket *psock,
                                 FAR struct udp_conn_s *conn);
@@ -233,52 +228,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
     }
 }
 #endif
-
-/****************************************************************************
- * Name: sendto_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   pstate - sendto state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int sendto_timeout(FAR struct socket *psock,
-                                 FAR struct udp_conn_s *conn)
-{
-  FAR struct udp_wrbuffer_s *wrb;
-
-  /* Peek at the head of the write queue (without altering the write queue). */
-
-  wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
-  if (wrb != NULL)
-    {
-      /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-       * If none... we well let the send wait forever.
-       */
-
-      if (psock->s_sndtimeo != 0)
-        {
-          /* Check if the configured timeout has elapsed */
-
-          return net_timeo(wrb->wb_start, psock->s_sndtimeo);
-        }
-    }
-
-  /* No timeout */
-
-  return FALSE;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Name: sendto_next_transfer
@@ -513,19 +462,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       flags &= ~UDP_POLL;
     }
-
-#ifdef CONFIG_NET_SOCKOPTS
-  /* We cannot send the data now.  Check for a timeout. */
-
-  else if (sendto_timeout(psock, conn))
-    {
-      /* Free the write buffer at the head of the queue and attempt to setup
-       * the next transfer.
-       */
-
-      sendto_writebuffer_release(psock, conn);
-    }
-#endif /* CONFIG_NET_SOCKOPTS */
 
   /* Continue waiting */
 
@@ -765,10 +701,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
         {
           memcpy(&wrb->wb_dest, to, tolen);
         }
-
-#ifdef CONFIG_NET_SOCKOPTS
-      wrb->wb_start = clock_systimer();
-#endif
 
       /* Copy the user data into the write buffer.  We cannot wait for
        * buffer space if the socket was opened non-blocking.

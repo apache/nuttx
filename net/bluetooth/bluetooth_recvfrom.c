@@ -50,7 +50,6 @@
 #include <netpacket/bluetooth.h>
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>

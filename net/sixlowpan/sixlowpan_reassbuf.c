@@ -46,7 +46,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 
@@ -162,7 +161,7 @@ static void sixlowpan_reass_expire(void)
 
           /* If the reassembly has expired, then free the reassembly buffer */
 
-          if (elapsed > NET_6LOWPAN_TIMEOUT)
+          if (elapsed >= NET_6LOWPAN_TIMEOUT)
             {
               nwarn("WARNING: Reassembly timed out\n");
               sixlowpan_reass_free(reass);

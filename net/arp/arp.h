@@ -292,8 +292,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_SEND
-struct timespec;
-int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout);
+int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout);
 #else
 #  define arp_wait(n,t) (0)
 #endif

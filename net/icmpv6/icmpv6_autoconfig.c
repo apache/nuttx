@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -57,15 +56,6 @@
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CONFIG_ICMPv6_AUTOCONF_DELAYSEC  \
-  (CONFIG_ICMPv6_AUTOCONF_DELAYMSEC / 1000)
-#define CONFIG_ICMPv6_AUTOCONF_DELAYNSEC \
-  ((CONFIG_ICMPv6_AUTOCONF_DELAYMSEC - 1000*CONFIG_ICMPv6_AUTOCONF_DELAYSEC) * 1000000)
 
 /****************************************************************************
  * Private Types
@@ -293,7 +283,6 @@ errout_with_semaphore:
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
   struct icmpv6_rnotify_s notify;
-  struct timespec delay;
   net_ipv6addr_t lladdr;
   int retries;
   int ret;
@@ -374,11 +363,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
 
-  /* The optimal delay would be the worst case round trip time. */
-
-  delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
-  delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
-
   /* 4. Router Contact: The node next attempts to contact a local router for
    *    more information on continuing the configuration. This is done either
    *    by listening for Router Advertisement messages sent periodically by
@@ -405,7 +389,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_rwait(&notify, &delay);
+      ret = icmpv6_rwait(&notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that
@@ -415,9 +399,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           break;
         }
 
-      /* Double the delay time for the next loop */
-
-      clock_timespec_add(&delay, &delay, &delay);
       ninfo("Timed out... retrying %d\n", retries + 1);
     }
 

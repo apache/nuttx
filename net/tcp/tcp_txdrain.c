@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <semaphore.h>
 #include <sched.h>
-#include <time.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -91,7 +90,7 @@ static void txdrain_worker(FAR void *arg)
  *
  * Input Parameters:
  *   psock   - An instance of the internal socket structure.
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -99,8 +98,7 @@ static void txdrain_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int tcp_txdrain(FAR struct socket *psock,
-                FAR const struct timespec *abstime)
+int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
 {
   FAR struct tcp_conn_s *conn;
   sem_t waitsem;
@@ -159,7 +157,7 @@ int tcp_txdrain(FAR struct socket *psock,
            * wait for it to drain or be be disconnected.
            */
 
-          ret = net_timedwait_uninterruptible(&waitsem, abstime);
+          ret = net_timedwait_uninterruptible(&waitsem, timeout);
 
           /* Tear down the disconnect notifier */
 

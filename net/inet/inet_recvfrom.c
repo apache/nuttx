@@ -51,7 +51,6 @@
 
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
@@ -92,9 +91,6 @@
 struct inet_recvfrom_s
 {
   FAR struct socket       *ir_sock;      /* The parent socket structure */
-#ifdef CONFIG_NET_SOCKOPTS
-  clock_t                  ir_starttime; /* rcv start time for determining timeout */
-#endif
   FAR struct devif_callback_s *ir_cb;    /* Reference to callback instance */
   sem_t                    ir_sem;       /* Semaphore signals recv completion */
   size_t                   ir_buflen;    /* Length of receive buffer */
@@ -335,7 +331,7 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
 
       inet_update_recvlen(pstate, recvlen);
 
-      /* If we took all of the ata from the I/O buffer chain is empty, then
+      /* If we took all of the data from the I/O buffer chain is empty, then
        * release it.  If there is still data available in the I/O buffer
        * chain, then just trim the data that we have taken from the
        * beginning of the I/O buffer chain.
@@ -458,60 +454,6 @@ out:
     }
 }
 #endif
-
-/****************************************************************************
- * Name: inet_recvfrom_timeout
- *
- * Description:
- *   Check for recvfrom timeout.
- *
- * Input Parameters:
- *   pstate   recvfrom state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
-#ifdef CONFIG_NET_SOCKOPTS
-static int inet_recvfrom_timeout(struct inet_recvfrom_s *pstate)
-{
-  FAR struct socket *psock = 0;
-  socktimeo_t        timeo = 0;
-
-  /* Check for a timeout configured via setsockopts(SO_RCVTIMEO). If none...
-   * we well let the read hang forever (except for the special case below).
-   */
-
-  /* Get the socket reference from the private data */
-
-  psock = pstate->ir_sock;
-  if (psock)
-    {
-      /* Recover the timeout value (zero if no timeout) */
-
-      timeo = psock->s_rcvtimeo;
-    }
-
-  /* Is there an effective timeout? */
-
-  if (timeo)
-    {
-      /* Yes.. Check if the timeout has elapsed */
-
-      return net_timeo(pstate->ir_starttime, timeo);
-    }
-
-  /* No timeout -- hang forever waiting for data. */
-
-  return FALSE;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
-#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: inet_tcp_sender
@@ -676,14 +618,6 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
 
               nxsem_post(&pstate->ir_sem);
             }
-
-#ifdef CONFIG_NET_SOCKOPTS
-          /* Reset the timeout.  We will want a short timeout to terminate
-           * the TCP receive.
-           */
-
-          pstate->ir_starttime = clock_systimer();
-#endif
         }
 
       /* Check for a loss of connection.
@@ -734,36 +668,6 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
 
           nxsem_post(&pstate->ir_sem);
         }
-
-#ifdef CONFIG_NET_SOCKOPTS
-      /* No data has been received -- this is some other event... probably a
-       * poll -- check for a timeout.
-       */
-
-      else if (inet_recvfrom_timeout(pstate))
-        {
-          /* Yes.. the timeout has elapsed... do not allow any further
-           * callbacks
-           */
-
-          ninfo("TCP timeout\n");
-
-          pstate->ir_cb->flags   = 0;
-          pstate->ir_cb->priv    = NULL;
-          pstate->ir_cb->event   = NULL;
-
-          /* Report the timeout error */
-
-          pstate->ir_result      = -EAGAIN;
-
-          /* Wake up the waiting thread, returning either the error -EAGAIN
-           * that signals the timeout event or the data received up to
-           * the point that the timeout occurred (no error).
-           */
-
-          nxsem_post(&pstate->ir_sem);
-        }
-#endif /* CONFIG_NET_SOCKOPTS */
     }
 
   return flags;
@@ -977,25 +881,6 @@ static uint16_t inet_udp_eventhandler(FAR struct net_driver_s *dev,
 
           flags &= ~UDP_NEWDATA;
         }
-
-#ifdef CONFIG_NET_SOCKOPTS
-      /* No data has been received -- this is some other event... probably a
-       * poll -- check for a timeout.
-       */
-
-      else if (inet_recvfrom_timeout(pstate))
-        {
-          /* Yes.. the timeout has elapsed... do not allow any further
-           * callbacks
-           */
-
-          nerr("ERROR: UDP timeout\n");
-
-          /* Terminate the transfer with an -EAGAIN error */
-
-          inet_udp_terminate(pstate, -EAGAIN);
-        }
-#endif /* CONFIG_NET_SOCKOPTS */
     }
 
   return flags;
@@ -1046,9 +931,6 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
   /* Set up the start time for the timeout */
 
   pstate->ir_sock      = psock;
-#ifdef CONFIG_NET_SOCKOPTS
-  pstate->ir_starttime = clock_systimer();
-#endif
 }
 
 /* The only un-initialization that has to be performed is destroying the
@@ -1066,7 +948,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_lockedwait operation (may indicate EINTR)
+ *   result   The result of the net_timedwait operation (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -1092,8 +974,8 @@ static ssize_t inet_recvfrom_result(int result, struct inet_recvfrom_s *pstate)
       return pstate->ir_result;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have returned negated errno appropriately.
+  /* If net_timedwait failed, then we were probably reawakened by a signal. In
+   * this case, net_timedwait will have returned negated errno appropriately.
    */
 
   if (result < 0)
@@ -1199,11 +1081,11 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
           state.ir_cb->event   = inet_udp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_lockedwait will also terminate if a signal is
+           * to occur.  net_timedwait will also terminate if a signal is
            * received.
            */
 
-          ret = net_lockedwait(&state. ir_sem);
+          ret = net_timedwait(&state. ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
 
           /* Make sure that no further events are processed */
 
@@ -1349,11 +1231,11 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
           state.ir_cb->event   = inet_tcp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_lockedwait will also terminate if a signal isi
+           * to occur.  net_timedwait will also terminate if a signal isi
            * received.
            */
 
-          ret = net_lockedwait(&state.ir_sem);
+          ret = net_timedwait(&state.ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
 
           /* Make sure that no further events are processed */
 

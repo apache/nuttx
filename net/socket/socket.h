@@ -121,6 +121,14 @@
 #define _SO_GETVALID(o)  (((unsigned int)(o)) <= _SO_MAXOPT)
 #define _SO_SETVALID(o)  ((((unsigned int)(o)) <= _SO_MAXOPT) && !_SO_GETONLY(o))
 
+/* Macros to convert timeout value */
+
+#ifdef CONFIG_NET_SOCKOPTS
+#define _SO_TIMEOUT(t)   ((t) ? (t) * MSEC_PER_DSEC : UINT_MAX)
+#else
+#define _SO_TIMEOUT(t)   (UINT_MAX)
+#endif /* CONFIG_NET_SOCKOPTS */
+
 /* Macro to set socket errors */
 
 #ifdef CONFIG_NET_SOCKOPTS

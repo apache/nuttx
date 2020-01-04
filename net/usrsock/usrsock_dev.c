@@ -961,7 +961,6 @@ static int usrsockdev_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
   FAR struct usrsock_conn_s *conn;
-  struct timespec abstime;
   int ret;
 
   DEBUGASSERT(inode);
@@ -1004,17 +1003,7 @@ static int usrsockdev_close(FAR struct file *filep)
        * requests.
        */
 
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-      abstime.tv_sec += 0;
-      abstime.tv_nsec += 10 * NSEC_PER_MSEC;
-      if (abstime.tv_nsec >= NSEC_PER_SEC)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= NSEC_PER_SEC;
-        }
-
-      ret = net_timedwait(&dev->req.sem, &abstime);
+      ret = net_timedwait(&dev->req.sem, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)

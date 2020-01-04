@@ -221,10 +221,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
-#ifdef CONFIG_NET_SOLINGER
-  struct timespec abstime;
-  bool linger;
-#endif
   int ret = OK;
 
   /* Interrupts are disabled here to avoid race conditions */
@@ -247,31 +243,18 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    *   state of the option and linger interval.
    */
 
-  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
-  if (linger)
+  if (_SO_GETOPT(psock->s_options, SO_LINGER))
     {
-      /* Get the current time */
+      /* Wait until for the buffered TX data to be sent. */
 
-      ret = clock_gettime(CLOCK_REALTIME, &abstime);
-      if (ret >= 0)
+      ret = tcp_txdrain(psock, _SO_TIMEOUT(psock->s_linger));
+      if (ret < 0)
         {
-          /* NOTE: s_linger's unit is deciseconds so we don't need to update
-           * abstime.tv_nsec here.
+          /* tcp_txdrain may fail, but that won't stop us from closing
+           * the socket.
            */
 
-          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
-
-          /* Wait until abstime for the buffered TX data to be sent. */
-
-          ret = tcp_txdrain(psock, &abstime);
-          if (ret < 0)
-            {
-              /* tcp_txdrain may fail, but that won't stop us from closing
-               * the socket.
-               */
-
-              nerr("ERROR: tcp_txdrain() failed: %d\n", ret);
-            }
+          nerr("ERROR: tcp_txdrain() failed: %d\n", ret);
         }
     }
 #endif
@@ -376,10 +359,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 static inline int udp_close(FAR struct socket *psock)
 {
   FAR struct udp_conn_s *conn;
-#ifdef CONFIG_NET_SOLINGER
-  struct timespec abstime;
-  bool linger;
-#endif
 
   /* Interrupts are disabled here to avoid race conditions */
 
@@ -401,33 +380,20 @@ static inline int udp_close(FAR struct socket *psock)
    *   state of the option and linger interval.
    */
 
-  linger = _SO_GETOPT(psock->s_options, SO_LINGER);
-  if (linger)
+  if (_SO_GETOPT(psock->s_options, SO_LINGER))
     {
       int ret;
 
-      /* Get the current time */
+      /* Wait until for the buffered TX data to be sent. */
 
-      ret = clock_gettime(CLOCK_REALTIME, &abstime);
-      if (ret >= 0)
+      ret = udp_txdrain(psock, _SO_TIMEOUT(psock->s_linger));
+      if (ret < 0)
         {
-          /* NOTE: s_linger's unit is deciseconds so we don't need to update
-           * abstime.tv_nsec here.
+          /* udp_txdrain may fail, but that won't stop us from closing
+           * the socket.
            */
 
-          abstime.tv_sec += psock->s_linger / DSEC_PER_SEC;
-
-          /* Wait until abstime for the buffered TX data to be sent. */
-
-          ret = udp_txdrain(psock, &abstime);
-          if (ret < 0)
-            {
-              /* udp_txdrain may fail, but that won't stop us from closing
-               * the socket.
-               */
-
-              nerr("ERROR: udp_txdrain() failed: %d\n", ret);
-            }
+          nerr("ERROR: udp_txdrain() failed: %d\n", ret);
         }
     }
 #endif
