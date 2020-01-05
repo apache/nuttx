@@ -96,7 +96,7 @@ goto :End
 :ShowUsage
 echo USAGE: %0 ^<src^> ^<dest^>
 echo Where:
-echo   ^<src^> is the source directory to be copied
-echo   ^<dest^> is the destination directory to be created
+echo  ^<src^> is the source directory to be copied
+echo  ^<dest^> is the destination directory to be created
 
 :End

@@ -165,14 +165,14 @@ echo definitions arguments for a variety of diffent ccpaths in a variety of
 echo compilation environments"
 echo USAGE:%progname% [-h] ^<compiler-path^> [-val ^<^val1^>] [^<def2^> [-val ^<val2^>] [^<def3^> [-val ^<val3^>] ...]]
 echo Where:"
-echo 	^<compiler-path^>
-echo 		The full path to your ccpath
-echo 	^<def1^> ^<def2^> ^<def3^> ...
-echo 		A list of pre-preprocesser variable names to be defined.
-echo 	[-val ^<val1^>] [-val ^<val2^>] [-val ^<val3^>] ...
-echo 		optional values to be assigned to each pre-processor variable.
-echo 		If not supplied, the variable will be defined with no explicit value.
-echo 	-h
-echo 		Show this text and exit
+echo  ^<compiler-path^>
+echo    The full path to your ccpath
+echo  ^<def1^> ^<def2^> ^<def3^> ...
+echo    A list of pre-preprocesser variable names to be defined.
+echo  [-val ^<val1^>] [-val ^<val2^>] [-val ^<val3^>] ...
+echo    optional values to be assigned to each pre-processor variable.
+echo    If not supplied, the variable will be defined with no explicit value.
+echo  -h
+echo    Show this text and exit
 
 :End
