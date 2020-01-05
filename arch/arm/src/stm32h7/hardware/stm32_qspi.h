@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/hardware/stm32_qspi.h
+ * arch/arm/src/stm32h7/hardware/stm32_qspi.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H
-#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H
+#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7_QSPI_H
+#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7_QSPI_H
 
 /****************************************************************************************
  * Included Files
  ****************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/stm32f7/chip.h>
+#include <arch/stm32h7/chip.h>
 
 #include "chip.h"
 
@@ -51,8 +51,8 @@
 
 /* General Characteristics **************************************************************/
 
-#define STM32F7_QSPI_MINBITS            8         /* Minimum word width */
-#define STM32F7_QSPI_MAXBITS            32        /* Maximum word width */
+#define STM32H7_QSPI_MINBITS          8         /* Minimum word width */
+#define STM32H7_QSPI_MAXBITS          32        /* Maximum word width */
 
 /* QSPI register offsets ****************************************************************/
 
@@ -92,7 +92,6 @@
 
 #define QSPI_CR_EN                 (1 << 0)   /* Bit 0:  QSPI Enable */
 #define QSPI_CR_ABORT              (1 << 1)   /* Bit 1:  Abort request */
-#define QSPI_CR_DMAEN              (1 << 2)   /* Bit 2:  DMA enable */
 #define QSPI_CR_TCEN               (1 << 3)   /* Bit 3:  Timeout counter enable */
 #define QSPI_CR_SSHIFT             (1 << 4)   /* Bit 4:  Sample shift */
 #define QSPI_CR_DFM                (1 << 6)   /* Bit 6:  DFM: Dual-flash mode */
@@ -202,6 +201,7 @@
 #define QSPI_CCR_FMODE_MASK        (0x3 << QSPI_CCR_FMODE_SHIFT)
 #  define QSPI_CCR_FMODE(n)        ((uint32_t)(n) << QSPI_CCR_FMODE_SHIFT)
 #define QSPI_CCR_SIOO              (1 << 28)   /* Bit 28:  Send instruction only once mode */
+#define QSPI_CCR_FRCM              (1 << 29)   /* Bit 28:  Enters Free running clock mode */
 #define QSPI_CCR_DDRM              (1 << 31)   /* Bit 31:  Double data rate mode */
 
 /* Address Register */
@@ -236,4 +236,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H4_QSPI_H */

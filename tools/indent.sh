@@ -70,66 +70,66 @@ mode=inplace
 fca=-fca
 
 while [ ! -z "${1}" ]; do
-	case ${1} in
-	-d )
-		set -x
-		;;
-	-p )
-		fca=-nfca
-		;;
-	-o )
-		shift
-		outfile=${1}
-		mode=copy
-		;;
-	-h )
-		echo "$0 is a tool for generation of proper version files for the NuttX build"
-		echo ""
-		echo "USAGE:"
-		echo "	$0 [-d] [-p] -o <out-file> <in-file>"
-		echo "	$0 [-d] [-p] <in-file-list>"
-		echo "	$0 [-d] -h"
-		echo ""
-		echo "Where:"
-		echo "	-<in-file>"
-		echo "		A single, unformatted input file"
-		echo "	-<in-file-list>"
-		echo "		A list of unformatted input files that will be reformatted in place."
-		echo "	-o <out-file>"
-		echo "		Write the single, reformatted <in-file> to <out-file>.  <in-file>"
-		echo "		will not be modified."
-		echo "	-d"
-		echo "		Enable script debug"
-		echo "	-p"
-		echo "		Comments are pre-formatted.  Do not reformat."
-		echo "	-h"
-		echo "		Show this help message and exit"
-		exit 0
-		;;
-	* )
-		if [ ! -r ${1} ]; then
-			echo "Readable ${1} does not exist"
-			echo ${advice}
-			exit 1
-		fi
-		if [ -z "${filelist}" ]; then
-			filelist="${1}"
-			files=single
-		else
-			filelist="${filelist} ${1}"
-			files=multiple
-		fi
-		;;
-	esac
-	shift
+  case ${1} in
+  -d )
+    set -x
+    ;;
+  -p )
+    fca=-nfca
+    ;;
+  -o )
+    shift
+    outfile=${1}
+    mode=copy
+    ;;
+  -h )
+    echo "$0 is a tool for generation of proper version files for the NuttX build"
+    echo ""
+    echo "USAGE:"
+    echo "  $0 [-d] [-p] -o <out-file> <in-file>"
+    echo "  $0 [-d] [-p] <in-file-list>"
+    echo "  $0 [-d] -h"
+    echo ""
+    echo "Where:"
+    echo "  -<in-file>"
+    echo "    A single, unformatted input file"
+    echo "  -<in-file-list>"
+    echo "    A list of unformatted input files that will be reformatted in place."
+    echo "  -o <out-file>"
+    echo "    Write the single, reformatted <in-file> to <out-file>.  <in-file>"
+    echo "    will not be modified."
+    echo "  -d"
+    echo "    Enable script debug"
+    echo "  -p"
+    echo "    Comments are pre-formatted.  Do not reformat."
+    echo "  -h"
+    echo "    Show this help message and exit"
+    exit 0
+    ;;
+  * )
+    if [ ! -r ${1} ]; then
+      echo "Readable ${1} does not exist"
+      echo ${advice}
+      exit 1
+    fi
+    if [ -z "${filelist}" ]; then
+      filelist="${1}"
+      files=single
+    else
+      filelist="${filelist} ${1}"
+      files=multiple
+    fi
+    ;;
+  esac
+  shift
 done
 
 # Verify that at least one input file was provided
 
 if [ "X${files}" == "Xnone" ]; then
-	echo "ERROR: Neither <in-file> nor <in-file-list> provided"
-	echo ${advice}
-	exit 1
+  echo "ERROR: Neither <in-file> nor <in-file-list> provided"
+  echo ${advice}
+  exit 1
 fi
 
 # Options
@@ -139,16 +139,16 @@ options="-nbad -bap -bbb -nbbo -nbc -bl -bl2 -bls -nbs -cbi2 -ncdw -nce -ci2 -cl
 # Perform the indentation
 
 if [ "X${mode}" == "Xcopy" ]; then
-	if [ "X${files}" == "Xmultiple" ]; then
-		echo "ERROR: Only a single <in-file> can be used with the -o option"
-		echo ${advice}
-		exit 1
-	fi
-	if [ -f $outfile ]; then
-		echo "Removing old $outfile"
-		rm $outfile || { echo "Failed to remove $outfile" ; exit 1 ; }
-	fi
-	indent $options $filelist -o $outfile
+  if [ "X${files}" == "Xmultiple" ]; then
+    echo "ERROR: Only a single <in-file> can be used with the -o option"
+    echo ${advice}
+    exit 1
+  fi
+  if [ -f $outfile ]; then
+    echo "Removing old $outfile"
+    rm $outfile || { echo "Failed to remove $outfile" ; exit 1 ; }
+  fi
+  indent $options $filelist -o $outfile
 else
-	indent $options $filelist
+  indent $options $filelist
 fi

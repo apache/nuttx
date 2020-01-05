@@ -44,51 +44,51 @@ defaults=n
 prompt=y
 
 while [ ! -z "$1" ]; do
-    case $1 in
-    --debug )
-        set -x
-        ;;
-    --silent )
-        silent=y
-        defaults=y
-        prompt=n
-        ;;
-    --prompt )
-        prompt=y
-        ;;
-    --defaults )
-        defaults=y
-        ;;
-    --help )
-        echo "$0 is a tool for refreshing board configurations"
-        echo ""
-        echo $USAGE
-        echo ""
-        echo "Where [options] include:"
-        echo "  --debug"
-        echo "     Enable script debug"
-        echo "  --silent"
-        echo "     Update board configuration without interaction.  Implies --defaults."
-        echo "     Assumes no prompt for save.  Use --silent --prompt to prompt before saving."
-        echo "  --prompt"
-        echo "     Prompt before updating and overwriting the defconfig file.  Default is to"
-        echo "     prompt unless --silent"
-        echo "  --defaults"
-        echo "     Do not prompt for new default selections; accept all recommended default values"
-        echo "  --help"
-        echo "     Show this help message and exit"
-        echo "  <board>"
-        echo "     The board directory under nuttx/boards"
-        echo "  <config>"
-        echo "     The board configuration directory under nuttx/boards/<board>/configs"
-        exit 0
-        ;;
-    * )
-        CONFIG=$1
-        break
-        ;;
-    esac
-    shift
+  case $1 in
+  --debug )
+    set -x
+    ;;
+  --silent )
+    silent=y
+    defaults=y
+    prompt=n
+    ;;
+  --prompt )
+    prompt=y
+    ;;
+  --defaults )
+    defaults=y
+    ;;
+  --help )
+    echo "$0 is a tool for refreshing board configurations"
+    echo ""
+    echo $USAGE
+    echo ""
+    echo "Where [options] include:"
+    echo "  --debug"
+    echo "     Enable script debug"
+    echo "  --silent"
+    echo "     Update board configuration without interaction.  Implies --defaults."
+    echo "     Assumes no prompt for save.  Use --silent --prompt to prompt before saving."
+    echo "  --prompt"
+    echo "     Prompt before updating and overwriting the defconfig file.  Default is to"
+    echo "     prompt unless --silent"
+    echo "  --defaults"
+    echo "     Do not prompt for new default selections; accept all recommended default values"
+    echo "  --help"
+    echo "     Show this help message and exit"
+    echo "  <board>"
+    echo "     The board directory under nuttx/boards"
+    echo "  <config>"
+    echo "     The board configuration directory under nuttx/boards/<board>/configs"
+    exit 0
+    ;;
+  * )
+    CONFIG=$1
+    break
+    ;;
+  esac
+  shift
 done
 
 # Get the board configuration
@@ -153,12 +153,12 @@ fi
 MYNAME=`basename $0`
 
 if [ -x ./${MYNAME} ] ; then
-   cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
+  cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
 fi
 
 if [ ! -x tools/${MYNAME} ] ; then
-   echo "ERROR:  This file must be executed from the top-level NuttX directory: $PWD"
-   exit 1
+  echo "ERROR:  This file must be executed from the top-level NuttX directory: $PWD"
+  exit 1
 fi
 
 # Set up the environment
