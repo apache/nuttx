@@ -118,14 +118,13 @@ echo ERROR: Missing required argument
 :ShowUsage
 echo USAGE: %0 ^<action^> [-a ^<appsdir^>] [-c ^<cygwindir^>]
 echo Where:
-echo   ^<action^> is one of config, oldconf, or menuconfig
-echo   ^<appsdir^> is the relative path to the apps\ directory.
-echo     This defaults to ..\apps
-echo   ^<cygwindir^> is the relative path to the Cygwin installation
-echo     directory.  This defaults to C:\Cygwin
+echo  ^<action^> is one of config, oldconf, or menuconfig
+echo  ^<appsdir^> is the relative path to the apps\ directory.
+echo    This defaults to ..\apps
+echo  ^<cygwindir^> is the relative path to the Cygwin installation
+echo    directory.  This defaults to C:\Cygwin
 
 rem Restore the original PATH settings
 
 :End
 set PATH=%oldpath%
-

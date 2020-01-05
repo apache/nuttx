@@ -75,52 +75,52 @@ skip=0
 
 while [ ! -z "$1" ]; do
   case "$1" in
-    -a )
-      shift
-      appdir=$1
-      ;;
-    -c )
-      host=windows
-      wenv=cygwin
-      ;;
-    -d )
-      debug=y
-      set -x
-      ;;
-    -g )
-      host=windows
-      wenv=msys
-      ;;
-    -h )
+  -a )
+    shift
+    appdir=$1
+    ;;
+  -c )
+    host=windows
+    wenv=cygwin
+    ;;
+  -d )
+    debug=y
+    set -x
+    ;;
+  -g )
+    host=windows
+    wenv=msys
+    ;;
+  -h )
+    echo "$USAGE"
+    exit 0
+    ;;
+  -l )
+    host=linux
+    ;;
+  -m )
+    host=macos
+    ;;
+  -n )
+    host=windows
+    wenv=native
+    ;;
+  -s )
+    skip=1
+    ;;
+  -u )
+    host=windows
+    wenv=ubuntu
+    ;;
+  *)
+    if [ ! -z "${boardconfig}" ]; then
+      echo ""
+      echo "<board/config> defined twice"
       echo "$USAGE"
-      exit 0
-      ;;
-    -l )
-      host=linux
-      ;;
-    -m )
-      host=macos
-      ;;
-    -n )
-      host=windows
-      wenv=native
-      ;;
-    -s )
-      skip=1
-      ;;
-    -u )
-      host=windows
-      wenv=ubuntu
-      ;;
-    *)
-      if [ ! -z "${boardconfig}" ]; then
-        echo ""
-        echo "<board/config> defined twice"
-        echo "$USAGE"
-        exit 1
-      fi
-      boardconfig=$1
-      ;;
+      exit 1
+    fi
+    boardconfig=$1
+    ;;
   esac
   shift
 done
@@ -330,43 +330,43 @@ if [ ! -z "$host" ]; then
   sed -i -e "/CONFIG_SIM_X8664_SYSTEMV/d" ${dest_config}
 
   case "$host" in
-    "linux")
-      echo "  Select CONFIG_HOST_LINUX=y"
-      echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
-      echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
+  "linux")
+    echo "  Select CONFIG_HOST_LINUX=y"
+    echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
+    echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
+    ;;
+
+  "macos")
+    echo "  Select CONFIG_HOST_MACOS=y"
+    echo "CONFIG_HOST_MACOS=y" >> "${dest_config}"
+    ;;
+
+  "windows")
+    echo "  Select CONFIG_HOST_WINDOWS=y"
+    echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
+    echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
+
+    case "$wenv" in
+    "cygwin")
+      echo "  Select CONFIG_WINDOWS_CYGWIN=y"
+      echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
       ;;
 
-    "macos")
-      echo "  Select CONFIG_HOST_MACOS=y"
-      echo "CONFIG_HOST_MACOS=y" >> "${dest_config}"
+    "msys")
+      echo "  Select CONFIG_WINDOWS_MSYS=y"
+      echo "CONFIG_WINDOWS_MSYS=y" >> "${dest_config}"
       ;;
 
-    "windows")
-      echo "  Select CONFIG_HOST_WINDOWS=y"
-      echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
-      echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
+    "ubuntu")
+      echo "  Select CONFIG_WINDOWS_UBUNTU=y"
+      echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
+      ;;
 
-      case "$wenv" in
-          "cygwin")
-            echo "  Select CONFIG_WINDOWS_CYGWIN=y"
-            echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
-            ;;
-
-          "msys")
-            echo "  Select CONFIG_WINDOWS_MSYS=y"
-            echo "CONFIG_WINDOWS_MSYS=y" >> "${dest_config}"
-            ;;
-
-          "ubuntu")
-            echo "  Select CONFIG_WINDOWS_UBUNTU=y"
-            echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
-            ;;
-
-          *)
-            echo "  Select CONFIG_WINDOWS_NATIVE=y"
-            echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
-            ;;
-      esac
+    *)
+      echo "  Select CONFIG_WINDOWS_NATIVE=y"
+      echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
+      ;;
+    esac
   esac
 fi
 

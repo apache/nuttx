@@ -35,7 +35,7 @@
 WD=`pwd`
 if [[ "$WD" =~ "nuttx/tools" ]]
 then
-	cd ..
+  cd ..
 fi
 
 find .. -type f -iname "*.[chs]" -o -iname "*.cxx" -o -iname "*.hxx" | xargs ctags -a

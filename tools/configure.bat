@@ -115,10 +115,10 @@ echo  -f:
 echo    Informs the tool that it should use POSIX style paths like /usr/local/bin.
 echo    By default, Windows style paths like C:\\Program Files are used.
 echo  -l selects the Linux (l) host environment.  The [-c^|u^|n] options
-echo     select one of the Windows environments.  Default:  Use host setup
-echo     in the defconfig file
+echo    select one of the Windows environments.  Default:  Use host setup
+echo    in the defconfig file
 echo  [-c^|u^|n] selects the Windows host and a Windows environment:  Cygwin (c),
-echo     Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+echo    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
 echo  -a ^<app-dir^>:
 echo    Informs the configuration tool where the application build
 echo    directory.  This is a relative path from the top-level NuttX
