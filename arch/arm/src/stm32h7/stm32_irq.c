@@ -519,7 +519,7 @@ void up_irqinitialize(void)
   irq_attach(STM32_IRQ_RESERVED, stm32_reserved, NULL);
 #endif
 
-  stm32_dumpnvic("initial", STM32_IRQ_NIRQS);
+  stm32_dumpnvic("initial", NR_IRQS);
 
   /* If a debugger is connected, try to prevent it from catching hardfaults.
    * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
