@@ -80,6 +80,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
     {
 #ifdef CONFIG_NET_ETHERNET
       case NET_LL_ETHERNET:
+      case NET_LL_IEEE80211:
         neighbor_ethernet_out(dev);
         break;
 #endif

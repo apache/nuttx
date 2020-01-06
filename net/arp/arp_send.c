@@ -248,7 +248,8 @@ int arp_send(in_addr_t ipaddr)
    * Ethernet link layer protocol.
    */
 
-  if (dev->d_lltype != NET_LL_ETHERNET)
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
     {
       return OK;
     }

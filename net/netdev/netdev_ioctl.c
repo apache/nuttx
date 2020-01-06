@@ -976,7 +976,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
 #ifdef CONFIG_NET_ETHERNET
-              if (dev->d_lltype == NET_LL_ETHERNET)
+              if (dev->d_lltype == NET_LL_ETHERNET ||
+                  dev->d_lltype == NET_LL_IEEE80211)
                 {
                   memcpy(dev->d_mac.ether.ether_addr_octet,
                          req->ifr_hwaddr.sa_data, IFHWADDRLEN);
