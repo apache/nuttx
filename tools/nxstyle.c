@@ -60,6 +60,7 @@
 #define WARN(m, l, o)  message(WARN, (m), (l), (o))
 #define ERROR(m, l, o) message(ERROR, (m), (l), (o))
 #define INFO(m, l, o)  message(INFO, (m), (l), (o))
+#define INFOFL(m,s)    message(INFO, (m), -1, -1)
 
 /****************************************************************************
  * Private types
@@ -157,7 +158,7 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
     {
       if (lineno == -1 && ndx == -1)
         {
-          fprintf(out, "%s:%s: %s\n", class_text[class], text,  g_file_name);
+          fprintf(out, "%s: %s: %s\n", g_file_name, class_text[class], text);
         }
       else
         {
@@ -301,11 +302,11 @@ int main(int argc, char **argv, char **envp)
 
   /* Are we parsing a header file? */
 
-  ext         = strrchr(g_file_name, '.');
+  ext = strrchr(g_file_name, '.');
 
   if (ext == 0)
     {
-      WARN("No file extension", 0 , 0);
+      INFOFL("No file extension", g_file_name);
     }
   else if (strcmp(ext, ".h") == 0)
     {
@@ -314,6 +315,12 @@ int main(int argc, char **argv, char **envp)
   else if (strcmp(ext, ".c") == 0)
     {
       g_file_type = C_SOURCE;
+    }
+
+  if (g_file_type == UNKNOWN)
+    {
+      INFOFL("Unknown file extension", g_file_name);
+      return 0;
     }
 
   btabs          = false; /* True: TAB characters found on the line */
