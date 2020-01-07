@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H
-#define __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -99,4 +99,4 @@
 #undef PINCONF_SDIO_CD_GPIO
 #define PINCONF_SDIO_CD_GPIO       PINCONF(PIN_SDIO_CD,        0, 0, 0, PINCONF_PULLUP)
 
-#endif  /* __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H */
+#endif  /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H */

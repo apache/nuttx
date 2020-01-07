@@ -83,4 +83,4 @@ int board_kx022_initialize(FAR const char *devpath, int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CXD56XX_SENSORS_INCLUDE_CXD56_KX022_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_KX022_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bh1721fvc_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bh1721fvc_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_pin.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_pin.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_PIN_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_PIN_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_PIN_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_PIN_H
 
 /***************************************************************************
  * Included Files
@@ -65,4 +65,4 @@
 void cxd56_audio_pin_i2s_set(void);
 void cxd56_audio_pin_i2s_unset(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_PIN_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_PIN_H */

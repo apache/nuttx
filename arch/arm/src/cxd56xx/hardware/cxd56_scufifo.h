@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUFIFO_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUFIFO_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUFIFO_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUFIFO_H
 
 #define SCUFIFO_R_CTRL0(fn)      (((fn) * 0x20) + SCUFIFO_D0_R1_C_CTRL0)
 #define SCUFIFO_R_CTRL1(fn)      (((fn) * 0x20) + SCUFIFO_D0_R1_C_CTRL1)
@@ -422,4 +422,4 @@
 
 #define SCUFIFO_FIFO_DATA(x)      (CXD56_SCU_FIFO_REG_BASE + 0x2100 + (0x4 * (x)))
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUFIFO_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUFIFO_H */

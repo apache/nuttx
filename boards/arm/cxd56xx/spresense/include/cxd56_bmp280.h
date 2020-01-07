@@ -1,5 +1,5 @@
 /****************************************************************************
- * board/arm/cxd56xx/spresense/include/cxd56_bmp280.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_bmp280.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56X_SPRESENSE_INCLUDE_CXD56_BMP280_H
-#define __BOARDS_ARM_CXD56X_SPRESENSE_INCLUDE_CXD56_BMP280_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BMP280_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BMP280_H
 
 /****************************************************************************
  * Included Files
@@ -83,4 +83,4 @@ int board_bmp280_initialize(int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CX56XX_SPRESENSE_INCLUDE_CXD56_BMP280_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BMP280_H */

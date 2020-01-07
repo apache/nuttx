@@ -175,9 +175,7 @@ static void clock_inittime(void)
   /* (Re-)initialize the time value to match the RTC */
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-#ifndef CONFIG_RTC_HIRES
   clock_basetime(&g_basetime);
-#endif
 
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/cxd56_uart0.h
+ * arch/arm/include/cxd56xx/uart0.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARM_ARCH_INCLUDE_CXD56XX_CXD56_UART0_H
-#define __ARM_ARCH_INCLUDE_CXD56XX_CXD56_UART0_H
+#ifndef __ARM_ARCH_INCLUDE_CXD56XX_UART0_H
+#define __ARM_ARCH_INCLUDE_CXD56XX_UART0_H
 
 /****************************************************************************
  * Public Types

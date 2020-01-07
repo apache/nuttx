@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_SPESENSE_INCLUDE_CXD56_LT1PA01_H
-#define __BOARDS_ARM_CXD56XX_SPESENSE_INCLUDE_CXD56_LT1PA01_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_LT1PA01_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_LT1PA01_H
 
 /****************************************************************************
  * Included Files
@@ -83,4 +83,4 @@ int board_lt1pa01_initialize(int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CXD56XX_SPESENSE_INCLUDE_CXD56_LT1PA01_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_LT1PA01_H */

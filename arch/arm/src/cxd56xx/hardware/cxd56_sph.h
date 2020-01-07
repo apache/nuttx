@@ -67,4 +67,4 @@
 #define LOCK_OWNER(sts) (((sts) >> 16) & 0x1f)
 #define RESV_OWNER(sts) (((sts) >> 24) & 0x1f)
 
-#endif
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPH_H */

@@ -398,6 +398,11 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
       status = up_serialin(priv, UART_IP_OFFSET);
 
+      if (status == 0)
+        {
+          break;
+        }
+
       if (status & UART_IP_RXWM)
         {
           /* Process incoming bytes */
@@ -405,9 +410,12 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
           uart_recvchars(dev);
         }
 
-      /* Process outgoing bytes */
+      if (status & UART_IP_TXWM)
+        {
+          /* Process outgoing bytes */
 
-      uart_xmitchars(dev);
+          uart_xmitchars(dev);
+        }
     }
 
   return OK;

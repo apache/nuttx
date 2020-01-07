@@ -707,4 +707,4 @@ struct cxd56_gnss_status_s
 }
 #endif /* __cplusplus */
 
-#endif /* ARCH_ARM_INCLUDE_CXD56XX_GNSS_TYPE_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_GNSS_TYPE_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/rpr0521rs_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/rpr0521rs_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

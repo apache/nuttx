@@ -44,6 +44,6 @@ double tanh(double x)
   double x0 = exp(x);
   double x1 = 1.0 / x0;
 
-  return ((x0 + x1) / (x0 - x1));
+  return ((x0 - x1) / (x0 + x1));
 }
 #endif

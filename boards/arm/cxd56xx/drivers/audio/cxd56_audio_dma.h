@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_dma.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_dma.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DMA_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DMA_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H
 
 /***************************************************************************
  * Included Files
@@ -78,4 +78,5 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_start(cxd56_audio_dma_t handle,
                                         uint32_t addr,
                                         uint32_t sample);
 CXD56_AUDIO_ECODE cxd56_audio_dma_stop(cxd56_audio_dma_t handle);
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DMA_H */
+
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H */

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUSEQ_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUSEQ_H
 
 #define SCUSEQ_SRC_SEL                      (CXD56_SCU_SEQ_DRAM_BASE + 0x00c)
 #define SCUSEQ_PROPERTY(s)                  (CXD56_SCU_SEQ_DRAM_BASE + 0x020 + ((s) * 0x20))
@@ -52,4 +52,4 @@
 #define SCUSEQ_SYNCRO_ISOP2CPU              (CXD56_SCU_SEQ_DRAM_BASE + 0x2C8)
 #define SCUSEQ_RAM_OUT_DATA0                (CXD56_SCU_SEQ_DRAM_BASE + 0x2CC)
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCUSEQ_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCUSEQ_H */

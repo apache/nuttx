@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bmp280_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bmp280_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

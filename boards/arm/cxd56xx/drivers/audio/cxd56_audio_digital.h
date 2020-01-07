@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_digital.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_digital.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DIGITAL_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DIGITAL_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DIGITAL_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DIGITAL_H
 
 /***************************************************************************
  * Included Files
@@ -65,4 +65,4 @@
 void cxd56_audio_digital_poweron(void);
 void cxd56_audio_digital_enable(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_DIGITAL_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DIGITAL_H */

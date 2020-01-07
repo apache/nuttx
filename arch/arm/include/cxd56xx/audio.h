@@ -35,8 +35,8 @@
 
 /* audioutils Audio Utility */
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
 
 /* API Documents creater with Doxgen */
 
@@ -948,4 +948,4 @@ bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq);
 } /* end of extern "C" */
 #endif /* __cplusplus */
 
-#endif /* __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H */
