@@ -177,7 +177,7 @@ int board_app_initialize(uintptr_t arg)
   ret = nsh_spifi_initialize();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: nsh_spifi_initialize() fails: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: nsh_spifi_initialize() failed: %d\n", ret);
     }
 #endif
 
