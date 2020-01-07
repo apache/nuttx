@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H
 
 /****************************************************************************
  * Included Files
@@ -163,4 +163,4 @@ struct dma_descriptor_s {
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H */

@@ -72,6 +72,7 @@ extern "C"
  *   Initialize BH1721FVC i2c driver and register the BH1721FVC device.
  *
  ****************************************************************************/
+
 #if defined(CONFIG_SENSORS_BH1721FVC) || defined(CONFIG_SENSORS_BH1721FVC_SCU)
 int board_bh1721fvc_initialize(FAR const char *devpath, int bus);
 #endif

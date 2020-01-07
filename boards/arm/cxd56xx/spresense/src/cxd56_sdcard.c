@@ -171,6 +171,7 @@ static void board_sdcard_enable(FAR void *arg)
               else
                 {
                   _err("ERROR: Failed to mount the SDCARD. %d\n", errno);
+                  goto release_frequency_lock;
                 }
             }
         }

@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_irq.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_irq.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_IRQ_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_IRQ_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_IRQ_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_IRQ_H
 
 /***************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ void cxd56_audio_irq_detach(void);
 void cxd56_audio_irq_enable(void);
 void cxd56_audio_irq_disable(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_IRQ_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_IRQ_H */

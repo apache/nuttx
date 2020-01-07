@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_bca_reg.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_bca_reg.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BCA_REG_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BCA_REG_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BCA_REG_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BCA_REG_H
 
 /***************************************************************************
  * Included Files
@@ -309,4 +309,4 @@ uint32_t cxd56_audio_bca_reg_get_mon_state_buf(cxd56_audio_dma_t handle);
 uint32_t cxd56_audio_bca_reg_get_dma_state(cxd56_audio_dma_t handle);
 void cxd56_audio_bca_reg_reset_chsel(cxd56_audio_dma_t handle);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BCA_REG_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BCA_REG_H */

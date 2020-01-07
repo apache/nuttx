@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -208,4 +208,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H */

@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_mic.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_mic.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_MIC_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_MIC_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_MIC_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_MIC_H
 
 /***************************************************************************
  * Included Files
@@ -68,4 +68,4 @@ CXD56_AUDIO_ECODE cxd56_audio_mic_set_gain(FAR cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_mic_set_seloutch(uint8_t mic_num,
                                                cxd56_audio_samp_fmt_t format);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_MIC_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_MIC_H */

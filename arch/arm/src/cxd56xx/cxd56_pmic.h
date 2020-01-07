@@ -457,7 +457,55 @@ int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge);
  *
  ****************************************************************************/
 
-int cxd56_pmic_getlowervol(FAR int *vol);
+int cxd56_pmic_getlowervol(FAR int *voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_setlowervol
+ *
+ * Description:
+ *   Set lower limit of voltage for system to be running.
+ *
+ * Input Parameter:
+ *   voltage - Lower limit voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setlowervol(int voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_getnotifyvol
+ *
+ * Description:
+ *   Get voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_getnotifyvol(FAR int *voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_setnotifyvol
+ *
+ * Description:
+ *   Set voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setnotifyvol(int voltage);
 
 /****************************************************************************
  * Name: cxd56_pmic_getchargevol

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bmi160_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bmi160_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

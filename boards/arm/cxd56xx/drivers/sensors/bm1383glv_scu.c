@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bm1383glv_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bm1383glv_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

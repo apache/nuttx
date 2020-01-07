@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_RTC_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_RTC_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_RTC_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_RTC_H
 
 /****************************************************************************************
  * Included Files
@@ -137,4 +137,4 @@
 #define RTCREG_ALM_ERRDBG_MASK          (1u << 31)
 
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_RTC_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_RTC_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bm1422gmv_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bm1422gmv_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

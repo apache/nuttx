@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCU_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCU_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCU_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCU_H
 
 #define SCU_PWM0_PARAM			(CXD56_SCU_BASE + 0x0000)
 #define SCU_PWM0_EN			(CXD56_SCU_BASE + 0x0004)
@@ -194,4 +194,4 @@
 #define SCU_INT_MASKED_STT_ERR_2	(CXD56_SCU_BASE + 0x0470)
 #define SCU_RAM_TEST			(CXD56_SCU_BASE + 0x0500)
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SCU_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SCU_H */

@@ -738,40 +738,35 @@ static int cxd56_i2c_scurecv(int port, int addr, uint8_t *buf, ssize_t buflen)
     {
       return OK;
     }
+  if (buflen > 16)
+    {
+      return -EINVAL;
+    }
 
   rem = buflen;
-  while (rem)
+  len0 = rem > 8 ? 8 : rem;
+  rem -= len0;
+  len1 = rem > 8 ? 8 : rem;
+  rem -= len1;
+
+  inst[0] = SCU_INST_RECV(len0);
+  if (len1)
     {
-      len0 = rem > 8 ? 8 : rem;
-      rem -= len0;
-      len1 = rem > 8 ? 8 : rem;
-      rem -= len1;
+      inst[1] = SCU_INST_RECV(len1);
+      instn = 2;
+    }
+  else
+    {
+      instn = 1;
+    }
 
-      inst[0] = SCU_INST_RECV(len0);
-      if (len1)
-        {
-          inst[1] = SCU_INST_RECV(len1);
-          instn = 2;
-        }
-      else
-        {
-          instn = 1;
-        }
+  inst[instn - 1] |= SCU_INST_LAST;
 
-      if (rem == 0)
-        {
-          inst[instn - 1] |= SCU_INST_LAST;
-        }
-
-      ret = scu_i2ctransfer(port, addr, inst, instn, buf, len0 + len1);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "I2C receive failed. port %d addr %d\n",
-                 port, addr);
-          break;
-        }
-
-      buf += len0 + len1;
+  ret = scu_i2ctransfer(port, addr, inst, instn, buf, buflen);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "I2C receive failed. port %d addr %d\n",
+             port, addr);
     }
 
   return ret;

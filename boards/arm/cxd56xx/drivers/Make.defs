@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/Makefile
+# boards/arm/cxd56xx/drivers/Make.defs
 #
 #   Copyright 2018 Sony Semiconductor Solutions Corporation
 #
