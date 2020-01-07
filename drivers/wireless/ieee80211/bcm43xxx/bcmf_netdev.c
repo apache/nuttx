@@ -623,7 +623,7 @@ static void bcmf_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-  ,        (wdparm_t)priv);
+           (wdparm_t)priv);
 exit_unlock:
   net_unlock();
 }

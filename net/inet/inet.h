@@ -130,18 +130,6 @@ struct tcp_conn_s; /* Forward reference */
 struct socket; /* Forward reference */
 
 /****************************************************************************
- * Name: inet_setipid
- *
- * Description:
- *   This function may be used at boot time to set the initial ip_id.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void inet_setipid(uint16_t id);
-
-/****************************************************************************
  * Name: inet_sockif
  *
  * Description:
@@ -159,7 +147,7 @@ void inet_setipid(uint16_t id);
  ****************************************************************************/
 
 FAR const struct sock_intf_s *
-  inet_sockif(sa_family_t family, int type, int protocol);
+inet_sockif(sa_family_t family, int type, int protocol);
 
 /****************************************************************************
  * Name: ipv4_setsockopt and ipv6_setsockopt

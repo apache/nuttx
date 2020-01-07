@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/imxrt/imxrt1060-evk/src/imxrt_bringup.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2020 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -121,7 +121,10 @@ static int nsh_sdmmc_initialize(void)
                  "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
                  ret);
         }
+
+      imxrt_usdhc_set_sdio_card_isr(sdmmc, NULL, NULL);
     }
+
   return OK;
 }
 #else

@@ -47,7 +47,6 @@ endif
 
 ifeq ($(CONFIG_NET_IPv4),y)
 SOCK_CSRCS += ipv4_setsockopt.c ipv4_getsockname.c ipv4_getpeername.c
-SOCK_CSRCS += inet_setipid.c
 endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
