@@ -3019,6 +3019,12 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
       priv->cintints = 0;
     }
 
+#if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
+  if (priv->sw_cd_gpio == 0)
+    {
+      priv->cintints |= USDHC_INT_CINS | USDHC_INT_CRM;
+	}
+#endif
   flags = enter_critical_section();
   regval = getreg32(priv->addr + IMXRT_USDHC_IRQSIGEN_OFFSET);
   regval = (regval & ~USDHC_INT_CINT) | priv->cintints;

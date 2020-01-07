@@ -121,6 +121,7 @@ static int nsh_sdmmc_initialize(void)
                  "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
                  ret);
         }
+      imxrt_usdhc_set_sdio_card_isr(sdmmc, NULL, NULL);
     }
   return OK;
 }
