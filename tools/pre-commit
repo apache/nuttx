@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# tools/pre-commit
+# git hook to run check-patch on the output and stop any commits
+# that do not pass. Note, only for git-commit, and not for any of the
+# other scenarios
+#
+# Copyright 2010 Ben Dooks, <ben-linux@fluff.org>
+
+if git rev-parse --verify HEAD 2>/dev/null >/dev/null
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+git diff --cached $against -- | ../nuttx/tools/checkpatch.sh -r -
