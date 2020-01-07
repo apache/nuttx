@@ -1232,9 +1232,28 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
 
       /* We don't want any more ints now, so switch it off */
 
-      priv->cintints  = 0;
       regval         &= ~USDHC_INT_CINT;
+      priv->cintints  = regval;
       putreg32(regval, priv->addr + IMXRT_USDHC_IRQSIGEN_OFFSET);
+    }
+
+  if ((pending & USDHC_INT_CINS) != 0 || (pending & USDHC_INT_CRM) != 0)
+    {
+      if (up_interrupt_context())
+        {
+          /* Yes.. queue it */
+
+          mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                          priv->cbarg, 0);
+        }
+      else
+        {
+          /* No.. then just call the callback here */
+
+          mcinfo("Callback to %p(%p)\n", priv->callback, priv->cbarg);
+          priv->callback(priv->cbarg);
+        }
     }
 
   /* Handle wait events *****************************************************/
