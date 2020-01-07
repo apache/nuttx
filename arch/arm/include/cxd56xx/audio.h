@@ -945,7 +945,7 @@ uint32_t cxd56_audio_get_micmap(void);
 bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq);
 
 #ifdef __cplusplus
-} /* end of extern "C" */
+}
 #endif /* __cplusplus */
 
 #endif /* __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H */

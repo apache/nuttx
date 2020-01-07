@@ -280,6 +280,7 @@ static int bm1383glv_seqinit(FAR struct bm1383glv_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -351,6 +352,7 @@ static int bm1383glv_open(FAR struct file *filep)
                 BM1383AGLV_MODE_CONTROL_RESERVED |
                 BM1383AGLV_MODE_CONTROL_CONTINUOUS;
         }
+
       bm1383glv_putreg8(priv, BM1383GLV_MODE_CONTROL, val);
     }
   else

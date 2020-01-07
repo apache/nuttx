@@ -148,7 +148,8 @@
  * Public Types
  ****************************************************************************/
 
-struct dma_descriptor_s {
+struct dma_descriptor_s
+{
     volatile void * volatile srcend;
     volatile void * volatile dstend;
     volatile uint32_t        ctrl;

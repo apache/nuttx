@@ -61,6 +61,7 @@ enum audio_irq_reg_type_e
 };
 
 /* INT_EN1 */
+
 #define CXD56_INTC_BASE      0xe0045000
 #define INT_EN1_REG_ADDR     (CXD56_INTC_BASE + 0x10 + 3 * 4)
 #define INT_EN1_BIT_AU0      6
@@ -181,6 +182,7 @@ static CXD56_AUDIO_ECODE get_dma_handle(cxd56_audio_dma_path_t path,
       default:
         return CXD56_AUDIO_ECODE_DMA_PATH_INV;
     }
+
   return CXD56_AUDIO_ECODE_OK;
 }
 
@@ -204,6 +206,7 @@ static CXD56_AUDIO_ECODE get_dma_path(cxd56_audio_dma_t handle,
       default:
         return CXD56_AUDIO_ECODE_DMA_HANDLE_INV;
     }
+
   return CXD56_AUDIO_ECODE_OK;
 }
 
@@ -256,6 +259,7 @@ static CXD56_AUDIO_ECODE exec_dma_ch_sync_workaround(
               break;
             }
         }
+
       if (timeout_cnt == DMA_TIMEOUT_CNT)
         {
           return CXD56_AUDIO_ECODE_DMA_SMP_TIMEOUT;
@@ -507,7 +511,6 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_en_dmaint(void)
   cxd56_audio_bca_reg_en_bus_err_int();
 
   return CXD56_AUDIO_ECODE_OK;
-
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_dma_dis_dmaint(void)
@@ -565,7 +568,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_stop(cxd56_audio_dma_t handle)
   return CXD56_AUDIO_ECODE_OK;
 }
 
-void CXD56_audio_dma_int_handler(void)
+void cxd56_audio_dma_int_handler(void)
 {
   uint32_t int_irq  = read_int_reg(INT_IRQ1_REG);
   uint32_t int_ac   = cxd56_audio_bca_reg_get_dma_done_state_mic();

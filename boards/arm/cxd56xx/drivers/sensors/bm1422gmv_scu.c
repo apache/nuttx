@@ -294,6 +294,7 @@ static int bm1422gmv_seqinit(FAR struct bm1422gmv_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -377,7 +378,6 @@ static int bm1422gmv_close(FAR struct file *filep)
 
   if (g_refcnt == 0)
     {
-
       /* goto power-down mode */
 
       bm1422gmv_putreg8(priv, BM1422GMV_CNTL1, BM1422GMV_CNTL1_RST_LV);

@@ -505,6 +505,7 @@ CXD56_AUDIO_ECODE cxd56_audio_en_deq(FAR cxd56_audio_deq_coef_t *coef)
     {
       g_pwon_param.deq.coef = coef;
     }
+
   if (g_status == CXD56_AUDIO_POWER_STATE_OFF)
     {
       return ret;
@@ -673,6 +674,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dis_output(void)
           return ret;
         }
     }
+
 #endif
   return ret;
 }
@@ -989,6 +991,7 @@ CXD56_AUDIO_ECODE cxd56_audio_set_datapath(cxd56_audio_signal_t sig,
           return ret;
         }
     }
+
   return ret;
 }
 

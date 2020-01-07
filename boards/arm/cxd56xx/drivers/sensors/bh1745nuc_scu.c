@@ -270,6 +270,7 @@ static int bh1745nuc_seqinit(FAR struct bh1745nuc_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);

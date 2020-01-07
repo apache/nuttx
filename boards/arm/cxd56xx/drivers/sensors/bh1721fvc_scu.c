@@ -76,6 +76,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for bh1721fvc device
  */
@@ -177,6 +178,7 @@ static int bh1721fvc_seqinit(FAR struct bh1721fvc_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -216,6 +218,7 @@ static int bh1721fvc_open(FAR struct file *filep)
       bh1721fvc_writeopecode(priv, BH1721FVC_POWERON);
       bh1721fvc_writeopecode(priv, BH1721FVC_AUTORESOLUTION);
     }
+
   g_refcnt++;
 
   return OK;

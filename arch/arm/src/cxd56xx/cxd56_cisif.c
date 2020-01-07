@@ -216,6 +216,7 @@ static uint64_t cisif_get_msec_time(void)
     {
       return 0;
     }
+
   return (((uint64_t)tp.tv_sec) * 1000 + tp.tv_nsec / 1000000);
 }
 
@@ -318,6 +319,7 @@ static void cisif_callback_for_intlev(uint8_t code)
 /****************************************************************************
  * cisif_ycc_axi_trdn_int
  ****************************************************************************/
+
 static void cisif_ycc_axi_trdn_int(uint8_t code)
 {
   uint32_t size;

@@ -127,6 +127,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for rpr0521rs device
  */
@@ -237,6 +238,7 @@ static uint8_t g_ps_persistence = RPR0521RS_PS_CONTROL_PS_PERSISTENCE_2;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: rpr0521rs_getreg8
  *
@@ -358,7 +360,7 @@ static int rpr0521rs_checkid(FAR struct rpr0521rs_dev_s *priv)
 
   id = rpr0521rs_getreg8(priv, RPR0521RS_SYSTEM_CONTROL);
 
-  if ((id & 0x3F) != RPR0521RS_PARTID)
+  if ((id & 0x3f) != RPR0521RS_PARTID)
     {
       /* Part ID is not Correct */
 
@@ -422,6 +424,7 @@ static void rpr0521rs_setmodecontrol(FAR struct rpr0521rs_dev_s *priv,
           val = RPR0521RS_MODE_CONTROL_MEASTIME_STANDBY;
         }
     }
+
   rpr0521rs_putreg8(priv, RPR0521RS_MODE_CONTROL, val);
 
   leave_critical_section(flags);
@@ -446,6 +449,7 @@ static int rpr0521rsals_seqinit(FAR struct rpr0521rs_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_als_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -479,6 +483,7 @@ static int rpr0521rsps_seqinit(FAR struct rpr0521rs_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_ps_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -553,6 +558,7 @@ static int rpr0521rs_open_ps(FAR struct file *filep)
         {
           return ret;
         }
+
       rpr0521rs_setmodecontrol(priv, SETMODECONTROL_TYPE_PS, true);
     }
   else
