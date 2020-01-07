@@ -114,7 +114,7 @@ static void set_miccfg(void)
 
   if (is_amic)
     {
-      if(is_dmic)
+      if (is_dmic)
         {
           g_audio_cfg.mic_dev  = CXD56_AUDIO_CFG_MIC_DEV_ANADIG;
           g_audio_cfg.mic_mode = CXD56_AUDIO_CFG_MIC_MODE_64FS;
@@ -127,7 +127,7 @@ static void set_miccfg(void)
     }
   else
     {
-      if(is_dmic)
+      if (is_dmic)
         {
           g_audio_cfg.mic_dev  = CXD56_AUDIO_CFG_MIC_DEV_DIGITAL;
           g_audio_cfg.mic_mode = CXD56_AUDIO_CFG_MIC_MODE_64FS;

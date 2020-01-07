@@ -317,7 +317,7 @@ static int board_sdcard_detect_int(int irq, FAR void *context, FAR void *arg)
                            NULL);
     }
 
-   return OK;
+    return OK;
 }
 #endif
 

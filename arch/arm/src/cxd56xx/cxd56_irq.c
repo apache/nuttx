@@ -364,7 +364,9 @@ void up_irqinitialize(void)
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-  /* up_prioritize_irq(CXD56_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+  /* up_prioritize_irq(CXD56_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN);
+   */
+
 #endif
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -402,13 +404,13 @@ void up_irqinitialize(void)
    */
 
 #if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  {
-    uint32_t regval;
+    {
+      uint32_t regval;
 
-    regval  = getreg32(NVIC_DEMCR);
-    regval &= ~NVIC_DEMCR_VCHARDERR;
-    putreg32(regval, NVIC_DEMCR);
-  }
+      regval  = getreg32(NVIC_DEMCR);
+      regval &= ~NVIC_DEMCR_VCHARDERR;
+      putreg32(regval, NVIC_DEMCR);
+    }
 #endif
 
   /* And finally, enable interrupts */

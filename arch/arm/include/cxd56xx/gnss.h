@@ -38,7 +38,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -648,7 +649,6 @@ extern "C" {
 
 struct cxd56_gnss_ope_mode_param_s
 {
-
   /* receiver operation mode
    *    0: No Change Operation
    *    1: Normal(default)

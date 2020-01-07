@@ -278,6 +278,7 @@ static int kx022_seqinit(FAR struct kx022_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);

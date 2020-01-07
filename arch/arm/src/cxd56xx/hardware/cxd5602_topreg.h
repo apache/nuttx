@@ -39,15 +39,15 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_TOPREG_H
 #define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_TOPREG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define CXD56_TOPREG_PWD_CTL                    (CXD56_TOPREG_BASE + 0x0000)
 #define CXD56_TOPREG_ANA_PW_CTL                 (CXD56_TOPREG_BASE + 0x0004)
@@ -377,6 +377,7 @@
 #define CXD56_TOPREG_GP_USB_VBUSINT             (CXD56_TOPREG_BASE + 0x2188)
 
 /* Topreg sub */
+
 #define CXD56_TOPREG_PSW_CHECK                  (CXD56_TOPREG_SUB_BASE + 0x0000)
 #define CXD56_TOPREG_UNEXP_PSW_DIG              (CXD56_TOPREG_SUB_BASE + 0x0004)
 #define CXD56_TOPREG_UNEXP_PSW_ANA              (CXD56_TOPREG_SUB_BASE + 0x0008)

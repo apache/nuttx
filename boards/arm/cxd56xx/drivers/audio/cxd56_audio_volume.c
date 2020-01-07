@@ -228,6 +228,7 @@ CXD56_AUDIO_ECODE cxd56_audio_volume_set(cxd56_audio_volid_t id,
           return CXD56_AUDIO_ECODE_VOL_MIN;
         }
     }
+
   if (VOLUME_MAX < vol)
     {
       return CXD56_AUDIO_ECODE_VOL_MAX;

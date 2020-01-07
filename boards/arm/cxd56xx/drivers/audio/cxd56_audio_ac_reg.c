@@ -891,6 +891,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_checkid(void)
     {
       return CXD56_AUDIO_ECODE_REG_AC_REVID;
     }
+
   if (read_ac_reg(RI_DEVICEID) != AC_DEVICEID)
     {
       return CXD56_AUDIO_ECODE_REG_AC_DEVID;
@@ -944,7 +945,7 @@ void cxd56_audio_ac_reg_poweron_sdes(void)
 
 CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_micmode(uint8_t mic_mode)
 {
-  switch(mic_mode)
+  switch (mic_mode)
     {
       case CXD56_AUDIO_CFG_MIC_MODE_128FS:
         write_ac_reg(RI_FS_FS,    0);
@@ -1066,6 +1067,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_alcspc(void)
         {
           return ret;
         }
+
       write_ac_reg(RI_ALC_EN, 1);
     }
   else if (CXD56_AUDIO_CFG_ALCSPC == CXD56_AUDIO_CFG_ALCSPC_SPC)
@@ -1077,6 +1079,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_alcspc(void)
         {
           return ret;
         }
+
       write_ac_reg(RI_SPC_EN, 1);
     }
 
@@ -1196,15 +1199,18 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(uint8_t mic_in,
           write_ac_reg(RI_CIC4IN_SEL, 0);
           write_ac_reg(RI_HPF4_MODE,  1);
         }
+
       if (cic_num > 2)
         {
           if (read_ac_reg(RI_PDN_AMICEXT) == 1)
             {
               write_ac_reg(RI_PDN_AMICEXT, 0);
             }
+
           write_ac_reg(RI_CIC3IN_SEL, 0);
           write_ac_reg(RI_HPF3_MODE,  1);
         }
+
       if (cic_num > 1)
         {
           write_ac_reg(RI_PDN_AMIC2,  0);
@@ -1212,6 +1218,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(uint8_t mic_in,
           write_ac_reg(RI_HPF2_MODE,  1);
           write_ac_reg(RI_CIC2_GAIN_MODE, 1);
         }
+
       if (cic_num > 0)
         {
           write_ac_reg(RI_PDN_AMIC1,  0);
@@ -1232,17 +1239,20 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(uint8_t mic_in,
           write_ac_reg(RI_CIC4IN_SEL, 1);
           write_ac_reg(RI_HPF4_MODE,  1);
         }
+
       if (cic_num > 2)
         {
           write_ac_reg(RI_CIC3IN_SEL, 1);
           write_ac_reg(RI_HPF3_MODE,  1);
         }
+
       if (cic_num > 1)
         {
           write_ac_reg(RI_CIC2IN_SEL, 1);
           write_ac_reg(RI_HPF2_MODE,  1);
           write_ac_reg(RI_CIC2_GAIN_MODE, 1);
         }
+
       if (cic_num > 0)
         {
           write_ac_reg(RI_CIC1IN_SEL, 1);

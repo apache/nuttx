@@ -51,7 +51,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-extern void CXD56_audio_dma_int_handler(void);
+extern void cxd56_audio_dma_int_handler(void);
 
 /***************************************************************************
  * Private Data
@@ -71,10 +71,10 @@ extern void CXD56_audio_dma_int_handler(void);
 
 void cxd56_audio_irq_attach(void)
 {
-  irq_attach(CXD56_IRQ_AUDIO_0, (xcpt_t)CXD56_audio_dma_int_handler, NULL);
-  irq_attach(CXD56_IRQ_AUDIO_1, (xcpt_t)CXD56_audio_dma_int_handler, NULL);
-  irq_attach(CXD56_IRQ_AUDIO_2, (xcpt_t)CXD56_audio_dma_int_handler, NULL);
-  irq_attach(CXD56_IRQ_AUDIO_3, (xcpt_t)CXD56_audio_dma_int_handler, NULL);
+  irq_attach(CXD56_IRQ_AUDIO_0, (xcpt_t)cxd56_audio_dma_int_handler, NULL);
+  irq_attach(CXD56_IRQ_AUDIO_1, (xcpt_t)cxd56_audio_dma_int_handler, NULL);
+  irq_attach(CXD56_IRQ_AUDIO_2, (xcpt_t)cxd56_audio_dma_int_handler, NULL);
+  irq_attach(CXD56_IRQ_AUDIO_3, (xcpt_t)cxd56_audio_dma_int_handler, NULL);
 }
 
 void cxd56_audio_irq_detach(void)

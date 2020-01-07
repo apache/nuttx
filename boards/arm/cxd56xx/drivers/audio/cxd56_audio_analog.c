@@ -105,6 +105,7 @@ static void wait_mic_boot_finish(void)
         {
           return;
         }
+
       uint64_t time = (uint64_t)end.tv_sec * 1000 +
                       (uint64_t)end.tv_nsec / 1000000 -
                        g_mic_boot_start_time;
@@ -231,6 +232,7 @@ CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff_input(void)
     {
       return ret;
     }
+
   clear_mic_boot_time();
 #endif
 

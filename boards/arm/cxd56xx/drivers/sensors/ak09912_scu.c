@@ -146,6 +146,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for ak09912 device
  */
@@ -271,7 +272,7 @@ static void ak09912_putreg8(FAR struct ak09912_dev_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 static int ak09912_getreg(FAR struct ak09912_dev_s *priv, uint8_t regaddr,
-                          uint8_t* buffer, uint32_t cnt)
+                          uint8_t *buffer, uint32_t cnt)
 {
   uint16_t inst[2];
 
@@ -325,6 +326,7 @@ static int ak09912_seqinit(FAR struct ak09912_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -489,7 +491,8 @@ static int ak09912_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int ak09912_init(FAR struct i2c_master_s *i2c, int port)
 {
-  FAR struct ak09912_dev_s tmp, *priv = &tmp;
+  struct ak09912_dev_s tmp;
+  struct ak09912_dev_s *priv = &tmp;
   uint8_t val;
   int ret;
 

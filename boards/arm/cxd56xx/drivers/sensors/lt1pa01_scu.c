@@ -144,6 +144,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for lt1pa01 device
  */
@@ -349,6 +350,7 @@ static int lt1pa01als_seqinit(FAR struct lt1pa01_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_als_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -382,6 +384,7 @@ static int lt1pa01prox_seqinit(FAR struct lt1pa01_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_prox_seq;
 
   seq_setaddress(priv->seq, priv->addr);
