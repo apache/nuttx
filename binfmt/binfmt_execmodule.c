@@ -186,6 +186,7 @@ int exec_module(FAR const struct binary_s *binp)
     {
       ret = -get_errno();
       berr("task_init() failed: %d\n", ret);
+      kumm_free(stack);
       goto errout_with_addrenv;
     }
 

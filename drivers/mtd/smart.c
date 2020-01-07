@@ -4988,7 +4988,7 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
   physicalsector = smart_findfreephyssector(dev, FALSE);
   finfo("Alloc: log=%d, phys=%d, erase block=%d, free=%d, released=%d\n",
           logsector, physicalsector, physicalsector /
-          dev->sectorsPerBlk, dev->freesectors, dev->releasecount);
+          dev->sectorsPerBlk, dev->freesectors, dev->releasesectors);
 
   if (physicalsector == 0xffff)
     {
