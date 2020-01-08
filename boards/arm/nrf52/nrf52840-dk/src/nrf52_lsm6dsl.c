@@ -1,8 +1,8 @@
-/****************************************************************************
- * boards/arm/nrf52/nrf52840-dk/src/nrf52_boot.c
+/*****************************************************************************
+ * boards/arm/nrf52/nrf52840-dk/src/nrf52_lsm6dsl.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Greg Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,73 +30,68 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  ****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
+#include "nrf52_i2c.h"
 #include "nrf52840-dk.h"
+#include <nuttx/sensors/lsm6dsl.h>
 
-/****************************************************************************
+/*****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NRF52_I2C0_MASTER
+#  error "LSM6DSL driver requires CONFIG_NRF52_I2C0_MASTER to be enabled"
+#endif
+
+/*****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nrf52_board_initialize
+/*****************************************************************************
+ * Name: nrf52_lsm6dsl_initialize
  *
  * Description:
- *   All NRF52xxx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
+ *   Initialize I2C-based LSM6DSL.
  ****************************************************************************/
 
-void nrf52_board_initialize(void)
+int nrf52_lsm6dsl_initialize(char *devpath)
 {
-  /* Configure on-board LEDs if LED support has been selected. */
+  FAR struct i2c_master_s *i2c;
+  int ret = OK;
 
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
+  sninfo("Initializing LMS6DSL!\n");
+
+#ifdef CONFIG_NRF52_I2C0_MASTER
+  i2c = nrf52_i2cbus_initialize(0);
+  if (i2c == NULL)
+    {
+      return -ENODEV;
+    }
+
+  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
+
+  ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n",
+            devpath);
+      return -ENODEV;
+    }
+
+  sninfo("INFO: LMS6DSL sensor has been initialized successfully\n");
 #endif
 
-#ifdef CONFIG_NRF52_SPI_MASTER
-  /* Configure SPI chip selects */
-
-  nrf52_spidev_initialize();
-#endif
+  return ret;
 }
-
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  (void)nrf52_bringup();
-}
-#endif

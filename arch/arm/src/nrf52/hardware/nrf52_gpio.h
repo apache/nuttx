@@ -48,8 +48,14 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define NRF52_GPIO_PORT0            0
-#define NRF52_GPIO_NPORTS           1
+#ifdef CONFIG_ARCH_CHIP_NRF52840
+#  define NRF52_GPIO_NPORTS         2
+#  define NRF52_GPIO_PORT0          0
+#  define NRF52_GPIO_PORT1          1
+#else
+#  define NRF52_GPIO_PORT0          0
+#  define NRF52_GPIO_NPORTS         1
+#endif
 
 /* Register offsets *****************************************************************/
 

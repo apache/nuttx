@@ -71,6 +71,10 @@
 
 /* Register offsets for GPIOTE *********************************************/
 
+/* EVENT_IN Register */
+
+#define GPIOTE_EVENT_IN_EVENT   (1 << 0) /* Bit 0: Event generated from pin */
+
 /* INTENSET/INTENCLR Register */
 
 #define GPIOTE_INT_IN_SHIFT      0    /* Bits 0-7: Enable interrupt for event IN[i] */
@@ -83,8 +87,8 @@
 #define GPIOTE_CONFIG_MODE_SHIFT 0    /* Bits 0-1: Mode */
 #define GPIOTE_CONFIG_MODE_MASK  (0x3 << GPIOTE_CONFIG_MODE_SHIFT)
 #  define GPIOTE_CONFIG_MODE_DIS (0x0 << GPIOTE_CONFIG_MODE_SHIFT) /* 0: Disabled */
-#  define GPIOTE_CONFIG_MODE_EV  (0x0 << GPIOTE_CONFIG_MODE_SHIFT) /* 1: Event */
-#  define GPIOTE_CONFIG_MODE_TS  (0x0 << GPIOTE_CONFIG_MODE_SHIFT) /* 2: Task */
+#  define GPIOTE_CONFIG_MODE_EV  (0x1 << GPIOTE_CONFIG_MODE_SHIFT) /* 1: Event */
+#  define GPIOTE_CONFIG_MODE_TS  (0x3 << GPIOTE_CONFIG_MODE_SHIFT) /* 2: Task */
 #define GPIOTE_CONFIG_PSEL_SHIFT (8)  /* Bits 8-12: GPIO number */
 #define GPIOTE_CONFIG_PSEL_MASK  (0x1f << GPIOTE_CONFIG_PSEL_SHIFT)
 #define GPIOTE_CONFIG_PORT_SHIFT (13) /* Bit 13: GPIO port */

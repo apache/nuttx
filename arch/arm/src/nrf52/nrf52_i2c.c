@@ -310,6 +310,10 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_POLLED
           while (nrf52_i2c_getreg(priv,
                                   NRF52_TWIM_EVENTS_LASTTX_OFFSET) != 1);
+
+          /* Clear event */
+
+          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_LASTTX_OFFSET, 0);
 #endif
 
           /* TWIM stop */
@@ -321,6 +325,10 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_POLLED
           while (nrf52_i2c_getreg(priv,
                                   NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
+
+          /* Clear event */
+
+          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET, 0);
 #endif
         }
       else
@@ -425,8 +433,8 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
 
   /* Select SCL pin */
 
-  pin = (priv->scl_pin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (priv->scl_pin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = GPIO_PIN_DECODE(priv->scl_pin);
+  port = GPIO_PORT_DECODE(priv->scl_pin);
 
   regval = (pin << TWIM_PSELSCL_PIN_SHIFT);
   regval |= (port << TWIM_PSELSCL_PORT_SHIFT);
@@ -434,8 +442,8 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
 
   /* Select SDA pin */
 
-  pin = (priv->sda_pin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (priv->sda_pin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = GPIO_PIN_DECODE(priv->sda_pin);
+  port = GPIO_PORT_DECODE(priv->sda_pin);
 
   regval = (pin << TWIM_PSELSDA_PIN_SHIFT);
   regval |= (port << TWIM_PSELSDA_PORT_SHIFT);
