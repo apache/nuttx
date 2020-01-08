@@ -193,7 +193,11 @@ void up_enable_irq(int irq)
 
 uint32_t up_get_newintctx(void)
 {
-  return (MSTATUS_MPIE | MSTATUS_MIE);
+  /* Set machine previous privilege mode to machine mode.
+   * Also set machine previous interrupt enable
+   */
+
+  return (MSTATUS_MPPM | MSTATUS_MPIE);
 }
 
 /****************************************************************************
