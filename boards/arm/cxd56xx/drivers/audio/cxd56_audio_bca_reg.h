@@ -46,6 +46,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define DMA_STATE_BIT_AC_DONE        1
+#define DMA_STATE_BIT_AC_ERR         2
+#define DMA_STATE_BIT_AC_CMB         8
+#define DMA_STATE_BIT_I2S_OUT_DONE   1
+#define DMA_STATE_BIT_I2S_OUT_ERR    2
+#define DMA_STATE_BIT_I2S_IN_DONE    4
+#define DMA_STATE_BIT_I2S_IN_ERR     8
+#define DMA_STATE_BIT_I2S_CMB        32
+
+#define DMA_MSTATE_START             1
+#define DMA_MSTART_READY             0
+
+#define DMA_MSTATE_ERR_OK
+#define DMA_MSTATE_ERR_NO_ENABLE_CH  1
+#define DMA_MSTATE_ERR_CH1_4_INVALID 2
+#define DMA_MSTATE_ERR_CH5_8_INVALID 4
+
+#define DMA_MSTATE_BUF_EMPTY         3
+
+#define DMA_CMD_FIFO_NOT_FULL        1
+
+/***************************************************************************
+ * Public Types
+ ****************************************************************************/
+
 typedef enum
 {
   BCA_MIC_IN_START_ADR,
@@ -118,13 +143,13 @@ typedef enum
   BCA_I2S1_INT_CTRL_ERR_I2SO,
   BCA_I2S1_INT_CTRL_DONE_I2SI,
   BCA_I2S1_INT_CTRL_ERR_I2SI,
-  BCA_I2S1_INT_CTRL_SMP_I2S
+  BCA_I2S1_INT_CTRL_SMP_I2S,
   BCA_I2S1_INT_CTRL_CMB_I2S,
   BCA_I2S2_INT_CTRL_DONE_I2SO,
   BCA_I2S2_INT_CTRL_ERR_I2SO,
   BCA_I2S2_INT_CTRL_DONE_I2SI,
   BCA_I2S2_INT_CTRL_ERR_I2SI,
-  BCA_I2S2_INT_CTRL_SMP_I2S
+  BCA_I2S2_INT_CTRL_SMP_I2S,
   BCA_I2S2_INT_CTRL_CMB_I2S,
   BCA_MIC_INT_MASK_DONE_MIC,
   BCA_MIC_INT_MASK_ERR_MIC,
@@ -136,7 +161,7 @@ typedef enum
   BCA_I2S1_INT_MASK_ERR_I2SO,
   BCA_I2S1_INT_MASK_DONE_I2SI,
   BCA_I2S1_INT_MASK_ERR_I2SI,
-  BCA_I2S1_INT_MASK_SMP_I2S
+  BCA_I2S1_INT_MASK_SMP_I2S,
   BCA_I2S1_INT_MASK_CMB_I2S,
   BCA_I2S1_INT_MASK_NOSTPMSK,
   BCA_I2S1_INT_MASK_SRST_I2S,
@@ -144,7 +169,7 @@ typedef enum
   BCA_I2S2_INT_MASK_ERR_I2SO,
   BCA_I2S2_INT_MASK_DONE_I2SI,
   BCA_I2S2_INT_MASK_ERR_I2SI,
-  BCA_I2S2_INT_MASK_SMP_I2S
+  BCA_I2S2_INT_MASK_SMP_I2S,
   BCA_I2S2_INT_MASK_CMB_I2S,
   BCA_I2S2_INT_MASK_NOSTPMSK,
   BCA_I2S2_INT_MASK_SRST_I2S,
@@ -208,39 +233,6 @@ typedef enum
   AHB_MASTER_I2S2_MASK,
   BCA_REG_MAX_ENTRY
 } BCA_REG_ID;
-
-#define DMA_STATE_BIT_AC_DONE        1
-#define DMA_STATE_BIT_AC_ERR         2
-#define DMA_STATE_BIT_AC_CMB         8
-#define DMA_STATE_BIT_I2S_OUT_DONE   1
-#define DMA_STATE_BIT_I2S_OUT_ERR    2
-#define DMA_STATE_BIT_I2S_IN_DONE    4
-#define DMA_STATE_BIT_I2S_IN_ERR     8
-#define DMA_STATE_BIT_I2S_CMB        32
-
-#define DMA_MSTATE_START             1
-#define DMA_MSTART_READY             0
-
-#define DMA_MSTATE_ERR_OK
-#define DMA_MSTATE_ERR_NO_ENABLE_CH  1
-#define DMA_MSTATE_ERR_CH1_4_INVALID 2
-#define DMA_MSTATE_ERR_CH5_8_INVALID 4
-
-#define DMA_MSTATE_BUF_EMPTY         3
-
-#define DMA_CMD_FIFO_NOT_FULL        1
-
-/***************************************************************************
- * Public Types
- ****************************************************************************/
-
-/***************************************************************************
- * Public Data
- ****************************************************************************/
-
-/***************************************************************************
- * Inline Functions
- ****************************************************************************/
 
 /***************************************************************************
  * Public Function Prototypes
