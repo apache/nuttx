@@ -2009,11 +2009,9 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
 
     default:
       priv->u.alloclen = 0;
-      if (ret == OK)
-        {
-          priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
-          ret = -EINVAL;
-        }
+      priv->residue = priv->cbwlen;
+      priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
+      ret = -EINVAL;
       break;
     }
 
