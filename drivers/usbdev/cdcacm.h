@@ -61,7 +61,7 @@
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_CDCACM_STRBASE)
-#  define CONFIG_CDCACM_STRBASE    (4)
+#  define CONFIG_CDCACM_STRBASE    (0)
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_COMPOSITE_IAD)

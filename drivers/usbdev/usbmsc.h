@@ -69,7 +69,7 @@
 #endif
 
 #if defined(CONFIG_USBMSC_COMPOSITE) && !defined(CONFIG_USBMSC_STRBASE)
-#  define CONFIG_USBMSC_STRBASE (4)
+#  define CONFIG_USBMSC_STRBASE (0)
 #endif
 
 /* Interface IDs.  If the mass storage driver is built as a component of a

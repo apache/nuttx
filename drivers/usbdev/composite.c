@@ -619,8 +619,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       for (i = 0; i < priv->ndevices; i++)
                         {
-                          if (strid >= priv->device[i].compdesc.devinfo.strbase &&
-                              strid <  priv->device[i].compdesc.devinfo.strbase +
+                          if (strid >  priv->device[i].compdesc.devinfo.strbase &&
+                              strid <= priv->device[i].compdesc.devinfo.strbase +
                                        priv->device[i].compdesc.devinfo.nstrings)
                             {
                               ret = priv->device[i].compdesc.mkstrdesc(strid -
