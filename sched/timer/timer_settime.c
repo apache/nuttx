@@ -372,7 +372,7 @@ int timer_settime(timer_t timerid, int flags,
 
       timer->pt_last = delay;
       ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
-                     1, (uint32_t)((wdparm_t)timer));
+                     1, (wdparm_t)timer);
       if (ret < 0)
         {
           set_errno(-ret);
