@@ -388,7 +388,11 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 #endif
 
       dest->len         = USB_SIZEOF_CFGDESC;                /* Descriptor length */
+#ifdef CONFIG_USBDEV_DUALSPEED
+      dest->type        = type;                              /* Descriptor type */
+#else
       dest->type        = USB_DESC_TYPE_CONFIG;              /* Descriptor type */
+#endif
       dest->totallen[0] = LSBYTE(size);                      /* LS Total length */
       dest->totallen[1] = MSBYTE(size);                      /* MS Total length */
       dest->ninterfaces = CDCACM_NINTERFACES;                /* Number of interfaces */

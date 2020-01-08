@@ -1715,7 +1715,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
                   ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
-                                         dev->speed, ctrl->req);
+                                         dev->speed, ctrl->value[1]);
 #else
                   ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
 #endif
