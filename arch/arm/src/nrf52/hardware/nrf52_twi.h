@@ -150,7 +150,7 @@
 /* PSELSCL Register */
 
 #define TWIM_PSELSCL_PIN_SHIFT              (0)        /* Bits 0-4: SCL pin number */
-#define TWIM_PSELSCL_PIN_MASK               (0xf << TWIM_PSELSCL_PIN_SHIFT)
+#define TWIM_PSELSCL_PIN_MASK               (0x1f << TWIM_PSELSCL_PIN_SHIFT)
 #define TWIM_PSELSCL_PORT_SHIFT             (5)        /* Bit 5: SCL port number */
 #define TWIM_PSELSCL_PORT_MASK              (0x1 << TWIM_PSELSCL_PORT_SHIFT)
 #define TWIM_PSELSCL_CONNECTED              (1 << 31)  /* Bit 31: Connection */
@@ -159,7 +159,7 @@
 /* PSELSDA Register */
 
 #define TWIM_PSELSDA_PIN_SHIFT              (0)        /* Bits 0-4: SDA pin number */
-#define TWIM_PSELSDA_PIN_MASK               (0xf << TWIM_PSELSDA_PIN_SHIFT)
+#define TWIM_PSELSDA_PIN_MASK               (0x1f << TWIM_PSELSDA_PIN_SHIFT)
 #define TWIM_PSELSDA_PORT_SHIFT             (5)        /* Bit 5: SDA port number */
 #define TWIM_PSELSDA_PORT_MASK              (0x1 << TWIM_PSELSDA_PORT_SHIFT)
 #define TWIM_PSELSDA_CONNECTED              (1 << 31)  /* Bit 31: Connection */

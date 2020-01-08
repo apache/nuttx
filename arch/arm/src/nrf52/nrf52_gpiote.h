@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52840-dk/src/nrf52_boot.c
+ * arch/arm/src/nrf52/nrf52_gpiote.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,70 +33,57 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_GPIOTE_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_GPIOTE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/irq.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "nrf52840-dk.h"
+#include "chip.h"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_board_initialize
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_gpiosetevent
  *
  * Description:
- *   All NRF52xxx architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  - pinset: gpio pin configuration
+ *  - rising/falling edge: enables
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
  *
  ****************************************************************************/
 
-void nrf52_board_initialize(void)
-{
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
-
-#ifdef CONFIG_NRF52_SPI_MASTER
-  /* Configure SPI chip selects */
-
-  nrf52_spidev_initialize();
-#endif
-}
+int nrf52_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                       bool event, xcpt_t func, FAR void *arg);
 
 /****************************************************************************
- * Name: board_late_initialize
+ * Name: nrf52_gpiote_init
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   Initialize GPIOTE
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
+int nrf52_gpiote_init(void);
 
-  (void)nrf52_bringup();
-}
-#endif
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_GPIOTE_H */

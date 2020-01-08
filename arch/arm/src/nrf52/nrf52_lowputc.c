@@ -114,8 +114,7 @@ static const struct uart_config_s g_console_config =
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-static void nrf52_setbaud(uintptr_t base,
-                          FAR const struct uart_config_s *config)
+static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 {
   uint32_t br = 0;
 
@@ -164,8 +163,7 @@ void nrf52_lowsetup(void)
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void nrf52_usart_configure(uintptr_t base,
-                           FAR const struct uart_config_s *config)
+void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
 {
   uint32_t pin    = 0;
   uint32_t port   = 0;
@@ -186,8 +184,8 @@ void nrf52_usart_configure(uintptr_t base,
 
   /* Setect TX pins for UART */
 
-  pin = (config->txpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (config->txpin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = GPIO_PIN_DECODE(config->txpin);
+  port = GPIO_PORT_DECODE(config->txpin);
 
   regval = (pin << UART_PSELTXD_PIN_SHIFT);
   regval |= (port << UART_PSELTXD_PORT_SHIFT);
@@ -195,8 +193,8 @@ void nrf52_usart_configure(uintptr_t base,
 
   /* Setect RX pins for UART */
 
-  pin = (config->rxpin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (config->rxpin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = GPIO_PIN_DECODE(config->rxpin);
+  port = GPIO_PORT_DECODE(config->rxpin);
 
   regval = (pin << UART_PSELRXD_PIN_SHIFT);
   regval |= (port << UART_PSELRXD_PORT_SHIFT);
@@ -218,8 +216,7 @@ void nrf52_usart_configure(uintptr_t base,
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void nrf52_usart_disable(uintptr_t base,
-                         FAR const struct uart_config_s *config)
+void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 {
   /* Disable interrupts */
 
