@@ -1544,7 +1544,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
       /* Clip to the length in the CBW and declare a phase error */
 
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_PHASEERROR1), priv->cdb[0]);
-      if ((flags & USBMSC_FLAGS_BLOCKXFR) != 0)
+      if ((flags & USBMSC_FLAGS_BLOCKXFR) == 0)
         {
           priv->u.alloclen = priv->cbwlen;
         }
