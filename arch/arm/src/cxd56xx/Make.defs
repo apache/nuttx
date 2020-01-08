@@ -89,6 +89,10 @@ CMN_CSRCS += up_copyarmstate.c
 endif
 endif
 
+ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
+CMN_CSRCS += up_itm_syslog.c
+endif
+
 CHIP_ASRCS += cxd56_farapistub.S
 
 CHIP_CSRCS  = cxd56_allocateheap.c cxd56_idle.c

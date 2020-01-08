@@ -320,6 +320,12 @@ void __start(void)
 
   fpuconfig();
 
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+  /* Perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+#endif
+
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
