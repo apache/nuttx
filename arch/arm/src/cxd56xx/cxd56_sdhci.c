@@ -501,13 +501,13 @@ struct cxd56_sdiodev_s g_sdhcdev =
       .sendsetup        = cxd56_sdio_sendsetup,
       .cancel           = cxd56_sdio_cancel,
       .waitresponse     = cxd56_sdio_waitresponse,
-      .recv_r1           = cxd56_sdio_recvshortcrc,
-      .recv_r2           = cxd56_sdio_recvlong,
-      .recv_r3           = cxd56_sdio_recvshort,
-      .recv_r4           = cxd56_sdio_recvshort,
-      .recv_r5           = cxd56_sdio_recvshort,
-      .recv_r5           = cxd56_sdio_recvshortcrc,
-      .recv_r7           = cxd56_sdio_recvshort,
+      .recvR1           = cxd56_sdio_recvshortcrc,
+      .recvR2           = cxd56_sdio_recvlong,
+      .recvR3           = cxd56_sdio_recvshort,
+      .recvR4           = cxd56_sdio_recvshort,
+      .recvR5           = cxd56_sdio_recvshort,
+      .recvR5           = cxd56_sdio_recvshortcrc,
+      .recvR7           = cxd56_sdio_recvshort,
       .waitenable       = cxd56_sdio_waitenable,
       .eventwait        = cxd56_sdio_eventwait,
       .callbackenable   = cxd56_sdio_callbackenable,
@@ -3474,8 +3474,8 @@ static int cxd56_sdio_changeclock(FAR struct cxd56_sdiodev_s *priv)
  *
  ****************************************************************************/
 
-static FAR struct sdio_function_s
-           *cxd56_sdio_function_alloc(FAR struct sdio_softc_s *sc)
+static FAR struct sdio_function_s *
+  cxd56_sdio_function_alloc(FAR struct sdio_softc_s *sc)
 {
   FAR struct sdio_function_s *sf;
 
@@ -4376,7 +4376,7 @@ static int cxd56_sdio_initialize(struct cxd56_sdiodev_s *priv)
   ret = cxd56_sdio_recvshortcrc(&priv->dev, MMCSD_CMD7S, &response);
   if (ret != OK)
     {
-      mcerr("ERROR: mmcsd_recv_r1 for CMD7 failed: %d\n", ret);
+      mcerr("ERROR: cxd56_sdio_recvshortcrc for CMD7 failed: %d\n", ret);
       return ret;
     }
 
@@ -4563,8 +4563,9 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
 #endif
 
 #ifdef CONFIG_SDIO_DMA
-  for (i = 0; i < sizeof(cxd56_sdhci_adma_dscr) /
-                  sizeof(cxd56_sdhci_adma_dscr[0]); i++)
+  for (i = 0;
+       i < sizeof(cxd56_sdhci_adma_dscr) / sizeof(cxd56_sdhci_adma_dscr[0]);
+       i++)
     {
       cxd56_sdhci_adma_dscr[i] = 0;
     }
