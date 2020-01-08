@@ -2726,13 +2726,6 @@ int usbmsc_scsi_main(int argc, char *argv[])
       if ((eventset & (USBMSC_EVENT_DISCONNECT | USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
                        USBMSC_EVENT_IFCHANGE | USBMSC_EVENT_ABORTBULKOUT)) != 0)
         {
-          /* These events require that the current configuration be reset */
-
-          if ((eventset & USBMSC_EVENT_IFCHANGE) != 0)
-            {
-              usbmsc_resetconfig(priv);
-            }
-
           /* These events require that a new configuration be established */
 
           if ((eventset & (USBMSC_EVENT_CFGCHANGE)) != 0)
