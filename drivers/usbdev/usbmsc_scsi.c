@@ -1750,7 +1750,7 @@ static int usbmsc_idlestate(FAR struct usbmsc_dev_s *priv)
       /* Return the read request to the bulk out endpoint for re-filling */
 
       req           = privreq->req;
-      req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
+      req->len      = priv->epbulkout->maxpacket;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -2177,7 +2177,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       src    = &priv->iobuffer[lun->sectorsize - priv->nsectbytes];
       dest   = &req->buf[priv->nreqbytes];
 
-      nbytes = MIN(CONFIG_USBMSC_BULKINREQLEN - priv->nreqbytes, priv->nsectbytes);
+      nbytes = MIN(priv->epbulkin->maxpacket - priv->nreqbytes, priv->nsectbytes);
 
       /* Copy the data from the sector buffer to the USB request and update counts */
 
@@ -2189,7 +2189,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
        * then submit the request
        */
 
-      if (priv->nreqbytes >= CONFIG_USBMSC_BULKINREQLEN ||
+      if (priv->nreqbytes >= priv->epbulkin->maxpacket ||
           (priv->u.xfrlen <= 0 && priv->nsectbytes <= 0))
         {
           /* Remove the request that we just filled from wrreqlist (we've already checked
@@ -2347,7 +2347,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * to get the next read request.
        */
 
-      req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
+      req->len      = priv->epbulkout->maxpacket;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -2359,7 +2359,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
 
       /* Did the host decide to stop early? */
 
-      if (xfrd != CONFIG_USBMSC_BULKOUTREQLEN)
+      if (xfrd != priv->epbulkout->maxpacket)
         {
           priv->shortpacket = 1;
           goto errout;
