@@ -391,6 +391,9 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
 #endif
 static int smart_readsector(FAR struct smart_struct_s *dev, unsigned long arg);
 
+#ifdef CONFIG_MTD_SMART_ENABLE_CRC
+static int smart_validate_crc(FAR struct smart_struct_s *dev);
+#endif
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
 static int smart_read_wearstatus(FAR struct smart_struct_s *dev);
 static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t block);
@@ -1865,6 +1868,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   uint16_t  totalsectors;
   uint16_t  sectorsize, prerelease;
   uint16_t  logicalsector;
+  uint16_t  winner;
   uint16_t  loser;
   uint32_t  readaddress;
   uint32_t  offset;
@@ -1998,6 +2002,8 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   for (sector = 0; sector < totalsectors; sector++)
     {
       finfo("Scan sector %d\n", sector);
+
+      winner = sector;
 
       /* Calculate the read address for this sector */
 
@@ -2278,9 +2284,9 @@ static int smart_scan(FAR struct smart_struct_s *dev)
             {
               /* Seq 2 is the winner ... bigger or it wrapped */
 
+              winner = sector;
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
               loser = dev->smap[logicalsector];
-              dev->smap[logicalsector] = sector;
 #else
               loser = dupsector;
 #endif
@@ -2290,7 +2296,56 @@ static int smart_scan(FAR struct smart_struct_s *dev)
               /* We keep the original mapping and seq2 is the loser */
 
               loser = sector;
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+              winner = dev->smap[logicalsector];
+#else
+              winner = smart_cache_lookup(dev, logicalsector);
+#endif
             }
+
+          finfo("Duplicate Sector winner=%d, loser=%d\n", winner, loser);
+
+#ifdef CONFIG_MTD_SMART_ENABLE_CRC
+          /* Check CRC of the winner sector just in case */
+
+          ret = MTD_BREAD(dev->mtd, winner * dev->mtdblkspersector,
+                          dev->mtdblkspersector, (FAR uint8_t *) dev->rwbuffer);
+          if (ret == dev->mtdblkspersector)
+            {
+              /* Validate the CRC of the read-back data */
+
+              ret = smart_validate_crc(dev);
+            }
+
+          if (ret != OK)
+            {
+              /* The winner sector has CRC error, so we select the loser sector.
+               * After swapping the winner and the loser sector, we will release
+               * the loser sector with CRC error.
+               */
+
+              if (sector == winner)
+                {
+                  /* winner: sector(CRC error) -> origin
+                   * loser : origin            -> sector(CRC error)
+                   */
+
+                  winner = loser;
+                  loser = sector;
+                }
+              else
+                {
+                  /* winner: origin(CRC error) -> sector
+                   * loser : sector            -> origin(CRC error)
+                   */
+
+                  loser = winner;
+                  winner = sector;
+                }
+
+              finfo("Duplicate Sector winner=%d, loser=%d\n", winner, loser);
+            }
+#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
 
           /* Now release the loser sector */
 
@@ -2326,7 +2381,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
       /* Update the logical to physical sector map */
 
-      dev->smap[logicalsector] = sector;
+      dev->smap[logicalsector] = winner;
 #else
       /* Mark the logical sector as used in the bitmap */
 
@@ -2334,7 +2389,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
       if (logicalsector < SMART_FIRST_ALLOC_SECTOR)
         {
-          smart_add_sector_to_cache(dev, logicalsector, sector, __LINE__);
+          smart_add_sector_to_cache(dev, logicalsector, winner, __LINE__);
         }
 #endif
     }
