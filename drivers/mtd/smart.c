@@ -156,6 +156,10 @@
 #define SMART_WEARFLAGS_FORCE_REORG         0x01
 #define SMART_WEARFLAGS_WRITE_NEEDED        0x02
 
+#define SET_BITMAP(m, n) do { (m)[(n) / 8] |= 1 << ((n) % 8); } while (0)
+#define CLR_BITMAP(m, n) do { (m)[(n) / 8] &= ~(1 << ((n) % 8)); } while (0)
+#define ISSET_BITMAP(m, n) ((m)[(n) / 8] & (1 << ((n) % 8)))
+
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
 
 /****************************************************************************
@@ -364,6 +368,36 @@ typedef uint32_t crc_t;
 
 #endif
 
+/* Following two definitions copied from internal definition of fs/smartfs.
+ * Because needed to search chain_header and entry_header.
+ */
+
+#if defined(CONFIG_MTD_SMART_ENABLE_CRC) && defined(CONFIG_SMART_CRC_32)
+struct smart_chain_header_s
+{
+  uint8_t           nextsector[4];/* Next logical sector in the chain */
+  uint8_t           used[4];      /* Number of bytes used in this sector */
+  uint8_t           type;         /* Type of sector entry (file or dir) */
+};
+#else
+struct smart_chain_header_s
+{
+  uint8_t           type;         /* Type of sector entry (file or dir) */
+  uint8_t           nextsector[2];/* Next logical sector in the chain */
+  uint8_t           used[2];      /* Number of bytes used in this sector */
+};
+#endif
+
+struct smart_entry_header_s
+{
+  uint16_t          flags;        /* Flags, including permissions:
+                                      15:   Empty entry
+                                      14:   Active entry
+                                      12-0: Permissions bits */
+  int16_t           firstsector;  /* Sector number of the name */
+  uint32_t          utc;          /* Time stamp */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -401,6 +435,10 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
 
 static int smart_relocate_sector(FAR struct smart_struct_s *dev,
                  uint16_t oldsector, uint16_t newsector);
+
+#ifdef CONFIG_MTD_SMART_FSCK
+static int smart_fsck(FAR struct smart_struct_s *dev);
+#endif
 
 #ifdef CONFIG_SMART_DEV_LOOP
 static ssize_t smart_loop_read(FAR struct file *filep, FAR char *buffer,
@@ -2475,6 +2513,9 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 #endif  /* CONFIG_MTD_SMART_CONVERT_WEAR_FORMAT */
 #endif  /* CONFIG_MTD_SMART_WEAR_LEVEL && SMART_STATUS_VERSION == 1 */
 
+#ifdef CONFIG_MTD_SMART_FSCK
+  smart_fsck(dev);
+#endif
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
   /* Read the wear leveling status bits */
 
@@ -5511,6 +5552,471 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 ok_out:
   return ret;
 }
+
+#ifdef CONFIG_MTD_SMART_FSCK
+
+/****************************************************************************
+ * Name: smart_fsck_crc
+ *
+ * Description: Validate CRC to check smartfs filesystem
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_SMART_FSCK_ENABLE_CRC
+static int smart_fsck_crc(FAR struct smart_struct_s *dev, uint16_t physsector)
+{
+  int ret;
+
+  ret = MTD_BREAD(dev->mtd, physsector * dev->mtdBlksPerSector,
+                  dev->mtdBlksPerSector, (FAR uint8_t *)dev->rwbuffer);
+  if (ret != dev->mtdBlksPerSector)
+    {
+      ferr("ERROR: Error reading phys sector %d\n", physsector);
+      return ret;
+    }
+
+  ret = smart_validate_crc(dev);
+  if (ret != OK)
+    {
+      ferr("ERROR: Error validating sector %d CRC\n", physsector);
+      return ret;
+    }
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: smart_fsck_file
+ *
+ * Description: fsck for file entry
+ *
+ ****************************************************************************/
+
+static int smart_fsck_file(FAR struct smart_struct_s *dev,
+                           FAR uint8_t *checkmap, uint16_t logsector)
+{
+  int                               ret = OK;
+  ssize_t                           size;
+  uint32_t                          readaddress;
+  FAR struct smart_sect_header_s    *header;
+  FAR struct smart_chain_header_s   *chain;
+  FAR uint8_t                       *usedmap;
+  size_t                            mapsize;
+  uint16_t                          physsector;
+  int                               i;
+
+  if (logsector >= dev->totalsectors)
+    {
+      ret = -EINVAL;
+      return ret;
+    }
+
+  /* Allocate a bitmap table for sectors this file is using */
+
+  mapsize = (dev->totalsectors + 7) / 8;
+  usedmap = (FAR uint8_t *)kmm_zalloc(mapsize);
+  if (!usedmap)
+    {
+      ferr("ERROR: Out of memory used map\n");
+      return OK;
+    }
+
+  do
+    {
+      /* Read the header for file sector */
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+      physsector = dev->sMap[logsector];
+#else
+      physsector = smart_cache_lookup(dev, logsector);
+#endif
+
+      if (physsector >= dev->totalsectors)
+        {
+          ret = -ENXIO;
+          ferr("ERROR: Invalid phys sector %d\n", physsector);
+          break;
+        }
+
+#ifdef CONFIG_MTD_SMART_FSCK_ENABLE_CRC
+      if (smart_fsck_crc(dev, physsector) != OK)
+        {
+          ret = -ENOENT;
+          ferr("ERROR: CRC phys sector %d\n", physsector);
+          break;
+        }
+#endif
+
+      readaddress = physsector * dev->mtdBlksPerSector * dev->geo.blocksize;
+      size = MTD_READ(dev->mtd, readaddress,
+                      sizeof(struct smart_sect_header_s) + sizeof(struct smart_chain_header_s),
+                      (uint8_t *)dev->rwbuffer);
+      if (size != (sizeof(struct smart_sect_header_s) + sizeof(struct smart_chain_header_s)))
+        {
+          ret = -EIO;
+          ferr("Error reading phys sector %d\n", physsector);
+          break;
+        }
+
+      header = (struct smart_sect_header_s *)&dev->rwbuffer[0];
+      chain = (struct smart_chain_header_s *)&dev->rwbuffer[sizeof(struct smart_sect_header_s)];
+
+      /* Test if the sector has live data (not free or not released) */
+
+      if (((header->status & SMART_STATUS_COMMITTED) ==
+           (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_COMMITTED)) ||
+          ((header->status & SMART_STATUS_RELEASED) !=
+           (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_RELEASED)))
+        {
+          ret = -ENOENT;
+          ferr("ERROR: status(%02x) phys sector %d\n", header->status, physsector);
+          break;
+        }
+
+      SET_BITMAP(usedmap, logsector);
+
+      /* next logical sector */
+
+      logsector = *(uint16_t *)chain->nextsector;
+    }
+  while (logsector != 0xffff);
+
+  if (ret == OK)
+    {
+      /* These sectors in use are not removed */
+
+      for (i = 0; i < mapsize; i++)
+        {
+          checkmap[i] &= ~usedmap[i];
+        }
+    }
+  else
+    {
+      /* This file has any corruption, these sectors will be removed */
+
+      for (i = 0; i < mapsize; i++)
+        {
+          checkmap[i] |= usedmap[i];
+        }
+    }
+
+  kmm_free(usedmap);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: smart_fsck_directory
+ *
+ * Description: fsck for directory entry
+ *
+ ****************************************************************************/
+
+static int smart_fsck_directory(FAR struct smart_struct_s *dev,
+                                FAR uint8_t *checkmap, uint16_t logsector)
+{
+  int                               ret = OK;
+  int                               relocate = 0;
+  ssize_t                           size;
+  FAR uint8_t                       *rwbuffer;
+  FAR struct smart_sect_header_s    *header;
+  FAR struct smart_chain_header_s   *chain;
+  FAR struct smart_entry_header_s   *entry;
+  uint16_t                          entrysector;
+  uint16_t                          physsector;
+  uint16_t                          nextsector;
+  uint16_t                          newsector;
+  int                               entrysize;
+  FAR uint8_t                       *bottom;
+  FAR uint8_t                       *cur;
+#ifdef CONFIG_DEBUG_FS_INFO
+  char                              entryname[dev->namesize + 1];
+#endif
+
+  if ((logsector < SMART_FIRST_DIR_SECTOR) || (logsector >= dev->totalsectors))
+    {
+      ret = -EINVAL;
+      ferr("ERROR: Invalid log sector %d\n", logsector);
+      return ret;
+    }
+
+  /* Allocate sector buffer for Directory entry */
+
+  rwbuffer = (uint8_t *)kmm_malloc(dev->sectorsize);
+  if (!rwbuffer)
+    {
+      ferr("ERROR: Out of memory sector buffer\n");
+      return OK;
+    }
+
+  /* Read the Directory entry sector */
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+  physsector = dev->sMap[logsector];
+#else
+  physsector = smart_cache_lookup(dev, logsector);
+#endif
+  if (physsector >= dev->totalsectors)
+    {
+      ret = -ENXIO;
+      ferr("ERROR: Invalid phys sector %d\n", physsector);
+      goto errout;
+    }
+
+  size = MTD_BREAD(dev->mtd, physsector * dev->mtdBlksPerSector,
+                   dev->mtdBlksPerSector, rwbuffer);
+  if (size != dev->mtdBlksPerSector)
+    {
+      ret = -EIO;
+      ferr("ERROR: reading phys sector %d\n", physsector);
+      goto errout;
+    }
+
+  header = (struct smart_sect_header_s *)&rwbuffer[0];
+  chain = (struct smart_chain_header_s *)&rwbuffer[sizeof(struct smart_sect_header_s)];
+  entry = (struct smart_entry_header_s *)&rwbuffer[sizeof(struct smart_sect_header_s) +
+                                                   sizeof(struct smart_chain_header_s)];
+
+#ifdef CONFIG_MTD_SMART_FSCK_ENABLE_CRC
+  /* Check CRC */
+
+  if (smart_fsck_crc(dev, physsector) != OK)
+    {
+      ret = -ENOENT;
+      ferr("ERROR: CRC phys sector %d\n", physsector);
+      goto errout;
+    }
+#endif
+
+  /* Test if the sector has live data (not free or not released) */
+
+  if (((header->status & SMART_STATUS_COMMITTED) ==
+       (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_COMMITTED)) ||
+      ((header->status & SMART_STATUS_RELEASED) !=
+       (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_RELEASED)))
+    {
+      ret = -ENOENT;
+      ferr("ERROR: status(%02x) phys sector %d\n", header->status, physsector);
+      goto errout;
+    }
+
+  /* Check next sector recursively */
+
+  nextsector = *(uint16_t *)chain->nextsector;
+
+  if (nextsector != 0xffff)
+    {
+      finfo("Check next log sector %d\n", nextsector);
+
+      ret = smart_fsck_directory(dev, checkmap, nextsector);
+
+      if (ret != OK)
+        {
+          /* Invalidate the next sector */
+
+          ferr("Invalidate next log sector %d\n", nextsector);
+
+          *(uint16_t *)chain->nextsector = 0xffff;
+        }
+    }
+
+#define SMARTFS_DIRENT_EMPTY      0x8000  /* Set to non-erase state when entry used */
+#define SMARTFS_DIRENT_ACTIVE     0x4000  /* Set to erase state when entry is active */
+#define SMARTFS_DIRENT_TYPE       0x2000  /* Indicates the type of entry (file/dir) */
+#define SMARTFS_DIRENT_DELETING   0x1000  /* Directory entry is being deleted */
+#define SMARTFS_DIRENT_RESERVED   0x0E00  /* Reserved bits */
+
+  /* Check file or directory under this directory entry */
+
+  entrysize = sizeof(struct smart_entry_header_s) + dev->namesize;
+  bottom = rwbuffer + dev->sectorsize;
+  cur = &rwbuffer[sizeof(struct smart_sect_header_s) + sizeof(struct smart_chain_header_s)];
+
+  while ((cur + entrysize) <= bottom)
+    {
+      ret = OK;
+
+      entry = (struct smart_entry_header_s *)cur;
+
+      if (entry->flags == 0xffff)
+        {
+          /* Test if the empty entry is exist or not? */
+
+          break;
+        }
+
+#ifdef CONFIG_DEBUG_FS_INFO
+      strncpy(entryname, (const char *)(cur + sizeof(struct smart_entry_header_s)), dev->namesize);
+      entryname[dev->namesize] = '\0';
+#endif
+      finfo("Check entry (name=%s flags=%02x logsector=%02x)\n",
+            entryname, entry->flags, entry->firstsector);
+
+      if (entry->flags & SMARTFS_DIRENT_ACTIVE)
+        {
+          entrysector = entry->firstsector;
+
+          if (entry->flags & SMARTFS_DIRENT_TYPE)
+            {
+              /* This entry is for directory */
+
+              ret = smart_fsck_directory(dev, checkmap, entrysector);
+            }
+          else
+            {
+              /* This entry is for file */
+
+              ret = smart_fsck_file(dev, checkmap, entrysector);
+            }
+        }
+
+      if (ret != OK)
+        {
+          finfo("Remove entry (name=%s flags=%02x)\n", entryname, entry->flags);
+          if ((cur + (2 * entrysize)) <= bottom)
+            {
+              /* Truncate the current entry and overwrite with next entries */
+
+              memmove(cur, cur + entrysize, bottom - (cur + entrysize));
+              memset(bottom - entrysize, CONFIG_SMARTFS_ERASEDSTATE, entrysize);
+            }
+          else
+            {
+              /* Only erase the current entry if next entry does not exist */
+
+              memset(cur, CONFIG_SMARTFS_ERASEDSTATE, entrysize);
+              cur += entrysize;
+            }
+          relocate = 1;
+        }
+      else
+        {
+          cur += entrysize;
+        }
+    }
+
+  /* Relocate sector */
+
+  if (relocate)
+    {
+      newsector = smart_findfreephyssector(dev, FALSE);
+      if (newsector == 0xffff)
+        {
+          ret = -ENOSPC;
+          ferr("Can't find a free sector for relocation\n");
+          goto errout;
+        }
+      memcpy(dev->rwbuffer, rwbuffer, dev->sectorsize);
+
+      ret = smart_relocate_sector(dev, physsector, newsector);
+      if (ret < 0)
+        {
+          ret = -EIO;
+          ferr("Can't relocate\n");
+          goto errout;
+        }
+
+      /* Update the variables */
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+      dev->sMap[*((FAR uint16_t *)header->logicalsector)] = newsector;
+#else
+      smart_update_cache(dev, *((FAR uint16_t *)header->logicalsector), newsector);
+#endif
+
+#ifdef CONFIG_MTD_SMART_PACK_COUNTS
+      smart_add_count(dev, dev->freecount, newsector / dev->sectorsPerBlk, -1);
+#else
+      dev->freecount[newsector / dev->sectorsPerBlk]--;
+#endif
+    }
+
+  kmm_free(rwbuffer);
+  CLR_BITMAP(checkmap, logsector);
+  return OK;
+
+errout:
+  kmm_free(rwbuffer);
+  SET_BITMAP(checkmap, logsector);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: smart_fsck
+ *
+ * Description: Check and repair the file system
+ *
+ ****************************************************************************/
+
+static int smart_fsck(FAR struct smart_struct_s *dev)
+{
+  uint16_t      logsector;
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+  uint16_t      physsector;
+#endif
+  FAR uint8_t   *checkmap;
+  size_t        mapsize;
+  uint8_t       rootdirentries;
+  int           x;
+
+  finfo("Entry\n");
+
+  /* Allocate a bitmap table for filesystem check */
+
+  mapsize = (dev->totalsectors + 7) / 8;
+  checkmap = (FAR uint8_t *)kmm_zalloc(mapsize);
+  if (!checkmap)
+    {
+      ferr("ERROR: Out of memory fsck map\n");
+      return -ENOMEM;
+    }
+
+  /* Set all of the sectors have live data into the check bitmap */
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+  for (logsector = 0; logsector < dev->totalsectors; logsector++)
+    {
+      physsector = dev->sMap[logsector];
+      if (physsector < dev->totalsectors)
+        {
+          SET_BITMAP(checkmap, logsector);
+        }
+    }
+#else
+  memcpy(checkmap, dev->sBitMap, mapsize);
+#endif
+
+  /* Check if the sector can be available from root directories */
+
+#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+  rootdirentries = dev->rootdirentries;
+#else
+  rootdirentries = 1;
+#endif
+
+  for (x = 0; x < rootdirentries; x++)
+    {
+      smart_fsck_directory(dev, checkmap, SMART_FIRST_DIR_SECTOR + x);
+    }
+
+  /* Release the invalid sector except for format or directory entry sector */
+
+  for (logsector = SMART_FIRST_ALLOC_SECTOR;
+       logsector < dev->totalsectors; logsector++)
+    {
+      if (ISSET_BITMAP(checkmap, logsector))
+        {
+          smart_freesector(dev, logsector);
+        }
+    }
+
+  /* Free the bitmap table for filesystem check */
+
+  kmm_free(checkmap);
+
+  return OK;
+}
+
+#endif /* CONFIG_MTD_SMART_FSCK */
 
 /****************************************************************************
  * Public Functions
