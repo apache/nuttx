@@ -62,16 +62,21 @@
 /* Clocking *****************************************************************/
 
 #if defined(HSI_CLOCK_CONFIG)
-/* The NUCLEOL432KC supports both HSE and LSE crystals (X2 and X3).  However, as
- * shipped, the X3 crystal is not populated.  Therefore the Nucleo-L432KC
- * will need to run off the 16MHz HSI clock, or the 32khz-synced MSI.
+/* The NUCLEOL432KC supports both HSE and LSE crystals (X2 and X3).
+ * However, asshipped, the X3 crystal is not populated.  Therefore the
+ * Nucleo-L432KC will need to run off the 16MHz HSI clock, or the 32khz-
+ * synced MSI.
  *
  *   System Clock source           : PLL (HSI)
- *   SYSCLK(Hz)                    : 80000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 80000000     (STM32L4_RCC_CFGR_HPRE)  (Max 80 MHz)
- *   AHB Prescaler                 : 1            (STM32L4_RCC_CFGR_HPRE)  (Max 80 MHz)
- *   APB1 Prescaler                : 1            (STM32L4_RCC_CFGR_PPRE1) (Max 80 MHz)
- *   APB2 Prescaler                : 1            (STM32L4_RCC_CFGR_PPRE2) (Max 80 MHz)
+ *   SYSCLK(Hz)                    : 80000000      Determined by PLL configuration
+ *   HCLK(Hz)                      : 80000000     (STM32L4_RCC_CFGR_HPRE)
+ *                                                (Max 80 MHz)
+ *   AHB Prescaler                 : 1            (STM32L4_RCC_CFGR_HPRE)
+ *                                                (Max 80 MHz)
+ *   APB1 Prescaler                : 1            (STM32L4_RCC_CFGR_PPRE1)
+ *                                                (Max 80 MHz)
+ *   APB2 Prescaler                : 1            (STM32L4_RCC_CFGR_PPRE2)
+ *                                                (Max 80 MHz)
  *   HSI Frequency(Hz)             : 16000000     (nominal)
  *   PLLM                          : 1            (STM32L4_PLLCFG_PLLM)
  *   PLLN                          : 10           (STM32L4_PLLCFG_PLLN)
@@ -109,11 +114,17 @@
  *
  * Formulae:
  *
- *   VCO input frequency        = PLL input clock frequency / PLLM, 1 <= PLLM <= 8
- *   VCO output frequency       = VCO input frequency × PLLN,       8 <= PLLN <= 86, frequency range 64 to 344 MHz
- *   PLL output P (SAI3) clock frequency = VCO frequency / PLLP,   PLLP = 7, or 17, or 0 to disable
- *   PLL output Q (48M1) clock frequency = VCO frequency / PLLQ,   PLLQ = 2, 4, 6, or 8, or 0 to disable
- *   PLL output R (CLK)  clock frequency = VCO frequency / PLLR,   PLLR = 2, 4, 6, or 8, or 0 to disable
+ *   VCO input frequency        = PLL input clock frequency / PLLM,
+ *                                1 <= PLLM <= 8
+ *   VCO output frequency       = VCO input frequency × PLLN,
+ *                                8 <= PLLN <= 86, frequency range 64 to
+ *                                 344 MHz
+ *   PLL output P (SAI3) clock frequency = VCO frequency / PLLP,
+ *                                 PLLP = 7, or 17, or 0 to disable
+ *   PLL output Q (48M1) clock frequency = VCO frequency / PLLQ,
+ *                                 PLLQ = 2, 4, 6, or 8, or 0 to disable
+ *   PLL output R (CLK)  clock frequency = VCO frequency / PLLR,
+ *                                 PLLR = 2, 4, 6, or 8, or 0 to disable
  *
  * PLL output P is used for SAI
  * PLL output Q is used for OTG FS, SDMMC, RNG
@@ -150,10 +161,15 @@
  * The PLLSAI1 is configured only if CONFIG_STM32L4_SAI1PLL is defined
  *
  *   SAI1VCO input frequency        = PLL input clock frequency
- *   SAI1VCO output frequency       = SAI1VCO input frequency × PLLSAI1N,       8 <= PLLSAI1N <= 86, frequency range 64 to 344 MHz
- *   SAI1PLL output P (SAI1) clock frequency = SAI1VCO frequency / PLLSAI1P,   PLLP = 7, or 17, or 0 to disable
- *   SAI1PLL output Q (48M2) clock frequency = SAI1VCO frequency / PLLSAI1Q,   PLLQ = 2, 4, 6, or 8, or 0 to disable
- *   SAI1PLL output R (ADC1) clock frequency = SAI1VCO frequency / PLLSAI1R,   PLLR = 2, 4, 6, or 8, or 0 to disable
+ *   SAI1VCO output frequency       = SAI1VCO input frequency × PLLSAI1N,
+ *                                    8 <= PLLSAI1N <= 86, frequency range
+ *                                    64 to 344 MHz
+ *   SAI1PLL output P (SAI1) clock frequency = SAI1VCO frequency / PLLSAI1P,
+ *                                    PLLP = 7, or 17, or 0 to disable
+ *   SAI1PLL output Q (48M2) clock frequency = SAI1VCO frequency / PLLSAI1Q,
+ *                                    PLLQ = 2, 4, 6, or 8, or 0 to disable
+ *   SAI1PLL output R (ADC1) clock frequency = SAI1VCO frequency / PLLSAI1R,
+ *                                    PLLR = 2, 4, 6, or 8, or 0 to disable
  *
  * We will configure like this
  *
@@ -168,9 +184,13 @@
  * The PLLSAI2 is configured only if CONFIG_STM32L4_SAI2PLL is defined
  *
  *   SAI2VCO input frequency        = PLL input clock frequency
- *   SAI2VCO output frequency       = SAI2VCO input frequency × PLLSAI2N,       8 <= PLLSAI1N <= 86, frequency range 64 to 344 MHz
- *   SAI2PLL output P (SAI2) clock frequency = SAI2VCO frequency / PLLSAI2P,   PLLP = 7, or 17, or 0 to disable
- *   SAI2PLL output R (ADC2) clock frequency = SAI2VCO frequency / PLLSAI2R,   PLLR = 2, 4, 6, or 8, or 0 to disable
+ *   SAI2VCO output frequency       = SAI2VCO input frequency × PLLSAI2N,
+ *                                    8 <= PLLSAI1N <= 86, frequency range
+ *                                    64 to 344 MHz
+ *   SAI2PLL output P (SAI2) clock frequency = SAI2VCO frequency / PLLSAI2P,
+ *                                    PLLP = 7, or 17, or 0 to disable
+ *   SAI2PLL output R (ADC2) clock frequency = SAI2VCO frequency / PLLSAI2R,
+ *                                    PLLR = 2, 4, 6, or 8, or 0 to disable
  *
  * We will configure like this
  *
@@ -178,11 +198,14 @@
  *
  * ----------------------------------------
  *
- * TODO: The STM32L is a low power peripheral and all these clocks should be configurable at runtime.
+ * TODO: The STM32L is a low power peripheral and all these clocks should be
+ *       configurable at runtime.
  *
  * ----------------------------------------
  *
- * TODO These clock sources can be configured in Kconfig (this is not a board feature)
+ * TODO These clock sources can be configured in Kconfig (this is not a
+ *      board feature)
+ *
  * USART1
  * USART2
  * USART3
@@ -286,6 +309,8 @@
 #define STM32L4_APB1_TIM2_CLKIN   (STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM6_CLKIN   (STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM7_CLKIN   (STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_LPTIM1_CLKIN (STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_LPTIM2_CLKIN (STM32L4_PCLK1_FREQUENCY)
 
 /* APB2 clock (PCLK2) is HCLK (80MHz) */
 

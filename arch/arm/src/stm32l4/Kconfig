@@ -2993,19 +2993,6 @@ endif # !STM32L4_PWM_MULTICHAN
 
 endif # STM32L4_TIM17_PWM
 
-config STM32L4_LPTIM1_PWM
-	bool "LPTIM1 PWM"
-	default n
-	depends on STM32L4_LPTIM1
-	select PWM
-	---help---
-		Reserve Low-power timer 1 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM1
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
 if STM32L4_LPTIM1_PWM
 
 if STM32L4_PWM_MULTICHAN
@@ -3048,19 +3035,6 @@ config STM32L4_LPTIM1_CHANNEL
 endif # !STM32L4_PWM_MULTICHAN
 
 endif # STM32L4_LPTIM1_PWM
-
-config STM32L4_LPTIM2_PWM
-	bool "LPTIM2 PWM"
-	default n
-	depends on STM32L4_LPTIM2
-	select PWM
-	---help---
-		Reserve Low-power timer 2 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32L4_LPTIM2
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
 
 if STM32L4_LPTIM2_PWM
 
