@@ -103,7 +103,6 @@ void up_irqinitialize(void)
   /* Attach the ecall interrupt handler */
 
   irq_attach(K210_IRQ_ECALLM, up_swint, NULL);
-  up_enable_irq(K210_IRQ_ECALLM);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -191,13 +190,17 @@ void up_enable_irq(int irq)
  * Name: up_get_newintctx
  *
  * Description:
- *   Return a value for EPIC. But K210 doesn't use EPIC for event control.
+ *   Return initial mstatus when a task is created.
  *
  ****************************************************************************/
 
 uint32_t up_get_newintctx(void)
 {
-  return 0;
+  /* Set machine previous privilege mode to machine mode.
+   * Also set machine previous interrupt enable
+   */
+
+  return (MSTATUS_MPPM | MSTATUS_MPIE);
 }
 
 /****************************************************************************
@@ -240,7 +243,7 @@ irqstate_t up_irq_save(void)
 
 void up_irq_restore(irqstate_t flags)
 {
-  /* Machine mode - mstatus */
+  /* Write flags to mstatus */
 
   asm volatile("csrw mstatus, %0" : /* no output */ : "r" (flags));
 }

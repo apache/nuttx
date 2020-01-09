@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/k210/k210_clockconfig.h
+ * arch/risc-v/src/k210/k210_clockconfig.h
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
