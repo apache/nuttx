@@ -90,7 +90,7 @@ Development Environment
   Several possible development environments may be used:
 
   - Linux or macOS native
-  - Cygwin unders Windows
+  - Cygwin under Windows
   - MinGW + MSYS under Windows
   - Windows native (with GNUMake from GNUWin32).
 
@@ -278,7 +278,14 @@ Loading Code into SRAM with J-Link
          (gdb) target remote localhost:2331
          (gdb) mon reset
          (gdb) load nuttx
-         (gdb) ... start debugging ...
+         (gdb) breakpoint nsh_main
+         (gdb) continue
+         Continuing.
+
+         Breakpoint 1, nsh_main (argc=1, argv=0x2007757c) at nsh_main.c:218
+         218	  sched_getparam(0, &param);
+         (gdb) continue
+         (gdb) ... debugging ...
 
   Loading code using J-Link Commander
   ----------------------------------
@@ -577,6 +584,28 @@ Load NuttX with U-Boot on AT91 boards
 
         NuttShell (NSH) NuttX-7.2
         nsh>
+
+      It is possible to autoboot from the SD Card:
+
+        1. Format an SD Card as FAT.
+        2. Copy the file nuttx/boards/arm/sama5/sama5d3-xplained/boot/uImage file to the SD Card.
+        3. Copy the file nuttx.bin you just compiled to the SD Card.
+        4. Attach a 3.3V USB-serial adapter to the DEBUG console port.
+        5. Open a serial terminal to the debug console. In Linux, do this:
+
+          picocom -b 115200 /dev/ttyUSB0
+
+        6. Press the RESET button. You should see a U-Boot prompt. Press a key to stop the booting process.
+        7. Issue the following commands to U-Boot:
+
+          U-Boot> setenv load_nuttx 'fatload mmc 0 0x20008000 nuttx.bin'
+          U-Boot> setenv run_nuttx 'go 0x20008040'
+          U-Boot> setenv boot_nuttx 'run load_nuttx; run run_nuttx'
+          U-Boot> setenv bootcmd 'boot_nuttx'
+          U-Boot> saveenv
+          U-Boot> reset
+
+        8. The board should now always boot to NuttX if you have the SD Card inserted.
 
   Loading through network
 
