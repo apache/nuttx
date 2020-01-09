@@ -775,6 +775,21 @@ config SMART_CRC_16
 
 endchoice # CRC level selection
 
+config MTD_SMART_FSCK
+	bool "Enable SMART file system check"
+	default n
+	depends on FS_WRITABLE
+	---help---
+		Enables fsck to check and repair the SMART file system.
+
+config MTD_SMART_FSCK_ENABLE_CRC
+	bool "Enable SMART file system CRC check during fsck"
+	default n
+	depends on MTD_SMART_FSCK && MTD_SMART_ENABLE_CRC
+	---help---
+		Enables CRC check during fsck. It's possible to check the file
+		system strictly, but it takes long time to do fsck.
+
 config MTD_SMART_MINIMIZE_RAM
 	bool "Minimize SMART RAM usage using logical sector cache"
 	depends on MTD_SMART
