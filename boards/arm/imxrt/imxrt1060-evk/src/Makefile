@@ -82,4 +82,8 @@ ifeq ($(CONFIG_IMXRT_LCD),y)
 CSRCS += imxrt_lcd.c
 endif
 
+ifeq ($(CONFIG_IMXRT_USBOTG),y)
+CSRCS += imxrt_usbhost.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

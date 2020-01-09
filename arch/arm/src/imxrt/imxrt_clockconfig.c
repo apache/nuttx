@@ -232,8 +232,8 @@ static void imxrt_pllsetup(void)
 {
 #ifdef CONFIG_ARCH_FAMILY_IMXRT102x
   uint32_t pll2reg;
-  uint32_t pll3reg;
 #endif
+  uint32_t pll3reg;
   uint32_t reg;
 
 #if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
@@ -254,6 +254,31 @@ static void imxrt_pllsetup(void)
   while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
     {
     }
+
+  /* Init USB PLL3 */
+
+  /* capture it's original value */
+
+  pll3reg = getreg32(IMXRT_CCM_ANALOG_PFD_480);
+  putreg32(pll3reg                         |
+           CCM_ANALOG_PFD_480_PFD0_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD1_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD2_CLKGATE |
+           CCM_ANALOG_PFD_480_PFD3_CLKGATE,
+           IMXRT_CCM_ANALOG_PFD_480);
+
+  reg = IMXRT_USB1_PLL_DIV_SELECT       |
+        CCM_ANALOG_PLL_USB1_ENABLE      |
+        CCM_ANALOG_PLL_USB1_EN_USB_CLKS |
+        CCM_ANALOG_PLL_USB1_POWER;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB1);
+
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) &
+          CCM_ANALOG_PLL_USB1_LOCK) == 0)
+    {
+    }
+
+  putreg32(pll3reg, IMXRT_CCM_ANALOG_PFD_480);
 
 #ifdef CONFIG_IMXRT_LCD
   /* Init Video PLL5 */
