@@ -45,7 +45,9 @@
 
 /* Machine Interrupt Enable bit in mstatus register */
 
-#define MSTATUS_MIE  (0x1 << 3)
+#define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
+#define MSTATUS_MPIE  (0x1 << 7)  /* Machine Previous Interrupt Enable */
+#define MSTATUS_MPPM  (0x3 << 11) /* Machine Previous Privilege (m-mode) */
 
 /* In mie (machine interrupt enable) register */
 
