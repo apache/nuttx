@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -62,7 +63,7 @@
 /* Configuration **************************************************************/
 /* PWM
  *
- * The STM3240G-Eval has no real on-board PWM devices, but the board can be
+ * The nucleo-l432kc has no real on-board PWM devices, but the board can be
  * configured to output a pulse train using variously unused pins on the board
  * for PWM output (see board.h for details of pins).
  */
