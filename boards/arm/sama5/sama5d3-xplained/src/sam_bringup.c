@@ -54,10 +54,15 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "sam_twi.h"
-#include "sama5d4-ek.h"
+#include "sama5d3-xplained.h"
 
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
+#endif
+
+#ifdef CONFIG_NET_CDCECM
+#  include <nuttx/usb/cdcecm.h>
+#  include <net/if.h>
 #endif
 
 /****************************************************************************
@@ -150,26 +155,6 @@ int sam_bringup(void)
   /* Register I2C drivers on behalf of the I2C tool */
 
   sam_i2ctool();
-
-#ifdef HAVE_NAND
-  /* Initialize the NAND driver */
-
-  ret = sam_nand_automount(NAND_MINOR);
-  if (ret < 0)
-    {
-      _err("ERROR: sam_nand_automount failed: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_AT25
-  /* Initialize the AT25 driver */
-
-  ret = sam_at25_automount(AT25_MINOR);
-  if (ret < 0)
-    {
-      _err("ERROR: sam_at25_automount failed: %d\n", ret);
-    }
-#endif
 
 #ifdef HAVE_HSMCI
 #ifdef CONFIG_SAMA5_HSMCI0
@@ -352,10 +337,32 @@ int sam_bringup(void)
     }
 #endif
 
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
+#if defined(CONFIG_RNDIS)
+  /* Set up a MAC address for the RNDIS device. */
+
+  uint8_t mac[6];
+  mac[0] = 0xa0; /* TODO */
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
+#endif
+
+#ifdef CONFIG_NET_CDCECM
+  ret = cdcecm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      _err("ERROR: cdcecm_initialize() failed: %d\n", ret);
+    }
+#endif
+
+
+    /* If we got here then perhaps not all initialization was successful, but
+     * at least enough succeeded to bring-up NSH with perhaps reduced
+     * capabilities.
+     */
 
   UNUSED(ret);
   return OK;
