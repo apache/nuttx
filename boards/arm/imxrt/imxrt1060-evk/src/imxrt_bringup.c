@@ -54,6 +54,10 @@
 #  include "imxrt_usdhc.h"
 #endif
 
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
+
 #include "imxrt1060-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -181,6 +185,25 @@ int imxrt_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD slot %d: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
+  ret = imxrt_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB host services: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
     }
 #endif
 

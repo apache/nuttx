@@ -196,6 +196,12 @@
 #define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | IOMUX_GOUT_DEFAULT | \
                          GPIO_PIN9 | GPIO_PORT1)
 
+
+/* USB OTG ID Pin： GPIO_AD_B1_02 */
+
+#define GPIO_USBOTG_ID  (GPIO_USB_OTG1_ID_1 | IOMUX_USBOTG_ID_DEFAULT)      /* AD_B1_02 */
+
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -296,6 +302,10 @@ int imxrt_ft5x06_register(void);
 
 #ifdef CONFIG_IMXRT_LCD
 void imxrt_lcd_initialize(void);
+#endif
+
+#if defined(CONFIG_IMXRT_USBOTG) || defined(CONFIG_USBHOST)
+int imxrt_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

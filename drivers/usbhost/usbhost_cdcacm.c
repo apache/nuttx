@@ -394,7 +394,7 @@ static bool usbhost_txempty(FAR struct uart_dev_s *uartdev);
  * device.
  */
 
-static const struct usbhost_id_s g_id[2] =
+static const struct usbhost_id_s g_id[4] =
 {
   {
     USB_CLASS_CDC,          /* base     */
@@ -409,6 +409,20 @@ static const struct usbhost_id_s g_id[2] =
     CDC_PROTO_ATM,          /* proto    */
     0,                      /* vid      */
     0                       /* pid      */
+  },
+  {
+    USB_CLASS_VENDOR_SPEC,  /* base     */
+    CDC_SUBCLASS_NONE,      /* subclass */
+    CDC_PROTO_NONE,         /* proto    */
+    0x2c7c,                 /* vid      */
+    0x0125                  /* pid      */
+  },
+  {
+    USB_CLASS_VENDOR_SPEC,  /* base     */
+    CDC_SUBCLASS_ACM,       /* subclass */
+    CDC_PROTO_NONE,         /* proto    */
+    0x2c7c,                 /* vid      */
+    0x0125                  /* pid      */
   }
 };
 
@@ -418,7 +432,7 @@ static struct usbhost_registry_s g_cdcacm =
 {
   NULL,                   /* flink    */
   usbhost_create,         /* create   */
-  2,                      /* nids     */
+  4,                      /* nids     */
   &g_id[0]                /* id[]     */
 };
 
@@ -1380,7 +1394,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
             /* Check for the CDC/ACM data interface */
 
-            if (ifdesc->classid == USB_CLASS_CDC_DATA &&
+            if ((ifdesc->classid == USB_CLASS_CDC_DATA || ifdesc->classid == USB_CLASS_VENDOR_SPEC) &&
                 (found & USBHOST_DATAIF_FOUND) == 0)
               {
                 /* Save the data interface number and mark that the data
