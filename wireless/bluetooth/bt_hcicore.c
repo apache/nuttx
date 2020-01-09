@@ -1759,7 +1759,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
            * released while we are waiting.
            */
 
-          nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
+          ret = nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
         }
 
       sched_unlock();
