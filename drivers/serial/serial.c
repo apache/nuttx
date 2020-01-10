@@ -210,7 +210,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
   int ret;
 
 #ifdef CONFIG_SMP
-  flags = enter_critical_section();
+  irqstate_t flags2 = enter_critical_section();
 #endif
 
   /* Increment to see what the next head pointer will be.  We need to use the "next"
@@ -347,7 +347,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 err_out:
 
 #ifdef CONFIG_SMP
-  leave_critical_section(flags);
+  leave_critical_section(flags2);
 #endif
 
   return ret;
