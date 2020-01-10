@@ -438,7 +438,7 @@ static int sam_reset(void);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* In this driver implementation, support is provided for only a single a single
+/* In this driver implementation, support is provided for only a single
  * USB device.  All status information can be simply retained in a single global
  * instance.
  */
@@ -4924,18 +4924,18 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* "In order to initialize the host controller, software should perform the
    *  following steps:
    *
-   *  • "Program the CTRLDSSEGMENT register with 4-Gigabyte segment where all
+   *  - "Program the CTRLDSSEGMENT register with 4-Gigabyte segment where all
    *     of the interface data structures are allocated. [64-bit mode]
-   *  • "Write the appropriate value to the USBINTR register to enable the
+   *  - "Write the appropriate value to the USBINTR register to enable the
    *     appropriate interrupts.
-   *  • "Write the base address of the Periodic Frame List to the PERIODICLIST
+   *  - "Write the base address of the Periodic Frame List to the PERIODICLIST
    *     BASE register. If there are no work items in the periodic schedule,
    *     all elements of the Periodic Frame List should have their T-Bits set
    *     to a one.
-   *  • "Write the USBCMD register to set the desired interrupt threshold,
+   *  - "Write the USBCMD register to set the desired interrupt threshold,
    *     frame list size (if applicable) and turn the host controller ON via
    *     setting the Run/Stop bit.
-   *  •  Write a 1 to CONFIGFLAG register to route all ports to the EHCI controller
+   *  -  Write a 1 to CONFIGFLAG register to route all ports to the EHCI controller
    *     ...
    *
    * "At this point, the host controller is up and running and the port registers

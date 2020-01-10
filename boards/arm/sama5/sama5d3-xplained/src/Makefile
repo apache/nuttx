@@ -86,6 +86,7 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c
+CSRCS += sam_bringup.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
