@@ -1408,6 +1408,9 @@ USB High-Speed Device
    The latter has a telnetd enabled, so once the system boots, you can issue the telnetd command,
    and then telnet into it from the host.
 
+   To use them, copy them to .config, and run 'make menuconfig' (you don't have to change anything),
+   then save the file. Then run 'make' to make NuttX.
+
    On Linux, a helper script is provided called helpers/netusb-up.sh. This script can be used
    to configure the Linux USB Ethernet Gadget network interface. Once you boot a NuttX system with the
    CDC ECM Ethernet over USB device, the Linux network interface will be added to your system. You should
@@ -1450,7 +1453,10 @@ USB High-Speed Device
            ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
 
    Now that the new interface has an IP address, you can ping the NuttX box at 10.0.0.2
-   (or whatever IP address you configured it to have).
+   (or whatever IP address you configured it to have). If you used the telnet defconfig,
+   you should be able to telnet to the board using:
+
+   $ telnet 10.0.0.2
 
    The helper script also sets up Network Address Translation (NAT) so the NuttX system
    can access the Internet. If that is not what you want, you can remove the iptables
