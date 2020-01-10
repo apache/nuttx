@@ -55,8 +55,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MPL115A_I2C_PORTNO 1   /* On I2C1 */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -102,4 +100,4 @@ int stm32_bmp180initialize(FAR const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_SENSORS_MPL115A && CONFIG_STM32_I2C1 */
+#endif /* CONFIG_I2C && CONFIG_STM32_I2C1 */
