@@ -1378,6 +1378,84 @@ USB High-Speed Device
     Application Configuration -> Examples:
       CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
 
+  CDC/ECM Ethernet Over USB
+  -------------------------
+
+  This will select the CDC/ECM Ethernet over USB device.  Defaults for the other
+  options should be okay.
+
+      CONFIG_NET_CDCECM=y
+      CONFIG_CDCECM_EP0MAXPACKET=64
+      CONFIG_CDCECM_EPINTIN=1
+      CONFIG_CDCECM_EPINTIN_FSSIZE=16
+      CONFIG_CDCECM_EPINTIN_HSSIZE=16
+      CONFIG_CDCECM_EPBULKOUT=5
+      CONFIG_CDCECM_EPBULKOUT_FSSIZE=64
+      CONFIG_CDCECM_EPBULKOUT_HSSIZE=512  # needed for non-fragmentation IP and ICMP packets in HS mode
+      CONFIG_CDCECM_EPBULKIN=2
+      CONFIG_CDCECM_EPBULKIN_FSSIZE=64
+      CONFIG_CDCECM_EPBULKIN_HSSIZE=512  # needed for non-fragmentation IP and ICMP packets in HS mode
+      CONFIG_CDCECM_VENDORID=0x0525
+      CONFIG_CDCECM_PRODUCTID=0xa4a2
+      CONFIG_CDCECM_VENDORSTR="NuttX"
+      CONFIG_CDCECM_PRODUCTSTR="CDC/ECM Ethernet"
+
+   There are two defconfig files that have been tested with these configurations:
+
+   ethernet-over-usb/defconfig
+   ethernet-over-usb-telnetd/defconfig
+
+   The latter has a telnetd enabled, so once the system boots, you can issue the telnetd command,
+   and then telnet into it from the host.
+
+   On Linux, a helper script is provided called helpers/netusb-up.sh. This script can be used
+   to configure the Linux USB Ethernet Gadget network interface. Once you boot a NuttX system with the
+   CDC ECM Ethernet over USB device, the Linux network interface will be added to your system. You should
+   see something like the following messages in /var/log/kern.log:
+
+   [302074.552879] usb 1-2: new high-speed USB device number 107 using ehci-pci
+   [302074.718264] usb 1-2: New USB device found, idVendor=0525, idProduct=a4a2, bcdDevice= 1.00
+   [302074.718267] usb 1-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+   [302074.718269] usb 1-2: Product: CDC/ECM Ethernet
+   [302074.718271] usb 1-2: Manufacturer: NuttX
+   [302074.718272] usb 1-2: SerialNumber: 0
+   [302074.760638] cdc_ether 1-2:1.0 usb0: register 'cdc_ether' at usb-0000:02:03.0-2, CDC Ethernet Device, 02:00:00:11:22:33
+   [302074.796215] cdc_ether 1-2:1.0 ens35u2: renamed from usb0
+
+   If you execute the command 'ifconfig -a' you should see a new interface:
+
+   $ ifconfig -a
+
+   ens35u2: flags=4098<BROADCAST,MULTICAST>  mtu 576
+           ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
+           RX packets 0  bytes 0 (0.0 B)
+           RX errors 0  dropped 0  overruns 0  frame 0
+           TX packets 0  bytes 0 (0.0 B)
+           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+   If you run the netusb-up.sh script, then do ifconfig, you should see the following:
+
+   $ sudo ./netusb-up.sh
+   $ ifconfig -a
+
+   ens35u2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 576
+           ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
+           RX packets 0  bytes 0 (0.0 B)
+           RX errors 0  dropped 0  overruns 0  frame 0
+           TX packets 15  bytes 2477 (2.4 KB)
+           TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+   ens35u2:0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 576
+           inet 10.0.0.1  netmask 255.255.255.0  broadcast 10.0.0.255
+           ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
+
+   Now that the new interface has an IP address, you can ping the NuttX box at 10.0.0.2
+   (or whatever IP address you configured it to have).
+
+   The helper script also sets up Network Address Translation (NAT) so the NuttX system
+   can access the Internet. If that is not what you want, you can remove the iptables
+   NAT commands from the script.
+
   Debugging USB Device
   --------------------
 
