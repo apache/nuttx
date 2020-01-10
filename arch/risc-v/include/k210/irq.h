@@ -51,6 +51,7 @@
 
 /* In mie (machine interrupt enable) register */
 
+#define MIE_MSIE      (0x1 << 3)  /* Machine Software Interrupt Enable */
 #define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
 #define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
 
@@ -81,7 +82,11 @@
 
 /* Machine Grobal External Interrupt */
 
+#ifdef CONFIG_K210_WITH_QEMU
+#define K210_IRQ_UART0    (K210_IRQ_MEXT + 4)
+#else
 #define K210_IRQ_UART0    (K210_IRQ_MEXT + 33)
+#endif
 
 /* Total number of IRQs */
 

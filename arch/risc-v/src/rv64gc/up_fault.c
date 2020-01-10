@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/up_initialstate.c
+ * arch/risc-v/src/rv64gc/up_fault.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2020 Masayuki Ishikawa. All rights reserved.
+ *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,83 +39,85 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <nuttx/board.h>
+#include <nuttx/syslog/syslog.h>
 
-#include "up_internal.h"
+#include <arch/board/board.h>
+
+#include "sched/sched.h"
+#include "irq/irq.h"
+
 #include "up_arch.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
+ * Name: up_fault
  *
  * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
- *
- *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
+ *   This is Fault exception handler.
  *
  ****************************************************************************/
 
-void up_initial_state(struct tcb_s *tcb)
+void up_fault(int irq, uint64_t *regs)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
-  uint64_t regval;
+  CURRENT_REGS = regs;
 
-  /* Initialize the initial exception register context structure */
+  _alert("EPC:%016x\n",
+         CURRENT_REGS[REG_EPC]);
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
+  _alert("Fault IRQ=%d \n", irq);
 
-  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
-   * beginning of the stack region.  Some functions may want to store data on
-   * the caller's stack and it might be good to reserve some space.  However,
-   * only the start function would do that and we have control over that one
-   */
+  /* Dump register info */
 
-  xcp->regs[REG_SP]      = (uintptr_t)tcb->adj_stack_ptr;
+  _alert("A0:%016x A1:%016x A2:%016x A3:%016x \n",
+         CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
+         CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3]);
 
-  /* Save the task entry point */
+  _alert("A4:%016x A5:%016x A6:%016x A7:%016x \n",
+         CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
+         CURRENT_REGS[REG_A6], CURRENT_REGS[REG_A7]);
 
-  xcp->regs[REG_EPC]     = (uintptr_t)tcb->start;
+  _alert("T0:%016x T1:%016x T2:%016x T3:%016x \n",
+         CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
+         CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
 
-  /* If this task is running PIC, then set the PIC base register to the
-   * address of the allocated D-Space region.
-   */
+  _alert("T4:%016x T5:%016x T6:%016x \n",
+         CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
+         CURRENT_REGS[REG_T6]);
 
-#ifdef CONFIG_PIC
-#  warning "Missing logic"
+  _alert("S0:%016x S1:%016x S2:%016x S3:%016x \n",
+         CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
+         CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3]);
+
+  _alert("S4:%016x S5:%016x S6:%016x S7:%016x \n",
+         CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
+         CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
+
+  _alert("S8:%016x S9:%016x S10:%016x S11:%016x \n",
+         CURRENT_REGS[REG_S8], CURRENT_REGS[REG_S9],
+         CURRENT_REGS[REG_S10], CURRENT_REGS[REG_S11]);
+
+#ifdef RISCV_SAVE_GP
+  _alert("GP:%016x SP:%016x FP:%016x TP:%016x RA:%016x \n",
+         CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
+         CURRENT_REGS[REG_FP], CURRENT_REGS[REG_TP],
+         CURRENT_REGS[REG_RA]);
+#else
+  _alert("SP:%016x FP:%016x TP:%016x RA:%016x \n",
+         CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
+         CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
 #endif
 
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
-   */
-
-#ifdef CONFIG_BUILD_KERNEL
-#  warning "Missing logic"
-#endif
-
-  /* Set the initial value of the interrupt context register.
-   *
-   * Since various RISC-V platforms use different interrupt
-   * methodologies, the value of the interrupt context is
-   * part specific.
-   *
-   */
-
-  regval = up_get_newintctx();
-  xcp->regs[REG_INT_CTX] = regval;
+  (void)up_irq_save();
 }
-
