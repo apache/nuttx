@@ -1299,7 +1299,6 @@ static int cdcecm_setconfig(FAR struct cdcecm_driver_s *self, uint8_t config)
 
   self->epint->priv = self;
 
-  // af
   bool is_high_speed = (self->usbdev.speed == USB_SPEED_HIGH);
   cdcecm_mkepdesc(CDCECM_EP_BULKIN_IDX, &epdesc, &self->devinfo, is_high_speed);
   ret = EP_CONFIGURE(self->epbulkin, &epdesc, false);
@@ -1311,7 +1310,6 @@ static int cdcecm_setconfig(FAR struct cdcecm_driver_s *self, uint8_t config)
 
   self->epbulkin->priv = self;
 
-  // af
   cdcecm_mkepdesc(CDCECM_EP_BULKOUT_IDX, &epdesc, &self->devinfo, is_high_speed);
   ret = EP_CONFIGURE(self->epbulkout, &epdesc, true);
 
@@ -1700,7 +1698,6 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
 
   len += USB_SIZEOF_IFDESC;
 
-  // af
   #ifdef CONFIG_USBDEV_DUALSPEED
   bool is_high_speed = USB_SPEED_HIGH;
   #else
@@ -1711,7 +1708,6 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
     {
       FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)desc;
 
-      // af
       cdcecm_mkepdesc(CDCECM_EP_BULKIN_IDX, epdesc, devinfo, is_high_speed);
       desc += USB_SIZEOF_EPDESC;
     }
@@ -1722,7 +1718,6 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
     {
       FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)desc;
 
-      // af
       cdcecm_mkepdesc(CDCECM_EP_BULKOUT_IDX, epdesc, devinfo, is_high_speed);
       desc += USB_SIZEOF_EPDESC;
     }
