@@ -53,7 +53,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint64_t * g_current_regs;
+extern void up_fault(int irq, uint64_t *regs);
 
 /****************************************************************************
  * Public Functions
@@ -67,6 +67,13 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 {
   uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
   uint64_t *mepc = regs;
+
+  /* Check if fault happened */
+
+  if (vector < 11)
+    {
+      up_fault((int)irq, regs);
+    }
 
   /* Firstly, check if the irq is machine external interrupt */
 
@@ -94,17 +101,22 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
   PANIC();
 #else
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * g_current_regs is also used to manage interrupt level context switches.
+   * CURRENT_REGS is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  ASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
-  /* Deliver the IRQ */
+  /* MEXT means no interrupt */
 
-  irq_dispatch(irq, regs);
+  if (K210_IRQ_MEXT != irq)
+    {
+      /* Deliver the IRQ */
+
+      irq_dispatch(irq, regs);
+    }
 
   if (K210_IRQ_MEXT <= irq)
     {
@@ -115,13 +127,13 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 #endif
 
   /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
+   * CURRENT_REGS may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)g_current_regs;
-  g_current_regs = NULL;
+  regs = (uint64_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   return regs;
 }

@@ -70,11 +70,12 @@
  */
 
 #ifdef CONFIG_ARCH_RV64GC
-#define up_savestate(regs)    up_copystate(regs, (uint64_t*)g_current_regs)
+#define up_savestate(regs)    up_copystate(regs, (uint64_t*)CURRENT_REGS)
+#define up_restorestate(regs) (CURRENT_REGS = regs)
 #else
 #define up_savestate(regs)    up_copystate(regs, (uint32_t*)g_current_regs)
-#endif
 #define up_restorestate(regs) (g_current_regs = regs)
+#endif
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
@@ -118,7 +119,13 @@ extern "C"
 #endif
 
 #ifdef CONFIG_ARCH_RV64GC
-EXTERN volatile uint64_t *g_current_regs;
+#ifdef CONFIG_SMP
+EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
+#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
+#else
+EXTERN volatile uint64_t *g_current_regs[1];
+#  define CURRENT_REGS (g_current_regs[0])
+#endif
 EXTERN uintptr_t g_idle_topstack;
 #else
 EXTERN volatile uint32_t *g_current_regs;

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_timerisr.c
+ * arch/risc-v/src/k210/k210_cpustart.c
  *
- *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
+ *   Copyright (C) 2020 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,110 +40,154 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <time.h>
+#include <assert.h>
 #include <debug.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
+#include <nuttx/spinlock.h>
+#include <nuttx/sched_note.h>
 
 #include "up_arch.h"
+#include "sched/sched.h"
+#include "init/init.h"
+#include "up_internal.h"
+#include "chip.h"
 
-#include "k210.h"
-#include "k210_clockconfig.h"
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define getreg64(a)   (*(volatile uint64_t *)(a))
-#define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
-
-#ifdef CONFIG_K210_WITH_QEMU
-#define TICK_COUNT (10000000 / TICK_PER_SEC)
+#if 0
+#  define DPRINTF(fmt, args...) _err(fmt, ##args)
 #else
-#define TICK_COUNT ((k210_get_cpuclk() / 50) / TICK_PER_SEC)
+#  define DPRINTF(fmt, args...) do {} while (0)
+#endif
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
 #endif
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-static bool _b_tick_started = false;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  k210_reload_mtimecmp
- ****************************************************************************/
-
-static void k210_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave();
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(K210_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(K210_CLINT_MTIMECMP);
-    }
-
-  uint64_t tick = TICK_COUNT;
-  next = current + tick;
-
-  putreg64(next, K210_CLINT_MTIMECMP);
-
-  spin_unlock_irqrestore(flags);
-}
-
-/****************************************************************************
- * Name:  k210_timerisr
- ****************************************************************************/
-
-static int k210_timerisr(int irq, void *context, FAR void *arg)
-{
-  k210_reload_mtimecmp();
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
+extern volatile bool g_serial_ok;
+extern int riscv_pause_handler(int irq, void *c, FAR void *arg);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_timer_initialize
+ * Name: k210_cpu_boot
  *
  * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   Boot handler for cpu1
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void riscv_timer_initialize(void)
+void k210_cpu_boot(int cpu)
 {
-#if 1
-  /* Attach timer interrupt handler */
+  if (1 < cpu)
+    {
+      return;
+    }
 
-  (void)irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
+  /* Wait for g_serial_ok set by cpu0 when booting */
 
-  /* Reload CLINT mtimecmp */
+  while (!g_serial_ok)
+    {
+    }
 
-  k210_reload_mtimecmp();
+  /* Clear machine software interrupt for CPU(cpu) */
 
-  /* And enable the timer interrupt */
+  putreg32(0, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
 
-  up_enable_irq(K210_IRQ_MTIMER);
+  /* Enable machine software interrupt for IPI to boot */
+
+  up_enable_irq(K210_IRQ_MSOFT);
+
+  /* Wait interrupt */
+
+  asm("WFI");
+
+  showprogress('b');
+  DPRINTF("CPU%d Started\n", this_cpu());
+
+  /* TODO: Setup FPU */
+
+  /* Clear machine software interrupt for CPU(cpu) */
+
+  putreg32(0, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify that this CPU has started */
+
+  sched_note_cpu_started(this_task());
 #endif
+
+  (void)up_irq_enable();
+
+  /* Then transfer control to the IDLE task */
+
+  (void)nx_idle_task(0, NULL);
 }
 
+/****************************************************************************
+ * Name: up_cpu_start
+ *
+ * Description:
+ *   In an SMP configution, only one CPU is initially active (CPU 0). System
+ *   initialization occurs on that single thread. At the completion of the
+ *   initialization of the OS, just before beginning normal multitasking,
+ *   the additional CPUs would be started by calling this function.
+ *
+ *   Each CPU is provided the entry point to is IDLE task when started.  A
+ *   TCB for each CPU's IDLE task has been initialized and placed in the
+ *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   initialized.
+ *
+ *   The OS initialization logic calls this function repeatedly until each
+ *   CPU has been started, 1 through (CONFIG_SMP_NCPUS-1).
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU being started.  This will be a numeric
+ *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
+ *         0 is already active)
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_cpu_start(int cpu)
+{
+  DPRINTF("cpu=%d\n", cpu);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(this_task(), cpu);
+#endif
+
+  /* Send IPI to CPU(cpu) */
+
+  putreg32(1, (uintptr_t)K210_CLINT_MSIP + (cpu * 4));
+
+  return 0;
+}
+
+#endif /* CONFIG_SMP */
