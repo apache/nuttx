@@ -59,6 +59,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* If the USB mass storage device is configured as part of a composite device
  * then both CONFIG_USBDEV_COMPOSITE and CONFIG_USBMSC_COMPOSITE must be
  * defined.
@@ -69,7 +70,7 @@
 #endif
 
 #if defined(CONFIG_USBMSC_COMPOSITE) && !defined(CONFIG_USBMSC_STRBASE)
-#  define CONFIG_USBMSC_STRBASE (4)
+#  define CONFIG_USBMSC_STRBASE (0)
 #endif
 
 /* Interface IDs.  If the mass storage driver is built as a component of a
@@ -360,6 +361,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Endpoint descriptors */
 
 enum usbmsc_epdesc_e

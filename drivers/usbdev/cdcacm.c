@@ -593,10 +593,10 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
    * control when there are no watermarks.
    */
 
- if (nexthead == recv->tail)
-   {
-     cdcuart_rxflowcontrol(&priv->serdev, recv->size - 1, true);
-   }
+  if (nexthead == recv->tail)
+    {
+      cdcuart_rxflowcontrol(&priv->serdev, recv->size - 1, true);
+    }
 #endif
 
   /* If data was added to the incoming serial buffer, then wake up any
@@ -918,6 +918,7 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
     }
 
 errout_with_flags:
+
   /* Reset all of the "irregular" notification */
 
   priv->serialstate &= CDC_UART_CONSISTENT;
@@ -1177,7 +1178,7 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract references to private data */
@@ -1253,7 +1254,7 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract references to our private data */
@@ -1502,7 +1503,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -1631,7 +1632,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EINVAL;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -1715,7 +1716,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                 {
 #ifdef CONFIG_USBDEV_DUALSPEED
                   ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
-                                         dev->speed, ctrl->req);
+                                         dev->speed, ctrl->value[1]);
 #else
                   ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
 #endif
@@ -2030,7 +2031,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -2094,7 +2095,7 @@ static void cdcacm_suspend(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -2128,7 +2129,7 @@ static void cdcacm_resume(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -2304,7 +2305,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *   called to get the data associated CDCACM_EVENT_CTRLLINE event.
      */
 
-   case CAIOC_GETCTRLLINE:
+    case CAIOC_GETCTRLLINE:
       {
         FAR int *ptr = (FAR int *)((uintptr_t)arg);
         if (ptr != NULL)
@@ -2356,6 +2357,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Report state of output flow control */
+
 #  warning Missing logic
 #endif
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
@@ -2387,6 +2389,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Handle changes to output flow control */
+
 #  warning Missing logic
 #endif
 
@@ -2422,7 +2425,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                  */
 
                 cdcacm_release_rxpending(priv);
-
               }
 
             /* Flow control has been enabled. */
@@ -2671,8 +2673,8 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 #ifdef CONFIG_DEBUG_FEATURES
   if (dev == NULL || dev->priv == NULL)
     {
-       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-       return false;
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
+      return false;
     }
 #endif
 
@@ -2990,7 +2992,7 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
 
   /* Register the CDC/ACM TTY device */
 
-  sprintf(devname, CDCACM_DEVNAME_FORMAT, minor);
+  snprintf(devname, CDCACM_DEVNAME_SIZE, CDCACM_DEVNAME_FORMAT, minor);
   ret = uart_register(devname, &priv->serdev);
   if (ret < 0)
     {
@@ -3145,7 +3147,7 @@ void cdcacm_uninitialize(FAR void *handle)
 
   /* Un-register the CDC/ACM TTY device */
 
-  sprintf(devname, CDCACM_DEVNAME_FORMAT, priv->minor);
+  snprintf(devname, CDCACM_DEVNAME_SIZE, CDCACM_DEVNAME_FORMAT, priv->minor);
   ret = unregister_driver(devname);
   if (ret < 0)
     {

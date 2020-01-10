@@ -243,10 +243,10 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
           size_t total_len     = sizeof(struct usb_msft_os_feature_desc_s) +
                                  (response->count - 1) *
                                  sizeof(struct usb_msft_os_function_desc_s);
-          response->len[0]     = (total_len >> 0) & 0xFF;
-          response->len[1]     = (total_len >> 8) & 0xFF;
-          response->len[2]     = (total_len >> 16) & 0xFF;
-          response->len[3]     = (total_len >> 24) & 0xFF;
+          response->len[0]     = (total_len >> 0) & 0xff;
+          response->len[1]     = (total_len >> 8) & 0xff;
+          response->len[2]     = (total_len >> 16) & 0xff;
+          response->len[3]     = (total_len >> 24) & 0xff;
           response->version[1] = 0x01;
           response->index[0]   = MSFTOSDESC_INDEX_FUNCTION;
 
@@ -265,7 +265,7 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
        * a bit incorrect here, the interface is in ctrl->value low byte.
        * Also WinUSB driver has limitation that index[0] will not be correct if
        * trying to read descriptors using e.g. libusb xusb.exe.
-        */
+       */
 
       uint8_t interface = ctrl->value[0];
       int ret = -ENOTSUP;
@@ -281,7 +281,7 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
               *dispatched = true;
               break;
             }
-       }
+        }
 
       return ret;
     }
@@ -437,7 +437,7 @@ static void composite_unbind(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -507,7 +507,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_SETUPINVALIDARGS), 0);
       return -EIO;
-     }
+    }
 #endif
 
   /* Extract a reference to private data */
@@ -588,7 +588,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                   /* value == string index. Zero is the language ID. */
 
                   uint8_t strid = ctrl->value[0];
-                  FAR struct usb_strdesc_s *buf = (FAR struct usb_strdesc_s *)ctrlreq->buf;
+                  FAR struct usb_strdesc_s *buf =
+                             (FAR struct usb_strdesc_s *)ctrlreq->buf;
 
                   if (strid < COMPOSITE_NSTRIDS)
                     {
@@ -604,7 +605,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       static const uint8_t msft_response[16] =
                       {
-                        'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0, 0xEE, 0
+                        'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0,
+                        0xff, 0
                       };
 
                       buf->len = 18;
@@ -619,8 +621,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       for (i = 0; i < priv->ndevices; i++)
                         {
-                          if (strid >= priv->device[i].compdesc.devinfo.strbase &&
-                              strid <  priv->device[i].compdesc.devinfo.strbase +
+                          if (strid >  priv->device[i].compdesc.devinfo.strbase &&
+                              strid <= priv->device[i].compdesc.devinfo.strbase +
                                        priv->device[i].compdesc.devinfo.nstrings)
                             {
                               ret = priv->device[i].compdesc.mkstrdesc(strid -
@@ -634,7 +636,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
               default:
                 {
-                  usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC), value);
+                  usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC),
+                           value);
                 }
                 break;
               }
@@ -651,7 +654,11 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                 for (i = 0; i < priv->ndevices; i++)
                   {
-                    ret = CLASS_SETUP(priv->device[i].dev, dev, ctrl, dataout, outlen);
+                    ret = CLASS_SETUP(priv->device[i].dev,
+                                      dev,
+                                      ctrl,
+                                      dataout,
+                                      outlen);
                   }
 
                 dispatched = true;
@@ -693,7 +700,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
            break;
 
         default:
-          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
+          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ),
+                   ctrl->req);
           break;
         }
     }
@@ -770,7 +778,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -828,7 +836,7 @@ static void composite_suspend(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -875,7 +883,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_INVALIDARG), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -905,6 +913,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: composite_initialize
  *
@@ -1050,6 +1059,7 @@ void composite_uninitialize(FAR void *handle)
   usbdev_unregister(&alloc->drvr.drvr);
 
   /* Free any resources used by the composite driver */
+
   /* None */
 
   /* Second phase uninitialization:  Clean up all memory resources */
@@ -1084,7 +1094,7 @@ int composite_ep0submit(FAR struct usbdevclass_driver_s *driver,
    * it becomes necessary to manage the completion callbacks.
    */
 
-   return EP_SUBMIT(dev->ep0, ctrlreq);
+  return EP_SUBMIT(dev->ep0, ctrlreq);
 }
 
 #endif /* CONFIG_USBDEV_COMPOSITE */
