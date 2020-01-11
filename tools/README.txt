@@ -143,6 +143,14 @@ Libraries.mk, FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk
   FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk:  These control the
   selection of libraries to be built, depending on the selected build mode.
 
+listcommonpercentage.sh
+-----------------------
+  This script uses 'wdiff -123 -s' in order to get the relative percentage
+  of common lines of text of each supplied file, relative to all other
+  supplied files. It can be used to identify copies or semi-copies of files.
+  Please read the description inside the script itself, for usage
+  information and examples.
+
 lowhex.c
 --------
 
