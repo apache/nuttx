@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_exec.c
  *
- *   Copyright (C) 2009, 2013-2014, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2009, 2013-2014, 2017-2018, 2020 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
