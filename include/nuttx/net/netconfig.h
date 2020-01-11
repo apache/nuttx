@@ -587,20 +587,6 @@
 #  endif
 #endif
 
-/* General configuration options */
-
-/* Delay after receive to catch a following packet.  No delay should be
- * required if TCP/IP read-ahead buffering is enabled.
- */
-
-#ifndef CONFIG_NET_TCP_RECVDELAY
-#  ifdef CONFIG_NET_TCP_READAHEAD
-#    define CONFIG_NET_TCP_RECVDELAY 0
-#  else
-#    define CONFIG_NET_TCP_RECVDELAY 5
-#  endif
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

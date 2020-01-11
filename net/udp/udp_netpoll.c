@@ -281,7 +281,6 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   fds->priv = (FAR void *)info;
 
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Check for read data availability now */
 
   if (!IOB_QEMPTY(&conn->readahead))
@@ -290,7 +289,6 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       fds->revents |= (POLLRDNORM & fds->events);
     }
-#endif
 
   if (psock_udp_cansend(psock) >= 0)
     {

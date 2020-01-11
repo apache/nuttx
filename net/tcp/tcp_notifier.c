@@ -85,7 +85,6 @@ int tcp_readahead_notifier_setup(worker_t worker,
                                  FAR struct tcp_conn_s *conn,
                                  FAR void *arg)
 {
-#ifdef CONFIG_NET_TCP_READAHEAD
   struct work_notifier_s info;
 
   DEBUGASSERT(worker != NULL);
@@ -108,9 +107,6 @@ int tcp_readahead_notifier_setup(worker_t worker,
   info.worker    = worker;
 
   return work_notifier_setup(&info);
-#else
-  return 0;
-#endif
 }
 
 /****************************************************************************
@@ -269,14 +265,12 @@ int tcp_notifier_teardown(int key)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_READAHEAD
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
   return work_notifier_signal(WORK_TCP_READAHEAD, conn);
 }
-#endif
 
 /****************************************************************************
  * Name: tcp_writebuffer_signal

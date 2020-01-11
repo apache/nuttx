@@ -89,22 +89,18 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   if (dev->d_len > 0)
     {
-#ifdef CONFIG_NET_TCP_READAHEAD
       uint8_t *buffer = dev->d_appdata;
       int      buflen = dev->d_len;
       uint16_t recvlen;
-#endif
 
       ninfo("No listener on connection\n");
 
-#ifdef CONFIG_NET_TCP_READAHEAD
       /* Save as the packet data as in the read-ahead buffer.  NOTE that
        * partial packets will not be buffered.
        */
 
       recvlen = tcp_datahandler(conn, buffer, buflen);
       if (recvlen < buflen)
-#endif
         {
           /* There is no handler to receive new data and there are no free
            * read-ahead buffers to retain the data -- drop the packet.
@@ -241,7 +237,6 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_READAHEAD
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t buflen)
 {
@@ -298,6 +293,5 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }
-#endif /* CONFIG_NET_TCP_READAHEAD */
 
 #endif /* NET_TCP_HAVE_STACK */

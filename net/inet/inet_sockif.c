@@ -287,28 +287,12 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock)
     {
 #ifdef NET_TCP_HAVE_STACK
       case SOCK_STREAM:
-        /* REVISIT:  Non-blocking recv() depends on CONFIG_NET_TCP_READAHEAD,
-         * but non-blocking send() depends on CONFIG_NET_TCP_WRITE_BUFFERS.
-         */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
         return SOCKCAP_NONBLOCKING;
-#else
-        return 0;
-#endif
 #endif
 
 #ifdef NET_UDP_HAVE_STACK
       case SOCK_DGRAM:
-        /* REVISIT:  Non-blocking recvfrom() depends on CONFIG_NET_UDP_READAHEAD,
-         * but non-blocking sendto() depends on CONFIG_NET_UDP_WRITE_BUFFERS.
-         */
-
-#ifdef CONFIG_NET_UDP_READAHEAD
         return SOCKCAP_NONBLOCKING;
-#else
-        return 0;
-#endif
 #endif
 
       default:
