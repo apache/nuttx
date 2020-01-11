@@ -43,22 +43,23 @@
  *
  *   1. Provide logic in stm32l4_board_initialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32l4_spi1/2/3select() and stm32l4_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
+ *   2. Provide stm32l4_spi1/2/3select() and stm32l4_spi1/2/3status() functions in
+ *      your board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to stm32l4_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by stm32l4_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by stm32l4_spibus_initialize() may then be used to bind
+ *      the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************c********************************/
+ *************************************************************************************/
 
 /* This driver is ported from the stm32 one, which only supports 8 and 16 bits
  * transfers. The STM32L4 family supports frame size from 4 to 16 bits, but we do not
  * support that yet. For the moment, we replace uses of the CR1_DFF bit with a check
- * of the CR2_DS[0..3] bits. If the value is SPI_CR2_DS_16BIT it means 16 bits, else 8 bits.
+ * of the CR2_DS[0..3] bits. If the value is SPI_CR2_DS_16BIT it means 16 bits,
+ * else 8 bits.
  */
 
 /************************************************************************************
@@ -100,6 +101,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* SPI interrupts */
 
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -201,9 +203,13 @@ static inline void spi_dmatxwakeup(FAR struct stm32l4_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg);
 static void        spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg);
 static void        spi_dmarxsetup(FAR struct stm32l4_spidev_s *priv,
-                                  FAR void *rxbuffer, FAR void *rxdummy, size_t nwords);
+                                  FAR void *rxbuffer,
+                                  FAR void *rxdummy,
+                                  size_t nwords);
 static void        spi_dmatxsetup(FAR struct stm32l4_spidev_s *priv,
-                                  FAR const void *txbuffer, FAR const void *txdummy, size_t nwords);
+                                  FAR const void *txbuffer,
+                                  FAR const void *txdummy,
+                                  size_t nwords);
 static inline void spi_dmarxstart(FAR struct stm32l4_spidev_s *priv);
 static inline void spi_dmatxstart(FAR struct stm32l4_spidev_s *priv);
 #endif
@@ -280,7 +286,10 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct stm32l4_spidev_s g_spi1dev =
 {
-  .spidev   = { &g_spi1ops },
+  .spidev   =
+              {
+               &g_spi1ops
+              },
   .spibase  = STM32L4_SPI1_BASE,
   .spiclock = STM32L4_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -288,6 +297,7 @@ static struct stm32l4_spidev_s g_spi1dev =
 #endif
 #ifdef CONFIG_STM32L4_SPI_DMA
   /* lines must be configured in board.h */
+
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
 #endif
@@ -331,7 +341,10 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct stm32l4_spidev_s g_spi2dev =
 {
-  .spidev   = { &g_spi2ops },
+  .spidev   =
+              {
+                &g_spi2ops
+              },
   .spibase  = STM32L4_SPI2_BASE,
   .spiclock = STM32L4_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -381,7 +394,10 @@ static const struct spi_ops_s g_spi3ops =
 
 static struct stm32l4_spidev_s g_spi3dev =
 {
-  .spidev   = { &g_spi3ops },
+  .spidev   =
+              {
+               &g_spi3ops
+              },
   .spibase  = STM32L4_SPI3_BASE,
   .spiclock = STM32L4_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -637,7 +653,15 @@ static void spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
 #ifdef CONFIG_STM32L4_SPI_DMA
 static void spi_dmatxwait(FAR struct stm32l4_spidev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->txsem);
+  /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
+   * must not really have completed???
+   */
+
+  do
+    {
+      nxsem_wait_uninterruptible(&priv->txsem);
+    }
+  while (priv->txresult == 0);
 }
 #endif
 
@@ -770,8 +794,10 @@ static void spi_dmarxsetup(FAR struct stm32l4_spidev_s *priv, FAR void *rxbuffer
  ************************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI_DMA
-static void spi_dmatxsetup(FAR struct stm32l4_spidev_s *priv, FAR const void *txbuffer,
-                           FAR const void *txdummy, size_t nwords)
+static void spi_dmatxsetup(FAR struct stm32l4_spidev_s *priv,
+                           FAR const void *txbuffer,
+                           FAR const void *txdummy,
+                           size_t nwords)
 {
   /* 8- or 16-bit mode? */
 
@@ -1111,6 +1137,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   if (nbits != priv->nbits)
     {
       /* Yes... Set CR2 appropriately */
+
       /* Set the number of bits (valid range 4-16) */
 
       if (nbits < 4 || nbits > 16)
@@ -1141,7 +1168,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
-      priv->nbits = savbits; // nbits has been clobbered... save the signed value.
+      priv->nbits = savbits; /* nbits has been clobbered... save the signed value. */
     }
 }
 
@@ -1247,7 +1274,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
     }
   else
     {
-      spi_writebyte(priv, (uint8_t)(wd & 0xFF));
+      spi_writebyte(priv, (uint8_t)(wd & 0xff));
       ret = (uint16_t)spi_readbyte(priv);
     }
 
@@ -1515,7 +1542,9 @@ static int spi_trigger(FAR struct spi_dev_s *dev)
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev,
+                         FAR const void *txbuffer,
+                         size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
@@ -1542,7 +1571,9 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev,
+                          FAR void *rxbuffer,
+                          size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
@@ -1597,6 +1628,7 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
     case PM_STANDBY:
     case PM_SLEEP:
+
       /* Check if exclusive lock for SPI bus is held. */
 
       if (nxsem_getvalue(&priv->exclsem, &sval) < 0)
@@ -1615,6 +1647,7 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
       break;
 
     default:
+
       /* Should not get here */
 
       break;
@@ -1628,7 +1661,8 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
  * Name: spi_bus_initialize
  *
  * Description:
- *   Initialize the selected SPI bus in its default state (Master, 8-bit, mode 0, etc.)
+ *   Initialize the selected SPI bus in its default state (Master, 8-bit,
+ *   mode 0, etc.)
  *
  * Input Parameters:
  *   priv   - private SPI device structure
@@ -1652,7 +1686,8 @@ static void spi_bus_initialize(FAR struct stm32l4_spidev_s *priv)
    *   8-bit:                         CR2.DS=7
    *   MSB tranmitted first:          CR1.LSBFIRST=0
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CR1.SSM=1 (prevents MODF error)
-   *   Two lines full duplex:         CR1.BIDIMODE=0 CR1.BIDIOIE=(Don't care) and CR1.RXONLY=0
+   *   Two lines full duplex:         CR1.BIDIMODE=0 CR1.BIDIOIE=(Don't care) and
+   *                                                 CR1.RXONLY=0
    */
 
   clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
