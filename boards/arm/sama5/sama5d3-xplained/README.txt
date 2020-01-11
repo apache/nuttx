@@ -843,7 +843,6 @@ Networking
     CONFIG_NET_ETH_PKTSIZE=562           : Maximum packet size 1518 is more standard
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=562 : Read-ahead buffer size
     CONFIG_NET_UDP=y                     : Enable UDP networking
     CONFIG_NET_ICMP=y                    : Enable ICMP networking
     CONFIG_NET_ICMP_SOCKET=y             : Needed for NSH ping command

@@ -178,11 +178,9 @@ Networking Support
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
     CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
     CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
     CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
     CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
     CONFIG_NET_MAX_LISTENPORTS=20       :
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
     CONFIG_NET_UDP=y                    : Enable UDP networking
     CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
     CONFIG_NET_ICMP=y                   : Enable ICMP networking

@@ -48,10 +48,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
-
-#ifdef CONFIG_NET_UDP_READAHEAD
-#  include <nuttx/mm/iob.h>
-#endif
+#include <nuttx/mm/iob.h>
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -143,7 +140,6 @@ struct udp_conn_s
                            * Unbound: 0, Bound: 1-MAX_IFINDEX */
 #endif
 
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
@@ -151,7 +147,6 @@ struct udp_conn_s
    */
 
   struct iob_queue_s readahead;   /* Read-ahead buffering */
-#endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Write buffering
@@ -814,7 +809,7 @@ int udp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_NET_UDP_NOTIFIER)
+#ifdef CONFIG_NET_UDP_NOTIFIER
 void udp_readahead_signal(FAR struct udp_conn_s *conn);
 #endif
 

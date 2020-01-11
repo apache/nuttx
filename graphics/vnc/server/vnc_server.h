@@ -60,10 +60,6 @@
 
 /* Configuration */
 
-#ifndef CONFIG_NET_TCP_READAHEAD
-#  error CONFIG_NET_TCP_READAHEAD must be set to use VNC
-#endif
-
 #ifndef CONFIG_NX_UPDATE
 #  error CONFIG_NX_UPDATE must be set to use VNC
 #endif

@@ -1344,7 +1344,6 @@ Networking
     CONFIG_NET_ARP_IPIN=y                : IP address harvesting (optional)
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD=y           : Enable TCP read-ahead buffering
     CONFIG_NET_TCP_WRITE_BUFFERS=y       : Enable TCP write buffering
     CONFIG_NET_UDP=y                     : Enable UDP networking
     CONFIG_NET_BROADCAST=y               : Support UDP broadcast packets

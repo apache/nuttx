@@ -14,10 +14,12 @@ config ARCH_HAVE_PHY
 config NET_WRITE_BUFFERS
 	bool
 	default n
+	select MM_IOB
 
 config NET_READAHEAD
 	bool
 	default n
+	select MM_IOB
 
 config NET_MCASTGROUP
 	bool

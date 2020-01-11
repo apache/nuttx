@@ -302,15 +302,9 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   fds->priv    = (FAR void *)info;
 
-#ifdef CONFIG_NET_TCP_READAHEAD
   /* Check for read data or backlogged connection availability now */
 
   if (!IOB_QEMPTY(&conn->readahead) || tcp_backlogavailable(conn))
-#else
-  /* Check for backlogged connection now */
-
-  if (tcp_backlogavailable(conn))
-#endif
     {
       /* Normal data may be read without blocking. */
 

@@ -223,7 +223,6 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-#ifdef CONFIG_NET_TCP_READAHEAD
       FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->ir_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
       uint16_t buflen = dev->d_len - recvlen;
@@ -251,9 +250,6 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
         {
           nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
         }
-#endif
-#else
-      nerr("ERROR: packet data lost (%d bytes)\n", dev->d_len - recvlen);
 #endif
     }
 
@@ -312,7 +308,7 @@ static inline void inet_udp_newdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_READAHEAD)
+#ifdef NET_TCP_HAVE_STACK
 static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->ir_sock->s_conn;
@@ -373,9 +369,9 @@ static inline void inet_tcp_readahead(struct inet_recvfrom_s *pstate)
         }
     }
 }
-#endif /* NET_TCP_HAVE_STACK && CONFIG_NET_TCP_READAHEAD */
+#endif /* NET_TCP_HAVE_STACK */
 
-#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_UDP_READAHEAD)
+#ifdef NET_UDP_HAVE_STACK
 
 static inline void inet_udp_readahead(struct inet_recvfrom_s *pstate)
 {
@@ -500,26 +496,6 @@ static int inet_recvfrom_timeout(struct inet_recvfrom_s *pstate)
 
       timeo = psock->s_rcvtimeo;
     }
-
-  /* Use a fixed, configurable delay under the following circumstances:
-   *
-   * 1) This delay function has been enabled with CONFIG_NET_TCP_RECVDELAY > 0
-   * 2) Some data has already been received from the socket.  Since this can
-   *    only be true for a TCP/IP socket, this logic applies only to TCP/IP
-   *    sockets.  And either
-   * 3) There is no configured receive timeout, or
-   * 4) The configured receive timeout is greater than than the delay
-   */
-
-#if CONFIG_NET_TCP_RECVDELAY > 0
-  if ((timeo == 0 || timeo > CONFIG_NET_TCP_RECVDELAY) &&
-      pstate->ir_recvlen > 0)
-    {
-      /* Use the configured timeout */
-
-      timeo = CONFIG_NET_TCP_RECVDELAY;
-    }
-#endif
 
   /* Is there an effective timeout? */
 
@@ -675,28 +651,14 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
 
           flags = (flags & ~TCP_NEWDATA) | TCP_SNDACK;
 
-          /* Check for transfer complete.  We will consider the transfer
-           * complete in own of two different ways, depending on the setting
-           * of CONFIG_NET_TCP_RECVDELAY.
-           *
-           * 1) If CONFIG_NET_TCP_RECVDELAY == 0 then we will consider the
-           *    TCP/IP transfer complete as soon as any data has been received.
-           *    This is safe because if any additional data is received, it
-           *    will be retained in the TCP/IP read-ahead buffer until the
-           *    next receive is performed.
-           * 2) CONFIG_NET_TCP_RECVDELAY > 0 may be set to wait a little
-           *    bit to determine if more data will be received.  You might
-           *    do this if read-ahead buffering is disabled and we want to
-           *    minimize the loss of back-to-back packets.  In this case,
-           *    the transfer is complete when either a) the entire user buffer
-           *    is full or 2) when the receive timeout occurs (below).
+          /* Check for transfer complete.  We will consider the
+           * TCP/IP transfer complete as soon as any data has been received.
+           * This is safe because if any additional data is received, it
+           * will be retained in the TCP/IP read-ahead buffer until the
+           * next receive is performed.
            */
 
-#if CONFIG_NET_TCP_RECVDELAY > 0
-          if (pstate->ir_buflen == 0)
-#else
           if (pstate->ir_recvlen > 0)
-#endif
             {
               ninfo("TCP resume\n");
 
@@ -765,23 +727,7 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
             }
           else
             {
-              /* If no data has been received, then return ENOTCONN.
-               * Otherwise, let this return success.  The failure will
-               * be reported the next time that recv[from]() is called.
-               */
-
-#if CONFIG_NET_TCP_RECVDELAY > 0
-              if (pstate->ir_recvlen > 0)
-                {
-                  pstate->ir_result = 0;
-                }
-              else
-                {
-                  pstate->ir_result = -ENOTCONN;
-                }
-#else
               pstate->ir_result = -ENOTCONN;
-#endif
             }
 
           /* Wake up the waiting thread */
@@ -806,19 +752,9 @@ static uint16_t inet_tcp_eventhandler(FAR struct net_driver_s *dev,
           pstate->ir_cb->priv    = NULL;
           pstate->ir_cb->event   = NULL;
 
-          /* Report an error only if no data has been received. (If
-           * CONFIG_NET_TCP_RECVDELAY then ir_recvlen should always be
-           * less than or equal to zero).
-           */
+          /* Report the timeout error */
 
-#if CONFIG_NET_TCP_RECVDELAY > 0
-          if (pstate->ir_recvlen <= 0)
-#endif
-            {
-              /* Report the timeout error */
-
-              pstate->ir_result = -EAGAIN;
-            }
+          pstate->ir_result      = -EAGAIN;
 
           /* Wake up the waiting thread, returning either the error -EAGAIN
            * that signals the timeout event or the data received up to
@@ -1207,7 +1143,6 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
   net_lock();
   inet_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
 
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Copy the read-ahead data from the packet */
 
   inet_udp_readahead(&state);
@@ -1220,15 +1155,6 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
 
   ret = state.ir_recvlen;
 
-#else
-  /* Otherwise, the default return value of zero is used (only for the case
-   * where len == state.ir_buflen is zero).
-   */
-
-  ret = 0;
-#endif
-
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Handle non-blocking UDP sockets */
 
   if (_SS_ISNONBLOCK(psock->s_flags))
@@ -1253,7 +1179,6 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
    */
 
   else if (state.ir_recvlen <= 0)
-#endif
     {
       /* Get the device that will handle the packet transfers.  This may be
        * NULL if the UDP socket is bound to INADDR_ANY.  In that case, no
@@ -1336,7 +1261,6 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
    * socket has been disconnected.
    */
 
-#ifdef CONFIG_NET_TCP_READAHEAD
   inet_tcp_readahead(&state);
 
   /* The default return value is the number of bytes that we just copied
@@ -1346,14 +1270,6 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
    */
 
   ret = state.ir_recvlen;
-
-#else
-  /* Otherwise, the default return value of zero is used (only for the case
-   * where len == state.ir_buflen is zero).
-   */
-
-  ret = 0;
-#endif
 
   /* Verify that the SOCK_STREAM has been and still is connected */
 
@@ -1370,11 +1286,7 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
        * end-of-file indication.
        */
 
-#ifdef CONFIG_NET_TCP_READAHEAD
       if (ret <= 0 && !_SS_ISCLOSED(psock->s_flags))
-#else
-      if (!_SS_ISCLOSED(psock->s_flags))
-#endif
         {
           /* Nothing was previously received from the readahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive any
@@ -1391,9 +1303,7 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
    * if no data was obtained from the read-ahead buffers.
    */
 
-  else
-#ifdef CONFIG_NET_TCP_READAHEAD
-  if (_SS_ISNONBLOCK(psock->s_flags))
+  else if (_SS_ISNONBLOCK(psock->s_flags))
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.
@@ -1413,27 +1323,19 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
    */
 
   else
-#endif
 
   /* We get here when we we decide that we need to setup the wait for incoming
    * TCP/IP data.  Just a few more conditions to check:
    *
    * 1) Make sure thet there is buffer space to receive additional data
-   *    (state.ir_buflen > 0).  This could be zero, for example, if read-ahead
-   *    buffering was enabled and we filled the user buffer with data from
-   *    the read-ahead buffers.  And
-   * 2) if read-ahead buffering is enabled (CONFIG_NET_TCP_READAHEAD)
-   *    and delay logic is disabled (CONFIG_NET_TCP_RECVDELAY == 0), then we
-   *    not want to wait if we already obtained some data from the read-ahead
-   *    buffer.  In that case, return now with what we have (don't want for more
-   *    because there may be no timeout).
+   *    (state.ir_buflen > 0).  This could be zero, for example,  we filled
+   *    the user buffer with data from the read-ahead buffers.  And
+   * 2) then we not want to wait if we already obtained some data from the
+   *    read-ahead buffer.  In that case, return now with what we have (don't
+   *    want for more because there may be no timeout).
    */
 
-#if CONFIG_NET_TCP_RECVDELAY == 0 && defined(CONFIG_NET_TCP_READAHEAD)
   if (state.ir_recvlen == 0 && state.ir_buflen > 0)
-#else
-  if (state.ir_buflen > 0)
-#endif
     {
       FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
