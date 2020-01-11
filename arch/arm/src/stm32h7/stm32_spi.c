@@ -853,7 +853,15 @@ static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32H7_SPI_DMA
 static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->txsem);
+  /* Take the semaphore (perhaps waiting).  If the result is zero, then the DMA
+   * must not really have completed???
+   */
+
+  do
+    {
+      nxsem_wait_uninterruptible(&priv->txsem);
+    }
+  while (priv->txresult == 0);
 }
 #endif
 
