@@ -197,6 +197,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   kmm_free(bin);
 
   /* TODO: How does the module get unloaded in this case? */
+
 #endif
 
   sched_unlock();
@@ -212,7 +213,6 @@ errout_with_bin:
 errout:
   set_errno(errcode);
   return ERROR;
-
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE */

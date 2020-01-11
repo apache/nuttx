@@ -200,7 +200,6 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
         }
       else
         {
-
           /* Save the address of the .dtors (actually, .init_array) where it was
            * loaded into memory.  Since the .dtors lie in allocated memory, they
            * will be relocated via the normal mechanism.

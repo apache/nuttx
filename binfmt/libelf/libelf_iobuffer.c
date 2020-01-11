@@ -120,8 +120,8 @@ int elf_reallocbuffer(FAR struct elf_loadinfo_s *loadinfo, size_t increment)
 
   /* And perform the reallocation */
 
-   buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
-   if (!buffer)
+  buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
+  if (!buffer)
     {
       berr("Failed to reallocate the I/O buffer\n");
       return -ENOMEM;
