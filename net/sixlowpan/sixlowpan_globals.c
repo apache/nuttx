@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_globals.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,5 +66,9 @@ uint8_t g_uncomp_hdrlen;
  */
 
 uint8_t g_frame_hdrlen;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 #endif /* CONFIG_NET_6LOWPAN */

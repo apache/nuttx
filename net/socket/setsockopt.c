@@ -1,8 +1,8 @@
 /****************************************************************************
  * net/socket/setsockopt.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012, 2014-2015, 2017-2018 Gregory Nutt.
- *     All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2014-2015, 2017-2018, 2020 Gregory
+ *     Nutt.  All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -459,7 +459,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int setsockopt(int sockfd, int level, int option, const void *value, socklen_t value_len)
+int setsockopt(int sockfd, int level, int option, const void *value,
+               socklen_t value_len)
 {
   FAR struct socket *psock;
   int ret;

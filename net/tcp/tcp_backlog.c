@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_backlog.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2020 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,7 +187,8 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 
       /* Handle any pending connections in the backlog */
 
-      while ((blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&blg->bl_pending)) != NULL)
+      while ((blc = (FAR struct tcp_blcontainer_s *)
+                    sq_remfirst(&blg->bl_pending)) != NULL)
         {
           blconn = blc->bc_conn;
           if (blconn)
@@ -362,7 +364,8 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
     {
       /* Find the container hold the connection */
 
-      for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
+      for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending),
+           prev = NULL;
            blc;
            prev = blc, blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
         {

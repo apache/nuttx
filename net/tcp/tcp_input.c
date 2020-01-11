@@ -2,7 +2,8 @@
  * net/tcp/tcp_input.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2014, 2017-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2017-2019, 2020 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -768,6 +769,7 @@ found:
              * the received data. So the socket layer has to get this ACK even
              * if the connection is going to be closed.
              */
+
 #if 0
             if (conn->tx_unacked > 0)
               {

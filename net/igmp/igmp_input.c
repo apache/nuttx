@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_input.c
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -245,7 +245,8 @@ void igmp_input(struct net_driver_s *dev)
                   {
                     ticks   = net_dsec2tick((int)igmp->maxresp);
 
-                    if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
+                    if (IS_IDLEMEMBER(group->flags) ||
+                        igmp_cmptimer(group, ticks))
                       {
                         igmp_startticks(group, ticks);
                         CLR_IDLEMEMBER(group->flags);
@@ -261,7 +262,8 @@ void igmp_input(struct net_driver_s *dev)
             ninfo("Unicast query\n");
             IGMP_STATINCR(g_netstats.igmp.ucast_query);
 
-            ninfo("Query to a specific group with the group address as destination\n");
+            ninfo("Query to a specific group with the group address as "
+                  "destination\n");
 
             ticks = net_dsec2tick((int)igmp->maxresp);
             if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
