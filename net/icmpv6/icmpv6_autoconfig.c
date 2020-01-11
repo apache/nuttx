@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
- *   Copyright (C) 2015-2016, 2018-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -309,7 +309,8 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   net_lock();
 
   /* IPv6 Stateless Autoconfiguration
-   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
+   * Reference:
+   * http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
    *
    * The following is a summary of the steps a device takes when using
    * stateless auto-configuration:

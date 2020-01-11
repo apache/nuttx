@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_send.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -272,6 +272,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                 {
                   neighbor_notreachable(dev);
                 }
+
               sinfo.s_result = ret;
             }
 

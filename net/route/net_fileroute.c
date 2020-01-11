@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/route/net_fileroute.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,7 +178,8 @@ int net_routesize(FAR const char *path, size_t entrysize)
 #ifdef CONFIG_DEBUG_NET_WARN
       if (nentries * entrysize != buf.st_size)
         {
-          nwarn("WARNING: Size of routing table is not an even multiple of entries\n");
+          nwarn("WARNING: Size of routing table is not an even multiple of "
+                "entries\n");
           nwarn("         %lu != %lu / %lu\n",
                 (unsigned long)nentries,
                 (unsigned long)buf.st_size,

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_sendto.c
  *
- *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -422,6 +422,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
                   ret = -ENETUNREACH;
                 }
             }
+
           state.snd_result = ret;
         }
 

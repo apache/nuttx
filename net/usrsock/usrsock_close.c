@@ -187,6 +187,7 @@ int usrsock_close(FAR struct usrsock_conn_s *conn)
           /* TODO: Error handling for close? Mark closed anyway? There is not
            * much we can do if this happens.
            */
+
           ninfo("user-space daemon reported error %d for usockid=%d\n",
                 state.result, conn->usockid);
 

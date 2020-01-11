@@ -2,7 +2,7 @@
  * net/bluetooth/bluetooth_poll.c
  * Poll for the availability of ougoing Bluetooth frames
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,7 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
        *
        * REVISIT: Need to pass the meta data and the IOB through the callback
        */
+
 #warning Missing logic
 
       /* Perform the application callback */

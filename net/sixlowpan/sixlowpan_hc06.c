@@ -3,7 +3,7 @@
  * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06, updated to RFC
  * 6282)
  *
- *   Copyright (C) 2017, 2019 Gregory Nutt, all rights reserved
+ *   Copyright (C) 2017, 2019-2020 Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from Contiki:
@@ -240,7 +240,8 @@ static FAR struct sixlowpan_addrcontext_s *
       if ((g_hc06_addrcontexts[i].used == 1) &&
           net_ipv6addr_prefixcmp(&g_hc06_addrcontexts[i].prefix, ipaddr, 64))
         {
-          ninfo("Context found for ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x Context: %d\n",
+          ninfo("Context found for "
+                "ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x Context: %d\n",
                 ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
                 ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
                 ntohs(ipaddr[6]), ntohs(ipaddr[7]),
@@ -612,14 +613,22 @@ void sixlowpan_hc06_initialize(void)
           g_hc06_addrcontexts[1].used      = 1;
           g_hc06_addrcontexts[1].number    = 1;
 
-          g_hc06_addrcontexts[1].prefix[0] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_0;
-          g_hc06_addrcontexts[1].prefix[1] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_1;
-          g_hc06_addrcontexts[1].prefix[2] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_2;
-          g_hc06_addrcontexts[1].prefix[3] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_3;
-          g_hc06_addrcontexts[1].prefix[4] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_4;
-          g_hc06_addrcontexts[1].prefix[5] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_5;
-          g_hc06_addrcontexts[1].prefix[6] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_6;
-          g_hc06_addrcontexts[1].prefix[7] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_7;
+          g_hc06_addrcontexts[1].prefix[0] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_0;
+          g_hc06_addrcontexts[1].prefix[1] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_1;
+          g_hc06_addrcontexts[1].prefix[2] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_2;
+          g_hc06_addrcontexts[1].prefix[3] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_3;
+          g_hc06_addrcontexts[1].prefix[4] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_4;
+          g_hc06_addrcontexts[1].prefix[5] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_5;
+          g_hc06_addrcontexts[1].prefix[6] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_6;
+          g_hc06_addrcontexts[1].prefix[7] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_1_7;
         }
       else
 #ifdef CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREINIT_2
@@ -628,14 +637,22 @@ void sixlowpan_hc06_initialize(void)
           g_hc06_addrcontexts[2].used      = 1;
           g_hc06_addrcontexts[2].number    = 2;
 
-          g_hc06_addrcontexts[2].prefix[0] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_0;
-          g_hc06_addrcontexts[2].prefix[1] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1;
-          g_hc06_addrcontexts[2].prefix[2] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_2;
-          g_hc06_addrcontexts[2].prefix[3] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_3;
-          g_hc06_addrcontexts[2].prefix[4] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_4;
-          g_hc06_addrcontexts[2].prefix[5] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_5;
-          g_hc06_addrcontexts[2].prefix[6] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_6;
-          g_hc06_addrcontexts[2].prefix[7] = CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_7;
+          g_hc06_addrcontexts[2].prefix[0] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_0;
+          g_hc06_addrcontexts[2].prefix[1] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_1;
+          g_hc06_addrcontexts[2].prefix[2] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_2;
+          g_hc06_addrcontexts[2].prefix[3] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_3;
+          g_hc06_addrcontexts[2].prefix[4] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_4;
+          g_hc06_addrcontexts[2].prefix[5] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_5;
+          g_hc06_addrcontexts[2].prefix[6] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_6;
+          g_hc06_addrcontexts[2].prefix[7] =
+            CONFIG_NET_6LOWPAN_MAXADDRCONTEXT_PREFIX_2_7;
         }
       else
 #endif /* SIXLOWPAN_CONF_ADDR_CONTEXT_2 */
