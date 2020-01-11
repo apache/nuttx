@@ -87,7 +87,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
 
   elf_addrenv_free(loadinfo);
 
-   /* Release memory used to hold static constructors and destructors */
+  /* Release memory used to hold static constructors and destructors */
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
 #ifndef CONFIG_ARCH_ADDRENV
@@ -95,6 +95,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
     {
       kumm_free(loadinfo->ctoralloc);
     }
+
   if (loadinfo->dtoralloc != 0)
     {
       kumm_free(loadinfo->dtoralloc);

@@ -119,11 +119,13 @@ static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
 
   binfo("  DSPACE:\n");
   binfo("    dspace:       %08lx\n", loadinfo->dspace);
+
   if (loadinfo->dspace != NULL)
     {
       binfo("      crefs:      %d\n",    loadinfo->dspace->crefs);
       binfo("      region:     %08lx\n", loadinfo->dspace->region);
     }
+
   binfo("    datasize:     %08lx\n", loadinfo->datasize);
   binfo("    bsssize:      %08lx\n", loadinfo->bsssize);
   binfo("      (pad):      %08lx\n", loadinfo->dsize - dsize);
@@ -265,7 +267,7 @@ static int nxflat_unloadbinary(FAR struct binary_s *binp)
        */
     }
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -299,6 +301,7 @@ int nxflat_initialize(void)
     {
       berr("Failed to register binfmt: %d\n", ret);
     }
+
   return ret;
 }
 

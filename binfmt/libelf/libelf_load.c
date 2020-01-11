@@ -166,7 +166,8 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
       FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
-       * execution */
+       * execution.
+       */
 
       if ((shdr->sh_flags & SHF_ALLOC) == 0)
         {

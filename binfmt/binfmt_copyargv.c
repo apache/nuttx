@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This is an artificial limit to detect error conditions where an argv[]
  * list is not properly terminated.
  */
@@ -60,7 +61,7 @@
 #define MAX_EXEC_ARGS 256
 
 /****************************************************************************
- * Public Function
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -187,10 +188,10 @@ void binfmt_freeargv(FAR struct binary_s *binp)
       kmm_free(binp->argbuffer);
     }
 
-   /* Nullify the allocated argv[] array and the argument buffer pointers */
+  /* Nullify the allocated argv[] array and the argument buffer pointers */
 
-   binp->argbuffer = (FAR char *)NULL;
-   binp->argv      = (FAR char **)NULL;
+  binp->argbuffer = (FAR char *)NULL;
+  binp->argv      = (FAR char **)NULL;
 }
 #endif
 

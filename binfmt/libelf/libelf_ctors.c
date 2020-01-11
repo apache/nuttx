@@ -200,7 +200,6 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         }
       else
         {
-
           /* Save the address of the .ctors (actually, .init_array) where it was
            * loaded into memory.  Since the .ctors lie in allocated memory, they
            * will be relocated via the normal mechanism.

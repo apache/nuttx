@@ -291,9 +291,11 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset < 0 || rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
+      if (rel->r_offset < 0 ||
+          rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          berr("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          berr("Section %d reloc %d: Relocation address out of range, "
+               "offset %d size %d\n",
                relidx, i, rel->r_offset, dstsec->sh_size);
           ret = -EINVAL;
           break;
