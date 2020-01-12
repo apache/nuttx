@@ -41,6 +41,7 @@ Contents
   - RTC DS1307
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
+  - NiceRF LoRa (2AD66-LoRa V2)
   - HCI UART
   - STM32F4Discovery-specific Configuration Options
   - BASIC
@@ -641,6 +642,15 @@ that I am using:
 Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuration.  I have little technical information about
 the UG-2864HSWEG01 interface (see boards/arm/stm32/stm32f4discovery/src/up_ug2864hsweg01.c).
+
+NiceRF LoRa (2AD66-LoRa V2)
+===========================
+
+It is possible to wire an external LoRa module to STM32F4Discovery board.
+
+First connect the GND and VCC (to 3.3V) and then connect the SCK label to PA5,
+connnect the MISO to PA6, connect the MOSI to PA7, connect the NSS to PD8,
+connect DIO0 to PD0 and finally connect NRESET to PD4.
 
 HCI UART
 ========

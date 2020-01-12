@@ -78,6 +78,10 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_LCD_MAX7219) || defined(CONFIG_LEDS_MAX7219)
   stm32_configgpio(GPIO_MAX7219_CS);  /* MAX7219 chip select */
 #endif
+#ifdef CONFIG_LPWAN_SX127X
+  stm32_configgpio(GPIO_SX127X_CS);   /* SX127x chip select*/
+#endif
+
 #if defined(CONFIG_LCD_ST7567)
   stm32_configgpio(STM32_LCD_CS);     /* ST7567 chip select */
 #endif
@@ -126,6 +130,12 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
+#ifdef CONFIG_LPWAN_SX127X
+  if (devid == SPIDEV_LPWAN(0))
+    {
+      stm32_gpiowrite(GPIO_SX127X_CS, !selected);
+    }
+#endif
 #ifdef CONFIG_LCD_ST7567
   if (devid == SPIDEV_DISPLAY(0))
     {
@@ -153,7 +163,16 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+#ifdef CONFIG_LPWAN_SX127X
+  if (devid == SPIDEV_LPWAN(0))
+    {
+      status |= SPI_STATUS_PRESENT;
+    }
+#endif
+
+  return status;
 }
 #endif
 
