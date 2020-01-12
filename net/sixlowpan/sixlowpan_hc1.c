@@ -228,8 +228,10 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                 hcudp[SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING] = 0xe0;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_TTL]          = ipv6->ttl;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS]        =
-                  (uint8_t)((ntohs(udp->srcport) - CONFIG_NET_6LOWPAN_MINPORT) << 4) +
-                  (uint8_t)((ntohs(udp->destport) - CONFIG_NET_6LOWPAN_MINPORT));
+                  (uint8_t)((ntohs(udp->srcport) -
+                            CONFIG_NET_6LOWPAN_MINPORT) << 4) +
+                  (uint8_t)((ntohs(udp->destport) -
+                            CONFIG_NET_6LOWPAN_MINPORT));
 
                 memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
 
