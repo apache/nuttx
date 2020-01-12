@@ -245,7 +245,7 @@ static int block_comment_width(char *line)
    */
 
   if (strncmp(&line[b], "***", 3) == 0 &&
-      strncmp(&line[e - 4], "***/", 4) == 0)
+      strncmp(&line[e - 3], "***/", 4) == 0)
     {
       /* Return the the length of the line up to the final '*' */
 
@@ -257,7 +257,7 @@ static int block_comment_width(char *line)
    */
 
   if (strncmp(&line[b], "/*", 2) == 0 &&
-      strncmp(&line[e - 4], "***/", 4) == 0)
+      strncmp(&line[e - 3], "***/", 4) == 0)
     {
       /* Return the the length of the line up to the final '*' */
 
