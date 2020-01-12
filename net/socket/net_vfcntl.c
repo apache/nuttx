@@ -164,9 +164,9 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
         /* Set the file status flags, defined in <fcntl.h>, for the file description
          * associated with fd from the corresponding  bits in the third argument,
          * arg, taken as type int. Bits corresponding to the file access mode and
-         * the file creation flags, as defined in <fcntl.h>, that are set in arg shall
-         * be ignored. If any bits in arg other than those mentioned here are changed
-         * by the application, the result is unspecified.
+         * the file creation flags, as defined in <fcntl.h>, that are set in arg
+         * will be ignored. If any bits in arg other than those mentioned here are
+         * changed by the application, the result is unspecified.
          */
 
         {

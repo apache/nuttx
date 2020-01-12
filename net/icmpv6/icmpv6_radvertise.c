@@ -194,7 +194,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Set up the source address option */
 
   srcaddr           = (FAR struct icmpv6_srclladdr_s *)
-                      ((FAR uint8_t *)adv + sizeof(struct icmpv6_router_advertise_s));
+                      ((FAR uint8_t *)adv +
+                      sizeof(struct icmpv6_router_advertise_s));
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
   srcaddr->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize);
   memcpy(srcaddr->srclladdr, &dev->d_mac, lladdrsize);
