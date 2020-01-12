@@ -30,7 +30,7 @@ usage() {
 }
 
 check_file() {
-  $TOOLDIR/nxstyle -m 86 $@ 2>&1
+  $TOOLDIR/nxstyle $@ 2>&1
 }
 
 check_ranges() {
