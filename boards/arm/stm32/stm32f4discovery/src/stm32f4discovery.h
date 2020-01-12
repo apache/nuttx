@@ -242,6 +242,13 @@
 
 #define GPIO_CS43L22_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
 
+/* LoRa SX127x */
+
+#define GPIO_SX127X_DIO0    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
+
+#define GPIO_SX127X_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_CLEAR|\
+		             GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+
 /* PWM
  *
  * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
@@ -260,6 +267,9 @@
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
 #define GPIO_MAX6675_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
+
+#define GPIO_SX127X_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
 #define GPIO_MAX7219_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -475,6 +485,17 @@ int stm32_bmp180initialize(FAR const char *devpath);
 
 #ifdef CONFIG_STM32F4DISCO_LIS3DSH
 int stm32_lis3dshinitialize(FAR const char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_lpwaninitialize
+ *
+ * Description:
+ *   Initialize SX127X LPWAN interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int stm32_lpwaninitialize(void);
 #endif
 
 /****************************************************************************

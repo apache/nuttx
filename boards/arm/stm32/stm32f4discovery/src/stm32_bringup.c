@@ -466,5 +466,13 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LPWAN_SX127X
+  ret = stm32_lpwaninitialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
+    }
+#endif  /* CONFIG_LPWAN_SX127X */
+
   return ret;
 }

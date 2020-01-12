@@ -58,7 +58,7 @@
 #include "sx127x.h"
 
 /* TODO:
- *   - OOK communication (RX+TX) deosnt work yet
+ *   - OOK communication (RX+TX) doesn't work yet
  *   - Channel Activity Detection (CAD) for LORA
  *   - frequency hopping for LORA and FSK/OOK
  *   - modulation shaping for FSK/OOK
