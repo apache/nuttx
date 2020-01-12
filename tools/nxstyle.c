@@ -354,6 +354,7 @@ int main(int argc, char **argv, char **envp)
   int i;
   int c;
 
+  excess = 0;
   while ((c = getopt(argc, argv, ":hv:gm:r:")) != -1)
     {
       switch (c)
