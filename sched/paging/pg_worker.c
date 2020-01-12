@@ -381,8 +381,8 @@ static inline bool pg_startfill(void)
       DEBUGASSERT(result == OK);
 #else
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is non-blocking
-       * call. In this case up_fillpage() will accept an additional argument: The page
-       * fill worker thread will provide a callback function, pg_callback.
+       * call. In this case up_fillpage() will accept an additional argument:  The
+       * page fill worker thread will provide a callback function, pg_callback.
        *
        * Calling up_fillpage will start an asynchronous page fill. pg_callback
        * ill be called when the page fill is finished (or an error occurs). This

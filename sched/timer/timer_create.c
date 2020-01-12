@@ -90,7 +90,8 @@ static FAR struct posix_timer_s *timer_allocate(void)
     {
       /* Allocate a new timer from the heap */
 
-      ret      = (FAR struct posix_timer_s *)kmm_malloc(sizeof(struct posix_timer_s));
+      ret = (FAR struct posix_timer_s *)
+        kmm_malloc(sizeof(struct posix_timer_s));
       pt_flags = 0;
     }
 
