@@ -108,7 +108,8 @@ static const char g_pthreadname[] = "<pthread>";
  *
  ****************************************************************************/
 
-static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb, pthread_addr_t arg)
+static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
+                                    pthread_addr_t arg)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */

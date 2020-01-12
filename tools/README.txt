@@ -316,12 +316,12 @@ nxstyle.c
   Prints formatted messages that are classified as info, warn, error, 
   fatal. In a parsable format that can be used by editors and IDEs.
 
-  Usage: nxstyle [-m <maxline>] [-v <level>] [-r <start,count>] <filename>
-        nxstyle -h this help
-        nxstyle -v <level> where level is
-                   0 - no output
-                   1 - PASS/FAIL
-                   2 - output each line (default)
+  Usage: nxstyle [-m <excess>] [-v <level>] [-r <start,count>] <filename>
+         nxstyle -h this help
+         nxstyle -v <level> where level is
+                    0 - no output
+                    1 - PASS/FAIL
+                    2 - output each line (default)
 
   See also indent.sh and uncrustify.cfg
 

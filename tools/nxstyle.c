@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/nxstyle.c
  *
- *   Copyright (C) 2015, 2018-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <limits.h>
 #include <unistd.h>
 #include <libgen.h>
 
@@ -54,13 +55,15 @@
 
 #define LINE_SIZE      512
 #define RANGE_NUMBER   4096
+#define DEFAULT_WIDTH  78
 
 #define FATAL(m, l, o) message(FATAL, (m), (l), (o))
-#define FATALFL(m,s)   message(FATAL, (m), -1, -1)
+#define FATALFL(m, s)  message(FATAL, (m), -1, -1)
 #define WARN(m, l, o)  message(WARN, (m), (l), (o))
 #define ERROR(m, l, o) message(ERROR, (m), (l), (o))
+#define ERRORFL(m, s)  message(ERROR, (m), -1, -1)
 #define INFO(m, l, o)  message(INFO, (m), (l), (o))
-#define INFOFL(m,s)    message(INFO, (m), -1, -1)
+#define INFOFL(m, s)   message(INFO, (m), -1, -1)
 
 /****************************************************************************
  * Private types
@@ -95,7 +98,7 @@ enum file_e
 
 static char *g_file_name       = "";
 static enum file_e g_file_type = UNKNOWN;
-static int g_maxline           = 78;
+static int g_maxline           = DEFAULT_WIDTH;
 static int g_status            = 0;
 static int g_verbose           = 2;
 static int g_rangenumber       = 0;
@@ -114,7 +117,7 @@ static void show_usage(char *progname, int exitcode, char *what)
       fprintf(stderr, "%s\n", what);
     }
 
-  fprintf(stderr, "Usage:  %s [-m <maxline>] [-v <level>] [-r <start,count>] <filename>\n",
+  fprintf(stderr, "Usage:  %s [-m <excess>] [-v <level>] [-r <start,count>] <filename>\n",
           basename(progname));
   fprintf(stderr, "        %s -h this help\n", basename(progname));
   fprintf(stderr, "        %s -v <level> where level is\n", basename(progname));
@@ -199,6 +202,113 @@ static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
     }
 }
 
+static int block_comment_width(char *line)
+{
+  int b;
+  int e;
+  int n;
+
+  /* Skip over any leading whitespace on the line */
+
+  for (b = 0; isspace(line[b]); b++)
+    {
+    }
+
+  /* Skip over any trailing whitespace at the end of the line */
+
+  for (e = strlen(line) - 1; isspace(line[e]); e--)
+    {
+    }
+
+  /* Number of characters on the line */
+
+  n = e - b + 1;
+  if (n < 4)
+    {
+      return 0;
+    }
+
+  /* The first line of a block comment starts with "[slash]***" and ends with
+   * "***"
+   */
+
+  if (strncmp(&line[b], "/***", 4) == 0 &&
+      strncmp(&line[e - 2], "***", 3) == 0)
+    {
+      /* Return the the length of the line up to the final '*' */
+
+      return e + 1;
+    }
+
+  /* The last line of a block begins with whitespace then "***" and ends
+   * with "***[slash]"
+   */
+
+  if (strncmp(&line[b], "***", 3) == 0 &&
+      strncmp(&line[e - 4], "***/", 4) == 0)
+    {
+      /* Return the the length of the line up to the final '*' */
+
+      return e;
+    }
+
+  /* But there is also a special single line comment that begins with "[slash]* "
+   * and ends with "***[slash]"
+   */
+
+  if (strncmp(&line[b], "/*", 2) == 0 &&
+      strncmp(&line[e - 4], "***/", 4) == 0)
+    {
+      /* Return the the length of the line up to the final '*' */
+
+      return e;
+    }
+
+  /* Return zero if the line is not the first or last line of a block
+   * comment.
+   */
+
+  return 0;
+}
+
+static int get_line_width(FILE *instream)
+{
+  char line[LINE_SIZE]; /* The current line being examined */
+  int max = 0;
+  int min = INT_MAX;
+  int len;
+
+  while (fgets(line, LINE_SIZE, instream))
+    {
+      len = block_comment_width(line);
+      if (len > 0)
+        {
+          if (len > max)
+            {
+              max = len;
+            }
+
+          if (len < min)
+            {
+              min = len;
+            }
+        }
+    }
+
+  if (max < min)
+    {
+      ERRORFL("No block comments found", g_file_name);
+      return DEFAULT_WIDTH;
+    }
+  else if (max != min)
+    {
+      ERRORFL("Block comments have different lengths", g_file_name);
+      return DEFAULT_WIDTH;
+    }
+
+  return min;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -239,6 +349,7 @@ int main(int argc, char **argv, char **envp)
   int rbrace_lineno;    /* Last line containing a right brace */
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   int linelen;          /* Length of the line */
+  int excess;
   int n;
   int i;
   int c;
@@ -248,11 +359,13 @@ int main(int argc, char **argv, char **envp)
       switch (c)
       {
       case 'm':
-        g_maxline = atoi(optarg);
-        if (g_maxline < 1)
+        excess = atoi(optarg);
+        if (excess < 1)
           {
-            show_usage(argv[0], 1, "Bad value for <maxline>.");
+            show_usage(argv[0], 1, "Bad value for <excess>.");
+            excess = 0;
           }
+
         break;
 
       case 'v':
@@ -261,7 +374,8 @@ int main(int argc, char **argv, char **envp)
           {
             show_usage(argv[0], 1, "Bad value for <level>.");
           }
-          break;
+
+        break;
 
       case 'r':
         g_rangestart[g_rangenumber] = atoi(strtok(optarg, ","));
@@ -300,6 +414,11 @@ int main(int argc, char **argv, char **envp)
       return 1;
     }
 
+  /* Determine the line width */
+
+  g_maxline = get_line_width(instream) + excess;
+  rewind(instream);
+
   /* Are we parsing a header file? */
 
   ext = strrchr(g_file_name, '.');
@@ -324,7 +443,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   btabs          = false; /* True: TAB characters found on the line */
-  bcrs           = false; /* True: Carriable return found on the line */
+  bcrs           = false; /* True: Carriage return found on the line */
   bfunctions     = false; /* True: In private or public functions */
   bswitch        = false; /* True: Within a switch statement */
   bstring        = false; /* True: Within a string */
