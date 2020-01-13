@@ -64,9 +64,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-  inline void cxd56_audio_clock_enable(uint32_t clk, uint32_t div);
-  inline void cxd56_audio_clock_disable(void);
-  inline bool cxd56_audio_clock_is_enabled(void);
+inline void cxd56_audio_clock_enable(uint32_t clk, uint32_t div);
+inline void cxd56_audio_clock_disable(void);
+inline bool cxd56_audio_clock_is_enabled(void);
 
 /****************************************************************************
  * Private Data
