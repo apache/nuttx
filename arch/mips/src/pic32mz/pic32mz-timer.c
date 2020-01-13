@@ -974,7 +974,6 @@ static bool pic32mz_timer_setfreq(FAR struct pic32mz_timer_dev_s *dev,
                                   uint32_t freq)
 {
   uint16_t prescale;
-  uint32_t tmrfreq;
 
   DEBUGASSERT(dev != NULL);
 
@@ -1046,9 +1045,7 @@ static bool pic32mz_timer_setfreq(FAR struct pic32mz_timer_dev_s *dev,
       return false;
     }
 
-  tmrfreq = pic32mz_timer_getfreq(dev);
-
-  tmrinfo("Timer's frequency set to %luHz\n", tmrfreq);
+  tmrinfo("Timer's frequency set to %luHz\n", pic32mz_timer_getfreq(dev));
 
   return true;
 }
