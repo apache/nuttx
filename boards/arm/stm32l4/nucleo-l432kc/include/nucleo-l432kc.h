@@ -68,7 +68,8 @@
  * synced MSI.
  *
  *   System Clock source           : PLL (HSI)
- *   SYSCLK(Hz)                    : 80000000      Determined by PLL configuration
+ *   SYSCLK(Hz)                    : 80000000      Determined by PLL
+ *                                                 configuration
  *   HCLK(Hz)                      : 80000000     (STM32L4_RCC_CFGR_HPRE)
  *                                                (Max 80 MHz)
  *   AHB Prescaler                 : 1            (STM32L4_RCC_CFGR_HPRE)
@@ -233,9 +234,9 @@
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE:  currently the main PLL is implicitly turned on and is
+ * implicitly the system clock; this should be configurable since not all
+ * applications may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)
@@ -495,6 +496,8 @@
 #define STM32L4_APB1_TIM2_CLKIN   (STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM6_CLKIN   (STM32L4_PCLK1_FREQUENCY)
 #define STM32L4_APB1_TIM7_CLKIN   (STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_LPTIM1_CLKIN (STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_LPTIM2_CLKIN (STM32L4_PCLK1_FREQUENCY)
 
 /* Configure the APB2 prescaler */
 
@@ -507,8 +510,8 @@
 
 #endif
 
-/* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the same
+/* The timer clock frequencies are automatically defined by hardware. If the
+ * APB prescaler equals 1, the timer clock frequencies are set to the same
  * frequency as that of the APB domain. Otherwise they are set to twice.
  * Note: TIM1,15,16 are on APB2, others on APB1
  */
