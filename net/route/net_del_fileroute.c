@@ -58,7 +58,7 @@
 #if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
