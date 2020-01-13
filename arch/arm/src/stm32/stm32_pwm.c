@@ -1104,7 +1104,7 @@ static struct stm32_pwmtimer_s g_pwm5dev =
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM5_TRGO)
-  .trgo        = STM32_TIM5_TRGO
+  .trgo        = STM32_TIM5_TRGO,
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
   .irq         = STM32_IRQ_TIM5,
@@ -3226,8 +3226,6 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
   uint16_t outputs = 0;
   uint8_t j        = 0;
   int     ret      = OK;
-
-  UNUSED(priv);
 
   /* NOTE: leave timer counter disabled and all outputs disabled! */
 
