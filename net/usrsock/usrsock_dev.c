@@ -62,7 +62,7 @@
 #include "usrsock/usrsock.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_NET_USRSOCKDEV_NPOLLWAITERS
