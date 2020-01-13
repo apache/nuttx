@@ -97,9 +97,9 @@
 
 /*****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ *****************************************************************************/
 
-/* Configuration ************************************************************/
+/* Configuration *************************************************************/
 
 /* SPI interrupts */
 
@@ -119,7 +119,7 @@
 
 /*****************************************************************************
  * Private Types
- ****************************************************************************/
+ *****************************************************************************/
 
 struct imxrt_lpspidev_s
 {
@@ -144,7 +144,7 @@ enum imxrt_delay_e
 
 /*****************************************************************************
  * Private Function Prototypes
- ****************************************************************************/
+ *****************************************************************************/
 
 /* Helpers */
 
@@ -1180,7 +1180,7 @@ static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
  *   value if any H/W feature is not supportable.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
 static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
@@ -1369,7 +1369,7 @@ static void imxrt_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 }
 #endif /* !CONFIG_IMXRT_LPSPI_DMA || CONFIG_IMXRT_DMACAPABLE */
 
-/****************************************************************************
+/*****************************************************************************
  * Name: imxrt_lpspi_sndblock
  *
  * Description:
@@ -1570,7 +1570,7 @@ static void imxrt_lpspi_bus_initialize(struct imxrt_lpspidev_s *priv)
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 FAR struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
 {
