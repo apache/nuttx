@@ -819,12 +819,14 @@ int main(int argc, char **argv, char **envp)
 
           noblank_lineno = lineno;
 
-          /* Skip to the pre-processor command following the '#' if this
-           * is not a continuation line.
+          /* Check pre-processor commands if this is not a continuation
+           * line.
            */
 
           if (!ppline)
             {
+              /* Skip to the pre-processor command following the '#' */
+
                for (ii = indent + 1;
                     line[ii] != '\0' && isspace(line[ii]);
                     ii++)
