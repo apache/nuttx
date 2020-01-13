@@ -174,8 +174,6 @@ int imxrt_mmcsd_spi_initialize(int minor);
 void imxrt_autoled_initialize(void);
 #endif
 
-#ifdef CONFIG_DEV_GPIO
-
 /****************************************************************************
  * Name: imxrt_gpio_initialize
  *
@@ -184,7 +182,19 @@ void imxrt_autoled_initialize(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DEV_GPIO
 int imxrt_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_usbhost_initialize
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST
+int imxrt_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

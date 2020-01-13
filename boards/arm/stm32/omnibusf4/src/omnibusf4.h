@@ -210,5 +210,29 @@ int stm32_can_setup(void);
 int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
+/****************************************************************************
+ * Name: stm32_mpu6000_initialize
+ *
+ * Description:
+ *  Initialize the MPU6000 device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_MPU60X0
+int stm32_mpu6000_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_max7456_initialize
+ *
+ * Description:
+ *  Initialize the MAX7456 OSD device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_VIDEO_MAX7456
+int stm32_max7456_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_OMNIBUSF4_SRC_OMNIBUSF4_H */

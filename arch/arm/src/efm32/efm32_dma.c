@@ -63,8 +63,9 @@
 #define ALIGN_UP(v,m)   (((v) + (m)) & ~m)
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
+
 /* This structure describes one DMA channel */
 
 struct dma_channel_s
