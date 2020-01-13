@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
@@ -56,6 +57,9 @@
 #define LINE_SIZE      512
 #define RANGE_NUMBER   4096
 #define DEFAULT_WIDTH  78
+
+#define FIRST_SECTION  INCLUDED_FILES
+#define LAST_SECTION   PUBLIC_FUNCTION_PROTOTYPES
 
 #define FATAL(m, l, o) message(FATAL, (m), (l), (o))
 #define FATALFL(m, s)  message(FATAL, (m), -1, -1)
@@ -87,26 +91,108 @@ const char *class_text[] =
 
 enum file_e
 {
-  UNKNOWN,
-  C_HEADER,
-  C_SOURCE
+  UNKNOWN  = 0x00,
+  C_HEADER = 0x01,
+  C_SOURCE = 0x02
+};
+
+enum section_s
+{
+  NO_SECTION = 0,
+  INCLUDED_FILES,
+  PRE_PROCESSOR_DEFINITIONS,
+  PUBLIC_TYPES,
+  PRIVATE_TYPES,
+  PRIVATE_DATA,
+  PUBLIC_DATA,
+  PRIVATE_FUNCTIONS,
+  PRIVATE_FUNCTION_PROTOTYPES,
+  INLINE_FUNCTIONS,
+  PUBLIC_FUNCTIONS,
+  PUBLIC_FUNCTION_PROTOTYPES
+};
+
+struct file_section_s
+{
+  const char *name;   /* File section name */
+  uint8_t     ftype;  /* File type where section found */
 };
 
 /****************************************************************************
  * Private data
  ****************************************************************************/
 
-static char *g_file_name       = "";
-static enum file_e g_file_type = UNKNOWN;
-static int g_maxline           = DEFAULT_WIDTH;
-static int g_status            = 0;
-static int g_verbose           = 2;
-static int g_rangenumber       = 0;
+static char *g_file_name        = "";
+static enum file_e g_file_type  = UNKNOWN;
+static enum section_s g_section = NO_SECTION;
+static int g_maxline            = DEFAULT_WIDTH;
+static int g_status             = 0;
+static int g_verbose            = 2;
+static int g_rangenumber        = 0;
 static int g_rangestart[RANGE_NUMBER];
 static int g_rangecount[RANGE_NUMBER];
 
+static const struct file_section_s g_section_info[] =
+{
+  {
+    " *\n",                             /* Index: NO_SECTION */
+    C_SOURCE | C_HEADER
+  },
+  {
+    " * Included Files\n",              /* Index: INCLUDED_FILES */
+    C_SOURCE | C_HEADER
+  },
+  {
+    " * Pre-processor Definitions\n",   /* Index: PRE_PROCESSOR_DEFINITIONS */
+    C_SOURCE | C_HEADER
+  },
+  {
+    " * Public Types\n",                /* Index: PUBLIC_TYPES */
+    C_HEADER
+  },
+  {
+    " * Private Types\n",               /* Index: PRIVATE_TYPES */
+    C_SOURCE
+  },
+  {
+    " * Private Data\n",                /* Index: PRIVATE_DATA */
+    C_SOURCE
+  },
+  {
+    " * Public Data\n",                 /* Index: PUBLIC_DATA */
+    C_SOURCE | C_HEADER
+  },
+  {
+    " * Private Functions\n",           /* Index: PRIVATE_FUNCTIONS */
+    C_SOURCE
+  },
+  {
+    " * Private Function Prototypes\n", /* Index: PRIVATE_FUNCTION_PROTOTYPES */
+    C_SOURCE
+  },
+  {
+    " * Inline Functions\n",            /* Index: INLINE_FUNCTIONS */
+    C_SOURCE | C_HEADER
+  },
+  {
+    " * Public Functions\n",            /* Index: PUBLIC_FUNCTIONS */
+    C_SOURCE
+  },
+  {
+    " * Public Function Prototypes\n",  /* Index: PUBLIC_FUNCTION_PROTOTYPES */
+    C_HEADER
+  }
+};
+
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: show_usage
+ *
+ * Description:
+ *
  ****************************************************************************/
 
 static void show_usage(char *progname, int exitcode, char *what)
@@ -127,6 +213,13 @@ static void show_usage(char *progname, int exitcode, char *what)
   exit(exitcode);
 }
 
+/****************************************************************************
+ * Name: skip
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 static int skip(int lineno)
 {
   int i;
@@ -141,6 +234,13 @@ static int skip(int lineno)
 
   return g_rangenumber != 0;
 }
+
+/****************************************************************************
+ * Name: message
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 static int message(enum class_e class, const char *text, int lineno, int ndx)
 {
@@ -173,6 +273,13 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
   return g_status;
 }
 
+/****************************************************************************
+ * Name: check_spaces_left
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
 static void check_spaces_left(char *line, int lineno, int ndx)
 {
   /* Unary operator should generally be preceded by a space but make also
@@ -186,6 +293,13 @@ static void check_spaces_left(char *line, int lineno, int ndx)
              lineno, ndx);
     }
 }
+
+/****************************************************************************
+ * Name: check_spaces_leftright
+ *
+ * Description:
+ *
+ ****************************************************************************/
 
 static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
 {
@@ -201,6 +315,14 @@ static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
              lineno, ndx2);
     }
 }
+
+/****************************************************************************
+ * Name: block_comment_width
+ *
+ * Description:
+ *   Get the width of a block comment
+ *
+ ****************************************************************************/
 
 static int block_comment_width(char *line)
 {
@@ -271,6 +393,14 @@ static int block_comment_width(char *line)
   return 0;
 }
 
+/****************************************************************************
+ * Name: get_line_width
+ *
+ * Description:
+ *   Get the maximum line width by examining the width of the block comments.
+ *
+ ****************************************************************************/
+
 static int get_line_width(FILE *instream)
 {
   char line[LINE_SIZE]; /* The current line being examined */
@@ -307,6 +437,40 @@ static int get_line_width(FILE *instream)
     }
 
   return min;
+}
+
+/****************************************************************************
+ * Name:  check_section_header
+ *
+ * Description:
+ *   Check if the current line holds a section header
+ *
+ ****************************************************************************/
+
+static bool check_section_header(const char *line, int lineno)
+{
+  int i;
+
+  /* Search g_section_info[] to find a matching section header line */
+
+  for (i = FIRST_SECTION; i <= LAST_SECTION; i++)
+    {
+      if (strcmp(line, g_section_info[i].name) == 0)
+        {
+          g_section = (enum section_s)i;
+
+          /* Verify that this section is appropriate for this file type */
+
+          if ((g_file_type & g_section_info[i].ftype) == 0)
+            {
+              ERROR("Invalid section for this file type", lineno, 3);
+            }
+
+          return true;
+        }
+    }
+
+  return false;
 }
 
 /****************************************************************************
@@ -570,7 +734,7 @@ int main(int argc, char **argv, char **envp)
                          rbrace_lineno, n + 1);
                 }
 
-              /* If the right brace is followed by a pre-proceeor command
+              /* If the right brace is followed by a pre-processor command
                * like #endif (but not #else or #elif), then set the right
                * brace line number to the line number of the pre-processor
                * command (it then must be followed by a blank line)
@@ -650,10 +814,69 @@ int main(int argc, char **argv, char **envp)
       if (line[indent] == '#' || ppline)
         {
           int len;
+          int ii;
 
           /* Suppress error for comment following conditional compilation */
 
           noblank_lineno = lineno;
+
+          /* Check pre-processor commands if this is not a continuation
+           * line.
+           */
+
+          if (!ppline)
+            {
+              /* Skip to the pre-processor command following the '#' */
+
+               for (ii = indent + 1;
+                    line[ii] != '\0' && isspace(line[ii]);
+                    ii++)
+                 {
+                 }
+
+               if (line[ii] != '\0')
+                 {
+                   /* Make sure that pre-processor definitions are all in
+                    * the pre-processor definitions section.
+                    */
+
+                   if (strncmp(&line[ii], "define", 6) == 0)
+                     {
+                       if (g_section != PRE_PROCESSOR_DEFINITIONS)
+                         {
+                           /* Only a warning because there is some usage of
+                            * define outside the Pre-processor Definitions
+                            * section which is justifiable.  Should be
+                            * manually checked.
+                            */
+
+                           WARN("#define outside of 'Pre-processor "
+                                "Definitions' section",
+                                lineno, ii);
+                         }
+                     }
+
+                   /* Make sure that files are included only in the Included
+                    * Files section.
+                    */
+
+                   else if (strncmp(&line[ii], "include", 7) == 0)
+                     {
+                       if (g_section != INCLUDED_FILES)
+                         {
+                           /* Only a warning because there is some usage of
+                            * include outside the Included Files section
+                            * which may be is justifiable.  Should be
+                            * manually checked.
+                            */
+
+                           WARN("#include outside of 'Included Files' "
+                                "section",
+                                lineno, ii);
+                         }
+                     }
+                 }
+            }
 
           /* Check if the next line will be a continuation of the pre-
            * processor command.
@@ -708,16 +931,16 @@ int main(int argc, char **argv, char **envp)
             }
         }
 
-      /* Check for the comment block indicating the beginning of functions. */
+      /* Check for the comment block indicating the beginning of a new file
+       * section.
+       */
 
-      if (!bfunctions && ncomment > 0 &&
-          (strcmp(line, " * Private Functions\n") == 0 ||
-           strcmp(line, " * Public Functions\n") == 0))
+      if (check_section_header(line, lineno))
         {
-#if 0 /* Ask Greg why it was commented out */
-          ERROR("Functions begin", lineno, n);
-#endif
-          bfunctions = true;
+          if (g_section == PRIVATE_FUNCTIONS || g_section == PUBLIC_FUNCTIONS)
+            {
+              bfunctions = true;  /* Latched */
+            }
         }
 
       /* Check for some kind of declaration.

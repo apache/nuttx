@@ -53,6 +53,10 @@
 #include "sched/sched.h"
 #include "signal/signal.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #ifdef CONFIG_SIG_EVTHREAD_HPWORK
 #  define SIG_EVTHREAD_WORK HPWORK
 #else
