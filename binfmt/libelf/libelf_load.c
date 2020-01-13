@@ -51,6 +51,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
+#include <nuttx/elf.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/binfmt/elf.h>
 
