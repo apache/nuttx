@@ -819,50 +819,60 @@ int main(int argc, char **argv, char **envp)
 
           noblank_lineno = lineno;
 
-          /* Skip to the pre-processor command following the '#' */
+          /* Skip to the pre-processor command following the '#' if this
+           * is not a continuation line.
+           */
 
-          for (ii = indent + 1; line[ii] != '\0' && isspace(line[ii]); ii++)
+          if (!ppline)
             {
-            }
+               for (ii = indent + 1;
+                    line[ii] != '\0' && isspace(line[ii]);
+                    ii++)
+                 {
+                 }
 
-          if (line[ii] != '\0')
-            {
-              /* Make sure that pre-processor definitions are all in the
-               * pre-processor definitions section.
-               */
+               if (line[ii] != '\0')
+                 {
+                   /* Make sure that pre-processor definitions are all in
+                    * the pre-processor definitions section.
+                    */
 
-              if (strncmp(&line[ii], "define", 6) == 0)
-                {
-                  if (g_section != PRE_PROCESSOR_DEFINITIONS)
-                    {
-                      /* Only a warning because there is some usage of define
-                       * outside the Pre-processor Definitions section which
-                       * is justifiable.  Should be manually checked.
-                       */
+                   if (strncmp(&line[ii], "define", 6) == 0)
+                     {
+                       if (g_section != PRE_PROCESSOR_DEFINITIONS)
+                         {
+                           /* Only a warning because there is some usage of
+                            * define outside the Pre-processor Definitions
+                            * section which is justifiable.  Should be
+                            * manually checked.
+                            */
 
-                      WARN("#define outside of 'Pre-processor Definitions' "
-                           "section",
-                           lineno, ii);
-                    }
-                }
+                           WARN("#define outside of 'Pre-processor "
+                                "Definitions' section",
+                                lineno, ii);
+                         }
+                     }
 
-              /* Make sure that files are included only in the Included
-               * Files section.
-               */
+                   /* Make sure that files are included only in the Included
+                    * Files section.
+                    */
 
-              else if (strncmp(&line[ii], "include", 7) == 0)
-                {
-                  if (g_section != INCLUDED_FILES)
-                    {
-                      /* Only a warning because there is some usage of include
-                       * outside the Included Files section which may be
-                       * is justifiable.  Should be manually checked.
-                       */
+                   else if (strncmp(&line[ii], "include", 7) == 0)
+                     {
+                       if (g_section != INCLUDED_FILES)
+                         {
+                           /* Only a warning because there is some usage of
+                            * include outside the Included Files section
+                            * which may be is justifiable.  Should be
+                            * manually checked.
+                            */
 
-                      WARN("#include outside of 'Included Files' section",
-                           lineno, ii);
-                    }
-                }
+                           WARN("#include outside of 'Included Files' "
+                                "section",
+                                lineno, ii);
+                         }
+                     }
+                 }
             }
 
           /* Check if the next line will be a continuation of the pre-
