@@ -381,7 +381,7 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 
   freq = spwm->samples * spwm->waveform_freq;
   per = BOARD_TIM6_FREQUENCY / freq;
-  if (per > 0xFFFF)
+  if (per > 0xffff)
     {
       printf("ERROR: can not achieve TIM6 frequency\n");
       ret = -1;
