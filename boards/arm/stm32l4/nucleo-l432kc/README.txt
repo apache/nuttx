@@ -535,3 +535,14 @@ Configurations
        Pin 33 PA10 USART1_TX    some RS-232 converters
        Pin 20 GND
        Pin 8  U5V
+
+  spwm
+  ----
+
+    Configures the sinusoidal PWM (SPWM) example which presents a simple use case
+    of the STM32L4 PWM lower-half driver without generic upper-half PWM logic.
+
+    It uses TIM1 to generate PWM and TIM6 to change waveform samples
+
+    At the moment, the waveform parameters are hardcoded, but it should be easy to
+    modify this example and make it more functional.

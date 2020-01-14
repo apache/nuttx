@@ -92,4 +92,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
+ifeq ($(CONFIG_NUCLEOL432KC_SPWM),y)
+CSRCS += stm32_spwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

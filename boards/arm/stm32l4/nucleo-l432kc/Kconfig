@@ -107,4 +107,38 @@ endchoice
 
 endmenu
 
+menuconfig NUCLEOL432KC_SPWM
+	bool "Sinusoidal PWM generator example"
+	default n
+
+if NUCLEOL432KC_SPWM
+
+choice
+	prompt "Sinusoidal PWM source"
+	default NUCLEOL432KC_SPWM_USE_TIM1
+
+config NUCLEOL432KC_SPWM_USE_TIM1
+	bool "Use TIM1 as PWM source"
+
+endchoice
+
+config NUCLEOL432KC_SPWM_PWM_FREQ
+	int "PWM frequency in Hz"
+	default 100000
+
+config NUCLEOL432KC_SPWM_SAMPLES
+	int "Sine samples"
+	default 100
+
+config NUCLEOL432KC_SPWM_FREQ
+	int "Waveform frequency in Hz"
+	default 60
+
+config NUCLEOL432KC_SPWM_PHASE_NUM
+	int "Number of phases"
+	default 1
+	range 1 4 if NUCLEOL432KC_SPWM_USE_TIM1
+
+endif
+
 endif # ARCH_BOARD_NUCLEO_L432KC
