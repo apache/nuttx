@@ -38,7 +38,7 @@
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
 
-/* API Documents creater with Doxgen */
+/* API Documents created with Doxygen */
 
 /* cxd56_audio_api Audio Driver API
  *
