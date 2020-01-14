@@ -50,6 +50,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/timers/pwm.h>
+
 #include "chip.h"
 
 /****************************************************************************
@@ -808,42 +810,42 @@
 #ifdef CONFIG_STM32L4_PWM_LL_OPS
 
 /* NOTE: low-level ops accept pwm_lowerhalf_s as first argument, but llops
- *       access can be found in stm32_pwm_dev_s
+ *       access can be found in stm32l4_pwm_dev_s
  */
 
-#define STM32L4_PWM_SETUP(dev)                                                             \
+#define PWM_SETUP(dev)                                                             \
         (dev)->ops->setup((FAR struct pwm_lowerhalf_s *)dev)
-#define STM32L4_PWM_SHUTDOWN(dev)                                                          \
+#define PWM_SHUTDOWN(dev)                                                          \
         (dev)->ops->shutdown((FAR struct pwm_lowerhalf_s *)dev)
-#define STM32L4_PWM_CCR_UPDATE(dev, index, ccr)                                            \
+#define PWM_CCR_UPDATE(dev, index, ccr)                                            \
         (dev)->llops->ccr_update((FAR struct pwm_lowerhalf_s *)dev, index, ccr)
-#define STM32L4_PWM_MODE_UPDATE(dev, index, mode)                                          \
+#define PWM_MODE_UPDATE(dev, index, mode)                                          \
         (dev)->llops->mode_update((FAR struct pwm_lowerhalf_s *)dev, index, mode)
-#define STM32L4_PWM_CCR_GET(dev, index)                                                    \
+#define PWM_CCR_GET(dev, index)                                                    \
         (dev)->llops->ccr_get((FAR struct pwm_lowerhalf_s *)dev, index)
-#define STM32L4_PWM_ARR_UPDATE(dev, arr)                                                   \
+#define PWM_ARR_UPDATE(dev, arr)                                                   \
         (dev)->llops->arr_update((FAR struct pwm_lowerhalf_s *)dev, arr)
-#define STM32L4_PWM_ARR_GET(dev)                                                           \
+#define PWM_ARR_GET(dev)                                                           \
         (dev)->llops->arr_get((FAR struct pwm_lowerhalf_s *)dev)
-#define STM32L4_PWM_OUTPUTS_ENABLE(dev, out, state)                                        \
+#define PWM_OUTPUTS_ENABLE(dev, out, state)                                        \
         (dev)->llops->outputs_enable((FAR struct pwm_lowerhalf_s *)dev, out, state)
-#define STM32L4_PWM_SOFT_UPDATE(dev)                                                       \
+#define PWM_SOFT_UPDATE(dev)                                                       \
         (dev)->llops->soft_update((FAR struct pwm_lowerhalf_s *)dev)
-#define STM32L4_PWM_CONFIGURE(dev)                                                         \
+#define PWM_CONFIGURE(dev)                                                         \
         (dev)->llops->configure((FAR struct pwm_lowerhalf_s *)dev)
-#define STM32L4_PWM_SOFT_BREAK(dev, state)                                                 \
+#define PWM_SOFT_BREAK(dev, state)                                                 \
         (dev)->llops->soft_break((FAR struct pwm_lowerhalf_s *)dev, state)
-#define STM32L4_PWM_FREQ_UPDATE(dev, freq)                                                 \
+#define PWM_FREQ_UPDATE(dev, freq)                                                 \
         (dev)->llops->freq_update((FAR struct pwm_lowerhalf_s *)dev, freq)
-#define STM32L4_PWM_TIM_ENABLE(dev, state)                                                 \
+#define PWM_TIM_ENABLE(dev, state)                                                 \
         (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
 #ifdef CONFIG_DEBUG_STM32L4_PWM_INFO
-#  define STM32L4_PWM_DUMP_REGS(dev, msg)                                                  \
+#  define PWM_DUMP_REGS(dev, msg)                                                  \
         (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev, msg)
 #else
-#  define STM32L4_PWM_DUMP_REGS(dev, msg)
+#  define PWM_DUMP_REGS(dev, msg)
 #endif
-#define STM32L4_PWM_DT_UPDATE(dev, dt)                                                     \
+#define PWM_DT_UPDATE(dev, dt)                                                     \
         (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
 #endif
 
@@ -933,7 +935,7 @@ enum stm32l4_pwm_output_e
  * "lower-half" PWM driver structure.
  */
 
-struct stm32_pwm_dev_s
+struct stm32l4_pwm_dev_s
 {
   /* The first field of this state structure must be a pointer to the PWM
    * callback structure to be consistent with upper-half PWM driver.
