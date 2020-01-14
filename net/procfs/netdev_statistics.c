@@ -538,7 +538,7 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile)
   stats = &dev->d_statistics;
 
   return snprintf(netfile->line, NET_LINELEN , "\tTotal Errors: %08x\n\n",
-                  (unsigned long)stats->errors);
+                  stats->errors);
 }
 #endif /* CONFIG_NETDEV_STATISTICS */
 

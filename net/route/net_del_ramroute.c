@@ -53,7 +53,7 @@
 #if defined(CONFIG_ROUTE_IPv4_RAMROUTE) || defined(CONFIG_ROUTE_IPv6_RAMROUTE)
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_RAMROUTE

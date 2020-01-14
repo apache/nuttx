@@ -54,7 +54,7 @@
 #include "local/local.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define LOCAL_CS_SUFFIX    "CS"  /* Name of the client-to-server FIFO */

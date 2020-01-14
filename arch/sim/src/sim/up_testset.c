@@ -43,14 +43,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Must match definitions in arch/sim/include/spinlock.h */
 
 #define SP_UNLOCKED 0   /* The Un-locked state */
 #define SP_LOCKED   1   /* The Locked state */
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
+
 /* Must match definitions in arch/sim/include/spinlock.h */
 
 typedef uint8_t spinlock_t;

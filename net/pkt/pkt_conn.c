@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/pkt/pkt_conn.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -57,6 +57,15 @@
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define eth_addr_cmp(addr1, addr2) \
+  ((addr1[0] == addr2[0]) && (addr1[1] == addr2[1]) && \
+   (addr1[2] == addr2[2]) && (addr1[3] == addr2[3]) && \
+   (addr1[4] == addr2[4]) && (addr1[5] == addr2[5]))
 
 /****************************************************************************
  * Private Data
@@ -199,11 +208,6 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
 FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf)
 {
-  #define eth_addr_cmp(addr1, addr2) \
-  ((addr1[0] == addr2[0]) && (addr1[1] == addr2[1]) && \
-   (addr1[2] == addr2[2]) && (addr1[3] == addr2[3]) && \
-   (addr1[4] == addr2[4]) && (addr1[5] == addr2[5]))
-
   FAR struct pkt_conn_s *conn =
     (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
 

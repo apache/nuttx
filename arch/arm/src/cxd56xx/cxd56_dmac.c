@@ -269,7 +269,7 @@ static int (*intc_handler[])(int irq, FAR void *context, FAR void *arg) = {
 };
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes one DMA channel */

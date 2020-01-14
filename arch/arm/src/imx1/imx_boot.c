@@ -102,7 +102,7 @@ static const struct section_mapping_s section_mapping[] =
  ************************************************************************************/
 
 /* All i.MX architectures must provide the following entry point.  This entry point
- * is called early in the intitialization -- after all memory has been configured
+ * is called early in the initialization -- after all memory has been configured
  * and mapped but before any devices have been initialized.
  */
 
