@@ -50,6 +50,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sched.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 
 #include <net/ethernet.h>
@@ -83,6 +84,10 @@ struct timer
  ****************************************************************************/
 
 static struct timer g_periodic_timer;
+
+/* Net driver worker */
+
+static struct work_s g_network;
 
 /* A single packet buffer is used */
 
@@ -159,11 +164,7 @@ static int sim_txpoll(struct net_driver_s *dev)
   return 0;
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void netdriver_loop(void)
+static void netdriver_work(FAR void *arg)
 {
   FAR struct eth_hdr_s *eth;
 
@@ -326,6 +327,18 @@ void netdriver_loop(void)
     }
 
   sched_unlock();
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void netdriver_loop(void)
+{
+  if (work_available(&g_network))
+    {
+      work_queue(LPWORK, &g_network, netdriver_work, NULL, 0);
+    }
 }
 
 int netdriver_ifup(struct net_driver_s *dev)
