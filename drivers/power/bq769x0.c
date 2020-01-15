@@ -128,6 +128,7 @@ struct bq769x0_dev_s
   uint8_t addr;                 /* I2C address */
   uint8_t chip;                 /* Chip Type (e.g. CHIP_76920) */
   uint8_t cellcount;            /* Number of cells attached to chip */
+  uint8_t fault_cache;          /* Cache of last-read fault bits */
   uint32_t frequency;           /* I2C frequency */
   uint32_t gain;                /* ADC gain value in uV */
   uint32_t offset;              /* ADC offset value in uV */
@@ -1269,9 +1270,6 @@ static int bq769x0_state(struct battery_monitor_dev_s *dev, int *status)
       *status = BATTERY_UNKNOWN;
       return ret;
     }
-    /* Revisit: we could potentially provide other states as feedback
-     * based on state of charge
-     */
     if (regval & BQ769X0_FAULT_MASK)
       {
         *status = BATTERY_FAULT;
@@ -1290,8 +1288,9 @@ static int bq769x0_state(struct battery_monitor_dev_s *dev, int *status)
  * Description:
  *   Return the current battery health state
  *
- * Note: if more than one fault happened the user needs to call this ioctl
- * again to read a new fault, repeat until receive a BATTERY_HEALTH_GOOD.
+ * Note: if more than one fault happened the user will need to
+ * clear the fault and call this ioctl again to read a new fault,
+ * repeat until receive a BATTERY_HEALTH_GOOD.
  *
  ****************************************************************************/
 
@@ -1308,13 +1307,12 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health)
       *health = BATTERY_HEALTH_UNKNOWN;
       return ret;
     }
-  if (regval & BQ769X0_UV)
+
+  priv->fault_cache = regval;
+
+  if (regval & BQ769X0_DEVICE_XREADY)
     {
-      *health = BATTERY_HEALTH_UNDERVOLTAGE;
-    }
-  else if (regval & BQ769X0_OV)
-    {
-      *health = BATTERY_HEALTH_OVERVOLTAGE;
+      *health = BATTERY_HEALTH_WD_TMR_EXP;
     }
   else if (regval & BQ769X0_SCD)
     {
@@ -1324,9 +1322,13 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health)
     {
       *health = BATTERY_HEALTH_OVERCURRENT;
     }
-  else if (regval & BQ769X0_DEVICE_XREADY)
+  else if (regval & BQ769X0_OV)
     {
-      *health = BATTERY_HEALTH_WD_TMR_EXP;
+      *health = BATTERY_HEALTH_OVERVOLTAGE;
+    }
+  else if (regval & BQ769X0_UV)
+    {
+      *health = BATTERY_HEALTH_UNDERVOLTAGE;
     }
   else if (regval & BQ769X0_OVRD_ALERT)
     {
@@ -1336,7 +1338,6 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health)
     {
      *health = BATTERY_HEALTH_GOOD;
     }
-
   return OK;
 }
 
@@ -1504,7 +1505,7 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
  * Name: bq769x0_chip_cellcount
  *
  * Description:
- *   Returns the number of cell channels on the specified part
+ *   Returns the number of cell channels on the specified device
  *
  ****************************************************************************/
 static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv)
@@ -1785,7 +1786,8 @@ static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value) {
 
   /* The BQ769X0 does not support directly reporting pack state of charge.
    * You should be able to come up with a state-of-charge value by knowing an
-   * initial value and looking at the Coulomb counter
+   * initial value and looking at the Coulomb counter.  This is out of scope
+   * for this driver, though.
    */
 
   return -ENOSYS;
@@ -1803,7 +1805,7 @@ static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs) {
 
 
   /* The data from the coulomb counter on this part can be accessed via
-   * the current command.
+   * the "get current" command.
    */
   return -ENOSYS;
 }
@@ -1932,7 +1934,9 @@ static int bq769x0_chgdsg(struct battery_monitor_dev_s *dev,
  * Name: bq769x0_clearfaults
  *
  * Description:
- *   Clear the battery monitor faults
+ *   Clear the battery monitor faults one at a time in order of priority
+ *   Uses the most recent fault register read in order to avoid
+ *   race conditions.
  *
  ****************************************************************************/
 
@@ -1941,14 +1945,43 @@ static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
 {
   FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
   int ret;
+  uint8_t faults = priv->fault_cache;
+  uint8_t to_clear = 0;
 
-  ret =  bq769x0_clear_chipfaults(priv, BQ769X0_FAULT_MASK | BQ769X0_CC_READY);
-  if (ret < 0)
+  if (faults & BQ769X0_DEVICE_XREADY)
     {
-      baterr("ERROR: Error clearing faults! Error = %d\n", ret);
-      return ret;
+      to_clear = BQ769X0_DEVICE_XREADY;
+    }
+  else if (faults & BQ769X0_SCD)
+    {
+      to_clear = BQ769X0_SCD;
+    }
+  else if (faults & BQ769X0_OCD)
+    {
+      to_clear = BQ769X0_OCD;
+    }
+  else if (faults & BQ769X0_OV)
+    {
+      to_clear = BQ769X0_OV;
+    }
+  else if (faults & BQ769X0_UV)
+    {
+      to_clear = BQ769X0_UV;
+    }
+  else if (faults & BQ769X0_OVRD_ALERT)
+    {
+      to_clear = BQ769X0_OVRD_ALERT;
     }
 
+  if (to_clear)
+    {
+      ret =  bq769x0_clear_chipfaults(priv, to_clear);
+      if (ret < 0)
+        {
+          baterr("ERROR: Error clearing faults! Error = %d\n", ret);
+          return ret;
+        }
+    }
   return OK;
 }
 
@@ -2021,14 +2054,15 @@ FAR struct battery_monitor_dev_s *
       /* Initialize the BQ769x0 device structure */
 
       nxsem_init(&priv->batsem, 0, 1);
-      priv->ops       = &g_bq769x0ops;
-      priv->i2c       = i2c;
-      priv->addr      = addr;
-      priv->frequency = frequency;
-      priv->crc       = crc;
-      priv->chip      = chip;
-      priv->cellcount = cellcount;
-      priv->sense_r   = sense_r;
+      priv->ops         = &g_bq769x0ops;
+      priv->i2c         = i2c;
+      priv->addr        = addr;
+      priv->frequency   = frequency;
+      priv->crc         = crc;
+      priv->chip        = chip;
+      priv->cellcount   = cellcount;
+      priv->sense_r     = sense_r;
+      priv->fault_cache = 0;
 
       /* Sanity check the device setup and assign cell mapping table */
       switch (chip)
