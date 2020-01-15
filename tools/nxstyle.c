@@ -844,15 +844,24 @@ int main(int argc, char **argv, char **envp)
                      {
                        if (g_section != PRE_PROCESSOR_DEFINITIONS)
                          {
-                           /* Only a warning because there is some usage of
-                            * define outside the Pre-processor Definitions
-                            * section which is justifiable.  Should be
-                            * manually checked.
+                           /* A complication is the header files always have
+                            * the idempotence guard definitions before the
+                            * "Pre-processor Definitions section".
                             */
 
-                           WARN("#define outside of 'Pre-processor "
-                                "Definitions' section",
-                                lineno, ii);
+                           if (g_section == NO_SECTION &&
+                               g_file_type != C_HEADER)
+                             {
+                               /* Only a warning because there is some usage
+                                * of define outside the Pre-processor
+                                * Definitions section which is justifiable.
+                                * Should be manually checked.
+                                */
+
+                               WARN("#define outside of 'Pre-processor "
+                                    "Definitions' section",
+                                    lineno, ii);
+                             }
                          }
                      }
 
