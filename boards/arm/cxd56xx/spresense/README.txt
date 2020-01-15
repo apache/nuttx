@@ -25,7 +25,7 @@ Configuration sub-directories
   smp
 
     This is a configuration to run Spresense in SMP mode. To use this
-    configuration, new boot loader which will be released later must be used.
+    configuration, bootloader for Spresense SDK 1.5.0 or later must be intalled.
 
   wifi
 
