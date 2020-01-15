@@ -89,15 +89,27 @@
 #define NRF52_WDT_RR6                     (NRF52_WDT_BASE + NRF52_WDT_RR6_OFFSET)
 #define NRF52_WDT_RR7                     (NRF52_WDT_BASE + NRF52_WDT_RR7_OFFSET)
 
-/* UART Register Bitfield Definitions **************************************************************/
+/* WDT Register Bitfield Definitions ***************************************************************/
 
-/* ENABLE Register */
+/* INTENSET/INTENCLR Register */
 
-#define NRF52_UART_ENABLE_DISABLE           (0)
-#define NRF52_UART_ENABLE_ENABLE            (4)
+#define WDT_INT_TIMEOUT        (1 << 0) /* Bit 0: TIMEOUT */
 
-/* INTENSET Register */
+/* REQSTATUS[x] Register */
 
-#define NRF52_UART_INTENSET_RXDRDY          (1 << 2)
+#define WDT_REQSTATUS_RR(x)    (1 << (x)) /* Bits 0-7: Request status for RR[i] register */
+
+/* RREN[x] Register */
+
+#define WDT_RREN_RR(x)         (1 << (x)) /* Bits 0-7: Enable or disable RR[i] register */
+
+/* CONFIG Register */
+
+#define WDT_CONFIG_SLEEP       (1 << 0) /* Bit 0: */
+#define WDT_CONFIG_HALT        (1 << 0) /* Bit 3: */
+
+/* RR[x] Register */
+
+#define WDT_RR_VALUE           (0x6E524635UL) /* Fixed value, don't modify it */
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_WDT_H */

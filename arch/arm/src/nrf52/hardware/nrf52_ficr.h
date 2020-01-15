@@ -149,15 +149,6 @@
 
 /* FICR Register Bitfield Definitions **************************************************************/
 
-#define NRF52_FICR_READY_READY           (1 << 0) /* FICR is ready */
-
-#define NRF52_FICR_CONFIG_WEN            (1 << 0) /* Enable write program memory */
-
-#define NRF52_FICR_ICACHECNF_CACHEEN     (1 << 0) /* Cache enable */
-#define NRF52_FICR_ICACHECNF_CACHEPROFEN (1 << 8) /* Cache profiling enable */
-
-/* ENABLE Register */
-
-/* INTENSET Register */
+/* TODO: */
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_FICR_H */
