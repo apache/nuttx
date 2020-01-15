@@ -25651,7 +25651,7 @@ information):
 NuttX-8.2 Release Notes
 ------------------------
 
-The 133nd release of NuttX, Version 8.3, was made on November 16, 2019,
+The 133rd release of NuttX, Version 8.2, was made on November 16, 2019,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-8.2.tar.gz and
 apps-8.2.tar.gz.  These are available from:
