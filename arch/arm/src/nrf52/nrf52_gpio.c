@@ -144,17 +144,17 @@ static inline void nrf52_gpio_mode(nrf52_pinset_t cfgset,
   mode = cfgset & GPIO_MODE_MASK;
 
   regval = getreg32(offset);
-  regval &= NRF52_GPIO_CNF_PULL_MASK;
+  regval &= GPIO_CNF_PULL_MASK;
 
   if (mode == GPIO_PULLUP)
     {
-      regval &= NRF52_GPIO_CNF_PULL_MASK;
-      regval |= NRF52_GPIO_CNF_PULL_UP;
+      regval &= GPIO_CNF_PULL_MASK;
+      regval |= GPIO_CNF_PULL_UP;
     }
   else if (mode == GPIO_PULLDOWN)
     {
-      regval &= NRF52_GPIO_CNF_PULL_MASK;
-      regval |= NRF52_GPIO_CNF_PULL_DOWN;
+      regval &= GPIO_CNF_PULL_MASK;
+      regval |= GPIO_CNF_PULL_DOWN;
     }
 
   putreg32(regval, offset);
@@ -243,7 +243,7 @@ int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
 
   /* Configure as input and disconnect input buffer */
 
-  putreg32(NRF52_GPIO_CNF_INPUT, offset);
+  putreg32(GPIO_CNF_INPUT, offset);
 
   return OK;
 }
