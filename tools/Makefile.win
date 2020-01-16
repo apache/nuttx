@@ -335,7 +335,7 @@ ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
 else
 	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform .fakelnk
+	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform\.fakelnk
 endif
 
 ifeq ($(COMMON_DIR),y)
