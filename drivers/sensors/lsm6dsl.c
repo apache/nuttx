@@ -95,7 +95,7 @@ static int lsm6dsl_sensor_config(FAR struct lsm6dsl_dev_s *priv);
 static int lsm6dsl_sensor_start(FAR struct lsm6dsl_dev_s *priv);
 static int lsm6dsl_sensor_stop(FAR struct lsm6dsl_dev_s *priv);
 static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
-                               FAR struct lsm6dsl_sensor_data_s *sensor_data);
+                               FAR struct lsm6dsl_sensor_data_s *sdata);
 static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode);
 
 /* Character Driver Methods */
@@ -929,7 +929,7 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
  ****************************************************************************/
 
 static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
-                               FAR struct lsm6dsl_sensor_data_s *sensor_data)
+                               FAR struct lsm6dsl_sensor_data_s *sdata)
 {
   int16_t lox   = 0;
   int16_t loxg  = 0;
@@ -1006,16 +1006,20 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
 
   temp_val = (tempi / 256) + 25;
 
-  sninfo("Data 16-bit XL_X--->: %d mg\n", (short)(xf_val * g_accelerofactor));
-  sninfo("Data 16-bit XL_Y--->: %d mg\n", (short)(yf_val * g_accelerofactor));
-  sninfo("Data 16-bit XL_Z--->: %d mg\n", (short)(zf_val * g_accelerofactor));
-  sninfo("Data 16-bit TEMP--->: %d Celsius\n", temp_val);
+  sninfo("Data 16-bit XL_X--->: %d mg\n",
+         (short)(xf_val * g_accelerofactor));
+  sninfo("Data 16-bit XL_Y--->: %d mg\n",
+         (short)(yf_val * g_accelerofactor));
+  sninfo("Data 16-bit XL_Z--->: %d mg\n",
+         (short)(zf_val * g_accelerofactor));
+  sninfo("Data 16-bit TEMP--->: %d Celsius\n",
+         temp_val);
 
-  sensor_data->x_data = xf_val * g_accelerofactor;
-  sensor_data->y_data = yf_val * g_accelerofactor;
-  sensor_data->z_data = zf_val * g_accelerofactor;
-  sensor_data->temperature = temp_val;
-  sensor_data->timestamp = ts;
+  sdata->x_data = xf_val * g_accelerofactor;
+  sdata->y_data = yf_val * g_accelerofactor;
+  sdata->z_data = zf_val * g_accelerofactor;
+  sdata->temperature = temp_val;
+  sdata->timestamp = ts;
 
   x_valg = (int16_t) (((hixg) << 8) | loxg);
   y_valg = (int16_t) (((hiyg) << 8) | loyg);
@@ -1025,9 +1029,9 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
   sninfo("Data 16-bit G_Y--->: %d mdps\n", (short)(y_valg * g_gyrofactor));
   sninfo("Data 16-bit G_Z--->: %d mdps\n", (short)(z_valg * g_gyrofactor));
 
-  sensor_data->g_x_data = x_valg * g_gyrofactor;
-  sensor_data->g_y_data = y_valg * g_gyrofactor;
-  sensor_data->g_z_data = z_valg * g_gyrofactor;
+  sdata->g_x_data = x_valg * g_gyrofactor;
+  sdata->g_y_data = y_valg * g_gyrofactor;
+  sdata->g_z_data = z_valg * g_gyrofactor;
 
   return OK;
 }
@@ -1261,8 +1265,8 @@ static int lsm6dsl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register the LSM6DSL accelerometer, gyroscope device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/lsm6dsl0",
- *             "/dev/gyro0" or "/dev/mag0".
+ *   devpath - The full path to the driver to register, e.g.
+ *             "/dev/lsm6dsl0", "/dev/gyro0" or "/dev/mag0".
  *   i2c     - An I2C driver instance.
  *   addr    - The I2C address of the LSM6DSL accelerometer, gyroscope or
  *             magnetometer.
@@ -1340,7 +1344,8 @@ static int lsm6dsl_register(FAR const char *devpath,
  *   Register the LSM6DSL accelerometer character device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/lsm6dsl0".
+ *   devpath - The full path to the driver to register,
+ *             e.g. "/dev/lsm6dsl0".
  *   i2c     - An I2C driver instance.
  *   addr    - The I2C address of the LSM6DSL accelerometer.
  *
