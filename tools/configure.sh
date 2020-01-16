@@ -142,33 +142,12 @@ else
   boarddir=`echo ${boardconfig} | cut -d':' -f1`
 fi
 
-# Detect the architecture of this board.
-
-archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
-chips="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
- lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
- nuc1xx rx65n s32k1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
- stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
- pic32mz lm32 mor1kx m32262f8 sh7032 fe310 k210 gap8 nr5m100 sim qemu esp32 z16f2811
- ez80 z180 z8 z80"
-
-for arc in ${archs}; do
-for chip in ${chips}; do
-  if [ -f ${TOPDIR}/boards/${arc}/${chip}/${boarddir}/Kconfig ]; then
-    archdir=${arc}
-    chipdir=${chip}
-    echo "  Detected ${archdir} Architecture"
-    echo "  Detected ${chipdir} Chip"
-  fi
-done
-done
-
-configpath=${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}
-if [ ! -d "${configpath}" ]; then
+configpath=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}
+if [ ! -d ${configpath} ]; then
   # Try direct path used with custom configurations.
 
   configpath=${TOPDIR}/${boardconfig}
-  if [ ! -d "${configpath}" ]; then
+  if [ ! -d ${configpath} ]; then
     echo "Directory for ${boardconfig} does not exist.  Options are:"
     echo ""
     echo "Select one of the following options for <board-name>:"
@@ -185,26 +164,26 @@ if [ ! -d "${configpath}" ]; then
   fi
 fi
 
-src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}/Make.defs"
+src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}/Make.defs
 dest_makedefs="${TOPDIR}/Make.defs"
 
-if [ ! -r "${src_makedefs}" ]; then
-  src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/scripts/Make.defs"
+if [ ! -r ${src_makedefs} ]; then
+  src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Make.defs
 
-  if [ ! -r "${src_makedefs}" ]; then
-    src_makedefs="${TOPDIR}/${boardconfig}/Make.defs"
-    if [ ! -r "${src_makedefs}" ]; then
+  if [ ! -r ${src_makedefs} ]; then
+    src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
+    if [ ! -r ${src_makedefs} ]; then
       echo "File Make.defs could not be found"
       exit 4
     fi
   fi
 fi
 
-src_config="${configpath}/defconfig"
+src_config=${configpath}/defconfig
 dest_config="${TOPDIR}/.config"
 
-if [ ! -r "${src_config}" ]; then
-  echo "File \"${src_config}\" does not exist"
+if [ ! -r ${src_config} ]; then
+  echo "File ${src_config} does not exist"
   exit 5
 fi
 
@@ -223,7 +202,7 @@ fi
 # If we are going to some host other then windows native or to a windows
 # native host, then don't even check what is in the defconfig file.
 
-oldnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
+oldnative=`grep CONFIG_WINDOWS_NATIVE= ${src_config} | cut -d'=' -f2`
 if [ "X$host" != "Xwindows" -o "X$wenv" != "Xnative" ]; then
   unset winnative
 else
@@ -241,7 +220,7 @@ fi
 
 defappdir=y
 if [ -z "${appdir}" -a "X$oldnative" = "$winnative" ]; then
-  quoted=`grep "^CONFIG_APPS_DIR=" "${src_config}" | cut -d'=' -f2`
+  quoted=`grep "^CONFIG_APPS_DIR=" ${src_config} | cut -d'=' -f2`
   if [ ! -z "${quoted}" ]; then
     appdir=`echo ${quoted} | sed -e "s/\"//g"`
     defappdir=n
@@ -288,15 +267,15 @@ fi
 # Okay... Everything looks good.  Setup the configuration
 
 echo "  Copy files"
-install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
-  { echo "Failed to copy \"${src_makedefs}\"" ; exit 8 ; }
-install -m 644 "${src_config}" "${dest_config}" || \
-  { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
+install -m 644 ${src_makedefs} "${dest_makedefs}" || \
+  { echo "Failed to copy ${src_makedefs}" ; exit 8 ; }
+install -m 644 ${src_config} "${dest_config}" || \
+  { echo "Failed to copy ${src_config}" ; exit 9 ; }
 
 # Install any optional files
 
 for opt in ${OPTFILES}; do
-  test -f "${configpath}/${opt}" && install "${configpath}/${opt}" "${TOPDIR}/"
+  test -f ${configpath}/${opt} && install ${configpath}/${opt} "${TOPDIR}/"
 done
 
 # If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,

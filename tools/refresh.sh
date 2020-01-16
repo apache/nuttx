@@ -33,7 +33,6 @@
 #
 
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
-TOPDIR="${WD}/.."
 
 USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
@@ -115,39 +114,6 @@ else
   BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
 fi
 
-# Detect the architecture of this board.
-
-ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
-ARCHLIST="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
-CHIPLIST="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
-  lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
-  nuc1xx rx65n s32k1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
-  stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
-  pic32mz lm32 mor1kx m32262f8 sh7032 fe310 k210 gap8 nr5m100 sim qemu esp32 z16f2811
-  ez80 z180 z8 z80"
-
-for ARCH in ${ARCHLIST}; do
-  for CHIP in ${CHIPLIST}; do
-    if [ -f ${TOPDIR}/boards/${ARCH}/${CHIP}/${BOARDSUBDIR}/Kconfig ]; then
-      ARCHSUBDIR=${ARCH}
-      CHIPSUBDIR=${CHIP}
-      echo "  Detected ${ARCHSUBDIR} Architecture"
-      echo "  Detected ${CHIPSUBDIR} Chip"
-    fi
-  done
-done
-
-for ARCH in ${ARCHLIST}; do
-  if [ -f boards/${ARCH}/${BOARDSUBDIR}/Kconfig ]; then
-    ARCHSUBDIR=${ARCH}
-  fi
-done
-
-if [ -z "${ARCHSUBDIR}" ]; then
-  echo "ERROR:  Architecture of ${BOARDSUBDIR} not found"
-  exit 1
-fi
-
 # Where are we
 
 MYNAME=`basename $0`
@@ -163,7 +129,7 @@ fi
 
 # Set up the environment
 
-BOARDDIR=boards/$ARCHSUBDIR/$CHIPSUBDIR/$BOARDSUBDIR
+BOARDDIR=boards/*/*/$BOARDSUBDIR
 SCRIPTSDIR=$BOARDDIR/scripts
 MAKEDEFS1=$SCRIPTSDIR/Make.defs
 
@@ -179,25 +145,25 @@ CMPCONFIGMAKEDIR=tools
 
 # Check the board configuration directory
 
-if [ ! -d "$BOARDDIR" ]; then
+if [ ! -d $BOARDDIR ]; then
   echo "No board directory found at $BOARDDIR"
   exit 1
 fi
 
-if [ ! -d "$CONFIGDIR" ]; then
+if [ ! -d $CONFIGDIR ]; then
   echo "No configuration directory found at $CONFIGDIR"
   exit 1
 fi
 
-if [ ! -r "$DEFCONFIG" ]; then
+if [ ! -r $DEFCONFIG ]; then
   echo "No readable defconfig file at $DEFCONFIG"
   exit 1
 fi
 
-if [ -r "$MAKEDEFS1" ]; then
+if [ -r $MAKEDEFS1 ]; then
   MAKEDEFS=$MAKEDEFS1
 else
-  if [ -r "$MAKEDEFS2" ]; then
+  if [ -r $MAKEDEFS2 ]; then
     MAKEDEFS=$MAKEDEFS2
   else
     echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2"
