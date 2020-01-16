@@ -795,9 +795,10 @@ NuttX Configuration Tool
   An automated tool has been incorporated to support re-configuration
   of NuttX.  This tool is based on the kconfig-frontends application available
   at https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/.  (This
-  is a snapshot of http://ymorin.is-a-geek.org/projects/kconfig-frontends.)
-  This application provides a tool called 'kconfig-mconf' that is used by the
-  NuttX top-level Makefile. The following make target is provided:
+  is a snapshot of the old http://ymorin.is-a-geek.org/projects/kconfig-frontends
+  which is no longer available.)  This application provides a tool called
+  'kconfig-mconf' that is used by the NuttX top-level Makefile. The following
+  make target is provided:
 
     make menuconfig
 
@@ -1466,9 +1467,18 @@ Native Windows Build
   instead if you know what you are doing and want a faster download (No, I
   can't tell you which packages you should or should not download).
 
+  NOTE:  It should be possible to use Cygwin or MSYS2 in place of the GNUWin32
+  tools.  There are, however, complexities in doing that because those tools
+  depend on the shell environment and use DLLs that are not found (at least
+  not without the correct setup).
+
   Host Compiler:  I use the MingGW GCC compiler which can be downloaded from
   http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
   the you not install the optional MSYS components as there may be conflicts.
+
+  Kconfig-frontends:  See the section entitled "NuttX Configuration Tool
+  under DOS" for information about installing the kconfig-frontend tools to
+  run natively under Windows.
 
   This capability should still be considered a work in progress because:
 
@@ -1541,6 +1551,10 @@ Installing GNUWin32
   more than you will ever need.  If disc space is a problem for you, you might
   need to perform a manual installation of the individual ZIP files that you
   will find in the <this directory>/GetGNUWin32/packages directory.
+
+  9. Make sure that you add the GNUWin32 tools to your path variable:
+
+    set PATH=C:\gnuwin32\bin;%PATH%
 
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
