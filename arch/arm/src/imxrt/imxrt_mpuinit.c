@@ -115,6 +115,89 @@ void imxrt_mpu_initialize(void)
   DEBUGASSERT(dataend >= datastart);
 
   mpu_user_intsram(datastart, dataend - datastart);
+#else
+  mpu_configure_region(0xc0000000, 512*1024*1024,
+                       MPU_RASR_TEX_DEV  | /* Device             */
+                                           /* Not Cacheable      */
+                                           /* Not Bufferable     */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x80000000, 1024*1024*1024,
+                       MPU_RASR_TEX_DEV  | /* Device             */
+                                           /* Not Cacheable      */
+                                           /* Not Bufferable     */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x60000000, 8*1024*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RORO    /* P:RO   U:RO        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x00000000, 1024*1024*1024,
+                       MPU_RASR_TEX_DEV  | /* Device             */
+                                           /* Not Cacheable      */
+                                           /* Not Bufferable     */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x00000000,  128*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x20000000,  128*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x20200000,  512*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x20280000,  256*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x80000000,  32*1024*1024,
+                       MPU_RASR_TEX_SO   | /* Ordered             */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_configure_region(0x81e00000,  2*1024*1024,
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                                           /* Not Cacheable      */
+                                           /* Not Bufferable     */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
+
+  mpu_control(true, true, true);
+  return;
 #endif
 
   /* Then enable the MPU */
