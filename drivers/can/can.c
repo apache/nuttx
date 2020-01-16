@@ -391,6 +391,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 
   nxsem_init(&reader->fifo.rx_sem, 0, 1);
   reader->filep = filep;
+  filep->f_priv = filep;
 
   return reader;
 }
@@ -509,7 +510,7 @@ static int can_close(FAR struct file *filep)
 
   list_for_every_safe(&dev->cd_readers, node, tmp)
     {
-      if (((FAR struct can_reader_s *)node)->filep == filep)
+      if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
         {
           list_delete(node);
           kmm_free(node);
@@ -632,7 +633,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
       list_for_every(&dev->cd_readers, node)
         {
-          if (((FAR struct can_reader_s *) node)->filep == filep)
+          if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
             {
               reader = (FAR struct can_reader_s *)node;
               break;
@@ -1044,7 +1045,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   list_for_every(&dev->cd_readers, node)
     {
-      if (((FAR struct can_reader_s *)node)->filep == filep)
+      if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
         {
           reader = (FAR struct can_reader_s *)node;
           break;
