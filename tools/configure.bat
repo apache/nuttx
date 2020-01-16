@@ -33,6 +33,18 @@ rem ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 rem POSSIBILITY OF SUCH DAMAGE.
 rem
 
+if exist tools goto :GoToolDir
+if exist ..\tools goto :SetToolDir
+
+echo Cannot find tools\ directory
+goto End
+
+:GoToolDir
+cd tools
+
+:SetTooldir
+set tooldir=%CD%
+
 rem Parse command line arguments
 
 set debug=
@@ -86,6 +98,7 @@ if exist configure.exe goto :HaveConfigureExe
 
 set cc=mingw32-gcc.exe
 set cflags=-Wall -Wstrict-prototypes -Wshadow -g -pipe -I. -DCONFIG_WINDOWS_NATIVE=y
+echo %cc% %cflags% -o configure.exe configure.c cfgparser.c
 %cc% %cflags% -o configure.exe configure.c cfgparser.c
 if errorlevel 1 (
   echo ERROR: %cc% failed
@@ -94,15 +107,16 @@ if errorlevel 1 (
 )
 
 :HaveConfigureExe
-configure.exe %debug% %fmt% %hostopt% %appdir% %config%
+cd ..
+tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config%
 if errorlevel 1 echo configure.exe failed
 goto End
 
 :NoConfig
-echo Missing ^<board-name^>\configs\^<config-name^> argument
+echo Missing ^<board-name^>:^<config-name^> argument
 
 :ShowUsage
-echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>\configs\^<config-name^>
+echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>:^<config-name^>
 echo        %0 [-h]
 echo\nWhere:
 echo  -d:
