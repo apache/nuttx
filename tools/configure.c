@@ -221,6 +221,7 @@ static const char *g_chipnames[] =
   "sh7032",
   "fe310",
   "gap8",
+  "k210",
   "nr5m100",
   "sim",
   "qemu",
