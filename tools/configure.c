@@ -79,14 +79,23 @@
 
 static void show_usage(const char *progname, int exitcode);
 static void debug(const char *fmt, ...);
-static int  find_archname(const char *boardname, const char *configname);
 static void parse_args(int argc, char **argv);
 static bool check_directory(const char *directory);
 static void verify_directory(const char *directory);
 static bool verify_optiondir(const char *directory);
 static bool verify_file(const char *path);
 static void find_topdir(void);
-static void config_search(const char *boarddir);
+typedef void (*config_callback)(const char *boarddir, const char *archname,
+                                const char *chipname, const char *boardname,
+                                const char *configname, void *data);
+static void config_search(const char *boarddir, config_callback callback, void *data);
+static void find_archname_callback(const char *boarddir, const char *archname,
+                                   const char *chipname, const char *boardname,
+                                   const char *configname, void *data);
+static void find_archname(void);
+static void enumerate_callback(const char *boarddir, const char *archname,
+                               const char *chipname, const char *boardname,
+                               const char *configname, void *data);
 static void enumerate_configs(void);
 static void check_configdir(void);
 static void check_configured(void);
@@ -147,92 +156,6 @@ static char        g_buffer[BUFFER_SIZE];   /* Scratch buffer for forming full p
 
 static struct variable_s *g_configvars = NULL;
 static struct variable_s *g_versionvars = NULL;
-
-/* Recognized architectures */
-
-static const char *g_archnames[] =
-{
-  "arm",
-  "avr",
-  "hc",
-  "mips",
-  "misoc",
-  "or1k",
-  "renesas",
-  "risc-v",
-  "sim",
-  "x86",
-  "xtensa",
-  "z16",
-  "z80",
-  NULL
-};
-
-/* Recognized chip names */
-
-static const char *g_chipnames[] =
-{
-  "a1x",
-  "am335x",
-  "c5471",
-  "cxd56xx",
-  "dm320",
-  "efm32",
-  "imx6",
-  "imxrt",
-  "kinetis",
-  "kl",
-  "lc823450",
-  "lpc17xx_40xx",
-  "lpc214x",
-  "lpc2378",
-  "lpc31xx",
-  "lpc43xx",
-  "lpc54xx",
-  "max326xx",
-  "moxart",
-  "nrf52",
-  "nuc1xx",
-  "rx65n" 
-  "s32k1xx",
-  "sam34",
-  "sama5",
-  "samd2l2",
-  "samd5e5",
-  "samv7",
-  "stm32",
-  "stm32f0l0g0",
-  "stm32f7",
-  "stm32h7",
-  "stm32l4",
-  "str71x",
-  "tiva",
-  "tms570",
-  "xmc4",
-  "at32uc3",
-  "at90usb",
-  "atmega",
-  "mcs92s12ne64",
-  "pic32mx",
-  "pic32mz",
-  "lm32",
-  "mor1kx",
-  "m32262f8",
-  "sh7032",
-  "fe310",
-  "gap8",
-  "k210",
-  "nr5m100",
-  "sim",
-  "qemu",
-  "esp32",
-  "z16f2811",
-  "ez80",
-  "z180",
-  "z8",
-  "z80",
-  NULL
-};
 
 /* Optional configuration files */
 
@@ -318,49 +241,10 @@ static void debug(const char *fmt, ...)
     }
 }
 
-static int find_archname(const char *boardname, const char *configname)
-{
-  const char **archname;
-  const char **chipname;
-  struct stat statbuf;
-  int ret;
-
-  /* Try each combination of board and chip names */
-
-  for (archname = g_archnames; *archname != NULL; archname++)
-    {
-      for (chipname = g_chipnames; *chipname != NULL; chipname++)
-        {
-          /* Get the architecture directory under boards.  Path format:
-           * board/<arch-name>/<chip-name>/<board-name>/configs/<config-name>
-           */
-
-          snprintf(g_buffer, BUFFER_SIZE, "boards%c%s%c%s%c%s%cconfigs%c%s",
-                   g_delim, *archname, g_delim, *chipname, g_delim, boardname,
-                   g_delim, g_delim, configname);
-
-          /* Check if there is a directory at this path */
-
-          ret = stat(g_buffer, &statbuf);
-          if (ret == 0 && S_ISDIR(statbuf.st_mode))
-            {
-              g_archdir = *archname;
-              g_chipdir = *chipname;
-              return 0;
-            }
-        }
-    }
-
-  g_archdir = "unknown";
-  g_chipdir = "unknown";
-  return -1;
-}
-
 static void parse_args(int argc, char **argv)
 {
   char *ptr;
   int ch;
-  int ret;
 
   /* Parse command line options */
 
@@ -476,13 +360,6 @@ static void parse_args(int argc, char **argv)
     {
       fprintf(stderr, "ERROR: Unexpected garbage at the end of the line\n");
       show_usage(argv[0], EXIT_FAILURE);
-    }
-
-  ret = find_archname(g_boarddir, g_configdir);
-  if (ret != 0)
-    {
-      fprintf(stderr, "ERROR: Architecture for board %s not found\n",
-              g_boarddir);
     }
 }
 
@@ -633,7 +510,7 @@ static void find_topdir(void)
     }
 }
 
-static void config_search(const char *boarddir)
+static void config_search(const char *boarddir, config_callback callback, void *data)
 {
   DIR *dir;
   struct dirent *dp;
@@ -667,7 +544,7 @@ static void config_search(const char *boarddir)
 
   /* Visit each entry in the directory */
 
-  while ((dp = readdir (dir)) != NULL)
+  while ((dp = readdir(dir)) != NULL)
     {
       /* Ignore directory entries that start with '.' */
 
@@ -700,7 +577,7 @@ static void config_search(const char *boarddir)
           char *tmppath;
           snprintf(g_buffer, BUFFER_SIZE, "%s%c%s", boarddir, g_delim, child);
           tmppath = strdup(g_buffer);
-          config_search(tmppath);
+          config_search(tmppath, callback, data);
           free(tmppath);
         }
 
@@ -712,10 +589,11 @@ static void config_search(const char *boarddir)
 
       else if (S_ISREG(buf.st_mode) && strcmp("defconfig", child) == 0)
         {
+          char *archname;
+          char *chipname;
           char *boardname;
           char *configname;
           char *delim;
-          char *tmp;
 
           /* Get the board directory near the beginning of the 'boarddir' path:
            * <archdir>/<chipdir>/<boarddir>/configs/<configdir>
@@ -725,7 +603,9 @@ static void config_search(const char *boarddir)
 
           strncpy(g_buffer, boarddir, BUFFER_SIZE);
 
-          /* Skip over <archdir> */
+          /* Save the <archdir> */
+
+          archname = g_buffer;
 
           delim = strchr(g_buffer, g_delim);
           if (delim == NULL)
@@ -734,13 +614,15 @@ static void config_search(const char *boarddir)
             }
           else
             {
-              /* Skip over <chipdir> */
+              /* Save the <chipdir> */
 
-              tmp   = delim + 1;
-              delim = strchr(tmp, g_delim);
+              *delim   = '\0';
+              chipname = delim + 1;
+
+              delim = strchr(chipname, g_delim);
               if (delim == NULL)
                 {
-                  debug("ERROR: delimiter not found in path: %s\n", tmp);
+                  debug("ERROR: delimiter not found in path: %s\n", chipname);
                 }
               else
                 {
@@ -768,7 +650,7 @@ static void config_search(const char *boarddir)
                       else
                         {
                           configname = delim + 1;
-                          fprintf(stderr, "  %s:%s\n", boardname, configname);
+                          callback(boarddir, archname, chipname, boardname, configname, data);
                         }
                     }
                 }
@@ -782,10 +664,39 @@ static void config_search(const char *boarddir)
   closedir(dir);
 }
 
+static void find_archname_callback(const char *boarddir, const char *archname,
+                                   const char *chipname, const char *boardname,
+                                   const char *configname, void *data)
+{
+  if (strcmp(g_boarddir, boardname) == 0 &&
+      strcmp(g_configdir, configname) == 0)
+    {
+      g_archdir = strdup(archname);
+      g_chipdir = strdup(chipname);
+    }
+}
+
+static void find_archname(void)
+{
+  config_search("", find_archname_callback, NULL);
+  if (g_archdir == NULL || g_chipdir == NULL)
+    {
+      g_archdir = "unknown";
+      g_chipdir = "unknown";
+    }
+}
+
+static void enumerate_callback(const char *boarddir, const char *archname,
+                               const char *chipname, const char *boardname,
+                               const char *configname, void *data)
+{
+  fprintf(stderr, "  %s:%s\n", boardname, configname);
+}
+
 static void enumerate_configs(void)
 {
   fprintf(stderr, "Options for <board-name>:<config-name> include:\n\n");
-  config_search("");
+  config_search("", enumerate_callback, NULL);
 }
 
 static void check_configdir(void)
@@ -801,6 +712,8 @@ static void check_configdir(void)
   /* Get and verify the path to the selected configuration:
    * boards/<archdir>/<chipdir>/<boarddir>/configs/<configdir>
    */
+
+  find_archname();
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%cboards%c%s%c%s%c%s%cconfigs%c%s",
            g_topdir, g_delim, g_delim, g_archdir, g_delim, g_chipdir,
