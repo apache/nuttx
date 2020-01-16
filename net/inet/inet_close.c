@@ -412,6 +412,8 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 static inline int udp_close(FAR struct socket *psock)
 {
   FAR struct udp_conn_s *conn;
+  unsigned int timeout = UINT_MAX;
+  int ret;
 
   /* Interrupts are disabled here to avoid race conditions */
 
@@ -435,21 +437,21 @@ static inline int udp_close(FAR struct socket *psock)
 
   if (_SO_GETOPT(psock->s_options, SO_LINGER))
     {
-      int ret;
-
-      /* Wait until for the buffered TX data to be sent. */
-
-      ret = udp_txdrain(psock, _SO_TIMEOUT(psock->s_linger));
-      if (ret < 0)
-        {
-          /* udp_txdrain may fail, but that won't stop us from closing
-           * the socket.
-           */
-
-          nerr("ERROR: udp_txdrain() failed: %d\n", ret);
-        }
+      timeout = _SO_TIMEOUT(psock->s_linger);
     }
 #endif
+
+  /* Wait until for the buffered TX data to be sent. */
+
+  ret = udp_txdrain(psock, timeout);
+  if (ret < 0)
+    {
+      /* udp_txdrain may fail, but that won't stop us from closing
+       * the socket.
+       */
+
+      nerr("ERROR: udp_txdrain() failed: %d\n", ret);
+    }
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Free any semi-permanent write buffer callback in place. */
