@@ -55,11 +55,11 @@
 
 /* Accelerometer addresses */
 
-#define LSM303AGRACCELERO_ADDR  (0x32>>1)
+#define LSM303AGRACCELERO_ADDR  (0x32 >> 1)
 
 /* Magnetometer addresses */
 
-#define LSM303AGRMAGNETO_ADDR  (0x3C>>1) /* 7-bit */
+#define LSM303AGRMAGNETO_ADDR  (0x3C >> 1) /* 7-bit */
 
 /* Register Addresses *******************************************************/
 
@@ -93,7 +93,7 @@
 #define LSM303AGR_OUT_Z_L_A                               0x2C
 #define LSM303AGR_OUT_Z_H_A                               0x2D
 
-#define LSM303AGR_OUTX_L_A_SHIFT                          0 
+#define LSM303AGR_OUTX_L_A_SHIFT                          0
 #define LSM303AGR_OUTX_L_A_MASK                           (255 << LSM303AGR_OUTX_L_A_SHIFT)
 
 #define LSM303AGR_FIFO_CTRL_REG_A                         0x2E
@@ -142,7 +142,7 @@
 #define LSM303AGR_OUTZ_L_REG_M                            0x6C
 #define LSM303AGR_OUTZ_H_REG_M                            0x6D
 
-#define LSM303AGR_OUTX_L_M_SHIFT                          0 
+#define LSM303AGR_OUTX_L_M_SHIFT                          0
 #define LSM303AGR_OUTX_L_M_MASK                           (255 << LSM303AGR_OUTX_L_M_SHIFT)
 
 /****************************************************************************
@@ -166,7 +166,7 @@ struct lsm303agr_sensor_data_s
 };
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 struct lsm303agr_dev_s;
@@ -218,7 +218,7 @@ extern "C"
  ****************************************************************************/
 
 int lsm303agr_sensor_register(FAR const char *devpath,
-                              FAR struct i2c_master_s *i2c,uint8_t addr);
+                              FAR struct i2c_master_s *i2c, uint8_t addr);
 
 #ifdef __cplusplus
 }
