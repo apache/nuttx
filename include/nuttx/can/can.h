@@ -561,7 +561,6 @@ struct can_reader_s
 {
   struct list_node     list;
   sem_t                read_sem;
-  FAR struct file     *filep;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
 };
 
@@ -590,6 +589,7 @@ struct can_dev_s
 };
 
 /* Structures used with ioctl calls */
+
 /* CANIOC_RTR: */
 
 struct canioc_rtr_s
@@ -598,8 +598,9 @@ struct canioc_rtr_s
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
 
-/* CANIOC_GET_BITTIMING/CANIOC_SET_BITTIMING: */
-/* Bit time = Tquanta * (Sync_Seg + Prop_Seq + Phase_Seg1 + Phase_Seg2)
+/* CANIOC_GET_BITTIMING/CANIOC_SET_BITTIMING:
+ *
+ * Bit time = Tquanta * (Sync_Seg + Prop_Seq + Phase_Seg1 + Phase_Seg2)
  *          = Tquanta * (TSEG1 + TSEG2 + 1)
  * Where
  *   TSEG1 = Prop_Seq + Phase_Seg1
@@ -614,8 +615,9 @@ struct canioc_bittiming_s
   uint8_t               bt_sjw;          /* Synchronization Jump Width in time quanta */
 };
 
-/* CANIOC_GET_CONNMODES/CANIOC_SET_CONNMODES: */
-/* A CAN device may support loopback and silent mode. Both modes may not be
+/* CANIOC_GET_CONNMODES/CANIOC_SET_CONNMODES:
+ *
+ * A CAN device may support loopback and silent mode. Both modes may not be
  * settable independently.
  */
 
@@ -654,11 +656,7 @@ struct canioc_stdfilter_s
 };
 
 /************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #undef EXTERN
