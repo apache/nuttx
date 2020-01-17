@@ -390,8 +390,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   reader->fifo.rx_tail  = 0;
 
   nxsem_init(&reader->fifo.rx_sem, 0, 1);
-  reader->filep = filep;
-  filep->f_priv = filep;
+  filep->f_priv = reader;
 
   return reader;
 }
@@ -510,13 +509,15 @@ static int can_close(FAR struct file *filep)
 
   list_for_every_safe(&dev->cd_readers, node, tmp)
     {
-      if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
+      if (((FAR struct can_reader_s *)node) == ((FAR struct can_reader_s *)filep->f_priv))
         {
           list_delete(node);
           kmm_free(node);
           break;
         }
     }
+
+  filep->f_priv = NULL;
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -575,7 +576,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode         *inode = filep->f_inode;
   FAR struct can_dev_s     *dev = inode->i_private;
   FAR struct can_reader_s  *reader = NULL;
-  FAR struct list_node     *node;
   FAR struct can_rxfifo_s  *fifo;
   size_t                    nread;
   irqstate_t                flags;
@@ -631,16 +631,8 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
         }
 #endif /* CONFIG_CAN_ERRORS */
 
-      list_for_every(&dev->cd_readers, node)
-        {
-          if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
-            {
-              reader = (FAR struct can_reader_s *)node;
-              break;
-            }
-        }
-
-      DEBUGASSERT(reader != NULL);
+      DEBUGASSERT(filep->f_priv != NULL);
+      reader = (FAR struct can_reader_s *)filep->f_priv;
 
       fifo = &reader->fifo;
 
@@ -1028,7 +1020,6 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct inode *inode = (FAR struct inode *)filep->f_inode;
   FAR struct can_dev_s *dev = (FAR struct can_dev_s *)inode->i_private;
   FAR struct can_reader_s *reader = NULL;
-  FAR struct list_node *node;
   pollevent_t eventset;
   int ndx;
   int ret;
@@ -1043,16 +1034,8 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 #endif
 
-  list_for_every(&dev->cd_readers, node)
-    {
-      if (((FAR struct can_reader_s *)node)->filep == filep->f_priv)
-        {
-          reader = (FAR struct can_reader_s *)node;
-          break;
-        }
-    }
-
-  DEBUGASSERT(reader != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
+  reader = (FAR struct can_reader_s *)filep->f_priv;
 
   /* Get exclusive access to the poll structures */
 
