@@ -1556,6 +1556,13 @@ Installing GNUWin32
 
     set PATH=C:\gnuwin32\bin;%PATH%
 
+  WARNING:  Make sure you have C:\MinGW\bin in your path before any other
+  directory that contains libiconv-2.dll. Apparently the as.exe in some
+  MinGW distributions are dependent on that DLL, and having an old
+  version of it in the path somewhere (for example GnuWin32 tools) will
+  cause as.exe to pick up the older version that doesn't have the entry
+  point it's looking for.
+
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
 
