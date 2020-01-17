@@ -144,6 +144,26 @@ int nrf52_bringup(void)
     }
 #endif  /* CONFIG_SENSORS_LSM6DSL */
 
+#ifdef CONFIG_SENSORS_LSM303AGR
+  ret = nrf52_lsm303agr_initialize("/dev/lsm303agr0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize LSM303AGR driver: %d\n",
+             ret);
+    }
+#endif  /* CONFIG_SENSORS_LSM303AGR */
+
+#ifdef CONFIG_SENSORS_HTS221
+  ret = nrf52_hts221_initialize("/dev/hts2210");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize HTS221 driver: %d\n",
+             ret);
+    }
+#endif  /* CONFIG_SENSORS_HTS221 */
+
 #ifdef CONFIG_LPWAN_SX127X
   ret = nrf52_lpwaninitialize();
   if (ret < 0)
