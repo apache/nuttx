@@ -128,8 +128,32 @@ void nrf52_spidev_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_LSM303AGR
+#ifdef CONFIG_SENSORS_LSM6DSL
 int nrf52_lsm6dsl_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_lsm303agr_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM303AGR.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM303AGR
+int nrf52_lsm303agr_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_hts221_initialize
+ *
+ * Description:
+ *   Initialize I2C-based HTS221.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_HTS221
+int nrf52_hts221_initialize(char *devpath);
 #endif
 
 /*****************************************************************************

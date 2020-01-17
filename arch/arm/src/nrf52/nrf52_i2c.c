@@ -59,9 +59,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_I2C_POLLED
-#  error I2C irq not supported yet
-#endif
+/* I2C errors not functional yet */
+
+#undef CONFIG_NRF52_I2C_ERRORS
 
 /****************************************************************************
  * Private Types
@@ -76,6 +76,7 @@ struct nrf52_i2c_priv_s
   uint32_t                scl_pin;  /* SCL pin configuration */
   uint32_t                sda_pin;  /* SDA pin configuration */
   int                     refs;     /* Reference count */
+  int                     status;   /* I2C transfer status */
 #ifndef CONFIG_I2C_POLLED
   uint32_t                irq;      /* TWI interrupt */
 #endif
@@ -231,6 +232,12 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
   priv->msgv = msgs;
   priv->msgc = count;
 
+  /* Reset I2C transfer status */
+
+  priv->status = OK;
+
+  i2cinfo("I2C TRANSFER count=%d\n", count);
+
   /* Do we need change I2C bus freqency ? */
 
   if (priv->msgv->frequency != priv->freq)
@@ -284,6 +291,9 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
       priv->flags = priv->msgv->flags;
       priv->addr  = priv->msgv->addr;
 
+      i2cinfo("ptr=%p dcnt=%d flags=%d addr=%d\n",
+              priv->ptr, priv->dcnt, priv->flags, priv->addr);
+
       /* Write TWI address */
 
       regval = priv->addr;
@@ -314,21 +324,13 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
           /* Clear event */
 
           nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_LASTTX_OFFSET, 0);
-#endif
+#else
+          nxsem_wait(&priv->sem_isr);
 
-          /* TWIM stop */
-
-          nrf52_i2c_putreg(priv, NRF52_TWIM_TASKS_STOP_OFFSET, 1);
-
-          /* Wait for stop event */
-
-#ifdef CONFIG_I2C_POLLED
-          while (nrf52_i2c_getreg(priv,
-                                  NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
-
-          /* Clear event */
-
-          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET, 0);
+          if (priv->status < 0)
+            {
+              goto errout;
+            }
 #endif
         }
       else
@@ -352,16 +354,17 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_POLLED
           while (nrf52_i2c_getreg(priv,
                                   NRF52_TWIM_EVENTS_LASTRX_OFFSET) != 1);
-#endif
-          /* Stop TWIM */
 
-          nrf52_i2c_putreg(priv, NRF52_TWIM_TASKS_STOP_OFFSET, 1);
+          /* Clear event */
 
-          /* Wait for stop event */
+          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_LASTRX_OFFSET, 0);
+#else
+          nxsem_wait(&priv->sem_isr);
 
-#ifdef CONFIG_I2C_POLLED
-          while (nrf52_i2c_getreg(priv,
-                                  NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
+          if (priv->status < 0)
+            {
+              goto errout;
+            }
 #endif
         }
 
@@ -371,6 +374,28 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
       priv->msgv += 1;
     }
   while (priv->msgc > 0);
+
+  /* TWIM stop */
+
+  nrf52_i2c_putreg(priv, NRF52_TWIM_TASKS_STOP_OFFSET, 1);
+
+  /* Wait for stop event */
+
+#ifdef CONFIG_I2C_POLLED
+  while (nrf52_i2c_getreg(priv,
+                          NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
+
+  /* Clear event */
+
+  nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET, 0);
+#else
+  nxsem_wait(&priv->sem_isr);
+
+  if (priv->status < 0)
+    {
+      goto errout;
+    }
+#endif
 
 errout:
     return ret;
@@ -408,7 +433,80 @@ static int nrf52_i2c_reset(FAR struct i2c_master_s *dev)
 #ifndef CONFIG_I2C_POLLED
 static int nrf52_i2c_isr(int irq, void *context, FAR void *arg)
 {
-#error not implemented
+  FAR struct nrf52_i2c_priv_s *priv = (FAR struct nrf52_i2c_priv_s *)arg;
+
+  /* Reset I2C status */
+
+  priv->status = OK;
+
+  if ((priv->flags & I2C_M_READ) == 0)
+    {
+      if (nrf52_i2c_getreg(priv, NRF52_TWIM_EVENTS_LASTTX_OFFSET) == 1)
+        {
+          i2cinfo("I2C LASTTX\n");
+
+          /* TX done */
+
+          nxsem_post(&priv->sem_isr);
+
+          /* Clear event */
+
+          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_LASTTX_OFFSET, 0);
+
+          return OK;
+        }
+    }
+  else
+    {
+      if (nrf52_i2c_getreg(priv, NRF52_TWIM_EVENTS_LASTRX_OFFSET) == 1)
+        {
+          i2cinfo("I2C LASTRX\n");
+
+          /* RX done */
+
+          nxsem_post(&priv->sem_isr);
+
+          /* Clear event */
+
+          nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_LASTRX_OFFSET, 0);
+
+          return OK;
+        }
+    }
+
+  if (nrf52_i2c_getreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET) == 1)
+    {
+      i2cinfo("I2C STOPPED\n");
+
+      /* STOPPED event */
+
+      nxsem_post(&priv->sem_isr);
+
+      /* Clear event */
+
+      nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_STOPPED_OFFSET, 0);
+    }
+
+#ifdef CONFIG_NRF52_I2C_ERRORS
+  if (nrf52_i2c_getreg(priv, NRF52_TWIM_EVENTS_ERROR_OFFSET) == 1)
+    {
+      i2cerr("I2C ERROR\n");
+
+      /* Set ERROR status */
+
+      priv->status = ERROR;
+
+      /* ERROR event */
+
+      nxsem_post(&priv->sem_isr);
+
+      /* Clear event */
+
+      nrf52_i2c_putreg(priv, NRF52_TWIM_EVENTS_ERROR_OFFSET, 0);
+    }
+#endif
+
+  return OK;
 }
 #endif
 
@@ -454,6 +552,16 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
   nrf52_i2c_putreg(priv, NRF52_TWIS_ENABLE_OFFSET, TWIM_ENABLE_EN);
 
 #ifndef CONFIG_I2C_POLLED
+  /* Enable I2C interrupts */
+
+#ifdef CONFIG_NRF52_I2C_ERRORS
+  regval = (TWIM_INT_LASTRX | TWIM_INT_LASTTX | TWIM_INT_STOPPED |
+            TWIM_INT_ERROR);
+#else
+  regval = (TWIM_INT_LASTRX | TWIM_INT_LASTTX | TWIM_INT_STOPPED);
+#endif
+  nrf52_i2c_putreg(priv, NRF52_TWIM_INTEN_OFFSET, regval);
+
   /* Attach error and event interrupts to the ISRs */
 
   irq_attach(priv->irq, nrf52_i2c_isr, priv);
@@ -559,6 +667,8 @@ FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port)
 {
   FAR struct nrf52_i2c_priv_s *priv = NULL;
   irqstate_t flags;
+
+  i2cinfo("I2C INITIALIZE port=%d\n", port);
 
   /* Get interface */
 

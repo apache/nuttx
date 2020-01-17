@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52840-dk/src/nrf52_lsm6dsl.c
+ * boards/arm/nrf52/nrf52840-dk/src/nrf52_lsm303agr.c
  *
- *   Copyright (C) 2019 Greg Nutt. All rights reserved.
+ *   Copyright (C) 2020 Greg Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,14 +45,14 @@
 #include <nuttx/board.h>
 #include "nrf52_i2c.h"
 #include "nrf52840-dk.h"
-#include <nuttx/sensors/lsm6dsl.h>
+#include <nuttx/sensors/lsm303agr.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_NRF52_I2C0_MASTER
-#  error "LSM6DSL driver requires CONFIG_NRF52_I2C0_MASTER to be enabled"
+#  error "LSM303AGR driver requires CONFIG_NRF52_I2C0_MASTER to be enabled"
 #endif
 
 /****************************************************************************
@@ -60,19 +60,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_lsm6dsl_initialize
+ * Name: nrf52_lsm303agr_initialize
  *
  * Description:
- *   Initialize I2C-based LSM6DSL.
+ *   Initialize I2C-based LSM303AGR.
  *
  ****************************************************************************/
 
-int nrf52_lsm6dsl_initialize(char *devpath)
+int nrf52_lsm303agr_initialize(char *devpath)
 {
   FAR struct i2c_master_s *i2c;
   int ret = OK;
 
-  sninfo("Initializing LMS6DSL!\n");
+  sninfo("Initializing LSM303AGR!\n");
 
 #ifdef CONFIG_NRF52_I2C0_MASTER
   i2c = nrf52_i2cbus_initialize(0);
@@ -81,18 +81,18 @@ int nrf52_lsm6dsl_initialize(char *devpath)
       return -ENODEV;
     }
 
-  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n",
+  sninfo("INFO: Initializing LSM303AGR accelero-magnet sensor over I2C%d\n",
          ret);
 
-  ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
+  ret = lsm303agr_sensor_register(devpath, i2c, LSM303AGRMAGNETO_ADDR);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n",
+      snerr("ERROR: Failed to initialize LSM303AGR acc-gyro driver %s\n",
             devpath);
       return -ENODEV;
     }
 
-  sninfo("INFO: LMS6DSL sensor has been initialized successfully\n");
+  sninfo("INFO: LSM303AGR sensor has been initialized successfully\n");
 #endif
 
   return ret;
