@@ -561,7 +561,6 @@ struct can_reader_s
 {
   struct list_node     list;
   sem_t                read_sem;
-  FAR struct file     *filep;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
 };
 
