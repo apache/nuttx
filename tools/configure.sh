@@ -68,10 +68,10 @@ OPTFILES="\
 # Parse command arguments
 
 unset boardconfig
+unset winnative
 unset appdir
 unset host
-unset wenv
-debug=n
+unset debug
 skip=0
 
 while [ ! -z "$1" ]; do
@@ -80,38 +80,24 @@ while [ ! -z "$1" ]; do
     shift
     appdir=$1
     ;;
-  -c )
-    host=windows
-    wenv=cygwin
+  -c | -g | -l | -m | -u )
+    winnative=n
+    host+=" $1"
+    ;;
+  -n )
+    winnative=y
+    host+=" $1"
     ;;
   -d )
-    debug=y
+    debug=-d
     set -x
-    ;;
-  -g )
-    host=windows
-    wenv=msys
     ;;
   -h )
     echo "$USAGE"
     exit 0
     ;;
-  -l )
-    host=linux
-    ;;
-  -m )
-    host=macos
-    ;;
-  -n )
-    host=windows
-    wenv=native
-    ;;
   -s )
     skip=1
-    ;;
-  -u )
-    host=windows
-    wenv=ubuntu
     ;;
   *)
     if [ ! -z "${boardconfig}" ]; then
@@ -204,14 +190,11 @@ fi
 # native host, then don't even check what is in the defconfig file.
 
 oldnative=`grep CONFIG_WINDOWS_NATIVE= ${src_config} | cut -d'=' -f2`
-if [ "X$host" != "Xwindows" -o "X$wenv" != "Xnative" ]; then
-  unset winnative
-else
-  if [ "X$host" == "Xwindows" -a "X$wenv" == "Xnative" ]; then
-    winnative=y
-  else
-    winnative=$oldnative
-  fi
+if [ -z "${oldnative}" ]; then
+  oldnative=n
+fi
+if [ -z "${winnative}" ]; then
+  winnative=$oldnative
 fi
 
 # If no application directory was provided on the command line and we are
@@ -296,73 +279,9 @@ if [ "X${defappdir}" = "Xy" ]; then
   fi
 fi
 
-if [ ! -z "$host" ]; then
-  sed -i -e "/CONFIG_HOST_LINUX/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_WINDOWS/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_MACOS/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_OTHER/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_NATIVE/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_CYGWIN/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_MSYS/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_UBUNTU/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_OTHER/d" ${dest_config}
-  sed -i -e "/CONFIG_SIM_X8664_MICROSOFT/d" ${dest_config}
-  sed -i -e "/CONFIG_SIM_X8664_SYSTEMV/d" ${dest_config}
-
-  case "$host" in
-  "linux")
-    echo "  Select CONFIG_HOST_LINUX=y"
-    echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
-    echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
-    ;;
-
-  "macos")
-    echo "  Select CONFIG_HOST_MACOS=y"
-    echo "CONFIG_HOST_MACOS=y" >> "${dest_config}"
-    ;;
-
-  "windows")
-    echo "  Select CONFIG_HOST_WINDOWS=y"
-    echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
-    echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
-
-    case "$wenv" in
-    "cygwin")
-      echo "  Select CONFIG_WINDOWS_CYGWIN=y"
-      echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
-      ;;
-
-    "msys")
-      echo "  Select CONFIG_WINDOWS_MSYS=y"
-      echo "CONFIG_WINDOWS_MSYS=y" >> "${dest_config}"
-      ;;
-
-    "ubuntu")
-      echo "  Select CONFIG_WINDOWS_UBUNTU=y"
-      echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
-      ;;
-
-    *)
-      echo "  Select CONFIG_WINDOWS_NATIVE=y"
-      echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
-      ;;
-    esac
-  esac
-fi
-
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-echo "  Refreshing..."
 cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 10; }
 
-MAKE_BIN=make
-if [ ! -z `which gmake 2>/dev/null` ]; then
-  MAKE_BIN=gmake
-fi
-
-if [ "X${debug}" = "Xy" ]; then
-  ${MAKE_BIN} olddefconfig V=1
-else
-  ${MAKE_BIN} olddefconfig 1>/dev/null
-fi
+./tools/sethost.sh $debug $host

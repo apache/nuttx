@@ -887,19 +887,19 @@ sethost.sh
 
   Or, if you are on a Windows/Cygwin 64-bit platform:
 
-    $ tools/sethost.sh -w
+    $ tools/sethost.sh -c
 
   Other options are available:
 
     $ ./sethost.sh -h
 
-    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [<config>]
+    USAGE: ./sethost.sh [-l|m|c|u|g|n] [<config>]
            ./sethost.sh -h
 
     Where:
-      -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux
-      -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under
-         Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin
+      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
+         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)
+         or Windows native (n).  Default Linux
       -h will show this help test and terminate
       <config> selects configuration file.  Default: .config
 
@@ -935,15 +935,15 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-w|l] [-c|u|n] [-a <appsdir>] [-n <nxdir>] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>
            ./testbuild.sh -h
 
     Where:
-      -w|l selects Windows (w) or Linux (l).  Default: Linux
-      -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under
-         Windows 10 (u), or Windows native (n).  Default Cygwin
+      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
+         Ubuntu under Windows 10 (u), or Windows native (n).  Default Linux
       -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
-      -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets
+      -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx
+      -j <ncpus> passed on to make.  Default:  No -j make option
       -d enables script debug output
       -x exit on build failures
       -h will show this help test and terminate
@@ -954,8 +954,8 @@ testbuild.sh
 
   These script needs two pieces of information.
 
-    a. A description of the platform that you are testing on.  This
-       description is provided by the optional -w, -l, -c, and -n options.
+    a. A description of the platform that you are testing on.  This description
+       is provided by the optional -l, -m, -c, -u, -g and -n options.
     b. A list of configurations to build.  That list is provided by a test
        list file.  The final, non-optional parameter, <testlist-file>,
        provides the path to that file.
