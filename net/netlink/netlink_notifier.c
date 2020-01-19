@@ -144,5 +144,5 @@ void netlink_notifier_signal(FAR struct netlink_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_NETLINK_RESPONSE, conn);
+  work_notifier_signal(WORK_NETLINK_RESPONSE, conn);
 }
