@@ -73,7 +73,13 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+/* g_current_regs holds a references to the current interrupt level
+ * register storage structure.  It is non-NULL only during interrupt
+ * processing.  Access to g_current_regs must be through the macro
+ * CURRENT_REGS for portability.
+ */
+
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -241,7 +247,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* And finally, enable interrupts */
 

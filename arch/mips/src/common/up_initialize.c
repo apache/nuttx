@@ -86,7 +86,7 @@ void up_initialize(void)
 {
   /* Initialize global variables */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Add any extra memory fragments to the memory manager */
 
