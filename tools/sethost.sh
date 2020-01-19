@@ -35,7 +35,6 @@
 progname=$0
 host=linux
 wenv=cygwin
-hsize=64
 unset configfile
 
 function showusage {
@@ -47,7 +46,6 @@ function showusage {
   echo "  -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux"
   echo "  -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under"
   echo "     Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin"
-  echo "  -32|64 selects 32- or 64-bit host.  Default 64"
   echo "  -h will show this help test and terminate"
   echo "  <config> selects configuration file.  Default: .config"
   exit 1
@@ -81,12 +79,6 @@ while [ ! -z "$1" ]; do
   -n )
     host=windows
     wenv=native
-    ;;
-  -32 )
-    hsize=32
-    ;;
-  -64 )
-    hsize=32
     ;;
   -h )
     showusage
@@ -241,12 +233,6 @@ else
         kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
       fi
     fi
-  fi
-
-  if [ "X$hsize" == "X32" ]; then
-    kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_M32
-  else
-    kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
   fi
 fi
 
