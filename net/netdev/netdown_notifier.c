@@ -151,7 +151,7 @@ void netdown_notifier_signal(FAR struct net_driver_s *dev)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_NET_DOWN, dev);
+  work_notifier_signal(WORK_NET_DOWN, dev);
 }
 
 #endif /* CONFIG_NETDOWN_NOTIFIER */

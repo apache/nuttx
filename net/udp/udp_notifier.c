@@ -215,7 +215,7 @@ void udp_readahead_signal(FAR struct udp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_UDP_READAHEAD, conn);
+  work_notifier_signal(WORK_UDP_READAHEAD, conn);
 }
 
 /****************************************************************************
@@ -244,7 +244,7 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_UDP_WRITEBUFFER, conn);
+  work_notifier_signal(WORK_UDP_WRITEBUFFER, conn);
 }
 #endif
 
