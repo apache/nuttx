@@ -173,6 +173,8 @@ function configure {
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_WINDOWS
 
+    kconfig-tweak --file $nuttx/.config --disable CONFIG_TOOLCHAIN_WINDOWS
+
     kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_NATIVE
     kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_CYGWIN
     kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_MSYS
