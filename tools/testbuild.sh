@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# testbuild.sh
+# tools/testbuild.sh
 #
 #   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
