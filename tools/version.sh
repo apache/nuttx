@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# version.sh
+# tools/version.sh
 #
 #   Copyright (C) 2011, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

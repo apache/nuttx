@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# tools/checkpatch.sh
 #
 # Copyright (C) 2019 Xiaomi
 #

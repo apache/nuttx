@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# refresh.sh
+# tools/refresh.sh
 #
 #   Copyright (C) 2014, 2016-2017, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

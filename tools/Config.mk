@@ -1,5 +1,5 @@
 ############################################################################
-# Config.mk
+# tools/Config.mk
 # Global build rules and macros.
 #
 #   Copyright (C) 2011, 2013-2014, 2018-2019 Gregory Nutt. All rights
