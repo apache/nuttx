@@ -40,7 +40,8 @@ USAGE="
 USAGE: ${0} [-d] [-s] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
-  -s Skip the .config/Make.defs existence check
+  -d enables script debug output
+  -s skip the .config/Make.defs existence check
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -49,10 +50,10 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
+  -a <app-dir> is the path to the apps/ directory, relative to the nuttx
+     directory
   <board-name> is the name of the board in the boards directory
   configs/<config-name> is the name of the board configuration sub-directory
-  <app-dir> is the path to the apps/ directory, relative to the nuttx
-     directory
 
 "
 
