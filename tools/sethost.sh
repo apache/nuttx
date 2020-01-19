@@ -32,8 +32,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-WD=$PWD
-
 progname=$0
 host=linux
 wenv=cygwin
@@ -203,10 +201,6 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" ]; then
   kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_UBUNTU
   kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_MSYS
   kconfig-tweak --file $nuttx/.config --disable CONFIG_WINDOWS_OTHER
-
-  kconfig-tweak --file $nuttx/.config --enable CONFIG_SIM_X8664_SYSTEMV
-  kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_X8664_MICROSOFT
-  kconfig-tweak --file $nuttx/.config --disable CONFIG_SIM_M32
 else
   echo "  Select CONFIG_HOST_WINDOWS=y"
 
@@ -256,7 +250,6 @@ else
   fi
 fi
 
-kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
 kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OTHER
 
 echo "  Refreshing..."

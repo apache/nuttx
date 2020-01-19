@@ -174,11 +174,13 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-s] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
+  fprintf(stderr, "  -s:\n");
+  fprintf(stderr, "    Skip the .config/Make.defs existence check\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
@@ -197,13 +199,10 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    instead of Windows style paths like C:\\Program Files are used.  POSIX\n");
   fprintf(stderr, "    style paths are used by default.\n");
 #endif
-  fprintf(stderr, "  -s:\n");
-  fprintf(stderr, "    Skip the .config/Make.defs existence check\n");
   fprintf(stderr, "  [-l|m|c|u|g|n]\n");
   fprintf(stderr, "    Selects the host environment.\n");
   fprintf(stderr, "    -l Selects the Linux (l) host environment.\n");
   fprintf(stderr, "    -m Selects the macOS (m) host environment.\n");
-  fprintf(stderr, "  [-c|u|g|n] selects the Windows host and a Windows host environment:\n");
   fprintf(stderr, "    -c Selects the Windows host and Cygwin (c) environment.\n");
   fprintf(stderr, "    -u Selects the Windows host and Ubuntu under Windows 10 (u) environment.\n");
   fprintf(stderr, "    -g Selects the Windows host and the MinGW/MSYS environment.\n");
@@ -325,7 +324,7 @@ static void parse_args(int argc, char **argv)
 
   if (optind >= argc)
     {
-      fprintf(stderr, "ERROR: Missing <board-name>%c<config-name>\n", g_delim);
+      fprintf(stderr, "ERROR: Missing <board-name>:<config-name>\n");
       show_usage(argv[0], EXIT_FAILURE);
     }
 
@@ -899,7 +898,7 @@ static void check_appdir(void)
 
       /* Try ../apps-xx.yy where xx.yy is the version string */
 
-      snprintf(tmp, 16, ".%capps-%s", g_delim, g_verstring);
+      snprintf(tmp, 16, "..%capps-%s", g_delim, g_verstring);
       debug("check_appdir: Try appdir=%s\n", tmp);
       if (verify_appdir(tmp))
         {
@@ -1151,7 +1150,7 @@ static void copy_optional(void)
         {
           char *optsrc = strdup(g_buffer);
 
-          snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
+          snprintf(g_buffer, BUFFER_SIZE, "%s%c%s", g_topdir, g_delim, g_optfiles[i]);
 
           debug("copy_optional: Copying from %s to %s\n", optsrc, g_buffer);
           copy_file(optsrc, g_buffer, 0644);
@@ -1232,7 +1231,7 @@ static void set_host(const char *destconfig)
 
       case HOST_MACOS:
         {
-          printf("  Select the Linux host\n");
+          printf("  Select the macOS host\n");
 
           disable_feature(destconfig, "CONFIG_HOST_LINUX");
           disable_feature(destconfig, "CONFIG_HOST_WINDOWS");
@@ -1255,7 +1254,6 @@ static void set_host(const char *destconfig)
           disable_feature(destconfig, "CONFIG_HOST_LINUX");
           disable_feature(destconfig, "CONFIG_HOST_MACOS");
 
-          disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
           disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
 
           enable_feature(destconfig, "CONFIG_SIM_X8664_MICROSOFT");
@@ -1272,7 +1270,7 @@ static void set_host(const char *destconfig)
                 break;
 
               case WINDOWS_MSYS:
-                printf("  Select Ubuntu for Windows 10 host\n");
+                printf("  Select Windows/MSYS host\n");
                 disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 enable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
                 disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");

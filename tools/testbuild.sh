@@ -34,8 +34,6 @@
 
 WD=$PWD
 nuttx=$WD/../nuttx
-TOOLSDIR=$nuttx/tools
-UNLINK=$TOOLSDIR/unlink.sh
 
 progname=$0
 host=linux
@@ -49,7 +47,7 @@ unset JOPTION
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-j <ncpus>] [-a <apps-dir>] [-t <nuttx-dir><testlist-file>"
+  echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
@@ -263,7 +261,7 @@ function dotest {
 # Perform the build test for each entry in the test list file
 
 if [ ! -d $APPSDIR ]; then
-  export "ERROR: No directory found at $APPSDIR"
+  echo "ERROR: No directory found at $APPSDIR"
   exit 1
 fi
 
