@@ -100,38 +100,38 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (g_current_regs)
+  if (CURRENT_REGS)
     {
       _alert("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
-            g_current_regs[REG_MFLO], g_current_regs[REG_MFHI],
-            g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
+            CURRENT_REGS[REG_MFLO], CURRENT_REGS[REG_MFHI],
+            CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_STATUS]);
       _alert("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
-            g_current_regs[REG_AT], g_current_regs[REG_V0],
-            g_current_regs[REG_V1], g_current_regs[REG_A0],
-            g_current_regs[REG_A1], g_current_regs[REG_A2],
-            g_current_regs[REG_A3]);
+            CURRENT_REGS[REG_AT], CURRENT_REGS[REG_V0],
+            CURRENT_REGS[REG_V1], CURRENT_REGS[REG_A0],
+            CURRENT_REGS[REG_A1], CURRENT_REGS[REG_A2],
+            CURRENT_REGS[REG_A3]);
       _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x "
              "T6:%08x T7:%08x\n",
-            g_current_regs[REG_T0], g_current_regs[REG_T1],
-            g_current_regs[REG_T2], g_current_regs[REG_T3],
-            g_current_regs[REG_T4], g_current_regs[REG_T5],
-            g_current_regs[REG_T6], g_current_regs[REG_T7]);
+            CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
+            CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3],
+            CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
+            CURRENT_REGS[REG_T6], CURRENT_REGS[REG_T7]);
       _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
              "S6:%08x S7:%08x\n",
-            g_current_regs[REG_S0], g_current_regs[REG_S1],
-            g_current_regs[REG_S2], g_current_regs[REG_S3],
-            g_current_regs[REG_S4], g_current_regs[REG_S5],
-            g_current_regs[REG_S6], g_current_regs[REG_S7]);
+            CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
+            CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3],
+            CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
+            CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
 #ifdef MIPS32_SAVE_GP
       _alert("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
-            g_current_regs[REG_T8], g_current_regs[REG_T9],
-            g_current_regs[REG_GP], g_current_regs[REG_SP],
-            g_current_regs[REG_FP], g_current_regs[REG_RA]);
+            CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
+            CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
+            CURRENT_REGS[REG_FP], CURRENT_REGS[REG_RA]);
 #else
       _alert("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
-            g_current_regs[REG_T8], g_current_regs[REG_T9],
-            g_current_regs[REG_SP], g_current_regs[REG_FP],
-            g_current_regs[REG_RA]);
+            CURRENT_REGS[REG_T8], CURRENT_REGS[REG_T9],
+            CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
+            CURRENT_REGS[REG_RA]);
 #endif
     }
 }
@@ -202,7 +202,7 @@ void up_dumpstate(void)
       sp = g_intstackbase;
       _alert("sp:     %08x\n", sp);
     }
-  else if (g_current_regs)
+  else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       up_stackdump(istackbase - istacksize, istackbase);

@@ -86,7 +86,7 @@ static void _up_assert(int errorcode)
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || running_task()->flink == NULL)
+  if (CURRENT_REGS || running_task()->flink == NULL)
     {
       up_irq_save();
       for (; ; )
