@@ -893,14 +893,13 @@ sethost.sh
 
     $ ./sethost.sh -h
 
-    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [-32|64] [<config>]
+    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [<config>]
            ./sethost.sh -h
 
     Where:
       -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux
       -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under
          Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin
-      -32|64 selects 32- or 64-bit host.  Default 64
       -h will show this help test and terminate
       <config> selects configuration file.  Default: .config
 
@@ -936,14 +935,13 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-w|l] [-c|u|n] [-s] [-a <appsdir>] [-n <nxdir>] <testlist-file>
+    USAGE: ./testbuild.sh [-w|l] [-c|u|n] [-a <appsdir>] [-n <nxdir>] <testlist-file>
            ./testbuild.sh -h
 
     Where:
       -w|l selects Windows (w) or Linux (l).  Default: Linux
       -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under
          Windows 10 (u), or Windows native (n).  Default Cygwin
-      -s Use C++ unsigned long size_t in new operator. Default unsigned int
       -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
       -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets
       -d enables script debug output

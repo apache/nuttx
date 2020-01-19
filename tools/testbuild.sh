@@ -38,7 +38,6 @@ nuttx=$WD/../nuttx
 progname=$0
 host=linux
 wenv=cygwin
-sizet=uint
 APPSDIR=../apps
 MAKE_FLAGS=-i
 MAKE=make
@@ -47,14 +46,13 @@ unset JOPTION
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
+  echo "USAGE: $progname [-w|l] [-c|u|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
   echo "  -w|l selects Windows (w) or Linux (l).  Default: Linux"
   echo "  -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under"
   echo "     Windows 10 (u), or Windows native (n).  Default Cygwin"
-  echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
   echo "  -d enables script debug output"
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
@@ -93,10 +91,6 @@ while [ ! -z "$1" ]; do
   -n )
     host=windows
     wenv=native
-    ;;
-  -s )
-    host=windows
-    sizet=long
     ;;
   -x )
     MAKE_FLAGS='--silent --no-print-directory'
@@ -214,14 +208,6 @@ function configure {
 
   kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
   kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_OTHER
-
-  if [ "X$sizet" == "Xlong" ]; then
-    echo "  Select CONFIG_CXX_NEWLONG=y"
-    kconfig-tweak --file $nuttx/.config --enable CONFIG_CXX_NEWLONG
-  else
-    echo "  Disable CONFIG_CXX_NEWLONG"
-    kconfig-tweak --file $nuttx/.config --disable CONFIG_CXX_NEWLONG
-  fi
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep TOOLCHAIN $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_GNU=y | grep =y`
