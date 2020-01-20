@@ -1,6 +1,6 @@
 /* This file is generated at May 18 2016  16:19:52 */
 
-const unsigned long scuIsopProgArray[] = {
+const unsigned long scu_isopprog_array[] = {
 0xf7f8d600, 0xa2024f86, 0x0001a200, 0x18004081,
 0x00008014, 0x00000000, 0x0000a207, 0x00000000,
 0x0000a070, 0xac2d4ec6, 0xd000ac27, 0x50a2e444,
@@ -441,4 +441,4 @@ const unsigned long scuIsopProgArray[] = {
 0xfc311011, 0xfc212000, 0x800621fc, 0xf338d100,
 0xf418d300, 0x1d320103, 0x0002f531, 0x0000a070,
 };
-const unsigned long sizeOfscuIsopProgArray = 7024; /* 0x00001b70 */
+const unsigned long sizeof_scu_isopprog_array = 7024; /* 0x00001b70 */

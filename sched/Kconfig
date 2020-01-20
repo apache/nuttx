@@ -455,7 +455,7 @@ config RR_INTERVAL
 	default 0
 	---help---
 		The round robin timeslice will be set this number of milliseconds;
-		Round roben scheduling (SCHED_RR) is enabled by setting this
+		Round robin scheduling (SCHED_RR) is enabled by setting this
 		interval to a positive, non-zero value.
 
 config SCHED_SPORADIC

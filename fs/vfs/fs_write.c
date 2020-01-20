@@ -67,7 +67,7 @@
  *   Equivalent to the standard write() function except that is accepts a
  *   struct file instance instead of a file descriptor.  It is functionally
  *   equivalent to write() except that in addition to the differences in
- *   input paramters:
+ *   input parameters:
  *
  *  - It does not modify the errno variable,
  *  - It is not a cancellation point, and
