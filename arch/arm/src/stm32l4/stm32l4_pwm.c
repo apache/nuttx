@@ -258,8 +258,10 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 static int pwm_lptimer(FAR struct pwm_lowerhalf_s *dev,
                        FAR const struct pwm_info_s *info);
 #  endif
-static int pwm_configure(FAR struct pwm_lowerhalf_s *dev);
 #endif
+
+static int pwm_configure(FAR struct pwm_lowerhalf_s *dev);
+
 static int pwm_soft_break(FAR struct pwm_lowerhalf_s *dev, bool state); /* REVISIT: valid for all timers? */
 static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
                           uint32_t ccr);
@@ -3001,7 +3003,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
        * value.
        */
 
-      priv->prev  = stm32l4pwm_pulsecount(info->count);
+      priv->prev  = pwm_pulsecount(info->count);
       pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
 
       /* Generate an update event to reload the prescaler.  This should
@@ -3015,7 +3017,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
        */
 
       priv->count = info->count;
-      priv->curr  = stm32l4pwm_pulsecount(info->count - priv->prev);
+      priv->curr  = pwm_pulsecount(info->count - priv->prev);
       pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
@@ -3402,7 +3404,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
        */
 
       priv->prev = priv->curr;
-      priv->curr = stm32l4pwm_pulsecount(priv->count - priv->prev);
+      priv->curr = pwm_pulsecount(priv->count - priv->prev);
       pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
@@ -3445,7 +3447,7 @@ static int pwm_tim8interrupt(int irq, void *context, FAR void *arg)
 #endif /* CONFIG_STM32L4_TIM8_PWM */
 
 /****************************************************************************
- * Name: stm32l4pwm_pulsecount
+ * Name: pwm_pulsecount
  *
  * Description:
  *   Pick an optimal pulse count to program the RCR.
@@ -3458,7 +3460,7 @@ static int pwm_tim8interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static uint8_t stm32l4pwm_pulsecount(uint32_t count)
+static uint8_t pwm_pulsecount(uint32_t count)
 {
   /* The the remaining pulse count is less than or equal to the maximum, the
    * just return the count.
@@ -3491,7 +3493,7 @@ static uint8_t stm32l4pwm_pulsecount(uint32_t count)
 #endif /* HAVE_PWM_INTERRUPT */
 
 /****************************************************************************
- * Name: stm32l4pwm_setapbclock
+ * Name: pwm_setapbclock
  *
  * Description:
  *   Enable or disable APB clock for the timer peripheral
@@ -3502,7 +3504,7 @@ static uint8_t stm32l4pwm_pulsecount(uint32_t count)
  *
  ****************************************************************************/
 
-static int stm32l4pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv,
+static int pwm_setapbclock(FAR struct stm32l4_pwmtimer_s *priv,
                                   bool on)
 {
   uint32_t en_bit;
@@ -3740,7 +3742,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   /* Enable APB1/2 clocking for timer. */
 
-  stm32l4pwm_setapbclock(priv, true);
+  pwm_setapbclock(priv, true);
 
   pwm_dumpregs(dev, "Initially");
 
@@ -3823,7 +3825,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable APB1/2 clocking for timer. */
 
-  ret = stm32l4pwm_setapbclock(priv, false);
+  ret = pwm_setapbclock(priv, false);
   if (ret < 0)
     {
       goto errout;
@@ -4174,7 +4176,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, stm32l4pwm_tim1interrupt, NULL);
+        irq_attach(lower->irq, pwm_tim1interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
@@ -4211,7 +4213,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer)
         /* Attach but disable the TIM8 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-        irq_attach(lower->irq, stm32l4pwm_tim8interrupt, NULL);
+        irq_attach(lower->irq, pwm_tim8interrupt, NULL);
         up_disable_irq(lower->irq);
 #endif
         break;
