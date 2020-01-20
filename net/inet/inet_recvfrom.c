@@ -1086,6 +1086,10 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
            */
 
           ret = net_timedwait(&state. ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
+          if (ret == -ETIMEDOUT)
+            {
+              ret = -EAGAIN;
+            }
 
           /* Make sure that no further events are processed */
 
@@ -1236,6 +1240,10 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
            */
 
           ret = net_timedwait(&state.ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
+          if (ret == -ETIMEDOUT)
+            {
+              ret = -EAGAIN;
+            }
 
           /* Make sure that no further events are processed */
 

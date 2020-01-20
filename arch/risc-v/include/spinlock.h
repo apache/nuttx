@@ -87,10 +87,10 @@
 
 /* The Type of a spinlock.
  *
- * RISC-V architecture introuced the concept of exclusive accesses to memory
- * locations in the form of the Load-Reserved (LR) and Store-Conditional
- * (SC) instructions. RV64 supports doubleword aligned data only but others
- * supports word aligned data.
+ * RISC-V architecture (in the standard atomic-instruction extension "A")
+ * supports exclusive accesses to memory locations in the form of the
+ * Load-Reserved (LR) and Store-Conditional (SC) instructions. RV64 supports
+ * doubleword aligned data only but others supports word aligned data.
  *
  * RISC-V architecture supports fence instruction to ensure memory ordering
  */

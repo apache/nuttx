@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mkctags.sh
+# tools/mkctags.sh
 #
 #   Copyright (C) 2013 Ken pettit All rights reserved.
 #   Author: Ken pettit <pettitkd@gmail.com>

@@ -21912,7 +21912,7 @@ Additional new features and extended functionality:
         number as an argument.  This makes it possible to have multiple
         instances of the NX server running on boards that support multiple
         displays.  Also includes updates to boardctl() to accept display
-        number paramters.  From Gregory Nutt.
+        number parameters.  From Gregory Nutt.
       - Graphics:  nx_openwindow() and nxtk_openwindow() now accept an
         additional 'flag' parameter.  This argument is current used only to
         select a RAM backed, per-window framebuffer.  From Gregory Nutt.
@@ -25651,7 +25651,7 @@ information):
 NuttX-8.2 Release Notes
 ------------------------
 
-The 133nd release of NuttX, Version 8.3, was made on November 16, 2019,
+The 133rd release of NuttX, Version 8.2, was made on November 16, 2019,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-8.2.tar.gz and
 apps-8.2.tar.gz.  These are available from:
@@ -26590,7 +26590,7 @@ information):
       - apps/system/cu/: (1) Fix early exit.  getc(stdin) can return 0 the
         first time around.  (2) Set optind to zero.  getopt() was being
         left in a bad state, causing parsing errors on second use.  (3) Fix
-        priority of cu_listen().  (4) Add suppor for -h.  From David
+        priority of cu_listen().  (4) Add support for -h.  From David
         Alessio.
       - apps/system/lzf/: Check the protection by CONFIG_SYSTEM_LZF !=
         CONFIG_m (not elf binary) instead of CONFIG_KERNEL_BUILD.  From

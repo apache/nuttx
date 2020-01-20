@@ -88,7 +88,9 @@ if "%usemklink%"=="y" (
 goto :End
 )
 
-xcopy %src% %link% /c /q /s /e /y /i
+rem %src% may include forward slashes.  That upsets xcopy, but not GNUWin32 cp
+rem xcopy %src% %link% /c /q /s /e /y /i
+cp -dR %src% %link%
 echo FAKELNK > %link%\.fakelnk
 goto :End
 

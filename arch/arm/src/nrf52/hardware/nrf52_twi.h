@@ -169,7 +169,7 @@
 
 #define TWIM_FREQUENCY_100KBPS              (0x01980000) /* 100 kbps */
 #define TWIM_FREQUENCY_250KBPS              (0x04000000) /* 250 kbps */
-#define TWIM_FREQUENCY_400KBPS              (0x64000000) /* 400 kbps */
+#define TWIM_FREQUENCY_400KBPS              (0x06400000) /* 400 kbps */
 
 /* RXDMAXCNT Register */
 

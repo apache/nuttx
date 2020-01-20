@@ -75,6 +75,7 @@
 #include "neighbor/neighbor.h"
 #include "udp/udp.h"
 #include "devif/devif.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -713,8 +714,21 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
+          unsigned int count;
+          int blresult;
+
+          /* iob_copyin might wait for buffers to be freed, but if
+           * network is locked this might never happen, since network
+           * driver is also locked, therefore we need to break the lock
+           */
+
+          blresult = net_breaklock(&count);
           ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
                            IOBUSER_NET_SOCK_UDP);
+          if (blresult >= 0)
+            {
+              net_restorelock(count);
+            }
         }
 
       if (ret < 0)

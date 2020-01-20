@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* CONFIG_CDCACM
  *   Enable compilation of the USB serial driver
  * CONFIG_CDCACM_EP0MAXPACKET
@@ -259,6 +260,7 @@
 #endif
 
 /* IOCTL Commands ***********************************************************/
+
 /* The USB serial driver will support a subset of the TIOC IOCTL commands
  * defined in include/nuttx/serial/tioctl.h.  This subset includes:
  *
@@ -368,7 +370,7 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
  *
  * Returned Value:
  *   Zero (OK) means that the driver was successfully registered.  On any
- *   failure, a negated errno value is retured.
+ *   failure, a negated errno value is returned.
  *
  ****************************************************************************/
 

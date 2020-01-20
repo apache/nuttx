@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_wdt.h
+ * boards/arm/nrf52/nrf52840-dk/src/nrf52_lsm303agr.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2020 Greg Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,73 +30,70 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  ****************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
-#define __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#ifdef CONFIG_WATCHDOG
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include "nrf52_i2c.h"
+#include "nrf52840-dk.h"
+#include <nuttx/sensors/lsm303agr.h>
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
 
-enum wdt_behaviour_e
-{
-  WDG_PAUSE = 0,
-  WDG_RUN = 1
-};
+#ifndef CONFIG_NRF52_I2C0_MASTER
+#  error "LSM303AGR driver requires CONFIG_NRF52_I2C0_MASTER to be enabled"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Name: nrf52_wdt_initialize
+ * Name: nrf52_lsm303agr_initialize
  *
  * Description:
- *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
- *   disabled.
- *
- * Input Parameters:
- *   devpath    - The full path to the watchdog.  This should be of the form
- *                /dev/watchdog0
- *   mode_sleep - The behaviour of watchdog when CPU enter sleep mode
- *   mode_halt  - The behaviour of watchdog when CPU was  HALT by
- *                debugger
- *
- * Returned Values:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   Initialize I2C-based LSM303AGR.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NRF52_WDT
-int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
-                         int16_t mode_halt);
+int nrf52_lsm303agr_initialize(char *devpath)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret = OK;
+
+  sninfo("Initializing LSM303AGR!\n");
+
+#ifdef CONFIG_NRF52_I2C0_MASTER
+  i2c = nrf52_i2cbus_initialize(0);
+  if (i2c == NULL)
+    {
+      return -ENODEV;
+    }
+
+  sninfo("INFO: Initializing LSM303AGR accelero-magnet sensor over I2C%d\n",
+         ret);
+
+  ret = lsm303agr_sensor_register(devpath, i2c, LSM303AGRMAGNETO_ADDR);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize LSM303AGR acc-gyro driver %s\n",
+            devpath);
+      return -ENODEV;
+    }
+
+  sninfo("INFO: LSM303AGR sensor has been initialized successfully\n");
 #endif
 
-#undef EXTERN
-#if defined(__cplusplus)
+  return ret;
 }
-#endif
-
-#endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_H */
