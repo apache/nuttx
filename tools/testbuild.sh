@@ -123,10 +123,21 @@ if [ ! -d "$nuttx" ]; then
   showusage
 fi
 
+if [ ! -d $APPSDIR ]; then
+  echo "ERROR: No directory found at $APPSDIR"
+  exit 1
+fi
+
+export APPSDIR
+
+testlist=`grep -v "^-" $testfile`
+blacklist=`grep "^-" $testfile`
+
+cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
+
 # Clean up after the last build
 
 function distclean {
-  cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
   if [ -f .config ]; then
     echo "  Cleaning..."
     ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
@@ -136,9 +147,8 @@ function distclean {
 # Configure for the next build
 
 function configure {
-  cd $nuttx/tools || { echo "ERROR: failed to CD to $nuttx/tools"; exit 1; }
   echo "  Configuring..."
-  ./configure.sh ${HOPTION} $config
+  ./tools/configure.sh ${HOPTION} $config
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_*=y | grep =y`
@@ -156,7 +166,6 @@ function configure {
 # Perform the next build
 
 function build {
-  cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
   ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
@@ -165,37 +174,16 @@ function build {
 # Coordinate the steps for the next build test
 
 function dotest {
-  echo "------------------------------------------------------------------------------------"
-  distclean
-  configure
-  build
-}
-
-# Perform the build test for each entry in the test list file
-
-if [ ! -d $APPSDIR ]; then
-  echo "ERROR: No directory found at $APPSDIR"
-  exit 1
-fi
-
-export APPSDIR
-
-# Shouldn't have to do this
-
-testlist=`cat $testfile`
-
-#while read -r line || [[ -n $line ]]; do
-for line in $testlist; do
   echo "===================================================================================="
-  firstch=${line:0:1}
-  if [ "X$firstch" == "X#" ]; then
-    echo "Skipping: $line"
+  config=`echo $1 | cut -d',' -f1`
+  re=\\b${config/\//:}\\b
+  if [[ $blacklist =~ $re ]]; then
+    echo "Skipping: $1"
   else
-    echo "Configuration/Tool: $line"
+    echo "Configuration/Tool: $1"
 
     # Parse the next line
 
-    config=`echo $line | cut -d',' -f1`
     configdir=`echo $config | cut -s -d':' -f2`
     if [ -z "${configdir}" ]; then
       configdir=`echo $config | cut -s -d'/' -f2`
@@ -216,8 +204,8 @@ for line in $testlist; do
     fi
 
     unset toolchain;
-    if [ "X$config" != "X$line" ]; then
-      toolchain=`echo $line | cut -d',' -f2`
+    if [ "X$config" != "X$1" ]; then
+      toolchain=`echo $1 | cut -d',' -f2`
       if [ -z "$toolchain" ]; then
         echo "  Warning: no tool configuration"
       fi
@@ -225,9 +213,26 @@ for line in $testlist; do
 
     # Perform the build test
 
-    dotest
+    echo "------------------------------------------------------------------------------------"
+    distclean
+    configure
+    build
   fi
-  cd $WD || { echo "ERROR: Failed to CD to $WD"; exit 1; }
-done # < $testfile
+}
+
+# Perform the build test for each entry in the test list file
+
+for line in $testlist; do
+  firstch=${line:0:1}
+  if [ "X$firstch" == "X/" ]; then
+    dir=`echo $line | cut -d',' -f1`
+    list=`find boards$dir -name defconfig | cut -d'/' -f4,6`
+    for i in ${list}; do
+      dotest $i${line/$dir/}
+    done
+  elif [ "X$firstch" != "X#" ]; then
+    dotest $line
+  fi
+done
 
 echo "===================================================================================="

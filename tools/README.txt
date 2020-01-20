@@ -963,21 +963,20 @@ testbuild.sh
   The test list file is a sequence of build descriptons, one per line.  One
   build descriptions consists of two comma separated values.  For example:
 
-    stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+    stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+    /arm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
 
   The first value is the usual configuration description of the form
-  form <board-name>/<configuration-name> and must correspond to a
-  configuration in the nuttx/boards directory.
+  <board-name>:<configuration-name> or /<folder-name> and must correspond to a
+  configuration or folder in the nuttx/boards directory.
 
   The second value is valid name for a toolchain configuration to use
   when building the configuration.  The set of valid toolchain
   configuration names depends on the underlying architecture of the
   configured board.
 
-  NOTE: The environment variable APPSDIR should be set to the relative
-  path to the application directory when running this script like:
-
-    $ export APPSDIR=../apps
+  The prefix '-' can be used to skip a configruation:
+  -stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
 
 uncrustify.cfg
 --------------
