@@ -908,10 +908,11 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
     {
 #ifdef CONFIG_TIVA_HCIUART_SW_TXFLOW
       if (tiva_gpioread(config->cts_gpio))
-      {
+        {
           break;
-      }
+        }
 #endif
+
       /* Is the transmit data register empty?
        *
        * Transmit data register empty
@@ -1135,6 +1136,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
               tiva_gpiowrite(config->rts_gpio, true);
             }
 #endif
+
           /* Received data ready... copy data from the Rx FIFO to the Rx
            * buffer.
            */
@@ -1150,6 +1152,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
               tiva_gpiowrite(config->rts_gpio, false);
             }
 #endif
+
           /* Is there anything in the Rx buffer?  Has the user registered an
            * Rx callback function?
            */
@@ -1508,6 +1511,7 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   while (remaining > 0)
     {
       /* Copy bytes to the tail of the Tx buffer */
+
       /* Get a copy of the rxhead and rxtail indices of the Tx buffer */
 
       txhead = state->txhead;
@@ -1675,32 +1679,29 @@ static void hciuart_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
+
         /* Should not get here */
 
         break;
@@ -1813,12 +1814,6 @@ hciuart_instantiate(enum hciuart_devno_e uart)
  *   Performs the low-level, one-time UART initialization.  This must be
  *   called before hciuart_instantiate.
  *
- * Input Paramters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 void hciuart_initialize(void)
@@ -1830,7 +1825,7 @@ void hciuart_initialize(void)
 
   /* Configure all UARTs */
 
-  for (i = 0; i < sizeof(g_hciuarts)/sizeof(g_hciuarts[0]); i++)
+  for (i = 0; i < sizeof(g_hciuarts) / sizeof(g_hciuarts[0]); i++)
     {
       config = g_hciuarts[i];
       if (config != NULL)

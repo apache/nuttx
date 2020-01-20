@@ -86,12 +86,6 @@ const struct btuart_lowerhalf_s *hciuart_instantiate(enum hciuart_devno_e uart);
  *   Performs the low-level, one-time USART initialization.  This must be
  *   called before hciuart_instantiate.
  *
- * Input Paramters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 void hciuart_initialize(void);
@@ -104,12 +98,6 @@ void hciuart_initialize(void);
  *   to the point where the DMA half/full interrupt has triggered.
  *
  *   This function should be called from a timer or other periodic context.
- *
- * Input Paramters:
- *   None
- *
- * Returned Value:
- *   None
  *
  ****************************************************************************/
 
