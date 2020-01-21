@@ -241,41 +241,6 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
- * Name: inet_recvfrom
- *
- * Description:
- *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  inet_recvfrom() receives messages from
- *   a socket, and may be used to receive data on a socket whether or not it
- *   is connection-oriented.
- *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
- *   modified on return to indicate the actual size of the address stored
- *   there.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters received.  If no data is
- *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
- *
- ****************************************************************************/
-
-ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                      int flags, FAR struct sockaddr *from,
-                      FAR socklen_t *fromlen);
-
-/****************************************************************************
  * Name: inet_close
  *
  * Description:
