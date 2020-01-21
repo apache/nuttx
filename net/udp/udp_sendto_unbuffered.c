@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/udp/udp_psock_sendto_unbuffered.c
+ * net/udp/udp_sendto_unbuffered.c
  *
  *   Copyright (C) 2007-2009, 2011-2016, 2018-2019 Gregory Nutt. All rights
  *     reserved.
