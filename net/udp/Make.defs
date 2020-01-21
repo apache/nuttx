@@ -40,6 +40,8 @@ ifneq ($(CONFIG_NET_UDP_NO_STACK),y)
 
 # Socket layer
 
+SOCK_CSRCS += udp_recvfrom.c
+
 ifeq ($(CONFIG_NET_UDPPROTO_OPTIONS),y)
 SOCK_CSRCS += udp_setsockopt.c
 endif
