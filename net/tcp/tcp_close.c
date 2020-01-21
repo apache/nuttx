@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/inet/inet_close.c
+ * net/tcp/tcp_close.c
  *
- *   Copyright (C) 2007-2017, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,38 +38,25 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET_TCP
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
 #include <assert.h>
 
-#include <arch/irq.h>
-
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
-#include <nuttx/net/udp.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "pkt/pkt.h"
-#include "local/local.h"
 #include "socket/socket.h"
-#include "usrsock/usrsock.h"
-#include "inet/inet.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 struct tcp_close_s
 {
   FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
@@ -77,7 +64,6 @@ struct tcp_close_s
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
 };
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -85,22 +71,8 @@ struct tcp_close_s
 
 /****************************************************************************
  * Name: tcp_close_eventhandler
- *
- * Description:
- *   Handle network callback events.
- *
- * Input Parameters:
- *   conn - TCP connection structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called from normal user-level logic
- *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        FAR void *pvconn, FAR void *pvpriv,
                                        uint16_t flags)
@@ -197,7 +169,6 @@ end_wait:
   ninfo("Resuming\n");
   return flags;
 }
-#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: tcp_close_txnotify
@@ -215,7 +186,6 @@ end_wait:
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static inline void tcp_close_txnotify(FAR struct socket *psock,
                                       FAR struct tcp_conn_s *conn)
 {
@@ -246,7 +216,6 @@ static inline void tcp_close_txnotify(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_IPv6 */
 }
-#endif /* NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Name: tcp_close_disconnect
@@ -265,7 +234,6 @@ static inline void tcp_close_txnotify(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#ifdef NET_TCP_HAVE_STACK
 static inline int tcp_close_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
@@ -389,215 +357,52 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   net_unlock();
   return ret;
 }
-#endif /* NET_TCP_HAVE_STACK */
-
-/****************************************************************************
- * Name: udp_close
- *
- * Description:
- *   Break any current UDP connection
- *
- * Input Parameters:
- *   conn - UDP connection structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called from normal user-level logic
- *
- ****************************************************************************/
-
-#ifdef NET_UDP_HAVE_STACK
-static inline int udp_close(FAR struct socket *psock)
-{
-  FAR struct udp_conn_s *conn;
-  unsigned int timeout = UINT_MAX;
-  int ret;
-
-  /* Interrupts are disabled here to avoid race conditions */
-
-  net_lock();
-
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn != NULL);
-
-#ifdef CONFIG_NET_SOLINGER
-  /* SO_LINGER
-   *   Lingers on a close() if data is present. This option controls the
-   *   action taken when unsent messages queue on a socket and close() is
-   *   performed. If SO_LINGER is set, the system shall block the calling
-   *   thread during close() until it can transmit the data or until the
-   *   time expires. If SO_LINGER is not specified, and close() is issued,
-   *   the system handles the call in a way that allows the calling thread
-   *   to continue as quickly as possible. This option takes a linger
-   *   structure, as defined in the <sys/socket.h> header, to specify the
-   *   state of the option and linger interval.
-   */
-
-  if (_SO_GETOPT(psock->s_options, SO_LINGER))
-    {
-      timeout = _SO_TIMEOUT(psock->s_linger);
-    }
-#endif
-
-  /* Wait until for the buffered TX data to be sent. */
-
-  ret = udp_txdrain(psock, timeout);
-  if (ret < 0)
-    {
-      /* udp_txdrain may fail, but that won't stop us from closing
-       * the socket.
-       */
-
-      nerr("ERROR: udp_txdrain() failed: %d\n", ret);
-    }
-
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-  /* Free any semi-permanent write buffer callback in place. */
-
-  if (psock->s_sndcb != NULL)
-    {
-      udp_callback_free(conn->dev, conn, psock->s_sndcb);
-      psock->s_sndcb = NULL;
-    }
-#endif
-
-  /* And free the connection structure */
-
-  conn->crefs = 0;
-  udp_free(psock->s_conn);
-  net_unlock();
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_close
+ * Name: tcp_close
  *
  * Description:
- *   Performs the close operation on an AF_INET or AF_INET6 socket instance
+ *   Break any current TCP connection
  *
  * Input Parameters:
- *   psock   Socket instance
- *
- * Returned Value:
- *   0 on success; -1 on error with errno set appropriately.
+ *   psock - An instance of the internal socket structure.
  *
  * Assumptions:
+ *   Called from normal user-level logic
  *
  ****************************************************************************/
 
-int inet_close(FAR struct socket *psock)
+int tcp_close(FAR struct socket *psock)
 {
-  /* Perform some pre-close operations for the AF_INET/AF_INET6 address
-   * types.
-   */
+  FAR struct tcp_conn_s *conn = psock->s_conn;
+  int ret;
 
-  switch (psock->s_type)
+  /* Perform the disconnection now */
+
+  tcp_unlisten(conn); /* No longer accepting connections */
+  conn->crefs = 0;    /* Discard our reference to the connection */
+
+  /* Break any current connections and close the socket */
+
+  ret = tcp_close_disconnect(psock);
+  if (ret < 0)
     {
-#ifdef CONFIG_NET_TCP
-      case SOCK_STREAM:
-        {
-#ifdef NET_TCP_HAVE_STACK
-          FAR struct tcp_conn_s *conn = psock->s_conn;
-          int ret;
+      /* This would normally occur only if there is a timeout
+       * from a lingering close.
+       */
 
-          /* Is this the last reference to the connection structure (there
-           * could be more if the socket was dup'ed).
-           */
-
-          if (conn->crefs <= 1)
-            {
-              /* Yes... then perform the disconnection now */
-
-              tcp_unlisten(conn); /* No longer accepting connections */
-              conn->crefs = 0;    /* Discard our reference to the connection */
-
-              /* Break any current connections and close the socket */
-
-              ret = tcp_close_disconnect(psock);
-              if (ret < 0)
-                {
-                  /* This would normally occur only if there is a timeout
-                   * from a lingering close.
-                   */
-
-                  nerr("ERROR: tcp_close_disconnect failed: %d\n", ret);
-                  return ret;
-                }
-
-              /* Stop the network monitor for all sockets */
-
-              tcp_stop_monitor(conn, TCP_CLOSE);
-            }
-          else
-            {
-              /* No.. Just decrement the reference count */
-
-              conn->crefs--;
-
-              /* Stop monitor for this socket only */
-
-              tcp_close_monitor(psock);
-            }
-#else
-        nwarn("WARNING: SOCK_STREAM support is not available in this "
-              "configuration\n");
-        return -EAFNOSUPPORT;
-#endif /* NET_TCP_HAVE_STACK */
-        }
-        break;
-#endif /* CONFIG_NET_TCP */
-
-#ifdef CONFIG_NET_UDP
-      case SOCK_DGRAM:
-        {
-#ifdef NET_UDP_HAVE_STACK
-          FAR struct udp_conn_s *conn = psock->s_conn;
-          int ret;
-
-          /* Is this the last reference to the connection structure (there
-           * could be more if the socket was dup'ed).
-           */
-
-          if (conn->crefs <= 1)
-            {
-              /* Yes... Clost the socket */
-
-              ret = udp_close(psock);
-              if (ret < 0)
-                {
-                  /* This would normally occur only if there is a timeout
-                   * from a lingering close.
-                   */
-
-                  nerr("ERROR: udp_close failed: %d\n", ret);
-                  return ret;
-                }
-            }
-          else
-            {
-              /* No.. Just decrement the reference count */
-
-              conn->crefs--;
-            }
-#else
-          nwarn("WARNING: SOCK_DGRAM support is not available in this "
-                "configuration\n");
-          return -EAFNOSUPPORT;
-#endif /* NET_UDP_HAVE_STACK */
-        }
-        break;
-#endif /* CONFIG_NET_UDP */
-
-      default:
-        return -EBADF;
+      nerr("ERROR: tcp_close_disconnect failed: %d\n", ret);
+      return ret;
     }
 
+  /* Stop the network monitor for all sockets */
+
+  tcp_stop_monitor(conn, TCP_CLOSE);
   return OK;
 }
+
+#endif /* CONFIG_NET_TCP */

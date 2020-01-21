@@ -38,10 +38,10 @@
 SOCK_CSRCS += inet_txdrain.c
 
 ifeq ($(CONFIG_NET_IPv4),y)
-SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_close.c
+SOCK_CSRCS += inet_sockif.c inet_recvfrom.c
 SOCK_CSRCS += inet_globals.c
 else ifeq ($(CONFIG_NET_IPv6),y)
-SOCK_CSRCS += inet_sockif.c inet_recvfrom.c inet_close.c
+SOCK_CSRCS += inet_sockif.c inet_recvfrom.c
 SOCK_CSRCS += inet_globals.c
 endif
 
