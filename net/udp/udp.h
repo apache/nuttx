@@ -301,6 +301,22 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: udp_close
+ *
+ * Description:
+ *   Break any current UDP connection
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int udp_close(FAR struct socket *psock);
+
+/****************************************************************************
  * Name: udp_ipv4_select
  *
  * Description:

@@ -668,6 +668,22 @@ void tcp_lost_connection(FAR struct socket *psock,
                          FAR struct devif_callback_s *cb, uint16_t flags);
 
 /****************************************************************************
+ * Name: tcp_close
+ *
+ * Description:
+ *   Break any current TCP connection
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int tcp_close(FAR struct socket *psock);
+
+/****************************************************************************
  * Name: tcp_ipv4_select
  *
  * Description:
