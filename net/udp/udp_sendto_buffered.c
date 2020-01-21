@@ -630,7 +630,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Dump the incoming buffer */
 
-  BUF_DUMP("psock_udp_send", buf, len);
+  BUF_DUMP("psock_udp_sendto", buf, len);
 
   if (len > 0)
     {
