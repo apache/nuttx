@@ -424,13 +424,6 @@ clean_context:
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
-	$(call DELDIR, include\arch\board)
-	$(call DELDIR, include\arch\chip)
-	$(call DELDIR, include\arch)
-	$(call DELDIR, $(ARCH_SRC)\board\board)
-	$(call DELDIR, $(ARCH_SRC)\board)
-	$(call DELDIR, $(ARCH_SRC)\chip)
-	$(call DELDIR, $(TOPDIR)\drivers\platform)
 
 # check_context
 #
@@ -645,6 +638,13 @@ endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELDIR, include\arch\board)
+	$(call DELDIR, include\arch\chip)
+	$(call DELDIR, include\arch)
+	$(call DELDIR, $(ARCH_SRC)\board\board)
+	$(call DELDIR, $(ARCH_SRC)\board)
+	$(call DELDIR, $(ARCH_SRC)\chip)
+	$(call DELDIR, $(TOPDIR)\drivers\platform)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps\ directory is included with NuttX,
