@@ -269,7 +269,7 @@ void tcp_readahead_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_READAHEAD, conn);
+  work_notifier_signal(WORK_TCP_READAHEAD, conn);
 }
 
 /****************************************************************************
@@ -298,7 +298,7 @@ void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_WRITEBUFFER, conn);
+  work_notifier_signal(WORK_TCP_WRITEBUFFER, conn);
 }
 #endif
 
@@ -321,7 +321,7 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_DISCONNECT, conn);
+  work_notifier_signal(WORK_TCP_DISCONNECT, conn);
 }
 
 #endif /* CONFIG_NET_TCP_NOTIFIER */
