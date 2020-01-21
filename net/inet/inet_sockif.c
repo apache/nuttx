@@ -1281,6 +1281,123 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: inet_close
+ *
+ * Description:
+ *   Performs the close operation on an AF_INET or AF_INET6 socket instance
+ *
+ * Input Parameters:
+ *   psock   Socket instance
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int inet_close(FAR struct socket *psock)
+{
+  /* Perform some pre-close operations for the AF_INET/AF_INET6 address
+   * types.
+   */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_TCP
+      case SOCK_STREAM:
+        {
+#ifdef NET_TCP_HAVE_STACK
+          FAR struct tcp_conn_s *conn = psock->s_conn;
+          int ret;
+
+          /* Is this the last reference to the connection structure (there
+           * could be more if the socket was dup'ed).
+           */
+
+          if (conn->crefs <= 1)
+            {
+              /* Yes... Clost the socket */
+
+              ret = tcp_close(psock);
+              if (ret < 0)
+                {
+                  /* This would normally occur only if there is a timeout
+                   * from a lingering close.
+                   */
+
+                  nerr("ERROR: tcp_close failed: %d\n", ret);
+                  return ret;
+                }
+            }
+          else
+            {
+              /* No.. Just decrement the reference count */
+
+              conn->crefs--;
+
+              /* Stop monitor for this socket only */
+
+              tcp_close_monitor(psock);
+            }
+#else
+        nwarn("WARNING: SOCK_STREAM support is not available in this "
+              "configuration\n");
+        return -EAFNOSUPPORT;
+#endif /* NET_TCP_HAVE_STACK */
+        }
+        break;
+#endif /* CONFIG_NET_TCP */
+
+#ifdef CONFIG_NET_UDP
+      case SOCK_DGRAM:
+        {
+#ifdef NET_UDP_HAVE_STACK
+          FAR struct udp_conn_s *conn = psock->s_conn;
+          int ret;
+
+          /* Is this the last reference to the connection structure (there
+           * could be more if the socket was dup'ed).
+           */
+
+          if (conn->crefs <= 1)
+            {
+              /* Yes... Clost the socket */
+
+              ret = udp_close(psock);
+              if (ret < 0)
+                {
+                  /* This would normally occur only if there is a timeout
+                   * from a lingering close.
+                   */
+
+                  nerr("ERROR: udp_close failed: %d\n", ret);
+                  return ret;
+                }
+            }
+          else
+            {
+              /* No.. Just decrement the reference count */
+
+              conn->crefs--;
+            }
+#else
+          nwarn("WARNING: SOCK_DGRAM support is not available in this "
+                "configuration\n");
+          return -EAFNOSUPPORT;
+#endif /* NET_UDP_HAVE_STACK */
+        }
+        break;
+#endif /* CONFIG_NET_UDP */
+
+      default:
+        return -EBADF;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: inet_sockif
  *
  * Description:
