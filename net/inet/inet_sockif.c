@@ -1113,13 +1113,15 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
             {
               /* UDP/IP packet send */
 
-              ret = psock_udp_send(psock, buf, len);
+              ret = _SS_ISCONNECTED(psock->s_flags) ?
+                psock_udp_sendto(psock, buf, len, 0, NULL, 0) : -ENOTCONN;
             }
 #endif /* NET_UDP_HAVE_STACK */
 #elif defined(NET_UDP_HAVE_STACK)
           /* Only UDP/IP packet send */
 
-          ret = psock_udp_send(psock, buf, len);
+          ret = _SS_ISCONNECTED(psock->s_flags) ?
+            psock_udp_sendto(psock, buf, len, 0, NULL, 0) : -ENOTCONN;
 #else
           ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */

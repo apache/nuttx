@@ -622,17 +622,6 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: psock_udp_send
- *
- * Description:
- *   Implements send() for connected UDP sockets
- *
- ****************************************************************************/
-
-ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len);
-
-/****************************************************************************
  * Name: psock_udp_sendto
  *
  * Description:
