@@ -40,7 +40,7 @@ ifneq ($(CONFIG_NET_TCP_NO_STACK),y)
 
 # Socket layer
 
-SOCK_CSRCS += tcp_connect.c tcp_accept.c
+SOCK_CSRCS += tcp_connect.c tcp_accept.c tcp_recvfrom.c
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 SOCK_CSRCS += tcp_send_buffered.c

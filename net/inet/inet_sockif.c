@@ -90,6 +90,9 @@ static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
 static ssize_t    inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
                     FAR off_t *offset, size_t count);
 #endif
+static ssize_t    inet_recvfrom(FAR struct socket *psock, FAR void *buf,
+                    size_t len, int flags, FAR struct sockaddr *from,
+                    FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Private Data
@@ -1273,6 +1276,123 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
   return -ENOSYS;
 }
 #endif
+
+/****************************************************************************
+ * Name: inet_recvfrom
+ *
+ * Description:
+ *   Implements the socket recvfrom interface for the case of the AF_INET
+ *   and AF_INET6 address families.  inet_recvfrom() receives messages from
+ *   a socket, and may be used to receive data on a socket whether or not it
+ *   is connection-oriented.
+ *
+ *   If 'from' is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in.  The argument 'fromlen' is
+ *   initialized to the size of the buffer associated with from, and
+ *   modified on return to indicate the actual size of the address stored
+ *   there.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     Address of source (may be NULL)
+ *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recv() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvfrom() for the list of appropriate error values).
+ *
+ ****************************************************************************/
+
+static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
+                             size_t len, int flags, FAR struct sockaddr *from,
+                             FAR socklen_t *fromlen)
+{
+  ssize_t ret;
+
+  /* If a 'from' address has been provided, verify that it is large
+   * enough to hold this address family.
+   */
+
+  if (from)
+    {
+      socklen_t minlen;
+
+      /* Get the minimum socket length */
+
+      switch (psock->s_domain)
+        {
+#ifdef CONFIG_NET_IPv4
+        case PF_INET:
+          {
+            minlen = sizeof(struct sockaddr_in);
+          }
+          break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+        case PF_INET6:
+          {
+            minlen = sizeof(struct sockaddr_in6);
+          }
+          break;
+#endif
+
+        default:
+          DEBUGPANIC();
+          return -EINVAL;
+        }
+
+      if (*fromlen < minlen)
+        {
+          return -EINVAL;
+        }
+    }
+
+  /* Read from the network interface driver buffer.
+   * Or perform the TCP/IP or UDP recv() operation.
+   */
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_TCP
+    case SOCK_STREAM:
+      {
+#ifdef NET_TCP_HAVE_STACK
+        ret = psock_tcp_recvfrom(psock, buf, len, from, fromlen);
+#else
+        ret = -ENOSYS;
+#endif
+      }
+      break;
+#endif /* CONFIG_NET_TCP */
+
+#ifdef CONFIG_NET_UDP
+    case SOCK_DGRAM:
+      {
+#ifdef NET_UDP_HAVE_STACK
+        ret = psock_udp_recvfrom(psock, buf, len, from, fromlen);
+#else
+        ret = -ENOSYS;
+#endif
+      }
+      break;
+#endif /* CONFIG_NET_UDP */
+
+    default:
+      {
+        nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
+        ret = -ENOSYS;
+      }
+      break;
+    }
+
+  return ret;
+}
 
 #endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
