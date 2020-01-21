@@ -36,8 +36,9 @@ WD=$PWD
 nuttx=$WD/../nuttx
 
 progname=$0
+fail=0
 APPSDIR=../apps
-MAKE_FLAGS=-i
+MAKE_FLAGS=-k
 MAKE=make
 unset testfile
 unset HOPTION
@@ -140,7 +141,7 @@ cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+    ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null || fail=1
   fi
 }
 
@@ -160,6 +161,9 @@ function configure {
 
     echo "  Enabling $toolchain"
     echo "$toolchain=y" >> $nuttx/.config
+
+    echo "  Refreshing..."
+    ${MAKE} ${MAKE_FLAGS} olddefconfig 1>/dev/null || fail=1
   fi
 }
 
@@ -168,7 +172,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
+  ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null || fail=1
 }
 
 # Coordinate the steps for the next build test
@@ -236,3 +240,5 @@ for line in $testlist; do
 done
 
 echo "===================================================================================="
+
+exit $fail
