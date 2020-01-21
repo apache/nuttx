@@ -1267,7 +1267,6 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen, FAR void **newconn);
 
-
 /****************************************************************************
  * Name: psock_tcp_recvfrom
  *
