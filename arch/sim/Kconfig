@@ -115,6 +115,7 @@ config SIM_NETDEV
 	default y
 	depends on NET
 	select ARCH_HAVE_NETDEV_STATISTICS
+	select SCHED_LPWORK
 	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.
