@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/sh7032/us7032evb1/include/board.h
+ * boards/renesas/sh1/us7032evb1/include/board.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

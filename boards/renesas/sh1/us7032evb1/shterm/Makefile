@@ -1,7 +1,7 @@
-##############################################################################
-# boards/renesas/sh7032/us7032evb1/scripts/Make.defs
+############################################################################
+# boards/renesas/sh1/us7032evb1/shterm/Makefile
 #
-#   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,55 +31,22 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-##############################################################################
+############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
+include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
+SRC	= shterm.c
+BIN	= shterm
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
+all: ..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT)
 
-ARCHCPUFLAGS = -m1 -fno-builtin
-ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES =
-ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/sdram.ld
+$(BIN)$(EXEEXT): $(SRC)
+	$(HOSTCC) $(HOSTCFLAGS) $^ -o $@
 
-CROSSDEV = sh-nuttx-elf-
-CC = $(CROSSDEV)gcc
-CPP = $(CROSSDEV)gcc -E
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
+..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT): $(BIN)$(EXEEXT)
+	install -m 0755 $^ $@
 
-CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
-AFLAGS = $(CFLAGS) -D__ASSEMBLY__
-
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif
-
-
-MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
-
-HOSTCC = gcc
-HOSTINCLUDES = -I.
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
-
+clean:
+	$(call DELFILE, $(BIN)$(EXEEXT))
+	$(call DELFILE..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT))
+	$(call CLEAN)

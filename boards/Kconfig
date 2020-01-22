@@ -2756,7 +2756,7 @@ if ARCH_BOARD_SKP16C26
 source "boards/renesas/m16c/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
-source "boards/renesas/sh7032/us7032evb1/Kconfig"
+source "boards/renesas/sh1/us7032evb1/Kconfig"
 endif
 if ARCH_BOARD_GAPUINO
 source "boards/risc-v/gap8/gapuino/Kconfig"

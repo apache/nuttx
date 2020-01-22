@@ -1,5 +1,5 @@
 ############################################################################
-# boards/renesas/sh7032/us7032evb1/src/Makefile
+# boards/renesas/sh1/us7032evb1/src/Makefile
 #
 #   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
