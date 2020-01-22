@@ -2125,9 +2125,9 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "rx65n"                    if ARCH_BOARD_RX65N
-	default "rx65n"                    if ARCH_BOARD_RX65N_RSK1MB
-	default "rx65n"                    if ARCH_BOARD_RX65N_RSK2MB
-	default "rx65n"                    if ARCH_BOARD_RX65N_GRROSE
+	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
+	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
+	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
