@@ -2121,7 +2121,7 @@ nuttx/
  |   |       `- moteino-mega/
  |   |           `- README.txt
  |   |- hc/
- |   |   `- mcs92s12ne64/
+ |   |   `- m9s12/
  |   |       |- demo9s12ne64/
  |   |       |   `- README.txt
  |   |       `- ne64badge/

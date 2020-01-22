@@ -2720,10 +2720,10 @@ if ARCH_BOARD_CUSTOM
 source "boards/dummy/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
-source "boards/hc/mcs92s12ne64/demo9s12ne64/Kconfig"
+source "boards/hc/m9s12/demo9s12ne64/Kconfig"
 endif
 if ARCH_BOARD_NE64BADGE
-source "boards/hc/mcs92s12ne64/ne64badge/Kconfig"
+source "boards/hc/m9s12/ne64badge/Kconfig"
 endif
 if ARCH_BOARD_MIRTOO
 source "boards/mips/pic32mx/mirtoo/Kconfig"
