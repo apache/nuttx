@@ -1,6 +1,5 @@
 /****************************************************************************
- * boards/renesas/m32262f8/skp16c26/include/board.h
- * arch/board/board.h
+ * boards/renesas/m16c/skp16c26/include/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -2753,7 +2753,7 @@ if ARCH_BOARD_OR1K
 source "boards/or1k/mor1kx/or1k/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
-source "boards/renesas/m32262f8/skp16c26/Kconfig"
+source "boards/renesas/m16c/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
 source "boards/renesas/sh7032/us7032evb1/Kconfig"

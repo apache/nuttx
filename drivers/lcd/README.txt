@@ -233,7 +233,7 @@ interface) that makes then less re-usable:
 
   Alphnumeric/segment LCD Displays:
 
-    boards/renesas/m32262f8/skp16c26/src/m16c_lcd.c.  Untested alphanumeric
+    boards/renesas/m16c/skp16c26/src/m16c_lcd.c.  Untested alphanumeric
       LCD driver.
     boards/mips/pic32mx/sure-pic32mx/src/pic32_lcd1602.c. An LCD1602 segment
       LCD.  This is a bit-bang version of the driver and appears to

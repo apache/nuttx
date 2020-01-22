@@ -1,4 +1,4 @@
-boards/renesas/m32262f8/skp16c26/README.txt
+boards/renesas/m16c/skp16c26/README.txt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. The buildroot package can be used to build an M16C toolchain.  The toolchain

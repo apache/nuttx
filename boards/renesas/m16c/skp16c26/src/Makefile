@@ -1,7 +1,7 @@
 ############################################################################
-# boards/renesas/m32262f8/skp16c26/scripts/Make.defs
+# boards/renesas/m16c/skp16c26/src/Makefile
 #
-#   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,46 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
+-include $(TOPDIR)/Make.defs
 
-CROSSDEV		= m32c-nuttx-elf-
-CC			= $(CROSSDEV)gcc
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
+CFLAGS += -I$(TOPDIR)/sched
 
-ARCHCCVERSION		= ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+CSRCS = m16c_leds.c m16c_buttons.c m16c_lcd.c m16c_lcdconsole.c
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION	= -g
-endif
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
 
-ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
-ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES		=
-ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT		= -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/skp16c26.ld
+all: libboard$(LIBEXT)
 
-CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
 
-ASMEXT			= .S
-OBJEXT			= .o
-LIBEXT			= .a
-EXEEXT			=
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS		+= -g
-endif
+libboard$(LIBEXT): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
-MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
 
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS		=
+depend: .depend
 
+context:
+
+clean:
+	$(call DELFILE, libboard$(LIBEXT))
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep
