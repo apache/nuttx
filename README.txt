@@ -2152,7 +2152,7 @@ nuttx/
  |   |       `- or1k/
  |   |           `- README.txt
  |   |- renesas/
- |   |   |- m32262f8/
+ |   |   |- m16c/
  |   |   |   `- skp16c26/
  |   |   |       `- README.txt
  |   |   `-sh7032/
