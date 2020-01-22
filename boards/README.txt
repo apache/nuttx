@@ -853,7 +853,7 @@ boards/mips/pic32mx/ubw32
   with this board http://www.sparkfun.com/products/9713. See also
   http://www.schmalzhaus.com/UBW32/.
 
-boards/renesas/sh7032/us7032evb1
+boards/renesas/sh1/us7032evb1
   This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
   STATUS:  Work has just began on this port.
 

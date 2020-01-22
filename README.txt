@@ -2155,7 +2155,7 @@ nuttx/
  |   |   |- m16c/
  |   |   |   `- skp16c26/
  |   |   |       `- README.txt
- |   |   `-sh7032/
+ |   |   `-sh1/
  |   |       `- us7032evb1/
  |   |           `- README.txt
  |   |- risc-v/

@@ -114,7 +114,7 @@ Architecture selection
     implemented in.
   CONFIG_ARCH_BOARD - identifies the boards/ subdirectory and, hence,
     the board that supports the particular chip or SoC.  This
-    should be us7032evb1 for (boards/renesas/sh7032/us7032evb1).
+    should be us7032evb1 for (boards/renesas/sh1/us7032evb1).
   CONFIG_ARCH_BOARD_US7032EVB1 - for use in C code
   CONFIG_ENDIAN_BIG - the SH-1 usually runs big-endian
   CONFIG_ARCH_NOINTC - define if the architecture does not
