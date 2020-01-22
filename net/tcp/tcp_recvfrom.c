@@ -45,6 +45,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
