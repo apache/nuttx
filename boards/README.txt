@@ -865,7 +865,7 @@ boards/arm/stm32/viewtool-stm32f107
 config/xmc4500-relax
   Infineon XMC4000 Relax Lite v1
 
-boards/z16/z16f2811/z16f2800100zcog
+boards/z16/z16f/z16f2800100zcog
   z16f Microcontroller.  This port use the Zilog z16f2800100zcog
   development kit and the Zilog ZDS-II Windows command line tools.  The
   development environment is Cygwin under WinXP.
