@@ -584,7 +584,7 @@ static void     tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
 
 /* Interrupt handler */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#if 0 /* defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) */
 static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
@@ -873,7 +873,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#if 0 /* defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) */
 static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
 {
 #warning "Missing logic"
