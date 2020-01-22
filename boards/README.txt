@@ -218,7 +218,7 @@ boards/arm/stm32/cloudctrl
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
 
-boards/hc/mcs92s12ne64/demo9s12ne64
+boards/hc/m9s12/demo9s12ne64
   NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
