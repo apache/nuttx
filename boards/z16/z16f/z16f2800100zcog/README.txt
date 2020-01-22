@@ -105,7 +105,7 @@ Other Versions
   If you use any version of ZDS-II or if you install ZDS-II at any location
   other than the default location, you will have to modify
   arch/z16/src/z16f/Kconfig and
-  boards/z16/z16f2811/z16f2800100zcog/scripts/Make.defs.
+  boards/z16/z16f/z16f2800100zcog/scripts/Make.defs.
   Simply edit that file, changing 5.0.1 to whatever.
 
 Patches
@@ -128,7 +128,7 @@ attempt to recover the parameters from the stack and a failure then follows.
 
 This bug prevents the use of NSH with the ZNEO.  However, a patch has been
 developed that works around the problem.  That patch can be found at
-boards/z16/z16f2811/z16f2800100zcog/tools/zneo-zdsii-5_0_1-variadic-func-fix.patch.
+boards/z16/z16f/z16f2800100zcog/tools/zneo-zdsii-5_0_1-variadic-func-fix.patch.
 In that directory is also a bash script that will apply that patch for you.
 
 The patch would be applied when NuttX is configured as follows:

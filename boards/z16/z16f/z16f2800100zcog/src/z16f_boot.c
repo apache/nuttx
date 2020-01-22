@@ -1,8 +1,10 @@
 /****************************************************************************
- * boards/z16/z16f2811/z16f2800100zcog/z16f_leds.c
+ * boards/z16/z16f/z16f2800100zcog/src/z16f_boot.c
  *
- *   Copyright (C) 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Based upon sample code included with the Zilog ZDS-II toolchain.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,31 +35,16 @@
  *
  ****************************************************************************/
 
-/* The z16f2800100zcog board has four LEDs:
- *
- * - Green LED D1 which illuminates in the presence of Vcc
- * - Red LED D2 connected to chip port PA0_T0IN
- * - Yellow LED D3 connected to chip port PA1_T0OUT
- * - Green LED D4 connected to chip port PA2_DE0
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "up_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,43 +52,43 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: z16f_gpioinit
+ *
+ * Description:
+ *   Configure board-specific GPIO usage here.  Driver pin configurations
+ *   are set in the associated device drivers (such as UART, SPI, I2C,
+ *   etc.) and must be preserved.
+ *
+ ****************************************************************************/
+
+static void z16f_gpioinit(void)
+{
+  /* Configure LEDs and Run/Stop switch port */
+
+  putreg8(getreg8(Z16F_GPIOA_DD) | 0x87, Z16F_GPIOA_DD);
+  putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
+  putreg8(getreg8(Z16F_GPIOA_DD) & 0xf8, Z16F_GPIOA_DD);
+
+  /* Configure rate switch port */
+
+  putreg8(getreg8(Z16F_GPIOB_DD) | 0x20, Z16F_GPIOB_DD);
+  putreg8(getreg8(Z16F_GPIOB_AFL) | 0x20, Z16F_GPIOB_AFL);
+
+#if 0 /* Not yet */
+  putreg8(0x05, Z16F_ADC0_MAX);
+  putreg8(0xf5, Z16F_ADC0_CTL);
+#endif
+
+  /* Configure Direction switch port */
+
+  putreg8(getreg8(Z16F_GPIOC_DD) | 0x01, Z16F_GPIOC_DD);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_autoled_initialize
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_autoled_initialize(void)
+void z16f_board_initialize(void)
 {
-  /* The following is performed up_board_initialize() as well */
-
-  putreg8(getreg8(Z16F_GPIOA_OUT) | 0x07, Z16F_GPIOA_OUT);
-  putreg8(getreg8(Z16F_GPIOA_DD) & 0xf8, Z16F_GPIOA_DD);
+  z16f_gpioinit();
 }
-
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  if ((unsigned)led <= 7)
-    {
-       putreg8(((getreg8(Z16F_GPIOA_OUT) & 0xf8) | led), Z16F_GPIOA_OUT);
-    }
-}
-
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
-
-void board_autoled_off(int led)
-{
-  if (led >= 1)
-    {
-      board_autoled_on(led-1);
-    }
-}
-#endif /* CONFIG_ARCH_LEDS */

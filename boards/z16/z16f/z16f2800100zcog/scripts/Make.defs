@@ -1,5 +1,5 @@
 ############################################################################
-# boards/z16/z16f2811/z16f2800100zcog/scripts/Make.defs
+# boards/z16/z16f/z16f2800100zcog/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
