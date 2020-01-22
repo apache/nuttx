@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/m32262f8/scp16c26/src/m16c_leds.c
+ * boards/renesas/m16c/scp16c26/src/m16c_leds.c
  *
  *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/renesas/m32262f8/skp16c26/src/m16c_buttons.c
+ * boards/renesas/m16c/scp16c26/src/m16c_lcdconsole.c
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -39,25 +39,29 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <nuttx/arch.h>
 
-#include <nuttx/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
 #include "up_internal.h"
+#include "skp16c26.h"
+
+/* Only use the LCD as a console if there are is no serial console */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_M16C_UART0)
+#  define HAVE_SERIALCONSOLE 1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_M16C_UART1)
+#  define HAVE_SERIALCONSOLE 1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_M16C_UART2)
+#  define HAVE_SERIALCONSOLE 1
+#else
+#  undef HAVE_SERIALCONSOLE
+#endif
+
+#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_SLCD) && \
+     defined(CONFIG_SLCD_CONSOLE)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* The SKP62C26 has 3 buttons control by bits 1, 2, and 3 in port 8. */
-
-#define SW1_BIT             (1 << 3)   /* Bit 3, port 8 */
-#define SW2_BIT             (1 << 2)   /* Bit 2, port 8 */
-#define SW3_BIT             (1 << 1)   /* Bit 1, port 8 */
-
-#define SW_PRESSED(p,b)     (((p) & (b)) == 0)
 
 /****************************************************************************
  * Private Data
@@ -72,43 +76,67 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_button_initialize
+ * Name: up_earlyconsoleinit
+ *
+ * Description:
+ *   Performs the low level UART initialization early in  debug so that the
+ *   serial console will be available during bootup.
+ *   This must be called before up_consoleinit.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void)
+#ifdef USE_EARLYSERIALINIT
+# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
+void up_earlyconsoleinit(void)
 {
-  uint8_t regval;
+  /* There is probably a problem if we are here */
+}
+#endif
 
-  regval  = getreg8(M16C_PD8);
-  regval |= (SW1_BIT | SW2_BIT | SW3_BIT);
-  putreg8(regval, M16C_PD8);
+/****************************************************************************
+ * Name: up_consoleinit
+ *
+ * Description:
+ *   Register serial console and serial ports.  This assumes that
+ *   up_earlyconsoleinit was called previously.
+ *
+ ****************************************************************************/
+
+#if USE_SERIALDRIVER
+# warning "You probably need to define CONFIG_ARCH_LOWCONSOLE"
+void up_consoleinit(void)
+{
+  /* There is probably a problem if we are here */
+
+  lowconsole_init();
+}
+#endif
+
+/****************************************************************************
+ * Name: up_lowputc
+ *
+ * Description:
+ *   Output one character on the console
+ *
+ ****************************************************************************/
+
+void up_lowputc(char ch)
+{
+  up_lcdputc(ch);
 }
 
 /****************************************************************************
- * Name: board_buttons
+ * Name: up_putc
+ *
+ * Description:
+ *   Output one character on the console
+ *
  ****************************************************************************/
 
-uint32_t board_buttons(void)
+int up_putc(int ch)
 {
-  uint32_t swset  = 0;
-  uint8_t regval = getreg8(M16C_P8);
-
-  if (SW_PRESSED(regval, SW1_BIT))
-    {
-      swset |= SW1_PRESSED;
-    }
-
-  if (SW_PRESSED(regval, SW2_BIT))
-    {
-      swset |= SW2_PRESSED;
-    }
-
-  if (SW_PRESSED(regval, SW3_BIT))
-    {
-      swset |= SW3_PRESSED;
-    }
-
-  return swset;
+  up_lcdputc(ch);
+  return ch;
 }
-#endif /* CONFIG_ARCH_BUTTONS */
+
+#endif /* !HAVE_SERIALCONSOLE && CONFIG_SLCD && CONFIG_SLCD_CONSOLE */

@@ -717,7 +717,7 @@ boards/arm/stm32/shenzhou
   This is the port of NuttX to the Shenzhou development board from
   www.armjishu.com. This board features the STMicro STM32F107VCT MCU.
 
-boards/renesas/m32262f8/skp16c26
+boards/renesas/m16c/skp16c26
   Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
   uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
   due to issues with compiler internal errors.
