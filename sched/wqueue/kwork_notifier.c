@@ -257,6 +257,10 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
     }
   else
     {
+      /* Initialize the work structure */
+
+      memset(&notifier->work, 0, sizeof(notifier->work));
+
       /* Duplicate the notification info */
 
       memcpy(&notifier->info, info, sizeof(struct work_notifier_s));
