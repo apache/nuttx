@@ -61,9 +61,15 @@ choice
 config WINDOWS_NATIVE
 	bool "Windows Native"
 	select TOOLCHAIN_WINDOWS
+	depends on EXPERIMENTAL
 	---help---
 		Build natively in a CMD.exe environment with Windows style paths
 		(like C:\cgywin\home)
+
+		This Windows native build is complete and available, but not often
+		used or verified.  As a consequence, it cannot be assured to be
+		fully functional at any given time.  Hence, it is marked here as
+		EXPERIMENTAL so that the end user will be aware of this state.
 
 config WINDOWS_CYGWIN
 	bool "Cygwin"
