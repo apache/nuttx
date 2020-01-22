@@ -826,8 +826,7 @@ static uint16_t rndis_fillrequest(FAR struct rndis_dev_s *priv,
 
   req->len = 0;
 
-  datalen = min(priv->netdev.d_len,
-                CONFIG_RNDIS_BULKIN_REQLEN - RNDIS_PACKET_HDR_SIZE);
+  datalen = min(priv->netdev.d_len, CONFIG_NET_ETH_PKTSIZE);
   if (datalen > 0)
     {
       /* Send the required headers */
@@ -1056,7 +1055,10 @@ static int rndis_transmit(FAR struct rndis_dev_s *priv)
 
   /* Queue the packet */
 
-  rndis_fillrequest(priv, priv->net_req->req);
+  if (!rndis_fillrequest(priv, priv->net_req->req))
+    {
+      return -EINVAL;
+    }
   rndis_sendnetreq(priv);
 
   if (!rndis_allocnetreq(priv))
