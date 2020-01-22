@@ -2179,7 +2179,7 @@ nuttx/
  |   |       `- esp32-core/
  |   |           `- README.txt
  |   |- z16/
- |   |   `- z16f2811/
+ |   |   `- z16f/
  |   |       `- z16f2800100zcog/
  |   |           |- configs/nsh/README.txt
  |   |           |- configs/ostest/README.txt

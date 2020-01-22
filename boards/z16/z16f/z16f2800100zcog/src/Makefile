@@ -1,8 +1,7 @@
-#!/usr/bin/env bash
 ############################################################################
-# boards/z16/z16f2811/z16f2800100zcog/tools/dopatch.sh
+# boards/z16/z16f/z16f2800100zcog/Makefile
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,27 +33,9 @@
 #
 ############################################################################
 
-USAGE="${0} [-R] \$PWD"
-WD=`pwd`
-TOOLDIR=${WD}/boards/z16f2800100zcog/tools
-ME=${TOOLDIR}/dopatch.sh
-PATCH=${TOOLDIR}/zneo-zdsii-5_0_1-variadic-func-fix.patch
-ARGS=${1}
+-include $(TOPDIR)/Make.defs
 
-if [ ! -x ${ME} ]; then
-  echo "ERROR:  This script must be executed from the top-level NuttX directory"
-  echo ${USAGE}
-  exit 1
-fi
+ASRCS =
+CSRCS = z16f_boot.c z16f_leds.c
 
-if [ ! -r ${PATCH} ]; then
-  echo "ERROR: Readable patch not found at ${PATCH}"
-  echo ${USAGE}
-  exit 1
-fi
-
-cd .. || \
-  { echo "ERROR: failed to CD to the parent directory"; exit 1; }
-
-cat ${PATCH} | patch ${ARGS} -p1 || \
-  { echo "ERROR: patch failed" ; exit 1; }
+include $(TOPDIR)/boards/Board.mk

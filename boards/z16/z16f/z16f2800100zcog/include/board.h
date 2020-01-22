@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z16/z16f2811/z16f2800100zcog/board.h
+ * boards/z16/z16f/z16f2800100zcog/board.h
  *
  *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

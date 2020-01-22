@@ -2792,7 +2792,7 @@ if ARCH_BOARD_ESP32CORE
 source "boards/xtensa/esp32/esp32-core/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
-source "boards/z16/z16f2811/z16f2800100zcog/Kconfig"
+source "boards/z16/z16f/z16f2800100zcog/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200KITG
 source "boards/z80/ez80/ez80f910200kitg/Kconfig"
