@@ -841,6 +841,8 @@ int up_prioritize_irq(int irq, int priority)
     {
       sam_prioritize_irq(SAM_AIC_VBASE, irq, priority);
     }
+
+  return OK;
 }
 #endif
 
