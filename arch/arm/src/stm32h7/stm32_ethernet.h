@@ -80,7 +80,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET > 1
+#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf);
 #endif
 

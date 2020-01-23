@@ -4328,11 +4328,11 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET == 1 || defined(CONFIG_NETDEV_LATEINIT)
-static inline
-#endif
-
+#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf)
+#else
+static inline int stm32_ethinitialize(int intf)
+#endif
 {
   struct stm32_ethmac_s *priv;
 
