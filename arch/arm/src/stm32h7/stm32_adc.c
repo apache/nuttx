@@ -173,6 +173,8 @@ struct stm32_dev_s
   xcpt_t   isr;         /* Interrupt handler for this ADC block */
   uint32_t base;        /* Base address of registers unique to this ADC
                          * block */
+  uint32_t mbase;       /* Base address of master ADC (allows for access to
+                           shared common registers) */
 #ifdef ADC_HAVE_TIMER
   uint32_t tbase;       /* Base address of timer used by this ADC block */
   uint32_t trcc_enr;    /* RCC ENR Register */
@@ -297,6 +299,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .isr         = adc12_interrupt,
   .intf        = 1,
   .base        = STM32_ADC1_BASE,
+  .mbase       = STM32_ADC1_BASE,
 #ifdef ADC1_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC1_TIMTRIG,
   .tbase       = ADC1_TIMER_BASE,
@@ -337,6 +340,7 @@ static struct stm32_dev_s g_adcpriv2 =
   .isr         = adc12_interrupt,
   .intf        = 2,
   .base        = STM32_ADC2_BASE,
+  .mbase       = STM32_ADC1_BASE,
 #ifdef ADC2_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC2_TIMTRIG,
   .tbase       = ADC2_TIMER_BASE,
@@ -377,6 +381,7 @@ static struct stm32_dev_s g_adcpriv3 =
   .isr         = adc3_interrupt,
   .intf        = 3,
   .base        = STM32_ADC3_BASE,
+  .mbase       = STM32_ADC3_BASE,
 #ifdef ADC3_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC3_TIMTRIG,
   .tbase       = ADC3_TIMER_BASE,
@@ -475,6 +480,71 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
                           uint32_t clrbits, uint32_t setbits)
 {
   adc_putreg(priv, offset, (adc_getreg(priv, offset) & ~clrbits) | setbits);
+}
+/****************************************************************************
+ * Name: adc_getregm
+ *
+ * Description:
+ *   Read the value of an ADC register from the associated ADC master.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the ADC block status
+ *   offset - The offset to the register to read
+ *
+ * Returned Value:
+ *   The current contents of the specified register in the ADC master.
+ *
+ ****************************************************************************/
+
+static uint32_t adc_getregm(FAR struct stm32_dev_s *priv, int offset)
+{
+  return getreg32(priv->mbase + offset);
+}
+
+/****************************************************************************
+ * Name: adc_putregm
+ *
+ * Description:
+ *   Write a value to an ADC register in the associated ADC master.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the ADC block status
+ *   offset - The offset to the register to write to
+ *   value  - The value to write to the register
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void adc_putregm(FAR struct stm32_dev_s *priv, int offset,
+                       uint32_t value)
+{
+  putreg32(value, priv->mbase + offset);
+}
+
+/****************************************************************************
+ * Name: adc_modifyregm
+ *
+ * Description:
+ *   Modify the value of an ADC register in the associated ADC master
+ *  (not atomic).
+ *
+ * Input Parameters:
+ *   priv    - A reference to the ADC block status
+ *   offset  - The offset to the register to modify
+ *   clrbits - The bits to clear
+ *   setbits - The bits to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void adc_modifyregm(FAR struct stm32_dev_s *priv, int offset,
+                          uint32_t clrbits, uint32_t setbits)
+{
+  adc_putregm(priv, offset, (adc_getregm(priv, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -1320,7 +1390,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   adc_internal(priv, &setbits);
 
-  adc_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+  adc_modifyregm(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
 
 #ifdef ADC_HAVE_DMA
 
@@ -1390,7 +1460,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
-  ainfo("CCR:   0x%08x\n", getreg32(STM32_ADC_CCR));
+  ainfo("CCR:   0x%08x\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
 
   /* Enable the ADC interrupt */
 
