@@ -198,9 +198,7 @@ static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
   rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
   rtcinfo("  tm_min: %08x\n", tp->tm_min);
   rtcinfo(" tm_hour: %08x\n", tp->tm_hour);
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   rtcinfo(" tm_wday: %08x\n", tp->tm_wday);
-#endif
   rtcinfo(" tm_mday: %08x\n", tp->tm_mday);
   rtcinfo("  tm_mon: %08x\n", tp->tm_mon);
   rtcinfo(" tm_year: %08x\n", tp->tm_year);
@@ -642,9 +640,7 @@ int ez80_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   almregs.sec = alminfo->as_time.tm_sec;
   almregs.min = alminfo->as_time.tm_min;
   almregs.hrs = alminfo->as_time.tm_hour;
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   almregs.dow = alminfo->as_time.tm_wday;
-#endif
 
   set_raw_alarm(&almregs);
 
@@ -747,9 +743,7 @@ int ez80_rtc_rdalarm(FAR struct tm *almtime)
   almtime->tm_sec  = almregs.sec;
   almtime->tm_min  = almregs.min;
   almtime->tm_hour = almregs.hrs;
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   almtime->tm_wday = almregs.dow;
-#endif
 
   rtc_dumptime((FAR const struct tm *)almtime, "Returning");
   return OK;

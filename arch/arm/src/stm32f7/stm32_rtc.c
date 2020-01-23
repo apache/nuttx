@@ -1189,13 +1189,11 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tmp = (dr & (RTC_DR_YU_MASK | RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
   tp->tm_year = rtc_bcd2bin(tmp) + 100;
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   tmp = (dr & RTC_DR_WDU_MASK) >> RTC_DR_WDU_SHIFT;
   tp->tm_wday = tmp % 7;
   tp->tm_yday = tp->tm_mday +
     clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
   tp->tm_isdst = 0;
-#endif
 
 #ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
   /* Return RTC sub-seconds if a non-NULL value
@@ -1340,9 +1338,7 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
   dr = (rtc_bin2bcd(tp->tm_mday) << RTC_DR_DU_SHIFT) |
        ((rtc_bin2bcd(tp->tm_mon + 1))  << RTC_DR_MU_SHIFT) |
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
        ((tp->tm_wday == 0 ? 7 : (tp->tm_wday & 7))  << RTC_DR_WDU_SHIFT) |
-#endif
        ((rtc_bin2bcd(tp->tm_year - 100)) << RTC_DR_YU_SHIFT);
 
   dr &= ~RTC_DR_RESERVED_BITS;

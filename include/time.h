@@ -140,11 +140,9 @@ struct tm
   int tm_mday;    /* Day of the month (1-31) */
   int tm_mon;     /* Month (0-11) */
   int tm_year;    /* Years since 1900 */
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   int tm_wday;    /* Day of the week (0-6) */
   int tm_yday;    /* Day of the year (0-365) */
   int tm_isdst;   /* Non-0 if daylight savings time is in effect */
-#endif
 };
 
 /* Struct itimerspec is used to define settings for an interval timer */
@@ -209,12 +207,10 @@ FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm);
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 FAR char *asctime(FAR const struct tm *tp);
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);
 FAR char *ctime(FAR const time_t *timep);
 FAR char *ctime_r(FAR const time_t *timep, FAR char *buf);
-#endif
 
 time_t time(FAR time_t *timep);
 
