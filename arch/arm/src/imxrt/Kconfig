@@ -183,7 +183,7 @@ config IMXRT_EDMA
 config IMXRT_USBOTG
 	bool "USB EHCI"
 	default n
-	select USBHOST_HAVE_ASYNCH
+	select USBHOST_HAVE_ASYNCH if USBHOST
 	select USBHOST_ASYNCH
 
 config IMXRT_ENET
