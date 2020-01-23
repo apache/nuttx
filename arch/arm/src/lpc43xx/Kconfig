@@ -324,7 +324,7 @@ config LPC43_USART3
 config LPC43_USBOTG
 	bool "USB EHCI"
 	default n
-	select USBHOST_HAVE_ASYNCH
+	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config LPC43_USB0
 	bool "USB0"
