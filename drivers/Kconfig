@@ -77,14 +77,6 @@ endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 endmenu # Buffering
 
-config RAMDISK
-	bool "RAM Disk Support"
-	default n
-	---help---
-		Can be used to set up a block of memory or (read-only) FLASH as
-		a block driver that can be mounted as a files system.  See
-		include/nuttx/drivers/ramdisk.h.
-
 menuconfig CAN
 	bool "CAN Driver Support"
 	default n
