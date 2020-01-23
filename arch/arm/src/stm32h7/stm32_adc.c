@@ -175,6 +175,7 @@ struct stm32_dev_s
                          * block */
   uint32_t mbase;       /* Base address of master ADC (allows for access to
                            shared common registers) */
+  bool     initialized; /* Keeps track of the initialization status of the ADC */
 #ifdef ADC_HAVE_TIMER
   uint32_t tbase;       /* Base address of timer used by this ADC block */
   uint32_t trcc_enr;    /* RCC ENR Register */
@@ -300,6 +301,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .intf        = 1,
   .base        = STM32_ADC1_BASE,
   .mbase       = STM32_ADC1_BASE,
+  .initialized = false,
 #ifdef ADC1_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC1_TIMTRIG,
   .tbase       = ADC1_TIMER_BASE,
@@ -341,6 +343,7 @@ static struct stm32_dev_s g_adcpriv2 =
   .intf        = 2,
   .base        = STM32_ADC2_BASE,
   .mbase       = STM32_ADC1_BASE,
+  .initialized = false,
 #ifdef ADC2_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC2_TIMTRIG,
   .tbase       = ADC2_TIMER_BASE,
@@ -382,6 +385,7 @@ static struct stm32_dev_s g_adcpriv3 =
   .intf        = 3,
   .base        = STM32_ADC3_BASE,
   .mbase       = STM32_ADC3_BASE,
+  .initialized = false,
 #ifdef ADC3_HAVE_TIMER
   .trigger     = CONFIG_STM32H7_ADC3_TIMTRIG,
   .tbase       = ADC3_TIMER_BASE,
@@ -1323,9 +1327,18 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   flags = enter_critical_section();
 
-  /* Make sure that the ADC device is in the powered up, reset state. */
+  /* Make sure that the ADC device is in the powered up, reset state.
+   * Since reset is shared between ADC1 and ADC2, don't reset one if the
+   * other has already been reset.
+   */
 
-  adc_reset(dev);
+  if ((dev == &g_adcdev1 &&
+      !((FAR struct stm32_dev_s *)g_adcdev2.ad_priv)->initialized) ||
+     (dev == &g_adcdev2 &&
+      !((FAR struct stm32_dev_s *)g_adcdev1.ad_priv)->initialized))
+  {
+     adc_reset(dev);
+  }
 
   /* Initialize the same sample time for each ADC.
    * During sample cycles channel selection bits must remain unchanged.
@@ -1467,6 +1480,8 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   ainfo("Enable the ADC interrupt: irq=%d\n", priv->irq);
   up_enable_irq(priv->irq);
 
+  priv->initialized = true;
+
   return ret;
 }
 
@@ -1499,6 +1514,8 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
   /* Disable and reset the ADC module */
 
   adc_reset(dev);
+
+  priv->initialized = false;
 }
 
 /****************************************************************************
