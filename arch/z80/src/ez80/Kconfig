@@ -35,7 +35,6 @@ config EZ80_RTC
 	default n
 	select RTC
 	select RTC_DATETIME
-	select TIME_EXTENDED
 
 config EZ80_EMAC
 	bool "Ethernet MAC"

@@ -78,18 +78,16 @@ Version 5.2.1
   This is the change to suppress building these files:
 
     diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
-    index 5c9b746778..8327e287f4 100644
+    index 2a26d556ff..08fd0b7bcd 100644
     --- a/libs/libc/time/Make.defs
     +++ b/libs/libc/time/Make.defs
-    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
-     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
+    @@ -44,7 +44,7 @@ CSRCS += lib_asctime.c lib_asctimer.c lib_ctime.c lib_ctimer.c
+     ifdef CONFIG_LIBC_LOCALTIME
+     CSRCS += lib_localtime.c
      else
     -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
-    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
-     ifdef CONFIG_TIME_EXTENDED
-     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
-     CSRCS += lib_ctimer.c
+    +CSRCS += lib_mktime.c #lib_gmtime.c lib_gmtimer.c
+     endif
 
   The consequence is, of course, that these interfaces will not be available
   to applications.

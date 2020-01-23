@@ -45,8 +45,6 @@
 
 #include <nuttx/time.h>
 
-#if defined(CONFIG_TIME_EXTENDED)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -107,4 +105,3 @@ int clock_dayoftheweek(int mday, int month, int year)
   return (mday + year + year / 4 - year / 100 + year / 400 +
          (31 * month) / 12) % 7;
 }
-#endif /* CONFIG_TIME_EXTENDED */

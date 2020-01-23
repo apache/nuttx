@@ -68,16 +68,4 @@ config LIB_ZONEINFO_ROMFS
 
 endif # LIB_ZONEINFO
 endif # LIBC_LOCALTIME
-
-config TIME_EXTENDED
-	bool "Add day of week, year support"
-	default "n"
-	depends on !LIBC_LOCALTIME
-	---help---
-		Selecting TIME_EXTENDED adds tm_wday, tm_yday and tm_isdst
-		to the tm struct. This allows integration with 3rd party libraries
-		that expect the tm struct to contain these members.
-
-		Note: tm_isdst is always 0
-
 endmenu # Time/Time Zone Support
