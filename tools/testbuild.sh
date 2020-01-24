@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tools/testbuild.sh
 #
-#   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ nuttx=$WD/../nuttx
 
 progname=$0
 fail=0
+sizet=default
 APPSDIR=../apps
 MAKE_FLAGS=-k
 MAKE=make
@@ -46,16 +47,22 @@ unset JOPTION
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|u|g|n] [-si|-sl>] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
   echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux"
+  echo "  -si|-sl selected the type of size_t used within the compiler.  This necessary because"
+  echo "     the compiler will generate calls to new and delete operators using its internal"
+  echo "     understanding which must match the usage in libs/libxx.  -si indicates that the"
+  echo "     underlying size_t is 'unsigned int'; -sl indicates unsigned long.  Default:  Use"
+  echo "     the setting from the defconfig file."
   echo "  -d enables script debug output"
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
+  echo "  -u<l|i>"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"
@@ -87,6 +94,12 @@ while [ ! -z "$1" ]; do
   -j )
     shift
     JOPTION="-j $1"
+    ;;
+  -si )
+    sizet=uint
+    ;;
+  -sl )
+    sizet=ulong
     ;;
   -t )
     shift
@@ -157,6 +170,13 @@ function configure {
     if [ ! -z "$varname" ]; then
       echo "  Disabling $varname"
       sed -i -e "/$varname/d" $nuttx/.config
+    fi
+
+    if [ "X$sizet" != "Xdefault" ]; then
+      sed -i -e "/CONFIG_CXX_NEWLONG/d" $nuttx/.config
+      if [ "X$sizet" == "Xulong" ]; then
+        sed -i -e "\$aCONFIG_CXX_NEWLONG=y" $nuttx/.config
+      fi
     fi
 
     echo "  Enabling $toolchain"
