@@ -57,6 +57,9 @@
 #include "s32k1xx_serial.h"
 #include "s32k1xx_wdog.h"
 #include "s32k1xx_start.h"
+#if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K1XX_ENET)
+#include "hardware/s32k1xx_mpu.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -253,7 +256,8 @@ static inline void s32k1xx_mpu_config(void)
    */
 
   regval = (MPU_RGDAAC_M3UM_XACCESS | MPU_RGDAAC_M3UM_WACCESS |
-            MPU_RGDAAC_M3UM_RACCESS | MPU_RGDAAC_M3SM_M3UM;
+            MPU_RGDAAC_M3UM_RACCESS | MPU_RGDAAC_M3SM_M3UM);
+
   putreg32(regval, S32K1XX_MPU_RGDAAC(0));
 }
 #endif
@@ -331,10 +335,8 @@ void __start(void)
 
 #if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K1XX_ENET)
   /* Enable all MPU bus masters */
-
   s32k1xx_mpu_config();
   showprogress('D');
-}
 #endif
 
   /* Perform early serial initialization */

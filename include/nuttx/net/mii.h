@@ -634,20 +634,23 @@
 #  define MII_PHYCTRL1_MODE_10FDX    (5 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T full-duplex */
 #  define MII_PHYCTRL1_MODE_100FDX   (6 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T full-duplex */
 
-/* TJA1100 register bit settings *************************************************************/
+/* TJA110X register bit settings *************************************************************/
 
-/* TJA1100 MII ID1/2 register bits */
+/* TJA110X MII ID1/2 register bits */
 
 #define MII_PHYID1_TJA1100                0x0180  /* ID1 value for NXP TJA1100 */
 #define MII_PHYID2_TJA1100                0xdc40  /* ID2 value for NXP TJA1100 */
 
-#define MII_TJA1100_BCR                   0x0     /* Basic Control register */
-#define MII_TJA1100_BSR                   0x1     /* Basic Status register */
-#define MII_TJA1100_EXT_CNTRL             0x11    /* Extra control register */
-#define MII_TJA1100_CONFIG1               0x12    /* CONFIG 1 register */
-#define MII_TJA1100_CONFIG2               0x13    /* CONFIG 2 register */
+#define MII_PHYID1_TJA1101                0x0180  /* ID1 value for NXP TJA1101 */
+#define MII_PHYID2_TJA1101                0xdd00  /* ID2 value for NXP TJA1101 */
 
-/* MII_TJA1100_EXT_CNTRL */
+#define MII_TJA110X_BCR                   0x0     /* Basic Control register */
+#define MII_TJA110X_BSR                   0x1     /* Basic Status register */
+#define MII_TJA110X_EXT_CNTRL             0x11    /* Extra control register */
+#define MII_TJA110X_CONFIG1               0x12    /* CONFIG 1 register */
+#define MII_TJA110X_CONFIG2               0x13    /* CONFIG 2 register */
+
+/* MII_TJA110X_EXT_CNTRL */
 
 #define MII_EXT_CNTRL_LINK_CNTRL          (1   << 15)
 #define MII_EXT_CNTRL_POWER_MODE_SHIFT    (11)
@@ -680,7 +683,7 @@
 #define MII_EXT_CNTRL_CONFIG_INH          (1 <<  1)
 #define MII_EXT_CNTRL_WAKE_REQ            (1 <<  0)  /* transmit idle symbols as bus wake-up request */
 
-/* MII_TJA1100_CONFIG1 */
+/* MII_TJA110X_CONFIG1 */
 
 #define MII_CONFIG1_MASTER                (1 << 15)
 #define MII_CONFIG1_AUTO_OP               (1 << 14)
@@ -708,7 +711,7 @@
 #define MII_CONFIG1_CNFG_WAKE             (1 <<  2)  /* ratiometric input threshold, absolute if zero */
 #define MII_CONFIG1_AUTO_PWD              (1 <<  1)  /* autonomous power-down enabled */
 
-/* MII_TJA1100_CONFIG2 */
+/* MII_TJA110X_CONFIG2 */
 
 #define MII_CONFIG2_PHYAD_SHIFT           (11)  /* readback of scrambler key */
 #define MII_CONFIG2_PHYAD_MASK            (0x1f << MII_CONFIG2_PHYAD_SHIFT)

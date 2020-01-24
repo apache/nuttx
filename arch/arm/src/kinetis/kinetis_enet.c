@@ -173,7 +173,7 @@
 #  define BOARD_PHY_NAME        "TJA1100"
 #  define BOARD_PHYID1          MII_PHYID1_TJA1100
 #  define BOARD_PHYID2          MII_PHYID2_TJA1100
-#  define BOARD_PHY_STATUS      MII_TJA1100_BSR
+#  define BOARD_PHY_STATUS      MII_TJA110X_BSR
 #  define BOARD_PHY_10BASET(s)  0 /* PHY only supports 100BASE-T1 */
 #  define BOARD_PHY_100BASET(s) 1 /* PHY only supports 100BASE-T1 */
 #  define BOARD_PHY_ISDUPLEX(s) 1 /* PHY only supports fullduplex */
@@ -1882,40 +1882,40 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
 
 #if defined(CONFIG_ETH0_PHY_TJA1100)
-/* The NXP TJA1100 PHY is an automotive 100BASE-T1 PHY
+/* The NXP TJA110X PHY is an automotive 100BASE-T1 PHY
  * Which requires additional initialization
  */
 
-  /* select mode TJA1100 */
+  /* select mode TJA110X */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_EN |
                   MII_EXT_CNTRL_CONFIG_INH));
 
 #  if defined(CONFIG_PHY_100BASE_T1_MASTER)
-  /* Set TJA1100 in master mode */
+  /* Set TJA110X in master mode */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG1,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
                   (MII_CONFIG1_MASTER | MII_CONFIG1_TX_1250MV |
                   MII_CONFIG1_RMII_25MHZ | MII_CONFIG1_LED_EN));
 #  else
-  /* Set TJA1100 in slave mode */
+  /* Set TJA110X in slave mode */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG1,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
                   (MII_CONFIG1_TX_1250MV | MII_CONFIG1_RMII_25MHZ |
                   MII_CONFIG1_LED_EN));
 #  endif
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG2,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG2,
                   (MII_CONFIG2_SNR_AV64 | MII_CONFIG2_WLIM_D |
                    MII_CONFIG2_SNR_F_NL | MII_CONFIG2_SLP_T_1));
 
-  /* Select normal mode TJA1100 */
+  /* Select normal mode TJA110X */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_INH));
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_LINK_CNTRL | MII_EXT_CNTRL_NORMAL |
                   MII_EXT_CNTRL_CONFIG_INH));
 #endif

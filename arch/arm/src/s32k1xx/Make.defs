@@ -90,6 +90,10 @@ ifeq ($(CONFIG_S32K1XX_ENET),y)
 CHIP_CSRCS += s32k1xx_enet.c
 endif
 
+ifeq ($(CONFIG_S32K1XX_RTC),y)
+CHIP_CSRCS += s32k1xx_rtc.c
+endif
+
 # Source files specific to the ARM CPU family and to the S32K1xx chip family
 
 ifeq ($(CONFIG_ARCH_CHIP_S32K11X),y)

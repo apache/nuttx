@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "s32k1xx.h"
+#include "s32k1xx_pin.h"
 #include "hardware/s32k1xx_port.h"
 
 #ifdef CONFIG_S32K1XX_GPIOIRQ

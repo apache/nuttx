@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/s32k1xx/s32k1xx.h
+ * arch/arm/src/s32k1xx/s32k1xx_pin.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

@@ -49,7 +49,7 @@ MEMORY
   vflash (rx) : ORIGIN = 0x00000000, LENGTH = 1K
   pflash (rx) : ORIGIN = 0x00000400, LENGTH = 16
   dflash (rx) : ORIGIN = 0x00000410, LENGTH = 2047K-16
-  sram  (rwx) : ORIGIN = 0x1fff0000, LENGTH = 252K
+  sram  (rwx) : ORIGIN = 0x1ffe0000, LENGTH = 252K
 }
 
 OUTPUT_ARCH(arm)

@@ -333,7 +333,7 @@ static uint32_t s32k1xx_get_sircfreq(void)
 
       if ((getreg32(S32K1XX_SCG_SIRCCFG) & SCG_SIRCCFG_RANGE) != 0)
         {
-          return SCG_SIRQ_HIGHRANGE_FREQUENCY;
+          return SCG_SIRC_HIGHRANGE_FREQUENCY;
         }
     }
 
@@ -360,7 +360,7 @@ static uint32_t s32k1xx_get_fircfreq(void)
 
   if ((getreg32(S32K1XX_SCG_FIRCCSR) & SCG_FIRCCSR_FIRCVLD) != 0)
     {
-      return SCG_FIRQ_FREQUENCY0;
+      return SCG_FIRC_FREQUENCY0;
     }
   else
     {
@@ -1722,7 +1722,7 @@ uint32_t s32k1xx_get_coreclk(void)
 
         /* Slow IRC high range clock (8 MHz ) */
 
-        coreclk = SCG_SIRQ_HIGHRANGE_FREQUENCY;
+        coreclk = SCG_SIRC_HIGHRANGE_FREQUENCY;
         break;
 
       case SCG_CSR_SCS_FIRC:  /* Fast IRC */
@@ -1734,7 +1734,7 @@ uint32_t s32k1xx_get_coreclk(void)
 
         /* Fast IRC is trimmed to 48 MHz */
 
-        coreclk = SCG_FIRQ_FREQUENCY0;
+        coreclk = SCG_FIRC_FREQUENCY0;
         break;
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL

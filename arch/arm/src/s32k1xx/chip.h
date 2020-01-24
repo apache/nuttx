@@ -58,6 +58,11 @@
 #define ARMV6M_PERIPHERAL_INTERRUPTS S32K1XX_IRQ_NEXTINT
 #define ARMV7M_PERIPHERAL_INTERRUPTS S32K1XX_IRQ_NEXTINT
 
+/* Cache line sizes (in bytes)for the S32K14X */
+
+#define ARMV7M_DCACHE_LINESIZE 16  /* 16 bytes (4 words) */
+#define ARMV7M_ICACHE_LINESIZE 16  /* 16 bytes (4 words) */
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/

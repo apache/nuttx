@@ -35,7 +35,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * The external functions, s32k1xx_lpspi1/2/3/4select and s32k1xx_lpspi1/2/3/4status
+ * The external functions, s32k1xx_lpspi0/1/2select and s32k1xx_lpspi0/1/2status
  * must be provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct s32k1xx_lpspi_ops_s (see
  * include/nuttx/spi/spi.h). All other methods (including s32k1xx_lpspibus_initialize())
@@ -44,7 +44,7 @@
  *
  *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide s32k1xx_lpspi1/2/3/4select() and s32k1xx_lpspi1/2/3/4status()
+ *   2. Provide s32k1xx_lpspi0/1/2select() and s32k1xx_lpspi0/1/2status()
  *      functions in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
@@ -89,7 +89,8 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_S32K1XX_LPSPI
+#if defined(CONFIG_S32K1XX_LPSPI0) || defined(CONFIG_S32K1XX_LPSPI1) || \
+    defined(CONFIG_S32K1XX_LPSPI2)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -951,9 +952,7 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
       regval |= LPSPI_CCR_SCKDIV(best_scaler);
       s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, regval);
 
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET,
-                              LPSPI_TCR_PRESCALE_MASK, 0);
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET, 0,
+      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET, LPSPI_TCR_PRESCALE_MASK,
                               LPSPI_TCR_PRESCALE(best_prescaler));
 
       priv->frequency = frequency;
@@ -1556,4 +1555,4 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
   return (FAR struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_S32K1XX_LPSPI */
+#endif /* CONFIG_S32K1XX_LPSPI0 || CONFIG_S32K1XX_LPSPI1 || CONFIG_S32K1XX_LPSPI2 */

@@ -1062,7 +1062,7 @@ static void s32k1xx_lpi2c_setclock(FAR struct s32k1xx_lpi2c_priv_s *priv,
                 }
             }
 
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET, 0,
+          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET, LPI2C_MCFGR1_PRESCALE_MASK,
                                 LPI2C_MCFGR1_PRESCALE(best_prescale));
 
           /* Re-enable LPI2C if it was enabled previously */
@@ -1173,11 +1173,17 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 
   s32k1xx_lpi2c_tracenew(priv, status);
 
-  /* Continue with either sending or reading data */
+  /* After an error we can get an SDF  */
+
+  if (priv->intstate == INTSTATE_DONE && (status & LPI2C_MSR_SDF) != 0)
+    {
+      s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
+      s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, LPI2C_MSR_SDF);
+    }
 
   /* Check if there is more bytes to send */
 
-  if (((priv->flags & I2C_M_READ) == 0) && (status & LPI2C_MSR_TDF) != 0)
+  else if (((priv->flags & I2C_M_READ) == 0) && (status & LPI2C_MSR_TDF) != 0)
     {
       if (priv->dcnt > 0)
         {
@@ -1292,6 +1298,10 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
           if (priv->intstate == INTSTATE_WAITING)
             {
+              /* Update Status once at the end */
+
+              priv->status = status;
+
               /* inform the thread that transfer is complete
                * and wake it up
                */
@@ -1300,6 +1310,7 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
               priv->intstate = INTSTATE_DONE;
             }
 #else
+          priv->status = status;
           priv->intstate = INTSTATE_DONE;
 #endif
           /* Mark that this transaction stopped */
@@ -1340,6 +1351,10 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
           if (priv->intstate == INTSTATE_WAITING)
             {
+              /* Update Status once at the end */
+
+              priv->status = status;
+
               /* inform the thread that transfer is complete
                * and wake it up
                */
@@ -1348,11 +1363,11 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
               priv->intstate = INTSTATE_DONE;
             }
 #else
+          priv->status = status;
           priv->intstate = INTSTATE_DONE;
 #endif
     }
 
-  priv->status = status;
   return OK;
 }
 
@@ -1746,13 +1761,13 @@ FAR struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_S32K1XX_LPI2C0
-    case 1:
+    case 0:
       priv = (struct s32k1xx_lpi2c_priv_s *)&s32k1xx_lpi2c0_priv;
       break;
 #endif
 
 #ifdef CONFIG_S32K1XX_LPI2C1
-    case 2:
+    case 1:
       priv = (struct s32k1xx_lpi2c_priv_s *)&s32k1xx_lpi2c1_priv;
       break;
 #endif

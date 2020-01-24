@@ -76,9 +76,9 @@
 
 /* Nomial frequencies of internal clocks */
 
-#define SCG_SIRQ_LOWRANGE_FREQUENCY   2000000  /* 2MHz */
-#define SCG_SIRQ_HIGHRANGE_FREQUENCY  8000000  /* 8MHz */
-#define SCG_FIRQ_FREQUENCY0          48000000  /* 48MHz */
+#define SCG_SIRC_LOWRANGE_FREQUENCY   2000000  /* 2MHz */
+#define SCG_SIRC_HIGHRANGE_FREQUENCY  8000000  /* 8MHz */
+#define SCG_FIRC_FREQUENCY0          48000000  /* 48MHz */
 
 #define NUMBER_OF_TCLK_INPUTS        3
 

@@ -1245,6 +1245,56 @@ config ARCH_BOARD_S32K118EVB
 		This options selects support for NuttX on the NXP S32K118EVB board
 		featuring the S32K118 Cortex-M0+.
 
+config ARCH_BOARD_S32K144EVB
+	bool "NXP S32K144EVB"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP S32K144EVB board
+		featuring the S32K144 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UAVCAN144
+	bool "NXP RDDRONE-UAVCAN144"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
+		featuring the S32K144 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UAVCAN146
+	bool "NXP RDDRONE-UAVCAN146"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
+		featuring the S32K146 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UWB144
+	bool "NXP RDDRONE-UWB144"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UWB board
+		featuring the S32K144 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UWB146
+	bool "NXP RDDRONE-UWB146"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UWB board
+		featuring the S32K146 Cortex-M4F.
+
 config ARCH_BOARD_S32K146EVB
 	bool "NXP S32K146EVB"
 	depends on ARCH_CHIP_S32K146
@@ -2129,6 +2179,11 @@ config ARCH_BOARD
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
 	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
+	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
+	default "rddrone-uavcan144"        if ARCH_BOARD_RDDRONE_UAVCAN144
+	default "rddrone-uavcan146"        if ARCH_BOARD_RDDRONE_UAVCAN146
+	default "rddrone-uwb144"           if ARCH_BOARD_RDDRONE_UWB144
+	default "rddrone-uwb146"           if ARCH_BOARD_RDDRONE_UWB146
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -2262,6 +2317,21 @@ source "boards/arm/efm32/olimex-efm32g880f128-stk/Kconfig"
 endif
 if ARCH_BOARD_S32K118EVB
 source "boards/arm/s32k1xx/s32k118evb/Kconfig"
+endif
+if ARCH_BOARD_S32K144EVB
+source "boards/arm/s32k1xx/s32k144evb/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UAVCAN144
+source "boards/arm/s32k1xx/rddrone-uavcan144/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UAVCAN146
+source "boards/arm/s32k1xx/rddrone-uavcan146/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UWB144
+source "boards/arm/s32k1xx/rddrone-uwb144/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UWB146
+source "boards/arm/s32k1xx/rddrone-uwb146/Kconfig"
 endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
