@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/drivers/rwbuffer.h
  *
- *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ typedef CODE ssize_t (*rwbflush_t)(FAR void *dev, FAR const uint8_t *buffer,
  * A reference to the struct rwbuffer_s instance is then passed to each
  * interface like:
  *
- *  struct foo_dev_s *priv;
+ *  FAR struct foo_dev_s *priv;
  *  ...
  *  ... [Setup blocksize, nblocks, dev, wrmaxblocks, wrflush,
  *       rhmaxblocks, rhreload] ...
@@ -94,7 +94,8 @@ typedef CODE ssize_t (*rwbflush_t)(FAR void *dev, FAR const uint8_t *buffer,
 
 struct rwbuffer_s
 {
-  /********************************************************************/
+  /**************************************************************************/
+
   /* These values must be provided by the user prior to calling
    * rwb_initialize()
    */
@@ -130,7 +131,8 @@ struct rwbuffer_s
   rwbflush_t    wrflush;         /* Callout to flush the write buffer */
   rwbreload_t   rhreload;        /* Callout to reload the read-ahead buffer */
 
-  /********************************************************************/
+  /**************************************************************************/
+
   /* The user should never modify any of the remaining fields */
 
   /* This is the state of the write buffering */
