@@ -428,7 +428,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
       wrbend = rwb->wrblockstart + rwb->wrnblocks;
       invend = startblock + blockcount;
 
-      if (rwb->wrblockstart > invend || wrbend < startblock)
+      if (wrbend <= startblock || rwb->wrblockstart >= invend)
         {
           ret = OK;
         }
@@ -1130,4 +1130,3 @@ int rwb_flush(FAR struct rwbuffer_s *rwb)
 #endif
 
 #endif /* CONFIG_DRVR_WRITEBUFFER || CONFIG_DRVR_READAHEAD */
-
