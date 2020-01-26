@@ -209,7 +209,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_kstackalloc(&tcb->cmn);
   if (ret < 0)
     {
-      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_kstackalloc() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
 #endif
@@ -284,7 +284,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = up_addrenv_restore(&oldenv);
   if (ret < 0)
     {
-      berr("ERROR: up_addrenv_select() failed: %d\n", ret);
+      berr("ERROR: up_addrenv_restore() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
 #endif
