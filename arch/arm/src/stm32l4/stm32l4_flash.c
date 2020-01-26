@@ -187,6 +187,25 @@ static inline void flash_erase(size_t page)
   modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
 }
 
+
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+static void data_cache_disable(void)
+{
+  modifyreg32(STM32L4_FLASH_ACR, FLASH_ACR_DCEN, 0);
+}
+
+static void data_cache_enable(void)
+{
+  /* Reset data cache */
+
+  modifyreg32(STM32L4_FLASH_ACR, 0, FLASH_ACR_DCRST);
+
+  /* Enable data cache */
+
+  modifyreg32(STM32L4_FLASH_ACR, 0, FLASH_ACR_DCEN);
+}
+#endif /* defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -370,6 +389,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   size_t xfrsize;
   size_t offset;
   size_t page;
+  bool set_pg_bit = false;
   int i;
   int ret = OK;
 
@@ -447,7 +467,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
       /* Write the page. Must be with double-words. */
 
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_disable();
+#endif
+
       modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PG);
+      set_pg_bit = true;
 
       for (i = 0; i < FLASH_PAGE_WORDS; i += 2)
         {
@@ -463,20 +488,23 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
           if (getreg32(STM32L4_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
             {
-              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EROFS;
               goto out;
             }
 
           if (getreg32(dest-1) != *(src-1) || getreg32(dest-2) != *(src-2))
             {
-              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EIO;
               goto out;
             }
         }
 
       modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+      set_pg_bit = false;
+
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_enable();
+#endif
 
       /* Adjust pointers and counts for the next time through the loop */
 
@@ -489,6 +517,14 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
     }
 
 out:
+  if (set_pg_bit)
+    {
+      modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_enable();
+#endif
+    }
+
   /* If there was an error, clear all error flags in status
    * register (rc_w1 register so do this by writing the
    * error bits).
