@@ -371,7 +371,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session);
  *
  * Input Parameters:
  *   session - An instance of the session structure.
- *   pixelfmt - The pixel from from the received SetPixelFormat message
+ *   pixelfmt - The pixel from the received SetPixelFormat message
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value on failure.
